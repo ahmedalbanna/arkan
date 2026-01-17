@@ -65,12 +65,21 @@ export function useExport() {
             });
 
             if (!response.ok) {
-                const errorData = await response.json();
                 let errorMessage = 'Failed to generate DOCX file on the server.';
-                if (typeof errorData === 'string') {
-                    errorMessage = errorData;
-                } else if (errorData && errorData.message) {
-                    errorMessage = errorData.message;
+                try {
+                    const errorData = await response.json();
+                    if (typeof errorData === 'string') {
+                        errorMessage = errorData;
+                    } else if (errorData && errorData.message) {
+                        errorMessage = errorData.message;
+                        // Include additional error details if available
+                        if (errorData.error) {
+                            errorMessage += `\n\nDetails: ${errorData.error}`;
+                        }
+                    }
+                } catch (parseError) {
+                    // If response is not JSON, use status text
+                    errorMessage = `Server error: ${response.statusText || response.status}`;
                 }
                 throw new Error(errorMessage);
             }
@@ -80,8 +89,14 @@ export function useExport() {
 
             toast({ title: 'Export Successful', description: 'Report exported as DOCX.' });
         } catch (error) {
-            console.error(error);
-            toast({ title: 'Export Failed', description: error instanceof Error ? error.message : 'Could not generate the DOCX file.', variant: 'destructive' });
+            console.error('DOCX Export Error:', error);
+            const errorMessage = error instanceof Error ? error.message : 'Could not generate the DOCX file.';
+            toast({ 
+                title: 'Export Failed', 
+                description: errorMessage, 
+                variant: 'destructive',
+                duration: 7000 // Show error longer for user to read
+            });
         } finally {
             setIsExporting(false);
         }
@@ -134,8 +149,14 @@ export function useExport() {
 
             toast({ title: 'Export Successful', description: 'Presentation exported as PPTX.' });
         } catch (error) {
-            console.error(error);
-            toast({ title: 'Export Failed', description: 'Could not generate the PPTX file.', variant: 'destructive' });
+            console.error('PPTX Export Error:', error);
+            const errorMessage = error instanceof Error ? error.message : 'Could not generate the PPTX file.';
+            toast({ 
+                title: 'Export Failed', 
+                description: errorMessage, 
+                variant: 'destructive',
+                duration: 7000 // Show error longer for user to read
+            });
         } finally {
             setIsExporting(false);
         }

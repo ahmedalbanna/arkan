@@ -14,8 +14,15 @@ const commonParagraphStyles = [
         basedOn: 'Normal',
         next: 'Normal',
         quickFormat: true,
-        run: { size: 22 }, // 11pt
-        paragraph: { spacing: { after: 120, line: 276 } }, // 1.15 line spacing
+        run: { size: 24 }, // 12pt - standard professional size
+        paragraph: { 
+            spacing: { 
+                after: 200, // 10pt after for better paragraph separation
+                before: 0,
+                line: 360 // 1.5 line spacing for better readability
+            },
+            alignment: AlignmentType.JUSTIFIED // Better for professional documents
+        },
     },
     {
         id: 'Title',
@@ -47,18 +54,23 @@ const commonParagraphStyles = [
         name: 'Quote',
         basedOn: 'Normal',
         next: 'Normal',
-        run: { italics: true, color: '555555' },
+        run: { 
+            italics: true, 
+            color: '4A4A4A',
+            size: 24 
+        },
         paragraph: {
-            indent: { left: 720 },
-            spacing: { before: 120, after: 120 },
+            indent: { left: 1440, right: 720 }, // Larger left indent for quotes
+            spacing: { before: 240, after: 240, line: 360 },
             border: {
                 left: {
-                    color: "auto",
-                    space: 1,
+                    color: "4A90E2", // Blue accent
+                    space: 4,
                     style: "single",
-                    size: 6,
+                    size: 12, // Thicker border
                 },
             },
+            shading: { type: ShadingType.CLEAR, fill: 'FAFAFA' }, // Subtle background
         },
     },
     {
@@ -124,14 +136,20 @@ const commonParagraphStyles = [
         name: 'Code Block',
         basedOn: 'Normal',
         run: {
-            font: { name: 'Courier New' },
-            size: 18, // 9pt
-            color: '000000',
+            font: { name: 'Consolas' }, // Better monospace font
+            size: 20, // 10pt - more readable
+            color: '1E1E1E', // Softer black
         },
         paragraph: {
-            spacing: { before: 200, after: 200 },
-            indent: { left: 400 },
-            shading: { type: ShadingType.CLEAR, fill: 'F2F2F2' },
+            spacing: { before: 240, after: 240, line: 300 }, // Better spacing
+            indent: { left: 720, right: 720 }, // Indent from both sides
+            shading: { type: ShadingType.CLEAR, fill: 'F8F8F8' }, // Lighter background
+            border: {
+                left: { style: 'single', size: 8, color: '4A90E2' }, // Blue accent border
+                top: { style: 'single', size: 2, color: 'E1E1E1' },
+                bottom: { style: 'single', size: 2, color: 'E1E1E1' },
+                right: { style: 'single', size: 2, color: 'E1E1E1' },
+            },
         },
     },
     {
@@ -149,53 +167,62 @@ const commonParagraphStyles = [
         name: 'Custom Table',
         basedOn: 'TableNormal',
         run: {
-            size: 20, // 10pt
+            size: 22, // 11pt - better readability
             font: { name: 'Calibri' },
         },
         paragraph: {
-            spacing: { before: 100, after: 100 },
+            spacing: { before: 120, after: 120 },
+            alignment: AlignmentType.LEFT,
         },
         table: {
             cellMargin: {
-                top: 100,
-                bottom: 100,
-                left: 100,
-                right: 100,
+                top: 150, // Increased padding
+                bottom: 150,
+                left: 200,
+                right: 200,
             },
             borders: {
-                insideHorizontal: { style: 'single', size: 1, color: 'D9D9D9' },
-                insideVertical: { style: 'single', size: 1, color: 'D9D9D9' },
-                top: { style: 'single', size: 2, color: 'BFBFBF' },
-                bottom: { style: 'single', size: 2, color: 'BFBFBF' },
-                left: { style: 'single', size: 2, color: 'BFBFBF' },
-                right: { style: 'single', size: 2, color: 'BFBFBF' },
+                insideHorizontal: { style: 'single', size: 4, color: 'E5E5E5' },
+                insideVertical: { style: 'single', size: 4, color: 'E5E5E5' },
+                top: { style: 'single', size: 8, color: '4A90E2' }, // Blue top border
+                bottom: { style: 'single', size: 6, color: 'BFBFBF' },
+                left: { style: 'single', size: 4, color: 'BFBFBF' },
+                right: { style: 'single', size: 4, color: 'BFBFBF' },
             },
         },
-        tableRow: {},
+        tableRow: {
+            cantSplit: true, // Prevent row splitting across pages
+        },
         tableCell: {
             verticalAlign: 'center',
         },
         conditionalFormatting: {
             firstRow: {
-                run: { bold: true },
-                tableCell: { shading: { type: 'clear', fill: 'F2F2F2' } },
+                run: { bold: true, color: 'FFFFFF', size: 24 },
+                paragraph: { alignment: AlignmentType.CENTER },
+                tableCell: { 
+                    shading: { type: 'clear', fill: '4A90E2' }, // Blue header
+                    borders: {
+                        bottom: { style: 'single', size: 6, color: '2E5C8A' }
+                    }
+                },
             },
             lastRow: {
                 run: { bold: true },
                 tableCell: {
                     borders: {
-                        bottom: { style: 'double', size: 4, color: 'BFBFBF' }
+                        bottom: { style: 'double', size: 6, color: '4A90E2' }
                     }
                 },
             },
             firstColumn: {
-                run: { bold: true },
+                run: { bold: true, color: '2D2D2D' },
             },
             lastColumn: {
-                run: { bold: true },
+                run: { bold: false },
             },
             oddRowBanding: {
-                tableCell: { shading: { type: 'clear', fill: 'FAFAFA' } },
+                tableCell: { shading: { type: 'clear', fill: 'F9F9F9' } },
             },
             evenRowBanding: {
                 tableCell: { shading: { type: 'clear', fill: 'FFFFFF' } },
@@ -261,21 +288,28 @@ const commonCharacterStyles = [
 
 const modernCustomStyles: CustomStyles = {
     codeBlock: {
-        shading: { type: ShadingType.CLEAR, fill: 'F2F2F2' },
-        spacing: { before: 200, after: 200 },
-        indent: { left: 400 },
+        shading: { type: ShadingType.CLEAR, fill: 'F8F8F8' },
+        spacing: { before: 240, after: 240, line: 300 },
+        indent: { left: 720, right: 720 },
         bidirectional: false,
         alignment: AlignmentType.LEFT,
+        border: {
+            left: { style: 'single', size: 8, color: '4A90E2' },
+            top: { style: 'single', size: 2, color: 'E1E1E1' },
+            bottom: { style: 'single', size: 2, color: 'E1E1E1' },
+            right: { style: 'single', size: 2, color: 'E1E1E1' },
+        },
     },
     imageParagraph: {
         alignment: AlignmentType.CENTER,
         border: {
-            top: { style: 'single', size: 4, color: 'BFBFBF' },
-            bottom: { style: 'single', size: 4, color: 'BFBFBF' },
-            left: { style: 'single', size: 4, color: 'BFBFBF' },
-            right: { style: 'single', size: 4, color: 'BFBFBF' },
+            top: { style: 'single', size: 6, color: 'D0D0D0' },
+            bottom: { style: 'single', size: 6, color: 'D0D0D0' },
+            left: { style: 'single', size: 6, color: 'D0D0D0' },
+            right: { style: 'single', size: 6, color: 'D0D0D0' },
         },
-        spacing: { before: 100, after: 100 }
+        spacing: { before: 240, after: 240 },
+        shading: { type: ShadingType.CLEAR, fill: 'FCFCFC' }
     }
 };
 
@@ -315,13 +349,93 @@ const academicCustomStyles: CustomStyles = {
 
 const modernStyles: IStylesOptions = {
     default: {
-        document: { run: { font: { name: 'Calibri' }, size: 22, color: '333333' } },
-        heading1: { run: { font: { name: 'Calibri Light' }, size: 32, bold: true, color: "2E74B5" }, paragraph: { spacing: { after: 240, before: 240 }, outlineLevel: 1, keepNext: true } },
-        heading2: { run: { font: { name: 'Calibri Light' }, size: 26, bold: true, color: "2E74B5" }, paragraph: { spacing: { after: 220, before: 220 }, outlineLevel: 2, keepNext: true } },
-        heading3: { run: { font: { name: 'Calibri Light' }, size: 24, bold: true, color: "5B9BD5" }, paragraph: { spacing: { after: 200, before: 200 }, outlineLevel: 3, keepNext: true } },
-        heading4: { run: { font: { name: 'Calibri Light' }, size: 22, bold: true, color: "5B9BD5" }, paragraph: { spacing: { after: 180, before: 180 }, outlineLevel: 4, keepNext: true } },
-        heading5: { run: { font: { name: 'Calibri' }, size: 22, color: "595959" }, paragraph: { spacing: { after: 160, before: 160 }, outlineLevel: 5, keepNext: true } },
-        heading6: { run: { font: { name: 'Calibri' }, size: 22, italics: true, color: "595959" }, paragraph: { spacing: { after: 140, before: 140 }, outlineLevel: 6, keepNext: true } },
+        document: { 
+            run: { 
+                font: { name: 'Calibri' }, 
+                size: 24, // Increased from 22 to 24 (12pt) for better readability
+                color: '2D2D2D' // Slightly softer black
+            } 
+        },
+        heading1: { 
+            run: { 
+                font: { name: 'Calibri Light' }, 
+                size: 40, // Increased from 32 (20pt)
+                bold: true, 
+                color: "1F4788" // Deeper professional blue
+            }, 
+            paragraph: { 
+                spacing: { after: 360, before: 480, line: 360 }, // More spacing
+                outlineLevel: 1, 
+                keepNext: true,
+                keepLines: true
+            } 
+        },
+        heading2: { 
+            run: { 
+                font: { name: 'Calibri Light' }, 
+                size: 32, // Increased from 26 (16pt)
+                bold: true, 
+                color: "2E74B5" 
+            }, 
+            paragraph: { 
+                spacing: { after: 280, before: 360, line: 320 }, 
+                outlineLevel: 2, 
+                keepNext: true,
+                keepLines: true
+            } 
+        },
+        heading3: { 
+            run: { 
+                font: { name: 'Calibri' }, 
+                size: 28, // Increased from 24 (14pt)
+                bold: true, 
+                color: "4472C4" 
+            }, 
+            paragraph: { 
+                spacing: { after: 240, before: 280, line: 300 }, 
+                outlineLevel: 3, 
+                keepNext: true 
+            } 
+        },
+        heading4: { 
+            run: { 
+                font: { name: 'Calibri' }, 
+                size: 26, // Increased from 22 (13pt)
+                bold: true, 
+                color: "5B9BD5" 
+            }, 
+            paragraph: { 
+                spacing: { after: 200, before: 240, line: 280 }, 
+                outlineLevel: 4, 
+                keepNext: true 
+            } 
+        },
+        heading5: { 
+            run: { 
+                font: { name: 'Calibri' }, 
+                size: 24, // Same as body (12pt)
+                bold: true,
+                color: "636363" 
+            }, 
+            paragraph: { 
+                spacing: { after: 180, before: 200, line: 276 }, 
+                outlineLevel: 5, 
+                keepNext: true 
+            } 
+        },
+        heading6: { 
+            run: { 
+                font: { name: 'Calibri' }, 
+                size: 24, 
+                italics: true, 
+                color: "737373" 
+            }, 
+            paragraph: { 
+                spacing: { after: 160, before: 180, line: 276 }, 
+                outlineLevel: 6, 
+                keepNext: true 
+            } 
+        },
     },
     paragraphStyles: [
         ...commonParagraphStyles,
@@ -329,7 +443,7 @@ const modernStyles: IStylesOptions = {
             id: 'ModernSpecific',
             name: 'Modern Specific',
             basedOn: 'Normal',
-            run: { font: { name: 'Calibri' } }
+            run: { font: { name: 'Calibri' }, size: 24 }
         }
     ],
     characterStyles: commonCharacterStyles,

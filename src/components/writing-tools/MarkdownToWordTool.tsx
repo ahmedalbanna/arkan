@@ -79,7 +79,7 @@ export function MarkdownToWordTool() {
       }
 
       const blob = await response.blob();
-      // @ts-expect-error - saveAs is a UMD global from file-saver
+      const { saveAs } = await import('file-saver');
       saveAs(blob, `${data.fileName}.docx`);
 
       toast({
