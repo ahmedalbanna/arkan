@@ -14,6 +14,7 @@ import {
     Activity,
     Upload,
     TestTube,
+    BookOpen,
 } from 'lucide-react';
 
 export interface NavLink {
@@ -37,4 +38,5 @@ export const navConfig: NavLink[] = [
     { href: '/admin/automations/builder', labelKey: 'header.automations', icon: Workflow },
     { href: '/admin/writing-tools', labelKey: 'writingTools.pageTitle', icon: PenSquare },
     { href: '/admin/settings', labelKey: 'header.adminSettings', icon: Settings },
+    { href: '/api-docs', labelKey: 'API Docs', icon: BookOpen },
 ];
