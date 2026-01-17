@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { Button } from '@/components/ui/button';
@@ -7,8 +8,8 @@ import {
   Dialog,
   DialogClose,
   DialogContent,
-  DialogDescription,
   DialogFooter,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
@@ -23,7 +24,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '.
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Chapter } from '@/lib/models';
+import { Chapter, Section, type ProjectContent } from '@/lib/models';
 
 export function ExportDialog() {
   const { project } = useBuilderStore();
@@ -86,13 +87,16 @@ export function ExportDialog() {
     if (!project || !hasContent || selectedContent.size === 0) return;
 
     // Filter project content based on selection
-    const selectedProjectContent = project.content.map(item => {
-      if (item instanceof Chapter) {
-        const selectedSections = item.sections.filter(s => selectedContent.has(s.id));
-        return selectedSections.length > 0 ? item.with({ sections: selectedSections }) : null;
-      }
-      return selectedContent.has(item.id) ? item : null;
-    }).filter(Boolean);
+    const selectedProjectContent: ProjectContent = (project.content || [])
+      .map(item => {
+        if (item instanceof Chapter) {
+          const selectedSections = item.sections.filter(s => selectedContent.has(s.id));
+          return selectedSections.length > 0 ? item.with({ sections: selectedSections }) : null;
+        }
+        return selectedContent.has(item.id) ? item : null;
+      })
+      .filter((item): item is Chapter | Section => item !== null);
+
 
     if (format === 'docx') {
       await exportReportDocx({

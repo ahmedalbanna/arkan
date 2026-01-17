@@ -144,12 +144,17 @@ export class Project {
   }
   
   get fullMarkdownContent(): string {
-    return this.content.map(item => {
-        if (item instanceof Chapter) {
+    return this.generateMarkdownFromContent(this.content);
+  }
+
+  public generateMarkdownFromContent(content: ProjectContent): string {
+    if (!content) return '';
+    return content.map(item => {
+        if (item instanceof Chapter) { // Chapter
             const chapterContent = `# ${item.title}`;
             const sectionsContent = item.sections.map(section => `## ${section.title}\n\n${section.content || ''}`).join('\n\n');
             return `${chapterContent}\n\n${sectionsContent}`;
-        } else { // Top-level Section
+        } else { // Section
             return `# ${item.title}\n\n${item.content || ''}`;
         }
     }).join('\n\n<!-- slide-break -->\n\n');
