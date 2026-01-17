@@ -24,7 +24,7 @@ import {
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { useUpdateUser } from '@/hooks';
+import { useAdminUpdateUser, useSendNotification } from '@/hooks';
 import { UserProfile } from '@/lib/models';
 import { Loader2, Save, Send } from 'lucide-react';
 import { useEffect, useState } from 'react';
@@ -47,15 +47,14 @@ import {
   DialogFooter,
   DialogClose,
 } from '@/components/ui/dialog';
-import { useSendNotification } from '@/hooks/data/use-users';
 
 const profileSchema = z.object({
-  name: z.string().min(2, 'Name must be at least 2 characters.'),
-  email: z.string().email('Please enter a valid email address.'),
+  name: z.string().min(1, 'Name is required').optional(),
+  email: z.string().email('Invalid email address').optional(),
   bio: z.string().optional(),
-  credits: z.coerce.number().int().min(0, 'Credits cannot be negative.'),
-  role: z.enum(['user', 'admin']),
-  hasCompletedOnboarding: z.boolean(),
+  credits: z.coerce.number().int().min(0).optional(),
+  role: z.enum(['user', 'admin']).optional(),
+  hasCompletedOnboarding: z.boolean().optional(),
 });
 
 type ProfileFormValues = z.infer<typeof profileSchema>;
@@ -67,7 +66,7 @@ interface EditUserFormProps {
 export default function EditUserForm({ user }: EditUserFormProps) {
   const { userProfile: adminProfile } = useAuth();
   const { toast } = useToast();
-  const updateUserMutation = useUpdateUser();
+  const updateUserMutation = useAdminUpdateUser();
   const sendNotificationMutation = useSendNotification();
 
   const [isConfirming, setIsConfirming] = useState(false);
@@ -98,15 +97,14 @@ export default function EditUserForm({ user }: EditUserFormProps) {
   }, [user, form]);
 
   function onSubmit(data: ProfileFormValues) {
+    const dirtyFields = form.formState.dirtyFields;
     const payload: Partial<ProfileFormValues> = {};
 
-    // Build payload with only changed values
-    for (const key in data) {
-      const formKey = key as keyof ProfileFormValues;
-      if (data[formKey] !== user[formKey]) {
-        (payload as any)[formKey] = data[formKey];
-      }
-    }
+    (Object.keys(dirtyFields) as Array<keyof typeof dirtyFields>).forEach(key => {
+        if (dirtyFields[key]) {
+            (payload as any)[key] = data[key];
+        }
+    });
 
     if (Object.keys(payload).length === 0) {
       toast({ title: 'No Changes', description: 'No changes were made to the user profile.' });

@@ -91,6 +91,19 @@ export async function updateUserApi(userId: string, data: Partial<UserProfile>, 
 }
 
 /**
+ * Updates an existing user's profile via the ADMIN API.
+ */
+export async function adminUpdateUserApi(userId: string, data: Partial<UserProfile>, token: string): Promise<UserProfile> {
+  return apiService({
+    endpoint: `/api/admin/users/${userId}`,
+    method: 'PUT',
+    data,
+    token
+  });
+}
+
+
+/**
  * Deletes a user via the admin API.
  */
 export async function deleteUserApi(userId: string, token: string): Promise<{ message: string }> {
