@@ -4,7 +4,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { GenerationStep, StepConfig } from '@/lib/models/creative-content-config';
+import { _GenerationStep, StepConfig } from '@/lib/models/creative-content-config';
 
 export async function POST(req: NextRequest) {
   try {

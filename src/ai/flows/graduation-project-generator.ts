@@ -24,8 +24,8 @@ import {
     GraduationProjectDocumentationSchema,
     GraduationProjectInputSchema
 } from '@/ai/schemas/graduation-project';
-import { validateJsonOutput, RECOMMENDED_TEMPERATURES } from '@/ai/utils/json-output-validator';
-import { z } from 'zod';
+import { _validateJsonOutput, _RECOMMENDED_TEMPERATURES } from '@/ai/utils/json-output-validator';
+import { z as _z } from 'zod';
 
 // ==================== MAIN FLOW ====================
 
@@ -175,7 +175,7 @@ export const graduationProjectGenerator = ai.defineFlow(
                 tools: input.tools,
             });
 
-            const methodGenerated = await ai.generate({
+            const _methodGenerated = await ai.generate({
                 model: 'ollama/llama3.1:latest',
                 prompt: methodResult.text,
             });
@@ -234,7 +234,7 @@ export const graduationProjectGenerator = ai.defineFlow(
                 nonFunctionalRequirements: input.nonFunctionalRequirements,
             });
 
-            const analysisGenerated = await ai.generate({
+            const _analysisGenerated = await ai.generate({
                 model: 'ollama/llama3.1:latest',
                 prompt: analysisResult.text,
             });
@@ -287,7 +287,7 @@ export const graduationProjectGenerator = ai.defineFlow(
                 frameworks: input.frameworks,
             });
 
-            const designGenerated = await ai.generate({
+            const _designGenerated = await ai.generate({
                 model: 'ollama/llama3.1:latest',
                 prompt: designResult.text,
             });
@@ -335,7 +335,7 @@ export const graduationProjectGenerator = ai.defineFlow(
                 implementationSummary: input.implementationSummary,
             });
 
-            const implGenerated = await ai.generate({
+            const _implGenerated = await ai.generate({
                 model: 'ollama/llama3.1:latest',
                 prompt: implResult.text,
             });
@@ -375,7 +375,7 @@ export const graduationProjectGenerator = ai.defineFlow(
                 testResults: input.testResults,
             });
 
-            const testGenerated = await ai.generate({
+            const _testGenerated = await ai.generate({
                 model: 'ollama/llama3.1:latest',
                 prompt: testResult.text,
             });
@@ -428,7 +428,7 @@ export const graduationProjectGenerator = ai.defineFlow(
                 testResults: input.testResults,
             });
 
-            const resultsGenerated = await ai.generate({
+            const _resultsGenerated = await ai.generate({
                 model: 'ollama/llama3.1:latest',
                 prompt: resultsResult.text,
             });
@@ -525,7 +525,7 @@ export const graduationProjectGenerator = ai.defineFlow(
                 projectType: input.projectType,
             });
 
-            const recsGenerated = await ai.generate({
+            const _recsGenerated = await ai.generate({
                 model: 'ollama/llama3.1:latest',
                 prompt: recsResult.text,
             });

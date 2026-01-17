@@ -463,3 +463,7 @@ export async function listFlowVersions(flowId: string): Promise<FlowVersion[]> {
 export async function rollbackToVersion(flowId: string, version: string): Promise<FlowConfiguration> {
   return flowConfigService.rollbackToVersion(flowId, version);
 }
+
+export function getFlowConfigService(): FlowConfigService {
+  return flowConfigService;
+}

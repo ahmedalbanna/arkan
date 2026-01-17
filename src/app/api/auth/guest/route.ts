@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { handleApiError } from '@/lib/utils/api-utils';
 
-export async function POST(request: Request) {
+export async function POST(_request: Request) {
   try {
     const expiresIn = 60 * 60 * 24 * 30 * 1000; // 30 days for guest session
 

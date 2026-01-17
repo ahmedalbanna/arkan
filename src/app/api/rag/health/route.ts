@@ -11,7 +11,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getVectorStore } from '@/lib/rag/vector-store';
 import { RAGConfig, validateRAGConfig } from '@/lib/rag/config';
 
-export async function GET(request: NextRequest) {
+export async function GET(_request: NextRequest) {
   try {
     const checks = {
       config: { status: 'unknown' as 'ok' | 'error', details: {} as any },

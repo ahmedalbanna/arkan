@@ -3,18 +3,18 @@
  * Week 3 - Day 5: API Integration Tests
  */
 
-import { describe, test, expect, beforeAll, afterAll } from '@jest/globals';
+import { describe, test, expect, _beforeAll, afterAll } from '@jest/globals';
 
 // Note: These are integration test examples
 // Actual implementation depends on your testing setup (Jest, Vitest, etc.)
 
 describe('Flow Management API', () => {
-  const baseUrl = 'http://localhost:3000/api';
+  const _baseUrl = 'http://localhost:3000/api';
   const testFlowId = 'test-flow-' + Date.now();
 
   describe('POST /api/admin/flows', () => {
     test('should create a new flow', async () => {
-      const flowData = {
+      const _flowData = {
         id: testFlowId,
         name: 'Test Flow',
         description: 'Test flow description',
@@ -156,7 +156,7 @@ describe('Flow Management API', () => {
 });
 
 describe('Flow Execution API', () => {
-  const baseUrl = 'http://localhost:3000/api';
+  const _baseUrl = 'http://localhost:3000/api';
 
   describe('POST /api/flows/execute', () => {
     test('should execute a flow successfully', async () => {
@@ -194,7 +194,7 @@ describe('Flow Execution API', () => {
 });
 
 describe('Prompt Management API', () => {
-  const baseUrl = 'http://localhost:3000/api';
+  const _baseUrl = 'http://localhost:3000/api';
 
   describe('POST /api/admin/prompts', () => {
     test('should create a new prompt', async () => {
@@ -233,7 +233,7 @@ describe('Prompt Management API', () => {
 });
 
 describe('Tools API', () => {
-  const baseUrl = 'http://localhost:3000/api';
+  const _baseUrl = 'http://localhost:3000/api';
 
   describe('GET /api/admin/tools', () => {
     test('should list all tools', async () => {

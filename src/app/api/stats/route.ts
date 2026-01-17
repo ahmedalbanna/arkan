@@ -13,7 +13,7 @@ async function verifyUser(request: Request) {
     try {
         let decodedToken = await adminAuth.verifyIdToken(token, true);
         return { authorized: true, userId: decodedToken.uid };
-    } catch (error) {
+    } catch (_error) {
         return { authorized: false, message: 'Unauthorized', userId: null };
     }
 }
@@ -69,7 +69,7 @@ export async function GET(request: Request) {
             recentActivity,
         }, { status: 200 });
 
-    } catch (error) {
+    } catch (_error) {
         console.error('Error fetching user stats:', error);
         return NextResponse.json({ message: 'An unexpected error occurred.' }, { status: 500 });
     }

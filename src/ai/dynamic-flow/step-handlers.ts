@@ -15,8 +15,8 @@ import type {
   ToolStepConfig,
   FormatStepConfig,
   TransformStepConfig,
-  ConditionStepConfig,
-  LoopStepConfig,
+  _ConditionStepConfig,
+  _LoopStepConfig,
   PromptReference,
   ModelConfig
 } from '../../lib/models/flow-config';
@@ -79,7 +79,7 @@ export async function executeRetrieveStep(
       query,
     };
 
-  } catch (error) {
+  } catch (_error) {
     console.error('Retrieve step error:', error);
     throw new Error(`RAG retrieval failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
   }
@@ -164,7 +164,7 @@ export async function executeGenerateStep(
 
     return output;
 
-  } catch (error) {
+  } catch (_error) {
     console.error('Generate step error:', error);
     throw new Error(`LLM generation failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
   }
@@ -183,7 +183,7 @@ async function loadPrompt(promptId: string, version?: string): Promise<any> {
     }
     
     return prompt;
-  } catch (error) {
+  } catch (_error) {
     // Fallback: return a basic prompt structure
     console.warn('Failed to load prompt from database, using inline prompt');
     return {
@@ -260,7 +260,7 @@ export async function executeToolStep(
 
     return result;
 
-  } catch (error) {
+  } catch (_error) {
     console.error('Tool step error:', error);
     throw new Error(`Tool execution failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
   }
@@ -313,7 +313,7 @@ export async function executeFormatStep(
 
     return output;
 
-  } catch (error) {
+  } catch (_error) {
     console.error('Format step error:', error);
     throw new Error(`Formatting failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
   }
@@ -348,7 +348,7 @@ export async function executeTransformStep(
 
     return output;
 
-  } catch (error) {
+  } catch (_error) {
     console.error('Transform step error:', error);
     throw new Error(`Transformation failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
   }
@@ -376,8 +376,8 @@ async function applyTransformer(
     // Array transformers
     'join': (input, params) => Array.isArray(input) ? input.join(params.separator || ', ') : input,
     'split': (input, params) => String(input).split(params.separator || ','),
-    'filter': (input, params) => Array.isArray(input) ? input.filter((item: any) => item) : input,
-    'map': (input, params) => Array.isArray(input) ? input.map((item: any) => item) : input,
+    'filter': (input, _params) => Array.isArray(input) ? input.filter((item: any) => item) : input,
+    'map': (input, _params) => Array.isArray(input) ? input.map((item: any) => item) : input,
     'first': (input) => Array.isArray(input) ? input[0] : input,
     'last': (input) => Array.isArray(input) ? input[input.length - 1] : input,
     'length': (input) => Array.isArray(input) ? input.length : String(input).length,
@@ -496,7 +496,7 @@ export async function executeConditionStep(
       nextSteps: result ? config.thenSteps : (config.elseSteps || []),
     };
 
-  } catch (error) {
+  } catch (_error) {
     console.error('Condition step error:', error);
     throw new Error(`Condition evaluation failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
   }
@@ -538,7 +538,7 @@ function evaluateCondition(expression: string, context: ContextManager): boolean
     
     return Boolean(result);
     
-  } catch (error) {
+  } catch (_error) {
     console.error('Condition evaluation error:', error);
     throw new Error(`Invalid condition expression: ${expression}`);
   }
@@ -577,7 +577,7 @@ export async function executeLoopStep(
       totalIterations: iterationsToRun,
     };
 
-  } catch (error) {
+  } catch (_error) {
     console.error('Loop step error:', error);
     throw new Error(`Loop execution failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
   }

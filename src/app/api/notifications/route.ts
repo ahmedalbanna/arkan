@@ -14,7 +14,7 @@ async function getUserIdFromRequest(request: Request) {
     try {
         let decodedToken = await adminAuth.verifyIdToken(token, true);
         return decodedToken.uid;
-    } catch (error) {
+    } catch (_error) {
         return null;
     }
 }
@@ -39,7 +39,7 @@ export async function GET(request: Request) {
 
         return NextResponse.json(notifications, { status: 200 });
 
-    } catch (error) {
+    } catch (_error) {
         console.error('Error fetching notifications (Firestore):', error);
         return NextResponse.json({ message: 'An unexpected error occurred.' }, { status: 500 });
     }

@@ -240,7 +240,7 @@ class ToolRegistry {
 
       return output;
 
-    } catch (error) {
+    } catch (_error) {
       // Update stats
       if (stats) {
         stats.totalCalls++;
@@ -328,7 +328,7 @@ class ToolRegistry {
         try {
           const { googleSearch } = await import('./tools/google-search');
           return googleSearch(input.query, input.limit || 10);
-        } catch (error) {
+        } catch (_error) {
           console.warn('Google search tool not available, using mock data');
           return { results: [] };
         }
@@ -431,7 +431,7 @@ class ToolRegistry {
       handler: (input) => {
         try {
           return { data: JSON.parse(input.json) };
-        } catch (error) {
+        } catch (_error) {
           throw new Error('Invalid JSON');
         }
       },

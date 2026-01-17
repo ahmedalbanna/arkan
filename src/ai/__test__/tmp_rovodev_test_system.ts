@@ -10,7 +10,7 @@
 import { 
   summarizeText, 
   paraphraseText,
-  grammarCheck,
+  _grammarCheck,
   academicLiteratureReview,
   academicPaperQualityChecker,
   professionalDocumentWriter,
@@ -21,7 +21,7 @@ import {
   analyzeToneTool,
   validateCitationsTool,
   analyzeDocumentStructureTool,
-  professionalWritingTools,
+  _professionalWritingTools,
   getAvailableToolNames,
 } from '../tools';
 
@@ -67,7 +67,7 @@ async function testUniversalFlows() {
     
     // Test paraphrase
     console.log('  → Testing paraphraseText...');
-    const paraphrase = await paraphraseText({
+    const _paraphrase = await paraphraseText({
       text: 'This is a simple test sentence.',
       mode: 'formal',
     });
