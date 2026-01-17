@@ -1,5 +1,13 @@
 
 import type { NextConfig, SizeLimit } from 'next';
+import withPWA from "@ducanh2912/next-pwa";
+
+const pwaConfig = withPWA({
+  dest: 'public',
+  register: true,
+  skipWaiting: true,
+  disable: process.env.NODE_ENV === 'development',
+});
 
 const nextConfig: NextConfig = {
   reactStrictMode: true, // Enable React strict mode for better development experience
@@ -76,4 +84,4 @@ const nextConfig: NextConfig = {
   }
 };
 
-export default nextConfig;
+export default pwaConfig(nextConfig);

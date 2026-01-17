@@ -251,3 +251,6 @@ export const fileSchema = z.object({
       'Invalid file type. Only JPG, PNG, and PDF are allowed.'
     ),
 });
+
+export type PptxTemplateKey = 'modern' | 'dark' | 'professional';
+export type DocxTemplateKey = 'modern' | 'classic' | 'academic';

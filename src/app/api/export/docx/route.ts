@@ -1,19 +1,27 @@
 
+
 'use server';
 
 import { convertMarkdownToWord } from '@/lib/markdown-to-word-converter';
-import { Project, type ProjectProperties } from '@/lib/models';
+import { Project, type ProjectProperties, Chapter, type ChapterProperties, Section, type SectionProperties } from '@/lib/models';
 import type { ConversionOptions } from '@/lib/word-converter/types';
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 
-const exportSchema = z.object({
-  project: z.any().refine(val => val && typeof val === 'object' && val.id, {
-    message: "A valid project object is required.",
-  }),
-  markdown: z.string().min(1, "Markdown content cannot be empty."), // Added markdown field
+const projectExportSchema = z.object({
+  project: z.any().refine(val => val && typeof val === 'object' && val.id, { message: "Project object is invalid." }),
+  selectedContent: z.array(z.any()),
   options: z.custom<ConversionOptions>().optional().default({}),
 });
+
+const markdownExportSchema = z.object({
+  markdown: z.string().min(1),
+  fileName: z.string().min(1),
+  options: z.custom<ConversionOptions>().optional().default({}),
+});
+
+const exportSchema = z.union([projectExportSchema, markdownExportSchema]);
+
 
 export async function POST(req: NextRequest) {
   try {
@@ -24,17 +32,29 @@ export async function POST(req: NextRequest) {
       return new NextResponse(JSON.stringify(validation.error.flatten()), { status: 400 });
     }
 
-    const { project: projectData, markdown, options } = validation.data;
+    let docxBuffer: Buffer | Blob;
+    let fileName: string;
 
-    // Instantiate a Project object for metadata
-    const project = new Project(projectData as ProjectProperties);
-    const fileName = (project.name || 'Untitled').replace(/\s+/g, '_');
+    if ('project' in validation.data) {
+        // Handle project-based export
+        const { project: projectData, selectedContent: selectedContentData, options } = validation.data;
+        const project = new Project(projectData as ProjectProperties);
+        const selectedContent = selectedContentData.map(item => {
+            if ('sections' in item) {
+                return new Chapter(item as ChapterProperties);
+            }
+            return new Section(item as SectionProperties);
+        });
 
-    if (!markdown.trim()) {
-      return new NextResponse(JSON.stringify({ message: 'Project content is empty' }), { status: 400 });
+        docxBuffer = await convertMarkdownToWord(project, { ...options, selectedContent });
+        fileName = `${project.name.replace(/\s+/g, '_') || 'document'}.docx`;
+
+    } else {
+        // Handle direct markdown export
+        const { markdown, fileName: fn, options } = validation.data;
+        docxBuffer = await convertMarkdownToWord(markdown, fn, options);
+        fileName = `${fn}.docx`;
     }
-
-    const docxBuffer = await convertMarkdownToWord(markdown, fileName, options);
 
     if (!docxBuffer) {
       return new NextResponse('Error creating DOCX file buffer.', { status: 500 });
@@ -44,7 +64,7 @@ export async function POST(req: NextRequest) {
       status: 200,
       headers: {
         'Content-Type': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-        'Content-Disposition': `attachment; filename="${fileName}.docx"`,
+        'Content-Disposition': `attachment; filename="${fileName}"`,
       },
     });
 

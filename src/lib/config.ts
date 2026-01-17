@@ -1,6 +1,6 @@
 /**
  * Environment Configuration Validation
- * 
+ *
  * This module validates all required environment variables at startup
  * to ensure the application has all necessary configuration.
  */

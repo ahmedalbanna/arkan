@@ -18,6 +18,11 @@ import './globals.css';
 export const metadata: Metadata = {
   title: 'Arkan - Professional Portfolio Platform',
   description: 'Showcase your work, discover talent, and interact with a community of professionals.',
+  manifest: '/manifest.json',
+  themeColor: '#2E3A9A',
+  icons: {
+    apple: '/icons/icon-192x192.png',
+  },
 };
 
 const fontBody = localFont({

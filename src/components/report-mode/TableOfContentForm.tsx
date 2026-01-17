@@ -50,7 +50,7 @@ export function TableOfContentForm() {
           </header>
           
           <div className="flex-grow flex flex-col gap-4">
-            <Tabs defaultValue="edit" className="flex-grow flex flex-col min-h-0">
+            <Tabs defaultValue="edit" className="h-screen flex-grow flex flex-col min-h-0">
                 <TabsList className="grid w-full grid-cols-2">
                     <TabsTrigger value="edit">Edit</TabsTrigger>
                     <TabsTrigger value="view">View</TabsTrigger>

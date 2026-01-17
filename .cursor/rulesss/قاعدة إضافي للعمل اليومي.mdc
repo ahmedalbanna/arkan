@@ -1,0 +1,194 @@
+---
+description: "قواعد العمل اليومي مع مشروع Arkan"
+globs: ["src/**/*"]
+alwaysApply: true
+---
+
+# قواعد العمل اليومي - Arkan
+
+## قبل البدء في أي مهمة
+
+### 1. قراءة بنك الذاكرة
+```bash
+# اقرأ هذه الملفات بالترتيب:
+1. memory-bank/projectbrief.md - فهم الهدف العام
+2. memory-bank/techContext.md - فهم المكدس التقني
+3. memory-bank/activeContext.md - فهم السياق الحالي
+4. memory-bank/systemPatterns.md - فهم الأنماط المستخدمة
+5. memory-bank/progress.md - فهم حالة التقدم
+6. memory-bank/productContext.md - فهم الميزات والمنتج
+```
+
+### 2. فهم السياق الحالي
+- ما هي الميزات المكتملة؟
+- ما هي المهام قيد التطوير؟
+- ما هي التحديات الحالية؟
+- ما هي القرارات التقنية المهمة؟
+
+## قواعد التطوير
+
+### 1. هيكل الملفات
+src/
+├── app/ # صفحات Next.js App Router
+├── components/ # مكونات UI قابلة لإعادة الاستخدام
+├── core/ # وظائف أساسية قابلة لإعادة الاستخدام
+├── hooks/ # React hooks مخصصة
+├── lib/ # مكتبات مساعدة ونماذج
+├── ai/ # تدفقات الذكاء الاصطناعي والتكوينات
+├── services/ # تكاملات الخدمات الخارجية
+└── context/ # موفرو React Context
+
+### 2. أنماط المكونات
+```typescript
+// مثال على مكون جيد
+interface ComponentProps {
+  // Props محددة بوضوح
+  title: string;
+  onAction: () => void;
+  variant?: 'primary' | 'secondary';
+}
+
+export const Component: React.FC<ComponentProps> = ({
+  title,
+  onAction,
+  variant = 'primary'
+}) => {
+  // منطق المكون
+  return (
+    <div className="component-wrapper">
+      {/* محتوى المكون */}
+    </div>
+  );
+};
+```
+
+### 3. أنماط الـ Hooks
+```typescript
+// استخدام مصانع الـ Hooks الموجودة
+const formHandler = useFormHandler({
+  schema: validationSchema,
+  onSubmit: handleSubmit,
+  defaultValues: initialValues,
+});
+
+const fileUpload = useFileUpload({
+  acceptedTypes: ['pdf', 'docx', 'txt'],
+  maxSize: 10 * 1024 * 1024, // 10MB
+  onSuccess: handleFileSuccess,
+});
+```
+
+### 4. معالجة الأخطاء
+```typescript
+// استخدام نظام معالجة الأخطاء المركزي
+import { ErrorHandler } from '@/core';
+
+try {
+  await riskyOperation();
+} catch (error) {
+  ErrorHandler.handle(error, 'operationName');
+}
+```
+
+## قواعد الذكاء الاصطناعي
+
+### 1. استخدام نظام الذكاء الاصطناعي المحسن
+- استخدم تدفقات Genkit الموجودة في `src/ai/flows/`
+- استخدم المحفزات المحددة في `src/ai/prompts/`
+- استخدم مخططات التحقق في `src/ai/schemas/`
+- استخدم النظام الذكي في `src/ai/core/`
+
+### 2. أنماط تدفق الذكاء الاصطناعي
+```typescript
+// مثال على استخدام تدفق الذكاء الاصطناعي
+const result = await aiFlow.execute({
+  input: userInput,
+  context: projectContext,
+  options: {
+    model: 'gemini-pro',
+    temperature: 0.7,
+    maxTokens: 2000
+  }
+});
+```
+
+## قواعد الاختبار
+
+### 1. كتابة الاختبارات
+```typescript
+// مثال على اختبار المكون
+import { render, screen, fireEvent } from '@testing-library/react';
+import { Component } from '../Component';
+
+describe('Component', () => {
+  test('renders correctly', () => {
+    render(<Component title="Test" onAction={() => {}} />);
+    expect(screen.getByText('Test')).toBeInTheDocument();
+  });
+
+  test('calls onAction when clicked', () => {
+    const mockAction = jest.fn();
+    render(<Component title="Test" onAction={mockAction} />);
+
+    fireEvent.click(screen.getByRole('button'));
+    expect(mockAction).toHaveBeenCalledTimes(1);
+  });
+});
+```
+
+### 2. اختبار الـ Hooks
+```typescript
+// مثال على اختبار الـ Hook
+import { renderHook, act } from '@testing-library/react';
+import { useCustomHook } from '../useCustomHook';
+
+describe('useCustomHook', () => {
+  test('initializes with default values', () => {
+    const { result } = renderHook(() => useCustomHook());
+    expect(result.current.value).toBe(defaultValue);
+  });
+});
+```
+
+## قواعد الأداء
+
+### 1. تحسين الأداء
+- استخدم `React.memo` للمكونات الثقيلة
+- استخدم `useMemo` للحسابات المعقدة
+- استخدم `useCallback` للدوال الممررة كـ props
+- استخدم lazy loading للصفحات والمكونات الثقيلة
+
+### 2. تحسين الحزمة
+- استخدم dynamic imports للكود غير الضروري
+- استخدم code splitting على مستوى الصفحة
+- استخدم tree shaking لإزالة الكود غير المستخدم
+
+## قواعد الأمان
+
+### 1. التحقق من صحة البيانات
+- استخدم Zod schemas لجميع المدخلات
+- تحقق من صحة الملفات المرفوعة
+- استخدم sanitization للمحتوى المستخدم
+
+### 2. المصادقة والتفويض
+- تحقق من المصادقة على مستوى الخادم
+- استخدم Firebase Auth للجلسات
+- تطبيق التحكم في الوصول المستند إلى الأدوار
+
+## التحديث المستمر لبنك الذاكرة
+
+### متى أقترح تحديثات
+- عند إضافة ميزة جديدة مهمة
+- عند حل مشكلة تقنية معقدة
+- عند اتخاذ قرارات معمارية جديدة
+- عند تغيير أنماط التطوير
+
+### كيفية التحديث
+1. حدد الملف المناسب في بنك الذاكرة
+2. اقترح التحديث مع السياق
+3. اشرح سبب أهمية التحديث
+4. قدم النسخة المحدثة من المحتوى
+
+## الخلاصة
+
+هذه القواعد تضمن العمل بكفاءة مع مشروع Arkan مع الحفاظ على جودة الكود والأداء. يجب اتباعها في كل مهمة تطويرية.

@@ -243,7 +243,7 @@ export default function ProjectSettingsPanel() {
         <Form {...form}>
           <form className="space-y-4 h-full flex flex-col">
             <ScrollArea className="flex-grow pr-4 -mr-4">
-              <div className="space-y-4">
+              <div className="space-y-4 px-2">
                 <FormField control={form.control} name="name" render={({ field }) => (
                   <FormItem><FormLabel>Project Name</FormLabel><FormControl><Input {...field} onBlur={handleBlur} /></FormControl><FormMessage /></FormItem>
                 )} />

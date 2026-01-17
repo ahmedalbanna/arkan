@@ -23,18 +23,16 @@ export function useProjects() {
             try {
                 const token = await getAuthenticatedToken(firebaseUser);
                 const serverProjects = await fetchProjectsApi(token);
-                const projects = serverProjects.map(p => new Project(p));
-
-                // Sync the local database with the server's source of truth.
-                await localProjectService.syncProjects(serverProjects);
-                
-                return projects;
+                // The new, safe sync logic.
+                await localProjectService.syncWithServer(serverProjects);
             } catch (serverError) {
-                console.warn("Could not connect to server, attempting to load from local storage.", serverError);
-                // If server fetch fails, fall back to local storage
-                const localProjects = await localProjectService.getAllProjects();
-                return localProjects.map(p => new Project(p));
+                console.warn("Could not connect to server to sync. Will use local data only.", serverError);
             }
+            
+            // Always return all local projects as the source of truth for the UI.
+            // This ensures offline-created projects are visible.
+            const allLocalProjects = await localProjectService.getAllProjects();
+            return allLocalProjects.map(p => new Project(p));
         },
         enabled: !!firebaseUser,
         staleTime: 1000 * 60 * 5, // 5 minutes
@@ -59,6 +57,7 @@ export function useSaveProject() {
 
             if (!navigator.onLine || !firebaseUser) {
                 // If offline, we've already saved locally.
+                toast({ title: 'Saved Locally', description: 'Project saved to your device. It will sync when you are back online.' });
                 return updatedProjectData;
             }
             
@@ -82,8 +81,6 @@ export function useSaveProject() {
 
             if (navigator.onLine) {
                 toast({ title: 'Project Saved', description: `"${savedProject.name}" has been saved.` });
-            } else {
-                toast({ title: 'Saved Locally', description: 'Project saved to your device. It will sync when you are back online.' });
             }
         },
         onError: (error: any) => {

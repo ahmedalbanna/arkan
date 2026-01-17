@@ -1,0 +1,62 @@
+---
+description: "القواعد الشاملة لمشروع Arkan"
+globs: ["src/**/*"]
+alwaysApply: true
+---
+
+# قواعد مشروع Arkan
+
+## الفلسفة العامة
+- اتبع مبادئ Clean Code
+- استخدم TypeScript الصارم
+- ركز على قابلية القراءة والصيانة
+- اكتب اختبارات شاملة
+
+## معايير الكود
+- استخدم meaningful variable names
+- أضف JSDoc للدوال العامة
+- استخدم error handling شامل
+- اتبع React best practices
+
+## هيكل المشروع
+- ضع المكونات في `src/components/`
+- ضع الصفحات في `src/app/`
+- ضع الـ hooks في `src/hooks/`
+- ضع الـ utilities في `src/lib/`
+
+## أمثلة الكود المطلوب
+```typescript
+// ✅ مثال جيد للمكون
+interface UserCardProps {
+  user: User;
+  onEdit: (user: User) => void;
+  onDelete: (userId: string) => void;
+}
+
+export const UserCard: React.FC<UserCardProps> = ({
+  user,
+  onEdit,
+  onDelete
+}) => {
+  const handleEdit = useCallback(() => {
+    onEdit(user);
+  }, [user, onEdit]);
+
+  return (
+    <div className="p-4 border rounded-lg">
+      <h3 className="font-bold">{user.name}</h3>
+      <p className="text-gray-600">{user.email}</p>
+      <div className="mt-2 flex gap-2">
+        <button onClick={handleEdit}>تعديل</button>
+        <button onClick={() => onDelete(user.id)}>حذف</button>
+      </div>
+    </div>
+  );
+};
+```
+
+## ما يجب تجنبه
+- تجنب استخدام `any` type
+- لا تستخدم inline styles
+- لا تنس إضافة error handling
+- لا تكتب كود بدون اختبارات
