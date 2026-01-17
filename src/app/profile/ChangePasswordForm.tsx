@@ -11,23 +11,71 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Button } from '@/components/ui/button';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { Loader2, KeyRound } from 'lucide-react';
+import { Loader2, KeyRound, Eye, EyeOff } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Progress } from '@/components/ui/progress';
 
 const passwordSchema = z.object({
   currentPassword: z.string().min(1, 'Current password is required.'),
-  newPassword: z.string().min(6, 'New password must be at least 6 characters.'),
+  newPassword: z.string().min(8, 'New password must be at least 8 characters.'),
 });
 
 type PasswordFormValues = z.infer<typeof passwordSchema>;
 
+interface Strength {
+    score: number;
+    label: string;
+    color: string;
+}
+
+function evaluatePasswordStrength(password: string): Strength {
+    let score = 0;
+    if (password.length >= 8) score++;
+    if (/[a-z]/.test(password)) score++;
+    if (/[A-Z]/.test(password)) score++;
+    if (/[0-9]/.test(password)) score++;
+    if (/[^a-zA-Z0-9]/.test(password)) score++;
+
+    switch (score) {
+        case 0:
+        case 1:
+            return { score: 20, label: 'Very Weak', color: 'bg-red-500' };
+        case 2:
+            return { score: 40, label: 'Weak', color: 'bg-red-500' };
+        case 3:
+            return { score: 60, label: 'Medium', color: 'bg-yellow-500' };
+        case 4:
+            return { score: 80, label: 'Strong', color: 'bg-green-500' };
+        case 5:
+            return { score: 100, label: 'Very Strong', color: 'bg-green-500' };
+        default:
+            return { score: 0, label: '', color: '' };
+    }
+}
+
+
 export function ChangePasswordForm() {
   const { firebaseUser } = useAuth();
   const { toast } = useToast();
+  const [showCurrentPassword, setShowCurrentPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [passwordStrength, setPasswordStrength] = useState<Strength | null>(null);
 
   const form = useForm<PasswordFormValues>({
     resolver: zodResolver(passwordSchema),
     defaultValues: { currentPassword: '', newPassword: '' },
+    mode: 'onChange',
   });
+
+  const newPasswordValue = form.watch('newPassword');
+
+  useEffect(() => {
+    if (newPasswordValue) {
+        setPasswordStrength(evaluatePasswordStrength(newPasswordValue));
+    } else {
+        setPasswordStrength(null);
+    }
+  }, [newPasswordValue]);
 
   const changePasswordMutation = useMutation({
     mutationFn: async (data: PasswordFormValues) => {
@@ -76,9 +124,20 @@ export function ChangePasswordForm() {
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Current Password</FormLabel>
-                  <FormControl>
-                    <Input type="password" {...field} disabled={changePasswordMutation.isPending} />
-                  </FormControl>
+                  <div className="relative">
+                    <FormControl>
+                      <Input type={showCurrentPassword ? 'text' : 'password'} {...field} disabled={changePasswordMutation.isPending} />
+                    </FormControl>
+                    <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7"
+                        onClick={() => setShowCurrentPassword(!showCurrentPassword)}
+                    >
+                        {showCurrentPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                    </Button>
+                  </div>
                   <FormMessage />
                 </FormItem>
               )}
@@ -89,10 +148,27 @@ export function ChangePasswordForm() {
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>New Password</FormLabel>
-                  <FormControl>
-                    <Input type="password" {...field} disabled={changePasswordMutation.isPending} />
-                  </FormControl>
+                  <div className="relative">
+                    <FormControl>
+                      <Input type={showNewPassword ? 'text' : 'password'} {...field} disabled={changePasswordMutation.isPending} />
+                    </FormControl>
+                     <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7"
+                        onClick={() => setShowNewPassword(!showNewPassword)}
+                    >
+                        {showNewPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                    </Button>
+                  </div>
                   <FormMessage />
+                  {passwordStrength && (
+                    <div className="space-y-2 pt-2">
+                        <Progress value={passwordStrength.score} className={passwordStrength.color}/>
+                        <p className="text-xs font-medium">{passwordStrength.label}</p>
+                    </div>
+                  )}
                 </FormItem>
               )}
             />
