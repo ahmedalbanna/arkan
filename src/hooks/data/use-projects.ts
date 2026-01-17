@@ -27,10 +27,18 @@ export function useProjects() {
                 await localProjectService.syncWithServer(serverProjects);
             } catch (serverError) {
                 console.warn("Could not connect to server to sync. Will use local data only.", serverError);
+                // If server sync fails, try to load from local storage.
+                // If local storage is also empty, throw the error so the UI can show a proper error state.
+                const localProjects = await localProjectService.getAllProjects();
+                if (localProjects.length > 0) {
+                    return localProjects.map(p => new Project(p));
+                } else {
+                    // Only throw if both server and local are unavailable.
+                    throw serverError;
+                }
             }
             
-            // Always return all local projects as the source of truth for the UI.
-            // This ensures offline-created projects are visible.
+            // If server sync was successful, return all local projects (which now includes server projects).
             const allLocalProjects = await localProjectService.getAllProjects();
             return allLocalProjects.map(p => new Project(p));
         },
