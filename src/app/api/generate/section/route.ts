@@ -1,4 +1,3 @@
-
 'use server';
 
 import { z } from 'zod';
@@ -39,7 +38,7 @@ export const POST = withAuth(async ({ request, user }) => {
         () => generateReportSection(agentInput)
     );
     
-    // Ensure the AI returned content
+    // The result from the flow is now { content: "..." }
     const content = result?.content;
     
     if (!content) {
@@ -59,8 +58,8 @@ export const POST = withAuth(async ({ request, user }) => {
       creditCost: creditCost,
     });
 
-    // Return a success message. The client will get the update via real-time subscription.
-    return createApiResponse({ message: `Section '${agentInput.sectionToGenerate}' generated and saved successfully.` }, 200);
+    // Return the generated content to the client for optimistic updates
+    return createApiResponse({ content }, 200);
 
   } catch (error) {
     return handleApiError(error);
