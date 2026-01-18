@@ -88,3 +88,17 @@ To provide relevant, up-to-date, and domain-specific context to AI models, reduc
 **Purpose**: Avoids CORS issues and provides a security layer for fetching external images.
 - **Implementation**: `src/app/api/proxy/convert/route.ts`
 - **Features**: Whitelists allowed domains to prevent abuse (SSRF).
+
+## Developer Experience Patterns
+
+### 1. Interactive API Documentation
+**Purpose**: Provide developers with a clear, interactive way to understand and test the application's API.
+- **Implementation**:
+  - **Configuration**: `src/config/api-docs.ts` - A single source of truth defining all API endpoints, their methods, descriptions, authentication levels, and example request/response bodies.
+  - **UI Components**: Reusable components in `src/components/api-docs/` such as `EndpointCard`, `ApiTester`, and `CodeBlock` create a dynamic and maintainable documentation page.
+  - **Page**: `/app/api-docs/page.tsx` - The main page that renders the documentation from the configuration file.
+- **Benefits**:
+  - **Self-Documenting**: The API documentation is tightly coupled with its definition, reducing the chance of it becoming outdated.
+  - **Interactive Testing**: Developers can make live API calls directly from the documentation UI, speeding up testing and integration.
+  - **Clarity**: Provides a clear contract for each endpoint, including required parameters and expected response structures.
+  - **Maintainability**: Adding or updating API documentation is as simple as updating the central configuration file.
