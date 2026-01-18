@@ -1,18 +1,21 @@
-
 'use client';
 
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { getDatabase } from 'firebase/database';
-import { initializeFirebase } from '@/firebase';
-
-const { firebaseApp } = initializeFirebase();
-const rtdb = getDatabase(firebaseApp);
+import { initializeFirebase } from '@/firebase'; // Assuming this correctly initializes firebaseApp
 import { ref, onValue, off } from 'firebase/database';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import type { Notification } from '@/lib/types';
 import { toast } from '@/hooks/util/use-toast';
 import { notificationKeys } from '@/lib/query-keys';
+
+
+const { firebaseApp } = initializeFirebase();
+// Ensure that firebaseApp is properly initialized with databaseURL in your firebase config
+// The getDatabase function should be able to pick up the initialized app if it's the default app,
+// or you can explicitly pass the app instance.
+const rtdb = getDatabase(firebaseApp); 
 
 /**
  * A real-time hook to fetch notifications for the current user from Firebase Realtime Database.
