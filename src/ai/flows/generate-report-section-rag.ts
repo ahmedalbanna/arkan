@@ -68,11 +68,10 @@ ${ragContext ? 'IMPORTANT: You have access to RAG-retrieved context which contai
     system: systemPrompt,
     prompt: `
 ${getJsonPromptInstructions(`{
-  "sectionName": "{{sectionToGenerate}}",
   "content": "Complete section content in markdown format"
 }`)}
 
-CRITICAL: Your final output must be a JSON object where the 'sectionName' field exactly matches the requested section: '{{sectionToGenerate}}'. Your writing style should be natural and engaging, not robotic.
+CRITICAL: Your final output must be a JSON object with a single 'content' field containing the complete markdown for the section. Your writing style should be natural and engaging, not robotic.
 
 {{#if guidelines}}
 --- Guidelines ---\n
@@ -144,7 +143,6 @@ Now, generate the section content based on all the context provided above. Synth
       fallbackFn: (rawOutput) => {
         if (typeof rawOutput === 'string') {
           return {
-            sectionName: input.sectionToGenerate,
             content: rawOutput,
           };
         }

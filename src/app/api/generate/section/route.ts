@@ -1,4 +1,3 @@
-
 'use server';
 
 import { executeWithQueue, generateRequestId, selectModel } from '@/ai';
@@ -38,8 +37,8 @@ export const POST = withAuth(async ({ request, user }) => {
       'generate-report-section',
       () => generateReportSection(agentInput)
     );
-
-    // Ensure the AI returned content
+    
+    // The result from the flow is now { content: "..." }
     const content = result?.content;
 
     if (!content) {
