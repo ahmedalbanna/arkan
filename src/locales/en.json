@@ -39,7 +39,15 @@
     "generationTemplates": "Generation Templates",
     "promptTemplates": "Prompt Templates",
     "manageSections": "Manage Sections",
+    "manageTemplates": "Manage Templates",
     "agentLab": "Agent Lab"
+  },
+  "manageTemplates": {
+    "pageTitle": "Template Management",
+    "pageSubtitle": "Customize and manage all generation and style templates.",
+    "docxTemplates": "DOCX Styles",
+    "pptxTemplates": "PPTX Styles",
+    "reportTemplates": "Report Templates"
   },
   "writingTools": {
     "pageTitle": "AI Writing Tools",

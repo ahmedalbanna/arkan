@@ -39,6 +39,7 @@
     "generationTemplates": "قوالب الإنشاء",
     "promptTemplates": "قوالب الأوامر",
     "manageSections": "إدارة الأقسام",
+    "manageTemplates": "إدارة القوالب",
     "agentLab": "معمل الوكلاء"
   },
   "writingTools": {
@@ -1000,85 +1001,11 @@
     "createStructure": "إنشاء بنية"
   },
   "manageTemplates": {
-    "pageTitle": "إدارة قوالب الإنشاء",
-    "pageSubtitle": "تكوين المطالبات والإعدادات لمولدات المقترحات والتقارير والعروض التقديمية.",
-    "proposalTemplates": "قوالب المقترحات",
-    "reportTemplates": "قوالب التقارير",
-    "presentationTemplates": "قوالب العروض التقديمية",
-    "proposalTitle": "قوالب إنشاء المقترحات",
-    "proposalDescription": "تكوين القوالب المستخدمة لإنشاء مقترحات المشاريع. تتحكم هذه الإعدادات في المطالبات والإرشادات المقدمة للذكاء الاصطناعي.",
-    "reportTitle": "قوالب إنشاء التقارير",
-    "reportDescription": "تكوين أقسام التقرير المضمنة في خيار 'إنشاء تقرير كامل'.",
-    "presentationTitle": "قوالب إنشاء العروض التقديمية",
-    "presentationDescription": "تكوين بنية المحتوى لأنواع مختلفة من العروض التقديمية.",
-    "createButton": "إنشاء جديد",
-    "cancelButton": "إلغاء",
-    "deleteDialog": {
-      "title": "هل أنت متأكد؟",
-      "description": "لا يمكن التراجع عن هذا الإجراء. سيؤدي هذا إلى حذف قالب '{templateName}' نهائيًا.",
-      "deleteButton": "حذف"
-    },
-    "createDialog": {
-      "title": "إنشاء قالب",
-      "nameLabel": "اسم القالب",
-      "idLabel": "معرف القالب",
-      "descriptionLabel": "الوصف"
-    },
-    "proposalDialog": {
-      "title": "إنشاء قالب مقترح",
-      "description": "تحديد قالب جديد لإنشاء مقترحات المشاريع.",
-      "idPlaceholder": "على سبيل المثال، my-custom-template",
-      "namePlaceholder": "على سبيل المثال، قالب مخصص خاص بي",
-      "promptLabel": "المطالبة الأساسية",
-      "guidelinesLabel": "الإرشادات",
-      "removeGuideline": "إزالة",
-      "addGuideline": "إضافة إرشادات",
-      "jsonStructureLabel": "بنية JSON",
-      "saveButton": "حفظ التغييرات",
-      "deleteButton": "حذف"
-    },
-    "reportDialog": {
-      "title": "إنشاء قالب تقرير جديد",
-      "description": "اختر الوكلاء الذين تريد تضمينهم في هذا القالب للتفاعلات الجماعية.",
-      "namePlaceholder": "على سبيل المثال، تقرير برنامج فني",
-      "descriptionPlaceholder": "وصف قصير لما يستخدم له هذا القالب.",
-      "idPlaceholder": "على سبيل المثال، tech-report",
-      "includedAgentsLabel": "الوكلاء المضمنون",
-      "availableAgentsLabel": "الوكلاء المتاحون",
-      "searchPlaceholder": "ابحث عن وكلاء..."
-    },
-    "presentationDialog": {
-      "title": "إنشاء قالب عرض تقديمي",
-      "description": "تحديد قالب جديد لإنشاء العروض التقديمية.",
-      "idPlaceholder": "على سبيل المثال، weekly-update",
-      "namePlaceholder": "على سبيل المثال، تحديث أسبوعي",
-      "relevantSectionsLabel": "أقسام التقرير ذات الصلة",
-      "relevantSectionsDesc": "حدد أقسام التقرير الأكثر صلة بنوع هذا العرض التقديمي."
-    },
-    "pptxDialog": {
-      "title": "إنشاء قالب PPTX جديد",
-      "description": "تحديد قالب نمط جديد لصادرات PPTX. سيتم تهيئته بنمط \"حديث\" كأساس.",
-      "idPlaceholder": "على سبيل المثال، my-corporate-style",
-      "namePlaceholder": "على سبيل المثال، My Corporate Style"
-    },
-    "docxDialog": {
-      "title": "إنشاء قالب DOCX جديد",
-      "description": "تحديد قالب نمط جديد لصادرات DOCX. سيتم تهيئته بنمط \"حديث\" كأساس."
-    },
-    "generalStyles": "الأنماط العامة",
-    "headingStyles": "أنماط العناوين",
-    "fontFamily": "نوع الخط",
-    "fontSize": "حجم الخط (نقطة)",
-    "fontColor": "لون الخط",
-    "bold": "عريض",
-    "headingLevel": "عنوان المستوى {level}",
-    "saveButton": "حفظ القالب",
-    "createSuccessToast": {
-      "title": "نجاح",
-      "proposalDesc": "تم إنشاء قالب مقترح جديد.",
-      "reportDesc": "تم إنشاء قالب تقرير جديد.",
-      "presentationDesc": "تم إنشاء قالب عرض تقديمي جديد."
-    }
+    "pageTitle": "إدارة القوالب",
+    "pageSubtitle": "تخصيص وإدارة جميع قوالب التوليد والأنماط.",
+    "docxTemplates": "أنماط DOCX",
+    "pptxTemplates": "أنماط PPTX",
+    "reportTemplates": "قوالب التقارير"
   },
   "templates": {
     "modern": {

@@ -71,7 +71,14 @@ const nextConfig: NextConfig = {
         async_hooks: false,
       };
     }
-    
+
+    // Suppress specific warnings
+    config.ignoreWarnings = config.ignoreWarnings || [];
+    config.ignoreWarnings.push(
+      { module: /@opentelemetry\/instrumentation/ },
+      { module: /handlebars/ }
+    );
+
     return config;
   },
   turbopack: {

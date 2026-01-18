@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useForm, Controller, useFieldArray } from 'react-hook-form';
@@ -21,6 +20,7 @@ import { LanguageSchema, BehaviorSchema, type Behavior, type ProjectProperties, 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../../ui/select';
 import { Slider } from '../../ui/slider';
 import { Badge } from '../../ui/badge';
+import { ToggleGroup, ToggleGroupItem } from '../../ui/toggle-group';
 
 const settingsSchema = z.object({
   name: z.string().min(1, 'Project name is required.'),
@@ -392,28 +392,40 @@ export default function ProjectSettingsPanel() {
                           </FormItem>
                         )} />
                         
-                        <div className="space-y-2">
-                          <Label>Behaviors & Personas</Label>
-                          {behaviors.map((item, index) => (
-                              <div key={item.id} className="flex gap-2 items-center">
-                                  <Input {...form.register(`behaviors.${index}.name`)} onBlur={handleBlur} placeholder="e.g., Expert academic writer" />
-                                  <Controller
-                                      control={form.control}
-                                      name={`behaviors.${index}.type`}
-                                      render={({ field }) => (
-                                          <Select onValueChange={(value) => { field.onChange(value); handleBlur(); }} value={field.value}>
-                                              <SelectTrigger className="w-[120px]"><SelectValue /></SelectTrigger>
-                                              <SelectContent>
-                                                  <SelectItem value="persona">Persona</SelectItem>
-                                                  <SelectItem value="behavior">Behavior</SelectItem>
-                                              </SelectContent>
-                                          </Select>
-                                      )}
-                                  />
-                                  <Button type="button" variant="ghost" size="icon" onClick={() => removeBehavior(index)}><Trash2 className="h-4 w-4 text-destructive" /></Button>
-                              </div>
-                          ))}
-                          <Button type="button" size="sm" variant="outline" onClick={() => appendBehavior({ name: '', type: 'behavior' })}>Add Behavior</Button>
+                        <div className="space-y-3">
+                            <Label>Behaviors &amp; Personas</Label>
+                            <div className="space-y-2">
+                                {behaviors.map((item, index) => (
+                                    <div key={item.id} className="flex items-center gap-2 rounded-md border p-2 bg-muted/50">
+                                        <Input
+                                            {...form.register(`behaviors.${index}.name`)}
+                                            onBlur={handleBlur}
+                                            placeholder="e.g., 'Act as an expert academic writer'"
+                                            className="flex-grow bg-background border-transparent focus-visible:ring-1 focus-visible:ring-ring"
+                                        />
+                                        <Controller
+                                            control={form.control}
+                                            name={`behaviors.${index}.type`}
+                                            render={({ field }) => (
+                                                <ToggleGroup
+                                                    type="single"
+                                                    value={field.value}
+                                                    onValueChange={(value) => { if (value) { field.onChange(value); handleBlur(); } }}
+                                                    className="shrink-0"
+                                                    size="sm"
+                                                >
+                                                    <ToggleGroupItem value="persona">Persona</ToggleGroupItem>
+                                                    <ToggleGroupItem value="behavior">Behavior</ToggleGroupItem>
+                                                </ToggleGroup>
+                                            )}
+                                        />
+                                        <Button type="button" variant="ghost" size="icon" onClick={() => removeBehavior(index)}>
+                                            <Trash2 className="h-4 w-4 text-destructive" />
+                                        </Button>
+                                    </div>
+                                ))}
+                            </div>
+                            <Button type="button" size="sm" variant="outline" className="w-full" onClick={() => appendBehavior({ name: '', type: 'behavior' })}>Add Behavior</Button>
                         </div>
                         
                         <FormField control={form.control} name="rules" render={({ field }) => (

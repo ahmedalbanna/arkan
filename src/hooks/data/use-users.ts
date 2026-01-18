@@ -8,6 +8,7 @@ import {
   fetchUserProfileApi,
   updateUserApi,
   sendNotificationApi,
+  adminUpdateUserApi,
 } from '@/services/api/userService';
 import { User, type UserProfile } from '@/lib/models';
 import { userKeys } from '@/lib/query-keys';
@@ -69,7 +70,7 @@ export function useCreateUser(options?: { onSuccess?: (data: any) => void }) {
 
 /**
  * Mutation hook for updating a user's profile.
- * Requires authentication. Admins can update any user, regular users can only update their own.
+ * Requires authentication. This is for users updating their OWN profile.
  */
 export function useUpdateUser() {
   const queryClient = useQueryClient();
@@ -88,6 +89,27 @@ export function useUpdateUser() {
     onError: (error) => handleErrorUtility(error, "Update Failed"),
   });
 }
+
+/**
+ * Mutation hook for ADMINS updating a user's profile.
+ */
+export function useAdminUpdateUser() {
+  const queryClient = useQueryClient();
+  const { firebaseUser } = useAuth();
+  return useMutation({
+    mutationFn: async (variables: { userId: string; data: Partial<UserProfile> }) => {
+      const token = await getAuthenticatedToken(firebaseUser);
+      return adminUpdateUserApi(variables.userId, variables.data, token);
+    },
+    onSuccess: (data) => {
+      toast({ title: 'Success', description: 'User profile has been successfully updated.' });
+      queryClient.invalidateQueries({ queryKey: userKeys.lists() });
+      queryClient.invalidateQueries({ queryKey: userKeys.profile(data.id) });
+    },
+    onError: (error) => handleErrorUtility(error, "Update Failed"),
+  });
+}
+
 
 /**
  * Mutation hook for deleting a user.

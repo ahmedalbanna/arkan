@@ -1,8 +1,6 @@
-
 import { z } from 'zod';
 import { SectionPropertiesSchema } from './section';
 import { Template, type BaseTemplateProperties } from './template';
-
 
 export const ReportTemplateChapterSchema = z.object({
   title: z.string(),
@@ -49,9 +47,14 @@ export interface ReportTemplateProperties extends BaseTemplateProperties {
 
 export class ReportTemplate extends Template {
   public isDefault: boolean;
+  public content: {
+    title: string;
+    sections: z.infer<typeof SectionPropertiesSchema>[];
+  }[];
 
   constructor(props: ReportTemplateProperties) {
     super(props);
     this.isDefault = props.isDefault || false;
+    this.content = props.content || [];
   }
 }

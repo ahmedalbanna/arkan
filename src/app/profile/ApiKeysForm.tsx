@@ -8,8 +8,8 @@ import { Input } from '@/components/ui/input';
 import { useUpdateUser } from '@/hooks';
 import { UserProfile } from '@/lib/models';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Loader2, Save } from 'lucide-react';
-import { useEffect } from 'react';
+import { Loader2, Save, Eye, EyeOff } from 'lucide-react';
+import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 
@@ -26,6 +26,8 @@ interface ApiKeysFormProps {
 
 export function ApiKeysForm({ userProfile }: ApiKeysFormProps) {
   const updateUserMutation = useUpdateUser();
+  const [showGeminiKey, setShowGeminiKey] = useState(false);
+  const [showChatGPTKey, setShowChatGPTKey] = useState(false);
 
   const form = useForm<ApiKeysFormValues>({
     resolver: zodResolver(apiKeysSchema),
@@ -67,9 +69,25 @@ export function ApiKeysForm({ userProfile }: ApiKeysFormProps) {
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Google Gemini API Key</FormLabel>
-                  <FormControl>
-                    <Input type="password" {...field} placeholder="Enter your Gemini API key" disabled={updateUserMutation.isPending} />
-                  </FormControl>
+                  <div className="relative">
+                    <FormControl>
+                      <Input
+                        type={showGeminiKey ? 'text' : 'password'}
+                        {...field}
+                        placeholder="Enter your Gemini API key"
+                        disabled={updateUserMutation.isPending}
+                      />
+                    </FormControl>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7"
+                      onClick={() => setShowGeminiKey(!showGeminiKey)}
+                    >
+                      {showGeminiKey ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                    </Button>
+                  </div>
                   <FormMessage />
                 </FormItem>
               )}
@@ -80,9 +98,25 @@ export function ApiKeysForm({ userProfile }: ApiKeysFormProps) {
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>OpenAI ChatGPT API Key</FormLabel>
-                  <FormControl>
-                    <Input type="password" {...field} placeholder="Enter your ChatGPT API key" disabled={updateUserMutation.isPending} />
-                  </FormControl>
+                  <div className="relative">
+                    <FormControl>
+                      <Input
+                        type={showChatGPTKey ? 'text' : 'password'}
+                        {...field}
+                        placeholder="Enter your ChatGPT API key"
+                        disabled={updateUserMutation.isPending}
+                      />
+                    </FormControl>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7"
+                      onClick={() => setShowChatGPTKey(!showChatGPTKey)}
+                    >
+                      {showChatGPTKey ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                    </Button>
+                  </div>
                   <FormMessage />
                 </FormItem>
               )}
