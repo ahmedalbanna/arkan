@@ -1,4 +1,3 @@
-
 'use client';
 
 import { A4Page } from '@/components/shared/A4Page';
@@ -14,8 +13,12 @@ import { useLocalization } from '@/context/LocalizationContext';
 import { useBuilderStore } from '@/hooks';
 import MarkdownEditor from './MarkdownEditor';
 import { CoverPage } from '../shared/CoverPage';
-import { BookOpenCheck, Brush, LayoutList, Bot, FileVideo, FileText } from 'lucide-react';
+import { BookOpenCheck, Brush, LayoutList, Bot, FileVideo, FileText, ChevronDown, Lightbulb, History } from 'lucide-react';
 import { TableOfContentForm } from './TableOfContentForm';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '../ui/collapsible';
+import { useState } from 'react';
+import { formatDistanceToNow } from 'date-fns';
+import { Button } from '../ui/button';
 
 const ReportSteps = () => {
   const { t } = useLocalization();
@@ -78,12 +81,24 @@ interface ReportResultsProps {
 const ReportResults = ({ activePanelKey }: ReportResultsProps) => {
   const { t } = useLocalization();
   const { project, version, updateProjectFromMarkdown } = useBuilderStore();
+  const [isSuggestionVisible, setIsSuggestionVisible] = useState(true);
 
   const handleContentChange = (newMarkdown: string) => {
     updateProjectFromMarkdown(newMarkdown);
   };
   
   const hasContent = project?.content && project.content.length > 0;
+
+  // Logic for suggestions
+  const getSuggestion = () => {
+    if (!project || !project.sections) return "Start by adding a chapter or applying a template.";
+    const emptySection = project.sections.find(s => !s.content);
+    if (emptySection) {
+        return `Suggestion: Try generating the "${emptySection.title}" section next.`;
+    }
+    return "All sections have content. You can now review or export your document.";
+  };
+  const suggestion = getSuggestion();
 
   const renderContent = () => {
     switch (activePanelKey) {
@@ -113,7 +128,7 @@ const ReportResults = ({ activePanelKey }: ReportResultsProps) => {
                         <MarkdownEditor
                             key={version} // Re-mount editor when version changes
                             content={project?.fullMarkdownContent || ''}
-                            onChange={handleContentChange}
+                            onBlur={handleContentChange}
                         />
                     </A4Page>
                  )
@@ -128,18 +143,42 @@ const ReportResults = ({ activePanelKey }: ReportResultsProps) => {
 
   return (
     <Card className="h-full flex flex-col overflow-hidden">
-      <CardHeader>
-        <div className="flex justify-between items-center">
-          <div>
-            <CardTitle className="font-headline">
-              {t('builder.reportGenerator.resultsTitle')}
-            </CardTitle>
-            <CardDescription>
-              {t('builder.reportGenerator.resultsDesc')}
-            </CardDescription>
-          </div>
-        </div>
-      </CardHeader>
+      <Collapsible open={isSuggestionVisible} onOpenChange={setIsSuggestionVisible} className="border-b">
+        <CollapsibleTrigger asChild>
+            <div className="flex items-center justify-between p-4 cursor-pointer hover:bg-muted/50">
+                <div>
+                    <CardTitle className="font-headline text-lg">
+                      {t('builder.reportGenerator.resultsTitle')}
+                    </CardTitle>
+                    <CardDescription className="text-xs">
+                      {t('builder.reportGenerator.resultsDesc')}
+                    </CardDescription>
+                </div>
+                <Button variant="ghost" size="sm" className="shrink-0">
+                    <ChevronDown className={`h-4 w-4 transition-transform ${isSuggestionVisible ? '' : '-rotate-90'}`} />
+                    <span className="sr-only">Toggle suggestions</span>
+                </Button>
+            </div>
+        </CollapsibleTrigger>
+        <CollapsibleContent>
+            <div className="p-4 border-t bg-muted/30 space-y-2">
+                <div className="flex items-center gap-2 text-sm">
+                    <Lightbulb className="h-4 w-4 text-yellow-500" />
+                    <span className="font-semibold">Suggestion:</span>
+                    <span className="text-muted-foreground">{suggestion}</span>
+                </div>
+                {project?.meta.updated && (
+                    <div className="flex items-center gap-2 text-sm">
+                        <History className="h-4 w-4 text-blue-500" />
+                        <span className="font-semibold">Last operation:</span>
+                        <span className="text-muted-foreground">
+                            Project updated {formatDistanceToNow(new Date(project.meta.updated), { addSuffix: true })}
+                        </span>
+                    </div>
+                )}
+            </div>
+        </CollapsibleContent>
+      </Collapsible>
 
       <CardContent className="flex-grow flex flex-col p-0 bg-slate-200 dark:bg-slate-900/50 min-h-0">
           <ScrollArea className="flex-grow">
