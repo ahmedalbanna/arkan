@@ -468,6 +468,7 @@ export const GenerateSectionInputSchema = z
 export type GenerateSectionInput = z.infer<typeof GenerateSectionInputSchema>;
 
 export const GenerateSectionOutputSchema = z.object({
+    sectionName: SectionNameSchema.describe("The name of the section that was generated. This must match the 'sectionToGenerate' from the input."),
     content: z.string().describe("The generated markdown content for the specified section."),
 });
 export type GenerateSectionOutput = z.infer<typeof GenerateSectionOutputSchema>;

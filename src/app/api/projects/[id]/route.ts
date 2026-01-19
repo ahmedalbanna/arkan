@@ -1,11 +1,10 @@
 
-
 import { withAuth, handleApiError, createApiResponse } from '@/lib/utils/api-utils';
 import { getProject, deleteProject } from '@/services/projectService';
 
-export const GET = withAuth(async ({ params, user }) => {
+export const GET = withAuth(async ({ params }) => {
   try {
-    const project = await getProject(user.id, params.id);
+    const project = await getProject(params.id);
     if (!project) {
       return handleApiError({ message: 'Project not found.' }, 404);
     }
@@ -15,9 +14,9 @@ export const GET = withAuth(async ({ params, user }) => {
   }
 });
 
-export const DELETE = withAuth(async ({ params, user }) => {
+export const DELETE = withAuth(async ({ params }) => {
   try {
-    await deleteProject(user.id, params.id);
+    await deleteProject(params.id);
     return createApiResponse({ message: 'Project deleted successfully.' }, 200);
   } catch (error) {
     return handleApiError(error);

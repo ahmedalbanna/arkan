@@ -6,7 +6,6 @@ import { deductCredit } from '@/services/credit-service';
 import { logGeneration } from '@/services/generation-service';
 import { withAuth, handleApiError, createApiResponse } from '@/lib/utils/api-utils';
 import { GenerateSectionInputSchema } from '@/ai/schemas';
-import { updateProjectSectionContent } from '@/services/projectService';
 import { executeWithQueue, generateRequestId, selectModel } from '@/ai';
 
 const SectionGenerationRequestSchema = GenerateSectionInputSchema.extend({
@@ -46,8 +45,6 @@ export const POST = withAuth(async ({ request, user }) => {
       throw new Error('AI generation returned empty content.');
     }
     
-    // Save the generated content directly to the database
-    await updateProjectSectionContent(user.id, projectId, agentInput.sectionToGenerate, content);
     
     // Log the generation event
     await logGeneration({
