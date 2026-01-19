@@ -3,7 +3,7 @@
 
 import { useLocalization } from '@/context/LocalizationContext';
 import { cn } from '@/lib/utils/cn';
-import { BookOpenText, Settings, SlidersHorizontal, Languages as LanguageIcon, MessageSquare } from 'lucide-react';
+import { BookOpenText, Settings, SlidersHorizontal, Languages as LanguageIcon, MessageSquare, ZoomOut, ZoomIn } from 'lucide-react';
 import React, { Suspense, lazy, useState } from 'react';
 import { Button } from '../ui/button';
 import { CollapsibleSidePanel } from '../ui/CollapsibleSidePanel';
@@ -79,6 +79,8 @@ export default function ReportModeGenerator() {
         panels,
         isChatOpen,
         setIsChatOpen,
+        zoomLevel,
+        setZoomLevel,
     } = useReportGenerator();
     
     const [isControlsPanelOpen, setIsControlsPanelOpen] = useState(false);
@@ -109,6 +111,10 @@ export default function ReportModeGenerator() {
           updateProject(p => p.with({ tone: value as Tone }));
         }
     };
+
+    const handleZoomIn = () => setZoomLevel(prev => Math.min(2, prev + 0.1));
+    const handleZoomOut = () => setZoomLevel(prev => Math.max(0.5, prev - 0.1));
+    const handleZoomReset = () => setZoomLevel(1);
 
     if (!isStoreInitialized || !project) {
         return <BuilderPageSkeleton />;
@@ -245,6 +251,36 @@ export default function ReportModeGenerator() {
                         <TooltipContent side="left">
                             <p>Consult with AI Agents</p>
                         </TooltipContent>
+                    </Tooltip>
+                </TooltipProvider>
+            </div>
+
+            {/* Zoom Controls - CENTER */}
+            <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-20 hidden lg:flex items-center gap-1 border bg-background/80 backdrop-blur-sm p-1 rounded-lg shadow-lg">
+                <TooltipProvider>
+                    <Tooltip>
+                        <TooltipTrigger asChild>
+                            <Button variant="ghost" size="icon" onClick={handleZoomOut} className="h-8 w-8">
+                                <ZoomOut className="h-4 w-4" />
+                            </Button>
+                        </TooltipTrigger>
+                        <TooltipContent><p>Zoom Out</p></TooltipContent>
+                    </Tooltip>
+                    <Tooltip>
+                        <TooltipTrigger asChild>
+                            <Button variant="ghost" size="sm" onClick={handleZoomReset} className="h-8 text-xs w-16">
+                                {(zoomLevel * 100).toFixed(0)}%
+                            </Button>
+                        </TooltipTrigger>
+                        <TooltipContent><p>Reset Zoom</p></TooltipContent>
+                    </Tooltip>
+                    <Tooltip>
+                        <TooltipTrigger asChild>
+                            <Button variant="ghost" size="icon" onClick={handleZoomIn} className="h-8 w-8">
+                                <ZoomIn className="h-4 w-4" />
+                            </Button>
+                        </TooltipTrigger>
+                        <TooltipContent><p>Zoom In</p></TooltipContent>
                     </Tooltip>
                 </TooltipProvider>
             </div>

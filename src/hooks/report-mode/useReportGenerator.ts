@@ -4,7 +4,7 @@
 import { useBuilderPageLogic } from '@/hooks/core/use-builder-page';
 import { useLocalization } from '@/context/LocalizationContext';
 import { useMobile } from '@/hooks/util/use-mobile';
-import React, { useState, useMemo, lazy } from 'react';
+import React, { useState, useMemo, lazy, useEffect } from 'react';
 import { Settings, UploadCloud, LayoutTemplate, BookOpenCheck } from 'lucide-react';
 
 // Lazy load components
@@ -19,8 +19,16 @@ export function useReportGenerator() {
   const [activeMobileView, setActiveMobileView] = useState<'generator' | 'result'>('result');
   const [activePanelKey, setActivePanelKey] = useState('settings');
   const [isChatOpen, setIsChatOpen] = useState(false);
+  const [zoomLevel, setZoomLevel] = useState(1);
 
   const builderPageLogic = useBuilderPageLogic();
+
+  useEffect(() => {
+    document.documentElement.style.setProperty('--zoom-scale', String(zoomLevel));
+    return () => {
+      document.documentElement.style.removeProperty('--zoom-scale');
+    };
+  }, [zoomLevel]);
 
   const panels = useMemo(() => [
     {
@@ -61,5 +69,7 @@ export function useReportGenerator() {
     locale,
     isChatOpen,
     setIsChatOpen,
+    zoomLevel,
+    setZoomLevel,
   };
 }
