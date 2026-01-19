@@ -2,8 +2,8 @@
 
 import { useLocalization } from '@/context/LocalizationContext';
 import { cn } from '@/lib/utils/cn';
-import { BookOpenText, Settings } from 'lucide-react';
-import React, { Suspense, lazy } from 'react';
+import { BookOpenText, Settings, SlidersHorizontal } from 'lucide-react';
+import React, { Suspense, lazy, useState } from 'react';
 import { Button } from '../ui/button';
 import { CollapsibleSidePanel } from '../ui/CollapsibleSidePanel';
 import { BuilderPageSkeleton } from '@/app/builder/loading';
@@ -73,6 +73,8 @@ export default function ReportModeGenerator() {
         panels,
     } = useReportGenerator();
     
+    const [isControlsPanelOpen, setIsControlsPanelOpen] = useState(false);
+    
     useBeforeUnload();
 
     const handleComplexityChange = (value: number) => {
@@ -94,37 +96,57 @@ export default function ReportModeGenerator() {
     return (
         <div className="relative flex-grow flex flex-col">
             <OnboardingGuide isOpen={showOnboarding} onOpenChange={setShowOnboarding} onComplete={handleOnboardingComplete} />
-             {/* Global Sliders */}
-            <div className="fixed left-4 top-1/2 -translate-y-1/2 z-20 hidden lg:flex flex-row items-start gap-4 bg-background/80 backdrop-blur-sm p-3 rounded-lg border shadow-lg">
-                {/* Complexity Slider */}
-                <div className="flex flex-col items-center gap-4">
-                    <Label className="[writing-mode:vertical-rl] transform rotate-180 text-xs text-muted-foreground font-semibold tracking-wider uppercase">Complexity</Label>
-                    <Slider
-                        orientation="vertical"
-                        value={[project.complexity ?? 50]}
-                        onValueChange={(val) => handleComplexityChange(val[0])}
-                        min={0}
-                        max={100}
-                        step={10}
-                        className="h-48"
-                    />
-                    <Badge variant="secondary">{project.complexity ?? 50}%</Badge>
-                </div>
-                {/* Formality Slider */}
-                <div className="flex flex-col items-center gap-4">
-                    <Label className="[writing-mode:vertical-rl] transform rotate-180 text-xs text-muted-foreground font-semibold tracking-wider uppercase">Formality</Label>
-                    <Slider
-                        orientation="vertical"
-                        value={[project.formality ?? 70]}
-                        onValueChange={(val) => handleFormalityChange(val[0])}
-                        min={0}
-                        max={100}
-                        step={10}
-                        className="h-48"
-                    />
-                    <Badge variant="secondary">{project.formality ?? 70}%</Badge>
+            
+            {/* Global Controls Floating UI */}
+            <div className="fixed bottom-6 left-6 z-20 hidden lg:block">
+                <div className="relative">
+                    {/* The Floating Panel for sliders */}
+                    {isControlsPanelOpen && (
+                        <div className="absolute bottom-full mb-4 w-64 bg-background/80 backdrop-blur-sm p-4 rounded-lg border shadow-lg animate-fade-in-up">
+                            <div className="space-y-6">
+                                {/* Formality Slider */}
+                                <div className="space-y-2">
+                                    <div className="flex justify-between items-center">
+                                        <Label className="text-xs font-semibold tracking-wider uppercase">Formality</Label>
+                                        <Badge variant="secondary">{project.formality ?? 70}%</Badge>
+                                    </div>
+                                    <Slider
+                                        value={[project.formality ?? 70]}
+                                        onValueChange={(val) => handleFormalityChange(val[0])}
+                                        min={0}
+                                        max={100}
+                                        step={10}
+                                    />
+                                </div>
+                                {/* Complexity Slider */}
+                                <div className="space-y-2">
+                                <div className="flex justify-between items-center">
+                                        <Label className="text-xs font-semibold tracking-wider uppercase">Complexity</Label>
+                                        <Badge variant="secondary">{project.complexity ?? 50}%</Badge>
+                                    </div>
+                                    <Slider
+                                        value={[project.complexity ?? 50]}
+                                        onValueChange={(val) => handleComplexityChange(val[0])}
+                                        min={0}
+                                        max={100}
+                                        step={10}
+                                    />
+                                </div>
+                            </div>
+                        </div>
+                    )}
+                    {/* The Circular Toggle Button */}
+                    <Button
+                        size="icon"
+                        className="rounded-full h-14 w-14 shadow-lg"
+                        onClick={() => setIsControlsPanelOpen(prev => !prev)}
+                        aria-label="Toggle global controls"
+                    >
+                        <SlidersHorizontal className="h-6 w-6" />
+                    </Button>
                 </div>
             </div>
+
             <div className="flex-grow flex flex-col mx-auto px-4 py-8 w-full">
                 <div className="flex justify-between items-start mb-4 gap-4 max-w-full">
                     <div className="flex-1 space-y-2 overflow-auto">
