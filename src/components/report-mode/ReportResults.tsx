@@ -19,6 +19,7 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '../ui/colla
 import { useState } from 'react';
 import { formatDistanceToNow } from 'date-fns';
 import { Button } from '../ui/button';
+import { FileContentViewer } from './file-manager/FileContentViewer';
 
 const ReportSteps = () => {
   const { t } = useLocalization();
@@ -80,7 +81,7 @@ interface ReportResultsProps {
 
 const ReportResults = ({ activePanelKey }: ReportResultsProps) => {
   const { t } = useLocalization();
-  const { project, version, updateProjectFromMarkdown } = useBuilderStore();
+  const { project, version, updateProjectFromMarkdown, selectedFileId } = useBuilderStore();
   const [isSuggestionVisible, setIsSuggestionVisible] = useState(true);
 
   const handleContentChange = (newMarkdown: string) => {
@@ -110,16 +111,27 @@ const ReportResults = ({ activePanelKey }: ReportResultsProps) => {
                     <TableOfContentForm />
                 </A4Page>
             );
-        case 'files':
+        case 'files': {
+            const selectedFile = project?.externalContext.find(f => f.id === selectedFileId);
+
+            if (!selectedFile) {
+                return (
+                    <A4Page>
+                        <div className="p-8 text-center text-muted-foreground h-full flex flex-col justify-center items-center">
+                            <FileText className="mx-auto h-16 w-16 mb-4" />
+                            <h3 className="text-xl font-semibold font-headline text-foreground">File Content Viewer</h3>
+                            <p className="mt-2">When you select a file from the manager, its content will be displayed here for review and analysis.</p>
+                        </div>
+                    </A4Page>
+                );
+            }
+
             return (
                 <A4Page>
-                    <div className="p-8 text-center text-muted-foreground h-full flex flex-col justify-center items-center">
-                        <FileText className="mx-auto h-16 w-16 mb-4" />
-                        <h3 className="text-xl font-semibold font-headline text-foreground">File Content Viewer</h3>
-                        <p className="mt-2">When you select a file from the manager, its content will be displayed here for review and analysis.</p>
-                    </div>
+                    <FileContentViewer fileName={selectedFile.fileName} content={selectedFile.content} />
                 </A4Page>
             );
+        }
         case 'generate':
         default:
              if (hasContent) {

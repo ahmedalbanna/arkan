@@ -1,4 +1,3 @@
-
 'use client';
 
 import { Chapter, Project, Section, TocSection, type ProjectProperties, User } from '@/lib/models';
@@ -15,7 +14,8 @@ interface BuilderState {
     hasUnsavedChanges: boolean;
     isStoreInitialized: boolean;
     version: number; // To track project updates
-    
+    selectedFileId: string | null;
+
     initializeStore: () => void;
     setUserProfile: (userProfile: User | null) => void; // Action to set the user profile
     setHasUnsavedChanges: (hasChanges: boolean) => void;
@@ -25,6 +25,7 @@ interface BuilderState {
     loadProjectFromFile: (file: File) => Promise<void>;
     newSession: () => void;
     applyTableOfContents: (tocMarkdown: string) => void;
+    selectFile: (fileId: string | null) => void;
 }
 
 const createNewTemporaryProject = (): Project => new Project({});
@@ -35,6 +36,7 @@ const useBuilderStore = create<BuilderState>((set, get) => ({
     hasUnsavedChanges: false,
     isStoreInitialized: false,
     version: 0,
+    selectedFileId: null,
 
     initializeStore: () => {
         if (get().isStoreInitialized) return;
@@ -47,14 +49,16 @@ const useBuilderStore = create<BuilderState>((set, get) => ({
             }
             
             if (projectToLoad) {
-                set({ project: new Project(projectToLoad), isStoreInitialized: true, version: 0 });
+                set({ project: new Project(projectToLoad), isStoreInitialized: true, version: 0, selectedFileId: null });
             } else {
-                set({ project: createNewTemporaryProject(), isStoreInitialized: true, version: 0 });
+                set({ project: createNewTemporaryProject(), isStoreInitialized: true, version: 0, selectedFileId: null });
             }
         };
         
         load();
     },
+
+    selectFile: (fileId) => set({ selectedFileId: fileId }),
 
     setUserProfile: (userProfile) => set({ userProfile }),
 
@@ -86,7 +90,7 @@ const useBuilderStore = create<BuilderState>((set, get) => ({
         const newProject = projectData instanceof Project ? projectData : new Project(projectData);
         localStorage.setItem('lastActiveProjectId', newProject.id);
         localProjectService.saveProject(newProject.toStateObject());
-        set({ project: newProject, hasUnsavedChanges: false, version: 0 });
+        set({ project: newProject, hasUnsavedChanges: false, version: 0, selectedFileId: null });
     },
 
     loadProjectFromFile: async (file: File) => {
@@ -108,7 +112,7 @@ const useBuilderStore = create<BuilderState>((set, get) => ({
         
         const currentProject = get().project;
         if (currentProject) {
-            set({ project: createNewTemporaryProject(), hasUnsavedChanges: false, version: 0 });
+            set({ project: createNewTemporaryProject(), hasUnsavedChanges: false, version: 0, selectedFileId: null });
             localStorage.removeItem('lastActiveProjectId');
 
             const editor = useEditorStore.getState().activeEditor;
