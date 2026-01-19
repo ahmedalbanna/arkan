@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useForm, Controller, useFieldArray } from 'react-hook-form';
@@ -16,7 +17,7 @@ import Image from 'next/image';
 import { Label } from '../../ui/label';
 import { CustomSelect } from '../../ui/CustomSelect';
 import { useImageUpload } from '@/hooks/core/useImageUpload';
-import { LanguageSchema, BehaviorSchema, type Behavior, type ProjectProperties, CitationStyleSchema } from '@/lib/models';
+import { LanguageSchema, BehaviorSchema, type Behavior, type ProjectProperties, CitationStyleSchema, Tone } from '@/lib/models';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../../ui/select';
 import { Slider } from '../../ui/slider';
 import { Badge } from '../../ui/badge';
@@ -34,6 +35,8 @@ const settingsSchema = z.object({
   teamMembers: z.string().optional(),
   language: LanguageSchema.optional(),
   complexity: z.number().min(0).max(100).optional(),
+  formality: z.number().min(0).max(100).optional(),
+  tone: z.string().optional(),
   behaviors: z.array(BehaviorSchema).optional(),
   rules: z.array(z.string()).optional(),
   constraints: z.array(z.string()).optional(),
@@ -100,6 +103,8 @@ export default function ProjectSettingsPanel() {
       teamMembers: '',
       language: 'default',
       complexity: 50,
+      formality: 70,
+      tone: 'professional',
       behaviors: [],
       rules: [],
       constraints: [],
@@ -121,6 +126,8 @@ export default function ProjectSettingsPanel() {
         teamMembers: Array.isArray(project.teamMembers) ? project.teamMembers.join(', ') : '',
         language: project.language || 'default',
         complexity: project.complexity ?? 50,
+        formality: project.formality ?? 70,
+        tone: project.tone || 'professional',
         behaviors: project.behaviors ? [...project.behaviors] : [],
         rules: project.rules ? [...project.rules] : [],
         constraints: project.constraints ? [...project.constraints] : [],
@@ -133,7 +140,6 @@ export default function ProjectSettingsPanel() {
   const handleBlur = () => {
     const data = form.getValues();
     updateProject(p => {
-      // @ts-expect-error - Form data type mismatch with ProjectProperties
       const updatePayload: Partial<ProjectProperties> = { ...data };
       if (data.teamMembers) {
         updatePayload.teamMembers = data.teamMembers.split(',').map(name => name.trim()).filter(Boolean);
@@ -172,6 +178,21 @@ export default function ProjectSettingsPanel() {
   ];
   
   const specializationOptions = [
+      { value: 'Artificial Intelligence', label: 'Artificial Intelligence' },
+      { value: 'Web Development', label: 'Web Development' },
+      { value: 'Data Science', label: 'Data Science' },
+      { value: 'Cybersecurity', label: 'Cybersecurity' },
+      { value: 'Machine Learning', label: 'Machine Learning' },
+      { value: 'Software Engineering', label: 'Software Engineering' },
+      { value: 'Computer Science', label: 'Computer Science' },
+      { value: 'Electrical Engineering', label: 'Electrical Engineering' },
+      { value: 'Mechanical Engineering', label: 'Mechanical Engineering' },
+      { value: 'Civil Engineering', label: 'Civil Engineering' },
+      { value: 'Medicine', label: 'Medicine' },
+      { value: 'Law', label: 'Law' },
+      { value: 'Business Administration', label: 'Business Administration' },
+      { value: 'Marketing', label: 'Marketing' },
+      { value: 'Finance', label: 'Finance' },
       { value: 'Physics', label: 'Physics' },
       { value: 'Chemistry', label: 'Chemistry' },
       { value: 'Biology', label: 'Biology' },
@@ -183,13 +204,6 @@ export default function ProjectSettingsPanel() {
       { value: 'History', label: 'History' },
       { value: 'Literature', label: 'Literature' },
       { value: 'Philosophy', label: 'Philosophy' },
-      { value: 'Business Management', label: 'Business Management' },
-      { value: 'Marketing', label: 'Marketing' },
-      { value: 'Law', label: 'Law' },
-      { value: 'Medicine', label: 'Medicine' },
-      { value: 'Nursing', label: 'Nursing' },
-      { value: 'Computer Science', label: 'Computer Science' },
-      { value: 'Engineering', label: 'Engineering' },
       { value: 'Education', label: 'Education' },
       { value: 'Environmental Science', label: 'Environmental Science' },
       { value: 'Communication Studies', label: 'Communication Studies' },
@@ -446,3 +460,5 @@ export default function ProjectSettingsPanel() {
     </Card>
   );
 }
+
+  
