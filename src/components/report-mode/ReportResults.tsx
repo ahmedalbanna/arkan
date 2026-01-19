@@ -116,7 +116,7 @@ const ReportResults = ({ activePanelKey }: ReportResultsProps) => {
                     <div className="p-8 text-center text-muted-foreground h-full flex flex-col justify-center items-center">
                         <FileText className="mx-auto h-16 w-16 mb-4" />
                         <h3 className="text-xl font-semibold font-headline text-foreground">File Content Viewer</h3>
-                        <p>When you select a file from the manager, its content will be displayed here for review and analysis.</p>
+                        <p className="mt-2">When you select a file from the manager, its content will be displayed here for review and analysis.</p>
                     </div>
                 </A4Page>
             );
@@ -128,7 +128,7 @@ const ReportResults = ({ activePanelKey }: ReportResultsProps) => {
                         <MarkdownEditor
                             key={version} // Re-mount editor when version changes
                             content={project?.fullMarkdownContent || ''}
-                            onBlur={handleContentChange}
+                            onChange={handleContentChange}
                         />
                     </A4Page>
                  )
