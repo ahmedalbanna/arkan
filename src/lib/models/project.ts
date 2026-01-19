@@ -6,7 +6,7 @@ import { ExternalContext, type ExternalContextProperties } from './external-cont
 import type { ReportTemplateProperties } from './reportTemplate';
 import { arrayMove } from '@dnd-kit/sortable';
 import { parseMarkdownToContent } from '@/hooks/util/useMarkdownParser';
-import { Language, Behavior, CitationStyleSchema } from './control-types';
+import { Language, Behavior, CitationStyleSchema, Tone } from './control-types';
 
 // Flexible Type for Project Content - strictly enforcing structure now
 export type ProjectContent = readonly (Chapter | Section)[];
@@ -40,6 +40,7 @@ export interface ProjectProperties {
   language?: Language;
   complexity?: number; // 0-100
   formality?: number; // 0-100
+  tone?: Tone;
   behaviors?: Behavior[];
   rules?: string[];
   constraints?: string[];
@@ -71,6 +72,7 @@ export class Project {
   public readonly language?: Language;
   public readonly complexity?: number;
   public readonly formality?: number;
+  public readonly tone?: Tone;
   public readonly behaviors?: readonly Behavior[];
   public readonly rules?: readonly string[];
   public readonly constraints?: readonly string[];
@@ -118,6 +120,7 @@ export class Project {
     this.language = props.language || 'default';
     this.complexity = props.complexity ?? 50;
     this.formality = props.formality ?? 70;
+    this.tone = props.tone || 'professional';
     this.behaviors = (props.behaviors || []).map(b => ({...b}));
     this.rules = props.rules ? [...props.rules] : [];
     this.constraints = props.constraints ? [...props.constraints] : [];
@@ -474,6 +477,7 @@ ${universityText}
       language: this.language,
       complexity: this.complexity,
       formality: this.formality,
+      tone: this.tone,
       behaviors: this.behaviors ? [...this.behaviors] : [],
       rules: this.rules ? [...this.rules] : [],
       constraints: this.constraints ? [...this.constraints] : [],

@@ -2,7 +2,7 @@
 
 import { useLocalization } from '@/context/LocalizationContext';
 import { cn } from '@/lib/utils/cn';
-import { BookOpenText, Settings, SlidersHorizontal } from 'lucide-react';
+import { BookOpenText, Settings, SlidersHorizontal, Languages as LanguageIcon } from 'lucide-react';
 import React, { Suspense, lazy, useState } from 'react';
 import { Button } from '../ui/button';
 import { CollapsibleSidePanel } from '../ui/CollapsibleSidePanel';
@@ -16,6 +16,10 @@ import { useBeforeUnload } from '@/hooks/util/useBeforeUnload';
 import { Slider } from '../ui/slider';
 import { Label } from '../ui/label';
 import { Badge } from '../ui/badge';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
+import { ToneSchema } from '@/lib/models';
+import type { Language, Tone } from '@/lib/models';
+
 
 const ReportResults = lazy(() => import('./ReportResults'));
 
@@ -74,6 +78,7 @@ export default function ReportModeGenerator() {
     } = useReportGenerator();
     
     const [isControlsPanelOpen, setIsControlsPanelOpen] = useState(false);
+    const [isLanguagePanelOpen, setIsLanguagePanelOpen] = useState(false);
     
     useBeforeUnload();
 
@@ -89,6 +94,18 @@ export default function ReportModeGenerator() {
         }
     };
 
+    const handleLanguageChange = (value: Language) => {
+        if (project) {
+          updateProject(p => p.with({ language: value }));
+        }
+    };
+    
+    const handleToneChange = (value: string) => {
+        if (project) {
+          updateProject(p => p.with({ tone: value as Tone }));
+        }
+    };
+
     if (!isStoreInitialized || !project) {
         return <BuilderPageSkeleton />;
     }
@@ -98,9 +115,9 @@ export default function ReportModeGenerator() {
             <OnboardingGuide isOpen={showOnboarding} onOpenChange={setShowOnboarding} onComplete={handleOnboardingComplete} />
             
             {/* Global Controls Floating UI */}
-            <div className="fixed bottom-6 left-6 z-20 hidden lg:block">
+            <div className="fixed bottom-6 left-6 z-20 hidden lg:flex items-center gap-4">
+                {/* Complexity & Formality */}
                 <div className="relative">
-                    {/* The Floating Panel for sliders */}
                     {isControlsPanelOpen && (
                         <div className="absolute bottom-full mb-4 w-64 bg-background/80 backdrop-blur-sm p-4 rounded-lg border shadow-lg animate-fade-in-up">
                             <div className="space-y-6">
@@ -135,7 +152,6 @@ export default function ReportModeGenerator() {
                             </div>
                         </div>
                     )}
-                    {/* The Circular Toggle Button */}
                     <Button
                         size="icon"
                         className="rounded-full h-14 w-14 shadow-lg"
@@ -143,6 +159,55 @@ export default function ReportModeGenerator() {
                         aria-label="Toggle global controls"
                     >
                         <SlidersHorizontal className="h-6 w-6" />
+                    </Button>
+                </div>
+
+                {/* Language & Tone */}
+                <div className="relative">
+                    {isLanguagePanelOpen && (
+                         <div className="absolute bottom-full mb-4 w-64 bg-background/80 backdrop-blur-sm p-4 rounded-lg border shadow-lg animate-fade-in-up">
+                            <div className="space-y-6">
+                                <div className="space-y-2">
+                                    <Label className="text-xs font-semibold tracking-wider uppercase">Language</Label>
+                                    <Select value={project.language ?? 'default'} onValueChange={handleLanguageChange}>
+                                        <SelectTrigger>
+                                            <SelectValue />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="default">Default</SelectItem>
+                                            <SelectItem value="en">English</SelectItem>
+                                            <SelectItem value="ar">Arabic</SelectItem>
+                                            <SelectItem value="es">Spanish</SelectItem>
+                                            <SelectItem value="fr">French</SelectItem>
+                                            <SelectItem value="de">German</SelectItem>
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+                                <div className="space-y-2">
+                                    <Label className="text-xs font-semibold tracking-wider uppercase">Tone</Label>
+                                    <Select value={project.tone ?? 'professional'} onValueChange={handleToneChange}>
+                                        <SelectTrigger>
+                                            <SelectValue />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            {ToneSchema.options.map(tone => (
+                                                <SelectItem key={tone} value={tone}>
+                                                    {tone.charAt(0).toUpperCase() + tone.slice(1)}
+                                                </SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+                     <Button
+                        size="icon"
+                        className="rounded-full h-14 w-14 shadow-lg"
+                        onClick={() => setIsLanguagePanelOpen(prev => !prev)}
+                        aria-label="Toggle language and tone controls"
+                    >
+                        <LanguageIcon className="h-6 w-6" />
                     </Button>
                 </div>
             </div>
