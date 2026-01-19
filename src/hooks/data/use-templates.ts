@@ -27,6 +27,7 @@ import {
 import { useBuilderStore } from '../core/useBuilderStore';
 import { useState } from 'react';
 import { useSections } from './use-sections';
+import { applyReportTemplate as applyReportTemplateUtil } from '@/lib/project/template';
 
 
 // ============================================================================
@@ -54,7 +55,7 @@ export function useApplyReportTemplate(onSuccessCallback?: () => void) {
 
         setIsApplying(true);
         try {
-            updateProject(p => p.applyTemplate(template, (allSections || []).map(s => s.toStateObject())));
+            updateProject(p => applyReportTemplateUtil(p, template));
             toast({ title: "Template Applied", description: `Project structured with '${template.name}'.` });
             if (onSuccessCallback) {
                 onSuccessCallback();

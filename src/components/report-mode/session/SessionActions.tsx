@@ -16,6 +16,7 @@ import { useRouter } from 'next/navigation';
 import { useRef } from 'react';
 import { BrowseProjectsDialog } from './BrowseProjectsDialog';
 import { ExportDialog } from './ExportDialog';
+import { downloadProjectAsFile } from '@/lib/project/io'; 
 
 interface SessionActionsProps {
     isSaving: boolean;
@@ -49,7 +50,7 @@ export function SessionActions({ isSaving }: SessionActionsProps) {
     
     const handleDownload = () => {
         if (project) {
-            project.downloadAsFile();
+            downloadProjectAsFile(project); 
         }
     };
 

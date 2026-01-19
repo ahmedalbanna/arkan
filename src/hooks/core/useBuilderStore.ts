@@ -7,7 +7,7 @@ import { useEffect } from 'react';
 import { create } from 'zustand';
 import { toast } from '../util/use-toast';
 import { useEditorStore } from './use-editor-store';
-import { parseMarkdownToContent } from '../util/useMarkdownParser';
+import { projectFromFile } from '@/lib/project/io'; // Import from new location
 
 interface BuilderState {
     project: Project | null;
@@ -91,7 +91,7 @@ const useBuilderStore = create<BuilderState>((set, get) => ({
 
     loadProjectFromFile: async (file: File) => {
         try {
-            const newProject = await Project.fromFile(file);
+            const newProject = await projectFromFile(file); // Use the new service function
             get().loadProject(newProject.toStateObject());
             toast({ title: 'Project Loaded', description: `Successfully loaded "${newProject.name}".` });
         } catch (err) {

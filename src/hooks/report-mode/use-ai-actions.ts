@@ -14,7 +14,7 @@ import type { SectionName } from '@/ai/schemas';
 import { PromptBuilder } from '@/lib/prompt-builder';
 import { writingToolApi } from '@/services/api/writingToolsService';
 import { Chapter, type Project, type Section } from '@/lib/models';
-import { parseMarkdownToContent } from '../util/useMarkdownParser';
+import { parseMarkdownToContent } from '@/lib/project/markdown-parser';
 import { useEditorStore } from '../core/use-editor-store';
 import { projectKeys } from '@/lib/query-keys';
 
