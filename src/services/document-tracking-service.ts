@@ -45,7 +45,7 @@ export async function recordIndexedDocument(data: {
   try {
     const docRef = adminDb.collection(COLLECTION_NAME).doc();
     
-    const record: any = {
+    const record = {
       projectId: data.projectId,
       sourceFile: data.sourceFile,
       chunksCount: data.chunksCount,
@@ -55,13 +55,9 @@ export async function recordIndexedDocument(data: {
       overlap: data.overlap,
       timestamp: Date.now(),
       indexedAt: Timestamp.now(),
-      status: 'indexed',
+      status: 'indexed' as const,
+      ...(data.userId && { userId: data.userId }),
     };
-    
-    // Conditionally add userId only if it's not undefined or null.
-    if (data.userId) {
-      record.userId = data.userId;
-    }
 
     await docRef.set(record);
     
@@ -88,7 +84,7 @@ export async function recordFailedIndexing(data: {
   try {
     const docRef = adminDb.collection(COLLECTION_NAME).doc();
     
-    const record: any = {
+    const record = {
       projectId: data.projectId,
       sourceFile: data.sourceFile,
       fileSize: data.fileSize,
@@ -100,12 +96,8 @@ export async function recordFailedIndexing(data: {
       indexedAt: Timestamp.now(),
       status: 'failed' as const,
       errorMessage: data.errorMessage,
+      ...(data.userId && { userId: data.userId }),
     };
-    
-    // Conditionally add userId only if it's not undefined or null.
-    if (data.userId) {
-      record.userId = data.userId;
-    }
 
     await docRef.set(record);
     

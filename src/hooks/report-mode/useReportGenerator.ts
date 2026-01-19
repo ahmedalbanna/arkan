@@ -13,7 +13,7 @@ const GenerationTools = lazy(() => import('@/components/report-mode/generation-t
 const ApplyTemplatePanel = lazy(() => import('@/components/report-mode/templates/ApplyTemplatePanel'));
 
 export function useReportGenerator() {
-  const { t } = useLocalization();
+  const { t, locale } = useLocalization();
   const isMobile = useMobile();
   const [activeMobileView, setActiveMobileView] = useState<'generator' | 'result'>('result');
   const [activePanelKey, setActivePanelKey] = useState('settings');
@@ -56,5 +56,6 @@ export function useReportGenerator() {
     setActivePanelKey,
     panels,
     t,
+    locale
   };
 }

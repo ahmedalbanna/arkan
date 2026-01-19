@@ -9,7 +9,6 @@ export * from './auth/use-auth-mutations';
 
 // Core Builder Hooks
 export * from './core/use-context-selector';
-export * from './core/useAutosave';
 export * from './core/useBuilderStore';
 export * from './core/use-editor-store';
 export * from './core/useProjectsPage';

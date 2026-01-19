@@ -38,9 +38,9 @@ export async function saveProject(projectData: ProjectProperties): Promise<Proje
  */
 export async function getProjects(userId: string): Promise<ProjectProperties[]> {
   const snapshot = await adminDb.collection('projects')
-    .where('meta.author', '==', userId)
-    .orderBy('meta.updated', 'desc')
-    .get();
+  .where('userId', '==', userId)
+  .orderBy('updatedAt', 'desc')
+  .get();
   
   if (snapshot.empty) {
     return [];

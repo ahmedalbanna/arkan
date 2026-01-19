@@ -1,29 +1,27 @@
 
 
-import FirebaseMessagingProvider from '@/components/firebase/FirebaseMessagingProvider';
 import LanguageDirectionManager from '@/components/shared/LanguageDirectionManager';
 import { Header } from '@/components/shared/Header';
-import QueryProvider from '@/components/shared/QueryProvider';
-import { ThemeProvider } from '@/components/shared/ThemeProvider';
 import { Toaster } from '@/components/ui/toaster';
-import { AuthProvider } from '@/context/AuthContext';
-import { LocalizationProvider } from '@/context/LocalizationContext';
 import { cn } from '@/lib/utils/cn';
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import { redirect } from 'next/dist/client/components/navigation';
 import localFont from 'next/font/local';
 import { cookies, headers } from 'next/headers';
 import './globals.css';
+import { AppProviders } from '@/components/shared/AppProviders';
 
 export const metadata: Metadata = {
   title: 'Arkan - Professional Portfolio Platform',
   description: 'Showcase your work, discover talent, and interact with a community of professionals.',
-  manifest: '/manifest.json',
-  themeColor: '#2E3A9A',
   icons: {
     apple: '/icons/icon-192x192.png',
   },
 };
+
+export const viewport: Viewport = {
+  themeColor: '#2E3A9A',
+}
 
 const fontBody = localFont({
   src: [
@@ -136,26 +134,13 @@ export default async function RootLayout({
   return (
     <html lang="en" dir="ltr" className={cn(fontBody.variable, fontHeadline.variable, fontAlmarai.variable, fontCairo.variable)} suppressHydrationWarning>
       <body className={cn('font-body antialiased min-h-screen  flex flex-col')}>
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="system"
-          enableSystem
-          disableTransitionOnChange
-        >
-          <QueryProvider>
-            <LocalizationProvider>
-              <AuthProvider>
-                <FirebaseMessagingProvider>
-                  <LanguageDirectionManager>
-                    <Header />
-                    <main className="flex-grow">{children}</main>
-                    <Toaster />
-                  </LanguageDirectionManager>
-                </FirebaseMessagingProvider>
-              </AuthProvider>
-            </LocalizationProvider>
-          </QueryProvider>
-        </ThemeProvider>
+        <AppProviders>
+            <LanguageDirectionManager>
+              <Header />
+              <main className="flex-grow">{children}</main>
+              <Toaster />
+            </LanguageDirectionManager>
+        </AppProviders>
       </body>
     </html>
   );

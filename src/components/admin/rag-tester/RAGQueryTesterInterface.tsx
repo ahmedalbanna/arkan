@@ -59,7 +59,7 @@ export function RAGQueryTesterInterface() {
     const startTime = Date.now();
 
     try {
-      const response = await fetch('/api/admin/rag-test', {
+      const response = await fetch('/api/admin/rag/test-query', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

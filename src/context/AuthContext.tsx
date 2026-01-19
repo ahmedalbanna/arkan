@@ -1,17 +1,14 @@
-
 'use client';
 
-import { initializeFirebase } from '@/firebase';
-
-const { auth } = initializeFirebase();
 import { userKeys } from '@/lib/query-keys';
-import { User, type UserProfile } from '@/lib/models';
+import { User } from '@/lib/models';
 import { getAuthenticatedToken } from '@/lib/utils/authUtils';
 import { fetchUserProfileApi, subscribeToUserProfile } from '@/services';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { User as FirebaseUser, onAuthStateChanged } from 'firebase/auth';
 import { createContext, ReactNode, useCallback, useContext, useEffect, useState } from 'react';
 import { useBuilderStore } from '@/hooks';
+import { useAuth as useFirebaseAuth } from '@/firebase/provider'; // Aliased to avoid naming conflict
 
 interface AuthContextType {
   firebaseUser: FirebaseUser | null;
@@ -42,6 +39,7 @@ async function manageSession(user: FirebaseUser | null) {
 }
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
+  const auth = useFirebaseAuth(); // Consume auth from FirebaseProvider
   const [firebaseUser, setFirebaseUser] = useState<FirebaseUser | null>(null);
   const [authIsLoading, setAuthIsLoading] = useState(true);
   const [isGuest, setIsGuest] = useState(false);
@@ -106,7 +104,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     });
 
     return () => unsubscribe();
-  }, [queryClient, setUserProfile]);
+  }, [auth, queryClient, setUserProfile]); // Added auth to dependency array
 
   const value = {
       firebaseUser,

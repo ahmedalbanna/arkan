@@ -19,6 +19,8 @@ import {
   CreditCard,
   Settings,
   Image,
+  SlidersHorizontal,
+  History,
 } from 'lucide-react';
 
 export interface ApiEndpoint {
@@ -159,6 +161,13 @@ export const apiDocsConfig: ApiSection[] = [
             recentActivity: [{ id: 'log1', agentId: 'summarizer', createdAt: '...'}]
         }
       },
+      {
+        method: 'GET',
+        path: '/api/transactions',
+        description: 'Get the transaction history for the current user.',
+        auth: 'user',
+        responseBody: [{ id: 'txn1', planName: 'Basic Plan', price: 10, status: 'verified' }]
+      }
     ],
   },
   {
@@ -206,6 +215,21 @@ export const apiDocsConfig: ApiSection[] = [
         }
       },
       {
+        method: 'PUT',
+        path: '/api/projects/[id]',
+        description: 'Update an existing project.',
+        auth: 'user',
+        requestBody: {
+          name: 'My Updated Project',
+          content: [{ "type": "chapter", "title": "Updated Chapter", "sections": [] }],
+        },
+        responseBody: {
+          id: 'proj1',
+          name: 'My Updated Project',
+          meta: { updatedAt: '2024-01-02T12:00:00Z' }
+        },
+      },
+      {
         method: 'DELETE',
         path: '/api/projects/[id]',
         description: 'Delete a specific project.',
@@ -248,12 +272,12 @@ export const apiDocsConfig: ApiSection[] = [
             auth: 'public',
             responseBody: {
                 status: 'healthy',
-                checks: { /*...*/ }
+                checks: {}
             }
         },
         {
             method: 'POST',
-            path: '/api/admin/index-document',
+            path: '/api/admin/rag/index',
             description: 'Upload and index a document (PDF, DOCX, TXT, MD) into the RAG system.',
             auth: 'admin',
             requestBody: {
@@ -268,7 +292,7 @@ export const apiDocsConfig: ApiSection[] = [
         },
         {
             method: 'GET',
-            path: '/api/admin/indexed-documents',
+            path: '/api/admin/rag/documents',
             description: 'Get a list of all documents indexed in the RAG system.',
             auth: 'admin',
             responseBody: {
@@ -277,7 +301,7 @@ export const apiDocsConfig: ApiSection[] = [
         },
         {
             method: 'DELETE',
-            path: '/api/admin/indexed-documents',
+            path: '/api/admin/rag/documents',
             description: 'Delete all indexed chunks associated with a specific project ID.',
             auth: 'admin',
             parameters: { projectId: 'project-to-delete' },
@@ -303,7 +327,7 @@ export const apiDocsConfig: ApiSection[] = [
         },
         {
             method: 'POST',
-            path: '/api/admin/rag-test',
+            path: '/api/admin/rag/test-query',
             description: 'An advanced endpoint for admins to test RAG queries with detailed options like caching and re-ranking.',
             auth: 'admin',
             requestBody: {
@@ -330,8 +354,8 @@ export const apiDocsConfig: ApiSection[] = [
             description: 'Get all available DOCX style templates.',
             auth: 'public',
             responseBody: {
-                modern: { name: 'Modern', ...{} },
-                classic: { name: 'Classic', ...{} }
+                modern: { name: 'Modern' },
+                classic: { name: 'Classic' }
             }
         },
         {
@@ -340,8 +364,8 @@ export const apiDocsConfig: ApiSection[] = [
             description: 'Get all available PPTX style templates.',
             auth: 'public',
             responseBody: {
-                modern: { name: 'Modern', ...{} },
-                dark: { name: 'Dark', ...{} }
+                modern: { name: 'Modern' },
+                dark: { name: 'Dark' }
             }
         },
         {
@@ -349,15 +373,23 @@ export const apiDocsConfig: ApiSection[] = [
             path: '/api/templates/report',
             description: 'Get all available Report structure templates.',
             auth: 'public',
-            responseBody: [{ id: 'technical-report', name: 'Technical Report', ...{} }]
+            responseBody: [{ id: 'technical-report', name: 'Technical Report' }]
         }
     ]
   },
   {
-    id: 'admin-management',
-    title: 'Admin API: Management',
-    icon: Shield,
+    id: 'admin-users',
+    title: 'Admin API: User Management',
+    icon: Users,
     endpoints: [
+       {
+        method: 'GET',
+        path: '/api/admin/users',
+        description: 'Admin: Get a paginated list of all users.',
+        auth: 'admin',
+        parameters: { limit: 10, lastVisibleId: '...' },
+        responseBody: { users: [{}], hasNextPage: true, lastVisibleId: '...' }
+      },
       {
         method: 'POST',
         path: '/api/admin/users',
@@ -372,7 +404,7 @@ export const apiDocsConfig: ApiSection[] = [
         description: 'Admin: Update any user\'s profile information.',
         auth: 'admin',
         requestBody: { name: 'Updated Name', credits: 200, role: 'admin' },
-        responseBody: { id: 'user123', name: 'Updated Name', ...{} }
+        responseBody: { id: 'user123', name: 'Updated Name' }
       },
       {
         method: 'DELETE',
@@ -383,36 +415,136 @@ export const apiDocsConfig: ApiSection[] = [
       },
       {
         method: 'POST',
-        path: '/api/admin/gift-credits',
-        description: 'Admin: Gift AI credits to a specific user.',
+        path: '/api/admin/users/[id]/reset-password',
+        description: 'Admin: Send a password reset email to a user.',
         auth: 'admin',
-        requestBody: { userId: 'user123', credits: 50, message: 'Bonus for feedback!' },
-        responseBody: { message: 'Successfully gifted 50 credits...' }
+        responseBody: { message: 'A password reset email has been sent...' }
       },
-      {
-        method: 'POST',
-        path: '/api/admin/payments/verify',
-        description: 'Admin: Verify or reject a pending payment request.',
-        auth: 'admin',
-        requestBody: { transactionId: '...', userId: '...', creditsToGrant: 100, status: 'verified' },
-        responseBody: { message: 'Transaction verified successfully.' }
-      },
-      {
-        method: 'POST',
-        path: '/api/admin/agents',
-        description: 'Admin: Create a new AI agent.',
-        auth: 'admin',
-        requestBody: { id: 'my-agent', name: 'My Agent', ...{} },
-        responseBody: { id: 'my-agent', ...{} }
-      },
-      {
-        method: 'PUT',
-        path: '/api/admin/agents/[id]',
-        description: 'Admin: Update an existing AI agent.',
-        auth: 'admin',
-        requestBody: { name: 'Updated Agent Name' },
-        responseBody: { id: 'my-agent', name: 'Updated Agent Name', ...{} }
-      },
+    ]
+  },
+  {
+    id: 'admin-payments',
+    title: 'Admin API: Payment Management',
+    icon: CreditCard,
+    endpoints: [
+        {
+            method: 'GET',
+            path: '/api/admin/transactions',
+            description: 'Admin: Get a list of transactions filtered by status.',
+            auth: 'admin',
+            parameters: { status: 'pending', limit: 10 },
+            responseBody: { transactions: [{}] }
+        },
+        {
+            method: 'POST',
+            path: '/api/admin/payments/verify',
+            description: 'Admin: Verify or reject a pending payment request.',
+            auth: 'admin',
+            requestBody: { transactionId: '...', userId: '...', creditsToGrant: 100, status: 'verified' },
+            responseBody: { message: 'Transaction verified successfully.' }
+        },
+        {
+            method: 'POST',
+            path: '/api/admin/gift-credits',
+            description: 'Admin: Gift AI credits to a specific user.',
+            auth: 'admin',
+            requestBody: { userId: 'user123', credits: 50, message: 'Bonus for feedback!' },
+            responseBody: { message: 'Successfully gifted 50 credits...' }
+        },
+        {
+            method: 'GET',
+            path: '/api/admin/transactions/report',
+            description: 'Admin: Get a transaction report for a specific date range.',
+            auth: 'admin',
+            parameters: { startDate: 'ISO_DATE', endDate: 'ISO_DATE' },
+            responseBody: [{ id: '...', amount: 10, status: 'verified' }]
+        },
+    ]
+  },
+  {
+    id: 'admin-agents',
+    title: 'Admin API: Agent Management',
+    icon: Bot,
+    endpoints: [
+        {
+            method: 'POST',
+            path: '/api/admin/agents',
+            description: 'Admin: Create a new AI agent.',
+            auth: 'admin',
+            requestBody: { id: 'my-agent', name: 'My Agent' },
+            responseBody: { id: 'my-agent' }
+        },
+        {
+            method: 'PUT',
+            path: '/api/admin/agents/[id]',
+            description: 'Admin: Update an existing AI agent.',
+            auth: 'admin',
+            requestBody: { name: 'Updated Agent Name' },
+            responseBody: { id: 'my-agent', name: 'Updated Agent Name' }
+        },
+    ]
+  },
+  {
+    id: 'admin-templates',
+    title: 'Admin API: Template Management',
+    icon: PencilRuler,
+    endpoints: [
+        { method: 'POST', path: '/api/admin/templates/docx', description: 'Admin: Create a new DOCX style template.', auth: 'admin' },
+        { method: 'PUT', path: '/api/admin/templates/docx/[key]', description: 'Admin: Update a DOCX style template.', auth: 'admin' },
+        { method: 'DELETE', path: '/api/admin/templates/docx/[key]', description: 'Admin: Delete a DOCX style template.', auth: 'admin' },
+        { method: 'POST', path: '/api/admin/templates/pptx', description: 'Admin: Create a new PPTX style template.', auth: 'admin' },
+        { method: 'PUT', path: '/api/admin/templates/pptx/[key]', description: 'Admin: Update a PPTX style template.', auth: 'admin' },
+        { method: 'DELETE', path: '/api/admin/templates/pptx/[key]', description: 'Admin: Delete a PPTX style template.', auth: 'admin' },
+        { method: 'GET', path: '/api/admin/templates/report/[id]', description: 'Admin: Get a single report template.', auth: 'admin' },
+        { method: 'POST', path: '/api/admin/templates/report', description: 'Admin: Create a new report template.', auth: 'admin' },
+        { method: 'PUT', path: '/api/admin/templates/report/[id]', description: 'Admin: Update a report template.', auth: 'admin' },
+        { method: 'DELETE', path: '/api/admin/templates/report/[id]', description: 'Admin: Delete a report template.', auth: 'admin' },
+    ]
+  },
+  {
+    id: 'admin-system',
+    title: 'Admin API: System & Logs',
+    icon: History,
+    endpoints: [
+        {
+            method: 'GET',
+            path: '/api/admin/dashboard-stats',
+            description: 'Admin: Get aggregated statistics for the admin dashboard.',
+            auth: 'admin',
+            responseBody: { totalUsers: 100, totalGenerations: 5000 }
+        },
+        {
+            method: 'PUT',
+            path: '/api/admin/features/[id]',
+            description: 'Admin: Enable or disable a specific feature flag.',
+            auth: 'admin',
+            requestBody: { isEnabled: true },
+            responseBody: { id: 'feature-id', isEnabled: true }
+        },
+        {
+            method: 'GET',
+            path: '/api/admin/logs',
+            description: 'Admin: Get a paginated list of AI generation logs.',
+            auth: 'admin',
+            parameters: { limit: 20, agentId: 'summarizer' },
+            responseBody: { logs: [{}], hasNextPage: true }
+        },
+        {
+            method: 'POST',
+            path: '/api/admin/notifications/send',
+            description: 'Admin: Send a manual notification to a user.',
+            auth: 'admin',
+            requestBody: { userId: 'user123', title: 'Update', body: '...' },
+            responseBody: { messageId: '...' }
+        },
+        {
+            method: 'PUT',
+            path: '/api/admin/settings',
+            description: 'Admin: Update global application settings.',
+            auth: 'admin',
+            requestBody: { newUserCredits: 20 },
+            responseBody: { newUserCredits: 20 }
+        },
     ]
   },
   {
@@ -425,7 +557,7 @@ export const apiDocsConfig: ApiSection[] = [
             path: '/api/export/docx',
             description: 'Export project content or raw markdown to a DOCX file.',
             auth: 'user',
-            requestBody: { project: '{...}', selectedContent: '[...]' },
+            requestBody: { project: {}, selectedContent: [] },
             responseBody: '(binary file data)'
         },
         {

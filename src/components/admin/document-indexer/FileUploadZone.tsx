@@ -103,7 +103,7 @@ export function FileUploadZone({ indexingOptions, onOptionsChange }: Props) {
           formData.append('userId', indexingOptions.userId);
         }
 
-        const response = await fetch('/api/admin/index-document', {
+        const response = await fetch('/api/admin/rag/index', {
           method: 'POST',
           body: formData,
         });

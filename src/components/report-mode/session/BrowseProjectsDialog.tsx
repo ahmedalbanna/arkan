@@ -17,7 +17,7 @@ import { useState, useMemo } from "react";
 import { ScrollArea } from "../../ui/scroll-area";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "../../ui/card";
 import { formatDistanceToNow } from "date-fns";
-import { useBuilderStore } from "@/hooks";
+import { useBuilderStore } from "@/hooks/core/useBuilderStore";
 import { useRouter } from "next/navigation";
 import { Skeleton } from "../../ui/skeleton";
 import { Project } from "@/lib/models";
@@ -73,7 +73,7 @@ export function BrowseProjectsDialog({ disabled }: { disabled?: boolean }) {
     const filteredProjects = useMemo(() => {
         if (!projects) return [];
         if (!searchQuery) return projects;
-        return projects.filter(p =>
+        return projects.filter((p: Project) =>
             p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
             p.projectDescription?.toLowerCase().includes(searchQuery.toLowerCase())
         );
@@ -126,7 +126,7 @@ export function BrowseProjectsDialog({ disabled }: { disabled?: boolean }) {
                                 </div>
                             ) : filteredProjects.length > 0 ? (
                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                    {filteredProjects.map(project => (
+                                    {filteredProjects.map((project: Project) => (
                                         <ProjectCard
                                             key={project.id}
                                             project={project}
