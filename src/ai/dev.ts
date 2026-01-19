@@ -38,3 +38,4 @@ import '@/ai/flows/write-document.ts';
 import '@/ai/flows/create-lecture-unit.ts';
 import '@/ai/flows/generate-theoretical-lecture.ts';
 import '@/ai/flows/generate-session-plan.ts';
+import '@/ai/flows/project-consultant';

@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useLocalization } from '@/context/LocalizationContext';
@@ -20,6 +21,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '.
 import { ToneSchema } from '@/lib/models';
 import type { Language, Tone } from '@/lib/models';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/tooltip';
+import { ProjectChat } from './chat/ProjectChat';
 
 const ReportResults = lazy(() => import('./ReportResults'));
 
@@ -75,6 +77,8 @@ export default function ReportModeGenerator() {
         updateProjectName,
         updateProject,
         panels,
+        isChatOpen,
+        setIsChatOpen,
     } = useReportGenerator();
     
     const [isControlsPanelOpen, setIsControlsPanelOpen] = useState(false);
@@ -118,7 +122,7 @@ export default function ReportModeGenerator() {
             <div className="fixed bottom-6 left-6 z-20 hidden lg:flex items-end gap-4">
                 <div className="relative">
                     {isControlsPanelOpen && (
-                        <div className="absolute bottom-full mb-2 w-64 bg-background/80 backdrop-blur-sm p-4 rounded-lg border shadow-lg animate-fade-in-up">
+                        <div className="absolute bottom-full mb-2 w-64 bg-background/80 backdrop-blur-sm p-4 rounded-lg border shadow-lg animate-in fade-in-0 slide-in-from-bottom-4">
                             <div className="space-y-6">
                                 {/* Formality Slider */}
                                 <div className="space-y-2">
@@ -170,7 +174,7 @@ export default function ReportModeGenerator() {
 
                 <div className="relative">
                     {isLanguagePanelOpen && (
-                         <div className="absolute bottom-full mb-2 w-64 bg-background/80 backdrop-blur-sm p-4 rounded-lg border shadow-lg animate-fade-in-up">
+                         <div className="absolute bottom-full mb-2 w-64 bg-background/80 backdrop-blur-sm p-4 rounded-lg border shadow-lg animate-in fade-in-0 slide-in-from-bottom-4">
                             <div className="space-y-6">
                                 <div className="space-y-2">
                                     <Label className="text-xs font-semibold tracking-wider uppercase">Language</Label>
@@ -224,7 +228,7 @@ export default function ReportModeGenerator() {
                 </div>
             </div>
             
-            {/* NEW: Chat FAB - RIGHT */}
+            {/* Chat FAB - RIGHT */}
             <div className="fixed bottom-6 right-6 z-20 hidden lg:block">
                 <TooltipProvider>
                     <Tooltip>
@@ -233,6 +237,7 @@ export default function ReportModeGenerator() {
                                 size="icon"
                                 className="rounded-full h-16 w-16 shadow-lg"
                                 aria-label="Consult with AI Agents"
+                                onClick={() => setIsChatOpen(prev => !prev)}
                             >
                                 <MessageSquare className="h-8 w-8" />
                             </Button>
@@ -244,13 +249,16 @@ export default function ReportModeGenerator() {
                 </TooltipProvider>
             </div>
 
+            <ProjectChat isOpen={isChatOpen} onClose={() => setIsChatOpen(false)} />
+
             <div className="flex-grow flex flex-col mx-auto px-4 py-8 w-full">
                 <div className="flex justify-between items-start mb-4 gap-4 max-w-full">
                     <div className="flex-1 space-y-2 overflow-auto">
                         <Input
-                            className="text-xl font-semibold text-foreground border-0 focus-visible:ring-0 focus-visible:ring-offset-0 p-0 h-auto"
+                            className="text-xl font-semibold text-foreground border-0 focus-visible:ring-0 focus-visible:ring-offset-0 p-0 h-auto bg-transparent"
                             value={project?.name || ''}
                             onChange={(e) => updateProjectName(e.target.value)}
+                            onBlur={() => updateProject(p => p)}
                             placeholder={'Untitled Project'}
                         />
                         {project?.meta.updated && (

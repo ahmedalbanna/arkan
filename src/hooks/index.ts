@@ -21,6 +21,7 @@ export * from './report-mode/use-chapter-actions';
 export * from './report-mode/use-report-generation-tools';
 export * from './report-mode/use-guideline-editor';
 export * from './report-mode/useReportGenerator';
+export * from './report-mode/useProjectChat';
 
 // Data Fetching Hooks
 export * from './data/use-analytics';
@@ -75,4 +76,3 @@ export * from './util/use-toast';
 export * from './util/useExport';
 export * from './util/useMarkdownParser';
 export * from './util/useBeforeUnload';
-

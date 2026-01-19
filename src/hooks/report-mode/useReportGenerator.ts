@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useBuilderPageLogic } from '@/hooks/core/use-builder-page';
@@ -17,6 +18,7 @@ export function useReportGenerator() {
   const isMobile = useMobile();
   const [activeMobileView, setActiveMobileView] = useState<'generator' | 'result'>('result');
   const [activePanelKey, setActivePanelKey] = useState('settings');
+  const [isChatOpen, setIsChatOpen] = useState(false);
 
   const builderPageLogic = useBuilderPageLogic();
 
@@ -56,6 +58,8 @@ export function useReportGenerator() {
     setActivePanelKey,
     panels,
     t,
-    locale
+    locale,
+    isChatOpen,
+    setIsChatOpen,
   };
 }
