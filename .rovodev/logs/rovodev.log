@@ -1,0 +1,226 @@
+2026-01-19 17:57:05.099 | WARNING  | Failed to preload voice model: No module named 'numpy'
+2026-01-19 17:57:05.100 | DEBUG    | Using endpoint: https://api.atlassian.com/rovodev/v3/sites
+2026-01-19 17:57:05.100 | DEBUG    | Making request to get sites from URL: https://api.atlassian.com/rovodev/v3/sites
+2026-01-19 17:57:05.341 | DEBUG    | Successfully received sites response. Response type: <class 'dict'>
+2026-01-19 17:57:05.342 | DEBUG    | Number of sites retrieved: 1
+2026-01-19 17:57:05.343 | DEBUG    | Fetching sites for Rovo Dev SKU filtering
+2026-01-19 17:57:05.343 | DEBUG    | Retrieved 1 total sites
+2026-01-19 17:57:05.343 | DEBUG    | Found 1 sites with active Rovo Dev SKU
+2026-01-19 17:57:05.357 | DEBUG    | Getting cloud ID for site URL: https://albannatech.atlassian.net
+2026-01-19 17:57:05.357 | DEBUG    | Found cloud ID in /sites data: 99973cfb-c3e0-499e-9404-e7294a2ce86e
+2026-01-19 17:57:05.357 | DEBUG    | Set BILLING_CLOUD_ID environment variable: 99973cfb-c3e0-499e-9404-e7294a2ce86e
+2026-01-19 17:57:05.357 | DEBUG    | Using endpoint: https://api.atlassian.com/rovodev/v3/credits/check
+2026-01-19 17:57:05.880 | DEBUG    | [get_usage_data] Raw API response: {'status': 'OK', 'balance': {'dailyTotal': None, 'dailyRemaining': None, 'dailyUsed': None, 'monthlyTotal': 2000, 'monthlyRemaining': 2000, 'monthlyUsed': 0}, 'message': None, 'ctaLink': None, 'additionalEntitlementParams': None, 'retryAfterSeconds': None, 'userCreditLimits': {'user': {'atlassianAccountId': '712020:a9edcb7a-3d57-4ab2-9340-e1e70126581f', 'atlassianOrgId': '2f3b1826-3192-437e-baaf-eaf71da5f540', 'cloudId': '99973cfb-c3e0-499e-9404-e7294a2ce86e', 'devaiWorkspaceARI': {'system': {'empty': False}, 'resourceOwner': {'empty': False}, 'cloudId': {'undefined': True, 'empty': True}, 'resourceType': {'undefined': False, 'empty': False}, 'resourceId': {'fragments': ['52d5e0a6-6fbe-4167-964b-726c78af6051'], 'undefined': False, 'empty': False}, 'ati': 'ati:cloud:devai:workspace', 'empty': False}, 'scmWorkspace': None, 'scmRepository': None, 'authType': 'ASAP', 'accountType': 'ANONYMOUS', 'isInternal': False, 'experienceId': 'rovodev-cli', 'isExistingBetaUser': None, 'sessionId': None, 'sessionAgentRunId': None, 'useMockResponse': None, 'productType': 'ROVO_DEV_STANDARD_TRIAL', 'ccpTransactionAccountId': None, 'ccpEntitlementId': 'f71e795f-cc31-32e9-a27b-fa807f24977b', 'isProductAdmin': False, 'isOrgAdmin': False, 'requestIp': '35.223.253.234'}, 'limits': {'dailyTokenLimit': None, 'minuteTokenLimit': 400000, 'monthlyCreditAllocation': 2000, 'monthlyCreditCap': 4000, 'creditType': 'FREE'}}, 'modelUsages': None, 'modelCreditUsage': []}
+2026-01-19 17:57:05.880 | WARNING  | Successfully updated site entitlement after site switch
+2026-01-19 17:57:05.881 | DEBUG    | set_billing_environment_variables_from_config called with AUTH_METHOD: api_token
+2026-01-19 17:57:05.881 | DEBUG    | Found site URL in config: https://albannatech.atlassian.net
+2026-01-19 17:57:05.881 | DEBUG    | Getting cloud ID for site URL: https://albannatech.atlassian.net
+2026-01-19 17:57:05.881 | DEBUG    | Found cloud ID in /sites data: 99973cfb-c3e0-499e-9404-e7294a2ce86e
+2026-01-19 17:57:05.881 | DEBUG    | Set BILLING_CLOUD_ID environment variable: 99973cfb-c3e0-499e-9404-e7294a2ce86e
+2026-01-19 17:57:05.881 | INFO     | Starting Rovo Dev CLI
+2026-01-19 17:57:05.882 | INFO     | Working directory: /teamspace/studios/this_studio
+2026-01-19 17:57:05.882 | INFO     | Config file: /teamspace/studios/this_studio/.rovodev/config.yml
+2026-01-19 17:57:05.882 | DEBUG    | {
+  "version": 1,
+  "agent": {
+    "additional_system_prompt": null,
+    "streaming": true,
+    "temperature": 0.3,
+    "model_id": "auto",
+    "enable_deep_plan_tool": false,
+    "experimental": {
+      "enable_shadow_mode": false
+    }
+  },
+  "sessions": {
+    "persistence_dir": "/teamspace/studios/this_studio/.rovodev/sessions",
+    "enable_workspace_state_sync": false
+  },
+  "atlassian_connections": {
+    "jira_projects": [],
+    "local_override_path": ".rovodev/atlassian_connections.json",
+    "enabled": true
+  },
+  "console": {
+    "output_format": "markdown",
+    "show_tool_results": true,
+    "tool_result_visibility": {
+      "bash": true,
+      "powershell": true,
+      "open_files": true,
+      "create_file": true,
+      "delete_file": true,
+      "move_file": true,
+      "expand_code_chunks": true,
+      "find_and_replace_code": true,
+      "grep": true,
+      "expand_folder": true,
+      "update_allowed_external_paths": true
+    },
+    "editing_mode": "EMACS",
+    "custom_command_prompt": null,
+    "max_output_width": 120,
+    "enable_startup_animations": true
+  },
+  "logging": {
+    "path": "/teamspace/studios/this_studio/.rovodev/logs/rovodev.log"
+  },
+  "mcp": {
+    "mcp_config_path": "/teamspace/studios/this_studio/.rovodev/mcp.json",
+    "allowed_mcp_servers": [],
+    "disabled_mcp_servers": []
+  },
+  "tool_permissions": {
+    "default": "ask",
+    "tools": {
+      "create_file": "ask",
+      "delete_file": "ask",
+      "move_file": "ask",
+      "find_and_replace_code": "ask",
+      "open_files": "allow",
+      "expand_code_chunks": "allow",
+      "expand_folder": "allow",
+      "grep": "allow"
+    },
+    "bash": {
+      "default": "ask",
+      "commands": [
+        {
+          "command": "ls(\\s.*)?",
+          "permission": "allow"
+        },
+        {
+          "command": "cat(\\s.*)?",
+          "permission": "allow"
+        },
+        {
+          "command": "echo(\\s.*)?",
+          "permission": "allow"
+        },
+        {
+          "command": "pwd",
+          "permission": "allow"
+        }
+      ],
+      "run_in_sandbox": false,
+      "env": {}
+    },
+    "allowed_external_paths": []
+  },
+  "announcement_tracking": {
+    "announcement_view_counts": {}
+  },
+  "session_feedback": {
+    "permanently_disabled": false,
+    "last_feedback_asked": null
+  },
+  "atlassian_billing_site": {
+    "site_url": "https://albannatech.atlassian.net"
+  },
+  "smart_tasks": {
+    "enabled": true,
+    "sources": [
+      "filesystem"
+    ]
+  }
+}
+2026-01-19 17:57:05.882 | DEBUG    | Initializing Atlassian Analytics client
+2026-01-19 17:57:05.882 | DEBUG    | API token auth - using service call only
+2026-01-19 17:57:05.882 | DEBUG    | [get_usage_data] Raw API response: {'status': 'OK', 'balance': {'dailyTotal': None, 'dailyRemaining': None, 'dailyUsed': None, 'monthlyTotal': 2000, 'monthlyRemaining': 2000, 'monthlyUsed': 0}, 'message': None, 'ctaLink': None, 'additionalEntitlementParams': None, 'retryAfterSeconds': None, 'userCreditLimits': {'user': {'atlassianAccountId': '712020:a9edcb7a-3d57-4ab2-9340-e1e70126581f', 'atlassianOrgId': '2f3b1826-3192-437e-baaf-eaf71da5f540', 'cloudId': '99973cfb-c3e0-499e-9404-e7294a2ce86e', 'devaiWorkspaceARI': {'system': {'empty': False}, 'resourceOwner': {'empty': False}, 'cloudId': {'undefined': True, 'empty': True}, 'resourceType': {'undefined': False, 'empty': False}, 'resourceId': {'fragments': ['52d5e0a6-6fbe-4167-964b-726c78af6051'], 'undefined': False, 'empty': False}, 'ati': 'ati:cloud:devai:workspace', 'empty': False}, 'scmWorkspace': None, 'scmRepository': None, 'authType': 'ASAP', 'accountType': 'ANONYMOUS', 'isInternal': False, 'experienceId': 'rovodev-cli', 'isExistingBetaUser': None, 'sessionId': None, 'sessionAgentRunId': None, 'useMockResponse': None, 'productType': 'ROVO_DEV_STANDARD_TRIAL', 'ccpTransactionAccountId': None, 'ccpEntitlementId': 'f71e795f-cc31-32e9-a27b-fa807f24977b', 'isProductAdmin': False, 'isOrgAdmin': False, 'requestIp': '35.223.253.234'}, 'limits': {'dailyTokenLimit': None, 'minuteTokenLimit': 400000, 'monthlyCreditAllocation': 2000, 'monthlyCreditCap': 4000, 'creditType': 'FREE'}}, 'modelUsages': None, 'modelCreditUsage': []}
+2026-01-19 17:57:05.882 | DEBUG    | Using service call for user identification
+2026-01-19 17:57:05.882 | DEBUG    | Analytics client initialized with user info: user_id=712020:a9edcb7a-3d57-4ab2-9340-e1e70126581f, tenant_id=99973cfb-c3e0-499e-9404-e7294a2ce86e, org_id=2f3b1826-3192-437e-baaf-eaf71da5f540, auth_type=ASAP, is_internal=False
+2026-01-19 17:57:05.883 | DEBUG    | Initializing Atlassian Analytics client with config: {'env': 'prod', 'product': 'rovodev', 'subproduct': 'rovodev', 'debug': True}
+2026-01-19 17:57:05.883 | DEBUG    | Atlassian Analytics client initialized successfully with platform: linux
+2026-01-19 17:57:05.896 | DEBUG    | Registered mapper: LLMEventMapper
+2026-01-19 17:57:05.896 | DEBUG    | Registered mapper: ToolEventMapper
+2026-01-19 17:57:05.896 | DEBUG    | Registered mapper: SessionEventMapper
+2026-01-19 17:57:05.896 | DEBUG    | Registered mapper: CommandEventMapper
+2026-01-19 17:57:05.896 | DEBUG    | Registered mapper: PromptEventMapper
+2026-01-19 17:57:05.896 | DEBUG    | Registered mapper: MCPEventMapper
+2026-01-19 17:57:05.896 | DEBUG    | Registered mapper: PermissionEventMapper
+2026-01-19 17:57:05.896 | DEBUG    | Registered mapper: CrashEventMapper
+2026-01-19 17:57:05.897 | DEBUG    | Registered mapper: EventHookUsageEventMapper
+2026-01-19 17:57:05.897 | DEBUG    | Registered mapper: CodeModificationMapper
+2026-01-19 17:57:05.898 | DEBUG    | Registered mapper: GitAIStatsMapper
+2026-01-19 17:57:05.898 | DEBUG    | Registered mapper: AgentRunEventMapper
+2026-01-19 17:57:05.898 | DEBUG    | Registered mapper: AgentRunUsageTrackingEventMapper
+2026-01-19 17:57:05.898 | DEBUG    | Registered mapper: ExternalAPIEventMapper
+2026-01-19 17:57:05.898 | DEBUG    | Registered mapper: IDEEventMapper
+2026-01-19 17:57:05.898 | DEBUG    | Registered mapper: SessionFeedbackEventMapper
+2026-01-19 17:57:05.898 | DEBUG    | Registered mapper: AIResultEventMapper
+2026-01-19 17:57:05.899 | DEBUG    | Registered mapper: CrashEventMapper
+2026-01-19 17:57:05.899 | DEBUG    | Registered mapper: SessionEventMapper
+2026-01-19 17:57:05.899 | DEBUG    | Registered mapper: LLMEventMapper
+2026-01-19 17:57:05.907 | DEBUG    | HTTP analytics disabled (enable via Statsig feature flag)
+2026-01-19 17:57:05.909 | DEBUG    | HTTP auto-instrumentation disabled (enable via Statsig feature flag)
+2026-01-19 17:57:05.909 | DEBUG    | Pydantic AI OpenTelemetry instrumentation enabled
+2026-01-19 17:57:05.909 | DEBUG    | Analytics initialized successfully
+2026-01-19 17:57:05.910 | DEBUG    | Using endpoint: https://api.atlassian.com/rovodev/v3/sites
+2026-01-19 17:57:07.468 | INFO     | 🚀 [bold]Announcing [green]Haiku 4.5[/green] in Rovo Dev CLI[/bold]  🚀
+
+Try it out today by typing [cyan]/models[/cyan] and get [green bold]2.5x[/green bold] more use from your Rovo Dev credits
+2026-01-19 17:57:07.469 | INFO     | Help shape the future of Rovo Dev. Fill out the survey and take part in a short interview to earn a gift card. |  https://go.atlassian.com/rovodevresearch
+2026-01-19 17:57:07.479 | DEBUG    | [get_usage_data] Raw API response: {'status': 'OK', 'balance': {'dailyTotal': None, 'dailyRemaining': None, 'dailyUsed': None, 'monthlyTotal': 2000, 'monthlyRemaining': 2000, 'monthlyUsed': 0}, 'message': None, 'ctaLink': None, 'additionalEntitlementParams': None, 'retryAfterSeconds': None, 'userCreditLimits': {'user': {'atlassianAccountId': '712020:a9edcb7a-3d57-4ab2-9340-e1e70126581f', 'atlassianOrgId': '2f3b1826-3192-437e-baaf-eaf71da5f540', 'cloudId': '99973cfb-c3e0-499e-9404-e7294a2ce86e', 'devaiWorkspaceARI': {'system': {'empty': False}, 'resourceOwner': {'empty': False}, 'cloudId': {'undefined': True, 'empty': True}, 'resourceType': {'undefined': False, 'empty': False}, 'resourceId': {'fragments': ['52d5e0a6-6fbe-4167-964b-726c78af6051'], 'undefined': False, 'empty': False}, 'ati': 'ati:cloud:devai:workspace', 'empty': False}, 'scmWorkspace': None, 'scmRepository': None, 'authType': 'ASAP', 'accountType': 'ANONYMOUS', 'isInternal': False, 'experienceId': 'rovodev-cli', 'isExistingBetaUser': None, 'sessionId': None, 'sessionAgentRunId': None, 'useMockResponse': None, 'productType': 'ROVO_DEV_STANDARD_TRIAL', 'ccpTransactionAccountId': None, 'ccpEntitlementId': 'f71e795f-cc31-32e9-a27b-fa807f24977b', 'isProductAdmin': False, 'isOrgAdmin': False, 'requestIp': '35.223.253.234'}, 'limits': {'dailyTokenLimit': None, 'minuteTokenLimit': 400000, 'monthlyCreditAllocation': 2000, 'monthlyCreditCap': 4000, 'creditType': 'FREE'}}, 'modelUsages': None, 'modelCreditUsage': []}
+2026-01-19 17:57:07.480 | INFO     | Starting new session
+2026-01-19 17:57:07.480 | DEBUG    | About to create span for new session: 4729f062-7174-4fcf-b166-27d5feebf049
+2026-01-19 17:57:07.480 | DEBUG    | No mappers found for span 'session created'
+2026-01-19 17:57:07.481 | DEBUG    | No mappers found for span 'session created'
+2026-01-19 17:57:07.481 | DEBUG    | Found mapper SessionEventMapper for span session created
+2026-01-19 17:57:07.492 | DEBUG    | Found mapper SessionEventMapper for span session created
+2026-01-19 17:57:07.565 | DEBUG    | [get_usage_data] Raw API response: {'status': 'OK', 'balance': {'dailyTotal': None, 'dailyRemaining': None, 'dailyUsed': None, 'monthlyTotal': 2000, 'monthlyRemaining': 2000, 'monthlyUsed': 0}, 'message': None, 'ctaLink': None, 'additionalEntitlementParams': None, 'retryAfterSeconds': None, 'userCreditLimits': {'user': {'atlassianAccountId': '712020:a9edcb7a-3d57-4ab2-9340-e1e70126581f', 'atlassianOrgId': '2f3b1826-3192-437e-baaf-eaf71da5f540', 'cloudId': '99973cfb-c3e0-499e-9404-e7294a2ce86e', 'devaiWorkspaceARI': {'system': {'empty': False}, 'resourceOwner': {'empty': False}, 'cloudId': {'undefined': True, 'empty': True}, 'resourceType': {'undefined': False, 'empty': False}, 'resourceId': {'fragments': ['52d5e0a6-6fbe-4167-964b-726c78af6051'], 'undefined': False, 'empty': False}, 'ati': 'ati:cloud:devai:workspace', 'empty': False}, 'scmWorkspace': None, 'scmRepository': None, 'authType': 'ASAP', 'accountType': 'ANONYMOUS', 'isInternal': False, 'experienceId': 'rovodev-cli', 'isExistingBetaUser': None, 'sessionId': None, 'sessionAgentRunId': None, 'useMockResponse': None, 'productType': 'ROVO_DEV_STANDARD_TRIAL', 'ccpTransactionAccountId': None, 'ccpEntitlementId': 'f71e795f-cc31-32e9-a27b-fa807f24977b', 'isProductAdmin': False, 'isOrgAdmin': False, 'requestIp': '35.223.253.234'}, 'limits': {'dailyTokenLimit': None, 'minuteTokenLimit': 400000, 'monthlyCreditAllocation': 2000, 'monthlyCreditCap': 4000, 'creditType': 'FREE'}}, 'modelUsages': None, 'modelCreditUsage': []}
+2026-01-19 17:57:07.681 | DEBUG    | No ROVODEV_SANDBOX_ID environment variable found
+2026-01-19 17:57:07.682 | DEBUG    | Sending event to Atlassian Analytics: llm_session created
+2026-01-19 17:57:07.686 | DEBUG    | Sent event to api_gateway: rovodev session created
+2026-01-19 17:57:07.865 | DEBUG    | [get_usage_data] Raw API response: {'status': 'OK', 'balance': {'dailyTotal': None, 'dailyRemaining': None, 'dailyUsed': None, 'monthlyTotal': 2000, 'monthlyRemaining': 2000, 'monthlyUsed': 0}, 'message': None, 'ctaLink': None, 'additionalEntitlementParams': None, 'retryAfterSeconds': None, 'userCreditLimits': {'user': {'atlassianAccountId': '712020:a9edcb7a-3d57-4ab2-9340-e1e70126581f', 'atlassianOrgId': '2f3b1826-3192-437e-baaf-eaf71da5f540', 'cloudId': '99973cfb-c3e0-499e-9404-e7294a2ce86e', 'devaiWorkspaceARI': {'system': {'empty': False}, 'resourceOwner': {'empty': False}, 'cloudId': {'undefined': True, 'empty': True}, 'resourceType': {'undefined': False, 'empty': False}, 'resourceId': {'fragments': ['52d5e0a6-6fbe-4167-964b-726c78af6051'], 'undefined': False, 'empty': False}, 'ati': 'ati:cloud:devai:workspace', 'empty': False}, 'scmWorkspace': None, 'scmRepository': None, 'authType': 'ASAP', 'accountType': 'ANONYMOUS', 'isInternal': False, 'experienceId': 'rovodev-cli', 'isExistingBetaUser': None, 'sessionId': None, 'sessionAgentRunId': None, 'useMockResponse': None, 'productType': 'ROVO_DEV_STANDARD_TRIAL', 'ccpTransactionAccountId': None, 'ccpEntitlementId': 'f71e795f-cc31-32e9-a27b-fa807f24977b', 'isProductAdmin': False, 'isOrgAdmin': False, 'requestIp': '35.223.253.234'}, 'limits': {'dailyTokenLimit': None, 'minuteTokenLimit': 400000, 'monthlyCreditAllocation': 2000, 'monthlyCreditCap': 4000, 'creditType': 'FREE'}}, 'modelUsages': None, 'modelCreditUsage': []}
+2026-01-19 17:57:07.907 | DEBUG    | Successfully sent event to Atlassian Analytics
+2026-01-19 17:57:08.051 | DEBUG    | [get_usage_data] Raw API response: {'status': 'OK', 'balance': {'dailyTotal': None, 'dailyRemaining': None, 'dailyUsed': None, 'monthlyTotal': 2000, 'monthlyRemaining': 2000, 'monthlyUsed': 0}, 'message': None, 'ctaLink': None, 'additionalEntitlementParams': None, 'retryAfterSeconds': None, 'userCreditLimits': {'user': {'atlassianAccountId': '712020:a9edcb7a-3d57-4ab2-9340-e1e70126581f', 'atlassianOrgId': '2f3b1826-3192-437e-baaf-eaf71da5f540', 'cloudId': '99973cfb-c3e0-499e-9404-e7294a2ce86e', 'devaiWorkspaceARI': {'system': {'empty': False}, 'resourceOwner': {'empty': False}, 'cloudId': {'undefined': True, 'empty': True}, 'resourceType': {'undefined': False, 'empty': False}, 'resourceId': {'fragments': ['52d5e0a6-6fbe-4167-964b-726c78af6051'], 'undefined': False, 'empty': False}, 'ati': 'ati:cloud:devai:workspace', 'empty': False}, 'scmWorkspace': None, 'scmRepository': None, 'authType': 'ASAP', 'accountType': 'ANONYMOUS', 'isInternal': False, 'experienceId': 'rovodev-cli', 'isExistingBetaUser': None, 'sessionId': None, 'sessionAgentRunId': None, 'useMockResponse': None, 'productType': 'ROVO_DEV_STANDARD_TRIAL', 'ccpTransactionAccountId': None, 'ccpEntitlementId': 'f71e795f-cc31-32e9-a27b-fa807f24977b', 'isProductAdmin': False, 'isOrgAdmin': False, 'requestIp': '35.223.253.234'}, 'limits': {'dailyTokenLimit': None, 'minuteTokenLimit': 400000, 'monthlyCreditAllocation': 2000, 'monthlyCreditCap': 4000, 'creditType': 'FREE'}}, 'modelUsages': None, 'modelCreditUsage': []}
+2026-01-19 17:57:08.320 | WARNING  | Could not determine specific VS Code variant from git askpass path: /usr/lib/code-server/lib/vscode/extensions/git/dist/askpass-main.js
+2026-01-19 17:57:08.320 | DEBUG    | Detected IDE type: vscode
+2026-01-19 17:57:08.335 | DEBUG    | Creating 'ide auto install' span for analytics
+2026-01-19 17:57:08.336 | INFO     | Starting MCP servers
+2026-01-19 17:57:08.336 | DEBUG    | No mappers found for span 'ide auto install'
+2026-01-19 17:57:08.348 | DEBUG    | No mappers found for span 'ide auto install'
+2026-01-19 17:57:08.407 | WARNING  | Extension installation failed: /usr/lib/code-server/lib/node: /home/zeus/.local/share/acli/1.3.11-stable/plugin/rovodev/lib/libstdc++.so.6: version `GLIBCXX_3.4.20' not found (required by /usr/lib/code-server/lib/node)
+/usr/lib/code-server/lib/node: /home/zeus/.local/share/acli/1.3.11-stable/plugin/rovodev/lib/libstdc++.so.6: version `CXXABI_1.3.9' not found (required by /usr/lib/code-server/lib/node)
+/usr/lib/code-server/lib/node: /home/zeus/.local/share/acli/1.3.11-stable/plugin/rovodev/lib/libstdc++.so.6: version `GLIBCXX_3.4.21' not found (required by /usr/lib/code-server/lib/node)
+
+2026-01-19 17:57:08.408 | DEBUG    | Found mapper IDEEventMapper for span ide auto install
+2026-01-19 17:57:08.424 | DEBUG    | Using IDE type from span: vscode
+2026-01-19 17:57:08.424 | DEBUG    | No mappers found for span 'ide auto install'
+2026-01-19 17:57:08.431 | DEBUG    | No ROVODEV_SANDBOX_ID environment variable found
+2026-01-19 17:57:08.433 | DEBUG    | Sending event to Atlassian Analytics: ide_installation error
+2026-01-19 17:57:08.512 | INFO     | Built file cache: 1015 files
+2026-01-19 17:57:08.546 | DEBUG    | Successfully sent event to Atlassian Analytics
+2026-01-19 17:57:08.841 | DEBUG    | Starting MCP server: stdio with /home/zeus/.local/share/acli/1.3.11-stable/plugin/rovodev/atlassian_cli_rovodev nautilus run --tools open_files,create_file,delete_file,move_file,expand_code_chunks,find_and_replace_code,grep,expand_folder,bash,powershell,update_allowed_external_paths --workspace-args-json {"workspace_view_max_files": 1000, "allowed_external_paths": [], "run_shell_in_sandbox": false}
+2026-01-19 17:57:08.841 | DEBUG    | No mappers found for span 'mcp_server_startup'
+2026-01-19 17:57:08.841 | DEBUG    | No mappers found for span 'mcp_server_startup'
+2026-01-19 17:57:08.843 | DEBUG    | Starting MCP server: stdio with /home/zeus/.local/share/acli/1.3.11-stable/plugin/rovodev/atlassian_cli_rovodev atlassian-exp run
+2026-01-19 17:57:08.843 | DEBUG    | No mappers found for span 'mcp_server_startup'
+2026-01-19 17:57:08.843 | DEBUG    | No mappers found for span 'mcp_server_startup'
+2026-01-19 17:57:10.870 | INFO     | nautilus.main:run:102 - Configuring Nautilus MCP server
+2026-01-19 17:57:10.908 | INFO     | nautilus.main:run:169 - Starting MCP Nautilus server using STDIO transport
+2026-01-19 17:57:10.919 | DEBUG    | Found mapper MCPEventMapper for span mcp_server_startup
+2026-01-19 17:57:10.919 | DEBUG    | Processing MCP event with attributes: {'code.filepath': 'logfire/_internal/stack_info.py', 'code.function': 'get_user_frame_and_stacklevel', 'code.lineno': 100, 'logfire.msg_template': 'mcp_server_startup', 'logfire.msg': 'mcp_server_startup', 'logfire.span_type': 'span', 'server_type': 'stdio', 'connection_info': '/home/zeus/.local/share/acli/1.3.11-stable/plugin/rovodev/atlassian_cli_rovodev nautilus run --tools open_files,create_file,delete_file,move_file,expand_code_chunks,find_and_replace_code,grep,expand_folder,bash,powershell,update_allowed_external_paths --workspace-args-json {"workspace_view_max_files": 1000, "allowed_external_paths": [], "run_shell_in_sandbox": false}', 'success': True, 'logfire.json_schema': '{"type":"object","properties":{"server_type":{},"connection_info":{},"success":{}}}'}
+2026-01-19 17:57:10.926 | DEBUG    | No mappers found for span 'mcp_server_startup'
+2026-01-19 17:57:10.927 | DEBUG    | No ROVODEV_SANDBOX_ID environment variable found
+2026-01-19 17:57:10.928 | DEBUG    | Sending event to Atlassian Analytics: mcp_server completed
+2026-01-19 17:57:10.990 | DEBUG    | Successfully sent event to Atlassian Analytics
+2026-01-19 17:57:11.010 | DEBUG    | Found mapper MCPEventMapper for span mcp_server_startup
+2026-01-19 17:57:11.011 | DEBUG    | Processing MCP event with attributes: {'code.filepath': 'logfire/_internal/stack_info.py', 'code.function': 'get_user_frame_and_stacklevel', 'code.lineno': 100, 'logfire.msg_template': 'mcp_server_startup', 'logfire.msg': 'mcp_server_startup', 'logfire.span_type': 'span', 'server_type': 'stdio', 'connection_info': '/home/zeus/.local/share/acli/1.3.11-stable/plugin/rovodev/atlassian_cli_rovodev atlassian-exp run', 'success': True, 'logfire.json_schema': '{"type":"object","properties":{"server_type":{},"connection_info":{},"success":{}}}'}
+2026-01-19 17:57:11.022 | DEBUG    | No mappers found for span 'mcp_server_startup'
+2026-01-19 17:57:11.023 | DEBUG    | No ROVODEV_SANDBOX_ID environment variable found
+2026-01-19 17:57:11.026 | DEBUG    | Sending event to Atlassian Analytics: mcp_server completed
+2026-01-19 17:57:11.119 | DEBUG    | Successfully sent event to Atlassian Analytics
+2026-01-19 17:57:14.058 | DEBUG    | Using keyring backend: Keyring
+2026-01-19 17:57:14.058 | DEBUG    | Starting MCP server: http with https://mcp.atlassian.com/v1/native/mcp
+2026-01-19 17:57:14.059 | DEBUG    | No mappers found for span 'mcp_server_startup'
+2026-01-19 17:57:14.059 | DEBUG    | No mappers found for span 'mcp_server_startup'
+2026-01-19 17:57:14.067 | WARNING  | Failed to retrieve token from keyring: No recommended backend was available. Install a recommended 3rd party backend package; or, install the keyrings.alt package if you want to use the non-recommended backends. See https://pypi.org/project/keyring for details.
+2026-01-19 17:57:14.067 | WARNING  | Failed to retrieve client info from keyring: No recommended backend was available. Install a recommended 3rd party backend package; or, install the keyrings.alt package if you want to use the non-recommended backends. See https://pypi.org/project/keyring for details.
+2026-01-19 17:57:14.236 | DEBUG    | Found mapper MCPEventMapper for span mcp_server_startup
+2026-01-19 17:57:14.237 | DEBUG    | Processing MCP event with attributes: {'code.filepath': 'logfire/_internal/stack_info.py', 'code.function': 'get_user_frame_and_stacklevel', 'code.lineno': 100, 'logfire.msg_template': 'mcp_server_startup', 'logfire.msg': 'mcp_server_startup', 'logfire.span_type': 'span', 'server_type': 'http', 'connection_info': 'https://mcp.atlassian.com/v1/native/mcp', 'success': True, 'logfire.json_schema': '{"type":"object","properties":{"server_type":{},"connection_info":{},"success":{}}}'}
+2026-01-19 17:57:14.245 | DEBUG    | No mappers found for span 'mcp_server_startup'
+2026-01-19 17:57:14.248 | DEBUG    | No ROVODEV_SANDBOX_ID environment variable found
+2026-01-19 17:57:14.249 | DEBUG    | Sending event to Atlassian Analytics: mcp_server completed
+2026-01-19 17:57:14.383 | DEBUG    | Successfully sent event to Atlassian Analytics
+2026-01-19 17:57:14.795 | INFO     | MCP servers started successfully
