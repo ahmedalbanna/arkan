@@ -2,7 +2,7 @@
 
 import { useLocalization } from '@/context/LocalizationContext';
 import { cn } from '@/lib/utils/cn';
-import { BookOpenText, Settings, SlidersHorizontal, Languages as LanguageIcon } from 'lucide-react';
+import { BookOpenText, Settings, SlidersHorizontal, Languages as LanguageIcon, MessageSquare } from 'lucide-react';
 import React, { Suspense, lazy, useState } from 'react';
 import { Button } from '../ui/button';
 import { CollapsibleSidePanel } from '../ui/CollapsibleSidePanel';
@@ -19,7 +19,7 @@ import { Badge } from '../ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { ToneSchema } from '@/lib/models';
 import type { Language, Tone } from '@/lib/models';
-
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/tooltip';
 
 const ReportResults = lazy(() => import('./ReportResults'));
 
@@ -114,12 +114,11 @@ export default function ReportModeGenerator() {
         <div className="relative flex-grow flex flex-col">
             <OnboardingGuide isOpen={showOnboarding} onOpenChange={setShowOnboarding} onComplete={handleOnboardingComplete} />
             
-            {/* Global Controls Floating UI */}
-            <div className="fixed bottom-6 left-6 z-20 hidden lg:flex items-center gap-4">
-                {/* Complexity & Formality */}
+            {/* Global Controls Floating UI - LEFT */}
+            <div className="fixed bottom-6 left-6 z-20 hidden lg:flex items-end gap-4">
                 <div className="relative">
                     {isControlsPanelOpen && (
-                        <div className="absolute bottom-full mb-4 w-64 bg-background/80 backdrop-blur-sm p-4 rounded-lg border shadow-lg animate-fade-in-up">
+                        <div className="absolute bottom-full mb-2 w-64 bg-background/80 backdrop-blur-sm p-4 rounded-lg border shadow-lg animate-fade-in-up">
                             <div className="space-y-6">
                                 {/* Formality Slider */}
                                 <div className="space-y-2">
@@ -152,20 +151,26 @@ export default function ReportModeGenerator() {
                             </div>
                         </div>
                     )}
-                    <Button
-                        size="icon"
-                        className="rounded-full h-14 w-14 shadow-lg"
-                        onClick={() => setIsControlsPanelOpen(prev => !prev)}
-                        aria-label="Toggle global controls"
-                    >
-                        <SlidersHorizontal className="h-6 w-6" />
-                    </Button>
+                    <TooltipProvider>
+                        <Tooltip>
+                            <TooltipTrigger asChild>
+                                <Button
+                                    size="icon"
+                                    className="rounded-full h-14 w-14 shadow-lg"
+                                    onClick={() => setIsControlsPanelOpen(prev => !prev)}
+                                    aria-label="Toggle global controls"
+                                >
+                                    <SlidersHorizontal className="h-6 w-6" />
+                                </Button>
+                            </TooltipTrigger>
+                            <TooltipContent side="right"><p>Complexity & Formality</p></TooltipContent>
+                        </Tooltip>
+                    </TooltipProvider>
                 </div>
 
-                {/* Language & Tone */}
                 <div className="relative">
                     {isLanguagePanelOpen && (
-                         <div className="absolute bottom-full mb-4 w-64 bg-background/80 backdrop-blur-sm p-4 rounded-lg border shadow-lg animate-fade-in-up">
+                         <div className="absolute bottom-full mb-2 w-64 bg-background/80 backdrop-blur-sm p-4 rounded-lg border shadow-lg animate-fade-in-up">
                             <div className="space-y-6">
                                 <div className="space-y-2">
                                     <Label className="text-xs font-semibold tracking-wider uppercase">Language</Label>
@@ -201,15 +206,42 @@ export default function ReportModeGenerator() {
                             </div>
                         </div>
                     )}
-                     <Button
-                        size="icon"
-                        className="rounded-full h-14 w-14 shadow-lg"
-                        onClick={() => setIsLanguagePanelOpen(prev => !prev)}
-                        aria-label="Toggle language and tone controls"
-                    >
-                        <LanguageIcon className="h-6 w-6" />
-                    </Button>
+                     <TooltipProvider>
+                        <Tooltip>
+                            <TooltipTrigger asChild>
+                                <Button
+                                    size="icon"
+                                    className="rounded-full h-14 w-14 shadow-lg"
+                                    onClick={() => setIsLanguagePanelOpen(prev => !prev)}
+                                    aria-label="Toggle language and tone controls"
+                                >
+                                    <LanguageIcon className="h-6 w-6" />
+                                </Button>
+                            </TooltipTrigger>
+                            <TooltipContent side="right"><p>Language & Tone</p></TooltipContent>
+                        </Tooltip>
+                    </TooltipProvider>
                 </div>
+            </div>
+            
+            {/* NEW: Chat FAB - RIGHT */}
+            <div className="fixed bottom-6 right-6 z-20 hidden lg:block">
+                <TooltipProvider>
+                    <Tooltip>
+                        <TooltipTrigger asChild>
+                            <Button
+                                size="icon"
+                                className="rounded-full h-16 w-16 shadow-lg"
+                                aria-label="Consult with AI Agents"
+                            >
+                                <MessageSquare className="h-8 w-8" />
+                            </Button>
+                        </TooltipTrigger>
+                        <TooltipContent side="left">
+                            <p>Consult with AI Agents</p>
+                        </TooltipContent>
+                    </Tooltip>
+                </TooltipProvider>
             </div>
 
             <div className="flex-grow flex flex-col mx-auto px-4 py-8 w-full">
