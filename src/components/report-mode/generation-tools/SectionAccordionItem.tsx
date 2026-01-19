@@ -17,10 +17,11 @@ import { SectionContextSelector } from '../section-controls/SectionContextSelect
 import { SectionGenerationControls } from '../section-controls/SectionGenerationControls';
 import { GuidelineEditor } from '../section-controls/SectionGuidelineEditor';
 import { useAiActions } from '@/hooks/report-mode/use-ai-actions';
+import { Section, type Project } from '@/lib/models';
 
 
 interface SectionAccordionItemProps {
-    sectionId: string;
+    section: Section;
     chapterIndex: number;
     sectionIndex: number;
     isProjectBuildMode: boolean;
@@ -29,7 +30,7 @@ interface SectionAccordionItemProps {
 }
 
 export function SectionAccordionItem({
-    sectionId,
+    section,
     chapterIndex,
     sectionIndex,
     isProjectBuildMode,
@@ -37,16 +38,11 @@ export function SectionAccordionItem({
     toggleSectionSelection,
 }: SectionAccordionItemProps) {
     const { t } = useLocalization();
-    const { 
-        project, 
-        userProfile, 
-    } = useBuilderStore();
+    const { userProfile, project } = useBuilderStore();
     
     const { generateSectionMutation, generateChapterMutation, generateProjectMutation } = useAiActions();
 
-    const section = project?.getSection(sectionId);
-    
-    const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: sectionId });
+    const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: section.id });
 
     const style: React.CSSProperties = {
         transform: CSS.Transform.toString(transform),
@@ -57,7 +53,7 @@ export function SectionAccordionItem({
     
     if (!section) return null;
 
-    const isGenerating = generateSectionMutation?.isPending && generateSectionMutation.variables === sectionId;
+    const isGenerating = generateSectionMutation?.isPending && generateSectionMutation.variables === section.id;
     const isAnythingGenerating = generateSectionMutation?.isPending || generateChapterMutation.isPending || generateProjectMutation.isPending;
     const hasCredits = (userProfile?.credits ?? 0) >= 1;
     const canGenerate = hasCredits && !isAnythingGenerating;
@@ -65,15 +61,28 @@ export function SectionAccordionItem({
     function handleGenerateClick(e: React.MouseEvent) {
         e.stopPropagation();
         if (canGenerate) {
-            generateSectionMutation.mutate(sectionId);
+            generateSectionMutation.mutate(section.id);
         }
     }
 
+    const getContextNames = (proj: Project | null, sec: Section): string[] => {
+        if (!proj || !sec.context) return [];
+    
+        const sectionNames = Object.keys(sec.context.sections || {}).map(id => proj.getSection(id)?.title || 'Untitled Section');
+        const fileNames = Object.keys(sec.context.externalContext || {}).map(id => proj.externalContext.find(f => f.id === id)?.fileName || 'Untitled File');
+    
+        return [...sectionNames, ...fileNames];
+    };
+
+    const contextNames = getContextNames(project, section);
+    const totalContext = contextNames.length;
+
+
     return (
-        <AccordionItem value={sectionId} key={sectionId} className="bg-background border rounded-lg" ref={setNodeRef} style={style} {...attributes}>
+        <AccordionItem value={section.id} key={section.id} className="bg-background border rounded-lg" ref={setNodeRef} style={style} {...attributes}>
             <div className="flex items-center px-4 py-2">
                 {isProjectBuildMode && (
-                    <div className="flex items-center gap-2" onClick={(e) => { e.stopPropagation(); toggleSectionSelection(sectionId); }}>
+                    <div className="flex items-center gap-2" onClick={(e) => { e.stopPropagation(); toggleSectionSelection(section.id); }}>
                         <Checkbox
                             checked={isSelected}
                             aria-label={`Select section ${section.title}`}
@@ -82,7 +91,7 @@ export function SectionAccordionItem({
                 )}
                 <AccordionTrigger className={cn("flex-1 hover:no-underline py-0", isProjectBuildMode && "ml-2")}>
                     <div className="flex items-center gap-2 flex-1 min-w-0">
-                         <div {...listeners} className="p-1 cursor-grab touch-none -ml-2 flex items-center gap-1 text-muted-foreground">
+                        <div {...listeners} className="p-1 cursor-grab touch-none -ml-2 flex items-center gap-1 text-muted-foreground">
                             <span className="text-xs w-8 text-left">{chapterIndex >= 0 ? `${chapterIndex + 1}.${sectionIndex + 1}`: `${sectionIndex + 1}`}</span>
                             <GripVertical className="h-5 w-5" />
                         </div>
@@ -90,33 +99,23 @@ export function SectionAccordionItem({
                         <span className="font-medium p-0 h-auto truncate">
                             {section.title}
                         </span>
-                        {(() => {
-                            const linkedSections = Object.keys(section.context?.sections || {}).length;
-                            const linkedFiles = Object.keys(section.context?.externalContext || {}).length;
-                            const totalContext = linkedSections + linkedFiles;
-                            
-                            if (totalContext > 0) {
-                                return (
-                                    <TooltipProvider>
-                                        <Tooltip>
-                                            <TooltipTrigger asChild>
-                                                <div className="flex items-center gap-1 ml-2">
-                                                    <LinkIcon className="h-3.5 w-3.5 text-blue-500" />
-                                                    <span className="text-xs text-blue-500 font-medium">{totalContext}</span>
-                                                </div>
-                                            </TooltipTrigger>
-                                            <TooltipContent side="top">
-                                                <div className="text-xs space-y-1">
-                                                    {linkedSections > 0 && <p>{linkedSections} linked section{linkedSections > 1 ? 's' : ''}</p>}
-                                                    {linkedFiles > 0 && <p>{linkedFiles} linked file{linkedFiles > 1 ? 's' : ''}</p>}
-                                                </div>
-                                            </TooltipContent>
-                                        </Tooltip>
-                                    </TooltipProvider>
-                                );
-                            }
-                            return null;
-                        })()}
+                        {totalContext > 0 && (
+                          <TooltipProvider>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <div className="flex items-center gap-1 ml-2">
+                                  <LinkIcon className="h-3.5 w-3.5 text-blue-500" />
+                                  <span className="text-xs text-blue-500 font-medium">{totalContext}</span>
+                                </div>
+                              </TooltipTrigger>
+                              <TooltipContent side="top">
+                                <div className="text-xs space-y-1">
+                                  {contextNames.map(name => <p key={name}>{name}</p>)}
+                                </div>
+                              </TooltipContent>
+                            </Tooltip>
+                          </TooltipProvider>
+                        )}
                     </div>
                 </AccordionTrigger>
             </div>
@@ -152,7 +151,7 @@ export function SectionAccordionItem({
                                 <SectionGenerationControls section={section} />
                             </TabsContent>
                             <TabsContent value="prompt" className="py-4">
-                                 <GuidelineEditor itemKey={section.id} />
+                                <GuidelineEditor itemKey={section.id} />
                             </TabsContent>
                             <TabsContent value="context" className="py-4">
                                 <SectionContextSelector sectionId={section.id} />

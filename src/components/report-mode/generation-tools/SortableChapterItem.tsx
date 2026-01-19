@@ -102,7 +102,7 @@ export function SortableChapterItem({
               {chapter.sections.map((section, sectionIndex) => (
                 <SectionAccordionItem
                   key={section.id}
-                  sectionId={section.id}
+                  section={section}
                   sectionIndex={sectionIndex}
                   chapterIndex={index}
                   isProjectBuildMode={isProjectBuildMode}

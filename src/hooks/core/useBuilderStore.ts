@@ -14,6 +14,7 @@ interface BuilderState {
     userProfile: User | null; // Add userProfile to the store state
     hasUnsavedChanges: boolean;
     isStoreInitialized: boolean;
+    version: number; // To track project updates
     
     initializeStore: () => void;
     setUserProfile: (userProfile: User | null) => void; // Action to set the user profile
@@ -33,6 +34,7 @@ const useBuilderStore = create<BuilderState>((set, get) => ({
     userProfile: null, // Initialize userProfile as null
     hasUnsavedChanges: false,
     isStoreInitialized: false,
+    version: 0,
 
     initializeStore: () => {
         if (get().isStoreInitialized) return;
@@ -45,9 +47,9 @@ const useBuilderStore = create<BuilderState>((set, get) => ({
             }
             
             if (projectToLoad) {
-                set({ project: new Project(projectToLoad), isStoreInitialized: true });
+                set({ project: new Project(projectToLoad), isStoreInitialized: true, version: 0 });
             } else {
-                set({ project: createNewTemporaryProject(), isStoreInitialized: true });
+                set({ project: createNewTemporaryProject(), isStoreInitialized: true, version: 0 });
             }
         };
         
@@ -65,11 +67,14 @@ const useBuilderStore = create<BuilderState>((set, get) => ({
             const result = updater(newProject);
             const finalProject = result instanceof Project ? result : newProject;
             
-            // Save to local storage for persistence across reloads
             localProjectService.saveProject(finalProject.toStateObject()); 
             localStorage.setItem('lastActiveProjectId', finalProject.id);
 
-            return { project: finalProject, hasUnsavedChanges: true };
+            return { 
+                project: finalProject, 
+                hasUnsavedChanges: true,
+                version: state.version + 1 
+            };
         });
     },
 
@@ -80,8 +85,8 @@ const useBuilderStore = create<BuilderState>((set, get) => ({
     loadProject: (projectData) => {
         const newProject = projectData instanceof Project ? projectData : new Project(projectData);
         localStorage.setItem('lastActiveProjectId', newProject.id);
-        localProjectService.saveProject(newProject.toStateObject()); // Also save to local DB on load
-        set({ project: newProject, hasUnsavedChanges: false });
+        localProjectService.saveProject(newProject.toStateObject());
+        set({ project: newProject, hasUnsavedChanges: false, version: 0 });
     },
 
     loadProjectFromFile: async (file: File) => {
@@ -103,7 +108,7 @@ const useBuilderStore = create<BuilderState>((set, get) => ({
         
         const currentProject = get().project;
         if (currentProject) {
-            set({ project: createNewTemporaryProject(), hasUnsavedChanges: false });
+            set({ project: createNewTemporaryProject(), hasUnsavedChanges: false, version: 0 });
             localStorage.removeItem('lastActiveProjectId');
 
             const editor = useEditorStore.getState().activeEditor;

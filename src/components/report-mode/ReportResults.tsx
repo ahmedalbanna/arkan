@@ -14,9 +14,8 @@ import { useLocalization } from '@/context/LocalizationContext';
 import { useBuilderStore } from '@/hooks';
 import MarkdownEditor from './MarkdownEditor';
 import { CoverPage } from '../shared/CoverPage';
-import { BookOpenCheck, Brush, LayoutList, Bot, FileVideo, PencilLine, FileText } from 'lucide-react';
+import { BookOpenCheck, Brush, LayoutList, Bot, FileVideo, FileText } from 'lucide-react';
 import { TableOfContentForm } from './TableOfContentForm';
-import { useState } from 'react';
 
 const ReportSteps = () => {
   const { t } = useLocalization();
@@ -78,13 +77,12 @@ interface ReportResultsProps {
 
 const ReportResults = ({ activePanelKey }: ReportResultsProps) => {
   const { t } = useLocalization();
-  const { project, updateProjectFromMarkdown } = useBuilderStore();
+  const { project, version, updateProjectFromMarkdown } = useBuilderStore();
 
   const handleContentChange = (newMarkdown: string) => {
     updateProjectFromMarkdown(newMarkdown);
   };
   
-  const fullContent = project?.fullMarkdownContent || '';
   const hasContent = project?.content && project.content.length > 0;
 
   const renderContent = () => {
@@ -113,8 +111,8 @@ const ReportResults = ({ activePanelKey }: ReportResultsProps) => {
                  return (
                     <A4Page>
                         <MarkdownEditor
-                            key={project?.id}
-                            content={fullContent}
+                            key={version} // Re-mount editor when version changes
+                            content={project?.fullMarkdownContent || ''}
                             onChange={handleContentChange}
                         />
                     </A4Page>
