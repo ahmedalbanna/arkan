@@ -13,6 +13,9 @@ import { formatDistanceToNow } from 'date-fns';
 import { SessionActions } from '@/components/report-mode/session/SessionActions';
 import { useReportGenerator } from '@/hooks/report-mode/useReportGenerator';
 import { useBeforeUnload } from '@/hooks/util/useBeforeUnload';
+import { Slider } from '../ui/slider';
+import { Label } from '../ui/label';
+import { Badge } from '../ui/badge';
 
 const ReportResults = lazy(() => import('./ReportResults'));
 
@@ -66,10 +69,17 @@ export default function ReportModeGenerator() {
         project,
         isStoreInitialized,
         updateProjectName,
+        updateProject,
         panels,
     } = useReportGenerator();
     
     useBeforeUnload();
+
+    const handleComplexityChange = (value: number) => {
+        if (project) {
+          updateProject(p => p.with({ complexity: value }));
+        }
+    };
 
     if (!isStoreInitialized || !project) {
         return <BuilderPageSkeleton />;
@@ -78,6 +88,20 @@ export default function ReportModeGenerator() {
     return (
         <div className="relative flex-grow flex flex-col">
             <OnboardingGuide isOpen={showOnboarding} onOpenChange={setShowOnboarding} onComplete={handleOnboardingComplete} />
+             {/* Complexity Slider */}
+            <div className="fixed left-4 top-1/2 -translate-y-1/2 z-20 hidden lg:flex flex-col items-center gap-4 bg-background/80 backdrop-blur-sm p-3 rounded-lg border shadow-lg">
+                <Label className="[writing-mode:vertical-rl] transform rotate-180 text-xs text-muted-foreground font-semibold tracking-wider uppercase">Complexity</Label>
+                <Slider
+                    orientation="vertical"
+                    value={[project.complexity ?? 50]}
+                    onValueChange={(val) => handleComplexityChange(val[0])}
+                    min={0}
+                    max={100}
+                    step={10}
+                    className="h-48"
+                />
+                <Badge variant="secondary">{project.complexity ?? 50}%</Badge>
+            </div>
             <div className="flex-grow flex flex-col mx-auto px-4 py-8 w-full">
                 <div className="flex justify-between items-start mb-4 gap-4 max-w-full">
                     <div className="flex-1 space-y-2 overflow-auto">
