@@ -4,28 +4,16 @@
  * 
  * Service for managing flow configurations in Firestore.
  * Provides CRUD operations and flow versioning.
+ * 
+ * NOTE: This service uses Firebase Admin SDK for server-side operations.
  */
 
-import { 
-  collection, 
-  doc, 
-  getDoc, 
-  getDocs, 
-  setDoc, 
-  updateDoc, 
-  deleteDoc,
-  query,
-  where,
-  orderBy,
-  limit as firestoreLimit,
-  Timestamp,
-  type QueryConstraint
-} from '@firebase/firestore';
-import { initializeFirebase } from '@/firebase';
-
-const { firestore: db } = initializeFirebase();
+import { adminDb } from '@/lib/firebase/server-init';
 import type { FlowConfiguration, FlowStatus, FlowVersion } from '../lib/models/flow-config';
 import { flowConfigCache } from '@/lib/cache/flow-config-cache';
+
+// Use Admin SDK Firestore instance
+const db = adminDb;
 
 // ============================================================================
 // Flow Configuration Service
@@ -60,8 +48,8 @@ export class FlowConfigService {
         },
       };
 
-      const flowRef = doc(db, this.collectionName, flow.id);
-      await setDoc(flowRef, this.toFirestore(flowWithMetadata));
+      const flowRef = db.collection(this.collectionName).doc(flow.id);
+      await flowRef.set(this.toFirestore(flowWithMetadata));
 
       // Create initial version
       await this.createVersion(flow.id, {
@@ -88,10 +76,10 @@ export class FlowConfigService {
         return this.getFlowVersion(flowId, version);
       }
 
-      const flowRef = doc(db, this.collectionName, flowId);
-      const flowSnap = await getDoc(flowRef);
+      const flowRef = db.collection(this.collectionName).doc(flowId);
+      const flowSnap = await flowRef.get();
 
-      if (!flowSnap.exists()) {
+      if (!flowSnap.exists) {
         return null;
       }
 
@@ -111,10 +99,10 @@ export class FlowConfigService {
     changeDescription?: string
   ): Promise<FlowConfiguration> {
     try {
-      const flowRef = doc(db, this.collectionName, flowId);
-      const flowSnap = await getDoc(flowRef);
+      const flowRef = db.collection(this.collectionName).doc(flowId);
+      const flowSnap = await flowRef.get();
 
-      if (!flowSnap.exists()) {
+      if (!flowSnap.exists) {
         throw new Error(`Flow not found: ${flowId}`);
       }
 
@@ -140,7 +128,7 @@ export class FlowConfigService {
         },
       };
 
-      await updateDoc(flowRef, this.toFirestore(updatedFlow));
+      await flowRef.update(this.toFirestore(updatedFlow));
 
       // Create version snapshot
       if (newVersion !== currentFlow.version) {
@@ -165,14 +153,14 @@ export class FlowConfigService {
    */
   async deleteFlow(flowId: string): Promise<void> {
     try {
-      const flowRef = doc(db, this.collectionName, flowId);
-      await deleteDoc(flowRef);
+      const flowRef = db.collection(this.collectionName).doc(flowId);
+      await flowRef.delete();
 
       // Delete all versions
-      const versionsRef = collection(db, this.collectionName, flowId, 'versions');
-      const versionsSnap = await getDocs(versionsRef);
+      const versionsRef = db.collection(this.collectionName).doc(flowId).collection('versions');
+      const versionsSnap = await versionsRef.get();
       
-      const deletePromises = versionsSnap.docs.map(doc => deleteDoc(doc.ref));
+      const deletePromises = versionsSnap.docs.map(doc => doc.ref.delete());
       await Promise.all(deletePromises);
     } catch (error) {
       console.error('Error deleting flow:', error);
@@ -190,28 +178,27 @@ export class FlowConfigService {
     limit?: number;
   }): Promise<FlowConfiguration[]> {
     try {
-      const constraints: QueryConstraint[] = [];
+      let query = db.collection(this.collectionName);
 
       if (filters?.status) {
-        constraints.push(where('status', '==', filters.status));
+        query = query.where('status', '==', filters.status) as any;
       }
 
       if (filters?.category) {
-        constraints.push(where('metadata.category', '==', filters.category));
+        query = query.where('metadata.category', '==', filters.category) as any;
       }
 
       if (filters?.tags && filters.tags.length > 0) {
-        constraints.push(where('tags', 'array-contains-any', filters.tags));
+        query = query.where('tags', 'array-contains-any', filters.tags) as any;
       }
 
-      constraints.push(orderBy('metadata.updatedAt', 'desc'));
+      query = query.orderBy('metadata.updatedAt', 'desc') as any;
 
       if (filters?.limit) {
-        constraints.push(firestoreLimit(filters.limit));
+        query = query.limit(filters.limit) as any;
       }
 
-      const q = query(collection(db, this.collectionName), ...constraints);
-      const querySnapshot = await getDocs(q);
+      const querySnapshot = await query.get();
 
       return querySnapshot.docs.map(doc => this.fromFirestore(doc.data()));
     } catch (error) {
@@ -252,10 +239,10 @@ export class FlowConfigService {
    */
   private async createVersion(flowId: string, version: FlowVersion): Promise<void> {
     try {
-      const versionRef = doc(db, this.collectionName, flowId, 'versions', version.version);
-      await setDoc(versionRef, {
+      const versionRef = db.collection(this.collectionName).doc(flowId).collection('versions').doc(version.version);
+      await versionRef.set({
         ...version,
-        createdAt: Timestamp.fromDate(version.createdAt),
+        createdAt: version.createdAt,
         configuration: this.toFirestore(version.configuration),
       });
     } catch (error) {
@@ -269,10 +256,10 @@ export class FlowConfigService {
    */
   async getFlowVersion(flowId: string, version: string): Promise<FlowConfiguration | null> {
     try {
-      const versionRef = doc(db, this.collectionName, flowId, 'versions', version);
-      const versionSnap = await getDoc(versionRef);
+      const versionRef = db.collection(this.collectionName).doc(flowId).collection('versions').doc(version);
+      const versionSnap = await versionRef.get();
 
-      if (!versionSnap.exists()) {
+      if (!versionSnap.exists) {
         return null;
       }
 
@@ -289,15 +276,14 @@ export class FlowConfigService {
    */
   async listVersions(flowId: string): Promise<FlowVersion[]> {
     try {
-      const versionsRef = collection(db, this.collectionName, flowId, 'versions');
-      const q = query(versionsRef, orderBy('createdAt', 'desc'));
-      const versionsSnap = await getDocs(q);
+      const versionsRef = db.collection(this.collectionName).doc(flowId).collection('versions');
+      const versionsSnap = await versionsRef.orderBy('createdAt', 'desc').get();
 
       return versionsSnap.docs.map(doc => {
         const data = doc.data();
         return {
           ...data,
-          createdAt: data.createdAt.toDate(),
+          createdAt: data.createdAt instanceof Date ? data.createdAt : data.createdAt.toDate(),
           configuration: this.fromFirestore(data.configuration),
         } as FlowVersion;
       });
@@ -334,10 +320,10 @@ export class FlowConfigService {
    */
   async updateStats(flowId: string, success: boolean, executionTime: number): Promise<void> {
     try {
-      const flowRef = doc(db, this.collectionName, flowId);
-      const flowSnap = await getDoc(flowRef);
+      const flowRef = db.collection(this.collectionName).doc(flowId);
+      const flowSnap = await flowRef.get();
 
-      if (!flowSnap.exists()) {
+      if (!flowSnap.exists) {
         return;
       }
 
@@ -361,7 +347,7 @@ export class FlowConfigService {
       stats.avgExecutionTime = (totalTime + executionTime) / stats.totalExecutions;
       stats.lastExecutedAt = new Date();
 
-      await updateDoc(flowRef, {
+      await flowRef.update({
         'metadata.stats': stats,
       });
     } catch (error) {
@@ -382,13 +368,11 @@ export class FlowConfigService {
       ...flow,
       metadata: {
         ...flow.metadata,
-        createdAt: Timestamp.fromDate(flow.metadata.createdAt),
-        updatedAt: Timestamp.fromDate(flow.metadata.updatedAt),
+        createdAt: flow.metadata.createdAt,
+        updatedAt: flow.metadata.updatedAt,
         stats: flow.metadata.stats ? {
           ...flow.metadata.stats,
-          lastExecutedAt: flow.metadata.stats.lastExecutedAt 
-            ? Timestamp.fromDate(flow.metadata.stats.lastExecutedAt)
-            : null,
+          lastExecutedAt: flow.metadata.stats.lastExecutedAt || null,
         } : undefined,
       },
     };
@@ -402,11 +386,15 @@ export class FlowConfigService {
       ...data,
       metadata: {
         ...data.metadata,
-        createdAt: data.metadata.createdAt.toDate(),
-        updatedAt: data.metadata.updatedAt.toDate(),
+        createdAt: data.metadata.createdAt instanceof Date ? data.metadata.createdAt : data.metadata.createdAt.toDate(),
+        updatedAt: data.metadata.updatedAt instanceof Date ? data.metadata.updatedAt : data.metadata.updatedAt.toDate(),
         stats: data.metadata.stats ? {
           ...data.metadata.stats,
-          lastExecutedAt: data.metadata.stats.lastExecutedAt?.toDate(),
+          lastExecutedAt: data.metadata.stats.lastExecutedAt 
+            ? (data.metadata.stats.lastExecutedAt instanceof Date 
+                ? data.metadata.stats.lastExecutedAt 
+                : data.metadata.stats.lastExecutedAt.toDate())
+            : undefined,
         } : undefined,
       },
     };

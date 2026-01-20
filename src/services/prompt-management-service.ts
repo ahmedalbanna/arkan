@@ -4,27 +4,15 @@
  * 
  * Service for managing prompt configurations in Firestore.
  * Provides CRUD operations and prompt versioning.
+ * 
+ * NOTE: This service uses Firebase Admin SDK for server-side operations.
  */
 
-import {
-  collection,
-  doc,
-  getDoc,
-  getDocs,
-  setDoc,
-  updateDoc,
-  deleteDoc,
-  query,
-  where,
-  orderBy,
-  limit as firestoreLimit,
-  Timestamp,
-  type QueryConstraint
-} from '@firebase/firestore';
-import { initializeFirebase } from '@/firebase';
-
-const { firestore: db } = initializeFirebase();
+import { adminDb } from '@/lib/firebase/server-init';
 import type { PromptConfiguration, PromptStatus, PromptVersion } from '../lib/models/prompt-config';
+
+// Use Admin SDK Firestore instance
+const db = adminDb;
 
 // ============================================================================
 // Prompt Management Service
@@ -60,8 +48,8 @@ export class PromptManagementService {
         },
       };
 
-      const promptRef = doc(db, this.collectionName, prompt.id);
-      await setDoc(promptRef, this.toFirestore(promptWithMetadata));
+      const promptRef = db.collection(this.collectionName).doc(prompt.id);
+      await promptRef.set(this.toFirestore(promptWithMetadata));
 
       // Create initial version
       await this.createVersion(prompt.id, {
@@ -88,10 +76,10 @@ export class PromptManagementService {
         return this.getPromptVersion(promptId, version);
       }
 
-      const promptRef = doc(db, this.collectionName, promptId);
-      const promptSnap = await getDoc(promptRef);
+      const promptRef = db.collection(this.collectionName).doc(promptId);
+      const promptSnap = await promptRef.get();
 
-      if (!promptSnap.exists()) {
+      if (!promptSnap.exists) {
         return null;
       }
 
@@ -111,10 +99,10 @@ export class PromptManagementService {
     changeDescription?: string
   ): Promise<PromptConfiguration> {
     try {
-      const promptRef = doc(db, this.collectionName, promptId);
-      const promptSnap = await getDoc(promptRef);
+      const promptRef = db.collection(this.collectionName).doc(promptId);
+      const promptSnap = await promptRef.get();
 
-      if (!promptSnap.exists()) {
+      if (!promptSnap.exists) {
         throw new Error(`Prompt not found: ${promptId}`);
       }
 
@@ -140,7 +128,7 @@ export class PromptManagementService {
         },
       };
 
-      await updateDoc(promptRef, this.toFirestore(updatedPrompt));
+      await promptRef.update(this.toFirestore(updatedPrompt));
 
       // Create version snapshot
       if (newVersion !== currentPrompt.version) {
@@ -165,14 +153,14 @@ export class PromptManagementService {
    */
   async deletePrompt(promptId: string): Promise<void> {
     try {
-      const promptRef = doc(db, this.collectionName, promptId);
-      await deleteDoc(promptRef);
+      const promptRef = db.collection(this.collectionName).doc(promptId);
+      await promptRef.delete();
 
       // Delete all versions
-      const versionsRef = collection(db, this.collectionName, promptId, 'versions');
-      const versionsSnap = await getDocs(versionsRef);
+      const versionsRef = db.collection(this.collectionName).doc(promptId).collection('versions');
+      const versionsSnap = await versionsRef.get();
 
-      const deletePromises = versionsSnap.docs.map(doc => deleteDoc(doc.ref));
+      const deletePromises = versionsSnap.docs.map(doc => doc.ref.delete());
       await Promise.all(deletePromises);
     } catch (error) {
       console.error('Error deleting prompt:', error);
@@ -191,32 +179,31 @@ export class PromptManagementService {
     limit?: number;
   }): Promise<PromptConfiguration[]> {
     try {
-      const constraints: QueryConstraint[] = [];
+      let query = db.collection(this.collectionName);
 
       if (filters?.status) {
-        constraints.push(where('status', '==', filters.status));
+        query = query.where('status', '==', filters.status) as any;
       }
 
       if (filters?.category) {
-        constraints.push(where('metadata.category', '==', filters.category));
+        query = query.where('metadata.category', '==', filters.category) as any;
       }
 
       if (filters?.language) {
-        constraints.push(where('metadata.language', '==', filters.language));
+        query = query.where('metadata.language', '==', filters.language) as any;
       }
 
       if (filters?.tags && filters.tags.length > 0) {
-        constraints.push(where('tags', 'array-contains-any', filters.tags));
+        query = query.where('tags', 'array-contains-any', filters.tags) as any;
       }
 
-      constraints.push(orderBy('metadata.updatedAt', 'desc'));
+      query = query.orderBy('metadata.updatedAt', 'desc') as any;
 
       if (filters?.limit) {
-        constraints.push(firestoreLimit(filters.limit));
+        query = query.limit(filters.limit) as any;
       }
 
-      const q = query(collection(db, this.collectionName), ...constraints);
-      const querySnapshot = await getDocs(q);
+      const querySnapshot = await query.get();
 
       return querySnapshot.docs.map(doc => this.fromFirestore(doc.data()));
     } catch (error) {
@@ -256,10 +243,10 @@ export class PromptManagementService {
    */
   private async createVersion(promptId: string, version: PromptVersion): Promise<void> {
     try {
-      const versionRef = doc(db, this.collectionName, promptId, 'versions', version.version);
-      await setDoc(versionRef, {
+      const versionRef = db.collection(this.collectionName).doc(promptId).collection('versions').doc(version.version);
+      await versionRef.set({
         ...version,
-        createdAt: Timestamp.fromDate(version.createdAt),
+        createdAt: version.createdAt,
         configuration: this.toFirestore(version.configuration),
       });
     } catch (error) {
@@ -273,10 +260,10 @@ export class PromptManagementService {
    */
   async getPromptVersion(promptId: string, version: string): Promise<PromptConfiguration | null> {
     try {
-      const versionRef = doc(db, this.collectionName, promptId, 'versions', version);
-      const versionSnap = await getDoc(versionRef);
+      const versionRef = db.collection(this.collectionName).doc(promptId).collection('versions').doc(version);
+      const versionSnap = await versionRef.get();
 
-      if (!versionSnap.exists()) {
+      if (!versionSnap.exists) {
         return null;
       }
 
@@ -293,15 +280,14 @@ export class PromptManagementService {
    */
   async listVersions(promptId: string): Promise<PromptVersion[]> {
     try {
-      const versionsRef = collection(db, this.collectionName, promptId, 'versions');
-      const q = query(versionsRef, orderBy('createdAt', 'desc'));
-      const versionsSnap = await getDocs(q);
+      const versionsRef = db.collection(this.collectionName).doc(promptId).collection('versions');
+      const versionsSnap = await versionsRef.orderBy('createdAt', 'desc').get();
 
       return versionsSnap.docs.map(doc => {
         const data = doc.data();
         return {
           ...data,
-          createdAt: data.createdAt.toDate(),
+          createdAt: data.createdAt instanceof Date ? data.createdAt : data.createdAt.toDate(),
           configuration: this.fromFirestore(data.configuration),
         } as PromptVersion;
       });
@@ -320,10 +306,10 @@ export class PromptManagementService {
    */
   async updateStats(promptId: string, success: boolean, tokensUsed: number, executionTime: number): Promise<void> {
     try {
-      const promptRef = doc(db, this.collectionName, promptId);
-      const promptSnap = await getDoc(promptRef);
+      const promptRef = db.collection(this.collectionName).doc(promptId);
+      const promptSnap = await promptRef.get();
 
-      if (!promptSnap.exists()) {
+      if (!promptSnap.exists) {
         return;
       }
 
@@ -352,7 +338,7 @@ export class PromptManagementService {
 
       stats.lastUsedAt = new Date();
 
-      await updateDoc(promptRef, {
+      await promptRef.update({
         'metadata.stats': stats,
       });
     } catch (error) {
@@ -373,13 +359,11 @@ export class PromptManagementService {
       ...prompt,
       metadata: {
         ...prompt.metadata,
-        createdAt: Timestamp.fromDate(prompt.metadata.createdAt),
-        updatedAt: Timestamp.fromDate(prompt.metadata.updatedAt),
+        createdAt: prompt.metadata.createdAt,
+        updatedAt: prompt.metadata.updatedAt,
         stats: prompt.metadata.stats ? {
           ...prompt.metadata.stats,
-          lastUsedAt: prompt.metadata.stats.lastUsedAt
-            ? Timestamp.fromDate(prompt.metadata.stats.lastUsedAt)
-            : null,
+          lastUsedAt: prompt.metadata.stats.lastUsedAt || null,
         } : undefined,
       },
     };
@@ -393,11 +377,15 @@ export class PromptManagementService {
       ...data,
       metadata: {
         ...data.metadata,
-        createdAt: data.metadata.createdAt.toDate(),
-        updatedAt: data.metadata.updatedAt.toDate(),
+        createdAt: data.metadata.createdAt instanceof Date ? data.metadata.createdAt : data.metadata.createdAt.toDate(),
+        updatedAt: data.metadata.updatedAt instanceof Date ? data.metadata.updatedAt : data.metadata.updatedAt.toDate(),
         stats: data.metadata.stats ? {
           ...data.metadata.stats,
-          lastUsedAt: data.metadata.stats.lastUsedAt?.toDate(),
+          lastUsedAt: data.metadata.stats.lastUsedAt 
+            ? (data.metadata.stats.lastUsedAt instanceof Date 
+                ? data.metadata.stats.lastUsedAt 
+                : data.metadata.stats.lastUsedAt.toDate())
+            : undefined,
         } : undefined,
       },
     };
