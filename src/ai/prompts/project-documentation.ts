@@ -6,21 +6,21 @@
  */
 
 import { ai } from '@/ai/genkit';
-
+import {z} from 'zod';
 // ==================== README GENERATION PROMPTS ====================
 
 export const readmeGenerationPrompt = ai.definePrompt({
     name: 'readmeGeneration',
     description: 'Generates comprehensive README.md files for projects',
     input: {
-        schema: ai.z.object({
-            projectName: ai.z.string(),
-            description: ai.z.string(),
-            features: ai.z.array(ai.z.string()).optional(),
-            techStack: ai.z.array(ai.z.string()).optional(),
-            installSteps: ai.z.string().optional(),
-            usageExamples: ai.z.string().optional(),
-            template: ai.z.enum(['minimal', 'standard', 'comprehensive']).default('standard'),
+        schema: z.object({
+            projectName: z.string(),
+            description: z.string(),
+            features: z.array(z.string()).optional(),
+            techStack: z.array(z.string()).optional(),
+            installSteps: z.string().optional(),
+            usageExamples: z.string().optional(),
+            template: z.enum(['minimal', 'standard', 'comprehensive']).default('standard'),
         }),
     },
 }, `
@@ -101,15 +101,15 @@ export const technicalSpecPrompt = ai.definePrompt({
     name: 'technicalSpecification',
     description: 'Generates detailed technical specification documents',
     input: {
-        schema: ai.z.object({
-            projectName: ai.z.string(),
-            projectType: ai.z.string(),
-            architecture: ai.z.string().optional(),
-            components: ai.z.array(ai.z.string()).optional(),
-            dataModels: ai.z.string().optional(),
-            apiEndpoints: ai.z.string().optional(),
-            securityRequirements: ai.z.array(ai.z.string()).optional(),
-            performanceGoals: ai.z.array(ai.z.string()).optional(),
+        schema: z.object({
+            projectName: z.string(),
+            projectType: z.string(),
+            architecture: z.string().optional(),
+            components: z.array(z.string()).optional(),
+            dataModels: z.string().optional(),
+            apiEndpoints: z.string().optional(),
+            securityRequirements: z.array(z.string()).optional(),
+            performanceGoals: z.array(z.string()).optional(),
         }),
     },
 }, `
@@ -208,17 +208,17 @@ export const apiDocumentationPrompt = ai.definePrompt({
     name: 'apiDocumentation',
     description: 'Generates API reference documentation',
     input: {
-        schema: ai.z.object({
-            apiName: ai.z.string(),
-            apiVersion: ai.z.string(),
-            baseUrl: ai.z.string().optional(),
-            endpoints: ai.z.array(ai.z.object({
-                method: ai.z.string(),
-                path: ai.z.string(),
-                description: ai.z.string(),
+        schema: z.object({
+            apiName: z.string(),
+            apiVersion: z.string(),
+            baseUrl: z.string().optional(),
+            endpoints: z.array(z.object({
+                method: z.string(),
+                path: z.string(),
+                description: z.string(),
             })).optional(),
-            authMethod: ai.z.string().optional(),
-            format: ai.z.enum(['rest', 'graphql', 'grpc']).default('rest'),
+            authMethod: z.string().optional(),
+            format: z.enum(['rest', 'graphql', 'grpc']).default('rest'),
         }),
     },
 }, `
@@ -319,18 +319,18 @@ export const projectReportPrompt = ai.definePrompt({
     name: 'projectReport',
     description: 'Generates project status and progress reports',
     input: {
-        schema: ai.z.object({
-            projectName: ai.z.string(),
-            reportPeriod: ai.z.string(),
-            metrics: ai.z.object({
-                commits: ai.z.number(),
-                contributors: ai.z.number(),
-                linesOfCode: ai.z.number(),
-                filesChanged: ai.z.number(),
+        schema: z.object({
+            projectName: z.string(),
+            reportPeriod: z.string(),
+            metrics: z.object({
+                commits: z.number(),
+                contributors: z.number(),
+                linesOfCode: z.number(),
+                filesChanged: z.number(),
             }).optional(),
-            achievements: ai.z.array(ai.z.string()).optional(),
-            challenges: ai.z.array(ai.z.string()).optional(),
-            targetAudience: ai.z.enum(['technical', 'executive', 'stakeholders']).default('stakeholders'),
+            achievements: z.array(z.string()).optional(),
+            challenges: z.array(z.string()).optional(),
+            targetAudience: z.enum(['technical', 'executive', 'stakeholders']).default('stakeholders'),
         }),
     },
 }, `
@@ -427,12 +427,12 @@ export const presentationContentPrompt = ai.definePrompt({
     name: 'presentationContent',
     description: 'Generates content for project presentations',
     input: {
-        schema: ai.z.object({
-            projectName: ai.z.string(),
-            presentationType: ai.z.enum(['demo', 'pitch', 'technical_review', 'status_update', 'training']),
-            duration: ai.z.number().describe('Duration in minutes'),
-            audience: ai.z.string(),
-            keyPoints: ai.z.array(ai.z.string()).optional(),
+        schema: z.object({
+            projectName: z.string(),
+            presentationType: z.enum(['demo', 'pitch', 'technical_review', 'status_update', 'training']),
+            duration: z.number().describe('Duration in minutes'),
+            audience: z.string(),
+            keyPoints: z.array(z.string()).optional(),
         }),
     },
 }, `
@@ -547,16 +547,16 @@ export const changelogPrompt = ai.definePrompt({
     name: 'changelogGeneration',
     description: 'Generates CHANGELOG.md following Keep a Changelog format',
     input: {
-        schema: ai.z.object({
-            projectName: ai.z.string(),
-            version: ai.z.string(),
-            releaseDate: ai.z.string().optional(),
-            commits: ai.z.array(ai.z.object({
-                hash: ai.z.string(),
-                message: ai.z.string(),
-                author: ai.z.string(),
+        schema: z.object({
+            projectName: z.string(),
+            version: z.string(),
+            releaseDate: z.string().optional(),
+            commits: z.array(z.object({
+                hash: z.string(),
+                message: z.string(),
+                author: z.string(),
             })).optional(),
-            includeUnreleased: ai.z.boolean().default(true),
+            includeUnreleased: z.boolean().default(true),
         }),
     },
 }, `
@@ -656,12 +656,12 @@ export const userGuidePrompt = ai.definePrompt({
     name: 'userGuide',
     description: 'Generates user-friendly guide documentation',
     input: {
-        schema: ai.z.object({
-            productName: ai.z.string(),
-            userType: ai.z.enum(['end-user', 'developer', 'admin']),
-            features: ai.z.array(ai.z.string()).optional(),
-            includeScreenshots: ai.z.boolean().default(false),
-            tutorialStyle: ai.z.enum(['quick-start', 'comprehensive', 'reference']).default('comprehensive'),
+        schema: z.object({
+            productName: z.string(),
+            userType: z.enum(['end-user', 'developer', 'admin']),
+            features: z.array(z.string()).optional(),
+            includeScreenshots: z.boolean().default(false),
+            tutorialStyle: z.enum(['quick-start', 'comprehensive', 'reference']).default('comprehensive'),
         }),
     },
 }, `

@@ -12,7 +12,7 @@ const resources = {
 };
 
 export async function getTranslator() {
-  const cookieStore = cookies();
+  const cookieStore = await cookies();
   const lng = cookieStore.get('locale')?.value || 'en';
 
   const i18n = createInstance();

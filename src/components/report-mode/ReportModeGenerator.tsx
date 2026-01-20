@@ -13,7 +13,6 @@ import { Input } from '@/components/ui/input';
 import { formatDistanceToNow } from 'date-fns';
 import { SessionActions } from '@/components/report-mode/session/SessionActions';
 import { useReportGenerator } from '@/hooks/report-mode/useReportGenerator';
-import { useBeforeUnload } from '@/hooks/util/useBeforeUnload';
 import { Slider } from '../ui/slider';
 import { Label } from '../ui/label';
 import { Badge } from '../ui/badge';
@@ -76,6 +75,7 @@ export default function ReportModeGenerator() {
         isStoreInitialized,
         updateProjectName,
         updateProject,
+        isSaving,
         panels,
         isChatOpen,
         setIsChatOpen,
@@ -86,7 +86,7 @@ export default function ReportModeGenerator() {
     const [isControlsPanelOpen, setIsControlsPanelOpen] = useState(false);
     const [isLanguagePanelOpen, setIsLanguagePanelOpen] = useState(false);
     
-    useBeforeUnload();
+
 
     const handleComplexityChange = (value: number) => {
         if (project) {
@@ -304,7 +304,7 @@ export default function ReportModeGenerator() {
                         )}
                     </div>
                     <div className="flex-none">
-                        <SessionActions />
+                        <SessionActions isSaving={false} />
                     </div>
                 </div>
                 <div className="flex flex-col flex-grow">

@@ -43,7 +43,7 @@ const manipulateTextFlow = ai.defineFlow(
   },
   async ({ textToManipulate, command }) => {
     try {
-      const result = await prompt({ textToManipulate, command });
+      const result = await prompt({ flow: "manipulate-text",textToManipulate, command });
       
       if (!result) {
         throw new Error('No output received from the model.');

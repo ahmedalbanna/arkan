@@ -19,20 +19,20 @@ import {
     calculateProjectMetricsTool,
     generateArchitectureDiagramTool,
 } from '@/ai/tools/reporting-and-metrics';
-
+import {z} from 'zod';
 // ==================== INPUT/OUTPUT SCHEMAS ====================
 
-const PresentationInputSchema = ai.z.object({
-    projectPath: ai.z.string().describe('Path to the project'),
-    projectName: ai.z.string().describe('Project name'),
-    projectDescription: ai.z.string().describe('Brief project description'),
+const PresentationInputSchema = z.object({
+    projectPath: z.string().describe('Path to the project'),
+    projectName: z.string().describe('Project name'),
+    projectDescription: z.string().describe('Brief project description'),
     presentationType: PresentationTypeSchema.describe('Type of presentation'),
-    duration: ai.z.number().describe('Presentation duration in minutes'),
-    audience: ai.z.string().describe('Target audience description'),
-    keyPoints: ai.z.array(ai.z.string()).optional().describe('Key points to emphasize'),
-    includeMetrics: ai.z.boolean().default(true).describe('Include project metrics'),
-    includeDiagram: ai.z.boolean().default(true).describe('Include architecture diagram'),
-    includeDemo: ai.z.boolean().default(false).describe('Include demo section'),
+    duration: z.number().describe('Presentation duration in minutes'),
+    audience: z.string().describe('Target audience description'),
+    keyPoints: z.array(z.string()).optional().describe('Key points to emphasize'),
+    includeMetrics: z.boolean().default(true).describe('Include project metrics'),
+    includeDiagram: z.boolean().default(true).describe('Include architecture diagram'),
+    includeDemo: z.boolean().default(false).describe('Include demo section'),
 });
 
 export const presentationContentCreator = ai.defineFlow(

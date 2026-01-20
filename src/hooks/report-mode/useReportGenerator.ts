@@ -6,7 +6,7 @@ import { useLocalization } from '@/context/LocalizationContext';
 import { useMobile } from '@/hooks/util/use-mobile';
 import React, { useState, useMemo, lazy, useEffect } from 'react';
 import { Settings, UploadCloud, LayoutTemplate, BookOpenCheck } from 'lucide-react';
-
+import { useSaveProject } from '@/hooks/data/use-projects';
 // Lazy load components
 const ProjectSettingsPanel = lazy(() => import('@/components/report-mode/settings/ProjectSettingsPanel'));
 const FileManager = lazy(() => import('@/components/report-mode/file-manager'));
@@ -20,7 +20,7 @@ export function useReportGenerator() {
   const [activePanelKey, setActivePanelKey] = useState('settings');
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [zoomLevel, setZoomLevel] = useState(1);
-
+  const { isSaving } = useSaveProject();
   const builderPageLogic = useBuilderPageLogic();
 
   useEffect(() => {
@@ -64,6 +64,7 @@ export function useReportGenerator() {
     setActiveMobileView,
     activePanelKey,
     setActivePanelKey,
+    isSaving,
     panels,
     t,
     locale,
