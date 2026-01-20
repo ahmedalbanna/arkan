@@ -7,30 +7,13 @@
 
 import { ai } from '@/ai/genkit';
 import { LiteratureReviewInputSchema, LiteratureReviewOutputSchema, type LiteratureReviewInput, type LiteratureReviewOutput } from '@/ai/schemas';
-import { validateJsonOutput, getJsonPromptInstructions, RECOMMENDED_TEMPERATURES } from '@/ai/utils/json-output-validator';
 
 const literatureReviewPrompt = ai.definePrompt({
   name: 'literatureReviewPrompt',
   input: { schema: LiteratureReviewInputSchema },
   output: { schema: LiteratureReviewOutputSchema },
-  model: 'ollama/llama3.1:latest',
-
+  model: 'ollama/gemma:2b',
   prompt: `You are an expert academic researcher specializing in literature reviews. Your task is to create a comprehensive, well-structured literature review on the given topic.
-
-${getJsonPromptInstructions(`{
-  "introduction": "Context and scope of the literature review",
-  "mainBody": "Thematically organized review with critical analysis",
-  "conclusion": "Summary of key findings and identified gaps",
-  "sources": [
-    {
-      "title": "Source Title",
-      "url": "https://example.com/source",
-      "summary": "Brief summary of the source",
-      "relevance": "Why this source is relevant"
-    }
-  ],
-  "gaps": ["Gap 1", "Gap 2", "..."]
-}`)}
 
 **Your Process:**
 1.  **Topic Understanding:** Analyze the research topic and any specified focus areas to understand the scope and key themes.
@@ -79,8 +62,7 @@ ${getJsonPromptInstructions(`{
 - All sources must have valid URLs and be properly documented
 `,
   config: {
-    responseSchema: LiteratureReviewOutputSchema,
-    temperature: RECOMMENDED_TEMPERATURES.BALANCED,
+    temperature: 0.7,
     maxOutputTokens: 8192,
   },
 });
@@ -90,31 +72,11 @@ const literatureReviewFlow = ai.defineFlow({
   inputSchema: LiteratureReviewInputSchema,
   outputSchema: LiteratureReviewOutputSchema,
 }, async (input) => {
-  try {
-    const { output } = await literatureReviewPrompt(input);
-    
-    if (!output) {
-      throw new Error('Literature Review Generator failed to produce an output.');
-    }
-
-    // التحقق والتنظيف باستخدام الدالة المساعدة
-    const validationResult = validateJsonOutput({
-      schema: LiteratureReviewOutputSchema,
-      output,
-      flowName: 'literatureReviewFlow',
-      attemptRecovery: true,
-      enableLogging: true,
-    });
-
-    if (!validationResult.success) {
-      throw new Error(validationResult.error || 'Failed to validate literature review output');
-    }
-
-    return validationResult.data!;
-  } catch (error) {
-    console.error('Error in literatureReviewFlow:', error);
-    throw new Error(`Literature Review Generator failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+  const { output } = await literatureReviewPrompt(input);
+  if (!output) {
+    throw new Error('Literature Review Generator failed to produce an output.');
   }
+  return output;
 });
 
 export async function generateLiteratureReview(input: LiteratureReviewInput): Promise<LiteratureReviewOutput> {

@@ -13,26 +13,25 @@ import {
   type ManipulateTextInput,
   type ManipulateTextOutput,
 } from '@/ai/schemas';
-import { RECOMMENDED_TEMPERATURES } from '@/ai/utils/json-output-validator';
 
 const prompt = ai.definePrompt({
   name: 'manipulateTextPrompt',
   input: { schema: ManipulateTextInputSchema },
-  // No output schema - model returns plain text
+  output: { schema: ManipulateTextOutputSchema },
   model: 'ollama/gemma:2b',
-  config: {
-    temperature: RECOMMENDED_TEMPERATURES.BALANCED,
-  },
   prompt: `You are an expert editor. A user has provided a piece of text and a command for how to change it. Your task is to follow the command and return the rewritten text.
+Your output must be a valid JSON object that adheres to the defined schema.
 
-Output ONLY the rewritten text. Do NOT wrap it in JSON or any other format.
+Command: {{{command}}}
 
-**Command:** {{{command}}}
-
-**Original Text:**
+Original Text:
 ---
 {{{textToManipulate}}}
----`,
+---
+`,
+  config: {
+    temperature: 0.5,
+  }
 });
 
 const manipulateTextFlow = ai.defineFlow(
@@ -42,27 +41,8 @@ const manipulateTextFlow = ai.defineFlow(
     outputSchema: ManipulateTextOutputSchema,
   },
   async ({ textToManipulate, command }) => {
-    try {
-      const result = await prompt({ flow: "manipulate-text",textToManipulate, command });
-      
-      if (!result) {
-        throw new Error('No output received from the model.');
-      }
-
-      // Wrap the plain text in the expected output structure
-      const output: ManipulateTextOutput = {
-        manipulatedText: result.text || result.output || ''
-      };
-
-      if (!output.manipulatedText || output.manipulatedText.trim().length === 0) {
-        throw new Error('Model returned empty text');
-      }
-
-      return output;
-    } catch (error) {
-      console.error('Error in manipulateTextFlow:', error);
-      throw new Error(`Text manipulation failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
-    }
+    const { output } = await prompt({flow: "manipulate-text", textToManipulate, command });
+    return output!;
   }
 );
 
