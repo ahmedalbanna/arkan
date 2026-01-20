@@ -26,41 +26,41 @@ export class FlowConfigService {
   // CRUD Operations
   // ============================================================================
 
-  /**
+/**
    * Create a new flow
    */
-  async createFlow(flow: Omit<FlowConfiguration, 'metadata'>): Promise<FlowConfiguration> {
+  async createFlow(flow: Partial<FlowConfiguration>): Promise<FlowConfiguration> {
     try {
       const now = new Date();
-      const flowWithMetadata: FlowConfiguration = {
-        ...flow,
-        metadata: {
-          createdAt: now,
-          updatedAt: now,
-          createdBy: flow.metadata?.createdBy || 'system',
-          updatedBy: flow.metadata?.updatedBy || 'system',
-          stats: {
-            totalExecutions: 0,
-            successfulExecutions: 0,
-            failedExecutions: 0,
-            avgExecutionTime: 0,
-          },
+      const newFlowData: FlowConfiguration = {
+        ...(flow as FlowConfiguration),
+        createdAt: now,
+        updatedAt: now,
+        createdBy: flow.createdBy || 'system',
+        updatedBy: flow.updatedBy || 'system',
+        stats: {
+          totalExecutions: 0,
+          successfulExecutions: 0,
+          failedExecutions: 0,
+          avgExecutionTime: 0,
         },
+        version: flow.version || 1, // Default to version 1
+        status: flow.status || 'draft',
       };
 
-      const flowRef = db.collection(this.collectionName).doc(flow.id);
-      await flowRef.set(this.toFirestore(flowWithMetadata));
+      const flowRef = db.collection(this.collectionName).doc(newFlowData.id);
+      await flowRef.set(this.toFirestore(newFlowData));
 
       // Create initial version
-      await this.createVersion(flow.id, {
-        version: flow.version,
+      await this.createVersion(newFlowData.id, {
+        version: newFlowData.version,
         changeDescription: 'Initial version',
         createdAt: now,
-        createdBy: flowWithMetadata.metadata.createdBy,
-        configuration: flowWithMetadata,
+        createdBy: newFlowData.createdBy,
+        configuration: newFlowData,
       });
 
-      return flowWithMetadata;
+      return newFlowData;
     } catch (error) {
       console.error('Error creating flow:', error);
       throw new Error(`Failed to create flow: ${error instanceof Error ? error.message : 'Unknown error'}`);
@@ -90,7 +90,7 @@ export class FlowConfigService {
     }
   }
 
-  /**
+    /**
    * Update a flow
    */
   async updateFlow(
@@ -109,34 +109,29 @@ export class FlowConfigService {
       const currentFlow = this.fromFirestore(flowSnap.data());
       const now = new Date();
 
-      // Increment version if steps or config changed
+      // Increment version if significant parts of the flow changed
       let newVersion = currentFlow.version;
-      if (updates.steps || updates.config) {
-        const versionParts = currentFlow.version.split('.');
-        versionParts[2] = String(Number(versionParts[2]) + 1);
-        newVersion = versionParts.join('.');
+      if (updates.steps || updates.config || updates.inputSchema || updates.outputSchema) {
+        newVersion = (currentFlow.version || 1) + 1;
       }
 
       const updatedFlow: FlowConfiguration = {
         ...currentFlow,
         ...updates,
         version: newVersion,
-        metadata: {
-          ...currentFlow.metadata,
-          updatedAt: now,
-          updatedBy: updates.metadata?.updatedBy || currentFlow.metadata.updatedBy,
-        },
+        updatedAt: now,
+        updatedBy: updates.updatedBy || currentFlow.updatedBy, // Assumes updater is passed in updates
       };
 
       await flowRef.update(this.toFirestore(updatedFlow));
 
-      // Create version snapshot
+      // Create a new version snapshot if the version changed
       if (newVersion !== currentFlow.version) {
         await this.createVersion(flowId, {
           version: newVersion,
           changeDescription: changeDescription || 'Flow updated',
           createdAt: now,
-          createdBy: updatedFlow.metadata.updatedBy,
+          createdBy: updatedFlow.updatedBy, // The user who made the change
           configuration: updatedFlow,
         });
       }
@@ -147,7 +142,6 @@ export class FlowConfigService {
       throw new Error(`Failed to update flow: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   }
-
   /**
    * Delete a flow
    */
@@ -168,7 +162,7 @@ export class FlowConfigService {
     }
   }
 
-  /**
+    /**
    * List flows with filters
    */
   async listFlows(filters?: {
@@ -184,15 +178,17 @@ export class FlowConfigService {
         query = query.where('status', '==', filters.status) as any;
       }
 
+      // FIX: Query 'category' at the root level
       if (filters?.category) {
-        query = query.where('metadata.category', '==', filters.category) as any;
+        query = query.where('category', '==', filters.category) as any;
       }
 
       if (filters?.tags && filters.tags.length > 0) {
         query = query.where('tags', 'array-contains-any', filters.tags) as any;
       }
 
-      query = query.orderBy('metadata.updatedAt', 'desc') as any;
+      // FIX: Order by 'updatedAt' at the root level
+      query = query.orderBy('updatedAt', 'desc') as any;
 
       if (filters?.limit) {
         query = query.limit(filters.limit) as any;
@@ -200,6 +196,7 @@ export class FlowConfigService {
 
       const querySnapshot = await query.get();
 
+      // FIX: The fromFirestore method also needs correction
       return querySnapshot.docs.map(doc => this.fromFirestore(doc.data()));
     } catch (error) {
       console.error('Error listing flows:', error);
@@ -378,25 +375,46 @@ export class FlowConfigService {
     };
   }
 
-  /**
+/**
    * Convert Firestore data to flow
    */
   private fromFirestore(data: any): FlowConfiguration {
+    if (!data) return data;
+
+    // Helper function to safely convert any value to a Date object
+    const safeConvertToDate = (value: any): Date | undefined => {
+      if (!value) {
+        return undefined;
+      }
+      // Case 1: Already a JavaScript Date object
+      if (value instanceof Date) {
+        return value;
+      }
+      // Case 2: Firestore Timestamp object
+      if (typeof value.toDate === 'function') {
+        return value.toDate();
+      }
+      // Case 3: String or number representation of a date
+      if (typeof value === 'string' || typeof value === 'number') {
+        const date = new Date(value);
+        // Ensure the parsed date is valid
+        if (!isNaN(date.getTime())) {
+          return date;
+        }
+      }
+      // If conversion fails, log a warning and return undefined
+      console.warn('Could not convert value to a valid Date:', value);
+      return undefined;
+    };
+
     return {
       ...data,
-      metadata: {
-        ...data.metadata,
-        createdAt: data.metadata.createdAt instanceof Date ? data.metadata.createdAt : data.metadata.createdAt.toDate(),
-        updatedAt: data.metadata.updatedAt instanceof Date ? data.metadata.updatedAt : data.metadata.updatedAt.toDate(),
-        stats: data.metadata.stats ? {
-          ...data.metadata.stats,
-          lastExecutedAt: data.metadata.stats.lastExecutedAt 
-            ? (data.metadata.stats.lastExecutedAt instanceof Date 
-                ? data.metadata.stats.lastExecutedAt 
-                : data.metadata.stats.lastExecutedAt.toDate())
-            : undefined,
+      createdAt: safeConvertToDate(data.createdAt),
+      updatedAt: safeConvertToDate(data.updatedAt),
+      stats: data.stats ? {
+          ...data.stats,
+          lastExecutedAt: safeConvertToDate(data.stats.lastExecutedAt),
         } : undefined,
-      },
     };
   }
 }

@@ -28,39 +28,39 @@ export class PromptManagementService {
   /**
    * Create a new prompt
    */
-  async createPrompt(prompt: Omit<PromptConfiguration, 'metadata'>): Promise<PromptConfiguration> {
+  async createPrompt(prompt: Partial<PromptConfiguration>): Promise<PromptConfiguration> {
     try {
       const now = new Date();
-      const promptWithMetadata: PromptConfiguration = {
-        ...prompt,
-        metadata: {
-          createdAt: now,
-          updatedAt: now,
-          createdBy: prompt.metadata?.createdBy || 'system',
-          updatedBy: prompt.metadata?.updatedBy || 'system',
-          stats: {
-            totalUses: 0,
-            successfulUses: 0,
-            failedUses: 0,
-            avgTokensUsed: 0,
-            avgExecutionTime: 0,
-          },
+      const newPromptData: PromptConfiguration = {
+        ...(prompt as PromptConfiguration),
+        createdAt: now,
+        updatedAt: now,
+        createdBy: prompt.createdBy || 'system',
+        updatedBy: prompt.updatedBy || 'system',
+        stats: {
+          totalUses: 0,
+          successfulUses: 0,
+          failedUses: 0,
+          avgTokensUsed: 0,
+          avgExecutionTime: 0,
         },
+        version: prompt.version || 1,
+        status: prompt.status || 'draft',
       };
 
-      const promptRef = db.collection(this.collectionName).doc(prompt.id);
-      await promptRef.set(this.toFirestore(promptWithMetadata));
+      const promptRef = db.collection(this.collectionName).doc(newPromptData.id);
+      await promptRef.set(this.toFirestore(newPromptData));
 
       // Create initial version
-      await this.createVersion(prompt.id, {
-        version: prompt.version,
+      await this.createVersion(newPromptData.id, {
+        version: newPromptData.version,
         changeDescription: 'Initial version',
         createdAt: now,
-        createdBy: promptWithMetadata.metadata.createdBy,
-        configuration: promptWithMetadata,
+        createdBy: newPromptData.createdBy,
+        configuration: newPromptData,
       });
 
-      return promptWithMetadata;
+      return newPromptData;
     } catch (error) {
       console.error('Error creating prompt:', error);
       throw new Error(`Failed to create prompt: ${error instanceof Error ? error.message : 'Unknown error'}`);
@@ -70,7 +70,7 @@ export class PromptManagementService {
   /**
    * Get a prompt by ID
    */
-  async getPrompt(promptId: string, version?: string): Promise<PromptConfiguration | null> {
+  async getPrompt(promptId: string, version?: number): Promise<PromptConfiguration | null> {
     try {
       if (version) {
         return this.getPromptVersion(promptId, version);
@@ -109,34 +109,29 @@ export class PromptManagementService {
       const currentPrompt = this.fromFirestore(promptSnap.data());
       const now = new Date();
 
-      // Increment version if template changed
+      // Increment version if template or variables changed
       let newVersion = currentPrompt.version;
       if (updates.template || updates.variables) {
-        const versionParts = currentPrompt.version.split('.');
-        versionParts[2] = String(Number(versionParts[2]) + 1);
-        newVersion = versionParts.join('.');
+        newVersion = (currentPrompt.version || 1) + 1;
       }
 
       const updatedPrompt: PromptConfiguration = {
         ...currentPrompt,
         ...updates,
         version: newVersion,
-        metadata: {
-          ...currentPrompt.metadata,
-          updatedAt: now,
-          updatedBy: updates.metadata?.updatedBy || currentPrompt.metadata.updatedBy,
-        },
+        updatedAt: now,
+        updatedBy: updates.updatedBy || currentPrompt.updatedBy,
       };
 
       await promptRef.update(this.toFirestore(updatedPrompt));
 
-      // Create version snapshot
+      // Create version snapshot if version changed
       if (newVersion !== currentPrompt.version) {
         await this.createVersion(promptId, {
           version: newVersion,
           changeDescription: changeDescription || 'Prompt updated',
           createdAt: now,
-          createdBy: updatedPrompt.metadata.updatedBy,
+          createdBy: updatedPrompt.updatedBy,
           configuration: updatedPrompt,
         });
       }
@@ -186,18 +181,18 @@ export class PromptManagementService {
       }
 
       if (filters?.category) {
-        query = query.where('metadata.category', '==', filters.category) as any;
+        query = query.where('category', '==', filters.category) as any;
       }
 
       if (filters?.language) {
-        query = query.where('metadata.language', '==', filters.language) as any;
+        query = query.where('language', '==', filters.language) as any;
       }
 
       if (filters?.tags && filters.tags.length > 0) {
         query = query.where('tags', 'array-contains-any', filters.tags) as any;
       }
 
-      query = query.orderBy('metadata.updatedAt', 'desc') as any;
+      query = query.orderBy('updatedAt', 'desc') as any;
 
       if (filters?.limit) {
         query = query.limit(filters.limit) as any;
@@ -217,15 +212,16 @@ export class PromptManagementService {
    */
   async searchPrompts(searchTerm: string, limit: number = 20): Promise<PromptConfiguration[]> {
     try {
-      const allPrompts = await this.listPrompts({ limit: 100 });
+      // This is not efficient for large datasets. Consider a dedicated search service like Algolia or Typesense.
+      const allPrompts = await this.listPrompts({ limit: 1000 }); // Increased limit for better search results
 
       const searchLower = searchTerm.toLowerCase();
       return allPrompts
         .filter(prompt =>
           prompt.name.toLowerCase().includes(searchLower) ||
-          prompt.description.toLowerCase().includes(searchLower) ||
+          (prompt.description && prompt.description.toLowerCase().includes(searchLower)) ||
           prompt.template.toLowerCase().includes(searchLower) ||
-          prompt.tags.some(tag => tag.toLowerCase().includes(searchLower))
+          (prompt.tags && prompt.tags.some(tag => tag.toLowerCase().includes(searchLower)))
         )
         .slice(0, limit);
     } catch (error) {
@@ -243,10 +239,10 @@ export class PromptManagementService {
    */
   private async createVersion(promptId: string, version: PromptVersion): Promise<void> {
     try {
-      const versionRef = db.collection(this.collectionName).doc(promptId).collection('versions').doc(version.version);
+      const versionRef = db.collection(this.collectionName).doc(promptId).collection('versions').doc(String(version.version));
       await versionRef.set({
         ...version,
-        createdAt: version.createdAt,
+        createdAt: version.createdAt, // Should already be a Date object
         configuration: this.toFirestore(version.configuration),
       });
     } catch (error) {
@@ -258,9 +254,9 @@ export class PromptManagementService {
   /**
    * Get a specific prompt version
    */
-  async getPromptVersion(promptId: string, version: string): Promise<PromptConfiguration | null> {
+  async getPromptVersion(promptId: string, version: number): Promise<PromptConfiguration | null> {
     try {
-      const versionRef = db.collection(this.collectionName).doc(promptId).collection('versions').doc(version);
+      const versionRef = db.collection(this.collectionName).doc(promptId).collection('versions').doc(String(version));
       const versionSnap = await versionRef.get();
 
       if (!versionSnap.exists) {
@@ -287,7 +283,7 @@ export class PromptManagementService {
         const data = doc.data();
         return {
           ...data,
-          createdAt: data.createdAt instanceof Date ? data.createdAt : data.createdAt.toDate(),
+          createdAt: data.createdAt.toDate(), // Timestamps from subcollections need conversion
           configuration: this.fromFirestore(data.configuration),
         } as PromptVersion;
       });
@@ -302,44 +298,43 @@ export class PromptManagementService {
   // ============================================================================
 
   /**
-   * Update prompt usage statistics
+   * Update prompt usage statistics using a transaction
    */
   async updateStats(promptId: string, success: boolean, tokensUsed: number, executionTime: number): Promise<void> {
     try {
       const promptRef = db.collection(this.collectionName).doc(promptId);
-      const promptSnap = await promptRef.get();
 
-      if (!promptSnap.exists) {
-        return;
-      }
+      await db.runTransaction(async (transaction) => {
+        const promptSnap = await transaction.get(promptRef);
+        if (!promptSnap.exists) {
+          return; // Prompt not found, do nothing
+        }
 
-      const prompt = this.fromFirestore(promptSnap.data());
-      const stats = prompt.metadata.stats || {
-        totalUses: 0,
-        successfulUses: 0,
-        failedUses: 0,
-        avgTokensUsed: 0,
-        avgExecutionTime: 0,
-      };
+        const prompt = this.fromFirestore(promptSnap.data());
+        const stats = prompt.stats || {
+          totalUses: 0,
+          successfulUses: 0,
+          failedUses: 0,
+          avgTokensUsed: 0,
+          avgExecutionTime: 0,
+        };
 
-      stats.totalUses++;
-      if (success) {
-        stats.successfulUses++;
-      } else {
-        stats.failedUses++;
-      }
+        stats.totalUses = (stats.totalUses || 0) + 1;
+        if (success) {
+          stats.successfulUses = (stats.successfulUses || 0) + 1;
+        } else {
+          stats.failedUses = (stats.failedUses || 0) + 1;
+        }
 
-      // Update averages
-      const totalTokens = stats.avgTokensUsed * (stats.totalUses - 1);
-      stats.avgTokensUsed = (totalTokens + tokensUsed) / stats.totalUses;
+        const totalTokens = (stats.avgTokensUsed || 0) * (stats.totalUses - 1);
+        stats.avgTokensUsed = (totalTokens + tokensUsed) / stats.totalUses;
 
-      const totalTime = stats.avgExecutionTime * (stats.totalUses - 1);
-      stats.avgExecutionTime = (totalTime + executionTime) / stats.totalUses;
+        const totalTime = (stats.avgExecutionTime || 0) * (stats.totalUses - 1);
+        stats.avgExecutionTime = (totalTime + executionTime) / stats.totalUses;
 
-      stats.lastUsedAt = new Date();
+        stats.lastUsedAt = new Date();
 
-      await promptRef.update({
-        'metadata.stats': stats,
+        transaction.update(promptRef, { stats: stats });
       });
     } catch (error) {
       console.error('Error updating stats:', error);
@@ -355,39 +350,37 @@ export class PromptManagementService {
    * Convert prompt to Firestore format
    */
   private toFirestore(prompt: PromptConfiguration): any {
-    return {
-      ...prompt,
-      metadata: {
-        ...prompt.metadata,
-        createdAt: prompt.metadata.createdAt,
-        updatedAt: prompt.metadata.updatedAt,
-        stats: prompt.metadata.stats ? {
-          ...prompt.metadata.stats,
-          lastUsedAt: prompt.metadata.stats.lastUsedAt || null,
-        } : undefined,
-      },
-    };
+    // The data is already flat. Just return it.
+    // Firestore handles Date to Timestamp conversion automatically.
+    return prompt;
   }
 
   /**
    * Convert Firestore data to prompt
    */
   private fromFirestore(data: any): PromptConfiguration {
+    if (!data) return data;
+
+    const safeConvertToDate = (value: any): Date | undefined => {
+      if (!value) return undefined;
+      if (value instanceof Date) return value;
+      if (typeof value.toDate === 'function') return value.toDate();
+      if (typeof value === 'string' || typeof value === 'number') {
+        const date = new Date(value);
+        if (!isNaN(date.getTime())) return date;
+      }
+      console.warn('Could not convert value to a valid Date:', value);
+      return undefined;
+    };
+
     return {
       ...data,
-      metadata: {
-        ...data.metadata,
-        createdAt: data.metadata.createdAt instanceof Date ? data.metadata.createdAt : data.metadata.createdAt.toDate(),
-        updatedAt: data.metadata.updatedAt instanceof Date ? data.metadata.updatedAt : data.metadata.updatedAt.toDate(),
-        stats: data.metadata.stats ? {
-          ...data.metadata.stats,
-          lastUsedAt: data.metadata.stats.lastUsedAt 
-            ? (data.metadata.stats.lastUsedAt instanceof Date 
-                ? data.metadata.stats.lastUsedAt 
-                : data.metadata.stats.lastUsedAt.toDate())
-            : undefined,
+      createdAt: safeConvertToDate(data.createdAt),
+      updatedAt: safeConvertToDate(data.updatedAt),
+      stats: data.stats ? {
+          ...data.stats,
+          lastUsedAt: safeConvertToDate(data.stats.lastUsedAt),
         } : undefined,
-      },
     };
   }
 }
@@ -402,11 +395,11 @@ export const promptManagementService = new PromptManagementService();
 // Public API
 // ============================================================================
 
-export async function createPrompt(prompt: Omit<PromptConfiguration, 'metadata'>): Promise<PromptConfiguration> {
+export async function createPrompt(prompt: Partial<PromptConfiguration>): Promise<PromptConfiguration> {
   return promptManagementService.createPrompt(prompt);
 }
 
-export async function getPromptById(promptId: string, version?: string): Promise<PromptConfiguration | null> {
+export async function getPromptById(promptId: string, version?: number): Promise<PromptConfiguration | null> {
   return promptManagementService.getPrompt(promptId, version);
 }
 
