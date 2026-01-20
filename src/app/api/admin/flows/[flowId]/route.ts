@@ -22,13 +22,14 @@ import type { FlowConfiguration } from '@/lib/models/flow-config';
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { flowId: string } }
+  { params }: { params: Promise<{ flowId: string }> }
 ) {
   try {
+    const { flowId } = await params;
     const { searchParams } = new URL(request.url);
     const version = searchParams.get('version');
 
-    const flow = await getFlow(params.flowId, version || undefined);
+    const flow = await getFlow(flowId, version || undefined);
 
     if (!flow) {
       return NextResponse.json(
@@ -64,9 +65,10 @@ export async function GET(
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { flowId: string } }
+  { params }: { params: Promise<{ flowId: string }> }
 ) {
   try {
+    const { flowId } = await params;
     const body = await request.json();
     const userId = request.headers.get('x-user-id') || 'system';
 
@@ -85,7 +87,7 @@ export async function PUT(
 
     // Update flow
     const flow = await updateFlow(
-      params.flowId,
+      flowId,
       updates,
       changeDescription || undefined
     );
@@ -115,10 +117,11 @@ export async function PUT(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { flowId: string } }
+  { params }: { params: Promise<{ flowId: string }> }
 ) {
   try {
-    await deleteFlow(params.flowId);
+    const { flowId } = await params;
+    await deleteFlow(flowId);
 
     return NextResponse.json({
       success: true,

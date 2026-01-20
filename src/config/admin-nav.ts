@@ -16,6 +16,9 @@ import {
     TestTube,
     BookOpen,
     Palette,
+    Layers,
+    MessageSquare,
+    Wrench,
 } from 'lucide-react';
 
 export interface NavLink {
@@ -30,6 +33,9 @@ export const navConfig: NavLink[] = [
     { href: '/admin/rag-monitor', labelKey: 'RAG Monitor', icon: Activity },
     { href: '/admin/document-indexer', labelKey: 'Document Indexer', icon: Upload },
     { href: '/admin/rag-tester', labelKey: 'RAG Query Tester', icon: TestTube },
+    { href: '/admin/flow-builder', labelKey: 'admin.flows.title', icon: Layers },
+    { href: '/admin/prompts', labelKey: 'admin.prompts.title', icon: MessageSquare },
+    { href: '/admin/tools', labelKey: 'admin.tools.title', icon: Wrench },
     { href: '/admin/manage-users', labelKey: 'header.manageUsers', icon: Users },
     { href: '/admin/manage-payments', labelKey: 'header.managePayments', icon: CreditCard },
     { href: '/admin/manage-agents', labelKey: 'header.agentManager', icon: Bot },

@@ -24,13 +24,14 @@ import {
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { toolName: string } }
+  { params }: { params: Promise<{ toolName: string }> }
 ) {
   try {
+    const { toolName } = await params;
     const { searchParams } = new URL(request.url);
     const includeStats = searchParams.get('includeStats') === 'true';
 
-    const tool = await getTool(params.toolName);
+    const tool = await getTool(toolName);
 
     if (!tool) {
       return NextResponse.json(
@@ -45,7 +46,7 @@ export async function GET(
     // Include stats if requested
     let stats = null;
     if (includeStats) {
-      stats = await getToolStats(params.toolName);
+      stats = await getToolStats(toolName);
     }
 
     return NextResponse.json({
@@ -75,9 +76,10 @@ export async function GET(
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { toolName: string } }
+  { params }: { params: Promise<{ toolName: string }> }
 ) {
   try {
+    const { toolName } = await params;
     const body = await request.json();
     const userId = request.headers.get('x-user-id') || 'system';
 
@@ -91,7 +93,7 @@ export async function PUT(
     };
 
     // Update tool
-    const tool = await updateTool(params.toolName, updates);
+    const tool = await updateTool(toolName, updates);
 
     return NextResponse.json({
       success: true,
@@ -118,10 +120,11 @@ export async function PUT(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { toolName: string } }
+  { params }: { params: Promise<{ toolName: string }> }
 ) {
   try {
-    await deleteTool(params.toolName);
+    const { toolName } = await params;
+    await deleteTool(toolName);
 
     return NextResponse.json({
       success: true,
@@ -147,9 +150,10 @@ export async function DELETE(
 
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { toolName: string } }
+  { params }: { params: Promise<{ toolName: string }> }
 ) {
   try {
+    const { toolName } = await params;
     const body = await request.json();
 
     if (typeof body.enabled !== 'boolean') {
@@ -162,7 +166,7 @@ export async function PATCH(
       );
     }
 
-    await setToolEnabled(params.toolName, body.enabled);
+    await setToolEnabled(toolName, body.enabled);
 
     return NextResponse.json({
       success: true,

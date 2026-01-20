@@ -22,13 +22,14 @@ import type { PromptConfiguration } from '@/lib/models/prompt-config';
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { promptId: string } }
+  { params }: { params: Promise<{ promptId: string }> }
 ) {
   try {
+    const { promptId } = await params;
     const { searchParams } = new URL(request.url);
     const version = searchParams.get('version');
 
-    const prompt = await getPromptById(params.promptId, version || undefined);
+    const prompt = await getPromptById(promptId, version || undefined);
 
     if (!prompt) {
       return NextResponse.json(
@@ -64,9 +65,10 @@ export async function GET(
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { promptId: string } }
+  { params }: { params: Promise<{ promptId: string }> }
 ) {
   try {
+    const { promptId } = await params;
     const body = await request.json();
     const userId = request.headers.get('x-user-id') || 'system';
 
@@ -85,7 +87,7 @@ export async function PUT(
 
     // Update prompt
     const prompt = await updatePrompt(
-      params.promptId,
+      promptId,
       updates,
       changeDescription || undefined
     );
@@ -115,10 +117,11 @@ export async function PUT(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { promptId: string } }
+  { params }: { params: Promise<{ promptId: string }> }
 ) {
   try {
-    await deletePrompt(params.promptId);
+    const { promptId } = await params;
+    await deletePrompt(promptId);
 
     return NextResponse.json({
       success: true,

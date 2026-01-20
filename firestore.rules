@@ -133,5 +133,58 @@ service cloud.firestore {
       // Only admins (via server) can write
       allow write: if isAdmin();
     }
+
+    
+    // === DYNAMIC FLOW SYSTEM ===
+    
+    // Flow Configurations
+    match /flows/{flowId} {
+      // All authenticated users can read active flows
+      allow read: if isAuth() && resource.data.status == 'active';
+      // Admins can read all flows (including draft and archived)
+      allow list, get: if isAdmin();
+      // Only admins can create, update, or delete flows
+      allow write: if isAdmin();
+    }
+
+    // Prompt Templates
+    match /prompts/{promptId} {
+      // All authenticated users can read active prompts
+      allow read: if isAuth() && resource.data.status == 'active';
+      // Admins can read all prompts
+      allow list, get: if isAdmin();
+      // Only admins can create, update, or delete prompts
+      allow write: if isAdmin();
+    }
+
+    // Tool Registry
+    match /tools/{toolId} {
+      // All authenticated users can read registered tools
+      allow read: if isAuth();
+      // Only admins can register or modify tools
+      allow write: if isAdmin();
+    }
+
+    // Execution Traces (Flow execution history)
+    match /execution_traces/{traceId} {
+      // Users can read their own execution traces
+      allow get: if isAuth() && resource.data.userId == request.auth.uid;
+      // Admins can read all traces
+      allow list, get: if isAdmin();
+      // System can create traces (via server-side)
+      allow create: if isAuth();
+      // Only admins can update or delete traces
+      allow update, delete: if isAdmin();
+    }
+
+    // Flow Test Results
+    match /flow_tests/{testId} {
+      // Only admins can read test results
+      allow read: if isAdmin();
+      // System can create test results (via server-side)
+      allow create: if isAdmin();
+      // Only admins can update or delete test results
+      allow update, delete: if isAdmin();
+    }
   }
 }
