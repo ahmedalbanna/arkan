@@ -6,7 +6,7 @@ import React, { useState } from 'react';
 import { ThemeProvider } from './ThemeProvider';
 import { LocalizationProvider } from '@/context/LocalizationContext';
 import { AuthProvider } from '@/context/AuthContext';
-import FirebaseMessagingProvider from '@/components/firebase/FirebaseMessagingProvider';
+import FirebaseMessagingProvider from '@/firebase/FirebaseMessagingProvider';
 import { FirebaseProvider } from '@/firebase/provider';
 import { initializeFirebase } from '@/firebase';
 

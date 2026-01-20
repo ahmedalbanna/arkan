@@ -41,7 +41,21 @@ export async function fetchUsersApi(limit: number, lastVisibleId: string | undef
  * This is a client-side function that uses the Firebase JS SDK.
  */
 export function subscribeToUserProfile(userId: string, callback: (user: UserProfile | null) => void) {
-  const db = getFirestore(app);
+  // Safety check for SSR
+  if (typeof window === 'undefined') {
+    console.warn('subscribeToUserProfile called during SSR');
+    return () => {}; // Return no-op unsubscribe function
+  }
+
+  let db;
+  try {
+    db = getFirestore(app);
+  } catch (err) {
+    console.error('Failed to initialize Firestore:', err);
+    callback(null);
+    return () => {}; // Return no-op unsubscribe function
+  }
+
   const userDocRef = doc(db, "users", userId);
 
   const unsubscribe = onSnapshot(userDocRef, (doc) => {
