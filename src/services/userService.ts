@@ -116,3 +116,11 @@ export async function deductUserCredits(userId: string, creditsToDeduct: number)
         return newBalance;
     });
 }
+
+export async function addUserCredits(userId: string, creditsToAdd: number): Promise<void> {
+    const userRef = adminDb.collection('users').doc(userId);
+    await userRef.update({
+        credits: FieldValue.increment(creditsToAdd),
+        updatedAt: new Date().toISOString(),
+    });
+}

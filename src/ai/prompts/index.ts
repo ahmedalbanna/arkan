@@ -3,71 +3,71 @@
 import { ai } from '@/ai/genkit';
 import {
     AiProofreadDocumentInputSchema,
-    _AiProofreadDocumentOutputSchema,
+    AiProofreadDocumentOutputSchema,
     AIResearcherInputSchema,
-    _AIResearcherOutputSchema,
-    _AnalyzeContextOutputSchema,
+    AIResearcherOutputSchema,
+    AnalyzeContextOutputSchema,
     BiasCheckInputSchema,
-    _BiasCheckOutputSchema,
+    BiasCheckOutputSchema,
     DetectAIInputSchema,
-    _DetectAIOutputSchema,
+    DetectAIOutputSchema,
     FactCheckInputSchema,
-    _FactCheckOutputSchema,
+    FactCheckOutputSchema,
     FactRetrievalInputSchema,
-    _FactRetrievalOutputSchema,
+    FactRetrievalOutputSchema,
     GenerateAgentConfigInputSchema,
-    _GenerateAgentConfigOutputSchema,
+    GenerateAgentConfigOutputSchema,
     GenerateChapterInputSchema,
-    _GenerateChapterOutputSchema,
+    GenerateChapterOutputSchema,
     GenerateCitationInputSchema,
-    _GenerateCitationOutputSchema,
+    GenerateCitationOutputSchema,
     GeneratePlantUMLInputSchema,
-    _GeneratePlantUMLOutputSchema,
+    GeneratePlantUMLOutputSchema,
     GenerateProjectBlueprintInputSchema,
-    _GenerateProjectBlueprintOutputSchema,
+    GenerateProjectBlueprintOutputSchema,
     GenerateQuizInputSchema,
-    _GenerateQuizOutputSchema,
+    GenerateQuizOutputSchema,
     GenerateSectionInputSchema,
-    _GenerateSectionOutputSchema,
+    GenerateSectionOutputSchema,
     GenerateTextInputSchema,
-    _GenerateTextOutputSchema,
+    GenerateTextOutputSchema,
     GenerateTocInputSchema,
-    _GenerateTocOutputSchema,
+    GenerateTocOutputSchema,
     GenerateUIDescriptionInputSchema,
-    _GenerateUIDescriptionOutputSchema,
+    GenerateUIDescriptionOutputSchema,
     GrammarCheckInputSchema,
-    _GrammarCheckOutputSchema,
+    GrammarCheckOutputSchema,
     HumanizeTextInputSchema,
-    _HumanizeTextOutputSchema,
+    HumanizeTextOutputSchema,
     ImageToTextInputSchema,
-    _ImageToTextOutputSchema,
+    ImageToTextOutputSchema,
     ImproveMarkdownInputSchema,
-    _ImproveMarkdownOutputSchema,
+    ImproveMarkdownOutputSchema,
     ManipulateTextInputSchema,
-    _ManipulateTextOutputSchema,
+    ManipulateTextOutputSchema,
     ParaphraseInputSchema,
-    _ParaphraseOutputSchema,
+    ParaphraseOutputSchema,
     PlagiarismCheckInputSchema,
-    _PlagiarismCheckOutputSchema,
+    PlagiarismCheckOutputSchema,
     QuestionAnsweringInputSchema,
-    _QuestionAnsweringOutputSchema,
+    QuestionAnsweringOutputSchema,
     RewriteDocumentInputSchema,
-    _RewriteDocumentOutputSchema,
+    RewriteDocumentOutputSchema,
     RewriteToMarkdownInputSchema,
-    _RewriteToMarkdownOutputSchema,
+    RewriteToMarkdownOutputSchema,
     SentenceStructureCheckInputSchema,
-    _SentenceStructureCheckOutputSchema,
+    SentenceStructureCheckOutputSchema,
     SolveAssignmentsInputSchema,
-    _SolveAssignmentsOutputSchema,
-    _SummarizeOutputSchema,
+    SolveAssignmentsOutputSchema,
+    SummarizeOutputSchema,
     TopicExplainerInputSchema,
-    _TopicExplainerOutputSchema,
+    TopicExplainerOutputSchema,
     TranslateTextInputSchema,
-    _TranslateTextOutputSchema,
+    TranslateTextOutputSchema,
     WriteDocumentInputSchema,
     WriteDocumentOutputSchema
 } from '@/ai/schemas';
-import { GenerateSessionPlanInputSchema, _GenerateSessionPlanOutputSchema, GenerateTheoreticalLectureInputSchema, GenerateTheoreticalLectureOutputSchema } from '@/ai/schemas/lecture-generator';
+import { GenerateSessionPlanInputSchema, GenerateSessionPlanOutputSchema, GenerateTheoreticalLectureInputSchema, GenerateTheoreticalLectureOutputSchema } from '@/ai/schemas/lecture-generator';
 import { z } from 'zod';
 
 // Export graduation project prompts
@@ -353,9 +353,9 @@ Proofread Document:`,
         input: { schema: GenerateAgentConfigInputSchema },
         // No output schema - model returns plain text or JSON
         model: 'ollama/gemma:2b',
-        system: `أنت **PROMPT-NEXUS-8.0**، عبارة عن نظام فائق التطور ومستقل (meta-system) وظيفته هي هندسة وتوليد موجهات نظام (System Prompts) كاملة وجاهزة للإنتاج. مهمتك هي استيعاب هدف أو مهمة خام (<RAW_GOAL>) وتحويلها إلى موجه نظام متكامل (<PRODUCTION_SYSTEM_PROMPT>) يوجه سلوك نماذج اللغة المتقدمة التي تستخدم أدوات مثل البحث على الويب ومنفذ الأكواد.
+        system: `أنت **PROMPT-NEXUS-8.0**، عبارة عن نظام فائق التطور ومستقل (meta-system) وظيفته هي هندسة وتوليد موجهات نظام (System Prompts) كاملة وجاهزة للإنتاج. مهمتك هي استيعاب هدف أو مهمة خام (<RAWGOAL>) وتحويلها إلى موجه نظام متكامل (<PRODUCTIONSYSTEMPROMPT>) يوجه سلوك نماذج اللغة المتقدمة التي تستخدم أدوات مثل البحث على الويب ومنفذ الأكواد.
 
-أنت لا تنفذ المهمة المطلوبة في <RAW_GOAL> إطلاقًا؛ وظيفتك الوحيدة هي بناء الموجه الذي سيقوم بتنفيذها.
+أنت لا تنفذ المهمة المطلوبة في <RAWGOAL> إطلاقًا؛ وظيفتك الوحيدة هي بناء الموجه الذي سيقوم بتنفيذها.
 
 ---
 
@@ -370,7 +370,7 @@ Proofread Document:`,
 
 ### *[1.0] MASTER DIRECTIVES*
 
-1.  *Mandate:* الإدخال: <RAW_GOAL>. الإخراج: <PRODUCTION_SYSTEM_PROMPT> + مخطط معماري. لا تقم بتنفيذ المهمة.
+1.  *Mandate:* الإدخال: <RAWGOAL>. الإخراج: <PRODUCTIONSYSTEMPROMPT> + مخطط معماري. لا تقم بتنفيذ المهمة.
 2.  *Adaptive Workflow:* اتبع *[3.0] ADAPTIVE GENERATION PROTOCOL* بمرونة بناءً على تحليل الهدف.
 3.  *Component Integrity:* استخدم فقط المكونات المعتمدة من *[2.0] COMPONENT REGISTRY*.
 4.  *Output Invariant:* اتبع بدقة هيكل الإخراج المحدد في *[5.0] OUTPUT SCHEMA*.
@@ -406,7 +406,7 @@ Proofread Document:`,
 ### *[3.0] ADAPTIVE GENERATION PROTOCOL*
 
 #### *PHASE 1: GOAL DECONSTRUCTION & ANALYSIS*
-1.  **Load <RAW_GOAL>:** استيعاب الهدف الأولي للمستخدم.
+1.  **Load <RAWGOAL>:** استيعاب الهدف الأولي للمستخدم.
 2.  *Analyze Intent & Complexity:* تحديد النية الحقيقية للمستخدم وتقييم تعقيد المهمة (بسيطة، مركبة، معقدة).
 3.  *Audit Key Dimensions:*
     *   *AUD-TOOL-NEED:* هل تتطلب المهمة أدوات (web.search, code.exec)؟
@@ -433,7 +433,7 @@ Proofread Document:`,
 #### *PHASE 4: VALIDATION & CERTIFICATION*
 1.  *Internal Simulation:* قم بمحاكاة ذهنية لكيفية استجابة النموذج المستهدف للموجه الذي تم إنشاؤه.
 2.  *Rubric Check:* تحقق من الموجه المُوَلَّد مقابل معايير [4.0] ENGINEERING RUBRIC.
-3.  *Certify:* قم بإصدار الموجه مع شهادة PROMPT-NEXUS-8.0 :: DYNAMIC_PRODUCTION_PROMPT.
+3.  *Certify:* قم بإصدار الموجه مع شهادة PROMPT-NEXUS-8.0 :: DYNAMICPRODUCTIONPROMPT.
 
 ---
 
@@ -461,7 +461,7 @@ Proofread Document:`,
 *   *Control Flow Design:* [ملخص للخوارزمية التي سيتبعها النموذج، بما في ذلك منطق استخدام الأدوات والمراجعة الذاتية]
 
 ---
-*✨ <PRODUCTION_SYSTEM_PROMPT> (PROMPT-NEXUS-8.0 :: DYNAMIC_PRODUCTION_PROMPT)*
+*✨ <PRODUCTIONSYSTEMPROMPT> (PROMPT-NEXUS-8.0 :: DYNAMICPRODUCTIONPROMPT)*
 [يتم إدراج الموجه الكامل والمُجمَّع هنا، مع تقسيم واضح للوحدات: Module-ID, Module-SAFETY, Module-OUTPUT, Module-TOOLS, Module-LOGIC, Module-QUALITY, Module-EXAMPLES]
 
 ---

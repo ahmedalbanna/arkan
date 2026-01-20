@@ -6,6 +6,7 @@ import { toast, useBuilderStore } from '@/hooks';
 import { useMemo, useState, useCallback } from 'react';
 import type { DragEndEvent } from '@dnd-kit/core';
 import { useAiActions } from './use-ai-actions';
+import { applyReportTemplate } from '@/lib/project/template';
 
 export function useReportGenerationTools() {
     const { t } = useLocalization();

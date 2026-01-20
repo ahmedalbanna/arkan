@@ -69,7 +69,7 @@ export async function GET(request: Request) {
             recentActivity,
         }, { status: 200 });
 
-    } catch (_error) {
+    } catch (error) {
         console.error('Error fetching user stats:', error);
         return NextResponse.json({ message: 'An unexpected error occurred.' }, { status: 500 });
     }

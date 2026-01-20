@@ -9,7 +9,6 @@ export * from './auth/use-auth-mutations';
 
 // Core Builder Hooks
 export * from './core/use-context-selector';
-export * from './core/useAutosave';
 export * from './core/useBuilderStore';
 export * from './core/use-editor-store';
 export * from './core/useProjectsPage';
@@ -22,6 +21,7 @@ export * from './report-mode/use-chapter-actions';
 export * from './report-mode/use-report-generation-tools';
 export * from './report-mode/use-guideline-editor';
 export * from './report-mode/useReportGenerator';
+export * from './report-mode/useProjectChat';
 
 // Data Fetching Hooks
 export * from './data/use-analytics';
@@ -76,4 +76,3 @@ export * from './util/use-toast';
 export * from './util/useExport';
 export * from './util/useMarkdownParser';
 export * from './util/useBeforeUnload';
-

@@ -1,4 +1,3 @@
-
 'use client';
 
 import {
@@ -29,13 +28,10 @@ import Image from 'next/image';
 import ReactMarkdown from 'react-markdown';
 import { markdownComponents } from '@/lib/utils/markdown-styles';
 import AnalystAgent from "./AnalystAgent";
+import { FileContentViewer } from './FileContentViewer';
 
 // Extracted ViewContextDialog component
 function ViewContextDialog({ item }: { item: { fileName: string, content: string } }) {
-    const isDataUri = item.content.startsWith('data:');
-    const isImage = isDataUri && item.content.startsWith('data:image');
-    const isPdf = isDataUri && item.content.startsWith('data:application/pdf');
-
     return (
         <Dialog>
             <DialogTrigger asChild>
@@ -46,17 +42,7 @@ function ViewContextDialog({ item }: { item: { fileName: string, content: string
             <DialogContent className="max-w-3xl h-[90vh]">
                 <DialogHeader><DialogTitle>{item.fileName}</DialogTitle></DialogHeader>
                 <div className="h-full overflow-y-auto">
-                    {isImage ? (
-                        <Image src={item.content} alt={item.fileName} width={500} height={700} className="mx-auto" />
-                    ) : isPdf ? (
-                        <PdfPreview fileUri={item.content} />
-                    ) : !isDataUri ? (
-                        <ScrollArea className="h-full rounded-md border p-4">
-                            <ReactMarkdown components={markdownComponents}>{item.content}</ReactMarkdown>
-                        </ScrollArea>
-                    ) : (
-                        <p className="text-muted-foreground p-8 text-center">Preview for this file type is not available. Please process the file to view its content.</p>
-                    )}
+                    <FileContentViewer fileName={item.fileName} content={item.content} />
                 </div>
             </DialogContent>
         </Dialog>
@@ -67,7 +53,7 @@ function ViewContextDialog({ item }: { item: { fileName: string, content: string
 export default function UploadManager() {
     const { t } = useLocalization();
     const { toast } = useToast();
-    const { project, updateProject } = useBuilderStore();
+    const { project, updateProject, selectedFileId, selectFile } = useBuilderStore();
     const [isLoading, setIsLoading] = useState(false);
     const [textInput, setTextInput] = useState('');
     const [textFileName, setTextFileName] = useState('');
@@ -192,13 +178,24 @@ export default function UploadManager() {
                                 <ScrollArea className="flex-grow">
                                     <ul className="space-y-1 list-none p-1">
                                         {externalContext.map((item, index) => (
-                                            <li key={item.id} className="flex items-center justify-between p-2 rounded-md hover:bg-muted transition-colors">
+                                            <li
+                                                key={item.id}
+                                                className={cn(
+                                                    "flex items-center justify-between p-2 rounded-md hover:bg-muted transition-colors cursor-pointer",
+                                                    selectedFileId === item.id && 'bg-muted'
+                                                )}
+                                                onClick={() => selectFile(item.id)}
+                                            >
                                                 <div className="flex items-center gap-2 flex-1 min-w-0">
                                                     <FileText className="h-4 w-4 shrink-0 text-muted-foreground" />
                                                     <span className="truncate font-medium text-sm" title={item.fileName}>{item.fileName}</span>
                                                 </div>
                                                 <div className="flex items-center gap-1">
-                                                    <Select value={item.type} onValueChange={(value: ExternalContextType) => updateProject(p => p.updateExternalContextType(index, value))}>
+                                                    <Select value={item.type} onValueChange={(value: ExternalContextType) => {
+                                                        updateProject(p => p.updateExternalContextType(index, value));
+                                                        // Prevent li's onClick from firing
+                                                        event?.stopPropagation();
+                                                    }}>
                                                         <SelectTrigger className="text-xs h-7 w-auto p-0 border-0 bg-transparent focus:ring-0">
                                                             <SelectValue asChild>
                                                                 <Badge variant="outline" className="capitalize cursor-pointer">{item.type}</Badge>
@@ -208,8 +205,8 @@ export default function UploadManager() {
                                                             {fileTypes.map(type => <SelectItem key={type} value={type} className="capitalize">{type}</SelectItem>)}
                                                         </SelectContent>
                                                     </Select>
-                                                    <ViewContextDialog item={item} />
-                                                    <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => updateProject(p => p.removeExternalContext(index))}><X className="h-4 w-4 text-destructive" /></Button>
+                                                    <div onClick={e => e.stopPropagation()}><ViewContextDialog item={item} /></div>
+                                                    <Button variant="ghost" size="icon" className="h-6 w-6" onClick={(e) => { e.stopPropagation(); updateProject(p => p.removeExternalContext(index)) }}><X className="h-4 w-4 text-destructive" /></Button>
                                                 </div>
                                             </li>
                                         ))}

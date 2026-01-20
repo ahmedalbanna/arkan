@@ -7,7 +7,6 @@
 
 import { ai } from '@/ai/genkit';
 import { ParaphraseInputSchema, ParaphraseOutputSchema, type ParaphraseInput, type ParaphraseMode, type ParaphraseOutput } from '@/ai/schemas';
-import { RECOMMENDED_TEMPERATURES } from '@/ai/utils/json-output-validator';
 
 const styleDescriptions: Record<ParaphraseMode, string> = {
     standard: "Provide a balanced rewrite that improves clarity while retaining the original meaning.",
@@ -20,14 +19,10 @@ const styleDescriptions: Record<ParaphraseMode, string> = {
 const paraphrasePrompt = ai.definePrompt({
     name: 'paraphraseTextPrompt',
     input: { schema: ParaphraseInputSchema },
-    // No output schema - model returns plain text
+    output: { schema: ParaphraseOutputSchema },
     model: 'ollama/gemma:2b',
-    config: {
-        temperature: RECOMMENDED_TEMPERATURES.CREATIVE,
-    },
     prompt: `You are an expert editor. Your task is to paraphrase the given text based on the selected mode. You must perfectly preserve all markdown formatting.
-
-Output ONLY the paraphrased text. Do NOT wrap it in JSON or any other format.
+Your output must be a valid JSON object that adheres to the defined schema.
 
 **Mode**: {{{mode}}}
 **Instruction**: {{{instruction}}}
@@ -35,7 +30,9 @@ Output ONLY the paraphrased text. Do NOT wrap it in JSON or any other format.
 **Original Text:**
 ---
 {{{text}}}
----`,
+---
+
+**Paraphrased Text:`,
 });
 
 const paraphraseTextFlow = ai.defineFlow({
@@ -43,33 +40,13 @@ const paraphraseTextFlow = ai.defineFlow({
     inputSchema: ParaphraseInputSchema,
     outputSchema: ParaphraseOutputSchema,
 }, async (input) => {
-    try {
-        const instruction = styleDescriptions[input.mode] || styleDescriptions.standard;
-        const result = await paraphrasePrompt({ text: input.text, mode: input.mode, instruction } as any);
-        
-        if (!result) {
-            throw new Error("No output received from the model.");
-        }
-
-        // Wrap the plain text in the expected output structure
-        let paraphrasedText = result.text || result.output || '';
-        
-        // Clean up any markdown separators
-        paraphrasedText = paraphrasedText.replace(/---/g, '').trim();
-
-        const output: ParaphraseOutput = {
-            paraphrasedText
-        };
-
-        if (!output.paraphrasedText || output.paraphrasedText.length === 0) {
-            throw new Error('Model returned empty text');
-        }
-        
-        return output;
-    } catch (error) {
-        console.error('Error in paraphraseTextFlow:', error);
-        throw new Error(`Paraphrasing failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    const instruction = styleDescriptions[input.mode] || styleDescriptions.standard;
+    const { output } = await paraphrasePrompt({ text: input.text, mode: input.mode, instruction } as any);
+    if (!output) {
+        throw new Error("Failed to paraphrase text.");
     }
+    output.paraphrasedText = output.paraphrasedText.replace(/---/g, '').trim();
+    return output;
 });
 
 export async function paraphraseText(input: ParaphraseInput): Promise<ParaphraseOutput> {

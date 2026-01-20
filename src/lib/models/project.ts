@@ -5,8 +5,9 @@ import { Section, type SectionProperties } from './section';
 import { ExternalContext, type ExternalContextProperties } from './external-context';
 import type { ReportTemplateProperties } from './reportTemplate';
 import { arrayMove } from '@dnd-kit/sortable';
-import { parseMarkdownToContent } from '@/hooks/util/useMarkdownParser';
-import { Language, Behavior, CitationStyleSchema } from './control-types';
+import { Language, Behavior, CitationStyleSchema, Tone } from './control-types';
+import { parseMarkdownToContent } from '@/lib/project/markdown-parser'; 
+import { applyReportTemplate } from '@/lib/project/template';
 
 // Flexible Type for Project Content - strictly enforcing structure now
 export type ProjectContent = readonly (Chapter | Section)[];
@@ -39,6 +40,8 @@ export interface ProjectProperties {
   // New global settings
   language?: Language;
   complexity?: number; // 0-100
+  formality?: number; // 0-100
+  tone?: Tone;
   behaviors?: Behavior[];
   rules?: string[];
   constraints?: string[];
@@ -69,6 +72,8 @@ export class Project {
   // New global settings
   public readonly language?: Language;
   public readonly complexity?: number;
+  public readonly formality?: number;
+  public readonly tone?: Tone;
   public readonly behaviors?: readonly Behavior[];
   public readonly rules?: readonly string[];
   public readonly constraints?: readonly string[];
@@ -115,6 +120,8 @@ export class Project {
     // Initialize new global settings
     this.language = props.language || 'default';
     this.complexity = props.complexity ?? 50;
+    this.formality = props.formality ?? 70;
+    this.tone = props.tone || 'professional';
     this.behaviors = (props.behaviors || []).map(b => ({...b}));
     this.rules = props.rules ? [...props.rules] : [];
     this.constraints = props.constraints ? [...props.constraints] : [];
@@ -210,10 +217,6 @@ export class Project {
 
   // --- Immutable Logic ---
   
-  /**
-   * Resets the project to its default empty state.
-   * @returns A new Project instance with default values.
-   */
   public reset(): Project {
     return new Project({});
   }
@@ -310,110 +313,6 @@ export class Project {
     return this.with({ externalContext: newContext.map(ec => ec.toStateObject()) });
   }
 
-  public generateCoverPageMarkdown(): Project {
-    const teamMemberText = this.teamMembers && this.teamMembers.length > 0 ? `\n\n**Submitted by:**\n${this.teamMembers.join(', ')}` : '';
-    const supervisorText = this.supervisor ? `\n\n**Supervisor:**\n${this.supervisor}` : '';
-    const universityText = this.university ? `\n\n**${this.university}**` : '';
-    
-    const coverContent = `
-# ${this.name || 'Untitled Project'}
-${this.projectDescription ? `\n*${this.projectDescription}*` : ''}
-${teamMemberText}
-${supervisorText}
-${universityText}
-\n\n{currentDate}
-    `.trim();
-
-    return this.updateSection('cover-page', s => s.with({ content: coverContent }));
-  }
-
-  public applyTemplate(template: ReportTemplateProperties, allSections: SectionProperties[]): Project {
-    if (!template.content) {
-      return this;
-    }
-    
-    // Create new chapters and sections directly from the template's content definition.
-    const newContent = template.content.map(chapterData => {
-      const sections = (chapterData.sections || []).map(sectionInfo => {
-        // sectionInfo from the template is the source of truth
-        return new Section({ ...sectionInfo });
-      });
-      return new Chapter({ title: chapterData.title, sections: sections });
-    });
-
-    // Apply project configuration from template if provided
-    const projectUpdates: Partial<ProjectProperties> = {
-      content: newContent,
-    };
-
-    if (template.projectType) projectUpdates.projectType = template.projectType;
-    if (template.specialization) projectUpdates.specialization = template.specialization;
-    if (template.university) projectUpdates.university = template.university;
-    if (template.course) projectUpdates.course = template.course;
-    if (template.educationalLevel) projectUpdates.educationalLevel = template.educationalLevel;
-
-    return this.with(projectUpdates);
-  }
-
-  public moveContentItem(activeId: string, overId: string): Project {
-    const contentArray = [...this.content];
-    let activeIndex = -1;
-    let overIndex = -1;
-
-    // Check root content
-    activeIndex = contentArray.findIndex(item => item.id === activeId);
-    overIndex = contentArray.findIndex(item => item.id === overId);
-
-    if (activeIndex !== -1 && overIndex !== -1) {
-        return this.with({ content: arrayMove(contentArray, activeIndex, overIndex) });
-    }
-
-    // If not in root, it must be a section within a chapter
-    const activeResult = this.findSectionWithParent(activeId);
-    const overResult = this.findSectionWithParent(overId);
-
-    if (activeResult && overResult) {
-        const { chapter: activeChapter, index: activeSectionIndex } = activeResult;
-        const { chapter: overChapter, index: overSectionIndex } = overResult;
-        if (activeChapter.id === overChapter.id) {
-            // Reordering within the same chapter
-            const newSections = arrayMove([...activeChapter.sections], activeSectionIndex, overSectionIndex);
-            return this.updateChapter(activeChapter.id, c => c.with({ sections: newSections }));
-        } else {
-            // Moving section between chapters
-            const newContent = [...this.content];
-            const sourceChapterIndex = newContent.findIndex(c => c.id === activeChapter.id);
-            const destChapterIndex = newContent.findIndex(c => c.id === overChapter.id);
-
-            const sourceChapter = newContent[sourceChapterIndex] as Chapter;
-            let destChapter = newContent[destChapterIndex] as Chapter;
-
-            const [movedSection] = [...sourceChapter.sections].splice(activeSectionIndex, 1);
-            const newDestSections = [...destChapter.sections];
-            newDestSections.splice(overSectionIndex, 0, movedSection);
-
-            const newSourceSections = sourceChapter.sections.filter((_, i) => i !== activeSectionIndex);
-
-            (newContent[sourceChapterIndex] as Chapter) = sourceChapter.with({ sections: newSourceSections });
-            (newContent[destChapterIndex] as Chapter) = destChapter.with({ sections: newDestSections });
-
-            return this.with({ content: newContent });
-        }
-    }
-
-    return this; // Return original if move is not possible
-  }
-
-  private findSectionWithParent(sectionId: string): { chapter: Chapter; index: number } | null {
-      for (const chapter of this.chapters) {
-          const index = chapter.sections.findIndex(s => s.id === sectionId);
-          if (index !== -1) {
-              return { chapter, index };
-          }
-      }
-      return null;
-  }
-
   public parseAndSetContentFromToc(tocText: string): ProjectContent {
     const lines = tocText.split('\n').filter(line => line.trim() !== '');
     const newContent: Chapter[] = [];
@@ -445,6 +344,10 @@ ${universityText}
     return newContent;
   }
 
+  public applyTemplate(template: ReportTemplateProperties, allSections: SectionProperties[]): Project {
+      return applyReportTemplate(this, template);
+  }
+
   // --- Serialization ---
   
   public toStateObject(): ProjectProperties {
@@ -470,6 +373,8 @@ ${universityText}
       // Add new fields
       language: this.language,
       complexity: this.complexity,
+      formality: this.formality,
+      tone: this.tone,
       behaviors: this.behaviors ? [...this.behaviors] : [],
       rules: this.rules ? [...this.rules] : [],
       constraints: this.constraints ? [...this.constraints] : [],
@@ -479,38 +384,5 @@ ${universityText}
 
   public toJSON(): ProjectProperties {
       return this.toStateObject();
-  }
-
-  // --- Static Methods ---
-
-  public static fromFile(file: File): Promise<Project> {
-    return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = (e) => {
-            try {
-                const json = JSON.parse(e.target?.result as string);
-                resolve(new Project(json as ProjectProperties));
-            } catch (err) {
-                reject(new Error("Invalid or corrupted project file."));
-            }
-        };
-        reader.onerror = () => reject(new Error("Could not read the file."));
-        reader.readAsText(file);
-    });
-  }
-
-  public downloadAsFile() {
-      if (!this.hasContent()) {
-          console.warn("Attempted to download an empty project.");
-          return;
-      }
-      const jsonString = JSON.stringify(this.toStateObject(), null, 2);
-      const blob = new Blob([jsonString], { type: 'application/json' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `${this.name.replace(/\s+/g, '_') || 'project'}.arkan`;
-      a.click();
-      URL.revokeObjectURL(url);
   }
 }

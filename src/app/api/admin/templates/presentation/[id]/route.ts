@@ -2,7 +2,7 @@
 
 import { createApiResponse, handleApiError, withAuth } from '@/lib/utils/api-utils';
 import { adminDb } from '@/lib/firebase/server-init';
-import { _PresentationGenerationTemplateSchema, UpdatePresentationTemplateSchema } from '@/ai/schemas';
+import { PresentationGenerationTemplateSchema, UpdatePresentationTemplateSchema } from '@/ai/schemas';
 
 // GET a single presentation template
 export const GET = withAuth(async ({ params }) => {

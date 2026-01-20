@@ -1,28 +1,31 @@
 'use client';
 
-import { Chapter, Project, Section, type ProjectProperties, User } from '@/lib/models';
+import { Chapter, Project, Section, TocSection, type ProjectProperties, User } from '@/lib/models';
 import { localProjectService } from '@/services/local-project-service';
 import { useEffect } from 'react';
 import { create } from 'zustand';
 import { toast } from '../util/use-toast';
 import { useEditorStore } from './use-editor-store';
-import { parseMarkdownToContent } from '../util/useMarkdownParser';
+import { projectFromFile } from '@/lib/project/io'; // Import from new location
 
 interface BuilderState {
     project: Project | null;
     userProfile: User | null; // Add userProfile to the store state
-    status: 'idle' | 'dirty' | 'loading' | 'saving';
+    hasUnsavedChanges: boolean;
     isStoreInitialized: boolean;
-    
+    version: number; // To track project updates
+    selectedFileId: string | null;
+
     initializeStore: () => void;
     setUserProfile: (userProfile: User | null) => void; // Action to set the user profile
-    setProjectStatus: (status: BuilderState['status']) => void;
+    setHasUnsavedChanges: (hasChanges: boolean) => void;
     updateProject: (updater: (project: Project) => void | Project) => void;
     updateProjectFromMarkdown: (markdown: string) => void;
     loadProject: (projectData: ProjectProperties) => void;
     loadProjectFromFile: (file: File) => Promise<void>;
     newSession: () => void;
     applyTableOfContents: (tocMarkdown: string) => void;
+    selectFile: (fileId: string | null) => void;
 }
 
 const createNewTemporaryProject = (): Project => new Project({});
@@ -30,12 +33,13 @@ const createNewTemporaryProject = (): Project => new Project({});
 const useBuilderStore = create<BuilderState>((set, get) => ({
     project: null,
     userProfile: null, // Initialize userProfile as null
-    status: 'loading',
+    hasUnsavedChanges: false,
     isStoreInitialized: false,
+    version: 0,
+    selectedFileId: null,
 
     initializeStore: () => {
         if (get().isStoreInitialized) return;
-        set({ status: 'loading' });
         
         const load = async () => {
             const lastProjectId = localStorage.getItem('lastActiveProjectId');
@@ -45,18 +49,20 @@ const useBuilderStore = create<BuilderState>((set, get) => ({
             }
             
             if (projectToLoad) {
-                set({ project: new Project(projectToLoad), isStoreInitialized: true, status: 'idle' });
+                set({ project: new Project(projectToLoad), isStoreInitialized: true, version: 0, selectedFileId: null });
             } else {
-                set({ project: createNewTemporaryProject(), isStoreInitialized: true, status: 'idle' });
+                set({ project: createNewTemporaryProject(), isStoreInitialized: true, version: 0, selectedFileId: null });
             }
         };
         
         load();
     },
 
+    selectFile: (fileId) => set({ selectedFileId: fileId }),
+
     setUserProfile: (userProfile) => set({ userProfile }),
 
-    setProjectStatus: (status) => set({ status }),
+    setHasUnsavedChanges: (hasChanges) => set({ hasUnsavedChanges: hasChanges }),
 
     updateProject: (updater) => {
         set(state => {
@@ -65,11 +71,14 @@ const useBuilderStore = create<BuilderState>((set, get) => ({
             const result = updater(newProject);
             const finalProject = result instanceof Project ? result : newProject;
             
-            // Save to local storage for persistence across reloads
             localProjectService.saveProject(finalProject.toStateObject()); 
             localStorage.setItem('lastActiveProjectId', finalProject.id);
 
-            return { project: finalProject, status: 'dirty' };
+            return { 
+                project: finalProject, 
+                hasUnsavedChanges: true,
+                version: state.version + 1 
+            };
         });
     },
 
@@ -80,13 +89,13 @@ const useBuilderStore = create<BuilderState>((set, get) => ({
     loadProject: (projectData) => {
         const newProject = projectData instanceof Project ? projectData : new Project(projectData);
         localStorage.setItem('lastActiveProjectId', newProject.id);
-        localProjectService.saveProject(newProject.toStateObject()); // Also save to local DB on load
-        set({ project: newProject, status: 'idle' });
+        localProjectService.saveProject(newProject.toStateObject());
+        set({ project: newProject, hasUnsavedChanges: false, version: 0, selectedFileId: null });
     },
 
     loadProjectFromFile: async (file: File) => {
         try {
-            const newProject = await Project.fromFile(file);
+            const newProject = await projectFromFile(file); // Use the new service function
             get().loadProject(newProject.toStateObject());
             toast({ title: 'Project Loaded', description: `Successfully loaded "${newProject.name}".` });
         } catch (err) {
@@ -95,7 +104,7 @@ const useBuilderStore = create<BuilderState>((set, get) => ({
     },
 
     newSession: () => {
-        if (get().status === 'dirty') {
+        if (get().hasUnsavedChanges) {
             if (typeof window !== 'undefined' && !window.confirm('Are you sure you want to start a new session? Any unsaved changes will be lost.')) {
                 return;
             }
@@ -103,7 +112,7 @@ const useBuilderStore = create<BuilderState>((set, get) => ({
         
         const currentProject = get().project;
         if (currentProject) {
-            set({ project: createNewTemporaryProject(), status: 'idle' });
+            set({ project: createNewTemporaryProject(), hasUnsavedChanges: false, version: 0, selectedFileId: null });
             localStorage.removeItem('lastActiveProjectId');
 
             const editor = useEditorStore.getState().activeEditor;

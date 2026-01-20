@@ -14,7 +14,7 @@ import {
   GripVertical,
   PlusCircle,
 } from 'lucide-react';
-import React, { useMemo, useCallback } from 'react';
+import React, { useMemo } from 'react';
 import { Checkbox } from "../../ui/checkbox";
 import { SectionAccordionItem } from './SectionAccordionItem';
 import { useBuilderStore } from "@/hooks";
@@ -28,14 +28,14 @@ interface SortableChapterItemProps {
   toggleSectionSelection: (sectionId: string) => void;
 }
 
-const SortableChapterItemComponent = ({
+export function SortableChapterItem({
   chapter,
   index,
   isProjectBuildMode,
   selectedSectionsForBuild,
   toggleChapterSelection,
   toggleSectionSelection,
-}: SortableChapterItemProps) => {
+}: SortableChapterItemProps) {
     const { 
         updateProject
     } = useBuilderStore(state => ({
@@ -63,9 +63,9 @@ const SortableChapterItemComponent = ({
     return hasSelected && !isAllSectionsSelected;
   }, [sectionsInChapter, selectedSectionsForBuild, isAllSectionsSelected]);
 
-  const handleAddSection = useCallback((chapterId: string) => {
+  const handleAddSection = (chapterId: string) => {
     updateProject(p => p.addSectionToChapter(chapterId, 'Untitled Section'));
-  }, [updateProject]);
+  }
 
   return (
     <div ref={setNodeRef} style={style} {...attributes}>
@@ -102,7 +102,7 @@ const SortableChapterItemComponent = ({
               {chapter.sections.map((section, sectionIndex) => (
                 <SectionAccordionItem
                   key={section.id}
-                  sectionId={section.id}
+                  section={section}
                   sectionIndex={sectionIndex}
                   chapterIndex={index}
                   isProjectBuildMode={isProjectBuildMode}
@@ -121,5 +121,3 @@ const SortableChapterItemComponent = ({
     </div>
   );
 };
-
-export const SortableChapterItem = React.memo(SortableChapterItemComponent);

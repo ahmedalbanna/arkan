@@ -63,5 +63,6 @@ export function useBuilderPageLogic() {
     project,
     isStoreInitialized,
     updateProjectName,
+    updateProject,
   };
 }

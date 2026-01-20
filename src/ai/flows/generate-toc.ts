@@ -7,28 +7,13 @@
 
 import { ai } from '@/ai/genkit';
 import { GenerateTocInputSchema, GenerateTocOutputSchema, type GenerateTocInput, type GenerateTocOutput } from '@/ai/schemas';
-import { validateJsonOutput, getJsonPromptInstructions, RECOMMENDED_TEMPERATURES } from '@/ai/utils/json-output-validator';
 
 const generateTocPrompt = ai.definePrompt({
   name: 'generateTocPrompt',
   input: { schema: GenerateTocInputSchema },
   output: { schema: GenerateTocOutputSchema },
-  model: 'ollama/phi3:mini-4k',
-  config: {
-    responseSchema: GenerateTocOutputSchema,
-    temperature: RECOMMENDED_TEMPERATURES.BALANCED,
-  },
-
+  model: 'ollama/gemma:2b',
   prompt: `You are an expert project planner and technical writer. Based on the provided project Description, generate a logical and comprehensive table of contents for a formal report.
-
-${getJsonPromptInstructions(`{
-  "tableOfContents": [
-    {
-      "title": "Chapter Title",
-      "sections": ["Section 1", "Section 2", "Section 3"]
-    }
-  ]
-}`)}
 
 **Project Description:**
 ---
@@ -41,8 +26,10 @@ ${getJsonPromptInstructions(`{
 3.  For each chapter, generate a list of 3-5 relevant **section** titles.
 4.  The output must be an array of objects, where each object has a 'title' (for the chapter) and a 'sections' (an array of strings for the section titles).
 5.  Include standard report chapters like 'Introduction', 'System Analysis', 'Conclusion', etc., but tailor the sections within them to the project description.
-
-**JSON Output:**`,
+`,
+  config: {
+    temperature: 0.4,
+  }
 });
 
 const generateTocFlow = ai.defineFlow({
@@ -50,30 +37,12 @@ const generateTocFlow = ai.defineFlow({
   inputSchema: GenerateTocInputSchema,
   outputSchema: GenerateTocOutputSchema,
 }, async (input) => {
-  try {
-    const { output } = await generateTocPrompt(input);
+  const { output } = await generateTocPrompt(input);
 
-    if (!output) {
-      throw new Error('No output received from the model.');
-    }
-
-    const validation = validateJsonOutput({
-      schema: GenerateTocOutputSchema,
-      output,
-      flowName: 'generateTocFlow',
-      attemptRecovery: true,
-      enableLogging: true,
-    });
-
-    if (!validation.success) {
-      throw new Error(validation.error || 'Failed to validate output');
-    }
-
-    return validation.data!;
-  } catch (error) {
-    console.error('Error in generateTocFlow:', error);
-    throw new Error(`Table of Contents generation failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+  if (!output) {
+    throw new Error('Table of Contents generation failed to produce an output.');
   }
+  return output;
 });
 
 export async function generateToc(input: GenerateTocInput): Promise<GenerateTocOutput> {

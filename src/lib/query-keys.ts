@@ -10,66 +10,66 @@
  */
 
 export const userKeys = {
-  all: ['users'] as const,
-  lists: () => [...userKeys.all, 'list'] as const,
+  all: () => ['users'] as const,
+  lists: () => [...userKeys.all(), 'list'] as const,
   list: (page: number) => [...userKeys.lists(), { page }] as const,
-  details: () => [...userKeys.all, 'detail'] as const,
+  details: () => [...userKeys.all(), 'detail'] as const,
   profile: (userId: string) => [...userKeys.details(), userId] as const,
-  admins: () => [...userKeys.all, 'admins'] as const,
+  admins: () => [...userKeys.all(), 'admins'] as const,
 };
 
 export const featureKeys = {
-  all: ['features'] as const,
-  lists: () => [...featureKeys.all, 'list'] as const,
-  details: () => [...featureKeys.all, 'detail'] as const,
+  all: () => ['features'] as const,
+  lists: () => [...featureKeys.all(), 'list'] as const,
+  details: () => [...featureKeys.all(), 'detail'] as const,
   detail: (featureId: string) => [...featureKeys.details(), featureId] as const,
 };
 
 export const transactionKeys = {
-  all: ['transactions'] as const,
-  lists: () => [...transactionKeys.all, 'list'] as const,
+  all: () => ['transactions'] as const,
+  lists: () => [...transactionKeys.all(), 'list'] as const,
   list: (identifier: 'pending' | 'verified' | 'rejected' | string) => [...transactionKeys.lists(), { identifier }] as const,
 }
 
 export const generationLogKeys = {
-  all: ['generation-logs'] as const,
-  lists: () => [...generationLogKeys.all, 'list'] as const,
+  all: () => ['generation-logs'] as const,
+  lists: () => [...generationLogKeys.all(), 'list'] as const,
   list: (filters: { agentId?: string; userId?: string; }) => [...generationLogKeys.lists(), filters] as const,
 }
 
 export const adminKeys = {
-  all: ['admin'] as const,
-  dashboardStats: () => [...adminKeys.all, 'dashboard-stats'] as const,
+  all: () => ['admin'] as const,
+  dashboardStats: () => [...adminKeys.all(), 'dashboard-stats'] as const,
 }
 
 export const analyticsKeys = {
-  all: ['analytics'] as const,
-  userStats: (userId: string) => [...analyticsKeys.all, 'user-stats', userId] as const,
+  all: () => ['analytics'] as const,
+  userStats: (userId: string) => [...analyticsKeys.all(), 'user-stats', userId] as const,
 }
 
 export const projectKeys = {
-  all: ['projects'] as const,
-  lists: () => [...projectKeys.all, 'list'] as const,
-  details: () => [...projectKeys.all, 'detail'] as const,
-  detail: (projectId: string) => [...projectKeys.details(), projectId] as const,
+  all: (userId: string) => ['projects', userId] as const,
+  lists: (userId: string) => [...projectKeys.all(userId), 'list'] as const,
+  details: (userId: string) => [...projectKeys.all(userId), 'detail'] as const,
+  detail: (projectId: string) => [...projectKeys.details('shared'), projectId] as const, // Use a shared user or specific if known
 }
 
 export const homeworkKeys = {
-  all: ['homework'] as const,
-  history: (userId?: string) => [...homeworkKeys.all, 'history', userId] as const,
+  all: () => ['homework'] as const,
+  history: (userId?: string) => [...homeworkKeys.all(), 'history', userId] as const,
 };
 
 export const notificationKeys = {
-  all: ['notifications'] as const,
-  lists: () => [...notificationKeys.all, 'list'] as const,
+  all: () => ['notifications'] as const,
+  lists: () => [...notificationKeys.all(), 'list'] as const,
 };
 
 export const sectionKeys = {
-  all: ['sections'] as const,
-  lists: () => [...sectionKeys.all, 'list'] as const,
-  detail: (id: string) => [...sectionKeys.all, 'detail', id] as const,
+  all: () => ['sections'] as const,
+  lists: () => [...sectionKeys.all(), 'list'] as const,
+  detail: (id: string) => [...sectionKeys.all(), 'detail', id] as const,
 };
 
 export const agentKeys = {
-  all: ['agents'] as const,
+  all: () => ['agents'] as const,
 };

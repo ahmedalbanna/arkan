@@ -41,7 +41,7 @@ export function IndexedDocumentsList() {
   const fetchDocuments = async () => {
     setLoading(true);
     try {
-      const response = await fetch('/api/admin/indexed-documents');
+      const response = await fetch('/api/admin/rag/documents');
       const data = await response.json();
       setDocuments(data.documents || []);
     } catch (error) {
@@ -53,7 +53,7 @@ export function IndexedDocumentsList() {
 
   const deleteDocument = async (projectId: string) => {
     try {
-      const response = await fetch(`/api/admin/indexed-documents?projectId=${projectId}`, {
+      const response = await fetch(`/api/admin/rag/documents?projectId=${projectId}`, {
         method: 'DELETE',
       });
       
