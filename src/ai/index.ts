@@ -8,7 +8,7 @@
 export * as schemas from './schemas';
 export * from './genkit';
 export * from './dev';
-export { getModelForFlow, FLOW_MODEL_MAPPING, FLOWS_BY_CATEGORY } from './model-mapping';
+export { getModelForFlow, FLOW_MODEL_MAPPING, FLOWS_BY_CATEGORY } from './models/model-mapping';
 export {
   TaskComplexity,
   PerformancePriority,
@@ -24,8 +24,8 @@ export {
   getModelsSortedBy,
   isModelSuitableForTask,
   getFallbackModel,
-} from './model-selector';
-export * from './model-performance-monitor';
-export * from './model-request-queue';
-export * from './model-health-check';
-export * from './model-utils';
+} from './models/model-selector';
+export * from './models/model-performance-monitor';
+export * from './models/model-request-queue';
+export * from './models/model-health-check';
+export * from './models/model-utils';

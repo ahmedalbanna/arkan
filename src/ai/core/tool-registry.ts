@@ -6,7 +6,7 @@
  * Provides tool registration, discovery, and execution capabilities.
  */
 
-import type { SchemaDefinition } from '../lib/models/flow-config';
+import type { SchemaDefinition } from '../../lib/models/flow-config';
 
 // ============================================================================
 // Tool Registry Types
@@ -326,7 +326,7 @@ class ToolRegistry {
       handler: async (input) => {
         // Import the actual Google search tool
         try {
-          const { googleSearch } = await import('./tools/google-search');
+          const { googleSearch } = await import('../tools/google-search');
           return googleSearch(input.query, input.limit || 10);
         } catch (_error) {
           console.warn('Google search tool not available, using mock data');

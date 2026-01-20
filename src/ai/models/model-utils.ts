@@ -5,7 +5,7 @@
  * including token counting, cost estimation, and optimization helpers.
  */
 
-import { OLLAMA_MODELS } from './genkit';
+import { OLLAMA_MODELS } from '../genkit';
 
 /**
  * Estimate token count from text

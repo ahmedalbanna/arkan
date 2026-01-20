@@ -11,11 +11,7 @@ import { toast } from '@/hooks/util/use-toast';
 import { notificationKeys } from '@/lib/query-keys';
 
 
-const { firebaseApp } = initializeFirebase();
-// Ensure that firebaseApp is properly initialized with databaseURL in your firebase config
-// The getDatabase function should be able to pick up the initialized app if it's the default app,
-// or you can explicitly pass the app instance.
-const rtdb = getDatabase(firebaseApp); 
+
 
 /**
  * A real-time hook to fetch notifications for the current user from Firebase Realtime Database.
@@ -24,7 +20,11 @@ const rtdb = getDatabase(firebaseApp);
 export function useNotifications() {
     const { firebaseUser } = useAuth();
     const [notifications, setNotifications] = useState<Notification[]>([]);
-
+    const { firebaseApp } = initializeFirebase();
+    // Ensure that firebaseApp is properly initialized with databaseURL in your firebase config
+    // The getDatabase function should be able to pick up the initialized app if it's the default app,
+    // or you can explicitly pass the app instance.
+    const rtdb = getDatabase(firebaseApp); 
     useEffect(() => {
         if (!firebaseUser?.uid) {
             setNotifications([]);

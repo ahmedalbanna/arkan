@@ -5,7 +5,7 @@
  * Prevents memory overload by controlling concurrent requests per model.
  */
 
-import { OLLAMA_MODELS } from './genkit';
+import { OLLAMA_MODELS } from '../genkit';
 import { getMaxConcurrentRequests } from './model-selector';
 import { performanceMonitor } from './model-performance-monitor';
 

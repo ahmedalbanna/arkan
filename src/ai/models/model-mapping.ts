@@ -13,7 +13,7 @@
  * - ACADEMIC: Research, literature reviews (Llama 3 8B with RAG)
  */
 
-import { MODEL_BY_TASK } from './genkit';
+import { MODEL_BY_TASK } from '../genkit';
 
 export const FLOW_MODEL_MAPPING = {
   // 🔄 Conversion & Processing - Gemma 2B (Fast, efficient)

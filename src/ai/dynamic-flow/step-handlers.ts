@@ -247,7 +247,7 @@ export async function executeToolStep(
     const resolvedParams = context.resolveObject(config.parameters);
 
     // Import tool registry
-    const { executeTool } = await import('../tool-registry');
+    const { executeTool } = await import('../core/tool-registry');
 
     // Execute tool with timeout
     const timeout = config.timeout || 30000;
@@ -424,7 +424,7 @@ async function applyTransformer(
 
   // Try to load custom transformer
   try {
-    const { getCustomTransformer } = await import('../custom-transformers');
+    const { getCustomTransformer } = await import('../core/custom-transformers');
     const customTransformer = await getCustomTransformer(transformerName);
     return customTransformer(input, parameters);
   } catch {

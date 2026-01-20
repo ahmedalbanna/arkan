@@ -338,7 +338,7 @@ export class StepExecutor {
   private async getToolFunction(toolName: string): Promise<Function | null> {
     // Import tool registry dynamically
     try {
-      const { toolRegistry } = await import('../tool-registry');
+      const { toolRegistry } = await import('../core/tool-registry');
       return toolRegistry.getTool(toolName);
     } catch (error) {
       console.warn(`Tool registry not available: ${error}`);

@@ -5,7 +5,7 @@
  * Provides insights for optimization and model selection tuning.
  */
 
-import { OLLAMA_MODELS } from './genkit';
+import { OLLAMA_MODELS } from '../genkit';
 
 /**
  * Performance metrics for a single request

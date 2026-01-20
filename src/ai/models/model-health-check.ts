@@ -5,7 +5,7 @@
  * and provides automatic fallback mechanisms.
  */
 
-import { OLLAMA_MODELS } from './genkit';
+import { OLLAMA_MODELS } from '../genkit';
 import { getFallbackModel } from './model-selector';
 
 /**
