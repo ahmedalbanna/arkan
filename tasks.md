@@ -22,12 +22,12 @@
 
 **Tasks:**
 - ✅ `step-handlers.test.ts` (COMPLETED)
-- ⬜ `flow-config.test.ts`
-- ⬜ `prompt-config.test.ts`
-- ⬜ `tool-config.test.ts`
-- ⬜ `execution-trace.test.ts`
-- ⬜ `project.test.ts`
-- ⬜ `template.test.ts`
+- ✅ `flow-config.test.ts` (COMPLETED)
+- ✅ `prompt-config.test.ts` (COMPLETED)
+- ✅ `tool-config.test.ts` (COMPLETED)
+- ✅ `execution-trace.test.ts` (COMPLETED)
+- ✅ `project.test.ts` (COMPLETED)
+- ✅ `template.test.ts` (COMPLETED)
 
 **Expected Coverage:** 25% → 40%
 
