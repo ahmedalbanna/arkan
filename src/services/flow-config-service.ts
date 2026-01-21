@@ -1,16 +1,15 @@
 /**
  * Flow Configuration Service
  * Week 2 - Day 4-5: Database Services
- * 
+ *
  * Service for managing flow configurations in Firestore.
  * Provides CRUD operations and flow versioning.
- * 
+ *
  * NOTE: This service uses Firebase Admin SDK for server-side operations.
  */
 
 import { adminDb } from '@/lib/firebase/server-init';
 import type { FlowConfiguration, FlowStatus, FlowVersion } from '../lib/models/flow-config';
-import { flowConfigCache } from '@/lib/cache/flow-config-cache';
 
 // Use Admin SDK Firestore instance
 const db = adminDb;
@@ -20,15 +19,15 @@ const db = adminDb;
 // ============================================================================
 
 export class FlowConfigService {
-  private readonly collectionName = 'flows';
+  private readonly collectionName = 'flowConfigs';
 
   // ============================================================================
   // CRUD Operations
   // ============================================================================
 
-/**
-   * Create a new flow
-   */
+  /**
+     * Create a new flow
+     */
   async createFlow(flow: Partial<FlowConfiguration>): Promise<FlowConfiguration> {
     try {
       const now = new Date();
@@ -90,11 +89,11 @@ export class FlowConfigService {
     }
   }
 
-    /**
-   * Update a flow
-   */
+  /**
+ * Update a flow
+ */
   async updateFlow(
-    flowId: string, 
+    flowId: string,
     updates: Partial<FlowConfiguration>,
     changeDescription?: string
   ): Promise<FlowConfiguration> {
@@ -153,7 +152,7 @@ export class FlowConfigService {
       // Delete all versions
       const versionsRef = db.collection(this.collectionName).doc(flowId).collection('versions');
       const versionsSnap = await versionsRef.get();
-      
+
       const deletePromises = versionsSnap.docs.map(doc => doc.ref.delete());
       await Promise.all(deletePromises);
     } catch (error) {
@@ -162,9 +161,9 @@ export class FlowConfigService {
     }
   }
 
-    /**
-   * List flows with filters
-   */
+  /**
+ * List flows with filters
+ */
   async listFlows(filters?: {
     status?: FlowStatus;
     category?: string;
@@ -215,7 +214,7 @@ export class FlowConfigService {
 
       const searchLower = searchTerm.toLowerCase();
       return allFlows
-        .filter(flow => 
+        .filter(flow =>
           flow.name.toLowerCase().includes(searchLower) ||
           flow.description.toLowerCase().includes(searchLower) ||
           flow.tags.some(tag => tag.toLowerCase().includes(searchLower))
@@ -296,7 +295,7 @@ export class FlowConfigService {
   async rollbackToVersion(flowId: string, version: string): Promise<FlowConfiguration> {
     try {
       const versionFlow = await this.getFlowVersion(flowId, version);
-      
+
       if (!versionFlow) {
         throw new Error(`Version not found: ${version}`);
       }
@@ -375,9 +374,9 @@ export class FlowConfigService {
     };
   }
 
-/**
-   * Convert Firestore data to flow
-   */
+  /**
+     * Convert Firestore data to flow
+     */
   private fromFirestore(data: any): FlowConfiguration {
     if (!data) return data;
 
@@ -412,9 +411,9 @@ export class FlowConfigService {
       createdAt: safeConvertToDate(data.createdAt),
       updatedAt: safeConvertToDate(data.updatedAt),
       stats: data.stats ? {
-          ...data.stats,
-          lastExecutedAt: safeConvertToDate(data.stats.lastExecutedAt),
-        } : undefined,
+        ...data.stats,
+        lastExecutedAt: safeConvertToDate(data.stats.lastExecutedAt),
+      } : undefined,
     };
   }
 }

@@ -19,7 +19,7 @@ You are also an expert analyst. Before you begin writing, you must first review 
   const reportSectionPrompt = ai.definePrompt({
     name: 'generateReportSectionPrompt', // Static name
     input: { schema: GenerateSectionInputSchema },
-    // No output schema - model returns plain text
+    output: { schema: GenerateSectionOutputSchema },
     model: 'ollama/gemma:2b',
     system: systemPrompt,
     prompt: `

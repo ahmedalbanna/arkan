@@ -1,14 +1,14 @@
 /**
  * Flow Analyzer
  * Week 5 - Day 1-2: Flow Analysis Tool
- * 
+ *
  * Analyzes existing static flows to prepare for migration.
  * Extracts flow structure, dependencies, and metadata.
  */
 
 import * as fs from 'fs';
 import * as path from 'path';
-import type { FlowConfiguration } from '../../models/flow-config';
+import { SchemaParser } from './SchemaParser';
 
 // ============================================================================
 // Types
@@ -19,6 +19,7 @@ export interface FlowAnalysisResult {
   filePath: string;
   flowType: 'genkit' | 'custom' | 'unknown';
   complexity: 'simple' | 'medium' | 'complex';
+  category: string;
   analysis: {
     stepCount: number;
     hasRAG: boolean;
@@ -71,10 +72,12 @@ export interface ToolUsage {
 export class FlowAnalyzer {
   private flowsDirectory: string;
   private results: Map<string, FlowAnalysisResult>;
+  private schemaParser: SchemaParser;
 
   constructor(flowsDirectory: string) {
     this.flowsDirectory = flowsDirectory;
     this.results = new Map();
+    this.schemaParser = new SchemaParser();
   }
 
   // ============================================================================
@@ -130,11 +133,14 @@ export class FlowAnalyzer {
     const recommendations = this.generateRecommendations(analysis, prompts, tools);
     const warnings = this.generateWarnings(analysis, content);
 
+    const category = this.inferCategory(flowName);
+
     return {
       flowName,
       filePath,
       flowType,
       complexity,
+      category,
       analysis,
       dependencies,
       inputs,
@@ -246,32 +252,36 @@ export class FlowAnalyzer {
   }
 
   private countSteps(content: string): number {
-    // Count potential steps (generate, retrieve, tool calls, etc.)
+    // Count potential steps (generate, retrieve, tool calls, prompt calls, etc.)
     let count = 0;
     count += (content.match(/await generate/g) || []).length;
     count += (content.match(/await retrieve/g) || []).length;
     count += (content.match(/await\s+\w+Tool/g) || []).length;
+    count += (content.match(/await\s+\w+Prompt\(/g) || []).length;
+    count += (content.match(/definePrompt\(/g) || []).length;
     return count || 1;
   }
 
   private detectRAG(content: string): boolean {
-    return content.includes('retrieve') || 
-           content.includes('searchDocuments') ||
-           content.includes('qdrant') ||
-           content.includes('vectorStore');
+    return content.includes('retrieve') ||
+      content.includes('searchDocuments') ||
+      content.includes('qdrant') ||
+      content.includes('vectorStore');
   }
 
   private detectLLM(content: string): boolean {
     return content.includes('generate') ||
-           content.includes('gemini') ||
-           content.includes('gpt') ||
-           content.includes('llm');
+      content.includes('gemini') ||
+      content.includes('gpt') ||
+      content.includes('llm') ||
+      content.includes('definePrompt') ||
+      content.includes('Prompt(');
   }
 
   private detectTools(content: string): boolean {
     return content.includes('Tool') ||
-           content.includes('tool(') ||
-           content.includes('defineTool');
+      content.includes('tool(') ||
+      content.includes('defineTool');
   }
 
   private detectConditions(content: string): boolean {
@@ -279,16 +289,37 @@ export class FlowAnalyzer {
   }
 
   private detectLoops(content: string): boolean {
-    return content.includes('for (') || 
-           content.includes('while (') ||
-           content.includes('.map(') ||
-           content.includes('.forEach(');
+    return content.includes('for (') ||
+      content.includes('while (') ||
+      content.includes('.map(') ||
+      content.includes('.forEach(');
   }
 
   private extractInputs(content: string): FlowInput[] {
     const inputs: FlowInput[] = [];
 
-    // Extract from input schema
+    // Try to extract from imported schema reference
+    const importedSchemaMatch = content.match(/inputSchema:\s*(\w+InputSchema)/);
+    if (importedSchemaMatch) {
+      const schemaName = importedSchemaMatch[1];
+      
+      // Use dynamic schema parser
+      const fields = this.schemaParser.getAllFields(schemaName);
+      if (fields.length > 0) {
+        return fields.map(field => ({
+          name: field.name,
+          type: field.type,
+          required: field.required,
+          description: field.description
+        }));
+      }
+      
+      // If dynamic parsing didn't find anything, return empty
+      // The validation step will catch this
+      return inputs;
+    }
+
+    // Fallback: Extract from inline schema definition
     const schemaMatch = content.match(/inputSchema:\s*z\.object\(\{([^}]+)\}\)/s);
     if (schemaMatch) {
       const fields = schemaMatch[1];
@@ -309,7 +340,26 @@ export class FlowAnalyzer {
   private extractOutputs(content: string): FlowOutput[] {
     const outputs: FlowOutput[] = [];
 
-    // Extract from output schema or return statements
+    // Try to extract from imported schema reference
+    const importedSchemaMatch = content.match(/outputSchema:\s*(\w+OutputSchema)/);
+    if (importedSchemaMatch) {
+      const schemaName = importedSchemaMatch[1];
+      
+      // Use dynamic schema parser
+      const fields = this.schemaParser.getAllFields(schemaName);
+      if (fields.length > 0) {
+        return fields.map(field => ({
+          name: field.name,
+          type: field.type,
+          description: field.description
+        }));
+      }
+      
+      // If dynamic parsing didn't find anything, return empty
+      return outputs;
+    }
+
+    // Fallback: Extract from inline output schema or return statements
     const schemaMatch = content.match(/outputSchema:\s*z\.object\(\{([^}]+)\}\)/s);
     if (schemaMatch) {
       const fields = schemaMatch[1];
@@ -324,6 +374,59 @@ export class FlowAnalyzer {
     }
 
     return outputs;
+  }
+
+  private inferOutputFieldName(flowName: string): string {
+    // Convert camelCase flow name to output field name
+    // GenerateText -> generatedText
+    // Paraphrase -> paraphrasedText
+    // Summarize -> summary
+    
+    const lower = flowName.charAt(0).toLowerCase() + flowName.slice(1);
+    
+    // Specific output field mappings
+    const outputFieldMap: Record<string, string> = {
+      'Paraphrase': 'paraphrasedText',
+      'Summarize': 'summary',
+      'TranslateText': 'translatedText',
+      'HumanizeText': 'humanizedText',
+      'ManipulateText': 'manipulatedText',
+      'GrammarCheck': 'correctedText',
+      'BiasCheck': 'issues',
+      'PlagiarismCheck': 'matches',
+      'FactCheck': 'claims',
+      'DetectAI': 'score',
+      'SentenceStructureCheck': 'issues',
+      'TopicExplainer': 'explanation',
+      'IdeaGeneration': 'markdown',
+    };
+    
+    // Check exact matches first
+    for (const [key, value] of Object.entries(outputFieldMap)) {
+      if (flowName === key) {
+        return value;
+      }
+    }
+    
+    // Common patterns
+    if (flowName.includes('Generate')) {
+      return lower.replace('generate', 'generated');
+    }
+    if (flowName.includes('Paraphrase')) {
+      return 'paraphrasedText';
+    }
+    if (flowName.includes('Summarize')) {
+      return 'summary';
+    }
+    if (flowName.includes('Translate')) {
+      return 'translatedText';
+    }
+    if (flowName.includes('Humanize')) {
+      return 'humanizedText';
+    }
+    
+    // Default: just use lowercase version
+    return lower;
   }
 
   private extractPrompts(content: string): PromptUsage[] {
@@ -374,6 +477,15 @@ export class FlowAnalyzer {
     }
 
     return dependencies;
+  }
+
+  private inferCategory(flowName: string): string {
+    const name = flowName.toLowerCase();
+    if (name.includes('academic') || name.includes('research')) return 'academic';
+    if (name.includes('report')) return 'reporting';
+    if (name.includes('summarize') || name.includes('summary')) return 'summarization';
+    if (name.includes('check') || name.includes('validate')) return 'validation';
+    return 'general';
   }
 
   // ============================================================================

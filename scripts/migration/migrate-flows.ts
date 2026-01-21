@@ -1,22 +1,22 @@
 #!/usr/bin/env tsx
 /**
  * Flow Migration Script
- * 
+ *
  * Orchestrates the complete migration of flows from static to dynamic.
  * Runs analysis, extraction, generation, and validation in sequence.
- * 
+ *
  * Usage:
  *   npm run migrate-flows
  *   tsx scripts/migration/migrate-flows.ts [--phase=1] [--flows=flow1,flow2]
  */
 
-import * as fs from 'fs';
-import * as path from 'path';
 import { FlowAnalyzer } from '@/lib/migration/analyzer/FlowAnalyzer';
 import { ConfigurationGenerator } from '@/lib/migration/generator/ConfigurationGenerator';
 import { MigrationValidator } from '@/lib/migration/validator/MigrationValidator';
 import { initializeApp } from 'firebase-admin/app';
 import { getFirestore } from 'firebase-admin/firestore';
+import * as fs from 'fs';
+import * as path from 'path';
 
 // Initialize Firebase
 try {
@@ -156,10 +156,12 @@ async function migrateFlow(flowName: string): Promise<MigrationResult> {
 
   try {
     const flowPath = path.join(process.cwd(), 'src/ai/flows', `${flowName}.ts`);
-    
+
     if (!fs.existsSync(flowPath)) {
       throw new Error(`Flow file not found: ${flowPath}`);
     }
+
+    const sourceCode = fs.readFileSync(flowPath, 'utf-8');
 
     // Step 1: Analyze the flow
     console.log('\n📊 Step 1: Analyzing flow...');
@@ -167,7 +169,7 @@ async function migrateFlow(flowName: string): Promise<MigrationResult> {
     const analysis = await analyzer.analyzeFlow(flowPath);
     console.log(`  ✅ Complexity: ${analysis.complexity}`);
     console.log(`  ✅ Category: ${analysis.category}`);
-    
+
     if (analysis.warnings && analysis.warnings.length > 0) {
       console.log(`  ⚠️  Warnings: ${analysis.warnings.length}`);
       analysis.warnings.forEach(w => console.log(`     - ${w}`));
@@ -176,17 +178,17 @@ async function migrateFlow(flowName: string): Promise<MigrationResult> {
     // Step 2: Generate configuration
     console.log('\n🔧 Step 2: Generating configuration...');
     const generator = new ConfigurationGenerator();
-    const flowConfig = await generator.generateFlowConfig(flowPath);
+    const flowConfig = await generator.generateFlowConfig(analysis, sourceCode);
     console.log(`  ✅ Generated ${flowConfig.steps.length} steps`);
 
     // Step 3: Validate configuration
     console.log('\n✅ Step 3: Validating configuration...');
     const validator = new MigrationValidator();
-    const validationResults = await validator.validateFlowConfig(flowConfig);
-    
+    const validationResults = await validator.validate(flowConfig);
+
     if (!validationResults.valid) {
       console.log(`  ❌ Validation failed:`);
-      validationResults.errors?.forEach(e => console.log(`     - ${e}`));
+      validationResults.errors?.forEach(e => console.log(`     - ${JSON.stringify(e, null, 2)}`));
       throw new Error('Configuration validation failed');
     }
     console.log('  ✅ Configuration is valid');
@@ -207,7 +209,7 @@ async function migrateFlow(flowName: string): Promise<MigrationResult> {
     if (!fs.existsSync(backupDir)) {
       fs.mkdirSync(backupDir, { recursive: true });
     }
-    
+
     const backupPath = path.join(backupDir, `${flowName}_${Date.now()}.json`);
     fs.writeFileSync(backupPath, JSON.stringify(flowConfig, null, 2));
     console.log(`  💾 Backup saved: ${backupPath}`);
@@ -258,7 +260,7 @@ async function migratePhase(phase: MigrationPhase): Promise<MigrationReport> {
   for (const flowName of phase.flows) {
     const result = await migrateFlow(flowName);
     report.results.push(result);
-    
+
     if (result.success) {
       report.successful++;
     } else {
@@ -279,20 +281,20 @@ async function migratePhase(phase: MigrationPhase): Promise<MigrationReport> {
   console.log(`✅ Successful: ${report.successful}`);
   console.log(`❌ Failed: ${report.failed}`);
   console.log(`📈 Success Rate: ${((report.successful / report.totalFlows) * 100).toFixed(1)}%`);
-  
+
   if (report.failed > 0) {
     console.log('\nFailed flows:');
     report.results
       .filter(r => !r.success)
       .forEach(r => console.log(`  ❌ ${r.flowName}: ${r.error}`));
   }
-  
+
   console.log('='.repeat(80) + '\n');
 
   // Save phase report
   const reportPath = path.join(
-    process.cwd(), 
-    'migration-reports', 
+    process.cwd(),
+    'migration-reports',
     `phase-${phase.phase}-report.json`
   );
   const reportDir = path.dirname(reportPath);
@@ -310,11 +312,11 @@ async function migratePhase(phase: MigrationPhase): Promise<MigrationReport> {
  */
 async function main() {
   const args = process.argv.slice(2);
-  
+
   // Parse arguments
   const phaseArg = args.find(arg => arg.startsWith('--phase='));
   const flowsArg = args.find(arg => arg.startsWith('--flows='));
-  
+
   const targetPhase = phaseArg ? parseInt(phaseArg.split('=')[1]) : null;
   const specificFlows = flowsArg ? flowsArg.split('=')[1].split(',') : null;
 
@@ -324,44 +326,44 @@ async function main() {
     if (specificFlows) {
       // Migrate specific flows
       console.log(`📋 Migrating specific flows: ${specificFlows.join(', ')}\n`);
-      
+
       for (const flowName of specificFlows) {
         await migrateFlow(flowName.trim());
       }
-      
+
       console.log('\n✅ Migration complete!');
-      
+
     } else if (targetPhase) {
       // Migrate specific phase
       const phase = MIGRATION_PHASES.find(p => p.phase === targetPhase);
-      
+
       if (!phase) {
         throw new Error(`Invalid phase: ${targetPhase}`);
       }
-      
+
       await migratePhase(phase);
       console.log('✅ Phase migration complete!');
-      
+
     } else {
       // Migrate all phases
       console.log('🌟 Starting full migration (all phases)\n');
-      
+
       const allReports: MigrationReport[] = [];
-      
+
       for (const phase of MIGRATION_PHASES) {
         const report = await migratePhase(phase);
         allReports.push(report);
-        
+
         // Pause between phases
         console.log('⏸️  Pausing 5 seconds before next phase...\n');
         await new Promise(resolve => setTimeout(resolve, 5000));
       }
-      
+
       // Print final summary
       const totalFlows = allReports.reduce((sum, r) => sum + r.totalFlows, 0);
       const totalSuccessful = allReports.reduce((sum, r) => sum + r.successful, 0);
       const totalFailed = allReports.reduce((sum, r) => sum + r.failed, 0);
-      
+
       console.log('\n' + '█'.repeat(80));
       console.log('🎉 MIGRATION COMPLETE - FINAL SUMMARY');
       console.log('█'.repeat(80));
@@ -370,7 +372,7 @@ async function main() {
       console.log(`❌ Failed: ${totalFailed}`);
       console.log(`📈 Overall Success Rate: ${((totalSuccessful / totalFlows) * 100).toFixed(1)}%`);
       console.log('\n' + '█'.repeat(80) + '\n');
-      
+
       // Save final summary
       const summaryPath = path.join(process.cwd(), 'migration-reports', 'final-summary.json');
       fs.writeFileSync(summaryPath, JSON.stringify({
@@ -383,9 +385,9 @@ async function main() {
       }, null, 2));
       console.log(`📄 Final summary saved: ${summaryPath}\n`);
     }
-    
+
     process.exit(0);
-    
+
   } catch (error) {
     console.error('\n❌ Migration failed:', error);
     process.exit(1);
