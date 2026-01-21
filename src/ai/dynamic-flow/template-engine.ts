@@ -15,18 +15,24 @@ import type { ExecutionContext } from './context-manager';
 
 export class TemplateEngine {
   private handlebars: typeof Handlebars;
+  private templateCache: Map<string, CompiledTemplate>;
+  private customHelpers: Map<string, HelperFunction>;
+  private templateVersions: Map<string, TemplateVersion[]>;
 
   constructor() {
     this.handlebars = Handlebars.create();
+    this.templateCache = new Map();
+    this.customHelpers = new Map();
+    this.templateVersions = new Map();
     this.registerHelpers();
   }
 
   /**
-   * Render template with context variables
+   * Render template with context variables (with caching)
    */
-  render(template: string, context: ExecutionContext): string {
+  render(template: string, context: ExecutionContext, useCache: boolean = true): string {
     try {
-      const compiled = this.handlebars.compile(template);
+      const compiled = useCache ? this.getCompiledTemplate(template) : this.handlebars.compile(template);
       const variables = this.buildVariableObject(context);
       return compiled(variables);
     } catch (error) {
@@ -35,6 +41,216 @@ export class TemplateEngine {
         { template, error }
       );
     }
+  }
+
+  /**
+   * Get or compile template with caching
+   */
+  private getCompiledTemplate(template: string): HandlebarsTemplateDelegate {
+    const hash = this.hashTemplate(template);
+    
+    // Check cache
+    const cached = this.templateCache.get(hash);
+    if (cached) {
+      cached.hitCount++;
+      return cached.compiled;
+    }
+
+    // Compile and cache
+    const compiled = this.handlebars.compile(template);
+    this.templateCache.set(hash, {
+      compiled,
+      hash,
+      timestamp: Date.now(),
+      hitCount: 0,
+    });
+
+    return compiled;
+  }
+
+  /**
+   * Generate hash for template (for caching)
+   */
+  private hashTemplate(template: string): string {
+    // Simple hash function (for production, use crypto.createHash)
+    let hash = 0;
+    for (let i = 0; i < template.length; i++) {
+      const char = template.charCodeAt(i);
+      hash = ((hash << 5) - hash) + char;
+      hash = hash & hash; // Convert to 32bit integer
+    }
+    return hash.toString(36);
+  }
+
+  /**
+   * Clear template cache
+   */
+  clearCache(): void {
+    this.templateCache.clear();
+  }
+
+  /**
+   * Get cache statistics
+   */
+  getCacheStats() {
+    let totalHits = 0;
+    for (const entry of this.templateCache.values()) {
+      totalHits += entry.hitCount;
+    }
+
+    return {
+      size: this.templateCache.size,
+      totalHits,
+      avgHitsPerTemplate: this.templateCache.size > 0 ? totalHits / this.templateCache.size : 0,
+    };
+  }
+
+  /**
+   * Register a custom helper
+   */
+  registerHelper(name: string, fn: HelperFunction, options?: HelperOptions): void {
+    // Store in custom helpers map
+    this.customHelpers.set(name, fn);
+    
+    // Register with Handlebars
+    this.handlebars.registerHelper(name, fn);
+  }
+
+  /**
+   * Unregister a custom helper
+   */
+  unregisterHelper(name: string): boolean {
+    if (this.customHelpers.has(name)) {
+      this.customHelpers.delete(name);
+      this.handlebars.unregisterHelper(name);
+      return true;
+    }
+    return false;
+  }
+
+  /**
+   * Get all registered custom helpers
+   */
+  getCustomHelpers(): string[] {
+    return Array.from(this.customHelpers.keys());
+  }
+
+  /**
+   * Check if helper exists
+   */
+  hasHelper(name: string): boolean {
+    return this.customHelpers.has(name);
+  }
+
+  /**
+   * Save template version
+   */
+  saveTemplateVersion(
+    templateId: string,
+    template: string,
+    metadata?: { author?: string; changelog?: string }
+  ): TemplateVersion {
+    const versions = this.templateVersions.get(templateId) || [];
+    const version: TemplateVersion = {
+      version: versions.length + 1,
+      template,
+      timestamp: Date.now(),
+      hash: this.hashTemplate(template),
+      author: metadata?.author,
+      changelog: metadata?.changelog,
+    };
+
+    versions.push(version);
+    this.templateVersions.set(templateId, versions);
+
+    return version;
+  }
+
+  /**
+   * Get template version history
+   */
+  getTemplateVersions(templateId: string): TemplateVersion[] {
+    return this.templateVersions.get(templateId) || [];
+  }
+
+  /**
+   * Get specific template version
+   */
+  getTemplateVersion(templateId: string, version: number): TemplateVersion | null {
+    const versions = this.templateVersions.get(templateId);
+    if (!versions) return null;
+
+    return versions.find(v => v.version === version) || null;
+  }
+
+  /**
+   * Get latest template version
+   */
+  getLatestTemplateVersion(templateId: string): TemplateVersion | null {
+    const versions = this.templateVersions.get(templateId);
+    if (!versions || versions.length === 0) return null;
+
+    return versions[versions.length - 1];
+  }
+
+  /**
+   * Compare two template versions
+   */
+  compareTemplateVersions(
+    templateId: string,
+    version1: number,
+    version2: number
+  ): { changes: string[]; v1: TemplateVersion | null; v2: TemplateVersion | null } {
+    const v1 = this.getTemplateVersion(templateId, version1);
+    const v2 = this.getTemplateVersion(templateId, version2);
+
+    const changes: string[] = [];
+
+    if (!v1 || !v2) {
+      return { changes: ['One or both versions not found'], v1, v2 };
+    }
+
+    if (v1.hash !== v2.hash) {
+      changes.push('Template content changed');
+    }
+
+    if (v1.author !== v2.author) {
+      changes.push(`Author changed: ${v1.author} → ${v2.author}`);
+    }
+
+    if (v2.changelog) {
+      changes.push(`Changelog: ${v2.changelog}`);
+    }
+
+    return { changes, v1, v2 };
+  }
+
+  /**
+   * Rollback to previous version
+   */
+  rollbackTemplateVersion(templateId: string, targetVersion: number): TemplateVersion | null {
+    const version = this.getTemplateVersion(templateId, targetVersion);
+    if (!version) return null;
+
+    // Save as new version with rollback note
+    return this.saveTemplateVersion(templateId, version.template, {
+      author: 'system',
+      changelog: `Rolled back to version ${targetVersion}`,
+    });
+  }
+
+  /**
+   * Delete template version history
+   */
+  deleteTemplateVersions(templateId: string): boolean {
+    return this.templateVersions.delete(templateId);
+  }
+
+  /**
+   * Get all template IDs with versions
+   */
+  getAllTemplateIds(): string[] {
+    return Array.from(this.templateVersions.keys());
   }
 
   /**
@@ -231,6 +447,42 @@ export class TemplateEngine {
 export interface ValidationResult {
   valid: boolean;
   errors: string[];
+}
+
+/**
+ * Template version information
+ */
+export interface TemplateVersion {
+  version: number;
+  template: string;
+  timestamp: number;
+  hash: string;
+  author?: string;
+  changelog?: string;
+}
+
+/**
+ * Compiled template with metadata
+ */
+export interface CompiledTemplate {
+  compiled: HandlebarsTemplateDelegate;
+  hash: string;
+  timestamp: number;
+  version?: number;
+  hitCount: number;
+}
+
+/**
+ * Custom helper function type
+ */
+export type HelperFunction = (...args: any[]) => any;
+
+/**
+ * Helper registration options
+ */
+export interface HelperOptions {
+  description?: string;
+  async?: boolean;
 }
 
 // ============================================================================
