@@ -146,13 +146,48 @@ export class ConditionEvaluator {
    */
   private parseExpression(expression: string): ParsedExpression {
     // Simple expression parser for common cases
-    // Supports: comparisons, logical operators, property access
+    // Supports: comparisons, logical operators, property access, function calls, regex, array ops
     
     expression = expression.trim();
 
     // Handle logical operators (AND, OR)
     if (expression.includes('&&') || expression.includes('||')) {
       return this.parseLogicalExpression(expression);
+    }
+
+    // Handle array operations (in, includes)
+    const inMatch = expression.match(/^(.+?)\s+(in|includes)\s+(.+)$/);
+    if (inMatch) {
+      return {
+        type: 'arrayOp',
+        operator: inMatch[2] as ArrayOperator,
+        left: inMatch[1].trim(),
+        right: inMatch[3].trim()
+      };
+    }
+
+    // Handle regex matching (with optional flags)
+    const regexMatch = expression.match(/^\/(.+?)\/([gimsuvy]*)\.test\((.+)\)$/);
+    if (regexMatch) {
+      return {
+        type: 'regex',
+        pattern: regexMatch[1],
+        flags: regexMatch[2] || undefined,
+        value: regexMatch[3].trim()
+      };
+    }
+
+    // Handle function calls
+    const functionMatch = expression.match(/^(\w+)\((.+)\)$/);
+    if (functionMatch) {
+      // Split args by comma, but respect nested structures
+      const argsString = functionMatch[2];
+      const args = this.splitFunctionArgs(argsString);
+      return {
+        type: 'function',
+        name: functionMatch[1],
+        args: args
+      };
     }
 
     // Handle comparison operators
@@ -206,6 +241,50 @@ export class ConditionEvaluator {
     }
 
     return this.parseExpression(expression);
+  }
+
+  /**
+   * Split function arguments by comma, respecting quotes and nested structures
+   */
+  private splitFunctionArgs(argsString: string): string[] {
+    const args: string[] = [];
+    let current = '';
+    let depth = 0;
+    let inString = false;
+    let stringChar = '';
+
+    for (let i = 0; i < argsString.length; i++) {
+      const char = argsString[i];
+      
+      if ((char === '"' || char === "'") && argsString[i - 1] !== '\\') {
+        if (!inString) {
+          inString = true;
+          stringChar = char;
+        } else if (char === stringChar) {
+          inString = false;
+        }
+        current += char;
+      } else if (inString) {
+        current += char;
+      } else if (char === '(') {
+        depth++;
+        current += char;
+      } else if (char === ')') {
+        depth--;
+        current += char;
+      } else if (char === ',' && depth === 0) {
+        args.push(current.trim());
+        current = '';
+      } else {
+        current += char;
+      }
+    }
+
+    if (current.trim()) {
+      args.push(current.trim());
+    }
+
+    return args;
   }
 
   /**
@@ -265,11 +344,106 @@ export class ConditionEvaluator {
       case 'negation':
         return !this.evaluateParsedExpression(parsed.expression!, scope);
 
+      case 'arrayOp':
+        return this.evaluateArrayOperation(parsed, scope);
+
+      case 'regex':
+        return this.evaluateRegex(parsed, scope);
+
+      case 'function':
+        return this.evaluateFunction(parsed, scope);
+
       case 'value':
         const value = this.resolveValue(parsed.value!, scope);
         return Boolean(value);
 
       default:
+        return false;
+    }
+  }
+
+  /**
+   * Evaluate array operations (in, includes, some, every)
+   */
+  private evaluateArrayOperation(parsed: ParsedExpression, scope: Record<string, any>): boolean {
+    const item = this.resolveValue(parsed.left!, scope);
+    const array = this.resolveValue(parsed.right!, scope);
+
+    if (!Array.isArray(array)) {
+      return false;
+    }
+
+    switch (parsed.operator) {
+      case 'in':
+      case 'includes':
+        return array.includes(item);
+      default:
+        return false;
+    }
+  }
+
+  /**
+   * Evaluate regex matching
+   */
+  private evaluateRegex(parsed: ParsedExpression, scope: Record<string, any>): boolean {
+    try {
+      const pattern = new RegExp(parsed.pattern!, parsed.flags);
+      const value = String(this.resolveValue(parsed.value!, scope));
+      return pattern.test(value);
+    } catch (error) {
+      console.error('Regex evaluation error:', error);
+      return false;
+    }
+  }
+
+  /**
+   * Evaluate function calls
+   */
+  private evaluateFunction(parsed: ParsedExpression, scope: Record<string, any>): boolean {
+    const funcName = parsed.name!;
+    const args = parsed.args!.map(arg => this.resolveValue(arg, scope));
+
+    switch (funcName) {
+      case 'length':
+        return typeof args[0] === 'string' || Array.isArray(args[0]) ? args[0].length > 0 : false;
+
+      case 'contains':
+        if (typeof args[0] === 'string' && args.length > 1) {
+          return args[0].includes(String(args[1]));
+        }
+        if (Array.isArray(args[0]) && args.length > 1) {
+          return args[0].includes(args[1]);
+        }
+        return false;
+
+      case 'startsWith':
+        return typeof args[0] === 'string' && args.length > 1 ? args[0].startsWith(String(args[1])) : false;
+
+      case 'endsWith':
+        return typeof args[0] === 'string' && args.length > 1 ? args[0].endsWith(String(args[1])) : false;
+
+      case 'isEmpty':
+        if (args[0] === null || args[0] === undefined) return true;
+        if (typeof args[0] === 'string') return args[0].length === 0;
+        if (Array.isArray(args[0])) return args[0].length === 0;
+        if (typeof args[0] === 'object') return Object.keys(args[0]).length === 0;
+        return false;
+
+      case 'isNotEmpty':
+        return !this.evaluateFunction({ ...parsed, name: 'isEmpty' }, scope);
+
+      case 'some':
+        // Array.some() - check if at least one element satisfies condition
+        // Usage: some(array) where array elements are truthy/falsy
+        return Array.isArray(args[0]) ? args[0].some(Boolean) : false;
+
+      case 'every':
+        // Array.every() - check if all elements satisfy condition
+        // Usage: every(array) where array elements are truthy/falsy
+        return Array.isArray(args[0]) ? args[0].every(Boolean) : false;
+
+      default:
+        console.warn(`Unknown function: ${funcName}`);
         return false;
     }
   }
@@ -347,6 +521,7 @@ export interface ValidationResult {
 
 type ComparisonOperator = '===' | '!==' | '==' | '!=' | '<' | '>' | '<=' | '>=';
 type LogicalOperator = '&&' | '||';
+type ArrayOperator = 'in' | 'includes';
 
 type ParsedExpression = 
   | {
@@ -363,6 +538,23 @@ type ParsedExpression =
   | {
       type: 'negation';
       expression: ParsedExpression;
+    }
+  | {
+      type: 'arrayOp';
+      operator: ArrayOperator;
+      left: string;
+      right: string;
+    }
+  | {
+      type: 'regex';
+      pattern: string;
+      flags?: string;
+      value: string;
+    }
+  | {
+      type: 'function';
+      name: string;
+      args: string[];
     }
   | {
       type: 'value';
