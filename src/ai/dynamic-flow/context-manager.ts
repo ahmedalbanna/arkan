@@ -12,6 +12,36 @@ import type { FlowConfiguration, StepResult } from '../../lib/models/flow-config
 // Types and Interfaces
 // ============================================================================
 
+/**
+ * Variable history entry for tracking changes
+ */
+export interface VariableHistoryEntry {
+  value: any;
+  timestamp: number;
+  operation: 'set' | 'delete' | 'update';
+  source?: string; // Step ID or operation source
+}
+
+/**
+ * Variable type constraint
+ */
+export interface VariableConstraint {
+  type: 'string' | 'number' | 'boolean' | 'object' | 'array' | 'any';
+  required?: boolean;
+  validator?: (value: any) => boolean;
+  errorMessage?: string;
+}
+
+/**
+ * Options for variable operations
+ */
+export interface VariableOptions {
+  immutable?: boolean;
+  trackHistory?: boolean;
+  constraint?: VariableConstraint;
+  source?: string;
+}
+
 export interface ExecutionContext {
   id: string;
   traceId: string;
@@ -31,6 +61,10 @@ export interface ExecutionContext {
   };
   startTime: number;
   lastStepTime?: number;
+  // Enhanced features
+  immutableVariables?: Set<string>;
+  variableHistory?: Map<string, VariableHistoryEntry[]>;
+  variableConstraints?: Map<string, VariableConstraint>;
 }
 
 export interface ExecutionOptions {
@@ -49,6 +83,9 @@ export interface ContextSnapshot {
   variables: Record<string, any>;
   stepResults: Array<{ stepId: string; status: string; output: any }>;
   metrics: any;
+  immutableVariables?: string[];
+  variableHistory?: Record<string, VariableHistoryEntry[]>;
+  variableConstraints?: Record<string, VariableConstraint>;
 }
 
 /**
@@ -97,7 +134,11 @@ export class ContextManager {
         cacheHits: 0,
         cacheMisses: 0
       },
-      startTime: Date.now()
+      startTime: Date.now(),
+      // Initialize enhanced features
+      immutableVariables: new Set(),
+      variableHistory: new Map(),
+      variableConstraints: new Map()
     };
 
     // Initialize with any provided variables
@@ -180,10 +221,209 @@ export class ContextManager {
   }
 
   /**
-   * Set variable in context
+   * Set variable in context with enhanced features
    */
-  setVariable(context: ExecutionContext, name: string, value: any): void {
+  setVariable(
+    context: ExecutionContext, 
+    name: string, 
+    value: any,
+    options?: VariableOptions
+  ): void {
+    // Check if variable is immutable
+    if (context.immutableVariables?.has(name)) {
+      throw new Error(
+        `Cannot modify immutable variable: ${name}. Variable was marked as immutable and cannot be changed.`
+      );
+    }
+
+    // Validate type constraint if exists
+    const constraint = context.variableConstraints?.get(name) || options?.constraint;
+    if (constraint) {
+      this.validateConstraint(name, value, constraint);
+      // Store constraint for future validations
+      if (options?.constraint && context.variableConstraints) {
+        context.variableConstraints.set(name, options.constraint);
+      }
+    }
+
+    // Track history if enabled
+    if (options?.trackHistory !== false && context.variableHistory) {
+      const history = context.variableHistory.get(name) || [];
+      const operation = context.variables.has(name) ? 'update' : 'set';
+      
+      history.push({
+        value: this.deepClone(value),
+        timestamp: Date.now(),
+        operation,
+        source: options?.source
+      });
+      
+      context.variableHistory.set(name, history);
+    }
+
+    // Set the variable
     context.variables.set(name, value);
+
+    // Mark as immutable if specified
+    if (options?.immutable && context.immutableVariables) {
+      context.immutableVariables.add(name);
+    }
+  }
+
+  /**
+   * Set variable with immutability protection
+   */
+  setImmutableVariable(
+    context: ExecutionContext,
+    name: string,
+    value: any,
+    options?: Omit<VariableOptions, 'immutable'>
+  ): void {
+    this.setVariable(context, name, value, { ...options, immutable: true });
+  }
+
+  /**
+   * Check if a variable is immutable
+   */
+  isImmutable(context: ExecutionContext, name: string): boolean {
+    return context.immutableVariables?.has(name) || false;
+  }
+
+  /**
+   * Get variable history
+   */
+  getVariableHistory(context: ExecutionContext, name: string): VariableHistoryEntry[] {
+    return context.variableHistory?.get(name) || [];
+  }
+
+  /**
+   * Get variable at specific point in time
+   */
+  getVariableAtTime(context: ExecutionContext, name: string, timestamp: number): any {
+    const history = this.getVariableHistory(context, name);
+    
+    // Find the last entry before or at the timestamp
+    for (let i = history.length - 1; i >= 0; i--) {
+      if (history[i].timestamp <= timestamp) {
+        return history[i].value;
+      }
+    }
+    
+    return undefined;
+  }
+
+  /**
+   * Get all variable changes
+   */
+  getAllVariableChanges(context: ExecutionContext): Map<string, VariableHistoryEntry[]> {
+    return context.variableHistory || new Map();
+  }
+
+  /**
+   * Set variable constraint
+   */
+  setVariableConstraint(
+    context: ExecutionContext,
+    name: string,
+    constraint: VariableConstraint
+  ): void {
+    if (!context.variableConstraints) {
+      context.variableConstraints = new Map();
+    }
+    
+    // Validate existing value if variable already exists
+    if (context.variables.has(name)) {
+      const currentValue = context.variables.get(name);
+      this.validateConstraint(name, currentValue, constraint);
+    }
+    
+    context.variableConstraints.set(name, constraint);
+  }
+
+  /**
+   * Get variable constraint
+   */
+  getVariableConstraint(context: ExecutionContext, name: string): VariableConstraint | undefined {
+    return context.variableConstraints?.get(name);
+  }
+
+  /**
+   * Validate value against constraint
+   */
+  private validateConstraint(name: string, value: any, constraint: VariableConstraint): void {
+    // Check required
+    if (constraint.required && (value === null || value === undefined)) {
+      throw new Error(
+        `Variable "${name}" is required but got ${value}. ${constraint.errorMessage || ''}`
+      );
+    }
+
+    // Skip validation if value is null/undefined and not required
+    if (value === null || value === undefined) {
+      return;
+    }
+
+    // Check type
+    if (constraint.type !== 'any') {
+      const actualType = Array.isArray(value) ? 'array' : typeof value;
+      
+      if (actualType !== constraint.type) {
+        throw new Error(
+          `Variable "${name}" must be of type "${constraint.type}" but got "${actualType}". ${constraint.errorMessage || ''}`
+        );
+      }
+    }
+
+    // Run custom validator if provided
+    if (constraint.validator) {
+      try {
+        const isValid = constraint.validator(value);
+        if (!isValid) {
+          throw new Error(
+            `Variable "${name}" failed custom validation. ${constraint.errorMessage || ''}`
+          );
+        }
+      } catch (error) {
+        throw new Error(
+          `Variable "${name}" validation error: ${error instanceof Error ? error.message : 'Unknown error'}. ${constraint.errorMessage || ''}`
+        );
+      }
+    }
+  }
+
+  /**
+   * Deep clone a value for history tracking
+   */
+  private deepClone(value: any): any {
+    if (value === null || value === undefined) {
+      return value;
+    }
+
+    if (typeof value !== 'object') {
+      return value;
+    }
+
+    if (Array.isArray(value)) {
+      return value.map(item => this.deepClone(item));
+    }
+
+    if (value instanceof Date) {
+      return new Date(value);
+    }
+
+    if (value instanceof Map) {
+      return new Map(Array.from(value.entries()).map(([k, v]) => [k, this.deepClone(v)]));
+    }
+
+    if (value instanceof Set) {
+      return new Set(Array.from(value).map(v => this.deepClone(v)));
+    }
+
+    const cloned: any = {};
+    for (const [key, val] of Object.entries(value)) {
+      cloned[key] = this.deepClone(val);
+    }
+    return cloned;
   }
 
   /**
@@ -221,7 +461,10 @@ export class ContextManager {
         status: result.status,
         output: result.output
       })),
-      metrics: { ...context.metrics }
+      metrics: { ...context.metrics },
+      immutableVariables: context.immutableVariables ? Array.from(context.immutableVariables) : [],
+      variableHistory: context.variableHistory ? Object.fromEntries(context.variableHistory) : {},
+      variableConstraints: context.variableConstraints ? Object.fromEntries(context.variableConstraints) : {}
     };
   }
 
