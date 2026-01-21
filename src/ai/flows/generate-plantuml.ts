@@ -124,7 +124,7 @@ const generatePlantUMLFlow = ai.defineFlow({
     },
   });
 
-  const { output } = await diagramPrompt({ description, diagramType });
+  const { output } = await diagramPrompt({ flow: "generate-plantuml",description, diagramType });
   if (!output) {
     throw new Error("PlantUML code generation failed.");
   }

@@ -18,23 +18,23 @@ import {
 import {
     generateArchitectureDiagramTool,
 } from '@/ai/tools/reporting-and-metrics';
-
+import {z} from 'zod';
 // ==================== INPUT/OUTPUT SCHEMAS ====================
 
-const TechnicalSpecInputSchema = ai.z.object({
-    projectPath: ai.z.string().describe('Path to the project'),
-    projectName: ai.z.string().describe('Project name'),
-    projectType: ai.z.string().describe('Type of project (web app, API, library, etc.)'),
-    featureName: ai.z.string().optional().describe('Specific feature to document'),
-    architecture: ai.z.string().optional().describe('Architecture description'),
-    components: ai.z.array(ai.z.string()).optional().describe('Main components to document'),
-    dataModels: ai.z.string().optional().describe('Data models description'),
-    securityRequirements: ai.z.array(ai.z.string()).optional().describe('Security requirements'),
-    performanceGoals: ai.z.array(ai.z.string()).optional().describe('Performance goals'),
-    includeArchitectureDiagram: ai.z.boolean().default(true).describe('Include architecture diagram'),
-    includeCodeMetrics: ai.z.boolean().default(true).describe('Include code complexity metrics'),
-    includeDataFlow: ai.z.boolean().default(true).describe('Include data flow diagrams'),
-    targetAudience: ai.z.enum(['developers', 'architects', 'stakeholders']).default('developers'),
+const TechnicalSpecInputSchema = z.object({
+    projectPath: z.string().describe('Path to the project'),
+    projectName: z.string().describe('Project name'),
+    projectType: z.string().describe('Type of project (web app, API, library, etc.)'),
+    featureName: z.string().optional().describe('Specific feature to document'),
+    architecture: z.string().optional().describe('Architecture description'),
+    components: z.array(z.string()).optional().describe('Main components to document'),
+    dataModels: z.string().optional().describe('Data models description'),
+    securityRequirements: z.array(z.string()).optional().describe('Security requirements'),
+    performanceGoals: z.array(z.string()).optional().describe('Performance goals'),
+    includeArchitectureDiagram: z.boolean().default(true).describe('Include architecture diagram'),
+    includeCodeMetrics: z.boolean().default(true).describe('Include code complexity metrics'),
+    includeDataFlow: z.boolean().default(true).describe('Include data flow diagrams'),
+    targetAudience: z.enum(['developers', 'architects', 'stakeholders']).default('developers'),
 });
 
 export const technicalSpecificationWriter = ai.defineFlow(

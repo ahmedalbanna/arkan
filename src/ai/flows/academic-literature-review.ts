@@ -20,9 +20,9 @@ import {
     checkLogicalFlowTool,
     validateCitationsTool,
 } from '@/ai/tools';
+import { getJsonPromptInstructions, RECOMMENDED_TEMPERATURES, validateJsonOutput } from '@/ai/utils/json-output-validator';
 import { z } from 'zod';
 import { AcademicLiteratureReviewInputSchema, AcademicLiteratureReviewOutputSchema } from '../tools/schemas';
-import { validateJsonOutput, getJsonPromptInstructions, RECOMMENDED_TEMPERATURES } from '@/ai/utils/json-output-validator';
 
 export type AcademicLiteratureReviewInput = z.infer<typeof AcademicLiteratureReviewInputSchema>;
 export type AcademicLiteratureReviewOutput = z.infer<typeof AcademicLiteratureReviewOutputSchema>;
@@ -51,7 +51,7 @@ export const academicLiteratureReviewFlow = ai.defineFlow(
         console.log('STEP 1: Generating initial literature review draft...');
 
         const draftOutputSchema = z.object({ draftText: z.string() });
-        
+
         const draftPrompt = ai.definePrompt(
             {
                 name: 'literatureReviewDraftPrompt',
@@ -180,7 +180,7 @@ ${getCitationGuidelines(citationStyle || 'APA')}
                 flowSuggestions: z.array(z.string()),
                 citationStyle: z.string(),
             });
-            
+
             const refinementPrompt = ai.definePrompt(
                 {
                     name: 'literatureReviewRefinementPrompt',
@@ -273,7 +273,7 @@ ${getJsonPromptInstructions(`{
             researchGaps: z.string().optional(),
             conclusion: z.string(),
         });
-        
+
         const structurePrompt = ai.definePrompt(
             {
                 name: 'extractStructurePrompt',
@@ -308,7 +308,7 @@ ${getJsonPromptInstructions(`{
         );
 
         const { output: structure } = await structurePrompt({ text: finalText });
-        
+
         // التحقق والتنظيف
         let validatedStructure = null;
         if (structure) {
@@ -319,7 +319,7 @@ ${getJsonPromptInstructions(`{
                 attemptRecovery: true,
                 enableLogging: true,
             });
-            
+
             if (structureValidation.success) {
                 validatedStructure = structureValidation.data;
             }

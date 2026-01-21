@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { unified } from 'unified';
@@ -11,7 +12,7 @@ import { getNodeText } from '@/lib/pptx-convert/ast-utils';
 
 /**
  * Parses a markdown string and converts it into a structured array of Chapter and Section objects.
- * This function is now more intelligent, handling hierarchy and preserving existing IDs and content.
+ * This function is now more intelligent, handling hierarchy and preserving existing IDs and properties.
  *
  * @param markdown The raw markdown string to parse.
  * @param existingContent The current project content to preserve IDs and properties.
@@ -24,45 +25,34 @@ export function parseMarkdownToContent(markdown: string, existingContent: Projec
   let currentChapter: Chapter | null = null;
   let currentSection: Section | null = null;
   let accumulatedContent: RootContent[] = [];
+  const usedIds = new Set<string>(); // Keep track of used IDs to avoid duplicates
 
-  const findExistingSection = (title: string): Section | undefined => {
-    for (const item of existingContent) {
-      if (item instanceof Section && item.title === title) return item;
-      if (item instanceof Chapter) {
-        const found = item.sections.find(s => s.title === title);
-        if (found) return found;
-      }
+  const findExistingItem = <T extends Chapter | Section>(title: string, collection: ProjectContent, constructor: { new(props: any): T }): T | undefined => {
+    for (const item of collection) {
+        if (item instanceof constructor && item.title === title && !usedIds.has(item.id)) {
+            return item as T;
+        }
+        if (item instanceof Chapter) {
+            const foundInSection = item.sections.find(s => s.title === title && !usedIds.has(s.id));
+            if (foundInSection && constructor === Section) {
+                return foundInSection as T;
+            }
+        }
     }
     return undefined;
   };
 
-  const findExistingChapter = (title: string): Chapter | undefined => {
-    return existingContent.find(item => item instanceof Chapter && item.title === title) as Chapter | undefined;
-  };
-
   const flushSection = () => {
     if (currentSection) {
-      const sectionMarkdown = isToc ? currentSection.content : unified().use(remarkGfm).use(remarkStringify).stringify({ type: 'root', children: accumulatedContent }).trim();
+      const sectionMarkdown = isToc ? (currentSection.content || '') : unified().use(remarkGfm).use(remarkStringify).stringify({ type: 'root', children: accumulatedContent }).trim();
       
-      // Only update content if it has changed and we are not in TOC mode
-      if (sectionMarkdown !== currentSection.content) {
-        currentSection = currentSection.with({ content: sectionMarkdown });
-      }
+      currentSection = currentSection.with({ content: sectionMarkdown });
 
       if (currentChapter) {
-        const sectionIndex = currentChapter.sections.findIndex(s => s.id === currentSection!.id);
-        if (sectionIndex !== -1) {
-            currentChapter = currentChapter.updateSection(currentSection.id, () => currentSection!);
-        } else {
-            currentChapter = currentChapter.addSection(currentSection);
-        }
+        // addSection is immutable and returns a new Chapter instance
+        currentChapter = currentChapter.addSection(currentSection);
       } else {
-        const existingIndex = newContent.findIndex(item => item.id === currentSection!.id);
-        if(existingIndex !== -1) {
-          (newContent as (Chapter | Section)[])[existingIndex] = currentSection;
-        } else {
-          newContent.push(currentSection);
-        }
+        newContent.push(currentSection);
       }
     }
     accumulatedContent = [];
@@ -71,12 +61,7 @@ export function parseMarkdownToContent(markdown: string, existingContent: Projec
   const flushChapter = () => {
     flushSection();
     if (currentChapter) {
-        const chapterIndex = newContent.findIndex(c => c.id === currentChapter!.id);
-        if(chapterIndex !== -1) {
-            (newContent as (Chapter | Section)[])[chapterIndex] = currentChapter;
-        } else {
-            newContent.push(currentChapter);
-        }
+      newContent.push(currentChapter);
     }
     currentChapter = null;
   };
@@ -87,52 +72,49 @@ export function parseMarkdownToContent(markdown: string, existingContent: Projec
       const title = getNodeText(node).trim();
       if (node.depth === 1) { // Chapter
         flushChapter();
-        const existingChapter = findExistingChapter(title);
+        const existingChapter = findExistingItem(title, existingContent, Chapter);
         currentChapter = new Chapter({ 
           id: existingChapter?.id, 
           title: title, 
-          sections: existingChapter?.sections ? [...existingChapter.sections] : []
+          sections: [] // CRITICAL FIX: Always start with empty sections
         });
+        if (existingChapter) usedIds.add(existingChapter.id);
         currentSection = null; // Reset section when a new chapter starts
       } else { // Section
         flushSection();
-        const existingSection = findExistingSection(title);
+        const existingSection = findExistingItem(title, existingContent, Section);
         currentSection = new Section({
             id: existingSection?.id,
             title: title,
             type: existingSection?.type || 'report',
-            content: existingSection?.content, // Preserve existing content
+            content: existingSection?.content,
             controls: existingSection?.controls,
             prompt: existingSection?.prompt,
-            rules: Array.isArray(existingSection?.rules) ? [...existingSection.rules] : [],
-            guidelines: Array.isArray(existingSection?.guidelines) ? [...existingSection.guidelines] : [],
-            constraints: Array.isArray(existingSection?.constraints) ? [...existingSection.constraints] : [],
-            behaviors: Array.isArray(existingSection?.behaviors) ? [...existingSection.behaviors] : [],
+            rules: existingSection?.rules ? [...existingSection.rules] : [],
+            guidelines: existingSection?.guidelines ? [...existingSection.guidelines] : [],
+            constraints: existingSection?.constraints ? [...existingSection.constraints] : [],
+            behaviors: existingSection?.behaviors ? [...existingSection.behaviors] : [],
             context: existingSection?.context,
         });
+        if (existingSection) usedIds.add(existingSection.id);
       }
     } else if (node.type === 'list' && currentChapter && isToc) {
-        // Handle sections listed under a chapter
         for (const listItem of node.children) {
             if (listItem.type === 'listItem') {
                 const sectionTitle = getNodeText(listItem).trim();
-                flushSection();
-                const existingSection = findExistingSection(sectionTitle);
-                currentSection = new Section({
-                    id: existingSection?.id,
-                    title: sectionTitle,
-                    type: existingSection?.type || 'report',
-                    content: existingSection?.content,
-                    controls: existingSection?.controls,
-                    prompt: existingSection?.prompt,
-                    rules: existingSection?.rules ? [...existingSection.rules] : [],
-                    guidelines: existingSection?.guidelines ? [...existingSection.guidelines] : [],
-                    constraints: existingSection?.constraints ? [...existingSection.constraints] : [],
-                    behaviors: existingSection?.behaviors ? [...existingSection.behaviors] : [],
-                    context: existingSection?.context,
-                });
-                flushSection(); // Immediately add the section
-                currentSection = null;
+                if (sectionTitle) {
+                    flushSection();
+                    const existingSection = findExistingItem(sectionTitle, existingContent, Section);
+                    currentSection = new Section({
+                        id: existingSection?.id,
+                        title: sectionTitle,
+                        type: 'report',
+                        // Carry over other properties from existing if needed
+                    });
+                    if (existingSection) usedIds.add(existingSection.id);
+                    flushSection();
+                    currentSection = null;
+                }
             }
         }
     } else {

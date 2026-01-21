@@ -1,19 +1,19 @@
 /**
  * Flow Management API - List and Create Flows
  * Week 3 - Day 1-2: Flow Management API
- * 
+ *
  * Endpoints:
  * - GET  /api/admin/flows - List all flows
  * - POST /api/admin/flows - Create new flow
  */
 
-import { NextRequest, NextResponse } from 'next/server';
-import { 
-  listFlows, 
-  createFlow, 
-  searchFlows 
-} from '@/services/flow-config-service';
 import type { FlowConfiguration, FlowStatus } from '@/lib/models/flow-config';
+import {
+  createFlow,
+  listFlows,
+  searchFlows
+} from '@/services/flow-config-service';
+import { NextRequest, NextResponse } from 'next/server';
 
 // ============================================================================
 // GET /api/admin/flows - List flows
@@ -22,7 +22,7 @@ import type { FlowConfiguration, FlowStatus } from '@/lib/models/flow-config';
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
-    
+
     // Get query parameters
     const search = searchParams.get('search');
     const status = searchParams.get('status') as FlowStatus | null;
@@ -32,7 +32,7 @@ export async function GET(request: NextRequest) {
 
     // Search or list flows
     let flows: FlowConfiguration[];
-    
+
     if (search) {
       flows = await searchFlows(search, limit);
     } else {
@@ -46,7 +46,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      data: flows,
+      flows: flows,
       count: flows.length,
     });
 

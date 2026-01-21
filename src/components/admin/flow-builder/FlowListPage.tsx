@@ -1,18 +1,24 @@
 /**
  * Flow List Page
  * Week 3 - Day 3: Flow Management
- * 
+ *
  * List and manage all flows with search and filters
  */
 
 'use client';
 
-import React, { useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
-import { Card } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { Input } from '@/components/ui/input';
 import {
   Select,
   SelectContent,
@@ -28,27 +34,21 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
+import type { FlowConfiguration } from '@/lib/models/flow-config';
+import { useQuery } from '@tanstack/react-query';
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import {
-  Plus,
-  Search,
+  BarChart3,
+  Copy,
+  Edit,
+  Eye,
   Filter,
   MoreHorizontal,
-  Edit,
-  Copy,
   Play,
+  Plus,
+  Search,
   Trash2,
-  Eye,
-  BarChart3,
 } from 'lucide-react';
-import type { FlowConfiguration } from '@/lib/models/flow-config';
+import { useState } from 'react';
 
 // ============================================================================
 // Flow List Page Component
@@ -103,7 +103,7 @@ export function FlowListPage({
   });
 
   const flows = data?.flows || [];
-  const total = data?.total || 0;
+  const total = data?.count || 0;
   const hasMore = data?.hasMore || false;
 
   const handleSearch = (value: string) => {

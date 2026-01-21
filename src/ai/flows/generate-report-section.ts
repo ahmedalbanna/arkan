@@ -1,3 +1,5 @@
+
+
 'use server';
 
 /**
@@ -6,7 +8,7 @@
  */
 
 import { ai } from '@/ai/genkit';
-import { GenerateSectionInputSchema, type GenerateSectionInput, type GenerateSectionOutput } from '@/ai/schemas';
+import { GenerateSectionInputSchema, GenerateSectionOutputSchema, type GenerateSectionInput, type GenerateSectionOutput } from '@/ai/schemas';
 
 export async function generateReportSection(input: GenerateSectionInput): Promise<GenerateSectionOutput> {
 
@@ -17,7 +19,7 @@ You are also an expert analyst. Before you begin writing, you must first review 
   const reportSectionPrompt = ai.definePrompt({
     name: 'generateReportSectionPrompt', // Static name
     input: { schema: GenerateSectionInputSchema },
-    // No output schema - model returns plain text
+    output: { schema: GenerateSectionOutputSchema },
     model: 'ollama/gemma:2b',
     system: systemPrompt,
     prompt: `

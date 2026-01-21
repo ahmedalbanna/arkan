@@ -512,6 +512,8 @@ export async function executeToolStep(
       toolName: config.toolName,
       parameters: resolvedParams,
     });
+    // Import tool registry
+    const { executeTool } = await import('../core/tool-registry');
 
     // Check if caching is enabled (default: false for tools, as they may have side effects)
     const cacheEnabled = config.cache === true;
@@ -702,7 +704,7 @@ async function applyTransformer(
 
   // Try to load custom transformer
   try {
-    const { getCustomTransformer } = await import('../custom-transformers');
+    const { getCustomTransformer } = await import('../core/custom-transformers');
     const customTransformer = await getCustomTransformer(transformerName);
     return customTransformer(input, parameters);
   } catch {

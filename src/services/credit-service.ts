@@ -1,7 +1,7 @@
 
 'use server';
 
-import { deductUserCredits, getUserProfile } from '@/services/userService';
+import { deductUserCredits, getUserProfile, addUserCredits } from '@/services/userService';
 
 export async function deductCredit(userId: string, amount: number = 1) {
     // Allows disabling credit deduction in development environments if needed
@@ -19,3 +19,9 @@ export async function deductCredit(userId: string, amount: number = 1) {
 
     await deductUserCredits(userId, amount);
 }
+
+export async function refundCredit(userId: string, amount: number) {
+    if (amount === 0) return;
+    await addUserCredits(userId, amount);
+}
+

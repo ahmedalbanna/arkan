@@ -1,30 +1,25 @@
 #!/usr/bin/env tsx
 /**
  * Prompt Extraction Script
- * 
+ *
  * Extracts prompts from existing Genkit flows and creates
  * reusable prompt configurations in the database.
- * 
+ *
  * Usage:
  *   npm run extract-prompts
  *   tsx scripts/migration/extract-prompts.ts [flowName]
  */
 
+import { adminDb } from '@/lib/firebase/server-init';
+import type { PromptConfiguration } from '@/lib/models/prompt-config';
+
 import * as fs from 'fs';
 import * as path from 'path';
 import * as ts from 'typescript';
-import { initializeApp } from 'firebase-admin/app';
-import { getFirestore } from 'firebase-admin/firestore';
-import type { PromptConfig } from '@/lib/models/prompt-config';
 
-// Initialize Firebase
-try {
-  initializeApp();
-} catch (error) {
-  // Already initialized
-}
 
-const db = getFirestore();
+
+const db = adminDb;
 
 interface ExtractedPrompt {
   flowName: string;
@@ -53,21 +48,21 @@ function extractPromptsFromFile(filePath: string): ExtractedPrompt[] {
     // Look for template literals or string literals that look like prompts
     if (ts.isTemplateExpression(node) || ts.isNoSubstitutionTemplateLiteral(node)) {
       const text = node.getText(sourceFile);
-      
+
       // Check if this looks like a prompt (contains certain keywords)
       if (
         text.length > 100 && // Prompts are usually long
-        (text.includes('Generate') || 
-         text.includes('Analyze') || 
-         text.includes('Write') ||
-         text.includes('Create') ||
-         text.includes('You are'))
+        (text.includes('Generate') ||
+          text.includes('Analyze') ||
+          text.includes('Write') ||
+          text.includes('Create') ||
+          text.includes('You are'))
       ) {
         // Extract variables from template expressions
         const variables: string[] = [];
         const variableRegex = /\$\{([^}]+)\}/g;
         let match;
-        
+
         while ((match = variableRegex.exec(text)) !== null) {
           const variable = match[1].trim();
           if (!variables.includes(variable)) {
@@ -111,17 +106,17 @@ function extractPromptsFromFile(filePath: string): ExtractedPrompt[] {
 /**
  * Create a prompt configuration from extracted prompt
  */
-function createPromptConfig(extracted: ExtractedPrompt): Omit<PromptConfig, 'id' | 'createdAt' | 'updatedAt'> {
+function createPromptConfig(extracted: ExtractedPrompt): Omit<PromptConfiguration, 'id' | 'createdAt' | 'updatedAt'> {
   const name = `${extracted.flowName}_${extracted.context}`.replace(/[^a-zA-Z0-9_]/g, '_');
-  
+
   // Extract variable definitions from the prompt text
   const variableDefinitions: Record<string, { type: string; description: string; required: boolean }> = {};
-  
+
   extracted.variables.forEach(variable => {
     // Try to infer type from variable name
     let type = 'string';
     const varLower = variable.toLowerCase();
-    
+
     if (varLower.includes('count') || varLower.includes('number') || varLower.includes('limit')) {
       type = 'number';
     } else if (varLower.includes('enable') || varLower.includes('is') || varLower.includes('has')) {
@@ -155,7 +150,7 @@ function createPromptConfig(extracted: ExtractedPrompt): Omit<PromptConfig, 'id'
 /**
  * Save prompt to Firestore
  */
-async function savePromptToFirestore(promptConfig: Omit<PromptConfig, 'id' | 'createdAt' | 'updatedAt'>): Promise<string> {
+async function savePromptToFirestore(promptConfig: Omit<PromptConfiguration, 'id' | 'createdAt' | 'updatedAt'>): Promise<string> {
   const docRef = await db.collection('prompts').add({
     ...promptConfig,
     createdAt: new Date().toISOString(),
@@ -170,15 +165,15 @@ async function savePromptToFirestore(promptConfig: Omit<PromptConfig, 'id' | 'cr
  */
 async function extractPromptsFromFlow(flowName: string): Promise<number> {
   const flowPath = path.join(process.cwd(), 'src/ai/flows', `${flowName}.ts`);
-  
+
   if (!fs.existsSync(flowPath)) {
     throw new Error(`Flow file not found: ${flowPath}`);
   }
 
   console.log(`🔍 Extracting prompts from: ${flowName}`);
-  
+
   const extractedPrompts = extractPromptsFromFile(flowPath);
-  
+
   if (extractedPrompts.length === 0) {
     console.log(`  ℹ️  No prompts found`);
     return 0;
@@ -189,7 +184,7 @@ async function extractPromptsFromFlow(flowName: string): Promise<number> {
   let savedCount = 0;
   for (const extracted of extractedPrompts) {
     const promptConfig = createPromptConfig(extracted);
-    
+
     try {
       const promptId = await savePromptToFirestore(promptConfig);
       console.log(`  ✅ Saved prompt: ${promptConfig.name} (ID: ${promptId})`);
@@ -240,7 +235,7 @@ async function main() {
       // Extract from all flows
       await extractAllPrompts();
     }
-    
+
     process.exit(0);
   } catch (error) {
     console.error('❌ Extraction failed:', error);

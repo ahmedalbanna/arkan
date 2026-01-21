@@ -17,6 +17,8 @@ import { z } from 'zod';
  * Stored in Firestore collection: 'flows'
  */
 export interface FlowConfiguration {
+  category: any;
+  updatedAt: string | number | Date;
   /** Unique identifier for the flow */
   id: string;
   
@@ -587,12 +589,3 @@ export const ErrorHandlingConfigSchema = z.object({
   fallbackValue: z.any().optional(),
   errorMessage: z.string().optional(),
 });
-
-// Export all types
-export type {
-  FlowConfiguration,
-  FlowStep,
-  StepConfig,
-  SchemaDefinition,
-  SchemaField,
-};

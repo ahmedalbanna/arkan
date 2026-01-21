@@ -19,7 +19,7 @@ const lengthDescriptions: Record<SummarizeLength, string> = {
 const summarizePrompt = ai.definePrompt({
     name: 'summarizeTextPrompt',
     input: { schema: z.object({ text: z.string(), instruction: z.string() }) },
-    // No output schema - model returns plain text
+    output: { schema: z.string() },
     model: 'ollama/gemma:2b',
     config: {
         temperature: RECOMMENDED_TEMPERATURES.PRECISE,
@@ -45,7 +45,7 @@ const summarizeTextFlow = ai.defineFlow({
     outputSchema: SummarizeOutputSchema
 }, async (input) => {
     const instruction = lengthDescriptions[input.length] || lengthDescriptions.medium;
-    
+
     try {
         const result = await summarizePrompt({ ...input, instruction });
 
@@ -74,7 +74,7 @@ export async function summarizeText(input: SummarizeInput): Promise<SummarizeOut
     if (!validation.success) {
         throw new Error(`Invalid input for summarizeText: ${validation.error.message}`);
     }
-    
+
     try {
         return await summarizeTextFlow(validation.data);
     } catch (error) {

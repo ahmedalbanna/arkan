@@ -14,7 +14,6 @@ export * from './detect-ai-content';
 export * from './fact-checker';
 export * from './generate-agent-config';
 export * from './generate-citation';
-export * from './generate-diagrams';
 export * from './generate-ideas';
 export * from './generate-image';
 export * from './generate-plantuml';
@@ -48,4 +47,5 @@ export * from './generate-ui-description';
 export * from './generate-chapter-content';
 export * from './generate-chapter-content-rag';
 export * from './generate-report-section-rag';
+export * from './project-consultant';
     

@@ -1,0 +1,530 @@
+{
+  "totalFlows": 54,
+  "flowsByComplexity": {
+    "simple": [
+      "ai-proofread-document",
+      "manipulate-text",
+      "run-agent-flow"
+    ],
+    "medium": [
+      "ai-researcher",
+      "analyze-context",
+      "bias-checker",
+      "create-lecture-unit",
+      "detect-ai-content",
+      "fact-checker",
+      "fact-retrieval",
+      "generate-agent-config",
+      "generate-chapter-content",
+      "generate-citation",
+      "generate-ideas",
+      "generate-image",
+      "generate-plantuml",
+      "generate-project-blueprint",
+      "generate-quiz",
+      "generate-report-section-rag",
+      "generate-report-section",
+      "generate-session-plan",
+      "generate-text",
+      "generate-theoretical-lecture",
+      "generate-toc",
+      "generate-ui-description",
+      "grammar-checker",
+      "humanize-text",
+      "image-to-text",
+      "improve-report-markdown",
+      "literature-review-generator",
+      "paraphrase-text",
+      "plagiarism-checker",
+      "project-consultant",
+      "question-answering",
+      "rewrite-document-to-markdown",
+      "rewrite-to-markdown",
+      "sentence-structure-checker",
+      "solve-assignments",
+      "summarize-document",
+      "summarize-text",
+      "topic-explainer",
+      "translate-text",
+      "write-document"
+    ],
+    "complex": [
+      "academic-literature-review",
+      "academic-paper-quality-checker",
+      "dynamic-flow-executor",
+      "generate-chapter-content-rag",
+      "graduation-project-generator",
+      "presentation-content-creator",
+      "professional-document-writer",
+      "project-documentation-generator",
+      "project-report-generator",
+      "technical-spec-writer",
+      "text-stylist"
+    ]
+  },
+  "flowsByCategory": {
+    "general": [
+      "academic-literature-review",
+      "academic-paper-quality-checker",
+      "ai-proofread-document",
+      "ai-researcher",
+      "analyze-context",
+      "bias-checker",
+      "create-lecture-unit",
+      "detect-ai-content",
+      "dynamic-flow-executor",
+      "fact-checker",
+      "fact-retrieval",
+      "generate-agent-config",
+      "generate-chapter-content-rag",
+      "generate-chapter-content",
+      "generate-citation",
+      "generate-ideas",
+      "generate-image",
+      "generate-plantuml",
+      "generate-project-blueprint",
+      "generate-quiz",
+      "generate-report-section-rag",
+      "generate-report-section",
+      "generate-session-plan",
+      "generate-text",
+      "generate-theoretical-lecture",
+      "generate-toc",
+      "generate-ui-description",
+      "graduation-project-generator",
+      "grammar-checker",
+      "humanize-text",
+      "image-to-text",
+      "improve-report-markdown",
+      "literature-review-generator",
+      "manipulate-text",
+      "paraphrase-text",
+      "plagiarism-checker",
+      "presentation-content-creator",
+      "professional-document-writer",
+      "project-consultant",
+      "project-documentation-generator",
+      "project-report-generator",
+      "question-answering",
+      "rewrite-document-to-markdown",
+      "rewrite-to-markdown",
+      "run-agent-flow",
+      "sentence-structure-checker",
+      "solve-assignments",
+      "summarize-document",
+      "summarize-text",
+      "technical-spec-writer",
+      "text-stylist",
+      "topic-explainer",
+      "translate-text",
+      "write-document"
+    ]
+  },
+  "migrationEstimate": {
+    "simple": 6,
+    "medium": 160,
+    "complex": 88,
+    "total": 254
+  },
+  "dependencies": [
+    {
+      "flowName": "academic-literature-review",
+      "dependencies": [
+        "@/ai/genkit",
+        "zod",
+        "../tools/schemas",
+        "@/ai/utils/json-output-validator"
+      ]
+    },
+    {
+      "flowName": "academic-paper-quality-checker",
+      "dependencies": [
+        "@/ai/genkit",
+        "zod",
+        "../tools/schemas"
+      ]
+    },
+    {
+      "flowName": "ai-proofread-document",
+      "dependencies": [
+        "@/ai/genkit",
+        "@/ai/schemas"
+      ]
+    },
+    {
+      "flowName": "ai-researcher",
+      "dependencies": [
+        "@/ai/genkit",
+        "@/ai/schemas"
+      ]
+    },
+    {
+      "flowName": "analyze-context",
+      "dependencies": [
+        "@/ai/genkit",
+        "@/ai/schemas",
+        "zod"
+      ]
+    },
+    {
+      "flowName": "bias-checker",
+      "dependencies": [
+        "@/ai/genkit",
+        "@/ai/schemas"
+      ]
+    },
+    {
+      "flowName": "detect-ai-content",
+      "dependencies": [
+        "@/ai/genkit",
+        "@/ai/schemas"
+      ]
+    },
+    {
+      "flowName": "dynamic-flow-executor",
+      "dependencies": [
+        "../dynamic-flow/context-manager",
+        "../dynamic-flow/schema-validator",
+        "../dynamic-flow/template-engine",
+        "../dynamic-flow/condition-evaluator",
+        "../dynamic-flow/step-executor"
+      ]
+    },
+    {
+      "flowName": "fact-checker",
+      "dependencies": [
+        "@/ai/genkit",
+        "@/ai/schemas"
+      ]
+    },
+    {
+      "flowName": "fact-retrieval",
+      "dependencies": [
+        "@/ai/genkit",
+        "@/ai/schemas"
+      ]
+    },
+    {
+      "flowName": "generate-agent-config",
+      "dependencies": [
+        "@/ai/genkit",
+        "@/ai/schemas",
+        "zod"
+      ]
+    },
+    {
+      "flowName": "generate-chapter-content-rag",
+      "dependencies": [
+        "@/ai/genkit",
+        "@/ai/schemas",
+        "@/lib/rag/retrieval"
+      ]
+    },
+    {
+      "flowName": "generate-chapter-content",
+      "dependencies": [
+        "@/ai/genkit",
+        "@/ai/schemas"
+      ]
+    },
+    {
+      "flowName": "generate-citation",
+      "dependencies": [
+        "@/ai/genkit",
+        "@/ai/schemas"
+      ]
+    },
+    {
+      "flowName": "generate-ideas",
+      "dependencies": [
+        "@/ai/genkit",
+        "@/ai/schemas"
+      ]
+    },
+    {
+      "flowName": "generate-image",
+      "dependencies": [
+        "@/ai/genkit",
+        "zod",
+        "@/ai/schemas"
+      ]
+    },
+    {
+      "flowName": "generate-plantuml",
+      "dependencies": [
+        "@/ai/genkit",
+        "@/ai/schemas"
+      ]
+    },
+    {
+      "flowName": "generate-project-blueprint",
+      "dependencies": [
+        "@/ai/genkit",
+        "@/ai/schemas"
+      ]
+    },
+    {
+      "flowName": "generate-quiz",
+      "dependencies": [
+        "@/ai/genkit",
+        "@/ai/schemas"
+      ]
+    },
+    {
+      "flowName": "generate-report-section-rag",
+      "dependencies": [
+        "@/ai/genkit",
+        "@/ai/schemas",
+        "@/lib/rag/retrieval",
+        "@/ai/utils/json-output-validator"
+      ]
+    },
+    {
+      "flowName": "generate-report-section",
+      "dependencies": [
+        "@/ai/genkit",
+        "@/ai/schemas"
+      ]
+    },
+    {
+      "flowName": "generate-session-plan",
+      "dependencies": [
+        "@/ai/genkit",
+        "@/lib/utils/ai-utils"
+      ]
+    },
+    {
+      "flowName": "generate-text",
+      "dependencies": [
+        "@/ai/genkit",
+        "@/ai/schemas",
+        "@/ai/utils/json-output-validator"
+      ]
+    },
+    {
+      "flowName": "generate-theoretical-lecture",
+      "dependencies": [
+        "@/ai/genkit",
+        "@/lib/utils/ai-utils"
+      ]
+    },
+    {
+      "flowName": "generate-toc",
+      "dependencies": [
+        "@/ai/genkit",
+        "@/ai/schemas"
+      ]
+    },
+    {
+      "flowName": "generate-ui-description",
+      "dependencies": [
+        "@/ai/genkit",
+        "@/ai/schemas"
+      ]
+    },
+    {
+      "flowName": "graduation-project-generator",
+      "dependencies": [
+        "@/ai/genkit",
+        "zod"
+      ]
+    },
+    {
+      "flowName": "grammar-checker",
+      "dependencies": [
+        "@/ai/genkit",
+        "@/ai/schemas"
+      ]
+    },
+    {
+      "flowName": "humanize-text",
+      "dependencies": [
+        "@/ai/genkit",
+        "@/ai/schemas"
+      ]
+    },
+    {
+      "flowName": "image-to-text",
+      "dependencies": [
+        "@/ai/genkit",
+        "@/ai/schemas"
+      ]
+    },
+    {
+      "flowName": "improve-report-markdown",
+      "dependencies": [
+        "@/ai/genkit",
+        "@/ai/schemas"
+      ]
+    },
+    {
+      "flowName": "literature-review-generator",
+      "dependencies": [
+        "@/ai/genkit",
+        "@/ai/schemas"
+      ]
+    },
+    {
+      "flowName": "manipulate-text",
+      "dependencies": [
+        "@/ai/genkit"
+      ]
+    },
+    {
+      "flowName": "paraphrase-text",
+      "dependencies": [
+        "@/ai/genkit",
+        "@/ai/schemas"
+      ]
+    },
+    {
+      "flowName": "plagiarism-checker",
+      "dependencies": [
+        "@/ai/genkit",
+        "@/ai/schemas"
+      ]
+    },
+    {
+      "flowName": "presentation-content-creator",
+      "dependencies": [
+        "@/ai/genkit",
+        "@/ai/prompts/project-documentation",
+        "zod"
+      ]
+    },
+    {
+      "flowName": "professional-document-writer",
+      "dependencies": [
+        "@/ai/genkit",
+        "zod",
+        "@/ai/utils/json-output-validator",
+        "../tools/schemas"
+      ]
+    },
+    {
+      "flowName": "project-consultant",
+      "dependencies": [
+        "@/ai/genkit",
+        "zod"
+      ]
+    },
+    {
+      "flowName": "project-documentation-generator",
+      "dependencies": [
+        "@/ai/genkit",
+        "@/ai/prompts/project-documentation",
+        "zod"
+      ]
+    },
+    {
+      "flowName": "project-report-generator",
+      "dependencies": [
+        "@/ai/genkit",
+        "@/ai/prompts/project-documentation",
+        "zod"
+      ]
+    },
+    {
+      "flowName": "question-answering",
+      "dependencies": [
+        "@/ai/genkit",
+        "@/ai/schemas"
+      ]
+    },
+    {
+      "flowName": "rewrite-document-to-markdown",
+      "dependencies": [
+        "@/ai/genkit",
+        "@/ai/schemas"
+      ]
+    },
+    {
+      "flowName": "rewrite-to-markdown",
+      "dependencies": [
+        "@/ai/genkit",
+        "@/ai/schemas"
+      ]
+    },
+    {
+      "flowName": "run-agent-flow",
+      "dependencies": [
+        "@/ai/genkit",
+        "zod"
+      ]
+    },
+    {
+      "flowName": "sentence-structure-checker",
+      "dependencies": [
+        "@/ai/genkit",
+        "@/ai/schemas"
+      ]
+    },
+    {
+      "flowName": "solve-assignments",
+      "dependencies": [
+        "@/ai/genkit",
+        "@/ai/schemas"
+      ]
+    },
+    {
+      "flowName": "summarize-document",
+      "dependencies": [
+        "@/ai/genkit",
+        "@/ai/schemas"
+      ]
+    },
+    {
+      "flowName": "summarize-text",
+      "dependencies": [
+        "@/ai/genkit",
+        "@/ai/schemas",
+        "@/ai/utils/json-output-validator",
+        "zod"
+      ]
+    },
+    {
+      "flowName": "technical-spec-writer",
+      "dependencies": [
+        "@/ai/genkit",
+        "@/ai/prompts/project-documentation",
+        "zod"
+      ]
+    },
+    {
+      "flowName": "text-stylist",
+      "dependencies": [
+        "@/ai/genkit"
+      ]
+    },
+    {
+      "flowName": "topic-explainer",
+      "dependencies": [
+        "@/ai/genkit",
+        "@/ai/schemas"
+      ]
+    },
+    {
+      "flowName": "translate-text",
+      "dependencies": [
+        "@/ai/genkit",
+        "@/ai/schemas"
+      ]
+    },
+    {
+      "flowName": "write-document",
+      "dependencies": [
+        "@/ai/genkit",
+        "@/ai/schemas"
+      ]
+    }
+  ],
+  "warnings": [
+    "generate-chapter-content-rag: ⚠️ LLM calls in loops may cause rate limiting",
+    "graduation-project-generator: ⚠️ LLM calls in loops may cause rate limiting",
+    "presentation-content-creator: ⚠️ LLM calls in loops may cause rate limiting",
+    "professional-document-writer: ⚠️ LLM calls in loops may cause rate limiting",
+    "project-report-generator: ⚠️ LLM calls in loops may cause rate limiting",
+    "technical-spec-writer: ⚠️ LLM calls in loops may cause rate limiting",
+    "text-stylist: ⚠️ LLM calls in loops may cause rate limiting"
+  ]
+}

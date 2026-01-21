@@ -98,13 +98,21 @@ export class ConfigurationGenerator {
   private generateInputSchema(analysis: FlowAnalysisResult): FlowConfiguration['inputSchema'] {
     return {
       type: 'zod',
-      fields: analysis.inputs.map(input => ({
-        name: input.name,
-        type: this.mapType(input.type),
-        label: this.generateLabel(input.name),
-        required: input.required,
-        description: input.description,
-      })),
+      fields: analysis.inputs.map(input => {
+        const field: any = {
+          name: input.name,
+          type: this.mapType(input.type),
+          label: this.generateLabel(input.name),
+          required: input.required,
+        };
+        
+        // Only include description if it exists (avoid undefined in Firestore)
+        if (input.description) {
+          field.description = input.description;
+        }
+        
+        return field;
+      }),
       required: true,
     };
   }
@@ -113,13 +121,21 @@ export class ConfigurationGenerator {
     if (analysis.outputs.length > 0) {
       return {
         type: 'zod',
-        fields: analysis.outputs.map(output => ({
-          name: output.name,
-          type: this.mapType(output.type),
-          label: this.generateLabel(output.name),
-          required: true,
-          description: output.description,
-        })),
+        fields: analysis.outputs.map(output => {
+          const field: any = {
+            name: output.name,
+            type: this.mapType(output.type),
+            label: this.generateLabel(output.name),
+            required: true,
+          };
+          
+          // Only include description if it exists (avoid undefined in Firestore)
+          if (output.description) {
+            field.description = output.description;
+          }
+          
+          return field;
+        }),
         required: true,
       };
     }

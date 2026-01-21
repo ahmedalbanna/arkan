@@ -42,7 +42,7 @@ Output ONLY the generated text. Do NOT wrap it in JSON or any other format.
     async (flowInput) => {
       try {
         const result = await promptTemplate(flowInput);
-        
+
         if (!result) {
           throw new Error('No output received from the model.');
         }

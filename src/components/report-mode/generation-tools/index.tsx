@@ -122,7 +122,7 @@ export default function GenerationTools() {
                           return (
                             <SectionAccordionItem
                               key={item.id}
-                              sectionId={item.id}
+                              section={item}
                               sectionIndex={index}
                               chapterIndex={-1}
                               isProjectBuildMode={isProjectBuildMode}

@@ -1,30 +1,19 @@
+
 /**
  * Tool Registry Service
  * Week 2 - Day 4-5: Database Services
  * 
  * Service for managing tool configurations in Firestore.
  * Provides CRUD operations for tool registry.
+ * 
+ * NOTE: This service uses Firebase Admin SDK for server-side operations.
  */
 
-import {
-  collection,
-  doc,
-  getDoc,
-  getDocs,
-  setDoc,
-  updateDoc,
-  deleteDoc,
-  query,
-  where,
-  orderBy,
-  limit as firestoreLimit,
-  Timestamp,
-  type QueryConstraint
-} from '@firebase/firestore';
-import { initializeFirebase } from '@/firebase';
-
-const { firestore: db } = initializeFirebase();
+import { adminDb } from '@/lib/firebase/server-init';
 import type { ToolConfiguration, ToolCategory } from '../lib/models/tool-config';
+
+// Use Admin SDK Firestore instance
+const db = adminDb;
 
 // ============================================================================
 // Tool Registry Service
@@ -40,31 +29,31 @@ export class ToolRegistryService {
   /**
    * Register a new tool
    */
-  async registerTool(tool: Omit<ToolConfiguration, 'metadata'>): Promise<ToolConfiguration> {
+  async registerTool(tool: Partial<ToolConfiguration>): Promise<ToolConfiguration> {
     try {
       const now = new Date();
-      const toolWithMetadata: ToolConfiguration = {
-        ...tool,
-        metadata: {
-          createdAt: now,
-          updatedAt: now,
-          createdBy: tool.metadata?.createdBy || 'system',
-          updatedBy: tool.metadata?.updatedBy || 'system',
-          version: tool.metadata?.version || '1.0.0',
-          stats: {
-            totalCalls: 0,
-            successfulCalls: 0,
-            failedCalls: 0,
-            totalExecutionTime: 0,
-            avgExecutionTime: 0,
-          },
+      const newToolData: ToolConfiguration = {
+        ...(tool as ToolConfiguration),
+        createdAt: now,
+        updatedAt: now,
+        createdBy: tool.createdBy || 'system',
+        updatedBy: tool.updatedBy || 'system',
+        version: tool.version || '1.0.0',
+        enabled: tool.enabled ?? true,
+        isBuiltIn: tool.isBuiltIn ?? false,
+        stats: {
+          totalCalls: 0,
+          successfulCalls: 0,
+          failedCalls: 0,
+          totalExecutionTime: 0,
+          avgExecutionTime: 0,
         },
       };
 
-      const toolRef = doc(db, this.collectionName, tool.name);
-      await setDoc(toolRef, this.toFirestore(toolWithMetadata));
+      const toolRef = db.collection(this.collectionName).doc(newToolData.name);
+      await toolRef.set(this.toFirestore(newToolData));
 
-      return toolWithMetadata;
+      return newToolData;
     } catch (error) {
       console.error('Error registering tool:', error);
       throw new Error(`Failed to register tool: ${error instanceof Error ? error.message : 'Unknown error'}`);
@@ -76,10 +65,10 @@ export class ToolRegistryService {
    */
   async getTool(toolName: string): Promise<ToolConfiguration | null> {
     try {
-      const toolRef = doc(db, this.collectionName, toolName);
-      const toolSnap = await getDoc(toolRef);
+      const toolRef = db.collection(this.collectionName).doc(toolName);
+      const toolSnap = await toolRef.get();
 
-      if (!toolSnap.exists()) {
+      if (!toolSnap.exists) {
         return null;
       }
 
@@ -98,10 +87,10 @@ export class ToolRegistryService {
     updates: Partial<ToolConfiguration>
   ): Promise<ToolConfiguration> {
     try {
-      const toolRef = doc(db, this.collectionName, toolName);
-      const toolSnap = await getDoc(toolRef);
+      const toolRef = db.collection(this.collectionName).doc(toolName);
+      const toolSnap = await toolRef.get();
 
-      if (!toolSnap.exists()) {
+      if (!toolSnap.exists) {
         throw new Error(`Tool not found: ${toolName}`);
       }
 
@@ -111,15 +100,11 @@ export class ToolRegistryService {
       const updatedTool: ToolConfiguration = {
         ...currentTool,
         ...updates,
-        metadata: {
-          ...currentTool.metadata,
-          ...updates.metadata,
-          updatedAt: now,
-          updatedBy: updates.metadata?.updatedBy || currentTool.metadata.updatedBy,
-        },
+        updatedAt: now,
+        updatedBy: updates.updatedBy || currentTool.updatedBy,
       };
 
-      await updateDoc(toolRef, this.toFirestore(updatedTool));
+      await toolRef.update(this.toFirestore(updatedTool));
 
       return updatedTool;
     } catch (error) {
@@ -133,14 +118,13 @@ export class ToolRegistryService {
    */
   async deleteTool(toolName: string): Promise<void> {
     try {
-      // Check if tool is built-in
       const tool = await this.getTool(toolName);
       if (tool?.isBuiltIn) {
         throw new Error('Cannot delete built-in tool');
       }
 
-      const toolRef = doc(db, this.collectionName, toolName);
-      await deleteDoc(toolRef);
+      const toolRef = db.collection(this.collectionName).doc(toolName);
+      await toolRef.delete();
     } catch (error) {
       console.error('Error deleting tool:', error);
       throw new Error(`Failed to delete tool: ${error instanceof Error ? error.message : 'Unknown error'}`);
@@ -158,32 +142,31 @@ export class ToolRegistryService {
     limit?: number;
   }): Promise<ToolConfiguration[]> {
     try {
-      const constraints: QueryConstraint[] = [];
+      let query: FirebaseFirestore.Query = db.collection(this.collectionName);
 
       if (filters?.category) {
-        constraints.push(where('category', '==', filters.category));
+        query = query.where('category', '==', filters.category);
       }
 
       if (filters?.enabled !== undefined) {
-        constraints.push(where('enabled', '==', filters.enabled));
+        query = query.where('enabled', '==', filters.enabled);
       }
 
       if (filters?.isBuiltIn !== undefined) {
-        constraints.push(where('isBuiltIn', '==', filters.isBuiltIn));
+        query = query.where('isBuiltIn', '==', filters.isBuiltIn);
       }
 
       if (filters?.tags && filters.tags.length > 0) {
-        constraints.push(where('metadata.tags', 'array-contains-any', filters.tags));
+        query = query.where('tags', 'array-contains-any', filters.tags);
       }
 
-      constraints.push(orderBy('metadata.updatedAt', 'desc'));
+      query = query.orderBy('updatedAt', 'desc');
 
       if (filters?.limit) {
-        constraints.push(firestoreLimit(filters.limit));
+        query = query.limit(filters.limit);
       }
 
-      const q = query(collection(db, this.collectionName), ...constraints);
-      const querySnapshot = await getDocs(q);
+      const querySnapshot = await query.get();
 
       return querySnapshot.docs.map(doc => this.fromFirestore(doc.data()));
     } catch (error) {
@@ -197,7 +180,7 @@ export class ToolRegistryService {
    */
   async searchTools(searchTerm: string, limit: number = 20): Promise<ToolConfiguration[]> {
     try {
-      const allTools = await this.listTools({ limit: 100 });
+      const allTools = await this.listTools({ limit: 1000 });
 
       const searchLower = searchTerm.toLowerCase();
       return allTools
@@ -205,7 +188,7 @@ export class ToolRegistryService {
           tool.name.toLowerCase().includes(searchLower) ||
           tool.displayName.toLowerCase().includes(searchLower) ||
           tool.description.toLowerCase().includes(searchLower) ||
-          (tool.metadata.tags && tool.metadata.tags.some(tag => tag.toLowerCase().includes(searchLower)))
+          (tool.tags && tool.tags.some(tag => tag.toLowerCase().includes(searchLower)))
         )
         .slice(0, limit);
     } catch (error) {
@@ -219,8 +202,8 @@ export class ToolRegistryService {
    */
   async setToolEnabled(toolName: string, enabled: boolean): Promise<void> {
     try {
-      const toolRef = doc(db, this.collectionName, toolName);
-      await updateDoc(toolRef, { enabled });
+      const toolRef = db.collection(this.collectionName).doc(toolName);
+      await toolRef.update({ enabled, updatedAt: new Date() });
     } catch (error) {
       console.error('Error setting tool enabled:', error);
       throw new Error(`Failed to set tool enabled: ${error instanceof Error ? error.message : 'Unknown error'}`);
@@ -236,39 +219,36 @@ export class ToolRegistryService {
    */
   async updateStats(toolName: string, success: boolean, executionTime: number): Promise<void> {
     try {
-      const toolRef = doc(db, this.collectionName, toolName);
-      const toolSnap = await getDoc(toolRef);
-
-      if (!toolSnap.exists()) {
-        return;
-      }
-
-      const tool = this.fromFirestore(toolSnap.data());
-      const stats = tool.metadata.stats || {
-        totalCalls: 0,
-        successfulCalls: 0,
-        failedCalls: 0,
-        totalExecutionTime: 0,
-        avgExecutionTime: 0,
-      };
-
-      stats.totalCalls++;
-      if (success) {
-        stats.successfulCalls++;
-      } else {
-        stats.failedCalls++;
-      }
-
-      stats.totalExecutionTime += executionTime;
-      stats.avgExecutionTime = stats.totalExecutionTime / stats.totalCalls;
-      stats.lastUsedAt = new Date();
-
-      await updateDoc(toolRef, {
-        'metadata.stats': {
-          ...stats,
-          lastUsedAt: Timestamp.fromDate(stats.lastUsedAt),
-        },
-      });
+        const toolRef = db.collection(this.collectionName).doc(toolName);
+  
+        await db.runTransaction(async (transaction) => {
+          const toolSnap = await transaction.get(toolRef);
+          if (!toolSnap.exists) {
+            return;
+          }
+  
+          const tool = this.fromFirestore(toolSnap.data());
+          const stats = tool.stats || {
+            totalCalls: 0,
+            successfulCalls: 0,
+            failedCalls: 0,
+            totalExecutionTime: 0,
+            avgExecutionTime: 0,
+          };
+  
+          stats.totalCalls = (stats.totalCalls || 0) + 1;
+          if (success) {
+            stats.successfulCalls = (stats.successfulCalls || 0) + 1;
+          } else {
+            stats.failedCalls = (stats.failedCalls || 0) + 1;
+          }
+  
+          stats.totalExecutionTime = (stats.totalExecutionTime || 0) + executionTime;
+          stats.avgExecutionTime = stats.totalExecutionTime / stats.totalCalls;
+          stats.lastUsedAt = new Date();
+  
+          transaction.update(toolRef, { stats: stats });
+        });
     } catch (error) {
       console.error('Error updating stats:', error);
       // Don't throw - stats update is non-critical
@@ -281,7 +261,7 @@ export class ToolRegistryService {
   async getToolStats(toolName: string): Promise<any> {
     try {
       const tool = await this.getTool(toolName);
-      return tool?.metadata.stats || null;
+      return tool?.stats || null;
     } catch (error) {
       console.error('Error getting tool stats:', error);
       return null;
@@ -296,37 +276,35 @@ export class ToolRegistryService {
    * Convert tool to Firestore format
    */
   private toFirestore(tool: ToolConfiguration): any {
-    return {
-      ...tool,
-      metadata: {
-        ...tool.metadata,
-        createdAt: Timestamp.fromDate(tool.metadata.createdAt),
-        updatedAt: Timestamp.fromDate(tool.metadata.updatedAt),
-        stats: tool.metadata.stats ? {
-          ...tool.metadata.stats,
-          lastUsedAt: tool.metadata.stats.lastUsedAt
-            ? Timestamp.fromDate(tool.metadata.stats.lastUsedAt)
-            : null,
-        } : undefined,
-      },
-    };
+    return tool;
   }
 
   /**
    * Convert Firestore data to tool
    */
   private fromFirestore(data: any): ToolConfiguration {
+    if (!data) return data;
+
+    const safeConvertToDate = (value: any): Date | undefined => {
+        if (!value) return undefined;
+        if (value instanceof Date) return value;
+        if (typeof value.toDate === 'function') return value.toDate();
+        if (typeof value === 'string' || typeof value === 'number') {
+            const date = new Date(value);
+            if (!isNaN(date.getTime())) return date;
+        }
+        console.warn('Could not convert value to a valid Date:', value);
+        return undefined;
+    };
+
     return {
-      ...data,
-      metadata: {
-        ...data.metadata,
-        createdAt: data.metadata.createdAt.toDate(),
-        updatedAt: data.metadata.updatedAt.toDate(),
-        stats: data.metadata.stats ? {
-          ...data.metadata.stats,
-          lastUsedAt: data.metadata.stats.lastUsedAt?.toDate(),
+        ...data,
+        createdAt: safeConvertToDate(data.createdAt),
+        updatedAt: safeConvertToDate(data.updatedAt),
+        stats: data.stats ? {
+            ...data.stats,
+            lastUsedAt: safeConvertToDate(data.stats.lastUsedAt),
         } : undefined,
-      },
     };
   }
 }
@@ -341,7 +319,7 @@ export const toolRegistryService = new ToolRegistryService();
 // Public API
 // ============================================================================
 
-export async function registerTool(tool: Omit<ToolConfiguration, 'metadata'>): Promise<ToolConfiguration> {
+export async function registerTool(tool: Partial<ToolConfiguration>): Promise<ToolConfiguration> {
   return toolRegistryService.registerTool(tool);
 }
 
