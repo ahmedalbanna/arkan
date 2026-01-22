@@ -7,7 +7,6 @@
 
 import { ai } from '@/ai/genkit';
 import { SummarizeInputSchema, SummarizeLength, SummarizeOutputSchema, type SummarizeInput, type SummarizeOutput } from '@/ai/schemas';
-import { RECOMMENDED_TEMPERATURES } from '@/ai/utils/json-output-validator';
 import z from 'zod';
 
 const lengthDescriptions: Record<SummarizeLength, string> = {
@@ -21,9 +20,6 @@ const summarizePrompt = ai.definePrompt({
     input: { schema: z.object({ text: z.string(), instruction: z.string() }) },
     output: { schema: z.string() },
     model: 'ollama/gemma:2b',
-    config: {
-        temperature: RECOMMENDED_TEMPERATURES.PRECISE,
-    },
     prompt: `You are a professional text summarizer.
 
 Output ONLY the summary text. Do NOT wrap it in JSON or any other format.

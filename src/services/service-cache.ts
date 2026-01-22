@@ -237,7 +237,7 @@ export class MultiLevelCache<T> {
   constructor(
     l1Ttl: number = 60 * 1000,      // 1 minute for L1
     l1MaxSize: number = 100,
-    l2Ttl: number = 5 * 60 * 1000,  // 5 minutes for L2
+    _l2Ttl: number = 5 * 60 * 1000,  // 5 minutes for L2 (reserved for future use)
     enableL2: boolean = false
   ) {
     this.l1Cache = new ServiceCache<T>(l1Ttl, l1MaxSize);

@@ -1,0 +1,14 @@
+
+> nextn@0.1.0 build /teamspace/studios/this_studio/arkan
+> next build
+
+   ▲ Next.js 15.5.9
+   - Environments: .env.local, .env
+   - Experiments (use with caution):
+     ✓ useCache
+     · serverActions
+
+   Creating an optimized production build ...
+ ○ (pwa) PWA support is disabled.
+   Linting and checking validity of types ...
+ ELIFECYCLE  Command failed with exit code 1.

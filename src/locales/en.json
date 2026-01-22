@@ -1768,16 +1768,4 @@
     "error": "Error",
     "copied": "Copied"
   }
-  },
-  "admin": {
-    "flows": {
-      "title": "Flows Management"
-    },
-    "prompts": {
-      "title": "Prompts Management"
-    },
-    "tools": {
-      "title": "Tools Management"
-    }
   }
-}

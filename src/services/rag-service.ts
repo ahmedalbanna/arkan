@@ -5,7 +5,7 @@
  * This service provides convenient methods for document indexing and retrieval.
  */
 
-import { indexDocument, indexProjectContext, type IndexingOptions, type IndexingResult } from '@/lib/rag/indexer';
+import { indexDocument, indexProjectContext, type IndexingResult } from '@/lib/rag/indexer';
 import { retrieveContext, type RetrievalOptions, type RetrievalResult } from '@/lib/rag/retrieval';
 import { getVectorStore } from '@/lib/rag/vector-store';
 

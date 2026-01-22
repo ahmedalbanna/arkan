@@ -19,9 +19,10 @@ import {
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { flowId: string } }
+  context: { params: Promise<{ flowId: string }> }
 ) {
   try {
+    const params = await context.params;
     const versions = await listFlowVersions(params.flowId);
 
     return NextResponse.json({
@@ -49,9 +50,10 @@ export async function GET(
 
 export async function POST(
   request: NextRequest,
-  { params }: { params: { flowId: string } }
+  context: { params: Promise<{ flowId: string }> }
 ) {
   try {
+    const params = await context.params;
     const body = await request.json();
 
     if (!body.version) {

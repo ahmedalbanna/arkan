@@ -13,9 +13,10 @@ import { getExecutionTraceService } from '@/services/execution-trace-service';
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { traceId: string } }
+  context: { params: Promise<{ traceId: string }> }
 ) {
   try {
+    const params = await context.params;
     const { traceId } = params;
 
     const traceService = getExecutionTraceService();

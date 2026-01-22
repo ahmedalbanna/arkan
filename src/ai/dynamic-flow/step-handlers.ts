@@ -6,7 +6,7 @@
  * Each handler is responsible for executing a specific type of step.
  */
 
-import { generate } from '@genkit-ai/ai';
+import { ai } from '../genkit';
 import { gemini15Flash, gemini15Pro } from '@genkit-ai/googleai';
 import type { ContextManager } from './context-manager';
 import type { 
@@ -395,11 +395,11 @@ export async function executeGenerateStep(
             };
 
             // Generate text
-            const response = await generate(options);
+            const response = await ai.generate(options);
 
             // Extract output based on format
             let output: any;
-            const text = response.text();
+            const text = response.text;
 
             switch (config.outputFormat) {
               case 'json':
@@ -528,9 +528,6 @@ export async function executeToolStep(
       async () => {
         return await executeWithTimeout(
           async () => {
-            // Import tool registry
-            const { executeTool } = await import('../tool-registry');
-
             // Execute tool
             return await executeTool(config.toolName, resolvedParams);
           },

@@ -27,8 +27,11 @@ type ApiHandler = (context: AuthContext) => Promise<NextResponse | Response>;
  * @returns A Next.js API route handler.
  */
 export const withAuth = (handler: ApiHandler, options: ApiHandlerOptions = {}) => {
-  return async (request: NextRequest, { params }: { params: { [key: string]: string } }) => {
+  return async (request: NextRequest, context: { params: Promise<{ [key: string]: string }> }) => {
     try {
+      // In Next.js 15, params is now a Promise
+      const params = await context.params;
+      
       const authorization = request.headers.get('Authorization');
       if (!authorization?.startsWith('Bearer ')) {
         return handleApiError({ message: 'Unauthorized: Missing token' }, 401);
