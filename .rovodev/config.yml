@@ -22,7 +22,7 @@ agent:
 # Session management settings
 sessions:
   # Directory where session data is stored
-  persistenceDir: /teamspace/studios/this_studio/.rovodev/sessions
+  persistenceDir: C:\Users\ahmed\source\repos\arkan\.rovodev\sessions
   # (Experimental) When enabled, Rovo Dev may warn and offer to switch your
   # workspace git state (branch/commit) to match the session checkpoint when
   # restoring or switching sessions.
@@ -33,7 +33,7 @@ atlassianConnections:
   # Global jira projects user is part of
   jiraProjects: []
   # Directory where any local overrides are stored
-  localOverridePath: .rovodev/atlassian_connections.json
+  localOverridePath: .rovodev\atlassian_connections.json
   # Whether atlassian integration is enabled
   enabled: true
 
@@ -71,12 +71,12 @@ console:
 # Logging and prompt collection settings
 logging:
   # Path to the log file
-  path: /teamspace/studios/this_studio/.rovodev/logs/rovodev.log
+  path: C:\Users\ahmed\source\repos\arkan\.rovodev\logs\rovodev.log
 
 # Model Context Protocol server configuration
 mcp:
   # Path to the MCP (Model Context Protocol) configuration file
-  mcpConfigPath: /teamspace/studios/this_studio/.rovodev/mcp.json
+  mcpConfigPath: C:\Users\ahmed\source\repos\arkan\.rovodev\mcp.json
   # List of allowed MCP server signatures
   allowedMcpServers: []
   # List of globally disabled MCP server signatures
