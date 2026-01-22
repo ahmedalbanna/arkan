@@ -2,8 +2,22 @@
 'use server';
 
 import { ai } from '@/ai/genkit';
-import { GenerateAgentConfigInputSchema, GenerateAgentConfigOutputSchema, type GenerateAgentConfigOutput } from '@/ai/schemas';
+
 import { z } from 'zod';
+
+// generate-agent-config.ts
+const GenerateAgentConfigInputSchema = z.string();
+
+const GenerateAgentConfigOutputSchema = z.object({
+  name: z.string().describe("A short, descriptive name for the new agent."),
+  description: z.string().describe("A concise, one-sentence description of the agent's purpose."),
+  instructions: z.string().describe("The base prompt or primary instruction for the agent. This should be a clear, concise paragraph explaining the agent's purpose and core function."),
+  guidelines: z.string().describe("A newline-separated list of 3-5 specific, actionable guidelines for the agent to follow. Each guideline should start with '- '."),
+  jsonStructure: z.any().optional().describe("If the user requested JSON output, provide a sample JSON object structure that the agent should return. It should be a simple but relevant example based on the user's prompt and any provided context. Otherwise, this field should be omitted."),
+});
+type GenerateAgentConfigOutput = z.infer<typeof GenerateAgentConfigOutputSchema>;
+type GenerateAgentConfigInput = z.infer<typeof GenerateAgentConfigInputSchema>;
+
 
 const generateAgentConfigPrompt = ai.definePrompt({
   name: 'generateAgentConfigPrompt',

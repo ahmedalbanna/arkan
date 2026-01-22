@@ -450,7 +450,6 @@ export type GenerateQuizOutput = z.infer<typeof GenerateQuizOutputSchema>;
 // generate-report-section.ts
 export const GenerateSectionInputSchema = z
     .object({
-        flow: z.literal('generate-section'),
         sectionToGenerate: SectionNameSchema,
         prompt: z.string().min(10, 'Prompt must be at least 10 characters.'),
         otherSections: z

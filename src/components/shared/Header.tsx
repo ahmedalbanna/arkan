@@ -1,21 +1,20 @@
 'use client';
 
+import { LanguageToggle } from '@/components/shared/LanguageToggle';
+import { ThemeToggle } from '@/components/shared/ThemeToggle';
+import { Button } from '@/components/ui/button';
+import { Skeleton } from '@/components/ui/skeleton';
 import { useAuth } from '@/context/AuthContext';
 import { useLocalization } from '@/context/LocalizationContext';
 import { cn } from '@/lib/utils/cn';
-import { HomeIcon, Wrench, SlidersHorizontal } from 'lucide-react';
+import { Gem, HomeIcon, SlidersHorizontal } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useEffect, useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { Skeleton } from '@/components/ui/skeleton';
-import { LanguageToggle } from '@/components/shared/LanguageToggle';
-import { ThemeToggle } from '@/components/shared/ThemeToggle';
 import { PurchaseCreditsDialog } from '../pricing/PurchaseCreditsDialog';
-import { Gem } from 'lucide-react';
 import { MobileNav } from './MobileNav';
-import { UserProfileDropdown } from './UserProfileDropdown';
 import { NotificationDropdown } from './NotificationDropdown';
+import { UserProfileDropdown } from './UserProfileDropdown';
 
 interface NavLink {
   href: string;
@@ -27,7 +26,6 @@ interface NavLink {
 const navLinks: NavLink[] = [
   { href: '/', label: 'header.home', icon: HomeIcon, auth: 'any' },
   { href: '/builder', label: 'header.generateDocs', icon: SlidersHorizontal, auth: true },
-  { href: '/writing-tools', label: 'header.tools', icon: Wrench, auth: true },
 ];
 
 function NavLinks() {
