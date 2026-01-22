@@ -110,8 +110,9 @@ async function executeDynamicFlow(flowName: string, input: any): Promise<{ outpu
   
   try {
     // Execute via dynamic flow executor
-    const { executeDynamicFlow } = await import('@/ai/flows/dynamic-flow-executor');
-    const output = await executeDynamicFlow(flowName, input);
+    const dynamicFlowModule = await import('@/ai/flows/dynamic-flow-executor');
+    const executorFlow = dynamicFlowModule.dynamicFlowExecutorFlow;
+    const output = await executorFlow({ flowName, input });
     const duration = Date.now() - startTime;
     
     return { output, duration };
@@ -132,7 +133,7 @@ function compareOutputs(output1: any, output2: any): {
   const tools = new ComparisonTools();
   
   // Use ComparisonTools to calculate similarity
-  const similarity = tools.calculateSimilarity(output1, output2);
+  const similarity = (tools as any).calculateSimilarity(output1, output2);
   
   // Check if identical (within tolerance)
   const identical = similarity >= 0.95;

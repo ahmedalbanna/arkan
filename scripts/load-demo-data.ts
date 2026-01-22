@@ -443,10 +443,10 @@ async function loadDemoData() {
           success: true,
         });
       } else {
-        console.log(`   ❌ Failed: ${result.error}\n`);
+        console.log(`   ❌ Failed: ${result.errors}\n`);
         results.push({
           title: doc.title,
-          error: result.error,
+          error: result.errors,
           success: false,
         });
       }

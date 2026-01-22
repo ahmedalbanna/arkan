@@ -137,8 +137,8 @@ async function indexTestDocuments() {
         console.log(`   ✅ Indexed successfully: ${result.chunksCreated} chunks created\n`);
         results.push({ ...doc.metadata, chunksCreated: result.chunksCreated });
       } else {
-        console.log(`   ❌ Failed: ${result.error}\n`);
-        results.push({ ...doc.metadata, error: result.error });
+        console.log(`   ❌ Failed: ${result.errors}\n`);
+        results.push({ ...doc.metadata, error: result.errors });
       }
     } catch (error) {
       console.error(`   ❌ Error: ${error instanceof Error ? error.message : 'Unknown error'}\n`);
@@ -270,7 +270,7 @@ async function main() {
     console.log('   ✅ TEST COMPLETED SUCCESSFULLY');
     console.log('═══════════════════════════════════════════════════════\n');
 
-    const successCount = indexResults.filter(r => !r.error).length;
+    const successCount = indexResults.filter((r: any) => !r.error).length;
     console.log(`📊 Summary:`);
     console.log(`   Documents indexed: ${successCount}/${testDocuments.length}`);
     console.log(`   Total chunks: ${indexResults.reduce((sum, r) => sum + (r.chunksCreated || 0), 0)}`);

@@ -42,7 +42,7 @@ async function analyzeFlows(): Promise<FlowAnalysisReport> {
   const flowFiles = fs.readdirSync(flowsDir)
     .filter(file => file.endsWith('.ts') && file !== 'index.ts');
 
-  const analyzer = new FlowAnalyzer();
+  const analyzer = new FlowAnalyzer(process.cwd());
   const report: FlowAnalysisReport = {
     totalFlows: 0,
     flowsByComplexity: {

@@ -44,8 +44,8 @@ export class PromptManagementService {
           avgTokensUsed: 0,
           avgExecutionTime: 0,
         },
-        version: prompt.version || 1,
-        status: prompt.status || 'draft',
+        version: prompt.version || '1',
+        status: (prompt.status || 'draft') as PromptStatus,
       };
 
       const promptRef = db.collection(this.collectionName).doc(newPromptData.id);
@@ -112,7 +112,8 @@ export class PromptManagementService {
       // Increment version if template or variables changed
       let newVersion = currentPrompt.version;
       if (updates.template || updates.variables) {
-        newVersion = (currentPrompt.version || 1) + 1;
+        const versionNum = parseInt(currentPrompt.version || '1');
+        newVersion = String(versionNum + 1);
       }
 
       const updatedPrompt: PromptConfiguration = {
@@ -120,7 +121,7 @@ export class PromptManagementService {
         ...updates,
         version: newVersion,
         updatedAt: now,
-        updatedBy: updates.updatedBy || currentPrompt.updatedBy,
+        updatedBy: (updates as any).updatedBy || currentPrompt.updatedBy,
       };
 
       await promptRef.update(this.toFirestore(updatedPrompt));
@@ -311,7 +312,7 @@ export class PromptManagementService {
         }
 
         const prompt = this.fromFirestore(promptSnap.data());
-        const stats = prompt.stats || {
+        const stats = (prompt as any).stats || {
           totalUses: 0,
           successfulUses: 0,
           failedUses: 0,

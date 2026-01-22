@@ -165,7 +165,7 @@ async function migrateFlow(flowName: string): Promise<MigrationResult> {
 
     // Step 1: Analyze the flow
     console.log('\n📊 Step 1: Analyzing flow...');
-    const analyzer = new FlowAnalyzer();
+    const analyzer = new FlowAnalyzer(process.cwd());
     const analysis = await analyzer.analyzeFlow(flowPath);
     console.log(`  ✅ Complexity: ${analysis.complexity}`);
     console.log(`  ✅ Category: ${analysis.category}`);

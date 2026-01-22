@@ -260,4 +260,5 @@ if (require.main === module) {
   main().catch(console.error);
 }
 
-export { migrateToQdrant, MigrationStats };
+export { migrateToQdrant };
+export type { MigrationStats };

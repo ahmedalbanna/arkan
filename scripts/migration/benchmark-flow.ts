@@ -114,8 +114,9 @@ async function executeWithMetrics(
       const flowFunction = Object.values(flowModule)[0] as any;
       await flowFunction(input);
     } else {
-      const { executeDynamicFlow } = await import('@/ai/flows/dynamic-flow-executor');
-      await executeDynamicFlow(flowName, input);
+      const dynamicFlowModule = await import('@/ai/flows/dynamic-flow-executor');
+      const executorFlow = dynamicFlowModule.dynamicFlowExecutorFlow;
+      await executorFlow({ flowName, input });
     }
     
     const duration = Date.now() - startTime;

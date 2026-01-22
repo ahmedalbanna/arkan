@@ -15,7 +15,7 @@ import * as path from 'path';
 import { initializeApp } from 'firebase-admin/app';
 import { getFirestore } from 'firebase-admin/firestore';
 import { ConfigurationGenerator } from '@/lib/migration/generator/ConfigurationGenerator';
-import type { FlowConfig } from '@/lib/models/flow-config';
+import type { FlowConfiguration } from '@/lib/models/flow-config';
 
 // Initialize Firebase
 try {
@@ -29,7 +29,7 @@ const db = getFirestore();
 /**
  * Save flow configuration to Firestore
  */
-async function saveFlowConfig(flowConfig: Omit<FlowConfig, 'id' | 'createdAt' | 'updatedAt'>): Promise<string> {
+async function saveFlowConfig(flowConfig: Omit<FlowConfiguration, 'id' | 'createdAt' | 'updatedAt'>): Promise<string> {
   const docRef = await db.collection('flowConfigs').add({
     ...flowConfig,
     createdAt: new Date().toISOString(),
@@ -43,7 +43,7 @@ async function saveFlowConfig(flowConfig: Omit<FlowConfig, 'id' | 'createdAt' | 
 /**
  * Generate and save flow configuration for a single flow
  */
-async function generateFlowConfig(flowName: string, saveToDB: boolean = true): Promise<FlowConfig | null> {
+async function generateFlowConfig(flowName: string, saveToDB: boolean = true): Promise<FlowConfiguration | null> {
   const flowPath = path.join(process.cwd(), 'src/ai/flows', `${flowName}.ts`);
   
   if (!fs.existsSync(flowPath)) {
@@ -53,7 +53,7 @@ async function generateFlowConfig(flowName: string, saveToDB: boolean = true): P
   console.log(`\n🔧 Generating configuration for: ${flowName}`);
   console.log(`  📄 Source: ${flowPath}`);
 
-  const generator = new ConfigurationGenerator();
+  const generator = new ConfigurationGenerator(process.cwd());
   
   try {
     const flowConfig = await generator.generateFlowConfig(flowPath);
@@ -76,10 +76,10 @@ async function generateFlowConfig(flowName: string, saveToDB: boolean = true): P
     // Save to database if requested
     if (saveToDB) {
       const docId = await saveFlowConfig(flowConfig);
-      return { ...flowConfig, id: docId } as FlowConfig;
+      return { ...flowConfig, id: docId } as FlowConfiguration;
     }
 
-    return flowConfig as FlowConfig;
+    return flowConfig as FlowConfiguration;
   } catch (error) {
     console.error(`  ❌ Failed to generate configuration:`, error);
     throw error;
