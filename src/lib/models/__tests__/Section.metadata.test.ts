@@ -2,8 +2,8 @@
  * Tests for Section metadata tracking functionality
  */
 
-import { Section } from '../section';
 import { SectionStatus } from '@/types';
+import { Section } from '../section';
 
 describe('Section - Metadata Tracking', () => {
   describe('Initialization', () => {

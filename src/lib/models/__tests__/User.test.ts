@@ -2,8 +2,7 @@
  * User Model Tests
  */
 
-import { User, type UserProfile } from '../user';
-import { UserValidationError } from '../user-validation';
+import { User } from '../user';
 
 describe('User Model', () => {
   describe('constructor', () => {

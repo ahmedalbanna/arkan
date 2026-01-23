@@ -5,7 +5,7 @@ import { z } from 'zod';
 export const ExternalContextTypeSchema = z.enum(['context', 'example', 'question', 'textbook', 'guidelines', 'dataset']);
 export type ExternalContextType = z.infer<typeof ExternalContextTypeSchema>;
 
-export const SectionTypeSchema = z.enum(['report', 'diagram', 'presentation', 'code', 'math']);
+export const SectionTypeSchema = z.enum(['report', 'diagram', 'presentation', 'code', 'math', 'text']);
 export type SectionType = z.infer<typeof SectionTypeSchema>;
 
 export const ToneSchema = z.enum(['professional', 'academic', 'casual', 'persuasive', 'technical', 'explanatory']);
@@ -30,16 +30,16 @@ export type Behavior = z.infer<typeof BehaviorSchema>;
 
 // Citation Styles
 export const CitationStyleSchema = z.enum([
-    'APA7',
-    'MLA9',
-    'Chicago17',
-    'Harvard',
-    'IEEE',
-    'Vancouver',
-    'OSCOLA',
-    'AMA',
-    'ASA',
-    'Turabian'
+  'APA7',
+  'MLA9',
+  'Chicago17',
+  'Harvard',
+  'IEEE',
+  'Vancouver',
+  'OSCOLA',
+  'AMA',
+  'ASA',
+  'Turabian'
 ]);
 export type CitationStyle = z.infer<typeof CitationStyleSchema>;
 
@@ -76,13 +76,13 @@ export const defaultControls: GenerationControlState = {
   complexity: 50,
   tone: 'professional',
   language: 'default',
-  outputStyle: { 
-    heading: true, 
-    paragraph: true, 
-    list: false, 
-    table: false, 
-    code: false, 
-    diagram: false, 
+  outputStyle: {
+    heading: true,
+    paragraph: true,
+    list: false,
+    table: false,
+    code: false,
+    diagram: false,
     math: false,
     includeCitations: false,
   },

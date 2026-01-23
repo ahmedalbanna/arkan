@@ -2,6 +2,7 @@
  * Type definitions for AI generation system
  */
 
+import { GenerateSectionInputSchema } from '@/ai/schemas';
 import { z } from 'zod';
 // Old schema removed - now using unified generation
 // import { GenerateSectionInputSchema } from '@/ai/flows/generate-report-section';
