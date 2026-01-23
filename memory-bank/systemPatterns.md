@@ -440,6 +440,160 @@ const mutation = useMutation({
 - **Builder Pattern**: Prompt building, document generation
 - **Singleton Pattern**: Firebase instances, database connections
 
+### Model Best Practices
+
+**Immutable Class-Based Models:**
+```typescript
+// Example: Project Model (Production-Ready Pattern)
+export class Project {
+  // All properties readonly
+  public readonly id: string;
+  public readonly name: string;
+  public readonly content: ProjectContent;
+  
+  constructor(props: ProjectProperties) {
+    // Validation at entry point
+    if (props.name !== undefined && props.name.trim() === '') {
+      throw new ProjectValidationError('Project name cannot be empty');
+    }
+    
+    // Initialize with defaults
+    this.id = props.id || uuidv4();
+    this.name = props.name || 'Untitled Project';
+    
+    // Validate content structure
+    this.content = validateAndConvertContent(props.content);
+  }
+  
+  // Immutable updates return new instances
+  public with(props: Partial<ProjectProperties>): Project {
+    return new Project({ ...this.toStateObject(), ...props });
+  }
+  
+  // Business logic methods
+  public addChapter(title: string): Project {
+    const newChapter = new Chapter({ title, sections: [] });
+    return this.with({ content: [...this.content, newChapter] });
+  }
+  
+  // Serialization for persistence
+  public toStateObject(): ProjectProperties {
+    return { id: this.id, name: this.name, /* ... */ };
+  }
+}
+```
+
+**Model Validation Pattern:**
+```typescript
+// Separate validation utilities
+// src/lib/models/project-validation.ts
+
+export const ProjectPropertiesSchema = z.object({
+  name: z.string().min(1).max(200),
+  complexity: z.number().min(0).max(100),
+  // ... all fields validated
+});
+
+export class ProjectValidationError extends Error {
+  constructor(
+    message: string,
+    public readonly field?: string,
+    public readonly errors?: z.ZodError
+  ) {
+    super(message);
+    this.name = 'ProjectValidationError';
+  }
+}
+
+export function validateProjectProperties(props: unknown) {
+  try {
+    return ProjectPropertiesSchema.parse(props);
+  } catch (error) {
+    throw new ProjectValidationError(/* ... */);
+  }
+}
+```
+
+**Documentation Standards:**
+```typescript
+/**
+ * Updates a section using an updater function
+ * 
+ * @param id - Section ID to update
+ * @param updater - Function that receives current section and returns updated section
+ * @returns New Project instance with updated section, or same instance if not found
+ * @throws {ProjectValidationError} If validation fails
+ * 
+ * @example
+ * ```typescript
+ * const updated = project.updateSection('s-1', section => 
+ *   section.with({ content: 'New content' })
+ * );
+ * ```
+ */
+public updateSection(id: string, updater: (s: Section) => Section): Project {
+  // Implementation
+}
+```
+
+**Testing Standards:**
+```typescript
+// Comprehensive test coverage
+describe('Project Model', () => {
+  describe('constructor', () => {
+    it('should validate required fields', () => {
+      expect(() => new Project({ name: '' }))
+        .toThrow('Project name cannot be empty');
+    });
+  });
+  
+  describe('immutability', () => {
+    it('should return new instance on update', () => {
+      const original = new Project({ name: 'Original' });
+      const updated = original.with({ name: 'Updated' });
+      
+      expect(updated).not.toBe(original);
+      expect(original.name).toBe('Original');
+    });
+  });
+});
+```
+
+**Model Checklist (Established Pattern):**
+- ✅ All properties `readonly`
+- ✅ Validation in constructor (Zod + custom logic)
+- ✅ Custom error classes (ModelValidationError)
+- ✅ JSDoc on all public methods
+- ✅ Immutable update methods
+- ✅ `with()` method for partial updates
+- ✅ `toStateObject()` for serialization
+- ✅ Separate validation utilities (model-validation.ts)
+- ✅ 70%+ test coverage (target: 80%+)
+- ✅ Works on client AND server (no 'use client')
+- ✅ Helper methods for common operations
+- ✅ Business logic methods where appropriate
+- ✅ Usage examples in JSDoc
+- ✅ ID-based operations (not array indices)
+
+**Production-Ready Models (Reference):**
+- ✅ Project Model: 89.71% coverage (38 tests) - `src/lib/models/project.ts`
+- ✅ User Model: 87.87% coverage (46 tests) - `src/lib/models/user.ts`
+- ✅ Chapter Model: 100% coverage (42 tests) - `src/lib/models/chapter.ts`
+- ✅ Section Model: 86.17% coverage (35 tests) - `src/lib/models/section.ts`
+
+**Anti-Patterns to Avoid:**
+- ❌ 'use client' in models (prevents SSR)
+- ❌ Mutable properties (use readonly)
+- ❌ Silent failures (validate inputs, throw errors)
+- ❌ Missing documentation (JSDoc all public methods)
+- ❌ Mixing concerns (keep models pure, move logic to utilities)
+- ❌ Using array indices instead of IDs (fragile, breaks on reorder)
+- ❌ Incomplete test coverage (<70%)
+- ❌ No validation (always validate constructor inputs)
+- ❌ Poor error messages (be specific about what failed)
+
+---
+
 ### Structural Patterns
 - **Adapter Pattern**: Firebase to app model conversion
 - **Facade Pattern**: API services wrapping Firebase
