@@ -27,7 +27,7 @@ const MarkdownEditorComponent = ({ content, onChange, editorClassName }: Markdow
   const { setActiveEditor } = useEditorStore();
   const bubbleMenuId = React.useId();
 
-  const editor: any = useEditor({
+  const editor = useEditor({
     extensions: editorExtensions(bubbleMenuId),
     content: marked.parse(content) as string,
     onBlur: ({ editor }) => {
@@ -78,7 +78,7 @@ const MarkdownEditorComponent = ({ content, onChange, editorClassName }: Markdow
       {editor && (
         <BubbleMenu
           editor={editor}
-          tippyOptions={{ duration: 100, placement: 'top', onClose: () => false }}
+          tippyOptions={{ duration: 100, placement: 'top' }}
           pluginKey={bubbleMenuId}
           shouldShow={({ editor }) => !editor.state.selection.empty}
         >

@@ -3,13 +3,15 @@
 import ReportModeGenerator from '@/components/report-mode/ReportModeGenerator';
 import { BuilderPageSkeleton } from './loading';
 import { Suspense } from 'react';
+import { ErrorBoundary } from '@/components/shared/ErrorBoundary';
 
 export default function GeneratePage() {
-  // The main page now simply wraps the ReportModeGenerator with Suspense for loading.
-  // All logic has been moved into the ReportModeGenerator component itself.
+  // The main page now wraps the ReportModeGenerator with ErrorBoundary and Suspense
   return (
-    <Suspense fallback={<BuilderPageSkeleton />}>
-      <ReportModeGenerator />
-    </Suspense>
+    <ErrorBoundary>
+      <Suspense fallback={<BuilderPageSkeleton />}>
+        <ReportModeGenerator />
+      </Suspense>
+    </ErrorBoundary>
   );
 }

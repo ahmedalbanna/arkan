@@ -83,18 +83,20 @@ export async function POST(req: NextRequest) {
 
       pptxBuffer = await convertMarkdownToPptx(finalMarkdown, project.name || 'Presentation', { ...options, title: project.name });
       fileName = `${(project.name || 'presentation').replace(/\s+/g, '_')}.pptx`;
-    } else {
+    } else if ('markdown' in validation.data && 'fileName' in validation.data) {
       // Handle direct markdown export
       const { markdown, fileName: fn, options } = validation.data;
       pptxBuffer = await convertMarkdownToPptx(markdown, fn, options);
       fileName = `${fn}.pptx`;
+    } else {
+      return new NextResponse('Invalid export data', { status: 400 });
     }
 
     if (!pptxBuffer) {
       return new NextResponse('Error creating PPTX file buffer.', { status: 500 });
     }
 
-    return new NextResponse(pptxBuffer, {
+    return new NextResponse(pptxBuffer as BodyInit, {
       status: 200,
       headers: {
         'Content-Type': 'application/vnd.openxmlformats-officedocument.presentationml.presentation',

@@ -1,0 +1,101 @@
+
+> nextn@0.1.0 typecheck
+> tsc --noEmit
+
+.next/types/validator.ts(198,31): error TS2344: Type 'typeof import("/teamspace/studios/this_studio/arkan/src/app/api/chat/project-consultant/route")' does not satisfy the constraint 'RouteHandlerConfig<"/api/chat/project-consultant">'.
+  Types of property 'POST' are incompatible.
+    Type '(request: NextRequest, { params }: { params: { [key: string]: string; }; }) => Promise<Response>' is not assignable to type '(request: NextRequest, context: { params: Promise<{}>; }) => void | Response | Promise<void | Response>'.
+      Types of parameters '__1' and 'context' are incompatible.
+        Type '{ params: Promise<{}>; }' is not assignable to type '{ params: { [key: string]: string; }; }'.
+          Types of property 'params' are incompatible.
+            Type 'Promise<{}>' is not assignable to type '{ [key: string]: string; }'.
+              Index signature for type 'string' is missing in type 'Promise<{}>'.
+.next/types/validator.ts(234,31): error TS2344: Type 'typeof import("/teamspace/studios/this_studio/arkan/src/app/api/generate/image/route")' does not satisfy the constraint 'RouteHandlerConfig<"/api/generate/image">'.
+  Types of property 'POST' are incompatible.
+    Type '(request: NextRequest, { params }: { params: { [key: string]: string; }; }) => Promise<Response>' is not assignable to type '(request: NextRequest, context: { params: Promise<{}>; }) => void | Response | Promise<void | Response>'.
+      Types of parameters '__1' and 'context' are incompatible.
+        Type '{ params: Promise<{}>; }' is not assignable to type '{ params: { [key: string]: string; }; }'.
+          Types of property 'params' are incompatible.
+            Type 'Promise<{}>' is not assignable to type '{ [key: string]: string; }'.
+              Index signature for type 'string' is missing in type 'Promise<{}>'.
+.next/types/validator.ts(252,31): error TS2344: Type 'typeof import("/teamspace/studios/this_studio/arkan/src/app/api/generate/section/route")' does not satisfy the constraint 'RouteHandlerConfig<"/api/generate/section">'.
+  Types of property 'POST' are incompatible.
+    Type '(request: NextRequest, { params }: { params: { [key: string]: string; }; }) => Promise<Response>' is not assignable to type '(request: NextRequest, context: { params: Promise<{}>; }) => void | Response | Promise<void | Response>'.
+      Types of parameters '__1' and 'context' are incompatible.
+        Type '{ params: Promise<{}>; }' is not assignable to type '{ params: { [key: string]: string; }; }'.
+          Types of property 'params' are incompatible.
+            Type 'Promise<{}>' is not assignable to type '{ [key: string]: string; }'.
+              Index signature for type 'string' is missing in type 'Promise<{}>'.
+.next/types/validator.ts(288,31): error TS2344: Type 'typeof import("/teamspace/studios/this_studio/arkan/src/app/api/payment/request/route")' does not satisfy the constraint 'RouteHandlerConfig<"/api/payment/request">'.
+  Types of property 'POST' are incompatible.
+    Type '(request: NextRequest, { params }: { params: { [key: string]: string; }; }) => Promise<Response>' is not assignable to type '(request: NextRequest, context: { params: Promise<{}>; }) => void | Response | Promise<void | Response>'.
+      Types of parameters '__1' and 'context' are incompatible.
+        Type '{ params: Promise<{}>; }' is not assignable to type '{ params: { [key: string]: string; }; }'.
+          Types of property 'params' are incompatible.
+            Type 'Promise<{}>' is not assignable to type '{ [key: string]: string; }'.
+              Index signature for type 'string' is missing in type 'Promise<{}>'.
+.next/types/validator.ts(306,31): error TS2344: Type 'typeof import("/teamspace/studios/this_studio/arkan/src/app/api/projects/[id]/route")' does not satisfy the constraint 'RouteHandlerConfig<"/api/projects/[id]">'.
+  Types of property 'GET' are incompatible.
+    Type '(request: NextRequest, { params }: { params: { [key: string]: string; }; }) => Promise<Response>' is not assignable to type '(request: NextRequest, context: { params: Promise<{ id: string; }>; }) => void | Response | Promise<void | Response>'.
+      Types of parameters '__1' and 'context' are incompatible.
+        Type '{ params: Promise<{ id: string; }>; }' is not assignable to type '{ params: { [key: string]: string; }; }'.
+          Types of property 'params' are incompatible.
+            Type 'Promise<{ id: string; }>' is not assignable to type '{ [key: string]: string; }'.
+              Index signature for type 'string' is missing in type 'Promise<{ id: string; }>'.
+.next/types/validator.ts(315,31): error TS2344: Type 'typeof import("/teamspace/studios/this_studio/arkan/src/app/api/projects/route")' does not satisfy the constraint 'RouteHandlerConfig<"/api/projects">'.
+  Types of property 'GET' are incompatible.
+    Type '(request: NextRequest, { params }: { params: { [key: string]: string; }; }) => Promise<Response>' is not assignable to type '(request: NextRequest, context: { params: Promise<{}>; }) => void | Response | Promise<void | Response>'.
+      Types of parameters '__1' and 'context' are incompatible.
+        Type '{ params: Promise<{}>; }' is not assignable to type '{ params: { [key: string]: string; }; }'.
+          Types of property 'params' are incompatible.
+            Type 'Promise<{}>' is not assignable to type '{ [key: string]: string; }'.
+              Index signature for type 'string' is missing in type 'Promise<{}>'.
+.next/types/validator.ts(351,31): error TS2344: Type 'typeof import("/teamspace/studios/this_studio/arkan/src/app/api/templates/docx/[key]/route")' does not satisfy the constraint 'RouteHandlerConfig<"/api/templates/docx/[key]">'.
+  Types of property 'PUT' are incompatible.
+    Type '(request: NextRequest, { params }: { params: { [key: string]: string; }; }) => Promise<Response>' is not assignable to type '(request: NextRequest, context: { params: Promise<{ key: string; }>; }) => void | Response | Promise<void | Response>'.
+      Types of parameters '__1' and 'context' are incompatible.
+        Type '{ params: Promise<{ key: string; }>; }' is not assignable to type '{ params: { [key: string]: string; }; }'.
+          Types of property 'params' are incompatible.
+            Type 'Promise<{ key: string; }>' is not assignable to type '{ [key: string]: string; }'.
+              Index signature for type 'string' is missing in type 'Promise<{ key: string; }>'.
+.next/types/validator.ts(360,31): error TS2344: Type 'typeof import("/teamspace/studios/this_studio/arkan/src/app/api/templates/docx/route")' does not satisfy the constraint 'RouteHandlerConfig<"/api/templates/docx">'.
+  Types of property 'POST' are incompatible.
+    Type '(request: NextRequest, { params }: { params: { [key: string]: string; }; }) => Promise<Response>' is not assignable to type '(request: NextRequest, context: { params: Promise<{}>; }) => void | Response | Promise<void | Response>'.
+      Types of parameters '__1' and 'context' are incompatible.
+        Type '{ params: Promise<{}>; }' is not assignable to type '{ params: { [key: string]: string; }; }'.
+          Types of property 'params' are incompatible.
+            Type 'Promise<{}>' is not assignable to type '{ [key: string]: string; }'.
+              Index signature for type 'string' is missing in type 'Promise<{}>'.
+.next/types/validator.ts(369,31): error TS2344: Type 'typeof import("/teamspace/studios/this_studio/arkan/src/app/api/templates/pptx/[key]/route")' does not satisfy the constraint 'RouteHandlerConfig<"/api/templates/pptx/[key]">'.
+  Types of property 'PUT' are incompatible.
+    Type '(request: NextRequest, { params }: { params: { [key: string]: string; }; }) => Promise<Response>' is not assignable to type '(request: NextRequest, context: { params: Promise<{ key: string; }>; }) => void | Response | Promise<void | Response>'.
+      Types of parameters '__1' and 'context' are incompatible.
+        Type '{ params: Promise<{ key: string; }>; }' is not assignable to type '{ params: { [key: string]: string; }; }'.
+          Types of property 'params' are incompatible.
+            Type 'Promise<{ key: string; }>' is not assignable to type '{ [key: string]: string; }'.
+              Index signature for type 'string' is missing in type 'Promise<{ key: string; }>'.
+.next/types/validator.ts(378,31): error TS2344: Type 'typeof import("/teamspace/studios/this_studio/arkan/src/app/api/templates/pptx/route")' does not satisfy the constraint 'RouteHandlerConfig<"/api/templates/pptx">'.
+  Types of property 'POST' are incompatible.
+    Type '(request: NextRequest, { params }: { params: { [key: string]: string; }; }) => Promise<Response>' is not assignable to type '(request: NextRequest, context: { params: Promise<{}>; }) => void | Response | Promise<void | Response>'.
+      Types of parameters '__1' and 'context' are incompatible.
+        Type '{ params: Promise<{}>; }' is not assignable to type '{ params: { [key: string]: string; }; }'.
+          Types of property 'params' are incompatible.
+            Type 'Promise<{}>' is not assignable to type '{ [key: string]: string; }'.
+              Index signature for type 'string' is missing in type 'Promise<{}>'.
+.next/types/validator.ts(386,39): error TS2306: File '/teamspace/studios/this_studio/arkan/src/app/api/templates/refresh-image/route.ts' is not a module.
+.next/types/validator.ts(405,31): error TS2344: Type 'typeof import("/teamspace/studios/this_studio/arkan/src/app/api/templates/report/route")' does not satisfy the constraint 'RouteHandlerConfig<"/api/templates/report">'.
+  Types of property 'POST' are incompatible.
+    Type '(request: NextRequest, { params }: { params: { [key: string]: string; }; }) => Promise<Response>' is not assignable to type '(request: NextRequest, context: { params: Promise<{}>; }) => void | Response | Promise<void | Response>'.
+      Types of parameters '__1' and 'context' are incompatible.
+        Type '{ params: Promise<{}>; }' is not assignable to type '{ params: { [key: string]: string; }; }'.
+          Types of property 'params' are incompatible.
+            Type 'Promise<{}>' is not assignable to type '{ [key: string]: string; }'.
+              Index signature for type 'string' is missing in type 'Promise<{}>'.
+.next/types/validator.ts(414,31): error TS2344: Type 'typeof import("/teamspace/studios/this_studio/arkan/src/app/api/transactions/report/route")' does not satisfy the constraint 'RouteHandlerConfig<"/api/transactions/report">'.
+  Types of property 'GET' are incompatible.
+    Type '(request: NextRequest, { params }: { params: { [key: string]: string; }; }) => Promise<Response>' is not assignable to type '(request: NextRequest, context: { params: Promise<{}>; }) => void | Response | Promise<void | Response>'.
+      Types of parameters '__1' and 'context' are incompatible.
+        Type '{ params: Promise<{}>; }' is not assignable to type '{ params: { [key: string]: string; }; }'.
+          Types of property 'params' are incompatible.
+            Type 'Promise<{}>' is not assignable to type '{ [key: string]: string; }'.
+              Index signature for type 'string' is missing in type 'Promise<{}>'.

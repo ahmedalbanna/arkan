@@ -51,11 +51,13 @@ export async function POST(req: NextRequest) {
         );
         fileName = `${(projectData as ProjectProperties).name?.replace(/\s+/g, '_') || 'document'}.docx`;
 
-    } else {
+    } else if ('markdown' in validation.data && 'fileName' in validation.data) {
         // Handle direct markdown export
         const { markdown, fileName: fn, options } = validation.data;
         docxBuffer = await convertMarkdownToWord(markdown, fn, options);
         fileName = `${fn}.docx`;
+    } else {
+        return new NextResponse('Invalid export data', { status: 400 });
     }
 
     if (!docxBuffer) {

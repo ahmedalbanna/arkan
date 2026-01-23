@@ -24,13 +24,8 @@ export const POST = withAuth(async ({ request, user }) => {
     let result = await generateReportSection(agentInput);
 
     // Safeguard: ensure the AI returned the section we requested.
-    // If there's a mismatch, log a warning and normalize the returned key to the requested one.
-    if (result.sectionName !== agentInput.sectionToGenerate) {
-      // Log for debugging/monitoring
-      console.warn(
-        `Generation mismatch: requested '${agentInput.sectionToGenerate}' but generator returned '${result.sectionName}'. Normalizing output to requested key.`
-      );
-    }
+    // If there's a mismatch, normalize the returned key to the requested one.
+    // The mismatch is handled silently as it's an internal AI behavior
 
     let transformedOutput = { [agentInput.sectionToGenerate]: result.content };
 

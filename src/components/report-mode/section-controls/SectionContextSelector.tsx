@@ -37,10 +37,13 @@ export function SectionContextSelector({ sectionId }: SectionContextSelectorProp
   
   // Get all sections except current one for copying context from
   const otherSections = useMemo(() => {
-    return reportSections.filter(s => s.id !== sectionId && (
-      Object.keys(s.context?.sections || {}).length > 0 || 
-      Object.keys(s.context?.externalContext || {}).length > 0
-    ));
+    return reportSections.filter(s => {
+      const section = s as any; // Type assertion for context property
+      return s.id !== sectionId && (
+        Object.keys(section.context?.sections || {}).length > 0 || 
+        Object.keys(section.context?.externalContext || {}).length > 0
+      );
+    });
   }, [reportSections, sectionId]);
   
   const handleCopyContext = () => {
@@ -97,8 +100,9 @@ export function SectionContextSelector({ sectionId }: SectionContextSelectorProp
                 </SelectTrigger>
                 <SelectContent>
                   {otherSections.map(section => {
-                    const contextCount = Object.keys(section.context?.sections || {}).length + 
-                                       Object.keys(section.context?.externalContext || {}).length;
+                    const sec = section as any; // Type assertion for context property
+                    const contextCount = Object.keys(sec.context?.sections || {}).length + 
+                                       Object.keys(sec.context?.externalContext || {}).length;
                     return (
                       <SelectItem key={section.id} value={section.id} className="text-xs">
                         {section.title} ({contextCount} link{contextCount > 1 ? 's' : ''})

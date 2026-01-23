@@ -16,7 +16,7 @@ export async function GET() {
         // Lazy seeding
         if (snapshot.empty) {
             let batch = adminDb.batch();
-            defaultReportTemplates.forEach(template => {
+            defaultReportTemplates.forEach((template: ReportTemplateProperties) => {
                 const docRef = collectionRef.doc(template.id);
                 batch.set(docRef, template);
             });

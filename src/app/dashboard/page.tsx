@@ -97,8 +97,8 @@ export default function UserDashboardPage() {
                     </div>
 
                     <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-7">
-                        <AgentUsageChart data={stats.agentUsageChartData} />
-                        <RecentActivity data={stats.recentActivity} />
+                        <AgentUsageChart data={stats.agentUsageChartData || []} />
+                        <RecentActivity activities={stats.recentActivity || []} />
                     </div>
                 </div>
             )}

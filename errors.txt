@@ -1,0 +1,34 @@
+[{
+	"resource": "/src/hooks/report-mode/use-ai-actions.ts",
+	"owner": "typescript",
+	"code": "2451",
+	"severity": 8,
+	"message": "Cannot redeclare block-scoped variable 'chapter'.",
+	"source": "ts",
+	"startLineNumber": 184,
+	"startColumn": 13,
+	"endLineNumber": 184,
+	"endColumn": 20
+},{
+	"resource": "/src/hooks/report-mode/use-ai-actions.ts",
+	"owner": "typescript",
+	"code": "2451",
+	"severity": 8,
+	"message": "Cannot redeclare block-scoped variable 'chapter'.",
+	"source": "ts",
+	"startLineNumber": 208,
+	"startColumn": 13,
+	"endLineNumber": 208,
+	"endColumn": 20
+},{
+	"resource": "/src/hooks/report-mode/use-ai-actions.ts",
+	"owner": "typescript",
+	"code": "2339",
+	"severity": 8,
+	"message": "Property 'findChapter' does not exist on type 'Project'.",
+	"source": "ts",
+	"startLineNumber": 208,
+	"startColumn": 31,
+	"endLineNumber": 208,
+	"endColumn": 42
+}]

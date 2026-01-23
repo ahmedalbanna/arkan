@@ -5,7 +5,7 @@ import withPWA from "@ducanh2912/next-pwa";
 const pwaConfig = withPWA({
   dest: 'public',
   register: true,
-  skipWaiting: true,
+  // skipWaiting: true, // Removed - not supported in this PWA version
   disable: process.env.NODE_ENV === 'development',
 });
 

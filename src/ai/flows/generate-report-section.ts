@@ -10,7 +10,7 @@
 import { ai } from '@/ai/genkit';
 import { z } from 'genkit';
 
-const GenerateSectionInputSchema = z
+export const GenerateSectionInputSchema = z
   .object({
     flow: z.literal('generate-section'),
     sectionToGenerate: z.string(),
@@ -75,7 +75,7 @@ const GenerateSectionInputSchema = z
       ]).optional().describe('Desired tone (e.g., professional, casual, persuasive).'),
     }));
 
-type GenerateSectionInput = z.infer<typeof GenerateSectionInputSchema>;
+export type GenerateSectionInput = z.infer<typeof GenerateSectionInputSchema>;
 
 const GenerateSectionOutputSchema = z.object({
   sectionName: z.string().describe("The name of the section that was generated. This must match the 'sectionToGenerate' from the input."),
@@ -159,11 +159,10 @@ You have access to the following documents. Review them and use the most relevan
   // Wrap the plain text in the expected output structure
   const output: GenerateSectionOutput = {
     sectionName: input.sectionToGenerate,
-    content: result.text || result.output || '' // Handle different response formats
+    content: typeof result === 'string' ? result : (result.text || (typeof result.output === 'string' ? result.output : '') || '')
   };
 
   if (!output.content || output.content.trim().length === 0) {
-    console.error(`AI failed to generate content for section: ${input.sectionToGenerate}`);
     throw new Error(`The AI failed to generate a response for the '${input.sectionToGenerate}' section. Please try again.`);
   }
 

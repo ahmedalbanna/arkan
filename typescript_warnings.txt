@@ -1,0 +1,252 @@
+
+> nextn@0.1.0 typecheck
+> tsc --noEmit
+
+.next/types/app/api/chat/project-consultant/route.ts(166,7): error TS2344: Type '{ __tag__: "POST"; __param_position__: "second"; __param_type__: { params: { [key: string]: string; }; }; }' does not satisfy the constraint 'ParamCheck<RouteContext>'.
+  The types of '__param_type__.params' are incompatible between these types.
+    Type '{ [key: string]: string; }' is missing the following properties from type 'Promise<any>': then, catch, finally, [Symbol.toStringTag]
+.next/types/app/api/generate/image/route.ts(166,7): error TS2344: Type '{ __tag__: "POST"; __param_position__: "second"; __param_type__: { params: { [key: string]: string; }; }; }' does not satisfy the constraint 'ParamCheck<RouteContext>'.
+  The types of '__param_type__.params' are incompatible between these types.
+    Type '{ [key: string]: string; }' is missing the following properties from type 'Promise<any>': then, catch, finally, [Symbol.toStringTag]
+.next/types/app/api/generate/section/route.ts(166,7): error TS2344: Type '{ __tag__: "POST"; __param_position__: "second"; __param_type__: { params: { [key: string]: string; }; }; }' does not satisfy the constraint 'ParamCheck<RouteContext>'.
+  The types of '__param_type__.params' are incompatible between these types.
+    Type '{ [key: string]: string; }' is missing the following properties from type 'Promise<any>': then, catch, finally, [Symbol.toStringTag]
+.next/types/app/api/payment/request/route.ts(166,7): error TS2344: Type '{ __tag__: "POST"; __param_position__: "second"; __param_type__: { params: { [key: string]: string; }; }; }' does not satisfy the constraint 'ParamCheck<RouteContext>'.
+  The types of '__param_type__.params' are incompatible between these types.
+    Type '{ [key: string]: string; }' is missing the following properties from type 'Promise<any>': then, catch, finally, [Symbol.toStringTag]
+.next/types/app/api/projects/[id]/route.ts(49,7): error TS2344: Type '{ __tag__: "GET"; __param_position__: "second"; __param_type__: { params: { [key: string]: string; }; }; }' does not satisfy the constraint 'ParamCheck<RouteContext>'.
+  The types of '__param_type__.params' are incompatible between these types.
+    Type '{ [key: string]: string; }' is missing the following properties from type 'Promise<any>': then, catch, finally, [Symbol.toStringTag]
+.next/types/app/api/projects/[id]/route.ts(244,7): error TS2344: Type '{ __tag__: "DELETE"; __param_position__: "second"; __param_type__: { params: { [key: string]: string; }; }; }' does not satisfy the constraint 'ParamCheck<RouteContext>'.
+  The types of '__param_type__.params' are incompatible between these types.
+    Type '{ [key: string]: string; }' is missing the following properties from type 'Promise<any>': then, catch, finally, [Symbol.toStringTag]
+.next/types/app/api/projects/route.ts(49,7): error TS2344: Type '{ __tag__: "GET"; __param_position__: "second"; __param_type__: { params: { [key: string]: string; }; }; }' does not satisfy the constraint 'ParamCheck<RouteContext>'.
+  The types of '__param_type__.params' are incompatible between these types.
+    Type '{ [key: string]: string; }' is missing the following properties from type 'Promise<any>': then, catch, finally, [Symbol.toStringTag]
+.next/types/app/api/projects/route.ts(166,7): error TS2344: Type '{ __tag__: "POST"; __param_position__: "second"; __param_type__: { params: { [key: string]: string; }; }; }' does not satisfy the constraint 'ParamCheck<RouteContext>'.
+  The types of '__param_type__.params' are incompatible between these types.
+    Type '{ [key: string]: string; }' is missing the following properties from type 'Promise<any>': then, catch, finally, [Symbol.toStringTag]
+.next/types/app/api/templates/docx/[key]/route.ts(205,7): error TS2344: Type '{ __tag__: "PUT"; __param_position__: "second"; __param_type__: { params: { [key: string]: string; }; }; }' does not satisfy the constraint 'ParamCheck<RouteContext>'.
+  The types of '__param_type__.params' are incompatible between these types.
+    Type '{ [key: string]: string; }' is missing the following properties from type 'Promise<any>': then, catch, finally, [Symbol.toStringTag]
+.next/types/app/api/templates/docx/[key]/route.ts(244,7): error TS2344: Type '{ __tag__: "DELETE"; __param_position__: "second"; __param_type__: { params: { [key: string]: string; }; }; }' does not satisfy the constraint 'ParamCheck<RouteContext>'.
+  The types of '__param_type__.params' are incompatible between these types.
+    Type '{ [key: string]: string; }' is missing the following properties from type 'Promise<any>': then, catch, finally, [Symbol.toStringTag]
+.next/types/app/api/templates/docx/route.ts(166,7): error TS2344: Type '{ __tag__: "POST"; __param_position__: "second"; __param_type__: { params: { [key: string]: string; }; }; }' does not satisfy the constraint 'ParamCheck<RouteContext>'.
+  The types of '__param_type__.params' are incompatible between these types.
+    Type '{ [key: string]: string; }' is missing the following properties from type 'Promise<any>': then, catch, finally, [Symbol.toStringTag]
+.next/types/app/api/templates/pptx/[key]/route.ts(205,7): error TS2344: Type '{ __tag__: "PUT"; __param_position__: "second"; __param_type__: { params: { [key: string]: string; }; }; }' does not satisfy the constraint 'ParamCheck<RouteContext>'.
+  The types of '__param_type__.params' are incompatible between these types.
+    Type '{ [key: string]: string; }' is missing the following properties from type 'Promise<any>': then, catch, finally, [Symbol.toStringTag]
+.next/types/app/api/templates/pptx/[key]/route.ts(244,7): error TS2344: Type '{ __tag__: "DELETE"; __param_position__: "second"; __param_type__: { params: { [key: string]: string; }; }; }' does not satisfy the constraint 'ParamCheck<RouteContext>'.
+  The types of '__param_type__.params' are incompatible between these types.
+    Type '{ [key: string]: string; }' is missing the following properties from type 'Promise<any>': then, catch, finally, [Symbol.toStringTag]
+.next/types/app/api/templates/pptx/route.ts(166,7): error TS2344: Type '{ __tag__: "POST"; __param_position__: "second"; __param_type__: { params: { [key: string]: string; }; }; }' does not satisfy the constraint 'ParamCheck<RouteContext>'.
+  The types of '__param_type__.params' are incompatible between these types.
+    Type '{ [key: string]: string; }' is missing the following properties from type 'Promise<any>': then, catch, finally, [Symbol.toStringTag]
+.next/types/app/api/templates/report/route.ts(166,7): error TS2344: Type '{ __tag__: "POST"; __param_position__: "second"; __param_type__: { params: { [key: string]: string; }; }; }' does not satisfy the constraint 'ParamCheck<RouteContext>'.
+  The types of '__param_type__.params' are incompatible between these types.
+    Type '{ [key: string]: string; }' is missing the following properties from type 'Promise<any>': then, catch, finally, [Symbol.toStringTag]
+.next/types/app/api/transactions/report/route.ts(49,7): error TS2344: Type '{ __tag__: "GET"; __param_position__: "second"; __param_type__: { params: { [key: string]: string; }; }; }' does not satisfy the constraint 'ParamCheck<RouteContext>'.
+  The types of '__param_type__.params' are incompatible between these types.
+    Type '{ [key: string]: string; }' is missing the following properties from type 'Promise<any>': then, catch, finally, [Symbol.toStringTag]
+.next/types/app/api/transactions/route.ts(49,7): error TS2344: Type '{ __tag__: "GET"; __param_position__: "second"; __param_type__: { params: { [key: string]: string; }; }; }' does not satisfy the constraint 'ParamCheck<RouteContext>'.
+  The types of '__param_type__.params' are incompatible between these types.
+    Type '{ [key: string]: string; }' is missing the following properties from type 'Promise<any>': then, catch, finally, [Symbol.toStringTag]
+.next/types/app/api/user-transactions/route.ts(49,7): error TS2344: Type '{ __tag__: "GET"; __param_position__: "second"; __param_type__: { params: { [key: string]: string; }; }; }' does not satisfy the constraint 'ParamCheck<RouteContext>'.
+  The types of '__param_type__.params' are incompatible between these types.
+    Type '{ [key: string]: string; }' is missing the following properties from type 'Promise<any>': then, catch, finally, [Symbol.toStringTag]
+.next/types/app/api/users/[id]/reset-password/route.ts(166,7): error TS2344: Type '{ __tag__: "POST"; __param_position__: "second"; __param_type__: { params: { [key: string]: string; }; }; }' does not satisfy the constraint 'ParamCheck<RouteContext>'.
+  The types of '__param_type__.params' are incompatible between these types.
+    Type '{ [key: string]: string; }' is missing the following properties from type 'Promise<any>': then, catch, finally, [Symbol.toStringTag]
+.next/types/app/api/users/[id]/route.ts(49,7): error TS2344: Type '{ __tag__: "GET"; __param_position__: "second"; __param_type__: { params: { [key: string]: string; }; }; }' does not satisfy the constraint 'ParamCheck<RouteContext>'.
+  The types of '__param_type__.params' are incompatible between these types.
+    Type '{ [key: string]: string; }' is missing the following properties from type 'Promise<any>': then, catch, finally, [Symbol.toStringTag]
+.next/types/app/api/users/[id]/route.ts(205,7): error TS2344: Type '{ __tag__: "PUT"; __param_position__: "second"; __param_type__: { params: { [key: string]: string; }; }; }' does not satisfy the constraint 'ParamCheck<RouteContext>'.
+  The types of '__param_type__.params' are incompatible between these types.
+    Type '{ [key: string]: string; }' is missing the following properties from type 'Promise<any>': then, catch, finally, [Symbol.toStringTag]
+.next/types/app/api/users/[id]/upload-profile-picture/route.ts(166,7): error TS2344: Type '{ __tag__: "POST"; __param_position__: "second"; __param_type__: { params: { [key: string]: string; }; }; }' does not satisfy the constraint 'ParamCheck<RouteContext>'.
+  The types of '__param_type__.params' are incompatible between these types.
+    Type '{ [key: string]: string; }' is missing the following properties from type 'Promise<any>': then, catch, finally, [Symbol.toStringTag]
+.next/types/validator.ts(198,31): error TS2344: Type 'typeof import("/teamspace/studios/this_studio/arkan/src/app/api/chat/project-consultant/route")' does not satisfy the constraint 'RouteHandlerConfig<"/api/chat/project-consultant">'.
+  Types of property 'POST' are incompatible.
+    Type '(request: NextRequest, { params }: { params: { [key: string]: string; }; }) => Promise<Response>' is not assignable to type '(request: NextRequest, context: { params: Promise<{}>; }) => void | Response | Promise<void | Response>'.
+      Types of parameters '__1' and 'context' are incompatible.
+        Type '{ params: Promise<{}>; }' is not assignable to type '{ params: { [key: string]: string; }; }'.
+          Types of property 'params' are incompatible.
+            Type 'Promise<{}>' is not assignable to type '{ [key: string]: string; }'.
+              Index signature for type 'string' is missing in type 'Promise<{}>'.
+.next/types/validator.ts(234,31): error TS2344: Type 'typeof import("/teamspace/studios/this_studio/arkan/src/app/api/generate/image/route")' does not satisfy the constraint 'RouteHandlerConfig<"/api/generate/image">'.
+  Types of property 'POST' are incompatible.
+    Type '(request: NextRequest, { params }: { params: { [key: string]: string; }; }) => Promise<Response>' is not assignable to type '(request: NextRequest, context: { params: Promise<{}>; }) => void | Response | Promise<void | Response>'.
+      Types of parameters '__1' and 'context' are incompatible.
+        Type '{ params: Promise<{}>; }' is not assignable to type '{ params: { [key: string]: string; }; }'.
+          Types of property 'params' are incompatible.
+            Type 'Promise<{}>' is not assignable to type '{ [key: string]: string; }'.
+              Index signature for type 'string' is missing in type 'Promise<{}>'.
+.next/types/validator.ts(252,31): error TS2344: Type 'typeof import("/teamspace/studios/this_studio/arkan/src/app/api/generate/section/route")' does not satisfy the constraint 'RouteHandlerConfig<"/api/generate/section">'.
+  Types of property 'POST' are incompatible.
+    Type '(request: NextRequest, { params }: { params: { [key: string]: string; }; }) => Promise<Response>' is not assignable to type '(request: NextRequest, context: { params: Promise<{}>; }) => void | Response | Promise<void | Response>'.
+      Types of parameters '__1' and 'context' are incompatible.
+        Type '{ params: Promise<{}>; }' is not assignable to type '{ params: { [key: string]: string; }; }'.
+          Types of property 'params' are incompatible.
+            Type 'Promise<{}>' is not assignable to type '{ [key: string]: string; }'.
+              Index signature for type 'string' is missing in type 'Promise<{}>'.
+.next/types/validator.ts(288,31): error TS2344: Type 'typeof import("/teamspace/studios/this_studio/arkan/src/app/api/payment/request/route")' does not satisfy the constraint 'RouteHandlerConfig<"/api/payment/request">'.
+  Types of property 'POST' are incompatible.
+    Type '(request: NextRequest, { params }: { params: { [key: string]: string; }; }) => Promise<Response>' is not assignable to type '(request: NextRequest, context: { params: Promise<{}>; }) => void | Response | Promise<void | Response>'.
+      Types of parameters '__1' and 'context' are incompatible.
+        Type '{ params: Promise<{}>; }' is not assignable to type '{ params: { [key: string]: string; }; }'.
+          Types of property 'params' are incompatible.
+            Type 'Promise<{}>' is not assignable to type '{ [key: string]: string; }'.
+              Index signature for type 'string' is missing in type 'Promise<{}>'.
+.next/types/validator.ts(306,31): error TS2344: Type 'typeof import("/teamspace/studios/this_studio/arkan/src/app/api/projects/[id]/route")' does not satisfy the constraint 'RouteHandlerConfig<"/api/projects/[id]">'.
+  Types of property 'GET' are incompatible.
+    Type '(request: NextRequest, { params }: { params: { [key: string]: string; }; }) => Promise<Response>' is not assignable to type '(request: NextRequest, context: { params: Promise<{ id: string; }>; }) => void | Response | Promise<void | Response>'.
+      Types of parameters '__1' and 'context' are incompatible.
+        Type '{ params: Promise<{ id: string; }>; }' is not assignable to type '{ params: { [key: string]: string; }; }'.
+          Types of property 'params' are incompatible.
+            Type 'Promise<{ id: string; }>' is not assignable to type '{ [key: string]: string; }'.
+              Index signature for type 'string' is missing in type 'Promise<{ id: string; }>'.
+.next/types/validator.ts(315,31): error TS2344: Type 'typeof import("/teamspace/studios/this_studio/arkan/src/app/api/projects/route")' does not satisfy the constraint 'RouteHandlerConfig<"/api/projects">'.
+  Types of property 'GET' are incompatible.
+    Type '(request: NextRequest, { params }: { params: { [key: string]: string; }; }) => Promise<Response>' is not assignable to type '(request: NextRequest, context: { params: Promise<{}>; }) => void | Response | Promise<void | Response>'.
+      Types of parameters '__1' and 'context' are incompatible.
+        Type '{ params: Promise<{}>; }' is not assignable to type '{ params: { [key: string]: string; }; }'.
+          Types of property 'params' are incompatible.
+            Type 'Promise<{}>' is not assignable to type '{ [key: string]: string; }'.
+              Index signature for type 'string' is missing in type 'Promise<{}>'.
+.next/types/validator.ts(351,31): error TS2344: Type 'typeof import("/teamspace/studios/this_studio/arkan/src/app/api/templates/docx/[key]/route")' does not satisfy the constraint 'RouteHandlerConfig<"/api/templates/docx/[key]">'.
+  Types of property 'PUT' are incompatible.
+    Type '(request: NextRequest, { params }: { params: { [key: string]: string; }; }) => Promise<Response>' is not assignable to type '(request: NextRequest, context: { params: Promise<{ key: string; }>; }) => void | Response | Promise<void | Response>'.
+      Types of parameters '__1' and 'context' are incompatible.
+        Type '{ params: Promise<{ key: string; }>; }' is not assignable to type '{ params: { [key: string]: string; }; }'.
+          Types of property 'params' are incompatible.
+            Type 'Promise<{ key: string; }>' is not assignable to type '{ [key: string]: string; }'.
+              Index signature for type 'string' is missing in type 'Promise<{ key: string; }>'.
+.next/types/validator.ts(360,31): error TS2344: Type 'typeof import("/teamspace/studios/this_studio/arkan/src/app/api/templates/docx/route")' does not satisfy the constraint 'RouteHandlerConfig<"/api/templates/docx">'.
+  Types of property 'POST' are incompatible.
+    Type '(request: NextRequest, { params }: { params: { [key: string]: string; }; }) => Promise<Response>' is not assignable to type '(request: NextRequest, context: { params: Promise<{}>; }) => void | Response | Promise<void | Response>'.
+      Types of parameters '__1' and 'context' are incompatible.
+        Type '{ params: Promise<{}>; }' is not assignable to type '{ params: { [key: string]: string; }; }'.
+          Types of property 'params' are incompatible.
+            Type 'Promise<{}>' is not assignable to type '{ [key: string]: string; }'.
+              Index signature for type 'string' is missing in type 'Promise<{}>'.
+.next/types/validator.ts(369,31): error TS2344: Type 'typeof import("/teamspace/studios/this_studio/arkan/src/app/api/templates/pptx/[key]/route")' does not satisfy the constraint 'RouteHandlerConfig<"/api/templates/pptx/[key]">'.
+  Types of property 'PUT' are incompatible.
+    Type '(request: NextRequest, { params }: { params: { [key: string]: string; }; }) => Promise<Response>' is not assignable to type '(request: NextRequest, context: { params: Promise<{ key: string; }>; }) => void | Response | Promise<void | Response>'.
+      Types of parameters '__1' and 'context' are incompatible.
+        Type '{ params: Promise<{ key: string; }>; }' is not assignable to type '{ params: { [key: string]: string; }; }'.
+          Types of property 'params' are incompatible.
+            Type 'Promise<{ key: string; }>' is not assignable to type '{ [key: string]: string; }'.
+              Index signature for type 'string' is missing in type 'Promise<{ key: string; }>'.
+.next/types/validator.ts(378,31): error TS2344: Type 'typeof import("/teamspace/studios/this_studio/arkan/src/app/api/templates/pptx/route")' does not satisfy the constraint 'RouteHandlerConfig<"/api/templates/pptx">'.
+  Types of property 'POST' are incompatible.
+    Type '(request: NextRequest, { params }: { params: { [key: string]: string; }; }) => Promise<Response>' is not assignable to type '(request: NextRequest, context: { params: Promise<{}>; }) => void | Response | Promise<void | Response>'.
+      Types of parameters '__1' and 'context' are incompatible.
+        Type '{ params: Promise<{}>; }' is not assignable to type '{ params: { [key: string]: string; }; }'.
+          Types of property 'params' are incompatible.
+            Type 'Promise<{}>' is not assignable to type '{ [key: string]: string; }'.
+              Index signature for type 'string' is missing in type 'Promise<{}>'.
+.next/types/validator.ts(405,31): error TS2344: Type 'typeof import("/teamspace/studios/this_studio/arkan/src/app/api/templates/report/route")' does not satisfy the constraint 'RouteHandlerConfig<"/api/templates/report">'.
+  Types of property 'POST' are incompatible.
+    Type '(request: NextRequest, { params }: { params: { [key: string]: string; }; }) => Promise<Response>' is not assignable to type '(request: NextRequest, context: { params: Promise<{}>; }) => void | Response | Promise<void | Response>'.
+      Types of parameters '__1' and 'context' are incompatible.
+        Type '{ params: Promise<{}>; }' is not assignable to type '{ params: { [key: string]: string; }; }'.
+          Types of property 'params' are incompatible.
+            Type 'Promise<{}>' is not assignable to type '{ [key: string]: string; }'.
+              Index signature for type 'string' is missing in type 'Promise<{}>'.
+.next/types/validator.ts(414,31): error TS2344: Type 'typeof import("/teamspace/studios/this_studio/arkan/src/app/api/transactions/report/route")' does not satisfy the constraint 'RouteHandlerConfig<"/api/transactions/report">'.
+  Types of property 'GET' are incompatible.
+    Type '(request: NextRequest, { params }: { params: { [key: string]: string; }; }) => Promise<Response>' is not assignable to type '(request: NextRequest, context: { params: Promise<{}>; }) => void | Response | Promise<void | Response>'.
+      Types of parameters '__1' and 'context' are incompatible.
+        Type '{ params: Promise<{}>; }' is not assignable to type '{ params: { [key: string]: string; }; }'.
+          Types of property 'params' are incompatible.
+            Type 'Promise<{}>' is not assignable to type '{ [key: string]: string; }'.
+              Index signature for type 'string' is missing in type 'Promise<{}>'.
+.next/types/validator.ts(423,31): error TS2344: Type 'typeof import("/teamspace/studios/this_studio/arkan/src/app/api/transactions/route")' does not satisfy the constraint 'RouteHandlerConfig<"/api/transactions">'.
+  Types of property 'GET' are incompatible.
+    Type '(request: NextRequest, { params }: { params: { [key: string]: string; }; }) => Promise<Response>' is not assignable to type '(request: NextRequest, context: { params: Promise<{}>; }) => void | Response | Promise<void | Response>'.
+      Types of parameters '__1' and 'context' are incompatible.
+        Type '{ params: Promise<{}>; }' is not assignable to type '{ params: { [key: string]: string; }; }'.
+          Types of property 'params' are incompatible.
+            Type 'Promise<{}>' is not assignable to type '{ [key: string]: string; }'.
+              Index signature for type 'string' is missing in type 'Promise<{}>'.
+.next/types/validator.ts(432,31): error TS2344: Type 'typeof import("/teamspace/studios/this_studio/arkan/src/app/api/user-transactions/route")' does not satisfy the constraint 'RouteHandlerConfig<"/api/user-transactions">'.
+  Types of property 'GET' are incompatible.
+    Type '(request: NextRequest, { params }: { params: { [key: string]: string; }; }) => Promise<Response>' is not assignable to type '(request: NextRequest, context: { params: Promise<{}>; }) => void | Response | Promise<void | Response>'.
+      Types of parameters '__1' and 'context' are incompatible.
+        Type '{ params: Promise<{}>; }' is not assignable to type '{ params: { [key: string]: string; }; }'.
+          Types of property 'params' are incompatible.
+            Type 'Promise<{}>' is not assignable to type '{ [key: string]: string; }'.
+              Index signature for type 'string' is missing in type 'Promise<{}>'.
+.next/types/validator.ts(441,31): error TS2344: Type 'typeof import("/teamspace/studios/this_studio/arkan/src/app/api/users/[id]/reset-password/route")' does not satisfy the constraint 'RouteHandlerConfig<"/api/users/[id]/reset-password">'.
+  Types of property 'POST' are incompatible.
+    Type '(request: NextRequest, { params }: { params: { [key: string]: string; }; }) => Promise<Response>' is not assignable to type '(request: NextRequest, context: { params: Promise<{ id: string; }>; }) => void | Response | Promise<void | Response>'.
+      Types of parameters '__1' and 'context' are incompatible.
+        Type '{ params: Promise<{ id: string; }>; }' is not assignable to type '{ params: { [key: string]: string; }; }'.
+          Types of property 'params' are incompatible.
+            Type 'Promise<{ id: string; }>' is not assignable to type '{ [key: string]: string; }'.
+              Index signature for type 'string' is missing in type 'Promise<{ id: string; }>'.
+.next/types/validator.ts(450,31): error TS2344: Type 'typeof import("/teamspace/studios/this_studio/arkan/src/app/api/users/[id]/route")' does not satisfy the constraint 'RouteHandlerConfig<"/api/users/[id]">'.
+  Types of property 'GET' are incompatible.
+    Type '(request: NextRequest, { params }: { params: { [key: string]: string; }; }) => Promise<Response>' is not assignable to type '(request: NextRequest, context: { params: Promise<{ id: string; }>; }) => void | Response | Promise<void | Response>'.
+      Types of parameters '__1' and 'context' are incompatible.
+        Type '{ params: Promise<{ id: string; }>; }' is not assignable to type '{ params: { [key: string]: string; }; }'.
+          Types of property 'params' are incompatible.
+            Type 'Promise<{ id: string; }>' is not assignable to type '{ [key: string]: string; }'.
+              Index signature for type 'string' is missing in type 'Promise<{ id: string; }>'.
+.next/types/validator.ts(459,31): error TS2344: Type 'typeof import("/teamspace/studios/this_studio/arkan/src/app/api/users/[id]/upload-profile-picture/route")' does not satisfy the constraint 'RouteHandlerConfig<"/api/users/[id]/upload-profile-picture">'.
+  Types of property 'POST' are incompatible.
+    Type '(request: NextRequest, { params }: { params: { [key: string]: string; }; }) => Promise<Response>' is not assignable to type '(request: NextRequest, context: { params: Promise<{ id: string; }>; }) => void | Response | Promise<void | Response>'.
+      Types of parameters '__1' and 'context' are incompatible.
+        Type '{ params: Promise<{ id: string; }>; }' is not assignable to type '{ params: { [key: string]: string; }; }'.
+          Types of property 'params' are incompatible.
+            Type 'Promise<{ id: string; }>' is not assignable to type '{ [key: string]: string; }'.
+              Index signature for type 'string' is missing in type 'Promise<{ id: string; }>'.
+src/app/dashboard/page.tsx(100,42): error TS2322: Type '{ name: string; count: number; }[]' is not assignable to type 'AgentUsageData[]'.
+  Property 'usage' is missing in type '{ name: string; count: number; }' but required in type 'AgentUsageData'.
+src/app/dashboard/page.tsx(101,41): error TS2322: Type '{ id: string; userId: string; agentId: string; createdAt: string; input: any; output: any; }[]' is not assignable to type 'Activity[]'.
+  Type '{ id: string; userId: string; agentId: string; createdAt: string; input: any; output: any; }' is missing the following properties from type 'Activity': user, action, timestamp
+src/components/report-mode/MarkdownEditor.tsx(41,7): error TS2769: No overload matches this call.
+  Overload 2 of 2, '(options?: UseEditorOptions | undefined, deps?: DependencyList | undefined): Editor | null', gave the following error.
+    Type '(this: any, view: EditorView, event: ClipboardEvent, slice: Slice) => Promise<boolean>' is not assignable to type '(this: any, view: EditorView, event: ClipboardEvent, slice: Slice) => boolean | void'.
+      Type 'Promise<boolean>' is not assignable to type 'boolean | void'.
+src/components/report-mode/MarkdownEditor.tsx(81,60): error TS2353: Object literal may only specify known properties, and 'onClose' does not exist in type 'Partial<Props>'.
+src/components/report-mode/ReportModeGenerator.tsx(70,5): error TS2339: Property 'handleComplexityChange' does not exist on type '{ isMobile: boolean; activeMobileView: "result" | "generator"; setActiveMobileView: Dispatch<SetStateAction<"result" | "generator">>; activePanelKey: string; ... 15 more ...; updateProject: (updater: (project: Project) => void | Project) => void; }'.
+src/components/report-mode/ReportModeGenerator.tsx(71,5): error TS2339: Property 'handleFormalityChange' does not exist on type '{ isMobile: boolean; activeMobileView: "result" | "generator"; setActiveMobileView: Dispatch<SetStateAction<"result" | "generator">>; activePanelKey: string; ... 15 more ...; updateProject: (updater: (project: Project) => void | Project) => void; }'.
+src/components/report-mode/ReportModeGenerator.tsx(72,5): error TS2339: Property 'handleLanguageChange' does not exist on type '{ isMobile: boolean; activeMobileView: "result" | "generator"; setActiveMobileView: Dispatch<SetStateAction<"result" | "generator">>; activePanelKey: string; ... 15 more ...; updateProject: (updater: (project: Project) => void | Project) => void; }'.
+src/components/report-mode/ReportModeGenerator.tsx(73,5): error TS2339: Property 'handleToneChange' does not exist on type '{ isMobile: boolean; activeMobileView: "result" | "generator"; setActiveMobileView: Dispatch<SetStateAction<"result" | "generator">>; activePanelKey: string; ... 15 more ...; updateProject: (updater: (project: Project) => void | Project) => void; }'.
+src/components/report-mode/ReportModeGenerator.tsx(74,5): error TS2339: Property 'handleZoomIn' does not exist on type '{ isMobile: boolean; activeMobileView: "result" | "generator"; setActiveMobileView: Dispatch<SetStateAction<"result" | "generator">>; activePanelKey: string; ... 15 more ...; updateProject: (updater: (project: Project) => void | Project) => void; }'.
+src/components/report-mode/ReportModeGenerator.tsx(75,5): error TS2339: Property 'handleZoomOut' does not exist on type '{ isMobile: boolean; activeMobileView: "result" | "generator"; setActiveMobileView: Dispatch<SetStateAction<"result" | "generator">>; activePanelKey: string; ... 15 more ...; updateProject: (updater: (project: Project) => void | Project) => void; }'.
+src/components/report-mode/ReportModeGenerator.tsx(88,11): error TS2322: Type '{ isOpen: true; onClose: () => void; onComplete: () => void; }' is not assignable to type 'IntrinsicAttributes & OnboardingGuideProps'.
+  Property 'onClose' does not exist on type 'IntrinsicAttributes & OnboardingGuideProps'.
+src/components/report-mode/dialogs/ChapterToolsDialog.tsx(12,35): error TS2307: Cannot find module '@/hooks/report-mode/use-chapter-actions' or its corresponding type declarations.
+src/components/report-mode/dialogs/ChapterToolsDialog.tsx(83,48): error TS7006: Parameter 'type' implicitly has an 'any' type.
+src/components/report-mode/dialogs/ChapterToolsDialog.tsx(96,47): error TS7006: Parameter 's' implicitly has an 'any' type.
+src/components/report-mode/dialogs/GenerateTocDialog.tsx(84,72): error TS7006: Parameter 'chapter' implicitly has an 'any' type.
+src/components/report-mode/dialogs/GenerateTocDialog.tsx(84,81): error TS7006: Parameter 'chapterIndex' implicitly has an 'any' type.
+src/components/report-mode/dialogs/GenerateTocDialog.tsx(88,76): error TS7006: Parameter 'section' implicitly has an 'any' type.
+src/components/report-mode/dialogs/GenerateTocDialog.tsx(88,85): error TS7006: Parameter 'sectionIndex' implicitly has an 'any' type.
+src/components/report-mode/file-manager/AnalystAgent.tsx(20,10): error TS2305: Module '"@/services"' has no exported member 'analyzeContextApi'.
+src/components/report-mode/section-controls/SectionContextSelector.tsx(41,21): error TS2339: Property 'context' does not exist on type '{ id: string; title: string; }'.
+src/components/report-mode/section-controls/SectionContextSelector.tsx(42,21): error TS2339: Property 'context' does not exist on type '{ id: string; title: string; }'.
+src/components/report-mode/section-controls/SectionContextSelector.tsx(100,62): error TS2339: Property 'context' does not exist on type '{ id: string; title: string; }'.
+src/components/report-mode/section-controls/SectionContextSelector.tsx(101,60): error TS2339: Property 'context' does not exist on type '{ id: string; title: string; }'.
+src/components/report-mode/session/export/ExportOptions.tsx(6,15): error TS2724: '"@/lib/models"' has no exported member named 'DocxTemplateKey'. Did you mean 'DocxTemplate'?
+src/components/report-mode/session/export/ExportOptions.tsx(6,32): error TS2724: '"@/lib/models"' has no exported member named 'PptxTemplateKey'. Did you mean 'PptxTemplate'?
+src/components/report-mode/settings/ProjectSettingsPanel.tsx(100,7): error TS2322: Type 'string | undefined' is not assignable to type '"professional" | "casual" | "persuasive" | "academic" | "technical" | "explanatory" | undefined'.
+  Type 'string' is not assignable to type '"professional" | "casual" | "persuasive" | "academic" | "technical" | "explanatory" | undefined'.
+src/components/report-mode/settings/ProjectSettingsPanel.tsx(115,51): error TS2345: Argument of type 'string' is not assignable to parameter of type '(dataUri: string) => void'.
+src/components/report-mode/settings/ProjectSettingsPanel.tsx(116,9): error TS1345: An expression of type 'void' cannot be tested for truthiness.
+src/components/report-mode/settings/components/ProjectMetadataForm.tsx(67,19): error TS2322: Type '{ onValueChange: (value: any) => void; options: { value: string; label: string; }[]; placeholder: string; onChange: (...event: any[]) => void; onBlur: Noop; value: string | undefined; disabled?: boolean | undefined; name: "projectType"; ref: RefCallBack; }' is not assignable to type 'IntrinsicAttributes & CustomSelectProps'.
+  Property 'onValueChange' does not exist on type 'IntrinsicAttributes & CustomSelectProps'.
+src/components/report-mode/settings/components/ProjectMetadataForm.tsx(67,35): error TS7006: Parameter 'value' implicitly has an 'any' type.
+src/components/report-mode/settings/components/ProjectMetadataForm.tsx(86,19): error TS2322: Type '{ onValueChange: (value: any) => void; options: { value: string; label: string; }[]; placeholder: string; onChange: (...event: any[]) => void; onBlur: Noop; value: string | undefined; disabled?: boolean | undefined; name: "specialization"; ref: RefCallBack; }' is not assignable to type 'IntrinsicAttributes & CustomSelectProps'.
+  Property 'onValueChange' does not exist on type 'IntrinsicAttributes & CustomSelectProps'.
+src/components/report-mode/settings/components/ProjectMetadataForm.tsx(86,35): error TS7006: Parameter 'value' implicitly has an 'any' type.
+src/components/report-mode/settings/components/ProjectMetadataForm.tsx(105,19): error TS2322: Type '{ onValueChange: (value: any) => void; options: { value: string; label: string; }[]; placeholder: string; onChange: (...event: any[]) => void; onBlur: Noop; value: string | undefined; disabled?: boolean | undefined; name: "educationalLevel"; ref: RefCallBack; }' is not assignable to type 'IntrinsicAttributes & CustomSelectProps'.
+  Property 'onValueChange' does not exist on type 'IntrinsicAttributes & CustomSelectProps'.
+src/components/report-mode/settings/components/ProjectMetadataForm.tsx(105,35): error TS7006: Parameter 'value' implicitly has an 'any' type.
+src/components/report-mode/settings/components/ProjectMetadataForm.tsx(124,19): error TS2322: Type '{ onValueChange: (value: any) => void; options: { value: string; label: string; }[]; placeholder: string; onChange: (...event: any[]) => void; onBlur: Noop; value: string | undefined; disabled?: boolean | undefined; name: "university"; ref: RefCallBack; }' is not assignable to type 'IntrinsicAttributes & CustomSelectProps'.
+  Property 'onValueChange' does not exist on type 'IntrinsicAttributes & CustomSelectProps'.

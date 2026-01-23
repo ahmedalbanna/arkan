@@ -9,7 +9,8 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { useChapterActions } from '@/hooks/report-mode/use-chapter-actions';
+// import { useChapterActions } from '@/hooks/report-mode/use-chapter-actions'; // TODO: Create this hook
+import { useAiActions } from '@/hooks/report-mode/use-ai-actions';
 import { Chapter } from '@/lib/models';
 import { Loader2, Wand2, PlusCircle, Link as LinkIcon, Edit } from 'lucide-react';
 import { ScrollArea } from '../../ui/scroll-area';
@@ -80,7 +81,7 @@ export function ChapterToolsDialog({ isOpen, onOpenChange, chapter }: ChapterToo
                     <Select value={manipulationType} onValueChange={(v) => setManipulationType(v as any)}>
                       <SelectTrigger><SelectValue /></SelectTrigger>
                       <SelectContent>
-                        {manipulationTypes.map(type => (
+                        {manipulationTypes.map((type: { value: string; label: string }) => (
                           <SelectItem key={type.value} value={type.value}>{type.label}</SelectItem>
                         ))}
                       </SelectContent>
@@ -93,7 +94,7 @@ export function ChapterToolsDialog({ isOpen, onOpenChange, chapter }: ChapterToo
                           <Select onValueChange={(val) => form.setValue('rewriteStyle', val)} defaultValue={form.getValues('rewriteStyle')}>
                               <SelectTrigger><SelectValue placeholder="Select a style" /></SelectTrigger>
                               <SelectContent>
-                                  {styles.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}
+                                  {styles.map((s: string) => <SelectItem key={s} value={s}>{s}</SelectItem>)}
                               </SelectContent>
                           </Select>
                       </div>
