@@ -45,6 +45,7 @@ ${metadataEntries}
      * @param section - The Section object to build the prompt for.
      * @param project - The entire Project object to resolve context references.
      * @returns A string containing the formatted prompt for the section.
+     * @deprecated Use buildSectionSystemPrompt and buildSectionUserPrompt instead
      */
     public static buildSectionPrompt(section: Section, project: Project): string {
         // Build project metadata context
@@ -54,32 +55,32 @@ ${metadataEntries}
             .map(([sectionId, type]) => {
                 const contextSection = project.getSection(sectionId);
                 if (contextSection) {
-                    return `--- Context from Section: ${contextSection.title} (Type: ${type}) ---\n${contextSection.content || ''}`;
+                    return `--- Context from Section: ${contextSection.title} (Type: ${type}) ---\\n${contextSection.content || ''}`;
                 }
                 return '';
             })
             .filter(Boolean)
-            .join('\n\n');
+            .join('\\n\\n');
 
         const externalContextContent = Object.entries(section.context?.externalContext || {})
             .map(([fileId, type]) => {
                 const file = project.externalContext?.find(f => f.id === fileId);
                 if (file) {
-                    return `--- Context from File: ${file.fileName} (Type: ${type}) ---\n${file.content}`;
+                    return `--- Context from File: ${file.fileName} (Type: ${type}) ---\\n${file.content}`;
                 }
                 return '';
             })
             .filter(Boolean)
-            .join('\n\n');
+            .join('\\n\\n');
         
-        const fullContext = [contextSectionsContent, externalContextContent].filter(Boolean).join('\n\n');
+        const fullContext = [contextSectionsContent, externalContextContent].filter(Boolean).join('\\n\\n');
         
         // Use the new dynamic system prompt and action prompt from the section model
         const systemPrompt = section.buildSystemPrompt();
         const actionPrompt = section.buildActionPrompt();
 
         return `
-### Instructions for Section: "${section.title}"
+### Instructions for Section: \"${section.title}\"
 
 ${projectMetadata}
 
@@ -93,6 +94,93 @@ ${systemPrompt}
 ${fullContext || 'No context provided from other items.'}
 ---
         `;
+    }
+
+    /**
+     * Builds the system prompt for a section containing role, persona, and constraints
+     * @param section - The Section object
+     * @param project - The parent Project object
+     * @returns System prompt string for the AI
+     */
+    public static buildSectionSystemPrompt(section: Section, project: Project): string {
+        const projectMetadata = this.buildProjectMetadata(project);
+        const systemPrompt = section.buildSystemPrompt();
+
+        return `You are an expert technical writer and analyst specialized in creating high-quality documentation.
+
+${projectMetadata}
+
+**Your Role for Section: "${section.title}"**
+${systemPrompt}
+
+**Core Instructions:**
+- Review all provided context carefully before writing
+- Synthesize information from multiple sources into a coherent narrative
+- Write in a natural, engaging style (not robotic)
+- Follow all guidelines and constraints provided
+- Output ONLY the markdown content for this section
+- Do NOT wrap output in JSON, XML, or any other format
+- Do NOT include schema definitions or metadata
+- Return pure markdown text only`;
+    }
+
+    /**
+     * Builds the user prompt containing task, context, and specific instructions
+     * @param section - The Section object
+     * @param project - The parent Project object
+     * @returns User prompt string with task and context
+     */
+    public static buildSectionUserPrompt(section: Section, project: Project): string {
+        const actionPrompt = section.buildActionPrompt();
+
+        // Build context from linked sections
+        const contextSectionsContent = Object.entries(section.context?.sections || {})
+            .map(([sectionId, type]) => {
+                const contextSection = project.getSection(sectionId);
+                if (contextSection) {
+                    return `--- Context from Section: ${contextSection.title} (Type: ${type}) ---
+${contextSection.content || '(No content yet)'}`;
+                }
+                return '';
+            })
+            .filter(Boolean)
+            .join('\\n\\n');
+
+        // Build context from external files
+        const externalContextContent = Object.entries(section.context?.externalContext || {})
+            .map(([fileId, type]) => {
+                const file = project.externalContext?.find(f => f.id === fileId);
+                if (file) {
+                    return `--- Context from File: ${file.fileName} (Type: ${type}) ---
+${file.content}`;
+                }
+                return '';
+            })
+            .filter(Boolean)
+            .join('\\n\\n');
+
+        const fullContext = [contextSectionsContent, externalContextContent]
+            .filter(Boolean)
+            .join('\\n\\n');
+
+        // Build guidelines list
+        const guidelinesList = section.guidelines && section.guidelines.length > 0
+            ? `\\n**Guidelines to Follow:**\\n${section.guidelines.map(g => `- ${g}`).join('\\n')}`
+            : '';
+
+        return `**Task:** Write the section titled "${section.title}"
+
+${actionPrompt}${guidelinesList}
+
+${fullContext ? `**Available Context:**\\n\\n${fullContext}` : '**Note:** No additional context provided. Write based on the section title and instructions above.'}
+
+**Output Requirements:**
+- Write complete, well-structured markdown content
+- Use appropriate headings (start with ##, not #)
+- Include relevant examples, explanations, and details
+- Ensure the content flows naturally
+- Meet the specified word count if provided
+- Return ONLY markdown text - no JSON, no schema, no metadata`;
     }
 
     /**

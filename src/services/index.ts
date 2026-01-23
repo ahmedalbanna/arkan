@@ -14,7 +14,6 @@ export * from './api/featureService';
 export * from './api/generationLogService';
 export * from './api/imageConversionService';
 export * from './api/projectService';
-export * from './api/reportService';
 export * from './api/sectionService';
 export * from './api/settingsService';
 export * from './api/templateService';

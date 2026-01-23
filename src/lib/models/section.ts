@@ -14,6 +14,17 @@ import {
 import { z } from 'zod';
 import type { Project } from './project';
 import { PromptBuilder } from '../prompt-builder';
+import type { SectionMetadata } from '@/types/section-metadata';
+import {
+  defaultSectionMetadata,
+  updateContentStatistics,
+  createGeneratedMetadata,
+  createEditedMetadata,
+  createGeneratingMetadata,
+  createFailedMetadata,
+  addVersionToHistory,
+  SectionStatus,
+} from '@/types/section-metadata';
 
 export const SectionPropertiesSchema = z.object({
   id: z.string().optional(),
@@ -70,7 +81,12 @@ export class Section {
     this.guidelines = props.guidelines ?? [];
     this.constraints = props.constraints ?? [];
     this.behaviors = props.behaviors ?? [];
-    this.metadata = props.metadata ?? {};
+    
+    // Initialize metadata with defaults if not provided
+    this.metadata = props.metadata ? {
+      ...defaultSectionMetadata,
+      ...props.metadata,
+    } : { ...defaultSectionMetadata };
 
     this.controls = {
       ...defaultControls,
@@ -89,6 +105,134 @@ export class Section {
 
   public with(props: Partial<SectionProperties>): Section {
     return new Section({ ...this.toStateObject(), ...props });
+  }
+
+  /**
+   * Mark section as being generated
+   */
+  public markAsGenerating(): Section {
+    const updatedMetadata = createGeneratingMetadata(this.metadata as SectionMetadata);
+    return this.with({ metadata: updatedMetadata });
+  }
+
+  /**
+   * Mark section as successfully generated with AI model info
+   */
+  public markAsGenerated(aiModel: string, content: string): Section {
+    let updatedMetadata = createGeneratedMetadata(this.metadata as SectionMetadata, aiModel);
+    updatedMetadata = updateContentStatistics(updatedMetadata, content);
+    
+    // Save version history if content changed
+    if (this.content && this.content !== content) {
+      updatedMetadata = addVersionToHistory(updatedMetadata, this.content);
+    }
+    
+    return this.with({ 
+      content,
+      metadata: updatedMetadata 
+    });
+  }
+
+  /**
+   * Mark section as failed generation
+   */
+  public markAsFailed(): Section {
+    const updatedMetadata = createFailedMetadata(this.metadata as SectionMetadata);
+    return this.with({ metadata: updatedMetadata });
+  }
+
+  /**
+   * Mark section as manually edited
+   */
+  public markAsEdited(content: string): Section {
+    let updatedMetadata = createEditedMetadata(this.metadata as SectionMetadata);
+    updatedMetadata = updateContentStatistics(updatedMetadata, content);
+    
+    // Save version history
+    if (this.content && this.content !== content) {
+      updatedMetadata = addVersionToHistory(updatedMetadata, this.content);
+    }
+    
+    return this.with({ 
+      content,
+      metadata: updatedMetadata 
+    });
+  }
+
+  /**
+   * Update content and refresh statistics
+   */
+  public updateContent(content: string, editedByUser: boolean = false): Section {
+    if (editedByUser) {
+      return this.markAsEdited(content);
+    }
+    
+    // Just update content and statistics without changing status
+    let updatedMetadata = { ...(this.metadata as SectionMetadata) };
+    updatedMetadata = updateContentStatistics(updatedMetadata, content);
+    updatedMetadata.lastModifiedAt = new Date().toISOString();
+    
+    return this.with({ 
+      content,
+      metadata: updatedMetadata 
+    });
+  }
+
+  /**
+   * Get current generation status
+   */
+  public getStatus(): SectionStatus {
+    return (this.metadata as SectionMetadata)?.status || SectionStatus.DRAFT;
+  }
+
+  /**
+   * Check if section has been generated
+   */
+  public isGenerated(): boolean {
+    const status = this.getStatus();
+    return status === SectionStatus.GENERATED || status === SectionStatus.EDITED;
+  }
+
+  /**
+   * Check if section is currently being generated
+   */
+  public isGenerating(): boolean {
+    return this.getStatus() === SectionStatus.GENERATING;
+  }
+
+  /**
+   * Get AI model used for generation
+   */
+  public getAiModel(): string | undefined {
+    return (this.metadata as SectionMetadata)?.aiModel;
+  }
+
+  /**
+   * Get word count from metadata
+   */
+  public getWordCount(): number {
+    return (this.metadata as SectionMetadata)?.wordCount || 0;
+  }
+
+  /**
+   * Get estimated read time
+   */
+  public getReadTime(): number {
+    return (this.metadata as SectionMetadata)?.estimatedReadTime || 0;
+  }
+
+  /**
+   * Get generation timestamp
+   */
+  public getGeneratedAt(): string | undefined {
+    return (this.metadata as SectionMetadata)?.generatedAt;
+  }
+
+  /**
+   * Get number of generation attempts
+   */
+  public getGenerationAttempts(): number {
+    return (this.metadata as SectionMetadata)?.generationAttempts || 0;
   }
 
   public buildSystemPrompt(): string {
