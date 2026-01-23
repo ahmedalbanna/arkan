@@ -127,8 +127,9 @@ export function useAgentManager() {
       const newAgent = await createMutation.mutateAsync(data);
       toast({ title: "Agent Created", description: `"${newAgent.name}" has been created.` });
       return newAgent;
-    } catch (error: any) {
-      toast({ title: "Creation Failed", description: error.message, variant: "destructive" });
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      toast({ title: "Creation Failed", description: errorMessage, variant: "destructive" });
       throw error;
     }
   };
@@ -138,8 +139,9 @@ export function useAgentManager() {
       const updatedAgent = await updateMutation.mutateAsync({ id, data });
       toast({ title: "Agent Updated", description: `"${updatedAgent.name}" has been updated.` });
       return updatedAgent;
-    } catch (error: any) {
-      toast({ title: "Update Failed", description: error.message, variant: "destructive" });
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      toast({ title: "Update Failed", description: errorMessage, variant: "destructive" });
       throw error;
     }
   };
@@ -148,8 +150,9 @@ export function useAgentManager() {
     try {
       await deleteMutation.mutateAsync(id);
       toast({ title: "Agent Deleted", description: "The agent has been removed." });
-    } catch (error: any) {
-      toast({ title: "Delete Failed", description: error.message, variant: "destructive" });
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      toast({ title: "Delete Failed", description: errorMessage, variant: "destructive" });
       throw error;
     }
   };

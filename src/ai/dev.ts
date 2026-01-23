@@ -5,4 +5,5 @@ config();
 
 // Core Builder Flows
 
-import '@/ai/flows/generate-report-section';
+// Old flows removed - now using unified generation
+import '@/ai/flows/generate-unified';

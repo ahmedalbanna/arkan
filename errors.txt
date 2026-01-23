@@ -1,34 +1,219 @@
- GET /api/admin/indexed-documents 200 in 1862ms
-📄 Processing file: Ghada-Ali-Al-Salmi.txt (46.30 KB)
-   Project: Ghada-Ali-Al-Salmi
-   Settings: chunkSize=400, overlap=50, type=context
-   Step 1: Extracting text...
-   ✓ Extracted 47388 characters
-   Step 2: Generating embeddings with Ollama (nomic-embed-text)...
-   Step 3: Storing in Qdrant...
-Split document into 136 chunks
-Successfully added 136 chunks to Qdrant
-Successfully indexed 136 chunks
-   ✓ Successfully indexed 136 chunks
-   ✓ Total time: ~68s (estimate)
-Error recording indexed document: Error: Value for argument "data" is not a valid Firestore document. Cannot use "undefined" as a Firestore value (found in field "userId"). If you want to ignore undefined values, enable `ignoreUndefinedProperties`.
-    at recordIndexedDocument (src/services/document-tracking-service.ts:55:18)
-    at POST (src/app/api/admin/index-document/route.ts:159:13)
-  53 |     };
-  54 |
-> 55 |     await docRef.set(record);
-     |                  ^
-  56 |     
-  57 |     console.log(`📝 Recorded document: ${data.sourceFile} (${data.chunksCount} chunks)`);
-  58 |     
-   ⚠️  Warning: Failed to record in tracking database: Error: Value for argument "data" is not a valid Firestore document. Cannot use "undefined" as a Firestore value (found in field "userId"). If you want to ignore undefined values, enable `ignoreUndefinedProperties`.
-    at recordIndexedDocument (src/services/document-tracking-service.ts:55:18)
-    at POST (src/app/api/admin/index-document/route.ts:159:13)
-  53 |     };
-  54 |
-> 55 |     await docRef.set(record);
-     |                  ^
-  56 |     
-  57 |     console.log(`📝 Recorded document: ${data.sourceFile} (${data.chunksCount} chunks)`);
-  58 |     
- POST /api/admin/index-document 200 in 631ms
+[INFO] Starting section generation for user nR5tqFUzwhdm4ybpBObt25pJ6TI2, section: 20ee12c0-44b3-40f5-84c2-32a8adf7528d
+[INFO] Generating section: 20ee12c0-44b3-40f5-84c2-32a8adf7528d with model: ollama/gemma:2b
+[INFO] Attempt 1/3 for section: 20ee12c0-44b3-40f5-84c2-32a8adf7528d
+[ERROR] ✗ Non-retryable error on attempt 1: INVALID_ARGUMENT: Schema validation failed. Parse Errors:
+
+- (root): must have required property 'sectionId'
+
+Provided data:
+
+{
+  "type": "object",
+  "properties": {
+    "sectionId": {
+      "type": "string",
+      "description": "The ID of the section that was generated"
+    },
+    "content": {
+      "type": "string",
+      "description": "The generated markdown content for the specified section"
+    }
+  },
+  "required": [
+    "sectionId",
+    "content"
+  ],
+  "additionalProperties": true,
+  "$schema": "http://json-schema.org/draft-07/schema#"
+}
+
+Required JSON schema:
+
+{
+  "type": "object",
+  "properties": {
+    "sectionId": {
+      "type": "string",
+      "description": "The ID of the section that was generated"
+    },
+    "content": {
+      "type": "string",
+      "description": "The generated markdown content for the specified section"
+    }
+  },
+  "required": [
+    "sectionId",
+    "content"
+  ],
+  "additionalProperties": true,
+  "$schema": "http://json-schema.org/draft-07/schema#"
+}
+[INFO] Credits refunded to user nR5tqFUzwhdm4ybpBObt25pJ6TI2 after generation failure
+[ERROR] Section generation failed for user nR5tqFUzwhdm4ybpBObt25pJ6TI2: GenkitError: INVALID_ARGUMENT: Schema validation failed. Parse Errors:
+
+- (root): must have required property 'sectionId'
+
+Provided data:
+
+{
+  "type": "object",
+  "properties": {
+    "sectionId": {
+      "type": "string",
+      "description": "The ID of the section that was generated"
+    },
+    "content": {
+      "type": "string",
+      "description": "The generated markdown content for the specified section"
+    }
+  },
+  "required": [
+    "sectionId",
+    "content"
+  ],
+  "additionalProperties": true,
+  "$schema": "http://json-schema.org/draft-07/schema#"
+}
+
+Required JSON schema:
+
+{
+  "type": "object",
+  "properties": {
+    "sectionId": {
+      "type": "string",
+      "description": "The ID of the section that was generated"
+    },
+    "content": {
+      "type": "string",
+      "description": "The generated markdown content for the specified section"
+    }
+  },
+  "required": [
+    "sectionId",
+    "content"
+  ],
+  "additionalProperties": true,
+  "$schema": "http://json-schema.org/draft-07/schema#"
+}
+API Route Error: Error [GenkitError]: INVALID_ARGUMENT: Schema validation failed. Parse Errors:
+
+- (root): must have required property 'sectionId'
+
+Provided data:
+
+{
+  "type": "object",
+  "properties": {
+    "sectionId": {
+      "type": "string",
+      "description": "The ID of the section that was generated"
+    },
+    "content": {
+      "type": "string",
+      "description": "The generated markdown content for the specified section"
+    }
+  },
+  "required": [
+    "sectionId",
+    "content"
+  ],
+  "additionalProperties": true,
+  "$schema": "http://json-schema.org/draft-07/schema#"
+}
+
+Required JSON schema:
+
+{
+  "type": "object",
+  "properties": {
+    "sectionId": {
+      "type": "string",
+      "description": "The ID of the section that was generated"
+    },
+    "content": {
+      "type": "string",
+      "description": "The generated markdown content for the specified section"
+    }
+  },
+  "required": [
+    "sectionId",
+    "content"
+  ],
+  "additionalProperties": true,
+  "$schema": "http://json-schema.org/draft-07/schema#"
+}
+    at async withRetry (src/lib/utils/retry-utils.ts:99:22)
+    at async generateSectionSimplified (src/ai/flows/generate-section-simplified.ts:47:18)
+    at async (src/app/api/generate/section/route.ts:49:20)
+   97 |       logger.info(`Attempt ${attemptNumber}/${config.maxAttempts}${context ? ` for ${context}` : ''}`);
+   98 |       
+>  99 |       const result = await fn();
+      |                      ^
+  100 |       
+  101 |       attempt.success = true;
+  102 |       attempt.endTime = Date.now(); {
+  source: undefined,
+  status: 'INVALID_ARGUMENT',
+  detail: [Object],
+  code: 400,
+  originalMessage: 'Schema validation failed. Parse Errors:\n' +
+    '\n' +
+    "- (root): must have required property 'sectionId'\n" +
+    '\n' +
+    'Provided data:\n' +
+    '\n' +
+    '{\n' +
+    '  "type": "object",\n' +
+    '  "properties": {\n' +
+    '    "sectionId": {\n' +
+    '      "type": "string",\n' +
+    '      "description": "The ID of the section that was generated"\n' +
+    '    },\n' +
+    '    "content": {\n' +
+    '      "type": "string",\n' +
+    '      "description": "The generated markdown content for the specified section"\n' +
+    '    }\n' +
+    '  },\n' +
+    '  "required": [\n' +
+    '    "sectionId",\n' +
+    '    "content"\n' +
+    '  ],\n' +
+    '  "additionalProperties": true,\n' +
+    '  "$schema": "http://json-schema.org/draft-07/schema#"\n' +
+    '}\n' +
+    '\n' +
+    'Required JSON schema:\n' +
+    '\n' +
+    '{\n' +
+    '  "type": "object",\n' +
+    '  "properties": {\n' +
+    '    "sectionId": {\n' +
+    '      "type": "string",\n' +
+    '      "description": "The ID of the section that was generated"\n' +
+    '    },\n' +
+    '    "content": {\n' +
+    '      "type": "string",\n' +
+    '      "description": "The generated markdown content for the specified section"\n' +
+    '    }\n' +
+    '  },\n' +
+    '  "required": [\n' +
+    '    "sectionId",\n' +
+    '    "content"\n' +
+    '  ],\n' +
+    '  "additionalProperties": true,\n' +
+    '  "$schema": "http://json-schema.org/draft-07/schema#"\n' +
+    '}',
+  ignoreFailedSpan: true
+}
+RangeError: init["status"] must be in the range of 200 to 599, inclusive.
+    at handleApiError (src/lib/utils/api-utils.ts:88:25)
+    at <unknown> (src/app/api/generate/section/route.ts:87:26)
+  86 |   // 3. Handle custom thrown errors (e.g., from our own logic)
+  87 |   if (error.status && error.message) {
+> 88 |     return NextResponse.json({ message: error.message }, { status: error.status });
+     |                         ^
+  89 |   }
+  90 |
+  91 |   // 4. Fallback for generic/unexpected errors
+ POST /api/generate/section 500 in 92481ms

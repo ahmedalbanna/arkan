@@ -1,137 +1,633 @@
 # System Patterns - Arkan
 
-## Architectural Patterns
+## Architecture Patterns
 
-### 1. Modular AI Flow Pattern
-**Purpose**: Standardized approach for creating AI-powered operations.
-- **Implementation**: `src/ai/flows/`
-- **Benefits**: Type safety with Zod, consistent error handling, reusability.
+### 1. Layered Architecture
 
-### 2. Component Composition Pattern
-**Purpose**: Building complex UI from smaller, reusable pieces.
-- **Implementation**: `src/components/` (e.g., `ReportGenerator`, admin dashboards).
-- **Benefits**: Maintainability, scalability, and code reuse.
+```
+┌─────────────────────────────────────────┐
+│         Presentation Layer              │
+│    (React Components + Pages)           │
+└─────────────────────────────────────────┘
+                  ↓
+┌─────────────────────────────────────────┐
+│         State Management Layer          │
+│    (Zustand + React Query + Dexie)      │
+└─────────────────────────────────────────┘
+                  ↓
+┌─────────────────────────────────────────┐
+│           API/Service Layer             │
+│    (Next.js API Routes + Services)      │
+└─────────────────────────────────────────┘
+                  ↓
+┌─────────────────────────────────────────┐
+│          Data/Backend Layer             │
+│         (Firebase + Genkit AI)          │
+└─────────────────────────────────────────┘
+```
 
-### 3. Service Layer Pattern
-**Purpose**: Abstracting API calls and business logic.
-- **Implementation**: `src/services/`
-- **Benefits**: Centralized logic, easier testing, separation of concerns.
+### 2. Component Patterns
 
-## RAG & Vector Search Pattern
+**Atomic Design Structure:**
+- **Atoms**: Button, Input, Label (shadcn/ui)
+- **Molecules**: FormField, Card, Dialog
+- **Organisms**: ReportModeGenerator, FileManager
+- **Templates**: Builder page, Dashboard
+- **Pages**: Next.js route pages
 
-### **Purpose**
-To provide relevant, up-to-date, and domain-specific context to AI models, reducing hallucinations and improving response accuracy.
+**Component Organization:**
+```
+src/components/
+├── ui/               # Atomic components (shadcn/ui)
+├── shared/           # Reusable molecules
+├── auth/             # Authentication components
+├── report-mode/      # Feature-specific organisms
+│   ├── dialogs/
+│   ├── generation-tools/
+│   ├── section-controls/
+│   └── session/
+└── home/             # Landing page components
+```
 
-### **Architecture**
-1.  **Indexing Pipeline**:
-    - **Input**: Documents (PDF, DOCX, TXT, MD).
-    - **Process**:
-        1.  `File Extraction`: Text is extracted from documents.
-        2.  `Chunking`: Text is split into smaller, overlapping chunks.
-        3.  `Embedding`: Each chunk is converted into a vector using Ollama (`nomic-embed-text`).
-        4.  `Storage`: Vectors and metadata are stored in Qdrant.
-    - **Implementation**: `src/lib/rag/indexer.ts`
+### 3. State Management Patterns
 
-2.  **Retrieval Pipeline**:
-    - **Input**: User query (string).
-    - **Process**:
-        1.  `Query Embedding`: The query is converted into a vector.
-        2.  `Vector Search`: Qdrant performs a similarity search (Cosine) to find the most relevant chunks.
-        3.  `Filtering`: Results are filtered by `projectId`, `userId`, etc.
-        4.  `Re-ranking`: Results are re-ordered using a hybrid approach (semantic + keyword) for better relevance.
-        5.  `Context Formatting`: Top results are formatted into a context string for the LLM.
-    - **Implementation**: `src/lib/rag/retrieval.ts` & `src/lib/rag/reranker.ts`
+**Three-Tier State:**
 
-### **Components**
-- **Vector Store**: `src/lib/rag/vector-store.ts` (Factory pattern to switch between in-memory and Qdrant).
-- **Qdrant Adapter**: `src/lib/rag/qdrant-adapter.ts` (Production-ready implementation).
-- **Embedding Service**: `src/lib/rag/embeddings.ts` (Handles communication with Ollama).
-- **Caching**: `src/lib/rag/cache.ts` (In-memory LRU cache for embeddings and search results).
+```typescript
+// 1. Client State (Zustand) - UI & transient data
+const useBuilderStore = create<BuilderState>((set) => ({
+  currentProject: null,
+  selectedChapter: null,
+  isGenerating: false,
+}));
 
-### **Benefits**
-- **Reduces Hallucinations**: Grounds AI responses in factual data.
-- **Enables Domain-Specific Knowledge**: Allows the AI to use proprietary or project-specific information.
-- **Keeps Knowledge Current**: The knowledge base can be updated without re-training the model.
+// 2. Server State (React Query) - Backend data with caching
+const { data: projects } = useQuery({
+  queryKey: ['projects'],
+  queryFn: () => api.getProjects(),
+  staleTime: 5 * 60 * 1000,
+});
 
-## Conversational AI Pattern (Project Consultant)
+// 3. Local State (Dexie/IndexedDB) - Offline persistence
+const db = new Dexie('ArkanDB');
+db.version(1).stores({
+  projects: '++id, userId, lastModified',
+});
+```
 
-### **Purpose**
-To provide users with a real-time, context-aware AI assistant that can answer questions, provide feedback, and offer suggestions about their currently active project.
+### 4. Data Flow Pattern
 
-### **Architecture**
-1.  **Frontend Component (`ProjectChat.tsx`)**:
-    - A floating chat window that can be toggled by the user.
-    - Manages the display of the conversation history.
-    - Captures user input and triggers the AI interaction.
+**Unidirectional Data Flow:**
+```
+User Action
+    ↓
+Component Event Handler
+    ↓
+Store Action (Zustand)
+    ↓
+API Call (React Query mutation)
+    ↓
+Backend (Firebase)
+    ↓
+Cache Update (React Query)
+    ↓
+Component Re-render
+```
 
-2.  **Client-side Hook (`useProjectChat.ts`)**:
-    - Manages the state of the chat session (messages, loading status).
-    - Retrieves the full context of the current project from the `useBuilderStore`.
-    - Uses React Query's `useMutation` to call the backend API endpoint.
-    - Appends user messages and AI responses to the conversation history for a seamless chat experience.
+### 5. API Route Pattern
 
-3.  **API Route (`/api/chat/project-consultant`)**:
-    - A secure endpoint protected by the `withAuth` middleware.
-    - Receives the user's message, the full project context, and the conversation history.
-    - Calls the corresponding Genkit AI flow (`projectConsultantFlow`).
+**Standardized API Handler:**
+```typescript
+// Pattern: withAuth wrapper for protected routes
+export async function POST(request: Request) {
+  return withAuth(async (req, { user, db }) => {
+    // 1. Validate input with Zod
+    const body = await req.json();
+    const validated = schema.parse(body);
+    
+    // 2. Check permissions
+    if (!hasPermission(user, validated)) {
+      return ApiResponse.error('Unauthorized', 403);
+    }
+    
+    // 3. Business logic
+    const result = await performOperation(validated);
+    
+    // 4. Return typed response
+    return ApiResponse.success(result);
+  }, { requireAuth: true, requireAdmin: false })(request);
+}
+```
 
-4.  **AI Flow (`projectConsultantFlow`)**:
-    - A Genkit flow specifically designed for conversational consultation.
-    - It receives the project context and conversation history and injects them into a system prompt.
-    - The system prompt instructs the AI to act as an expert consultant, using the provided project data to give relevant advice.
-    - It processes the user's immediate message to generate a helpful, context-aware response.
+**Error Handling Pattern:**
+```typescript
+// Centralized error handling
+try {
+  // Operation
+} catch (error) {
+  if (error instanceof ZodError) {
+    return ApiResponse.error('Validation failed', 400, error.errors);
+  }
+  if (error instanceof FirebaseError) {
+    return handleFirebaseError(error);
+  }
+  return ApiResponse.error('Internal server error', 500);
+}
+```
 
-### **Benefits**
-- **Context-Aware Assistance**: The AI has full knowledge of the user's current project, allowing it to provide highly relevant and specific advice.
-- **Interactive Experience**: Transforms the static document-building process into a dynamic conversation.
-- **Improved Productivity**: Users can get instant feedback and ideas without leaving their workspace.
+### 6. AI Generation Pattern
 
-## State Management Patterns
+**Flow-Based Generation:**
+```typescript
+// Pattern: Prompt → Context → Generate → Post-process
+async function generateSection(input: GenerationInput) {
+  // 1. Build prompt with context
+  const prompt = buildPrompt({
+    template: 'section-generation',
+    context: {
+      guidelines: input.guidelines,
+      previousSections: input.context,
+      externalContext: input.files,
+    }
+  });
+  
+  // 2. Select appropriate model
+  const model = selectModelByTask(input.taskType);
+  
+  // 3. Generate with retry logic
+  const result = await retryWithBackoff(() => 
+    genkit.generate({
+      model,
+      prompt,
+      config: { temperature: 0.7, maxTokens: 2000 }
+    })
+  );
+  
+  // 4. Post-process and validate
+  return validateAndFormat(result);
+}
+```
 
-### 1. Zustand Store Pattern (Client-side)
-**Purpose**: Lightweight global state management for UI and session data.
-- **Implementation**: `src/hooks/core/useBuilderStore.ts`
-- **Usage**: Manages the active project, application status (`loading`, `dirty`, `saving`), and user settings.
+**Model Selection Pattern:**
+```typescript
+// Task-specific model routing
+const MODEL_STRATEGY = {
+  'quick-conversion': OLLAMA_MODELS.GEMMA_2B,
+  'structured-report': OLLAMA_MODELS.PHI3_MINI,
+  'academic-content': OLLAMA_MODELS.LLAMA3_8B,
+  'general-task': OLLAMA_MODELS.QWEN2_5,
+};
 
-### 2. React Query Pattern (Server-side Cache)
-**Purpose**: Server state management with caching, refetching, and synchronization.
-- **Implementation**: Used throughout `src/hooks/data/`.
-- **Benefits**: Reduces redundant API calls, provides optimistic updates, handles background refetching.
+function selectModelByTask(taskType: TaskType): string {
+  return MODEL_STRATEGY[taskType] || MODEL_STRATEGY['general-task'];
+}
+```
 
-## Error Handling Patterns
+### 7. Authentication Pattern
 
-### 1. Centralized API Error Handling
-**Purpose**: Consistent error handling for all API routes.
-- **Implementation**: `src/lib/utils/api-utils.ts` (`handleApiError`)
-- **Benefits**: Standardized error responses, handles Zod validation and Firebase errors automatically.
+**Multi-Layer Auth:**
+```typescript
+// 1. Firebase Auth (Client)
+const { user } = useAuth();
 
-### 2. Document Processing Error Handling
-**Purpose**: Robust error handling for document generation (DOCX, PPTX).
-- **Implementation**: `src/lib/word-converter/ast-converter.ts`, `src/lib/utils/ProxiedImage.ts`
-- **Features**: Graceful fallbacks for invalid images and malformed tables, preventing export crashes.
+// 2. Session Cookie (Server)
+const session = cookies().get('session');
+const decodedToken = await adminAuth.verifySessionCookie(session);
 
-## Security Patterns
+// 3. Firestore User Profile
+const userProfile = await db.collection('users').doc(uid).get();
 
-### 1. Authentication Guard HOF
-**Purpose**: Protecting API routes and server actions from unauthorized access.
-- **Implementation**: `src/lib/utils/api-utils.ts` (`withAuth`)
-- **Benefits**: Centralized auth logic, support for admin-only routes.
+// 4. Role-Based Access Control
+if (userProfile.role !== 'admin') {
+  throw new Error('Insufficient permissions');
+}
+```
 
-### 2. Image Proxy
-**Purpose**: Avoids CORS issues and provides a security layer for fetching external images.
-- **Implementation**: `src/app/api/proxy/convert/route.ts`
-- **Features**: Whitelists allowed domains to prevent abuse (SSRF).
+### 8. Data Modeling Pattern
 
-## Developer Experience Patterns
+**Class-Based Models with Immutability:**
+```typescript
+export class Project {
+  constructor(private props: ProjectProperties) {}
+  
+  // Immutable updates
+  public with(updates: Partial<ProjectProperties>): Project {
+    return new Project({ ...this.props, ...updates });
+  }
+  
+  // Business logic encapsulation
+  public addChapter(chapter: Chapter): Project {
+    return this.with({
+      chapters: [...this.props.chapters, chapter]
+    });
+  }
+  
+  // Computed properties
+  get totalSections(): number {
+    return this.props.chapters.reduce(
+      (sum, ch) => sum + ch.sections.length, 0
+    );
+  }
+  
+  // Serialization
+  toFirestore(): FirestoreDocument {
+    return { ...this.props, updatedAt: serverTimestamp() };
+  }
+}
+```
 
-### 1. Interactive API Documentation
-**Purpose**: Provide developers with a clear, interactive way to understand and test the application's API.
-- **Implementation**:
-  - **Configuration**: `src/config/api-docs.ts` - A single source of truth defining all API endpoints, their methods, descriptions, authentication levels, and example request/response bodies.
-  - **UI Components**: Reusable components in `src/components/api-docs/` such as `EndpointCard`, `ApiTester`, and `CodeBlock` create a dynamic and maintainable documentation page.
-  - **Page**: `/app/api-docs/page.tsx` - The main page that renders the documentation from the configuration file.
-- **Benefits**:
-  - **Self-Documenting**: The API documentation is tightly coupled with its definition, reducing the chance of it becoming outdated.
-  - **Interactive Testing**: Developers can make live API calls directly from the documentation UI, speeding up testing and integration.
-  - **Clarity**: Provides a clear contract for each endpoint, including required parameters and expected response structures.
-  - **Maintainability**: Adding or updating API documentation is as simple as updating the central configuration file.
+### 9. Export Generation Pattern
+
+**Multi-Format Pipeline:**
+```typescript
+// Pattern: Parse → Transform → Format → Export
+class DocumentExporter {
+  async export(project: Project, format: ExportFormat) {
+    // 1. Parse markdown to AST
+    const ast = this.markdownParser.parse(project.content);
+    
+    // 2. Transform for target format
+    const transformed = this.transformers[format].transform(ast);
+    
+    // 3. Apply styling
+    const styled = this.stylers[format].apply(transformed, project.styles);
+    
+    // 4. Generate binary
+    return this.generators[format].generate(styled);
+  }
+}
+
+// Format-specific transformers
+const transformers = {
+  docx: new DocxTransformer(),
+  pptx: new PptxTransformer(),
+  pdf: new PdfTransformer(),
+};
+```
+
+### 10. Caching Strategy
+
+**Multi-Level Caching:**
+```typescript
+// Level 1: React Query (Memory)
+queryClient.setQueryData(['project', id], data, {
+  staleTime: 5 * 60 * 1000, // 5 minutes
+});
+
+// Level 2: IndexedDB (Local Storage)
+await db.projects.put({
+  id,
+  data,
+  cachedAt: Date.now(),
+});
+
+// Level 3: Firestore (Server)
+await db.collection('projects').doc(id).set(data, { merge: true });
+```
+
+**Cache Invalidation:**
+```typescript
+// Invalidate on mutation
+const mutation = useMutation({
+  mutationFn: updateProject,
+  onSuccess: (data, variables) => {
+    // Invalidate related queries
+    queryClient.invalidateQueries(['projects']);
+    queryClient.invalidateQueries(['project', variables.id]);
+    
+    // Update cache optimistically
+    queryClient.setQueryData(['project', variables.id], data);
+  },
+});
+```
+
+### 11. Error Boundary Pattern
+
+**Currently Missing - Recommended:**
+```typescript
+// Recommended implementation
+class ErrorBoundary extends React.Component {
+  state = { hasError: false, error: null };
+  
+  static getDerivedStateFromError(error: Error) {
+    return { hasError: true, error };
+  }
+  
+  componentDidCatch(error: Error, errorInfo: ErrorInfo) {
+    // Log to monitoring service
+    logErrorToService(error, errorInfo);
+  }
+  
+  render() {
+    if (this.state.hasError) {
+      return <ErrorFallback error={this.state.error} />;
+    }
+    return this.props.children;
+  }
+}
+```
+
+### 12. Form Handling Pattern
+
+**React Hook Form + Zod:**
+```typescript
+// Pattern: Schema → Form → Validation → Submit
+const formSchema = z.object({
+  title: z.string().min(1, 'Title required'),
+  content: z.string().optional(),
+});
+
+const form = useForm<FormData>({
+  resolver: zodResolver(formSchema),
+  defaultValues: { title: '', content: '' },
+});
+
+const onSubmit = form.handleSubmit(async (data) => {
+  await mutation.mutateAsync(data);
+  form.reset();
+});
+```
+
+### 13. File Upload Pattern
+
+**Multi-Stage Upload:**
+```typescript
+// Pattern: Select → Validate → Process → Upload → Store
+async function uploadFile(file: File) {
+  // 1. Client-side validation
+  if (!isValidFile(file)) throw new Error('Invalid file');
+  
+  // 2. Process if needed (resize image, extract text)
+  const processed = await processFile(file);
+  
+  // 3. Upload to Firebase Storage
+  const storageRef = ref(storage, `uploads/${userId}/${file.name}`);
+  const snapshot = await uploadBytes(storageRef, processed);
+  
+  // 4. Get download URL
+  const downloadURL = await getDownloadURL(snapshot.ref);
+  
+  // 5. Store metadata in Firestore
+  await db.collection('files').add({
+    userId,
+    name: file.name,
+    url: downloadURL,
+    uploadedAt: serverTimestamp(),
+  });
+  
+  return downloadURL;
+}
+```
+
+### 14. Internationalization Pattern
+
+**i18next Setup:**
+```typescript
+// Pattern: Detect → Load → Translate
+i18n
+  .use(initReactI18next)
+  .init({
+    resources: { en, ar },
+    lng: 'en',
+    fallbackLng: 'en',
+    interpolation: { escapeValue: false },
+  });
+
+// Usage with RTL support
+const { t, i18n } = useTranslation();
+const direction = i18n.language === 'ar' ? 'rtl' : 'ltr';
+
+return <div dir={direction}>{t('key')}</div>;
+```
+
+### 15. Optimistic Updates Pattern
+
+**React Query Optimistic:**
+```typescript
+const mutation = useMutation({
+  mutationFn: updateProject,
+  onMutate: async (newData) => {
+    // Cancel outgoing refetches
+    await queryClient.cancelQueries(['project', newData.id]);
+    
+    // Snapshot previous value
+    const previous = queryClient.getQueryData(['project', newData.id]);
+    
+    // Optimistically update
+    queryClient.setQueryData(['project', newData.id], newData);
+    
+    // Return rollback function
+    return { previous };
+  },
+  onError: (err, newData, context) => {
+    // Rollback on error
+    queryClient.setQueryData(
+      ['project', newData.id],
+      context?.previous
+    );
+  },
+  onSettled: (data, error, variables) => {
+    // Refetch to ensure consistency
+    queryClient.invalidateQueries(['project', variables.id]);
+  },
+});
+```
+
+## Design Patterns Used
+
+### Creational Patterns
+- **Factory Pattern**: Model creation (Project.create())
+- **Builder Pattern**: Prompt building, document generation
+- **Singleton Pattern**: Firebase instances, database connections
+
+### Model Best Practices
+
+**Immutable Class-Based Models:**
+```typescript
+// Example: Project Model (Production-Ready Pattern)
+export class Project {
+  // All properties readonly
+  public readonly id: string;
+  public readonly name: string;
+  public readonly content: ProjectContent;
+  
+  constructor(props: ProjectProperties) {
+    // Validation at entry point
+    if (props.name !== undefined && props.name.trim() === '') {
+      throw new ProjectValidationError('Project name cannot be empty');
+    }
+    
+    // Initialize with defaults
+    this.id = props.id || uuidv4();
+    this.name = props.name || 'Untitled Project';
+    
+    // Validate content structure
+    this.content = validateAndConvertContent(props.content);
+  }
+  
+  // Immutable updates return new instances
+  public with(props: Partial<ProjectProperties>): Project {
+    return new Project({ ...this.toStateObject(), ...props });
+  }
+  
+  // Business logic methods
+  public addChapter(title: string): Project {
+    const newChapter = new Chapter({ title, sections: [] });
+    return this.with({ content: [...this.content, newChapter] });
+  }
+  
+  // Serialization for persistence
+  public toStateObject(): ProjectProperties {
+    return { id: this.id, name: this.name, /* ... */ };
+  }
+}
+```
+
+**Model Validation Pattern:**
+```typescript
+// Separate validation utilities
+// src/lib/models/project-validation.ts
+
+export const ProjectPropertiesSchema = z.object({
+  name: z.string().min(1).max(200),
+  complexity: z.number().min(0).max(100),
+  // ... all fields validated
+});
+
+export class ProjectValidationError extends Error {
+  constructor(
+    message: string,
+    public readonly field?: string,
+    public readonly errors?: z.ZodError
+  ) {
+    super(message);
+    this.name = 'ProjectValidationError';
+  }
+}
+
+export function validateProjectProperties(props: unknown) {
+  try {
+    return ProjectPropertiesSchema.parse(props);
+  } catch (error) {
+    throw new ProjectValidationError(/* ... */);
+  }
+}
+```
+
+**Documentation Standards:**
+```typescript
+/**
+ * Updates a section using an updater function
+ * 
+ * @param id - Section ID to update
+ * @param updater - Function that receives current section and returns updated section
+ * @returns New Project instance with updated section, or same instance if not found
+ * @throws {ProjectValidationError} If validation fails
+ * 
+ * @example
+ * ```typescript
+ * const updated = project.updateSection('s-1', section => 
+ *   section.with({ content: 'New content' })
+ * );
+ * ```
+ */
+public updateSection(id: string, updater: (s: Section) => Section): Project {
+  // Implementation
+}
+```
+
+**Testing Standards:**
+```typescript
+// Comprehensive test coverage
+describe('Project Model', () => {
+  describe('constructor', () => {
+    it('should validate required fields', () => {
+      expect(() => new Project({ name: '' }))
+        .toThrow('Project name cannot be empty');
+    });
+  });
+  
+  describe('immutability', () => {
+    it('should return new instance on update', () => {
+      const original = new Project({ name: 'Original' });
+      const updated = original.with({ name: 'Updated' });
+      
+      expect(updated).not.toBe(original);
+      expect(original.name).toBe('Original');
+    });
+  });
+});
+```
+
+**Model Checklist (Established Pattern):**
+- ✅ All properties `readonly`
+- ✅ Validation in constructor (Zod + custom logic)
+- ✅ Custom error classes (ModelValidationError)
+- ✅ JSDoc on all public methods
+- ✅ Immutable update methods
+- ✅ `with()` method for partial updates
+- ✅ `toStateObject()` for serialization
+- ✅ Separate validation utilities (model-validation.ts)
+- ✅ 70%+ test coverage (target: 80%+)
+- ✅ Works on client AND server (no 'use client')
+- ✅ Helper methods for common operations
+- ✅ Business logic methods where appropriate
+- ✅ Usage examples in JSDoc
+- ✅ ID-based operations (not array indices)
+
+**Production-Ready Models (Reference):**
+- ✅ Project Model: 89.71% coverage (38 tests) - `src/lib/models/project.ts`
+- ✅ User Model: 87.87% coverage (46 tests) - `src/lib/models/user.ts`
+- ✅ Chapter Model: 100% coverage (42 tests) - `src/lib/models/chapter.ts`
+- ✅ Section Model: 86.17% coverage (35 tests) - `src/lib/models/section.ts`
+
+**Anti-Patterns to Avoid:**
+- ❌ 'use client' in models (prevents SSR)
+- ❌ Mutable properties (use readonly)
+- ❌ Silent failures (validate inputs, throw errors)
+- ❌ Missing documentation (JSDoc all public methods)
+- ❌ Mixing concerns (keep models pure, move logic to utilities)
+- ❌ Using array indices instead of IDs (fragile, breaks on reorder)
+- ❌ Incomplete test coverage (<70%)
+- ❌ No validation (always validate constructor inputs)
+- ❌ Poor error messages (be specific about what failed)
+
+---
+
+### Structural Patterns
+- **Adapter Pattern**: Firebase to app model conversion
+- **Facade Pattern**: API services wrapping Firebase
+- **Decorator Pattern**: HOCs (withAuth, withValidation)
+
+### Behavioral Patterns
+- **Observer Pattern**: React Query subscriptions, Zustand stores
+- **Strategy Pattern**: Model selection, export formats
+- **Command Pattern**: API mutations, undo/redo
+- **Template Method**: Document generation pipeline
+
+## Anti-Patterns to Avoid
+
+❌ **Prop Drilling**: Use context or state management instead
+❌ **God Objects**: Keep components focused and single-purpose
+❌ **Tight Coupling**: Use dependency injection and interfaces
+❌ **Magic Numbers**: Use constants and enums
+❌ **Console.log in Production**: Use proper logging service
+❌ **Hardcoded Values**: Use environment variables
+❌ **Large Components**: Split into smaller, reusable pieces
+❌ **Mutation of State**: Use immutable updates
+❌ **Synchronous Heavy Operations**: Use async/await and workers
+
+## Best Practices Checklist
+
+✅ **TypeScript strict mode** enabled
+✅ **Component composition** over inheritance
+✅ **Custom hooks** for reusable logic
+✅ **Error boundaries** (recommended, not implemented)
+✅ **Lazy loading** for code splitting (recommended)
+✅ **Memoization** for expensive computations
+✅ **Debouncing** for frequent operations
+✅ **Optimistic updates** for better UX
+✅ **Centralized error handling**
+✅ **Consistent naming conventions**
+✅ **Modular file structure**
+✅ **Separation of concerns**

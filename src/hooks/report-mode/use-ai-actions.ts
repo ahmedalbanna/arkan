@@ -8,7 +8,7 @@ import { Chapter, type Project } from '@/lib/models';
 import { parseMarkdownToContent } from '@/lib/project/markdown-parser';
 import { PromptBuilder } from '@/lib/prompt-builder';
 import { projectKeys } from '@/lib/query-keys';
-import { generateReportSectionApi } from '@/services/api/reportService';
+// Removed: old reportService - now using unifiedGenerationService
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Editor } from '@tiptap/react';
 import { marked } from 'marked';
@@ -17,9 +17,30 @@ import { useEditorStore } from '../core/use-editor-store';
 import { useBuilderStore } from '../core/useBuilderStore';
 
 interface AiActionsProps {
+  /** Optional TipTap editor instance. If not provided, uses the active editor from store. */
   editor?: Editor | null;
 }
 
+/**
+ * AI Actions Hook
+ * 
+ * Provides AI-powered content generation and manipulation features for the report builder.
+ * Handles section generation, chapter generation, and text manipulation (translate, rewrite, etc.).
+ * 
+ * @param props - Configuration options
+ * @returns AI action handlers and state
+ * 
+ * @example
+ * ```tsx
+ * const { generateSectionMutation, handleAiAction, isProcessing } = useAiActions();
+ * 
+ * // Generate a section
+ * generateSectionMutation.mutate('section-id');
+ * 
+ * // Apply AI text manipulation
+ * handleAiAction('summarize');
+ * ```
+ */
 export function useAiActions({ editor: initialEditor }: AiActionsProps = {}) {
   const { t } = useLocalization();
   const { toast } = useToast();
@@ -66,7 +87,7 @@ export function useAiActions({ editor: initialEditor }: AiActionsProps = {}) {
       await new Promise(resolve => setTimeout(resolve, 500)); // Simulate network delay
       return { manipulatedText: `[Sample AI Response for: "${variables.command}"]\n\nThis is a hardcoded result for testing purposes. The original text was:\n"${variables.textToManipulate}"` };
     },
-    onSuccess: (data: any) => handleSuccess(data.manipulatedText),
+    onSuccess: (data: { manipulatedText: string }) => handleSuccess(data.manipulatedText),
     onError: handleError,
   });
 
@@ -76,7 +97,7 @@ export function useAiActions({ editor: initialEditor }: AiActionsProps = {}) {
       await new Promise(resolve => setTimeout(resolve, 500));
       return { text: `[Translated to ${variables.targetLang}] This is a hardcoded translation for testing.` };
     },
-    onSuccess: (data: any) => handleSuccess(data.text),
+    onSuccess: (data: { text: string }) => handleSuccess(data.text),
     onError: handleError,
   });
 
@@ -87,7 +108,7 @@ export function useAiActions({ editor: initialEditor }: AiActionsProps = {}) {
     return /[؀-ۿ]/.test(text) ? 'Arabic' : 'English';
   };
 
-  const handleAiAction = (action: string, payload: any = {}) => {
+  const handleAiAction = (action: string, payload: Record<string, unknown> = {}) => {
     if (!editor) return;
     const { from, to } = editor.state.selection;
     const selectedText = editor.state.doc.textBetween(from, to);
@@ -129,27 +150,44 @@ export function useAiActions({ editor: initialEditor }: AiActionsProps = {}) {
       const section = currentProject.getSection(sectionId);
       if (!section) throw new Error("Section not found.");
 
+      // Mark section as generating before API call
+      updateProject(p => p.updateSection(sectionId, s => s.markAsGenerating()));
+
       const token = await firebaseUser.getIdToken();
-      const body = {
-        sectionToGenerate: section.id as SectionName,
-        prompt: section.buildActionPrompt(),
-        otherSections: section.getContextAsRecord(currentProject),
-        externalContext: section.getExternalContextAsArray(currentProject),
-        guidelines: section.guidelines,
-        instructionText: PromptBuilder.buildSectionPrompt(section, currentProject),
-      };
-      // The API now handles saving and the client updates via real-time listeners.
-      // We don't need to process the response content here anymore.
-      return generateReportSectionApi(body, token);
+      
+      // Build complete prompts using PromptBuilder
+      const systemPrompt = PromptBuilder.buildSectionSystemPrompt(section, currentProject);
+      const userPrompt = PromptBuilder.buildSectionUserPrompt(section, currentProject);
+      
+      // Use unified generation service
+      const { generateSection } = await import('@/services/api/unifiedGenerationService');
+      return generateSection(section.id, systemPrompt, userPrompt, token);
     },
-    onSuccess: (data, sectionId) => {
-      updateProject(p => p.updateSection(sectionId, s => s.with({ content: data.content })));
+    onSuccess: (result, sectionId) => {
+      // Extract content and metadata from unified response
+      const content = result.content;
+      const aiModel = result.metadata.modelUsed;
+
+      // Update section with generated content and mark as generated
+      updateProject(p => p.updateSection(sectionId, s => s.markAsGenerated(aiModel, content)));
+      
       queryClient.invalidateQueries({ queryKey: projectKeys.detail(project?.id || '') });
       refetchUser();
-      toast({ title: 'Generation In Progress', description: 'The AI is generating your content. It will appear automatically when ready.' });
+      
+      toast({ 
+        title: 'Section Generated', 
+        description: `Successfully generated in ${result.metadata.processingTimeMs}ms.` 
+      });
     },
-    onError: (error: any) => {
-      toast({ title: 'Section Generation Error', description: error.message || 'Failed to generate section', variant: 'destructive' });
+    onError: (error, sectionId) => {
+      // Mark section as failed
+      updateProject(p => p.updateSection(sectionId, s => s.markAsFailed()));
+      
+      toast({ 
+        title: 'Section Generation Error', 
+        description: error.message || 'Failed to generate section', 
+        variant: 'destructive' 
+      });
     },
   });
 
@@ -178,8 +216,30 @@ export function useAiActions({ editor: initialEditor }: AiActionsProps = {}) {
         }))
       };
 
-      const result = await writingToolApi<any, { markdownContent: string }>(`/api/writing-tools/generate-chapter`, { data: body, token });
-      return { chapterId, content: result.markdownContent };
+      // TODO: Implement chapter generation API endpoint
+      // const result = await writingToolApi<any, { markdownContent: string }>(`/api/writing-tools/generate-chapter`, { data: body, token });
+      // return { chapterId, content: result.markdownContent };
+      
+      // For now, generate sections sequentially
+      let generatedContent = '';
+      // const chapter = project.findChapter(chapterId);
+      if (!chapter) throw new Error('Chapter not found');
+      
+      for (const section of chapter.sections) {
+        // Use unified generation service
+        const { generateSection } = await import('@/services/api/unifiedGenerationService');
+        const systemPrompt = PromptBuilder.buildSectionSystemPrompt(section, currentProject);
+        const userPrompt = PromptBuilder.buildSectionUserPrompt(section, currentProject);
+        const result = await generateSection(section.id, systemPrompt, userPrompt, token);
+        
+        if (!result || !result.content) {
+          throw new Error(`Failed to generate section: ${section.title}`);
+        }
+        
+        generatedContent += result.content || '';
+      }
+      
+      return { chapterId, content: generatedContent };
     },
     onSuccess: (data) => {
       updateProject(p => {
@@ -195,7 +255,10 @@ export function useAiActions({ editor: initialEditor }: AiActionsProps = {}) {
       refetchUser();
       toast({ title: 'Chapter Generated', description: 'The AI has generated the content for the chapter.' });
     },
-    onError: (error: any) => toast({ title: 'Chapter Generation Error', description: error.message, variant: 'destructive' })
+    onError: (error) => {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      toast({ title: 'Chapter Generation Error', description: errorMessage, variant: 'destructive' });
+    }
   });
 
   const generateProjectMutation = useMutation({
@@ -204,14 +267,33 @@ export function useAiActions({ editor: initialEditor }: AiActionsProps = {}) {
       if (!firebaseUser) throw new Error("User not found.");
       if (selectedSectionIds.size === 0) throw new Error('No sections were selected for generation.');
 
-      for (const sectionId of selectedSectionIds) {
-        // This will be slow as it runs sequentially.
-        // A better approach would be a dedicated backend endpoint for bulk generation.
-        await generateSectionMutation.mutateAsync(sectionId);
+      // Generate sections in parallel for better performance
+      const sectionArray = Array.from(selectedSectionIds);
+      const results = await Promise.allSettled(
+        sectionArray.map(sectionId => generateSectionMutation.mutateAsync(sectionId))
+      );
+
+      // Check for failures
+      const failures = results.filter(r => r.status === 'rejected');
+      if (failures.length > 0) {
+        const failureCount = failures.length;
+        const successCount = results.length - failureCount;
+        throw new Error(
+          `${failureCount} section(s) failed to generate. ${successCount} succeeded. Check individual sections for details.`
+        );
       }
+
+      return results;
     },
-    onSuccess: () => toast({ title: "Project Build Complete", description: "All selected sections have been successfully generated." }),
-    onError: (error: Error) => toast({ title: "Project Build Failed", description: error.message, variant: "destructive" }),
+    onSuccess: () => toast({ 
+      title: "Project Build Complete", 
+      description: "All selected sections have been successfully generated." 
+    }),
+    onError: (error: Error) => toast({ 
+      title: "Project Build Failed", 
+      description: error.message, 
+      variant: "destructive" 
+    }),
   });
 
 

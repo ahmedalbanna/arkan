@@ -30,6 +30,31 @@ export function useReportGenerator() {
     };
   }, [zoomLevel]);
 
+  // Handler functions for floating controls
+  const handleComplexityChange = (value: number) => {
+    builderPageLogic.updateProject(p => p.with({ complexity: value }));
+  };
+
+  const handleFormalityChange = (value: number) => {
+    builderPageLogic.updateProject(p => p.with({ formality: value }));
+  };
+
+  const handleLanguageChange = (value: string) => {
+    builderPageLogic.updateProject(p => p.with({ language: value as any }));
+  };
+
+  const handleToneChange = (value: string) => {
+    builderPageLogic.updateProject(p => p.with({ tone: value as any }));
+  };
+
+  const handleZoomIn = () => {
+    setZoomLevel(prev => Math.min(prev + 0.1, 2));
+  };
+
+  const handleZoomOut = () => {
+    setZoomLevel(prev => Math.max(prev - 0.1, 0.5));
+  };
+
   const panels = useMemo(() => [
     {
         key: 'settings',
@@ -72,5 +97,11 @@ export function useReportGenerator() {
     setIsChatOpen,
     zoomLevel,
     setZoomLevel,
+    handleComplexityChange,
+    handleFormalityChange,
+    handleLanguageChange,
+    handleToneChange,
+    handleZoomIn,
+    handleZoomOut,
   };
 }

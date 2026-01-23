@@ -8,23 +8,77 @@ import { toast } from '../util/use-toast';
 import { useEditorStore } from './use-editor-store';
 import { projectFromFile } from '@/lib/project/io'; // Import from new location
 
+/**
+ * Builder Store State Interface
+ * 
+ * Central state management for the Builder/Report Mode application.
+ * Manages project data, user profile, and UI state.
+ */
 interface BuilderState {
+    /** Current active project */
     project: Project | null;
-    userProfile: User | null; // Add userProfile to the store state
+    
+    /** Current user profile */
+    userProfile: User | null;
+    
+    /** Flag indicating if there are unsaved changes */
     hasUnsavedChanges: boolean;
+    
+    /** Flag indicating if the store has been initialized from localStorage */
     isStoreInitialized: boolean;
-    version: number; // To track project updates
+    
+    /** Version counter for tracking project updates (optimistic updates) */
+    version: number;
+    
+    /** Currently selected file ID for file manager */
     selectedFileId: string | null;
 
+    /** Initialize the store from localStorage */
     initializeStore: () => void;
-    setUserProfile: (userProfile: User | null) => void; // Action to set the user profile
+    
+    /** Set the current user profile */
+    setUserProfile: (userProfile: User | null) => void;
+    
+    /** Update the unsaved changes flag */
     setHasUnsavedChanges: (hasChanges: boolean) => void;
+    
+    /**
+     * Update the project immutably
+     * @param updater - Function that receives the current project and returns updated project or void
+     */
     updateProject: (updater: (project: Project) => void | Project) => void;
+    
+    /**
+     * Update project structure from markdown content
+     * @param markdown - Markdown content to parse and apply
+     */
     updateProjectFromMarkdown: (markdown: string) => void;
+    
+    /**
+     * Load a project from data object
+     * @param projectData - Project properties to load
+     */
     loadProject: (projectData: ProjectProperties) => void;
+    
+    /**
+     * Load a project from a file (JSON)
+     * @param file - File object to load
+     */
     loadProjectFromFile: (file: File) => Promise<void>;
+    
+    /** Create a new empty project session */
     newSession: () => void;
+    
+    /**
+     * Apply table of contents markdown to project structure
+     * @param tocMarkdown - Markdown formatted table of contents
+     */
     applyTableOfContents: (tocMarkdown: string) => void;
+    
+    /**
+     * Select a file in the file manager
+     * @param fileId - File ID to select, or null to deselect
+     */
     selectFile: (fileId: string | null) => void;
 }
 
@@ -71,7 +125,10 @@ const useBuilderStore = create<BuilderState>((set, get) => ({
             const result = updater(newProject);
             const finalProject = result instanceof Project ? result : newProject;
             
-            localProjectService.saveProject(finalProject.toStateObject()); 
+            // Save asynchronously without blocking UI
+            localProjectService.saveProject(finalProject.toStateObject()).catch(err => {
+                console.error('Failed to save project to local storage:', err);
+            });
             localStorage.setItem('lastActiveProjectId', finalProject.id);
 
             return { 
@@ -89,7 +146,12 @@ const useBuilderStore = create<BuilderState>((set, get) => ({
     loadProject: (projectData) => {
         const newProject = projectData instanceof Project ? projectData : new Project(projectData);
         localStorage.setItem('lastActiveProjectId', newProject.id);
-        localProjectService.saveProject(newProject.toStateObject());
+        
+        // Save asynchronously without blocking UI
+        localProjectService.saveProject(newProject.toStateObject()).catch(err => {
+            console.error('Failed to save project to local storage:', err);
+        });
+        
         set({ project: newProject, hasUnsavedChanges: false, version: 0, selectedFileId: null });
     },
 

@@ -1,10 +1,7 @@
-// // src/app/api/templates/refresh-image/route.ts
-// import { generateImage } from '@/ai/flows/generate-image';
-// import { adminDb } from '@/lib/firebase/server-init';
-// import { createApiResponse, handleApiError, withAuth } from '@/lib/utils/api-utils';
-// import { logGeneration } from '@/services/generation-service';
-// import { getStorage } from 'firebase-admin/storage';
-// import { z } from 'zod';
+// Disabled temporarily - requires Firebase Storage setup
+// TODO: Re-enable after configuring Firebase Storage properly
+
+export {}; // Make this file a module
 
 
 // const refreshImageSchema = z.object({

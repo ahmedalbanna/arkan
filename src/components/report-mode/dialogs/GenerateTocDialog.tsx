@@ -81,11 +81,11 @@ export function GenerateTocDialog({ isOpen, onOpenChange, onApply }: GenerateToc
                                     </div>
                                 ) : (
                                     <ul className="space-y-3">
-                                        {results?.tableOfContents.map((chapter, chapterIndex) => (
+                                        {results?.tableOfContents.map((chapter: { title: string; sections: string[] }, chapterIndex: number) => (
                                             <li key={chapterIndex}>
                                                 <p className="font-semibold">{chapterIndex + 1}. {chapter.title}</p>
                                                 <ul className="pl-6 mt-1 space-y-1 list-disc list-inside text-sm text-muted-foreground">
-                                                    {chapter.sections.map((section, sectionIndex) => (
+                                                    {chapter.sections.map((section: string, sectionIndex: number) => (
                                                         <li key={sectionIndex}>{section}</li>
                                                     ))}
                                                 </ul>

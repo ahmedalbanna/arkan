@@ -66,3 +66,11 @@ package-lock.json
 .lightning_studio/.studiorc
 .lightning_studio/on_start.sh
 .lightning_studio/on_stop.sh
+package-lock.json
+*.bak
+*.txt
+errors.txt
+typecheck_errors.txt
+typescript_warnings.txt
+.firebase/logs/vsce-debug.log
+.firebase/hosting.Lm5leHQ.cache

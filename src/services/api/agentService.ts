@@ -1,46 +1,86 @@
+/**
+ * Agent Service - API calls for agent management
+ */
 
-'use client';
 import type { AgentProperties } from '@/lib/models';
-import { apiService } from './apiService';
 
-export async function fetchAgentsApi(token: string, category?: string): Promise<AgentProperties[]> {
-    const url = new URL('/api/agents', window.location.origin);
-    if (category) {
-        url.searchParams.append('category', category);
-    }
-    return apiService({ endpoint: url.toString(), token });
+/**
+ * Fetch all agents for the current user
+ */
+export async function fetchAgentsApi(token: string): Promise<AgentProperties[]> {
+  const response = await fetch('/api/agents', {
+    headers: {
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json',
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error(`Failed to fetch agents: ${response.statusText}`);
+  }
+
+  return response.json();
 }
 
-export async function fetchAgentByIdApi(id: string, token: string): Promise<AgentProperties> {
-    return apiService({ endpoint: `/api/agents/${id}`, token });
+/**
+ * Create a new agent
+ */
+export async function createAgentApi(
+  data: Omit<AgentProperties, 'id'> | AgentProperties,
+  token: string
+): Promise<AgentProperties> {
+  const response = await fetch('/api/agents', {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(data),
+  });
+
+  if (!response.ok) {
+    throw new Error(`Failed to create agent: ${response.statusText}`);
+  }
+
+  return response.json();
 }
 
-export async function createAgentApi(data: Omit<AgentProperties, 'id'> & { id: string }, token: string): Promise<AgentProperties> {
-    return apiService({
-      endpoint: '/api/agents',
-      method: 'POST',
-      data,
-      token
-    });
+/**
+ * Update an existing agent
+ */
+export async function updateAgentApi(
+  id: string,
+  data: Partial<AgentProperties>,
+  token: string
+): Promise<AgentProperties> {
+  const response = await fetch(`/api/agents/${id}`, {
+    method: 'PUT',
+    headers: {
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(data),
+  });
+
+  if (!response.ok) {
+    throw new Error(`Failed to update agent: ${response.statusText}`);
+  }
+
+  return response.json();
 }
 
-export async function updateAgentApi(id: string, data: Partial<AgentProperties>, token: string): Promise<AgentProperties> {
-    return apiService({
-      endpoint: `/api/agents/${id}`,
-      method: 'PUT',
-      data,
-      token
-    });
-}
+/**
+ * Delete an agent
+ */
+export async function deleteAgentApi(id: string, token: string): Promise<void> {
+  const response = await fetch(`/api/agents/${id}`, {
+    method: 'DELETE',
+    headers: {
+      'Authorization': `Bearer ${token}`,
+    },
+  });
 
-export async function deleteAgentApi(id: string, token: string): Promise<{ message: string }> {
-    return apiService({
-      endpoint: `/api/agents/${id}`,
-      method: 'DELETE',
-      token
-    });
-}
-
-export async function fetchAgentCategoriesApi(token: string) {
-    return apiService({ endpoint: '/api/agent-categories', token });
+  if (!response.ok) {
+    throw new Error(`Failed to delete agent: ${response.statusText}`);
+  }
 }
