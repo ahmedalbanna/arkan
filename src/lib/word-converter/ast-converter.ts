@@ -173,6 +173,7 @@ export async function convertAstToDocxObjects(ast: Root, footnoteIdMap: Map<stri
               const defaultHeight = 400; 
               
               imageChildren = [new ImageRun({
+                type: 'png',
                 data: proxiedImage.buffer,
                 transformation: {
                   width: maxWidth,

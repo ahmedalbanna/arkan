@@ -22,7 +22,17 @@ import {
 } from '@/ai/tools';
 import { z } from 'zod';
 import { RECOMMENDED_TEMPERATURES } from '@/ai/utils/json-output-validator';
-import { ProfessionalDocumentWriterInputSchema, ProfessionalDocumentWriterOutputSchema } from '../tools/schemas';
+// import { ProfessionalDocumentWriterInputSchema, ProfessionalDocumentWriterOutputSchema } from '../tools/schemas'; // File not found
+
+// Temporary fallback schemas
+const ProfessionalDocumentWriterInputSchema = z.object({
+  title: z.string(),
+  requirements: z.string().optional(),
+  tone: z.string().optional(),
+});
+const ProfessionalDocumentWriterOutputSchema = z.object({
+  document: z.string(),
+});
 
 export type ProfessionalDocumentWriterInput = z.infer<typeof ProfessionalDocumentWriterInputSchema>;
 export type ProfessionalDocumentWriterOutput = z.infer<typeof ProfessionalDocumentWriterOutputSchema>;

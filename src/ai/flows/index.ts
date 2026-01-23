@@ -18,7 +18,7 @@ export * from './generate-ideas';
 export * from './generate-image';
 export * from './generate-plantuml';
 export * from './generate-quiz';
-export * from './generate-report-section';
+// export * from './generate-report-section'; // File not found
 export * from './generate-session-plan';
 export * from './generate-text';
 export * from './generate-theoretical-lecture';
@@ -34,7 +34,7 @@ export * from './rewrite-to-markdown';
 export * from './summarize-document';
 export * from './summarize-text';
 export * from './text-stylist';
-export * from './text-to-speech';
+// export * from './text-to-speech'; // File not found
 export * from './topic-explainer';
 export * from './translate-text';
 export * from './write-document';

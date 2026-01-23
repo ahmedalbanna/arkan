@@ -22,7 +22,18 @@ import {
 } from '@/ai/tools';
 import { getJsonPromptInstructions, RECOMMENDED_TEMPERATURES, validateJsonOutput } from '@/ai/utils/json-output-validator';
 import { z } from 'zod';
-import { AcademicLiteratureReviewInputSchema, AcademicLiteratureReviewOutputSchema } from '../tools/schemas';
+// import { AcademicLiteratureReviewInputSchema, AcademicLiteratureReviewOutputSchema } from '../tools/schemas'; // File not found
+
+// Temporary fallback schemas
+const AcademicLiteratureReviewInputSchema = z.object({
+  topic: z.string(),
+  focusAreas: z.array(z.string()).optional(),
+  minLength: z.number().optional(),
+  includeGaps: z.boolean().optional(),
+});
+const AcademicLiteratureReviewOutputSchema = z.object({
+  review: z.string(),
+});
 
 export type AcademicLiteratureReviewInput = z.infer<typeof AcademicLiteratureReviewInputSchema>;
 export type AcademicLiteratureReviewOutput = z.infer<typeof AcademicLiteratureReviewOutputSchema>;

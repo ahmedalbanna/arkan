@@ -26,7 +26,16 @@ import {
     validateCitationsTool,
 } from '@/ai/tools';
 import { z } from 'zod';
-import { AcademicPaperQualityCheckerInputSchema, AcademicPaperQualityCheckerOutputSchema } from '../tools/schemas';
+// import { AcademicPaperQualityCheckerInputSchema, AcademicPaperQualityCheckerOutputSchema } from '../tools/schemas'; // File not found
+
+// Temporary fallback schemas
+const AcademicPaperQualityCheckerInputSchema = z.object({
+  paper: z.string(),
+  checkAreas: z.array(z.string()).optional(),
+});
+const AcademicPaperQualityCheckerOutputSchema = z.object({
+  report: z.string(),
+});
 
 export type AcademicPaperQualityCheckerInput = z.infer<typeof AcademicPaperQualityCheckerInputSchema>;
 export type AcademicPaperQualityCheckerOutput = z.infer<typeof AcademicPaperQualityCheckerOutputSchema>;

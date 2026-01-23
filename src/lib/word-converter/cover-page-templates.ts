@@ -88,6 +88,7 @@ function createLogoParagraph(logoImage?: Buffer): Paragraph | null {
       spacing: { after: 480 },
       children: [
         new ImageRun({
+          type: 'png',
           data: logoImage,
           transformation: {
             width: 150,

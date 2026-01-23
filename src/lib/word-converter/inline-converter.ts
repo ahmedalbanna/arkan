@@ -43,6 +43,7 @@ export async function transformInlines(
           const proxiedImage = await getProxiedImageBuffer(node.url);
           if (proxiedImage && proxiedImage.buffer && proxiedImage.buffer.byteLength > 0) {
             runs.push(new ImageRun({
+              type: 'png',
               data: proxiedImage.buffer,
               transformation: { width: 150, height: 100 },
             }));

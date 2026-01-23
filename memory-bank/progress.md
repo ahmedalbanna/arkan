@@ -312,6 +312,36 @@
 
 ---
 
+### Sprint 6: Build System & Quality Issues (In Progress - URGENT)
+
+**Status**: 🔴 BLOCKED - Build system broken, immediate fixes required
+
+**Issues to Fix (Priority Order):**
+
+1. **IMMEDIATE**: TypeScript Compilation Errors (~20+ errors)
+   - model-selector.ts: numeric type issues
+   - word-converter files: docx library type incompatibilities
+   - Missing service files (3 files)
+   - Status: 0% (Blocking build)
+   - Est. Time: 4-6 hours
+
+2. **HIGH**: ESLint Violations (253 errors, 381 warnings)
+   - Unused variables/imports (253 errors)
+   - Explicit `any` types (381 warnings)
+   - Status: 0% (Secondary priority)
+   - Est. Time: 3-4 hours
+
+3. **FIXED**: Duplicate Test Files
+   - ✅ Removed Chapter.test.ts, Project.test.ts, Section.test.ts (uppercase duplicates)
+   - TypeScript casing conflicts resolved
+
+**Current Session (Jan 23, 2026 Evening):**
+- Fixed file casing conflicts
+- Identified 20+ TypeScript compilation errors
+- Identified 253 ESLint errors + 381 warnings
+- Documented build timeout issue
+- Updated memory bank with findings
+
 ### Sprint 6: Current Focus (In Progress)
 **Duration:** January 2026  
 **Goal:** Security hardening and production readiness

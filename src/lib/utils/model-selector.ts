@@ -40,7 +40,8 @@ export function assessSectionComplexity(section: Section): SectionComplexity {
   let complexityScore = 0;
 
   // Factor 1: Word count requirement
-  const wordCount = section.controls?.wordCount || 0;
+  const wordCountStr = section.controls?.wordCount || '';
+  const wordCount = parseInt(wordCountStr, 10) || 0;
   if (wordCount > 1500) complexityScore += 3;
   else if (wordCount > 800) complexityScore += 2;
   else if (wordCount > 400) complexityScore += 1;
@@ -57,7 +58,7 @@ export function assessSectionComplexity(section: Section): SectionComplexity {
   else if (complexity > 40) complexityScore += 1;
 
   // Factor 4: Context dependencies
-  const contextCount = (section.context?.length || 0) + (section.externalContext?.length || 0);
+  const contextCount = (Object.keys(section.context?.sections || {}).length || 0) + (Object.keys(section.context?.externalContext || {}).length || 0);
   if (contextCount > 5) complexityScore += 2;
   else if (contextCount > 2) complexityScore += 1;
 
@@ -66,7 +67,7 @@ export function assessSectionComplexity(section: Section): SectionComplexity {
   if (behaviorsCount > 3) complexityScore += 1;
 
   // Factor 6: Section type
-  if (section.type === 'diagram' || section.type === 'table') {
+  if (section.type === 'diagram' || section.type === 'code' || section.type === 'presentation') {
     complexityScore += 2; // Structured content is more complex
   }
 
