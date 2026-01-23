@@ -71,5 +71,5 @@ export const sectionKeys = {
 };
 
 export const agentKeys = {
-  all: () => ['agents'] as const,
+  all: ['agents'] as const,
 };

@@ -63,9 +63,11 @@ export default function UploadManager() {
         for (const file of acceptedFiles) {
             const reader = new FileReader();
 
-            reader.onabort = () => console.log('file reading was aborted');
+            reader.onabort = () => {
+                // File reading was aborted
+            };
             reader.onerror = () => {
-                console.log('file reading has failed');
+                toast({ title: 'Error', description: 'Failed to read file', variant: 'destructive' });
                 toast({ title: t('builder.files.toasts.fileReadError'), description: t('builder.files.toasts.fileReadErrorDesc'), variant: 'destructive' });
             };
             reader.onload = () => {

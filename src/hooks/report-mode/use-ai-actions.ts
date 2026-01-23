@@ -19,9 +19,30 @@ import { useEditorStore } from '../core/use-editor-store';
 import { projectKeys } from '@/lib/query-keys';
 
 interface AiActionsProps {
+  /** Optional TipTap editor instance. If not provided, uses the active editor from store. */
   editor?: Editor | null;
 }
 
+/**
+ * AI Actions Hook
+ * 
+ * Provides AI-powered content generation and manipulation features for the report builder.
+ * Handles section generation, chapter generation, and text manipulation (translate, rewrite, etc.).
+ * 
+ * @param props - Configuration options
+ * @returns AI action handlers and state
+ * 
+ * @example
+ * ```tsx
+ * const { generateSectionMutation, handleAiAction, isProcessing } = useAiActions();
+ * 
+ * // Generate a section
+ * generateSectionMutation.mutate('section-id');
+ * 
+ * // Apply AI text manipulation
+ * handleAiAction('summarize');
+ * ```
+ */
 export function useAiActions({ editor: initialEditor }: AiActionsProps = {}) {
   const { t } = useLocalization();
   const { toast } = useToast();
@@ -68,7 +89,7 @@ export function useAiActions({ editor: initialEditor }: AiActionsProps = {}) {
         await new Promise(resolve => setTimeout(resolve, 500)); // Simulate network delay
         return { manipulatedText: `[Sample AI Response for: "${variables.command}"]\n\nThis is a hardcoded result for testing purposes. The original text was:\n"${variables.textToManipulate}"` };
     },
-    onSuccess: (data: any) => handleSuccess(data.manipulatedText),
+    onSuccess: (data: { manipulatedText: string }) => handleSuccess(data.manipulatedText),
     onError: handleError,
   });
 
@@ -89,7 +110,7 @@ export function useAiActions({ editor: initialEditor }: AiActionsProps = {}) {
     return /[؀-ۿ]/.test(text) ? 'Arabic' : 'English';
   };
 
-  const handleAiAction = (action: string, payload: any = {}) => {
+  const handleAiAction = (action: string, payload: Record<string, unknown> = {}) => {
     if (!editor) return;
     const { from, to } = editor.state.selection;
     const selectedText = editor.state.doc.textBetween(from, to);
@@ -199,7 +220,10 @@ export function useAiActions({ editor: initialEditor }: AiActionsProps = {}) {
         refetchUser();
         toast({ title: 'Chapter Generated', description: 'The AI has generated the content for the chapter.' });
     },
-    onError: (error: any) => toast({ title: 'Chapter Generation Error', description: error.message, variant: 'destructive' })
+    onError: (error) => {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      toast({ title: 'Chapter Generation Error', description: errorMessage, variant: 'destructive' });
+    }
   });
 
  const generateProjectMutation = useMutation({
@@ -213,9 +237,18 @@ export function useAiActions({ editor: initialEditor }: AiActionsProps = {}) {
           // A better approach would be a dedicated backend endpoint for bulk generation.
           await generateSectionMutation.mutateAsync(sectionId);
       }
+
+      return results;
     },
-    onSuccess: () => toast({ title: "Project Build Complete", description: "All selected sections have been successfully generated." }),
-    onError: (error: Error) => toast({ title: "Project Build Failed", description: error.message, variant: "destructive" }),
+    onSuccess: () => toast({ 
+      title: "Project Build Complete", 
+      description: "All selected sections have been successfully generated." 
+    }),
+    onError: (error: Error) => toast({ 
+      title: "Project Build Failed", 
+      description: error.message, 
+      variant: "destructive" 
+    }),
   });
 
 

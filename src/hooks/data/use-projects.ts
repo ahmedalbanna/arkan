@@ -12,10 +12,28 @@ import { getAuthenticatedToken } from '@/lib/utils/authUtils';
 import { fetchProjectsApi, saveProjectApi, deleteProjectApi } from '@/services/api/projectService';
 import { localProjectService } from '@/services/local-project-service';
 
+/**
+ * Projects Hook
+ * 
+ * Fetches and manages user projects with offline-first approach.
+ * Syncs between local IndexedDB storage and Firebase backend.
+ * 
+ * @returns Projects data and query state
+ * 
+ * @example
+ * ```tsx
+ * const { projects, isLoading, error } = useProjects();
+ * 
+ * if (isLoading) return <Loading />;
+ * if (error) return <Error message={error} />;
+ * 
+ * return <ProjectList projects={projects} />;
+ * ```
+ */
 export function useProjects() {
     const { firebaseUser } = useAuth();
     const { data, ...rest } = useQuery<Project[]>({
-        queryKey: projectKeys.lists(),
+        queryKey: firebaseUser ? projectKeys.lists(firebaseUser.uid) : projectKeys.lists('guest'),
         queryFn: async () => {
             if (!firebaseUser) return [];
             // Then, fetch from server and merge
@@ -31,8 +49,8 @@ export function useProjects() {
                 return mergedProjects;
 
             } catch (e) {
-                console.warn("Could not sync with server, using local projects.", e);
-                 // First, get local projects for optimistic UI
+                // Could not sync with server, fall back to local projects
+                // First, get local projects for optimistic UI
                 const localProjects = await localProjectService.getAllProjects();
                 return localProjects.map(p => new Project(p));
             }
@@ -43,6 +61,23 @@ export function useProjects() {
     return { projects: data, ...rest };
 }
 
+/**
+ * Save Project Hook
+ * 
+ * Handles saving projects to Firebase backend.
+ * Requires online connection and authenticated user.
+ * 
+ * @returns Save mutation and loading state
+ * 
+ * @example
+ * ```tsx
+ * const { saveProjectMutation, isSaving } = useSaveProject();
+ * 
+ * const handleSave = () => {
+ *   saveProjectMutation.mutate(project.toStateObject());
+ * };
+ * ```
+ */
 export function useSaveProject() {
     const queryClient = useQueryClient();
     const { setHasUnsavedChanges } = useBuilderStore();
@@ -59,11 +94,12 @@ export function useSaveProject() {
         },
         onSuccess: (savedProject) => {
             setHasUnsavedChanges(false);
-            queryClient.invalidateQueries({ queryKey: projectKeys.lists() });
+            queryClient.invalidateQueries({ queryKey: projectKeys.lists(firebaseUser?.uid || 'guest') });
             toast({ title: 'Project Saved', description: `"${savedProject.name}" has been saved to the cloud.` });
         },
-        onError: (error: any) => {
-            toast({ title: 'Error', description: `Failed to save project: ${error.message}`, variant: 'destructive' });
+        onError: (error) => {
+            const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+            toast({ title: 'Error', description: `Failed to save project: ${errorMessage}`, variant: 'destructive' });
         }
     });
 
@@ -92,12 +128,13 @@ export function useDeleteProject() {
         },
         onSuccess: (projectId) => {
             toast({ title: 'Project Deleted', description: 'The project has been successfully deleted.' });
-            queryClient.invalidateQueries({ queryKey: projectKeys.lists() });
+            queryClient.invalidateQueries({ queryKey: projectKeys.lists(firebaseUser?.uid || 'guest') });
             // Also remove from the specific detail query if it exists
             queryClient.removeQueries({ queryKey: projectKeys.detail(projectId) });
         },
-        onError: (error: any) => {
-            toast({ title: 'Delete Failed', description: error.message, variant: 'destructive' });
+        onError: (error) => {
+            const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+            toast({ title: 'Delete Failed', description: errorMessage, variant: 'destructive' });
         },
     });
 }
