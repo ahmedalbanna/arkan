@@ -8,7 +8,7 @@ import { Chapter, type Project } from '@/lib/models';
 import { parseMarkdownToContent } from '@/lib/project/markdown-parser';
 import { PromptBuilder } from '@/lib/prompt-builder';
 import { projectKeys } from '@/lib/query-keys';
-import { generateReportSectionApi } from '@/services/api/reportService';
+// Removed: old reportService - now using unifiedGenerationService
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Editor } from '@tiptap/react';
 import { marked } from 'marked';
@@ -150,27 +150,44 @@ export function useAiActions({ editor: initialEditor }: AiActionsProps = {}) {
       const section = currentProject.getSection(sectionId);
       if (!section) throw new Error("Section not found.");
 
+      // Mark section as generating before API call
+      updateProject(p => p.updateSection(sectionId, s => s.markAsGenerating()));
+
       const token = await firebaseUser.getIdToken();
-      const body = {
-        sectionToGenerate: section.id as SectionName,
-        prompt: section.buildActionPrompt(),
-        otherSections: section.getContextAsRecord(currentProject),
-        externalContext: section.getExternalContextAsArray(currentProject),
-        guidelines: section.guidelines,
-        instructionText: PromptBuilder.buildSectionPrompt(section, currentProject),
-      };
-      // The API now handles saving and the client updates via real-time listeners.
-      // We don't need to process the response content here anymore.
-      return generateReportSectionApi(body, token);
+      
+      // Build complete prompts using PromptBuilder
+      const systemPrompt = PromptBuilder.buildSectionSystemPrompt(section, currentProject);
+      const userPrompt = PromptBuilder.buildSectionUserPrompt(section, currentProject);
+      
+      // Use unified generation service
+      const { generateSection } = await import('@/services/api/unifiedGenerationService');
+      return generateSection(section.id, systemPrompt, userPrompt, token);
     },
-    onSuccess: (data, sectionId) => {
-      updateProject(p => p.updateSection(sectionId, s => s.with({ content: data.content })));
+    onSuccess: (result, sectionId) => {
+      // Extract content and metadata from unified response
+      const content = result.content;
+      const aiModel = result.metadata.modelUsed;
+
+      // Update section with generated content and mark as generated
+      updateProject(p => p.updateSection(sectionId, s => s.markAsGenerated(aiModel, content)));
+      
       queryClient.invalidateQueries({ queryKey: projectKeys.detail(project?.id || '') });
       refetchUser();
-      toast({ title: 'Generation In Progress', description: 'The AI is generating your content. It will appear automatically when ready.' });
+      
+      toast({ 
+        title: 'Section Generated', 
+        description: `Successfully generated in ${result.metadata.processingTimeMs}ms.` 
+      });
     },
-    onError: (error) => {
-      toast({ title: 'Section Generation Error', description: error.message || 'Failed to generate section', variant: 'destructive' });
+    onError: (error, sectionId) => {
+      // Mark section as failed
+      updateProject(p => p.updateSection(sectionId, s => s.markAsFailed()));
+      
+      toast({ 
+        title: 'Section Generation Error', 
+        description: error.message || 'Failed to generate section', 
+        variant: 'destructive' 
+      });
     },
   });
 
@@ -209,14 +226,17 @@ export function useAiActions({ editor: initialEditor }: AiActionsProps = {}) {
       if (!chapter) throw new Error('Chapter not found');
       
       for (const section of chapter.sections) {
-        const sectionResult = await generateReportSectionApi({
-          flow: 'generate-section',
-          sectionToGenerate: section.id,
-          prompt: PromptBuilder.buildSectionPrompt(section, project),
-          otherSections: {},
-          guidelines: [],
-        }, token);
-        generatedContent += sectionResult[section.id] || '';
+        // Use unified generation service
+        const { generateSection } = await import('@/services/api/unifiedGenerationService');
+        const systemPrompt = PromptBuilder.buildSectionSystemPrompt(section, currentProject);
+        const userPrompt = PromptBuilder.buildSectionUserPrompt(section, currentProject);
+        const result = await generateSection(section.id, systemPrompt, userPrompt, token);
+        
+        if (!result || !result.content) {
+          throw new Error(`Failed to generate section: ${section.title}`);
+        }
+        
+        generatedContent += result.content || '';
       }
       
       return { chapterId, content: generatedContent };

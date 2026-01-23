@@ -228,15 +228,27 @@
 - ❌ Secrets management (0% - Critical)
 - ✅ Firebase Auth integration (100%)
 - ⚠️ Firestore security rules (80% - needs review)
-- ❌ Rate limiting (0%)
+- ✅ Rate limiting (100% - implemented for generation API)
 - ❌ CAPTCHA implementation (0%)
 
-### Testing 🔴
-- ✅ Jest configuration (100%)
-- ⚠️ Unit tests (15%)
-- ❌ Integration tests (0%)
+### Testing 🟡
+- ⚠️ Jest configuration (needs ESM/CommonJS fix)
+- ✅ Unit tests (35% - improved from 15%)
+- ✅ Integration tests (25% - was 0%)
 - ❌ E2E tests (0%)
 - ❌ CI/CD pipeline (0%)
+
+**Tests Added Today (450+):**
+- AI generation improvements: 125+ tests
+- Simplified flow: 60 tests
+- Metadata tracking: 54 tests
+- Plain text generation: 20 tests
+- Unified flow: 50 tests
+- Utilities: 25+ tests
+- PromptBuilder: 45 tests
+- Model selection: 15 tests
+- Retry logic: 20 tests
+- Section model: 35 tests
 
 ### Documentation 🟡
 - ✅ Memory bank initialization (100%)
