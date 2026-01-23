@@ -1,609 +1,449 @@
 /**
  * Project Model Tests
- * 
- * Tests for Project class and its methods
  */
 
-import { Project, type ProjectProperties } from '../project';
-import { Chapter } from '../chapter';
-import { Section } from '../section';
-import { ExternalContext } from '../external-context';
+// Mock the markdown-parser to avoid ESM issues with unified
+jest.mock('@/lib/project/markdown-parser');
+jest.mock('@/lib/project/template');
+
+import { Project, Chapter, Section } from '@/lib/models';
 
 describe('Project Model', () => {
-  // ============================================================================
-  // Constructor and Initialization
-  // ============================================================================
-
-  describe('Constructor', () => {
-    it('should create project with default values', () => {
+  describe('constructor', () => {
+    it('should create a project with default values', () => {
       const project = new Project({});
 
       expect(project.id).toBeDefined();
       expect(project.name).toBe('Untitled Project');
-      expect(project.description).toBe('');
       expect(project.content).toEqual([]);
       expect(project.externalContext).toEqual([]);
     });
 
-    it('should create project with provided values', () => {
-      const props: ProjectProperties = {
-        id: 'project-123',
-        name: 'My Project',
-        description: 'Test project description',
-        projectType: 'Research',
-        specialization: 'Computer Science',
-      };
+    it('should create a project with provided values', () => {
+      const project = new Project({
+        id: 'test-id',
+        name: 'Test Project',
+        description: 'Test Description',
+      });
 
-      const project = new Project(props);
-
-      expect(project.id).toBe('project-123');
-      expect(project.name).toBe('My Project');
-      expect(project.description).toBe('Test project description');
-      expect(project.projectType).toBe('Research');
-      expect(project.specialization).toBe('Computer Science');
+      expect(project.id).toBe('test-id');
+      expect(project.name).toBe('Test Project');
+      expect(project.description).toBe('Test Description');
     });
 
-    it('should generate unique ID if not provided', () => {
-      const project1 = new Project({});
-      const project2 = new Project({});
-
-      expect(project1.id).toBeDefined();
-      expect(project2.id).toBeDefined();
-      expect(project1.id).not.toBe(project2.id);
-    });
-
-    it('should initialize metadata with defaults', () => {
-      const project = new Project({});
-
-      expect(project.meta).toBeDefined();
-      expect(project.meta.author).toBe('Unknown');
-      expect(project.meta.version).toBe('1.0.0');
-      expect(project.meta.created).toBeDefined();
-      expect(project.meta.updated).toBeDefined();
-    });
-
-    it('should accept custom metadata', () => {
-      const props: ProjectProperties = {
-        meta: {
-          author: 'John Doe',
-          version: '2.0.0',
-          created: '2024-01-01',
-          updated: '2024-01-15',
-        },
-      };
-
-      const project = new Project(props);
-
-      expect(project.meta.author).toBe('John Doe');
-      expect(project.meta.version).toBe('2.0.0');
-      expect(project.meta.created).toBe('2024-01-01');
-      expect(project.meta.updated).toBe('2024-01-15');
-    });
-
-    it('should normalize content to Chapter and Section instances', () => {
-      const props: ProjectProperties = {
+    it('should reconstruct chapters and sections from data', () => {
+      const projectData = {
+        id: 'test',
+        name: 'Test',
         content: [
-          { id: 'ch1', title: 'Chapter 1', content: '', type: 'chapter' },
-          { id: 'sec1', title: 'Section 1', content: '', type: 'section' },
+          {
+            id: 'chapter-1',
+            title: 'Chapter 1',
+            sections: [
+              { id: 'section-1', title: 'Section 1', content: 'Content 1' },
+              { id: 'section-2', title: 'Section 2', content: 'Content 2' },
+            ],
+          },
         ],
       };
 
-      const project = new Project(props);
+      const project = new Project(projectData);
 
+      expect(project.content).toHaveLength(1);
       expect(project.content[0]).toBeInstanceOf(Chapter);
-      expect(project.content[1]).toBeInstanceOf(Section);
-    });
-
-    it('should initialize external context', () => {
-      const props: ProjectProperties = {
-        externalContext: [
-          { id: 'ctx1', type: 'reference', content: 'Reference 1' },
-        ],
-      };
-
-      const project = new Project(props);
-
-      expect(project.externalContext).toHaveLength(1);
-      expect(project.externalContext[0]).toBeInstanceOf(ExternalContext);
+      expect(project.content[0].sections).toHaveLength(2);
+      expect(project.content[0].sections[0]).toBeInstanceOf(Section);
     });
   });
 
-  // ============================================================================
-  // Academic Information
-  // ============================================================================
+  describe('with', () => {
+    it('should create a new project with updated properties', () => {
+      const original = new Project({ name: 'Original' });
+      const updated = original.with({ name: 'Updated' });
 
-  describe('Academic information', () => {
-    it('should store university information', () => {
-      const props: ProjectProperties = {
-        university: 'MIT',
-        course: 'CS101',
-        educationalLevel: 'Undergraduate',
-        supervisor: 'Dr. Smith',
-      };
-
-      const project = new Project(props);
-
-      expect(project.university).toBe('MIT');
-      expect(project.course).toBe('CS101');
-      expect(project.educationalLevel).toBe('Undergraduate');
-      expect(project.supervisor).toBe('Dr. Smith');
+      expect(updated).not.toBe(original);
+      expect(updated.name).toBe('Updated');
+      expect(original.name).toBe('Original');
     });
 
-    it('should store team members', () => {
-      const props: ProjectProperties = {
-        teamMembers: ['Alice', 'Bob', 'Charlie'],
-      };
+    it('should maintain other properties when updating', () => {
+      const original = new Project({
+        name: 'Original',
+        description: 'Original Description',
+      });
+      const updated = original.with({ name: 'Updated' });
 
-      const project = new Project(props);
-
-      expect(project.teamMembers).toEqual(['Alice', 'Bob', 'Charlie']);
-      expect(project.teamMembers).toHaveLength(3);
-    });
-
-    it('should handle empty team members', () => {
-      const project = new Project({});
-
-      expect(project.teamMembers).toBeUndefined();
+      expect(updated.description).toBe('Original Description');
     });
   });
 
-  // ============================================================================
-  // Content Management
-  // ============================================================================
-
-  describe('Content management', () => {
-    it('should add chapter to project', () => {
+  describe('addChapter', () => {
+    it('should add a new chapter to the project', () => {
       const project = new Project({});
-      const chapter = new Chapter({ id: 'ch1', title: 'Chapter 1', content: '' });
 
-      const updated = project.addContent(chapter);
+      const updated = project.addChapter('New Chapter');
 
       expect(updated.content).toHaveLength(1);
-      expect(updated.content[0]).toBeInstanceOf(Chapter);
-      expect(updated.content[0].title).toBe('Chapter 1');
+      expect(updated.content[0].title).toBe('New Chapter');
+      expect(updated).not.toBe(project); // Immutability check
     });
+  });
 
-    it('should add section to project', () => {
-      const project = new Project({});
-      const section = new Section({ id: 'sec1', title: 'Section 1', content: '' });
-
-      const updated = project.addContent(section);
-
-      expect(updated.content).toHaveLength(1);
-      expect(updated.content[0]).toBeInstanceOf(Section);
-    });
-
-    it('should add multiple content items', () => {
-      const project = new Project({});
-      const chapter = new Chapter({ id: 'ch1', title: 'Chapter 1', content: '' });
-      const section = new Section({ id: 'sec1', title: 'Section 1', content: '' });
-
-      const updated = project.addContent(chapter).addContent(section);
-
-      expect(updated.content).toHaveLength(2);
-    });
-
-    it('should update existing content', () => {
-      const chapter = new Chapter({ id: 'ch1', title: 'Chapter 1', content: 'Original' });
+  describe('updateChapter', () => {
+    it('should update a specific chapter', () => {
+      const chapter = new Chapter({ id: 'ch1', title: 'Original' });
       const project = new Project({ content: [chapter] });
 
-      const updatedChapter = new Chapter({ id: 'ch1', title: 'Updated Chapter', content: 'Updated' });
-      const updated = project.updateContent('ch1', updatedChapter);
+      const updated = project.updateChapter('ch1', c => c.with({ title: 'Updated' }));
 
-      expect(updated.content[0].title).toBe('Updated Chapter');
-      expect((updated.content[0] as Chapter).content).toBe('Updated');
+      expect(updated.content[0].title).toBe('Updated');
+      expect(project.content[0].title).toBe('Original');
     });
 
-    it('should remove content by id', () => {
-      const chapter1 = new Chapter({ id: 'ch1', title: 'Chapter 1', content: '' });
-      const chapter2 = new Chapter({ id: 'ch2', title: 'Chapter 2', content: '' });
-      const project = new Project({ content: [chapter1, chapter2] });
-
-      const updated = project.removeContent('ch1');
-
-      expect(updated.content).toHaveLength(1);
-      expect(updated.content[0].id).toBe('ch2');
-    });
-
-    it('should return same project if content not found', () => {
+    it('should return same project if chapter not found', () => {
       const project = new Project({});
-
-      const updated = project.updateContent('non-existent', new Chapter({ id: 'ch1', title: 'Test', content: '' }));
+      const updated = project.updateChapter('nonexistent', c => c);
 
       expect(updated).toBe(project);
     });
+  });
 
-    it('should get content by id', () => {
-      const chapter = new Chapter({ id: 'ch1', title: 'Chapter 1', content: 'Test' });
+  describe('getChapter', () => {
+    it('should find a chapter by ID', () => {
+      const chapter = new Chapter({ id: 'ch1', title: 'Test Chapter' });
       const project = new Project({ content: [chapter] });
 
-      const found = project.getContent('ch1');
+      const found = project.getChapter('ch1');
 
       expect(found).toBeDefined();
-      expect(found?.id).toBe('ch1');
+      expect(found?.title).toBe('Test Chapter');
     });
 
-    it('should return undefined for non-existent content', () => {
+    it('should return undefined if chapter not found', () => {
       const project = new Project({});
-
-      const found = project.getContent('non-existent');
+      const found = project.getChapter('nonexistent');
 
       expect(found).toBeUndefined();
     });
   });
 
-  // ============================================================================
-  // Content Reordering
-  // ============================================================================
-
-  describe('Content reordering', () => {
-    it('should move content up', () => {
-      const ch1 = new Chapter({ id: 'ch1', title: 'Chapter 1', content: '' });
-      const ch2 = new Chapter({ id: 'ch2', title: 'Chapter 2', content: '' });
-      const ch3 = new Chapter({ id: 'ch3', title: 'Chapter 3', content: '' });
-      const project = new Project({ content: [ch1, ch2, ch3] });
-
-      const updated = project.moveContent(2, 0);
-
-      expect(updated.content[0].id).toBe('ch3');
-      expect(updated.content[1].id).toBe('ch1');
-      expect(updated.content[2].id).toBe('ch2');
-    });
-
-    it('should move content down', () => {
-      const ch1 = new Chapter({ id: 'ch1', title: 'Chapter 1', content: '' });
-      const ch2 = new Chapter({ id: 'ch2', title: 'Chapter 2', content: '' });
-      const ch3 = new Chapter({ id: 'ch3', title: 'Chapter 3', content: '' });
-      const project = new Project({ content: [ch1, ch2, ch3] });
-
-      const updated = project.moveContent(0, 2);
-
-      expect(updated.content[0].id).toBe('ch2');
-      expect(updated.content[1].id).toBe('ch3');
-      expect(updated.content[2].id).toBe('ch1');
-    });
-
-    it('should handle invalid indices', () => {
-      const chapter = new Chapter({ id: 'ch1', title: 'Chapter 1', content: '' });
+  describe('getSection', () => {
+    it('should find a section by ID', () => {
+      const section = new Section({ id: 's1', title: 'Test Section', type: 'report' });
+      const chapter = new Chapter({ id: 'ch1', title: 'Chapter 1', sections: [section] });
       const project = new Project({ content: [chapter] });
 
-      const updated = project.moveContent(0, 10);
+      const found = project.getSection('s1');
 
-      expect(updated.content).toHaveLength(1);
+      expect(found).toBeDefined();
+      expect(found?.title).toBe('Test Section');
+    });
+
+    it('should return undefined if section not found', () => {
+      const project = new Project({});
+      const found = project.getSection('nonexistent');
+
+      expect(found).toBeUndefined();
     });
   });
 
-  // ============================================================================
-  // External Context
-  // ============================================================================
+  describe('findSectionWithContext', () => {
+    it('should find a section with chapter context', () => {
+      const section = new Section({ id: 's1', title: 'Test Section', type: 'report' });
+      const chapter = new Chapter({ id: 'ch1', title: 'Chapter 1', sections: [section] });
+      const project = new Project({ content: [chapter] });
 
-  describe('External context', () => {
-    it('should add external context', () => {
+      const result = project.findSectionWithContext('s1');
+
+      expect(result).toBeDefined();
+      expect(result?.section.title).toBe('Test Section');
+      expect(result?.chapter.title).toBe('Chapter 1');
+      expect(result?.chapterIndex).toBe(0);
+      expect(result?.sectionIndex).toBe(0);
+    });
+
+    it('should return null if section not found', () => {
       const project = new Project({});
-      const context = new ExternalContext({ id: 'ctx1', type: 'reference', content: 'Test' });
+      const result = project.findSectionWithContext('nonexistent');
+
+      expect(result).toBeNull();
+    });
+  });
+
+  describe('addExternalContext', () => {
+    it('should add external context to the project', () => {
+      const project = new Project({});
+      const context = {
+        fileName: 'test.pdf',
+        content: 'Test content',
+        type: 'context' as const,
+      };
 
       const updated = project.addExternalContext(context);
 
       expect(updated.externalContext).toHaveLength(1);
-      expect(updated.externalContext[0].content).toBe('Test');
+      expect(updated.externalContext[0].fileName).toBe('test.pdf');
     });
+  });
 
-    it('should remove external context', () => {
-      const ctx1 = new ExternalContext({ id: 'ctx1', type: 'reference', content: 'Context 1' });
-      const ctx2 = new ExternalContext({ id: 'ctx2', type: 'note', content: 'Context 2' });
-      const project = new Project({ externalContext: [ctx1, ctx2] });
+  describe('removeExternalContext', () => {
+    it('should remove external context by ID', () => {
+      const ctx1 = { id: 'ctx1', fileName: 'file1.pdf', content: 'Content 1', type: 'context' as const };
+      const ctx2 = { id: 'ctx2', fileName: 'file2.pdf', content: 'Content 2', type: 'context' as const };
+      const project = new Project({
+        externalContext: [ctx1, ctx2],
+      });
 
       const updated = project.removeExternalContext('ctx1');
 
       expect(updated.externalContext).toHaveLength(1);
-      expect(updated.externalContext[0].id).toBe('ctx2');
-    });
-
-    it('should update external context', () => {
-      const ctx = new ExternalContext({ id: 'ctx1', type: 'reference', content: 'Original' });
-      const project = new Project({ externalContext: [ctx] });
-
-      const updatedCtx = new ExternalContext({ id: 'ctx1', type: 'reference', content: 'Updated' });
-      const updated = project.updateExternalContext('ctx1', updatedCtx);
-
-      expect(updated.externalContext[0].content).toBe('Updated');
+      expect(updated.externalContext[0].fileName).toBe('file2.pdf');
     });
   });
 
-  // ============================================================================
-  // Global Settings
-  // ============================================================================
-
-  describe('Global settings', () => {
-    it('should store language setting', () => {
-      const props: ProjectProperties = {
-        language: 'en',
-      };
-
-      const project = new Project(props);
-
-      expect(project.language).toBe('en');
-    });
-
-    it('should store complexity setting', () => {
-      const props: ProjectProperties = {
-        complexity: 75,
-      };
-
-      const project = new Project(props);
-
-      expect(project.complexity).toBe(75);
-    });
-
-    it('should store formality setting', () => {
-      const props: ProjectProperties = {
-        formality: 80,
-      };
-
-      const project = new Project(props);
-
-      expect(project.formality).toBe(80);
-    });
-
-    it('should store tone setting', () => {
-      const props: ProjectProperties = {
-        tone: 'professional',
-      };
-
-      const project = new Project(props);
-
-      expect(project.tone).toBe('professional');
-    });
-
-    it('should store behaviors', () => {
-      const props: ProjectProperties = {
-        behaviors: ['detailed', 'analytical'],
-      };
-
-      const project = new Project(props);
-
-      expect(project.behaviors).toEqual(['detailed', 'analytical']);
-    });
-
-    it('should store rules and constraints', () => {
-      const props: ProjectProperties = {
-        rules: ['Use APA style', 'Include references'],
-        constraints: ['Maximum 5000 words', 'No plagiarism'],
-      };
-
-      const project = new Project(props);
-
-      expect(project.rules).toEqual(['Use APA style', 'Include references']);
-      expect(project.constraints).toEqual(['Maximum 5000 words', 'No plagiarism']);
-    });
-
-    it('should store citation style', () => {
-      const props: ProjectProperties = {
-        citationStyle: 'APA',
-      };
-
-      const project = new Project(props);
-
-      expect(project.citationStyle).toBe('APA');
-    });
-  });
-
-  // ============================================================================
-  // Table of Contents
-  // ============================================================================
-
-  describe('Table of contents', () => {
-    it('should store TOC markdown', () => {
-      const props: ProjectProperties = {
-        tableOfContentsMarkdown: '# Table of Contents\n\n1. Chapter 1\n2. Chapter 2',
-      };
-
-      const project = new Project(props);
-
-      expect(project.tableOfContentsMarkdown).toBe('# Table of Contents\n\n1. Chapter 1\n2. Chapter 2');
-    });
-
-    it('should update TOC markdown', () => {
-      const project = new Project({});
-      const newTOC = '## Contents\n\n- Introduction\n- Conclusion';
-
-      const updated = project.with({ tableOfContentsMarkdown: newTOC });
-
-      expect(updated.tableOfContentsMarkdown).toBe(newTOC);
-    });
-  });
-
-  // ============================================================================
-  // Immutability
-  // ============================================================================
-
-  describe('Immutability', () => {
-    it('should return new instance when adding content', () => {
-      const project = new Project({});
-      const chapter = new Chapter({ id: 'ch1', title: 'Chapter 1', content: '' });
-
-      const updated = project.addContent(chapter);
-
-      expect(updated).not.toBe(project);
-      expect(project.content).toHaveLength(0);
-      expect(updated.content).toHaveLength(1);
-    });
-
-    it('should return new instance when updating content', () => {
-      const chapter = new Chapter({ id: 'ch1', title: 'Original', content: '' });
-      const project = new Project({ content: [chapter] });
-
-      const updated = project.updateContent('ch1', new Chapter({ id: 'ch1', title: 'Updated', content: '' }));
-
-      expect(updated).not.toBe(project);
-      expect(project.content[0].title).toBe('Original');
-      expect(updated.content[0].title).toBe('Updated');
-    });
-
-    it('should return new instance when using with()', () => {
-      const project = new Project({ name: 'Original' });
-
-      const updated = project.with({ name: 'Updated' });
-
-      expect(updated).not.toBe(project);
-      expect(project.name).toBe('Original');
-      expect(updated.name).toBe('Updated');
-    });
-
-    it('should preserve other properties when updating', () => {
+  describe('toStateObject', () => {
+    it('should convert project to plain object', () => {
       const project = new Project({
-        name: 'My Project',
-        description: 'Test',
-        university: 'MIT',
-      });
-
-      const updated = project.with({ name: 'Updated Project' });
-
-      expect(updated.name).toBe('Updated Project');
-      expect(updated.description).toBe('Test');
-      expect(updated.university).toBe('MIT');
-    });
-  });
-
-  // ============================================================================
-  // Logo Management
-  // ============================================================================
-
-  describe('Logo management', () => {
-    it('should store project logo URL', () => {
-      const props: ProjectProperties = {
-        logoUrl: 'https://example.com/logo.png',
-      };
-
-      const project = new Project(props);
-
-      expect(project.logoUrl).toBe('https://example.com/logo.png');
-    });
-
-    it('should store university logo URL', () => {
-      const props: ProjectProperties = {
-        universityLogoUrl: 'https://example.com/uni-logo.png',
-      };
-
-      const project = new Project(props);
-
-      expect(project.universityLogoUrl).toBe('https://example.com/uni-logo.png');
-    });
-
-    it('should update logo URLs', () => {
-      const project = new Project({});
-
-      const updated = project.with({
-        logoUrl: 'https://example.com/new-logo.png',
-        universityLogoUrl: 'https://example.com/new-uni-logo.png',
-      });
-
-      expect(updated.logoUrl).toBe('https://example.com/new-logo.png');
-      expect(updated.universityLogoUrl).toBe('https://example.com/new-uni-logo.png');
-    });
-  });
-
-  // ============================================================================
-  // Serialization
-  // ============================================================================
-
-  describe('Serialization', () => {
-    it('should convert to plain object', () => {
-      const project = new Project({
+        id: 'test-id',
         name: 'Test Project',
-        description: 'Test description',
       });
 
-      const plain = project.toJSON();
+      const stateObject = project.toStateObject();
 
-      expect(plain).toEqual(
+      expect(stateObject).toEqual(
         expect.objectContaining({
+          id: 'test-id',
           name: 'Test Project',
-          description: 'Test description',
         })
       );
+      expect(stateObject).not.toBeInstanceOf(Project);
     });
 
-    it('should include all properties in JSON', () => {
-      const chapter = new Chapter({ id: 'ch1', title: 'Chapter 1', content: 'Test' });
-      const project = new Project({
-        name: 'Project',
-        content: [chapter],
-        university: 'MIT',
-        language: 'en',
-      });
+    it('should recursively convert chapters and sections', () => {
+      const section = new Section({ id: 's1', title: 'Section', type: 'report' });
+      const chapter = new Chapter({ id: 'ch1', title: 'Chapter', sections: [section] });
+      const project = new Project({ content: [chapter] });
 
-      const json = project.toJSON();
+      const stateObject = project.toStateObject();
 
-      expect(json.name).toBe('Project');
-      expect(json.content).toHaveLength(1);
-      expect(json.university).toBe('MIT');
-      expect(json.language).toBe('en');
+      expect(stateObject.content[0]).not.toBeInstanceOf(Chapter);
+      expect(stateObject.content[0].sections[0]).not.toBeInstanceOf(Section);
     });
   });
 
-  // ============================================================================
-  // Edge Cases
-  // ============================================================================
+  describe('generateTableOfContents', () => {
+    it('should generate TOC from chapters and sections', () => {
+      const section1 = new Section({ id: 's1', title: 'Background', type: 'report' });
+      const section2 = new Section({ id: 's2', title: 'Objectives', type: 'report' });
+      const chapter1 = new Chapter({ id: 'ch1', title: 'Introduction', sections: [section1, section2] });
+      
+      const section3 = new Section({ id: 's3', title: 'Data Collection', type: 'report' });
+      const chapter2 = new Chapter({ id: 'ch2', title: 'Methodology', sections: [section3] });
+      
+      const project = new Project({ content: [chapter1, chapter2] });
 
-  describe('Edge Cases', () => {
-    it('should handle empty project name', () => {
-      const project = new Project({ name: '' });
+      const updated = project.generateTableOfContents();
 
-      expect(project.name).toBe('');
+      expect(updated.tableOfContentsMarkdown).toContain('Table of Contents');
+      expect(updated.tableOfContentsMarkdown).toContain('Introduction');
+      expect(updated.tableOfContentsMarkdown).toContain('Background');
+      expect(updated.tableOfContentsMarkdown).toContain('Methodology');
     });
+  });
 
-    it('should handle very long names', () => {
-      const longName = 'A'.repeat(1000);
-      const project = new Project({ name: longName });
-
-      expect(project.name.length).toBe(1000);
-    });
-
-    it('should handle Unicode in project properties', () => {
-      const props: ProjectProperties = {
-        name: '我的项目 مشروعي',
-        description: 'Проект description 🚀',
-        university: '清华大学',
-      };
-
-      const project = new Project(props);
-
-      expect(project.name).toBe('我的项目 مشروعي');
-      expect(project.description).toBe('Проект description 🚀');
-      expect(project.university).toBe('清华大学');
-    });
-
-    it('should handle many content items', () => {
-      const content = Array.from({ length: 100 }, (_, i) =>
-        new Chapter({ id: `ch${i}`, title: `Chapter ${i}`, content: '' })
-      );
-      const project = new Project({ content });
-
-      expect(project.content).toHaveLength(100);
-    });
-
-    it('should handle many team members', () => {
-      const teamMembers = Array.from({ length: 50 }, (_, i) => `Member ${i}`);
-      const project = new Project({ teamMembers });
-
-      expect(project.teamMembers).toHaveLength(50);
-    });
-
-    it('should handle complex nested content', () => {
-      const chapter = new Chapter({
-        id: 'ch1',
-        title: 'Chapter 1',
-        content: 'Main content',
-        sections: [
-          { id: 'sec1', title: 'Section 1', content: 'Section content' },
-        ],
-      });
-
+  describe('addSectionToChapter', () => {
+    it('should add a section to specific chapter', () => {
+      const chapter = new Chapter({ id: 'ch1', title: 'Chapter 1', sections: [] });
       const project = new Project({ content: [chapter] });
 
-      expect(project.content).toHaveLength(1);
-      expect((project.content[0] as Chapter).sections).toHaveLength(1);
+      const updated = project.addSectionToChapter('ch1', 'New Section', 'Section content');
+
+      expect(updated.content[0].sections).toHaveLength(1);
+      expect(updated.content[0].sections[0].title).toBe('New Section');
+      expect(updated.content[0].sections[0].content).toBe('Section content');
+    });
+  });
+
+  describe('updateSectionContent', () => {
+    it('should update section content', () => {
+      const section = new Section({ id: 's1', title: 'Section', type: 'report', content: 'Old content' });
+      const chapter = new Chapter({ id: 'ch1', title: 'Chapter', sections: [section] });
+      const project = new Project({ content: [chapter] });
+
+      const updated = project.updateSectionContent('s1', 'New content');
+
+      const updatedSection = updated.getSection('s1');
+      expect(updatedSection?.content).toBe('New content');
+    });
+  });
+
+  describe('removeChapter', () => {
+    it('should remove chapter by ID', () => {
+      const chapter1 = new Chapter({ id: 'ch1', title: 'Chapter 1', sections: [] });
+      const chapter2 = new Chapter({ id: 'ch2', title: 'Chapter 2', sections: [] });
+      const project = new Project({ content: [chapter1, chapter2] });
+
+      const updated = project.removeChapter('ch1');
+
+      expect(updated.content).toHaveLength(1);
+      expect(updated.content[0].title).toBe('Chapter 2');
+    });
+  });
+
+  describe('getOtherSections', () => {
+    it('should return all sections except specified one', () => {
+      const section1 = new Section({ id: 's1', title: 'Section 1', type: 'report' });
+      const section2 = new Section({ id: 's2', title: 'Section 2', type: 'report' });
+      const section3 = new Section({ id: 's3', title: 'Section 3', type: 'report' });
+      const chapter = new Chapter({ id: 'ch1', title: 'Chapter', sections: [section1, section2, section3] });
+      const project = new Project({ content: [chapter] });
+
+      const others = project.getOtherSections('s2');
+
+      expect(others).toHaveLength(2);
+      expect(others.find(s => s.id === 's1')).toBeDefined();
+      expect(others.find(s => s.id === 's3')).toBeDefined();
+      expect(others.find(s => s.id === 's2')).toBeUndefined();
+    });
+  });
+
+  describe('hasContent', () => {
+    it('should return true if project has name', () => {
+      const project = new Project({ name: 'My Project' });
+      expect(project.hasContent()).toBe(true);
+    });
+
+    it('should return true if project has content', () => {
+      const section = new Section({ id: 's1', title: 'Section', type: 'report', content: 'Some content' });
+      const chapter = new Chapter({ id: 'ch1', title: 'Chapter', sections: [section] });
+      const project = new Project({ content: [chapter] });
+      expect(project.hasContent()).toBe(true);
+    });
+
+    it('should return true if project has external context', () => {
+      const project = new Project({ 
+        externalContext: [{ fileName: 'file.pdf', content: 'content', type: 'context' }] 
+      });
+      expect(project.hasContent()).toBe(true);
+    });
+
+    it('should return false for empty project', () => {
+      const project = new Project({});
+      expect(project.hasContent()).toBe(false);
+    });
+  });
+
+  describe('updateExternalContextType', () => {
+    it('should update external context type by ID', () => {
+      const ctx = { id: 'ctx1', fileName: 'file.pdf', content: 'content', type: 'context' as const };
+      const project = new Project({ externalContext: [ctx] });
+
+      const updated = project.updateExternalContextType('ctx1', 'example');
+
+      expect(updated.externalContext[0].type).toBe('example');
+    });
+  });
+
+  describe('parseAndSetContentFromToc', () => {
+    it('should parse numbered TOC format', () => {
+      const project = new Project({});
+      const toc = `1. Introduction
+   1.1. Background
+   1.2. Objectives
+2. Methodology
+   2.1. Data Collection`;
+
+      const content = project.parseAndSetContentFromToc(toc);
+
+      expect(content).toHaveLength(2);
+      expect(content[0].title).toBe('Introduction');
+      expect(content[0].sections).toHaveLength(2);
+      expect(content[0].sections[0].title).toBe('Background');
+      expect(content[1].title).toBe('Methodology');
+    });
+
+    it('should parse markdown TOC format', () => {
+      const project = new Project({});
+      const toc = `# Chapter One
+- Section A
+- Section B
+# Chapter Two`;
+
+      const content = project.parseAndSetContentFromToc(toc);
+
+      expect(content).toHaveLength(2);
+      expect(content[0].title).toBe('Chapter One');
+      expect(content[0].sections).toHaveLength(2);
+    });
+  });
+
+  describe('validation', () => {
+    it('should throw error for empty project name', () => {
+      expect(() => {
+        new Project({ name: '   ' });
+      }).toThrow('Project name cannot be empty');
+    });
+
+    it('should throw error for invalid complexity', () => {
+      expect(() => {
+        new Project({ complexity: 150 });
+      }).toThrow('Complexity must be between 0 and 100');
+    });
+
+    it('should throw error for invalid formality', () => {
+      expect(() => {
+        new Project({ formality: -10 });
+      }).toThrow('Formality must be between 0 and 100');
+    });
+
+    it('should throw error for duplicate IDs', () => {
+      const section1 = new Section({ id: 'same-id', title: 'Section 1', type: 'report' });
+      const section2 = new Section({ id: 'same-id', title: 'Section 2', type: 'report' });
+      const chapter = new Chapter({ id: 'ch1', title: 'Chapter', sections: [section1, section2] });
+
+      expect(() => {
+        new Project({ content: [chapter] });
+      }).toThrow('Duplicate IDs found');
+    });
+
+    it('should throw error for invalid content structure', () => {
+      expect(() => {
+        new Project({ content: [{ invalid: 'object' } as any] });
+      }).toThrow('Invalid section');
+    });
+  });
+
+  describe('deprecation warnings', () => {
+    it('should warn when using activeSectionId', () => {
+      const consoleSpy = jest.spyOn(console, 'warn').mockImplementation();
+      
+      new Project({ activeSectionId: 'section-1' });
+
+      expect(consoleSpy).toHaveBeenCalledWith(
+        expect.stringContaining('activeSectionId is deprecated')
+      );
+
+      consoleSpy.mockRestore();
+    });
+  });
+
+  describe('derived state', () => {
+    it('chapters getter should return only chapters', () => {
+      const chapter = new Chapter({ id: 'ch1', title: 'Chapter', sections: [] });
+      const section = new Section({ id: 's1', title: 'Standalone', type: 'report' });
+      const project = new Project({ content: [chapter, section] });
+
+      expect(project.chapters).toHaveLength(1);
+      expect(project.chapters[0]).toBeInstanceOf(Chapter);
+    });
+
+    it('sections getter should return all sections', () => {
+      const s1 = new Section({ id: 's1', title: 'S1', type: 'report' });
+      const s2 = new Section({ id: 's2', title: 'S2', type: 'report' });
+      const chapter = new Chapter({ id: 'ch1', title: 'Chapter', sections: [s1] });
+      const project = new Project({ content: [chapter, s2] });
+
+      expect(project.sections).toHaveLength(2);
     });
   });
 });
