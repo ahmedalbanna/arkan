@@ -9,6 +9,9 @@ module.exports = {
     '^@/components/(.*)$': '<rootDir>/src/components/$1',
     '^@/hooks/(.*)$': '<rootDir>/src/hooks/$1',
     '^@/services/(.*)$': '<rootDir>/src/services/$1',
+    '^@/types/(.*)$': '<rootDir>/src/types/$1',
+    '^@/context/(.*)$': '<rootDir>/src/context/$1',
+    '^@/firebase/(.*)$': '<rootDir>/src/firebase/$1',
   },
   // A list of paths to modules that run some code to configure or set up the testing framework before each test.
   setupFilesAfterEnv: ['<rootDir>/jest.setup.js'],
