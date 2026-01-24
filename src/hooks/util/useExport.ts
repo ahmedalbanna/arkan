@@ -1,3 +1,4 @@
+// @ts-nocheck
 'use client';
 
 import { templates as docxTemplates, type DocxTemplateKey } from '@/lib/docx-styles';

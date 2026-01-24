@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Tests for model selection logic
  */

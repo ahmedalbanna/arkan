@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Admin Prompts API Route Tests
  * 

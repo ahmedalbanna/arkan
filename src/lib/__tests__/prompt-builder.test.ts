@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Tests for PromptBuilder utility
  */

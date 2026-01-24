@@ -135,7 +135,7 @@ export const StepConfigSchema = z.object({
   customInstructions: z.string().optional(),
   
   // خيارات متقدمة
-  useRAG: z.boolean().default(false),
+  useRAG: z.boolean().default(false).optional(),
   ragCollectionId: z.string().optional(),
   modelPreference: z.string().optional(),
   temperature: z.number().min(0).max(2).optional(),

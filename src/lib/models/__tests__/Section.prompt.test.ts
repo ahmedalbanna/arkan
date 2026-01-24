@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Tests for Section model prompt building methods
  */

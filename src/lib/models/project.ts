@@ -143,7 +143,7 @@ export class Project {
   public readonly supervisor?: string;
   public readonly course?: string;
   public readonly educationalLevel?: string;
-  public readonly teamMembers?: readonly string[];
+  public readonly teamMembers?: string[];
   public readonly logoUrl?: string;
   public readonly universityLogoUrl?: string;
   public readonly tableOfContentsMarkdown?: string;
@@ -162,9 +162,9 @@ export class Project {
   public readonly complexity?: number;
   public readonly formality?: number;
   public readonly tone?: Tone;
-  public readonly behaviors?: readonly Behavior[];
-  public readonly rules?: readonly string[];
-  public readonly constraints?: readonly string[];
+  public readonly behaviors?: Behavior[];
+  public readonly rules?: string[];
+  public readonly constraints?: string[];
   public readonly citationStyle?: string;
 
   /**

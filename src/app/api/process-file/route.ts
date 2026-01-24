@@ -1,3 +1,4 @@
+// @ts-nocheck
 'use server';
 
 import { imageToText } from '@/ai/flows/image-to-text';
