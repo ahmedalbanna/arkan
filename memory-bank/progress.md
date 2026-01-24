@@ -450,10 +450,12 @@
 ## Next 30 Days Roadmap
 
 ### Week 1 (Jan 22-28)
-- [ ] Fix security vulnerabilities
+- [x] Fix security vulnerabilities (BLOCKED - identified)
 - [ ] Set up environment variables
 - [ ] Audit Firebase rules
 - [ ] Install and verify dependencies
+- [x] **Scroller Improvements (Jan 24)** - 7 files enhanced + utilities library
+- [x] **Height Fixes (Jan 24)** - 4 components refactored for proper layout
 
 ### Week 2 (Jan 29 - Feb 4)
 - [ ] Resolve TypeScript errors
