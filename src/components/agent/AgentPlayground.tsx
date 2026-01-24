@@ -1,5 +1,7 @@
 'use client';
 
+import { ErrorBoundary } from '@/components/shared/ErrorBoundary';
+
 import { zodResolver } from '@hookform/resolvers/zod';
 import { CornerDownLeft, Loader2, Wand2 } from 'lucide-react';
 import { useEffect } from 'react';
@@ -83,7 +85,8 @@ function AgentPlayground({ agent }: AgentPlaygroundProps) {
   const agentResponses = (agent && responses[agent.id]?.[agent.id]) || [];
 
   return (
-    <div className="flex h-full flex-col">
+    <ErrorBoundary>
+      <div className="flex h-full flex-col">
       <header className="flex items-center gap-4 border-b bg-background p-4">
         <Avatar className="h-10 w-10">
           <AvatarFallback>{agent.name.charAt(0)}</AvatarFallback>
@@ -134,7 +137,8 @@ function AgentPlayground({ agent }: AgentPlaygroundProps) {
           </form>
         </Form>
       </div>
-    </div>
+      </div>
+    </ErrorBoundary>
   );
 }
 

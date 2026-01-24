@@ -2,6 +2,8 @@
 
 'use client';
 
+import { ErrorBoundary } from '@/components/shared/ErrorBoundary';
+
 import { Button } from '@/components/ui/button';
 import { useEditorStore } from '@/hooks/core/use-editor-store';
 import { ContextualToolbar } from '@/lib/editor/ToolBar';
@@ -75,7 +77,8 @@ const MarkdownEditorComponent = ({ content, onChange, editorClassName }: Markdow
   };
 
   return (
-    <div className="relative text-base h-full">
+    <ErrorBoundary>
+      <div className="relative text-base h-full">
       {editor && (
         <BubbleMenu
           editor={editor}
@@ -100,7 +103,8 @@ const MarkdownEditorComponent = ({ content, onChange, editorClassName }: Markdow
       >
         <EditorContent editor={editor} className="h-full" />
       </div>
-    </div>
+      </div>
+    </ErrorBoundary>
   );
 };
 

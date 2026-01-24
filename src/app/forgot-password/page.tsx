@@ -1,10 +1,12 @@
 
 import ForgotPasswordForm from '@/components/auth/ForgotPasswordForm';
 import Image from 'next/image';
+import { ErrorBoundary } from '@/components/shared/ErrorBoundary';
 
 export default function ForgotPasswordPage() {
   return (
-    <div className="w-full lg:grid lg:min-h-[calc(100vh-65px)] lg:grid-cols-2 xl:min-h-[calc(100vh-65px)]">
+    <ErrorBoundary>
+      <div className="w-full lg:grid lg:min-h-[calc(100vh-65px)] lg:grid-cols-2 xl:min-h-[calc(100vh-65px)]">
       <div className="flex items-center justify-center py-12">
         <div className="mx-auto grid w-[350px] gap-6">
           <div className="grid gap-2 text-center">
@@ -27,5 +29,6 @@ export default function ForgotPasswordPage() {
         />
       </div>
     </div>
+   </ErrorBoundary>
   );
 }

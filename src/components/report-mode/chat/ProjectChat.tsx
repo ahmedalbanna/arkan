@@ -1,6 +1,8 @@
 
 'use client';
 
+import { ErrorBoundary } from '@/components/shared/ErrorBoundary';
+
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -38,7 +40,8 @@ export function ProjectChat({ isOpen, onClose }: ProjectChatProps) {
     if (!isOpen) return null;
 
     return (
-        <div className="fixed bottom-24 right-6 z-50 w-full max-w-md h-[60vh] bg-background border rounded-lg shadow-2xl flex flex-col animate-in slide-in-from-bottom-4">
+        <ErrorBoundary>
+            <div className="fixed bottom-24 right-6 z-50 w-full max-w-md h-[60vh] bg-background border rounded-lg shadow-2xl flex flex-col animate-in slide-in-from-bottom-4">
             <header className="flex items-center justify-between p-4 border-b">
                 <div className="flex items-center gap-2">
                     <MessageSquare className="h-5 w-5 text-primary" />
@@ -108,5 +111,6 @@ export function ProjectChat({ isOpen, onClose }: ProjectChatProps) {
                 </div>
             </div>
         </div>
+        </ErrorBoundary>
     );
 }

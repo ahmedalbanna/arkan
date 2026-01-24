@@ -5,13 +5,15 @@ import SignupForm from '@/components/auth/SignupForm';
 import { useLocalization } from '@/context/LocalizationContext';
 import { UserPlus } from 'lucide-react';
 import Image from 'next/image';
+import { ErrorBoundary } from '@/components/shared/ErrorBoundary';
 
 
 export default function SignupPage() {
   const { t } = useLocalization();
 
   return (
-    <div className="w-full lg:grid lg:min-h-[calc(100vh-65px)] lg:grid-cols-2 xl:min-h-[calc(100vh-65px)]">
+    <ErrorBoundary>
+      <div className="w-full lg:grid lg:min-h-[calc(100vh-65px)] lg:grid-cols-2 xl:min-h-[calc(100vh-65px)]">
         <div className="flex items-center justify-center py-12">
             <div className="mx-auto grid w-[350px] gap-6">
                 <div className="grid gap-2 text-center">
@@ -33,6 +35,7 @@ export default function SignupPage() {
                 data-ai-hint="signup illustration"
             />
         </div>
-    </div>
+      </div>
+    </ErrorBoundary>
   );
 }

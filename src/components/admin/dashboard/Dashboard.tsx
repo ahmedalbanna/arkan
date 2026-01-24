@@ -1,6 +1,7 @@
 
 'use client';
 
+import { ErrorBoundary } from '@/components/shared/ErrorBoundary';
 import { useAdminDashboard } from '@/hooks/admin/use-admin-dashboard';
 import { AlertCircle, Bot, CreditCard, Users } from 'lucide-react';
 import { StatCard } from './StatCard';

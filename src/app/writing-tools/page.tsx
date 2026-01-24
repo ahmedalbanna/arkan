@@ -1,5 +1,6 @@
 'use client';
 
+import { ErrorBoundary } from '@/components/shared/ErrorBoundary';
 import { AIToolCard } from '@/components/writing-tools/AIToolCard';
 import { useLocalization } from '@/context/LocalizationContext';
 import { PenSquare } from 'lucide-react';
@@ -40,7 +41,8 @@ export default function WritingToolsPage() {
   ];
 
   return (
-    <div className="container mx-auto max-w-7xl px-4 py-12">
+    <ErrorBoundary>
+      <div className="container mx-auto max-w-7xl px-4 py-12">
       <div className="text-center mb-16">
         <h1 className="text-4xl md:text-5xl font-headline font-bold text-primary flex items-center justify-center gap-4">
           <PenSquare className="w-10 h-10" />
@@ -55,6 +57,7 @@ export default function WritingToolsPage() {
           <AIToolCard key={tool.name} {...tool} />
         ))}
       </div>
-    </div>
+      </div>
+    </ErrorBoundary>
   );
 }

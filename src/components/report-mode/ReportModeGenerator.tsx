@@ -1,5 +1,6 @@
 'use client';
 
+import { ErrorBoundary } from '@/components/shared/ErrorBoundary';
 import { BuilderPageSkeleton } from '@/app/builder/loading';
 import { OnboardingGuide } from '@/components/onboarding/OnboardingGuide';
 import { useLocalization } from '@/context/LocalizationContext';
@@ -80,7 +81,8 @@ export default function ReportModeGenerator() {
   }
 
   return (
-    <div className="relative w-full h-screen flex flex-col overflow-hidden bg-background">
+    <ErrorBoundary>
+      <div className="relative w-full h-screen flex flex-col overflow-hidden bg-background">
       {/* Onboarding Guide */}
       {showOnboarding && (
         <OnboardingGuide
@@ -175,6 +177,7 @@ export default function ReportModeGenerator() {
           </div>
         </div>
       </div>
-    </div>
+      </div>
+    </ErrorBoundary>
   );
 }

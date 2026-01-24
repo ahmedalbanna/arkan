@@ -1,11 +1,13 @@
 'use client';
 
+import { ErrorBoundary } from '@/components/shared/ErrorBoundary';
 import PhoneAuthForm from '@/components/auth/PhoneAuthForm';
 import { Phone } from 'lucide-react';
 
 export default function PhoneAuthPage() {
   return (
-    <div className="container mx-auto flex items-center justify-center min-h-[calc(100vh-200px)] py-12">
+    <ErrorBoundary>
+      <div className="container mx-auto flex items-center justify-center min-h-[calc(100vh-200px)] py-12">
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
           <h1 className="text-4xl font-headline font-bold text-primary flex items-center justify-center gap-4">
@@ -18,6 +20,7 @@ export default function PhoneAuthPage() {
         </div>
         <PhoneAuthForm />
       </div>
-    </div>
+      </div>
+    </ErrorBoundary>
   );
 }

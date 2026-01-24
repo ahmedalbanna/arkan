@@ -2,6 +2,7 @@
 
 'use client';
 
+import { ErrorBoundary } from '@/components/shared/ErrorBoundary';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -119,7 +120,8 @@ export function ExportDialog() {
   }
 
   return (
-    <Dialog open={isOpen} onOpenChange={setIsOpen}>
+    <ErrorBoundary>
+      <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
         <Button
           variant="outline"
@@ -270,6 +272,7 @@ export function ExportDialog() {
           <DialogClose asChild><Button variant="ghost">Cancel</Button></DialogClose>
         </DialogFooter>
       </DialogContent>
-    </Dialog>
+      </Dialog>
+    </ErrorBoundary>
   );
 }

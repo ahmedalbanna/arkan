@@ -1,6 +1,8 @@
 
 'use client';
 
+import { ErrorBoundary } from '@/components/shared/ErrorBoundary';
+
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Loader2, AlertCircle } from 'lucide-react';
@@ -26,7 +28,8 @@ export default function UserManagementConsole() {
   } = useUserManagementConsole();
 
   return (
-    <Card>
+    <ErrorBoundary>
+      <Card>
       <CardHeader>
         <div className="flex justify-between items-center">
             <CardTitle className="flex items-center gap-2">
@@ -59,6 +62,7 @@ export default function UserManagementConsole() {
             </>
         )}
       </CardContent>
-    </Card>
+      </Card>
+    </ErrorBoundary>
   );
 }

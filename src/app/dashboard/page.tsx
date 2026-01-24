@@ -2,6 +2,7 @@
 
 'use client';
 
+import { ErrorBoundary } from '@/components/shared/ErrorBoundary';
 import { AgentUsageChart } from '@/components/admin/dashboard/AgentUsageChart';
 import { RecentActivity } from '@/components/admin/dashboard/RecentActivity';
 import { StatCard } from '@/components/admin/dashboard/StatCard';
@@ -51,6 +52,7 @@ export default function UserDashboardPage() {
     const [isCreatingChat, setIsCreatingChat] = useState(false);
 
     return (
+        <ErrorBoundary>
         <div className="container mx-auto max-w-7xl px-4 py-12">
             <div className="flex justify-between items-start mb-12 flex-wrap gap-4">
                 <div className="text-center sm:text-left">
@@ -102,5 +104,6 @@ export default function UserDashboardPage() {
                 </div>
             )}
         </div>
+        </ErrorBoundary>
     );
 }

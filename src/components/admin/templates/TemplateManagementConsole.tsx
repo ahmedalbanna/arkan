@@ -1,5 +1,7 @@
 'use client';
 
+import { ErrorBoundary } from '@/components/shared/ErrorBoundary';
+
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useLocalization } from '@/context/LocalizationContext';
 import { useDocxStyles, usePptxStyles, useReportTemplates } from '@/hooks';
@@ -73,7 +75,8 @@ export function TemplateManagementConsole() {
     };
 
     return (
-        <>
+        <ErrorBoundary>
+            <>
             <TemplateFormDialog
                 isOpen={isDialogOpen}
                 onOpenChange={setIsDialogOpen}
@@ -99,6 +102,7 @@ export function TemplateManagementConsole() {
                     <ReportTemplateManager onEdit={handleEdit} />
                 </TabsContent>
           </Tabs>
-        </>
+            </>
+        </ErrorBoundary>
     );
 }

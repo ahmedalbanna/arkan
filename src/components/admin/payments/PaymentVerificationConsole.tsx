@@ -1,6 +1,8 @@
 
 'use client';
 
+import { ErrorBoundary } from '@/components/shared/ErrorBoundary';
+
 import { useLocalization } from '@/context/LocalizationContext';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { FinancialReportExporter } from './FinancialReportExporter';
@@ -10,7 +12,8 @@ import { TransactionList } from './TransactionList';
 export function PaymentVerificationConsole() {
     const { t } = useLocalization();
     return (
-        <div className="space-y-8">
+        <ErrorBoundary>
+            <div className="space-y-8">
             <FinancialReportExporter />
             <Card>
                 <CardHeader>
@@ -37,5 +40,6 @@ export function PaymentVerificationConsole() {
                 </CardContent>
             </Card>
         </div>
+        </ErrorBoundary>
     );
 }
