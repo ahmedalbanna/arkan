@@ -397,10 +397,10 @@ export class Section {
    * ```
    */
   public buildSystemPrompt(): string {
-    const personas = this.behaviors.filter(b => b.type === 'persona').map(b => b.name);
+    const personas = this.behaviors.filter(b => b.type === 'persona').map(b => b.description || b.name);
     const behaviorInstructions = this.behaviors.filter(b => b.type === 'behavior').map(b => b.name);
 
-    let systemPrompt = 'You are an advanced AI assistant tailored for academic and technical writing.';
+    let systemPrompt = `You are an advanced AI assistant tailored for academic and technical writing.\n\nCurrent Section: ${this.title}`;
 
     if (personas.length > 0) {
       systemPrompt += `\n\n**ROLE / PERSONA:**\nAdopt the persona of: ${personas.join(', ')}. Write with the authority, vocabulary, and perspective of this role.`;

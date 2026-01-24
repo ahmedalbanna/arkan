@@ -95,11 +95,12 @@ describe('Document Generation Flow Integration Tests', () => {
   describe('Section Management', () => {
     it('should add section to project', () => {
       const project = createMockProject();
+      const originalLength = project.sections.length;
       const newSection = createMockSection({ title: 'New Section' });
 
       project.sections.push(newSection);
 
-      expect(project.sections.length).toBe(testProjectWithSections.sections.length + 1);
+      expect(project.sections.length).toBe(originalLength + 1);
       expect(project.sections[project.sections.length - 1].title).toBe('New Section');
     });
 
@@ -125,12 +126,14 @@ describe('Document Generation Flow Integration Tests', () => {
 
     it('should reorder sections', () => {
       const project = createMockProject();
+      const firstTitle = project.sections[0].title;
+      const lastTitle = project.sections[project.sections.length - 1].title;
 
       // Reverse order
       project.sections = project.sections.reverse();
 
-      expect(project.sections[0].title).toBe('Conclusion');
-      expect(project.sections[project.sections.length - 1].title).toBe('Introduction');
+      expect(project.sections[0].title).toBe(lastTitle);
+      expect(project.sections[project.sections.length - 1].title).toBe(firstTitle);
     });
 
     it('should maintain section order consistency', () => {
@@ -147,7 +150,7 @@ describe('Document Generation Flow Integration Tests', () => {
     });
 
     it('should validate section title is not empty', () => {
-      const validateSection = (section: any) => section.title && section.title.length > 0;
+      const validateSection = (section: any) => !!(section.title && section.title.length > 0);
 
       expect(validateSection(testSectionData)).toBe(true);
       expect(validateSection({ title: '' })).toBe(false);

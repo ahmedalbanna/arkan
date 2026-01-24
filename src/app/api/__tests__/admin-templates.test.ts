@@ -40,6 +40,17 @@ describe('Admin Templates API Routes', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    // Setup mock functions
+    (templateService.getReportTemplate as jest.Mock) = jest.fn();
+    (templateService.createReportTemplate as jest.Mock) = jest.fn();
+    (templateService.updateReportTemplate as jest.Mock) = jest.fn();
+    (templateService.deleteReportTemplate as jest.Mock) = jest.fn();
+    (templateService.listReportTemplates as jest.Mock) = jest.fn();
+    (templateService.getPptxTemplate as jest.Mock) = jest.fn();
+    (templateService.createPptxTemplate as jest.Mock) = jest.fn();
+    (templateService.getDocxTemplate as jest.Mock) = jest.fn();
+    (templateService.createDocxTemplate as jest.Mock) = jest.fn();
+    (templateService.applyTemplateVariables as jest.Mock) = jest.fn();
   });
 
   // ============================================================================
@@ -56,12 +67,12 @@ describe('Admin Templates API Routes', () => {
     });
 
     it('should get report template by id', async () => {
-      (templateService.getReportTemplate as jest.Mock)?.mockResolvedValue(mockReportTemplate);
+      (templateService.getReportTemplate as jest.Mock).mockResolvedValue(mockReportTemplate);
 
-      const template = await templateService.getReportTemplate?.('template-123');
+      const template = await templateService.getReportTemplate('template-123');
 
       expect(template).toBeDefined();
-      expect(template?.id).toBe('template-123');
+      expect(template.id).toBe('template-123');
     });
 
     it('should create report template', async () => {
@@ -164,9 +175,9 @@ describe('Admin Templates API Routes', () => {
 
     it('should apply template variables', async () => {
       const applied = 'Dear John,';
-      (templateService.applyTemplateVariables as jest.Mock)?.mockReturnValue(applied);
+      (templateService.applyTemplateVariables as jest.Mock).mockReturnValue(applied);
 
-      const result = templateService.applyTemplateVariables?.(
+      const result = templateService.applyTemplateVariables(
         mockDocxTemplate.content,
         { name: 'John' }
       );

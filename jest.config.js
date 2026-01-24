@@ -1,6 +1,10 @@
 module.exports = {
   preset: 'ts-jest',
   testEnvironment: 'jsdom',
+  testPathIgnorePatterns: [
+    '/node_modules/',
+    '/__tests__/fixtures/',
+  ],
   moduleNameMapper: {
     // Handle module aliases from tsconfig.json
     // Add other aliases as needed from your tsconfig.json
@@ -22,8 +26,17 @@ module.exports = {
   // By default, node_modules are not transformed by Jest.
   // We need to transform ESM-only packages from the unified ecosystem.
   transformIgnorePatterns: [
-    '/node_modules/(?!(unified|remark-.*|rehype-.*|unist-.*|hast-.*|mdast-.*|micromark.*|vfile.*)/)',
+    'node_modules/(?!(unified|remark-.*|rehype-.*|unist-.*|hast-.*|mdast-.*|micromark.*|vfile.*|decode-named-character-reference|character-entities.*|ccount|escape-string-regexp)(?:/|$))',
   ],
+  globals: {
+    'ts-jest': {
+      useESM: true,
+      tsconfig: {
+        jsx: 'react-jsx',
+      },
+    },
+  },
+  extensionsToTreatAsEsm: ['.ts', '.tsx'],
   // Automatically clear mock calls and instances between every test
   clearMocks: true,
 };

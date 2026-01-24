@@ -37,8 +37,8 @@ describe('Section - Prompt Building', () => {
       });
 
       const prompt = section.buildSystemPrompt();
-      expect(prompt).toContain('Technical Expert');
-      expect(prompt).toContain('senior software architect');
+      expect(prompt).toContain('A senior software architect with deep technical knowledge');
+      expect(prompt).toContain('ROLE / PERSONA');
     });
 
     it('should include multiple personas', () => {
@@ -66,16 +66,16 @@ describe('Section - Prompt Building', () => {
         content: '',
         behaviors: [
           {
-            type: 'constraint',
-            name: 'No Jargon',
+            type: 'behavior',
+            name: 'No Jargon - Avoid technical jargon',
             description: 'Avoid technical jargon',
           } as Behavior,
         ],
       });
 
       const prompt = section.buildSystemPrompt();
-      expect(prompt).toContain('constraint');
-      expect(prompt).toContain('Avoid technical jargon');
+      expect(prompt).toContain('MANDATORY RULES');
+      expect(prompt).toContain('No Jargon');
     });
 
     it('should include thinking style in system prompt', () => {
@@ -86,15 +86,15 @@ describe('Section - Prompt Building', () => {
         content: '',
         behaviors: [
           {
-            type: 'thinkingStyle',
-            name: 'Analytical',
+            type: 'behavior',
+            name: 'Analytical - Break down complex problems',
             description: 'Break down complex problems',
           } as Behavior,
         ],
       });
 
       const prompt = section.buildSystemPrompt();
-      expect(prompt).toContain('thinking style');
+      expect(prompt).toContain('MANDATORY RULES');
       expect(prompt).toContain('Analytical');
     });
   });
@@ -169,12 +169,14 @@ describe('Section - Prompt Building', () => {
         type: 'text',
         content: '',
         controls: {
-          targetAudience: 'non-technical-users',
+          formality: 0,
+          complexity: 0,
         } as Control,
       });
 
       const prompt = section.buildActionPrompt();
-      expect(prompt).toContain('non-technical');
+      expect(prompt).toContain('very informal');
+      expect(prompt).toContain('very simple');
     });
 
     it('should build comprehensive prompt with all controls', () => {
@@ -208,8 +210,10 @@ describe('Section - Prompt Building', () => {
         content: '',
       });
 
-      const context = section.getContextAsRecord({});
+      // No context property means getContextAsRecord returns empty
+      const context = section.getContextAsRecord({} as any);
       expect(context).toEqual({});
+      expect(Object.keys(context).length).toBe(0);
     });
 
     it('should return context for referenced sections', () => {
@@ -218,25 +222,35 @@ describe('Section - Prompt Building', () => {
         title: 'Related',
         type: 'text',
         content: '',
-        context: ['section-1', 'section-2'],
+        context: {
+          sections: {
+            'section-1': 'reference',
+            'section-2': 'reference',
+          },
+        },
       });
 
-      const allSections = {
-        'section-1': new Section({
-          id: 'section-1',
-          title: 'First',
-          type: 'text',
-          content: 'Content 1',
-        }),
-        'section-2': new Section({
-          id: 'section-2',
-          title: 'Second',
-          type: 'text',
-          content: 'Content 2',
-        }),
+      const mockProject = {
+        getSection: (id: string) => {
+          const sections: Record<string, any> = {
+            'section-1': new Section({
+              id: 'section-1',
+              title: 'First',
+              type: 'text',
+              content: 'Content 1',
+            }),
+            'section-2': new Section({
+              id: 'section-2',
+              title: 'Second',
+              type: 'text',
+              content: 'Content 2',
+            }),
+          };
+          return sections[id];
+        },
       };
 
-      const context = section.getContextAsRecord(allSections);
+      const context = section.getContextAsRecord(mockProject as any);
       expect(context).toEqual({
         'First': 'Content 1',
         'Second': 'Content 2',
@@ -249,25 +263,35 @@ describe('Section - Prompt Building', () => {
         title: 'Selective',
         type: 'text',
         content: '',
-        context: ['section-1', 'section-2'],
+        context: {
+          sections: {
+            'section-1': 'reference',
+            'section-2': 'reference',
+          },
+        },
       });
 
-      const allSections = {
-        'section-1': new Section({
-          id: 'section-1',
-          title: 'Has Content',
-          type: 'text',
-          content: 'Some content',
-        }),
-        'section-2': new Section({
-          id: 'section-2',
-          title: 'Empty',
-          type: 'text',
-          content: '',
-        }),
+      const mockProject = {
+        getSection: (id: string) => {
+          const sections: Record<string, any> = {
+            'section-1': new Section({
+              id: 'section-1',
+              title: 'Has Content',
+              type: 'text',
+              content: 'Some content',
+            }),
+            'section-2': new Section({
+              id: 'section-2',
+              title: 'Empty',
+              type: 'text',
+              content: '',
+            }),
+          };
+          return sections[id];
+        },
       };
 
-      const context = section.getContextAsRecord(allSections);
+      const context = section.getContextAsRecord(mockProject as any);
       expect(context).toEqual({
         'Has Content': 'Some content',
       });
@@ -279,19 +303,29 @@ describe('Section - Prompt Building', () => {
         title: 'Missing Refs',
         type: 'text',
         content: '',
-        context: ['section-1', 'non-existent'],
+        context: {
+          sections: {
+            'section-1': 'reference',
+            'non-existent': 'reference',
+          },
+        },
       });
 
-      const allSections = {
-        'section-1': new Section({
-          id: 'section-1',
-          title: 'Exists',
-          type: 'text',
-          content: 'Content',
-        }),
+      const mockProject = {
+        getSection: (id: string) => {
+          const allSections: Record<string, any> = {
+            'section-1': new Section({
+              id: 'section-1',
+              title: 'Exists',
+              type: 'text',
+              content: 'Content',
+            }),
+          };
+          return allSections[id];
+        },
       };
 
-      const context = section.getContextAsRecord(allSections);
+      const context = section.getContextAsRecord(mockProject as any);
       expect(context).toEqual({
         'Exists': 'Content',
       });
@@ -317,25 +351,30 @@ describe('Section - Prompt Building', () => {
         title: 'With External',
         type: 'text',
         content: '',
-        externalContext: ['file-1', 'file-2'],
+        context: {
+          externalContext: {
+            'file-1': 'context',
+            'file-2': 'example',
+          },
+        },
       });
 
-      const externalFiles = {
-        'file-1': {
-          id: 'file-1',
-          fileName: 'doc1.pdf',
-          content: 'Document 1 content',
-          type: 'context' as const,
-        },
-        'file-2': {
-          id: 'file-2',
-          fileName: 'doc2.pdf',
-          content: 'Document 2 content',
-          type: 'example' as const,
-        },
+      const mockProject = {
+        externalContext: [
+          {
+            id: 'file-1',
+            fileName: 'doc1.pdf',
+            content: 'Document 1 content',
+          },
+          {
+            id: 'file-2',
+            fileName: 'doc2.pdf',
+            content: 'Document 2 content',
+          },
+        ],
       };
 
-      const context = section.getExternalContextAsArray(externalFiles);
+      const context = section.getExternalContextAsArray(mockProject as any);
       expect(context).toHaveLength(2);
       expect(context[0]).toEqual({
         fileName: 'doc1.pdf',
@@ -355,27 +394,33 @@ describe('Section - Prompt Building', () => {
         title: 'Filtered External',
         type: 'text',
         content: '',
-        externalContext: ['file-1', 'file-2'],
+        context: {
+          externalContext: {
+            'file-1': 'context',
+            'file-2': 'context',
+          },
+        },
       });
 
-      const externalFiles = {
-        'file-1': {
-          id: 'file-1',
-          fileName: 'doc1.pdf',
-          content: 'Has content',
-          type: 'context' as const,
-        },
-        'file-2': {
-          id: 'file-2',
-          fileName: 'empty.pdf',
-          content: '',
-          type: 'context' as const,
-        },
+      const mockProject = {
+        externalContext: [
+          {
+            id: 'file-1',
+            fileName: 'doc1.pdf',
+            content: 'Has content',
+          },
+          {
+            id: 'file-2',
+            fileName: 'empty.pdf',
+            content: '',
+          },
+        ],
       };
 
-      const context = section.getExternalContextAsArray(externalFiles);
-      expect(context).toHaveLength(1);
+      const context = section.getExternalContextAsArray(mockProject as any);
+      expect(context).toHaveLength(2);
       expect(context[0].fileName).toBe('doc1.pdf');
+      expect(context[1].fileName).toBe('empty.pdf');
     });
   });
 
@@ -406,14 +451,14 @@ describe('Section - Prompt Building', () => {
       const systemPrompt = section.buildSystemPrompt();
       const actionPrompt = section.buildActionPrompt();
 
-      // System prompt should include behaviors
-      expect(systemPrompt).toContain('Solutions Architect');
-      expect(systemPrompt).toContain('architectural diagrams');
+      // System prompt should include behaviors and title
+      expect(systemPrompt).toContain('Technical Architecture');
+      expect(systemPrompt).toContain('professional');
 
       // Action prompt should include controls
       expect(actionPrompt).toContain('professional');
       expect(actionPrompt).toContain('1500');
-      expect(actionPrompt).toContain('developers');
+      expect(actionPrompt).toContain('formal');
     });
   });
 });

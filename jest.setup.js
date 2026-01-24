@@ -1,6 +1,13 @@
 // jest.setup.js
 require('@testing-library/jest-dom');
 
+// Polyfill TextEncoder/TextDecoder for Next.js compatibility in tests
+if (typeof global.TextEncoder === 'undefined') {
+  const { TextEncoder, TextDecoder } = require('util');
+  global.TextEncoder = TextEncoder;
+  global.TextDecoder = TextDecoder;
+}
+
 // Mock the canvas context for text measurement functions
 // This prevents errors when running tests in a JSDOM environment
 // where the canvas API is not implemented.
