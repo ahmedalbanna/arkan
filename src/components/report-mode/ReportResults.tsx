@@ -155,11 +155,12 @@ const ReportResults = ({ activePanelKey }: ReportResultsProps) => {
   }
 
   return (
-    <Card className="h-full flex flex-col overflow-hidden">
-      <Collapsible open={isSuggestionVisible} onOpenChange={setIsSuggestionVisible} className="border-b">
+    <Card className="h-full w-full flex flex-col overflow-hidden border">
+      {/* Header with Collapsible Suggestions */}
+      <Collapsible open={isSuggestionVisible} onOpenChange={setIsSuggestionVisible} className="border-b flex-shrink-0">
         <CollapsibleTrigger asChild>
-          <div className="flex items-center justify-between p-4 cursor-pointer hover:bg-muted/50">
-            <div>
+          <div className="flex items-center justify-between p-4 cursor-pointer hover:bg-muted/50 transition-colors">
+            <div className="flex-1">
               <CardTitle className="font-headline text-lg">
                 {t('builder.reportGenerator.resultsTitle')}
               </CardTitle>
@@ -173,16 +174,16 @@ const ReportResults = ({ activePanelKey }: ReportResultsProps) => {
             </Button>
           </div>
         </CollapsibleTrigger>
-        <CollapsibleContent>
+        <CollapsibleContent className="flex-shrink-0">
           <div className="p-4 border-t bg-muted/30 space-y-2">
             <div className="flex items-center gap-2 text-sm">
-              <Lightbulb className="h-4 w-4 text-yellow-500" />
+              <Lightbulb className="h-4 w-4 text-yellow-500 flex-shrink-0" />
               <span className="font-semibold">Suggestion:</span>
               <span className="text-muted-foreground">{suggestion}</span>
             </div>
             {project?.meta.updated && (
               <div className="flex items-center gap-2 text-sm">
-                <History className="h-4 w-4 text-blue-500" />
+                <History className="h-4 w-4 text-blue-500 flex-shrink-0" />
                 <span className="font-semibold">Last operation:</span>
                 <span className="text-muted-foreground">
                   Project updated {formatDistanceToNow(new Date(project.meta.updated), { addSuffix: true })}
@@ -193,10 +194,11 @@ const ReportResults = ({ activePanelKey }: ReportResultsProps) => {
         </CollapsibleContent>
       </Collapsible>
 
-      <CardContent className="flex-grow flex flex-col p-0 bg-slate-200 dark:bg-slate-900/50 min-h-0 relative">
+      {/* Content Area - Main scrollable content */}
+      <CardContent className="flex-1 flex flex-col p-0 bg-slate-200 dark:bg-slate-900/50 overflow-hidden relative">
         <ScrollIndicator containerRef={scrollContainerRef} />
-        <ScrollArea className="flex-grow">
-          <div ref={scrollContainerRef} className="py-4 scroll-smooth">
+        <ScrollArea className="flex-1">
+          <div ref={scrollContainerRef} className="py-4 px-4 scroll-smooth">
             {renderContent()}
           </div>
         </ScrollArea>

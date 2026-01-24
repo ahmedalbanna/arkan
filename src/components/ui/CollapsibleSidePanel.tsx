@@ -39,12 +39,12 @@ export function CollapsibleSidePanel({
 
   return (
     <div className={cn(
-      "self-start flex flex-row bg-background border rounded-lg overflow-hidden",
+      "h-full w-full flex flex-row bg-background border rounded-lg overflow-hidden",
       isMobile && "mb-16",
       className
     )}>
-      {/* Vertical Divider */}
-      <div className="flex flex-col gap-2 border-r p-2 flex-shrink-0">
+      {/* Left Button Panel - Icon Navigation */}
+      <div className="flex flex-col gap-2 border-r p-2 flex-shrink-0 bg-muted/30">
         <TooltipProvider>
           {panels.map((panel) => (
             <Tooltip key={panel.key} delayDuration={0}>
@@ -68,9 +68,9 @@ export function CollapsibleSidePanel({
       </div>
 
       {/* Content Panel with Scroll Area */}
-      <div className="flex-1 relative min-h-0 overflow-hidden">
+      <div className="flex-1 flex flex-col min-h-0 overflow-hidden relative">
         <ScrollIndicator containerRef={scrollRef} />
-        <ScrollArea className="h-full w-full">
+        <ScrollArea className="flex-1">
           <div 
             ref={scrollRef}
             className="p-4 w-full scroll-smooth"
