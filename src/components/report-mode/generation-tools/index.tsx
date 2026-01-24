@@ -100,7 +100,7 @@ export default function GenerationTools() {
               </div>
             )}
             <ScrollArea className="flex-grow">
-              <div className="h-full pr-4 -mr-4">
+              <div className="w-full px-4 scroll-smooth">
                 <DndContext collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
                   <SortableContext items={(project?.content || []).map(c => c.id)} strategy={verticalListSortingStrategy}>
                     <Accordion type="multiple" className="w-full space-y-2">

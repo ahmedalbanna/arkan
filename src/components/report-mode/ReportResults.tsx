@@ -11,14 +11,15 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { useLocalization } from '@/context/LocalizationContext';
 import { useBuilderStore } from '@/hooks';
 import { formatDistanceToNow } from 'date-fns';
-import { BookOpenCheck, Bot, Brush, ChevronDown, FileText, FileVideo, History, LayoutList, Lightbulb } from 'lucide-react';
-import { useState } from 'react';
+import { BookOpenCheck, Bot, Brush, ChevronDown, FileText, FileVideo, History, LayoutList, Lightbulb, ArrowUp } from 'lucide-react';
+import { useState, useRef } from 'react';
 import { CoverPage } from '../shared/CoverPage';
 import { Button } from '../ui/button';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '../ui/collapsible';
 import { FileContentViewer } from './file-manager/FileContentViewer';
 import MarkdownEditor from './MarkdownEditor';
 import { TableOfContentForm } from './TableOfContentForm';
+import { ScrollToTopButton, ScrollIndicator } from '../ui/scroll-utilities';
 
 const ReportSteps = () => {
   const { t } = useLocalization();
@@ -82,6 +83,7 @@ const ReportResults = ({ activePanelKey }: ReportResultsProps) => {
   const { t } = useLocalization();
   const { project, version, updateProjectFromMarkdown, selectedFileId } = useBuilderStore();
   const [isSuggestionVisible, setIsSuggestionVisible] = useState(true);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   const handleContentChange = (newMarkdown: string) => {
     updateProjectFromMarkdown(newMarkdown);
@@ -191,12 +193,17 @@ const ReportResults = ({ activePanelKey }: ReportResultsProps) => {
         </CollapsibleContent>
       </Collapsible>
 
-      <CardContent className="flex-grow flex flex-col p-0 bg-slate-200 dark:bg-slate-900/50 min-h-0">
+      <CardContent className="flex-grow flex flex-col p-0 bg-slate-200 dark:bg-slate-900/50 min-h-0 relative">
+        <ScrollIndicator containerRef={scrollContainerRef} />
         <ScrollArea className="flex-grow">
-          <div className="py-4">
+          <div ref={scrollContainerRef} className="py-4 scroll-smooth">
             {renderContent()}
           </div>
         </ScrollArea>
+        <ScrollToTopButton 
+          containerRef={scrollContainerRef}
+          className="bottom-8"
+        />
       </CardContent>
     </Card>
   );

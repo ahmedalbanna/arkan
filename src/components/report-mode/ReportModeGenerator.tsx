@@ -80,7 +80,7 @@ export default function ReportModeGenerator() {
   }
 
   return (
-    <div className="relative h-screen flex flex-col overflow-hidden">
+    <div className="relative h-screen flex flex-col overflow-hidden scroll-smooth">
       {/* Onboarding Guide */}
       {showOnboarding && (
         <OnboardingGuide
@@ -120,7 +120,7 @@ export default function ReportModeGenerator() {
       <ProjectChat isOpen={isChatOpen} onClose={() => setIsChatOpen(false)} />
 
       {/* Main Content */}
-      <div className="flex-grow flex flex-col mx-auto px-4 py-8 w-full">
+      <div className="flex-grow flex flex-col mx-auto px-4 py-8 w-full scroll-smooth">
         {/* Project Header */}
         <ProjectHeader
           project={project}
