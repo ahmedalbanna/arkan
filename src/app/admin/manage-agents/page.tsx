@@ -1,24 +1,24 @@
+import AgentPlayground from '@/components/agent/AgentPlayground';
+import { AgentList } from '@/components/sidebar/AgentList';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Button } from '@/components/ui/button';
+import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@/components/ui/resizable';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { useAuth } from '@/context/AuthContext';
+import { useLocalization } from '@/context/LocalizationContext';
+import { useAgentManager } from '@/hooks/use-agent-store';
+import { AlertCircle, Bot, RefreshCw } from 'lucide-react';
+import { useEffect } from 'react';
+
 
 'use client';
 
-import { useEffect } from 'react';
-import AgentPlayground from '@/components/agent/AgentPlayground';
-import { AgentList } from '@/components/sidebar/AgentList';
-import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@/components/ui/resizable';
-import { useAgentManager } from '@/hooks/use-agent-store';
-import { Bot, RefreshCw, AlertCircle } from 'lucide-react';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Button } from '@/components/ui/button';
-import { Tooltip, TooltipProvider, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip';
-import { useLocalization } from '@/context/LocalizationContext';
-import { useAuth } from '@/context/AuthContext';
-
 export default function ManageAgentsPage() {
     const { t } = useLocalization();
-    const { 
-        agents, 
-        selectedAgent, 
-        isLoading, 
+    const {
+        agents,
+        selectedAgent,
+        isLoading,
         error,
         fetchAgents,
     } = useAgentManager();
@@ -49,10 +49,10 @@ export default function ManageAgentsPage() {
                         Manage, test, and configure your AI agents.
                     </p>
                 </div>
-                 <TooltipProvider>
+                <TooltipProvider>
                     <Tooltip>
                         <TooltipTrigger asChild>
-                             <Button 
+                            <Button
                                 onClick={handleFetch}
                                 disabled={isLoading || authIsLoading}
                                 variant="outline"
@@ -68,7 +68,7 @@ export default function ManageAgentsPage() {
                     </Tooltip>
                 </TooltipProvider>
             </div>
-            
+
             {error && (
                 <Alert variant="destructive" className="my-4">
                     <AlertCircle className="h-4 w-4" />
