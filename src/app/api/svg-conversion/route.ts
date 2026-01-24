@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-const EXTERNAL_API_ENDPOINT = 'http://185.190.140.93:9003/api/convert';
+const EXTERNAL_API_ENDPOINT = process.env.NEXT_PUBLIC_IMAGE_CONVERSION_API_ENDPOINT || 'http://localhost:9003/api/convert';
 
 export async function POST(request: NextRequest) {
     try {

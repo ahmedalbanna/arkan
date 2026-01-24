@@ -4,22 +4,8 @@
  * Supports Arabic and English with automatic detection
  * Includes logo support and professional borders
  */
+import { AlignmentType, BorderStyle, HeadingLevel, ImageRun, Paragraph, TextRun } from 'docx';
 
-import {
-  AlignmentType,
-  Paragraph,
-  TextRun,
-  HeadingLevel,
-  BorderStyle,
-  ShadingType,
-  ImageRun,
-  Table,
-  TableRow,
-  TableCell,
-  WidthType,
-  VerticalAlign,
-  convertInchesToTwip,
-} from 'docx';
 
 export interface CoverPageData {
   name?: string;
@@ -69,10 +55,10 @@ function getFormattedDate(isArabic: boolean): { date: string; year: string } {
     month: 'long',
     day: 'numeric',
   });
-  
+
   const currentYear = new Date().getFullYear();
   const year = `${currentYear}-${currentYear + 1}`;
-  
+
   return { date, year };
 }
 
@@ -81,7 +67,7 @@ function getFormattedDate(isArabic: boolean): { date: string; year: string } {
  */
 function createLogoParagraph(logoImage?: Buffer): Paragraph | null {
   if (!logoImage) return null;
-  
+
   try {
     return new Paragraph({
       alignment: AlignmentType.CENTER,
@@ -155,7 +141,7 @@ export async function createModernCoverPage(data: CoverPageData): Promise<Paragr
   }
 
   // === MAIN CONTENT (Centered vertically) ===
-  
+
   // Project Description (Large, italic, centered - like main content area)
   if (data.projectDescription) {
     elements.push(
@@ -176,7 +162,7 @@ export async function createModernCoverPage(data: CoverPageData): Promise<Paragr
   }
 
   // === FOOTER SECTION ===
-  
+
   // Educational Level and Specialization (like footer in CoverPage)
   if (data.educationalLevel) {
     elements.push(

@@ -38,7 +38,20 @@ yarn-error.log*
 next-env.d.ts
 
 .genkit/*
-.env*
+
+# environment variables - NEVER commit these files
+.env
+.env.local
+.env.*.local
+.env.production.local
+.env.development.local
+.env.test.local
+
+# secrets and credentials
+*.key
+*.pem
+docudec-firebase-adminsdk-*.json
+firebase-adminsdk-*.json
 
 # firebase
 firebase-debug.log

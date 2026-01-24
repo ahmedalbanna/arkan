@@ -10,8 +10,10 @@ import { ollama } from 'genkitx-ollama';
  * - Phi-3 Mini (~3.3GB): Strong reasoning, excellent for formatting, analysis, structured output
  * - Llama 3 8B (~4.7GB): Best quality for complex tasks, academic work (use sparingly)
  * 
- * Server: http://185.190.140.93:11434
+ * Server address is configured via environment variable NEXT_PUBLIC_OLLAMA_SERVER_ADDRESS
  */
+
+const ollamaServerAddress = process.env.NEXT_PUBLIC_OLLAMA_SERVER_ADDRESS || "http://localhost:11434";
 
 export const ai = genkit({
   plugins: [
@@ -30,7 +32,7 @@ export const ai = genkit({
           type: 'generate',
         },
       ],
-      serverAddress: "http://185.190.140.93:11434",
+      serverAddress: ollamaServerAddress,
     }),
   ],
 });
