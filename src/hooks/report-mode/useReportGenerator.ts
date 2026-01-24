@@ -1,12 +1,12 @@
 
 'use client';
 
-import { useBuilderPageLogic } from '@/hooks/core/use-builder-page';
 import { useLocalization } from '@/context/LocalizationContext';
-import { useMobile } from '@/hooks/util/use-mobile';
-import React, { useState, useMemo, lazy, useEffect } from 'react';
-import { Settings, UploadCloud, LayoutTemplate, BookOpenCheck } from 'lucide-react';
+import { useBuilderPageLogic } from '@/hooks/core/use-builder-page';
 import { useSaveProject } from '@/hooks/data/use-projects';
+import { useMobile } from '@/hooks/util/use-mobile';
+import { BookOpenCheck, LayoutTemplate, Settings, UploadCloud } from 'lucide-react';
+import React, { lazy, useEffect, useMemo, useState } from 'react';
 // Lazy load components
 const ProjectSettingsPanel = lazy(() => import('@/components/report-mode/settings/ProjectSettingsPanel'));
 const FileManager = lazy(() => import('@/components/report-mode/file-manager'));
@@ -57,28 +57,28 @@ export function useReportGenerator() {
 
   const panels = useMemo(() => [
     {
-        key: 'settings',
-        title: 'Project Settings',
-        icon: React.createElement(Settings, { className: "h-5 w-5" }),
-        content: React.createElement(ProjectSettingsPanel),
+      key: 'settings',
+      title: 'Project Settings',
+      icon: React.createElement(Settings, { className: "h-5 w-5" }),
+      content: React.createElement(ProjectSettingsPanel),
     },
     {
-        key: 'files',
-        title: t('builder.tabs.files'),
-        icon: React.createElement(UploadCloud, { className: "h-5 w-5" }),
-        content: React.createElement(FileManager),
+      key: 'files',
+      title: t('builder.tabs.files'),
+      icon: React.createElement(UploadCloud, { className: "h-5 w-5" }),
+      content: React.createElement(FileManager),
     },
     {
-        key: 'templates',
-        title: 'Apply Template',
-        icon: React.createElement(LayoutTemplate, { className: "h-5 w-5" }),
-        content: React.createElement(ApplyTemplatePanel),
+      key: 'templates',
+      title: 'Apply Template',
+      icon: React.createElement(LayoutTemplate, { className: "h-5 w-5" }),
+      content: React.createElement(ApplyTemplatePanel),
     },
     {
-        key: 'generate',
-        title: t('builder.reportGenerator.toolsTitle'),
-        icon: React.createElement(BookOpenCheck, { className: "h-5 w-5" }),
-        content: React.createElement(GenerationTools),
+      key: 'generate',
+      title: t('builder.reportGenerator.toolsTitle'),
+      icon: React.createElement(BookOpenCheck, { className: "h-5 w-5" }),
+      content: React.createElement(GenerationTools),
     },
   ], [t]);
 

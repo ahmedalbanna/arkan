@@ -1,6 +1,8 @@
 
 'use client';
 
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -9,13 +11,11 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { Button } from '@/components/ui/button';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useAuth } from '@/context/AuthContext';
-import { useLogout } from '@/hooks/auth/use-auth-mutations';
 import { useLocalization } from '@/context/LocalizationContext';
+import { useLogout } from '@/hooks/auth/use-auth-mutations';
+import { AreaChart, BookOpenCheck, LayoutDashboard, LogOut, User } from 'lucide-react';
 import Link from 'next/link';
-import { User, LayoutDashboard, AreaChart, LogOut, BookOpenCheck } from 'lucide-react';
 
 export function UserProfileDropdown() {
   const { t } = useLocalization();

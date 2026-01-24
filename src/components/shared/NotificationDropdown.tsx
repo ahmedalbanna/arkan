@@ -1,20 +1,8 @@
 
 'use client';
 
-import {
-  Bell,
-  CreditCard,
-  Bot,
-  FileText,
-  UserPlus,
-  Trash2,
-} from 'lucide-react';
-import Link from 'next/link';
-import { useRouter } from 'next/navigation';
-import { useLocalization } from '@/context/LocalizationContext';
-import { useClearAllNotifications, useMarkNotificationsAsRead, useNotifications } from '@/hooks';
-import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -24,8 +12,19 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { useLocalization } from '@/context/LocalizationContext';
+import { useClearAllNotifications, useMarkNotificationsAsRead, useNotifications } from '@/hooks';
 import type { Notification } from '@/lib/types';
 import { formatDistanceToNow } from 'date-fns';
+import {
+  Bell,
+  Bot,
+  CreditCard,
+  FileText,
+  Trash2,
+  UserPlus,
+} from 'lucide-react';
+import { useRouter } from 'next/navigation';
 
 function NotificationIcon({ icon }: { icon: Notification['icon'] }) {
   switch (icon) {

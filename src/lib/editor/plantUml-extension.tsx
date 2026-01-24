@@ -1,13 +1,13 @@
 'use client';
 
-import { Node, mergeAttributes } from '@tiptap/core';
-import { NodeViewWrapper, ReactNodeViewRenderer } from '@tiptap/react';
-import { useEffect, useState } from 'react';
-import pako from 'pako';
 import { Textarea } from '@/components/ui/textarea';
-import Image from 'next/image';
 import { useDebounce } from '@/hooks';
 import { encode64 } from '@/lib/utils/encode64';
+import { Node, mergeAttributes } from '@tiptap/core';
+import { NodeViewWrapper, ReactNodeViewRenderer } from '@tiptap/react';
+import Image from 'next/image';
+import pako from 'pako';
+import { useState } from 'react';
 
 const PlantUMLComponent = (props: any) => {
   const [code, setCode] = useState(props.node.attrs.code || '@startuml\nactor User\nUser -> System: Do something\n@enduml');

@@ -1,13 +1,13 @@
 'use client';
 
-import React from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
-import { ScrollArea } from '@/components/ui/scroll-area';
 import { Button } from '@/components/ui/button';
-import { Copy, Check } from 'lucide-react';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { useBuilderStore } from '@/hooks';
-import { PromptBuilder } from '@/lib/prompt-builder';
 import type { Section } from '@/lib/models';
+import { PromptBuilder } from '@/lib/prompt-builder';
+import { Check, Copy } from 'lucide-react';
+import React from 'react';
 
 interface FullPromptPreviewDialogProps {
   isOpen: boolean;

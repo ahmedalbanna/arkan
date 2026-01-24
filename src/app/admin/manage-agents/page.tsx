@@ -8,10 +8,7 @@ import { useAuth } from '@/context/AuthContext';
 import { useLocalization } from '@/context/LocalizationContext';
 import { useAgentManager } from '@/hooks/use-agent-store';
 import { AlertCircle, Bot, RefreshCw } from 'lucide-react';
-import { useEffect } from 'react';
 
-
-'use client';
 
 export default function ManageAgentsPage() {
     const { t } = useLocalization();

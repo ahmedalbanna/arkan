@@ -1,17 +1,17 @@
 
 'use client';
 
-import { useForm } from 'react-hook-form';
+import { useLocalization } from '@/context/LocalizationContext';
+import { useToast, useWritingTool } from '@/hooks';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { useState } from 'react';
+import { useForm } from 'react-hook-form';
 import { z } from 'zod';
-import { useWritingTool, useToast } from '@/hooks';
 // GeneratePresentationOutlineOutput type not yet defined in schemas
 type GeneratePresentationOutlineOutput = {
   cover: { title: string };
   outline: Array<{ title: string; content: string }>;
 };
-import { useLocalization } from '@/context/LocalizationContext';
-import { useState } from 'react';
 
 const outlineSchema = z.object({
   prompt: z.string().min(10, 'Please provide a more detailed topic.'),

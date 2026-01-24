@@ -105,7 +105,7 @@ export interface CurrencyDetails {
 export type PaymentMethodType = 'bank' | 'e-wallet' | 'local-transfer' | 'international-transfer';
 
 // E-Wallet provider types for Yemen
-export type YemenWalletProvider = 
+export type YemenWalletProvider =
     | 'cac-bank'           // كاك بنك
     | 'mobi-cash'          // موبي كاش
     | 'yemen-mobile'       // يمن موبايل
@@ -137,7 +137,7 @@ export interface PaymentMethod {
     displayName: string;
     icon?: string;
     isActive: boolean;
-    
+
     // For bank accounts
     accountHolder?: string;
     currencies?: {
@@ -145,10 +145,10 @@ export interface PaymentMethod {
         USD?: BankTransferDetails;
         YER?: BankTransferDetails;
     };
-    
+
     // For e-wallets
     wallet?: WalletDetails;
-    
+
     // Additional info
     instructions?: string;
     processingTime?: string; // e.g., "فوري" or "1-2 أيام عمل"
@@ -212,27 +212,27 @@ export type UpdatePresentationTemplateData = Partial<Omit<PresentationTemplatePr
 // Note: This is a duplicate of the interface in models/reportTemplate.ts
 // Keeping for backward compatibility with existing imports
 export interface ReportTemplateProperties {
-  id: string;
-  name: string;
-  description: string;
-  isDefault?: boolean;
-  content: {
-    title: string;
-    sections: {
-      title: string;
-      type: 'report' | 'diagram' | 'presentation';
-      prompt: string;
-      guidelines?: string[];
-      behaviors?: { name: string; type: 'persona' | 'behavior' }[];
-      controls?: any; // Use a more specific type if possible
+    id: string;
+    name: string;
+    description: string;
+    isDefault?: boolean;
+    content: {
+        title: string;
+        sections: {
+            title: string;
+            type: 'report' | 'diagram' | 'presentation';
+            prompt: string;
+            guidelines?: string[];
+            behaviors?: { name: string; type: 'persona' | 'behavior' }[];
+            controls?: any; // Use a more specific type if possible
+        }[];
     }[];
-  }[];
-  // Project configuration fields
-  projectType?: string;
-  specialization?: string;
-  university?: string;
-  course?: string;
-  educationalLevel?: string;
+    // Project configuration fields
+    projectType?: string;
+    specialization?: string;
+    university?: string;
+    course?: string;
+    educationalLevel?: string;
 }
 
 
@@ -242,14 +242,14 @@ export type UpdateReportTemplateData = Partial<Omit<ReportTemplateProperties, 'i
 // Payment proof file schema
 import { z } from 'zod';
 export const fileSchema = z.object({
-  file: z
-    .any()
-    .refine((files) => files?.length == 1, 'File is required.')
-    .refine((files) => files?.[0]?.size <= 5 * 1024 * 1024, `Max file size is 5MB.`)
-    .refine(
-      (files) => ['image/jpeg', 'image/png', 'application/pdf'].includes(files?.[0]?.type),
-      'Invalid file type. Only JPG, PNG, and PDF are allowed.'
-    ),
+    file: z
+        .any()
+        .refine((files) => files?.length == 1, 'File is required.')
+        .refine((files) => files?.[0]?.size <= 5 * 1024 * 1024, `Max file size is 5MB.`)
+        .refine(
+            (files) => ['image/jpeg', 'image/png', 'application/pdf'].includes(files?.[0]?.type),
+            'Invalid file type. Only JPG, PNG, and PDF are allowed.'
+        ),
 });
 
 export type PptxTemplateKey = 'modern' | 'dark' | 'professional';

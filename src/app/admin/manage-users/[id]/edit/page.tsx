@@ -1,15 +1,14 @@
 
 'use client';
 
-import { useUserProfile } from '@/hooks';
-import { notFound, useRouter } from 'next/navigation';
-import { UserCog } from 'lucide-react';
-import { useLocalization } from '@/context/LocalizationContext';
+import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useAuth } from '@/context/AuthContext';
-import { useEffect, use, lazy, Suspense } from 'react';
-import { Button } from '@/components/ui/button';
-import { ChevronLeft } from 'lucide-react';
+import { useLocalization } from '@/context/LocalizationContext';
+import { useUserProfile } from '@/hooks';
+import { ChevronLeft, UserCog } from 'lucide-react';
+import { notFound, useRouter } from 'next/navigation';
+import { lazy, Suspense, use, useEffect } from 'react';
 
 // Dynamically import the EditUserForm
 const EditUserFormComponent = lazy(() => import('@/components/admin/EditUserForm'));
@@ -33,39 +32,39 @@ function EditUserPageSkeleton() {
 }
 
 function EditUserPageContent({ userId }: { userId: string }) {
-    const { data: user, isLoading, isError } = useUserProfile(userId);
-    const { userProfile: adminProfile, isLoading: authIsLoading } = useAuth();
-    const router = useRouter();
+  const { data: user, isLoading, isError } = useUserProfile(userId);
+  const { userProfile: adminProfile, isLoading: authIsLoading } = useAuth();
+  const router = useRouter();
 
 
-    useEffect(() => {
-        // Only admins can access this page.
-        if (!authIsLoading && adminProfile?.role !== 'admin') {
-          notFound();
-        }
-    }, [adminProfile, authIsLoading]);
-
-    if (isLoading || authIsLoading) {
-      return <EditUserPageSkeleton />;
-    }
-
-    if (isError || !user) {
+  useEffect(() => {
+    // Only admins can access this page.
+    if (!authIsLoading && adminProfile?.role !== 'admin') {
       notFound();
     }
+  }, [adminProfile, authIsLoading]);
 
-    return (
-        <div className="container mx-auto max-w-2xl px-4 py-12">
-            <Button variant="outline" onClick={() => router.back()} className="mb-8">
-                <ChevronLeft className="mr-2 h-4 w-4" />
-                Back to User Management
-            </Button>
-            <HeaderSection userName={user.name} />
-            <Suspense fallback={<EditUserPageSkeleton />}>
-                {/* @ts-expect-error - Lazy loaded component prop type mismatch */}
-                <EditUserFormComponent user={user} />
-            </Suspense>
-        </div>
-    );
+  if (isLoading || authIsLoading) {
+    return <EditUserPageSkeleton />;
+  }
+
+  if (isError || !user) {
+    notFound();
+  }
+
+  return (
+    <div className="container mx-auto max-w-2xl px-4 py-12">
+      <Button variant="outline" onClick={() => router.back()} className="mb-8">
+        <ChevronLeft className="mr-2 h-4 w-4" />
+        Back to User Management
+      </Button>
+      <HeaderSection userName={user.name} />
+      <Suspense fallback={<EditUserPageSkeleton />}>
+        {/* @ts-expect-error - Lazy loaded component prop type mismatch */}
+        <EditUserFormComponent user={user} />
+      </Suspense>
+    </div>
+  );
 }
 
 function HeaderSection({ userName }: { userName: string | undefined }) {
@@ -85,6 +84,6 @@ function HeaderSection({ userName }: { userName: string | undefined }) {
 
 
 export default function EditUserPage({ params }: { params: Promise<{ id: string }> }) {
-    const resolvedParams = use(params);
-    return <EditUserPageContent userId={resolvedParams.id} />
+  const resolvedParams = use(params);
+  return <EditUserPageContent userId={resolvedParams.id} />
 }

@@ -3,11 +3,11 @@
 'use client';
 
 import { initializeFirebase } from '@/firebase';
-
-const { firebaseApp: app } = initializeFirebase();
 import type { UserProfile } from '@/lib/models/user';
 import { doc, getFirestore, onSnapshot } from "firebase/firestore";
 import { apiService } from './apiService';
+
+const { firebaseApp: app } = initializeFirebase();
 
 /**
  * Fetches a list of all administrators.
@@ -44,7 +44,7 @@ export function subscribeToUserProfile(userId: string, callback: (user: UserProf
   // Safety check for SSR
   if (typeof window === 'undefined') {
     console.warn('subscribeToUserProfile called during SSR');
-    return () => {}; // Return no-op unsubscribe function
+    return () => { }; // Return no-op unsubscribe function
   }
 
   let db;
@@ -53,7 +53,7 @@ export function subscribeToUserProfile(userId: string, callback: (user: UserProf
   } catch (err) {
     console.error('Failed to initialize Firestore:', err);
     callback(null);
-    return () => {}; // Return no-op unsubscribe function
+    return () => { }; // Return no-op unsubscribe function
   }
 
   const userDocRef = doc(db, "users", userId);

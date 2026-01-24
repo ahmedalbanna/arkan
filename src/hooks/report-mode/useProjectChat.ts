@@ -1,11 +1,11 @@
 
 'use client';
 
-import { useState } from 'react';
-import { useMutation } from '@tanstack/react-query';
 import { useAuth } from '@/context/AuthContext';
-import { useBuilderStore } from '../core/useBuilderStore';
 import { apiService } from '@/services';
+import { useMutation } from '@tanstack/react-query';
+import { useState } from 'react';
+import { useBuilderStore } from '../core/useBuilderStore';
 
 interface Message {
     role: 'user' | 'model';
@@ -38,7 +38,7 @@ export function useProjectChat() {
             setMessages(prev => [...prev, { role: 'model', content: data.response }]);
         },
         onError: (error: Error) => {
-             setMessages(prev => [...prev, { role: 'model', content: `Sorry, an error occurred: ${error.message}` }]);
+            setMessages(prev => [...prev, { role: 'model', content: `Sorry, an error occurred: ${error.message}` }]);
         },
     });
 

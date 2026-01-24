@@ -1,11 +1,11 @@
 
 'use client';
 
-import { useInfiniteQuery } from '@tanstack/react-query';
-import { userKeys } from '@/lib/query-keys';
-import { fetchUsersApi } from '@/services/api/userService';
 import { useAuth } from '@/context/AuthContext';
 import { User } from '@/lib/models/user';
+import { userKeys } from '@/lib/query-keys';
+import { fetchUsersApi } from '@/services/api/userService';
+import { useInfiniteQuery } from '@tanstack/react-query';
 
 const USERS_PER_PAGE = 10;
 
@@ -29,8 +29,8 @@ export function useUserManagementConsole() {
       const result = await fetchUsersApi(USERS_PER_PAGE, pageParam, token);
       // Instantiate User objects
       return {
-          ...result,
-          users: result.users.map(u => new User(u)),
+        ...result,
+        users: result.users.map(u => new User(u)),
       };
     },
     initialPageParam: undefined as string | undefined,

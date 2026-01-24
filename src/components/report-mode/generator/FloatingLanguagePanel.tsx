@@ -1,13 +1,13 @@
 'use client';
 
-import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Languages as LanguageIcon } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import type { Language, Tone } from '@/lib/models';
 import { ToneSchema } from '@/lib/models';
+import { Languages as LanguageIcon } from 'lucide-react';
+import { useState } from 'react';
 
 interface FloatingLanguagePanelProps {
   language: Language;
@@ -18,7 +18,7 @@ interface FloatingLanguagePanelProps {
 
 /**
  * FloatingLanguagePanel Component
- * 
+ *
  * Displays language and tone selection in a floating panel.
  */
 export function FloatingLanguagePanel({

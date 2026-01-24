@@ -2,12 +2,12 @@
 // C:\Users\ahmed\source\repos\arkan\src\app\admin\manage-sections\page.tsx
 'use client';
 
-import { useSections } from '@/hooks';
 import { SectionDataTable } from '@/components/admin/sections/SectionDataTable';
+import { SectionFormDialog } from '@/components/admin/sections/SectionFormDialog';
 import { columns } from '@/components/admin/sections/columns';
 import { Skeleton } from '@/components/ui/skeleton';
-import { SectionFormDialog } from '@/components/admin/sections/SectionFormDialog';
 import { useLocalization } from '@/context/LocalizationContext';
+import { useSections } from '@/hooks';
 
 export default function ManageSectionsPage() {
     const { t } = useLocalization();

@@ -13,7 +13,7 @@ import type { ProjectProperties } from '@/lib/models';
 export async function saveProject(projectData: ProjectProperties): Promise<ProjectProperties> {
   const collection = adminDb.collection('projects');
   const docRef = projectData.id ? collection.doc(projectData.id) : collection.doc();
-  
+
   const dataToSave = {
     ...projectData,
     id: docRef.id,
@@ -37,7 +37,7 @@ export async function getProjects(userId: string): Promise<ProjectProperties[]> 
     .where('meta.author', '==', userId)
     .orderBy('meta.updated', 'desc')
     .get();
-  
+
   if (snapshot.empty) {
     return [];
   }

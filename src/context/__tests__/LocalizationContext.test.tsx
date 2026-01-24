@@ -1,5 +1,4 @@
-import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import { LocalizationProvider, useLocalization } from '../LocalizationContext';
 
 const TestComponent = () => {
@@ -70,16 +69,16 @@ describe('LocalizationContext', () => {
 
     expect(document.documentElement.lang).toBe('ar');
     expect(document.documentElement.dir).toBe('rtl');
-    
+
     fireEvent.click(screen.getByText('Switch to English'));
-    
+
     expect(document.documentElement.lang).toBe('en');
     expect(document.documentElement.dir).toBe('ltr');
   });
 
   it('should persist locale in localStorage', () => {
     const setItemSpy = jest.spyOn(Storage.prototype, 'setItem');
-    
+
     render(
       <LocalizationProvider>
         <TestComponent />
@@ -87,12 +86,12 @@ describe('LocalizationContext', () => {
     );
 
     fireEvent.click(screen.getByText('Switch to Arabic'));
-    
+
     expect(setItemSpy).toHaveBeenCalledWith('locale', 'ar');
-    
+
     setItemSpy.mockRestore();
   });
-  
+
   it('should handle variable interpolation', () => {
     render(
       <LocalizationProvider>

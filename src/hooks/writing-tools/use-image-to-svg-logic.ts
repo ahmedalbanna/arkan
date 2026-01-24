@@ -1,8 +1,8 @@
 
 'use client';
 
-import { convertImageToSvgApi } from '@/services/api/imageConversionService';
 import { useToast } from '@/hooks/util/use-toast';
+import { convertImageToSvgApi } from '@/services/api/imageConversionService';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation } from '@tanstack/react-query';
 import { useState } from 'react';
@@ -84,7 +84,7 @@ export function useImageToSvgLogic() {
         if (typeof value === 'boolean') {
           formData.append(key, value ? 'true' : 'false');
         } else if (value instanceof File) {
-            formData.append(key, value);
+          formData.append(key, value);
         } else {
           formData.append(key, String(value));
         }

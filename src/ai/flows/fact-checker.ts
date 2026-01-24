@@ -42,7 +42,7 @@ const factCheckFlow = ai.defineFlow({
 }, async (input) => {
   try {
     const result = await factCheckPrompt(input);
-    
+
     if (!result) {
       throw new Error('No output received from the model.');
     }

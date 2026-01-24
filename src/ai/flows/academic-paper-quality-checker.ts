@@ -30,11 +30,11 @@ import { z } from 'zod';
 
 // Temporary fallback schemas
 const AcademicPaperQualityCheckerInputSchema = z.object({
-  paper: z.string(),
-  checkAreas: z.array(z.string()).optional(),
+    paper: z.string(),
+    checkAreas: z.array(z.string()).optional(),
 });
 const AcademicPaperQualityCheckerOutputSchema = z.object({
-  report: z.string(),
+    report: z.string(),
 });
 
 export type AcademicPaperQualityCheckerInput = z.infer<typeof AcademicPaperQualityCheckerInputSchema>;

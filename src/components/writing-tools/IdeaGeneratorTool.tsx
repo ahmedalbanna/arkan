@@ -8,10 +8,10 @@ import { Label } from '@/components/ui/label';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Textarea } from '@/components/ui/textarea';
 import { useIdeaGeneratorLogic } from '@/hooks/writing-tools/use-idea-generator-logic';
-import { Loader2, Sparkles } from 'lucide-react';
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '../ui/accordion';
-import ReactMarkdown from 'react-markdown';
 import { markdownComponents } from '@/lib/utils/markdown-styles';
+import { Loader2, Sparkles } from 'lucide-react';
+import ReactMarkdown from 'react-markdown';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '../ui/accordion';
 
 export function IdeaGeneratorTool() {
   const {

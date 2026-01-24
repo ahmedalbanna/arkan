@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useMemo, useState } from 'react';
+import { Button } from '@/components/ui/button';
 import {
   Dialog,
   DialogContent,
@@ -10,15 +10,14 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
-import { useApplyReportTemplate, useReportTemplates } from '@/hooks/data/use-templates';
-import { AlertCircle, FileText, Loader2 } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle } from '../../ui/card';
-import { ScrollArea } from '../../ui/scroll-area';
-import { Input } from '../../ui/input';
-import { Search } from 'lucide-react';
 import { useLocalization } from '@/context/LocalizationContext';
+import { useApplyReportTemplate, useReportTemplates } from '@/hooks/data/use-templates';
 import type { ReportTemplateProperties } from '@/lib/models';
+import { AlertCircle, FileText, Loader2, Search } from 'lucide-react';
+import { useMemo, useState } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '../../ui/card';
+import { Input } from '../../ui/input';
+import { ScrollArea } from '../../ui/scroll-area';
 
 interface ReportTemplateDialogProps {
   isOpen: boolean;
@@ -34,7 +33,7 @@ function TemplateCard({ template, onSelect, isLoading }: { template: ReportTempl
       <CardContent>
         <p className="text-sm text-muted-foreground min-h-[40px]">{template.description}</p>
         <Button onClick={onSelect} className="w-full mt-4" disabled={isLoading}>
-            {isLoading ? <Loader2 className="h-4 w-4 animate-spin"/> : 'Apply Template'}
+          {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Apply Template'}
         </Button>
       </CardContent>
     </Card>
@@ -48,8 +47,8 @@ export function ReportTemplateDialog({ isOpen, onOpenChange }: ReportTemplateDia
   const [selectedTemplateId, setSelectedTemplateId] = useState<string | null>(null);
 
   const {
-      handleSelectTemplate,
-      isApplyingTemplate,
+    handleSelectTemplate,
+    isApplyingTemplate,
   } = useApplyReportTemplate(() => onOpenChange(false));
 
 
@@ -67,8 +66,8 @@ export function ReportTemplateDialog({ isOpen, onOpenChange }: ReportTemplateDia
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogTrigger asChild>
         <Button
-            variant="outline"
-            className="w-full"
+          variant="outline"
+          className="w-full"
         >
           <FileText className="me-2 h-4 w-4" />
           Apply Report Template
@@ -104,14 +103,14 @@ export function ReportTemplateDialog({ isOpen, onOpenChange }: ReportTemplateDia
               ) : filteredTemplates.length > 0 ? (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                   {filteredTemplates.map(template => (
-                    <TemplateCard 
-                        key={template.id} 
-                        template={template} 
-                        onSelect={() => {
-                            setSelectedTemplateId(template.id);
-                            handleSelectTemplate(template);
-                        }} 
-                        isLoading={isApplyingTemplate && selectedTemplateId === template.id}
+                    <TemplateCard
+                      key={template.id}
+                      template={template}
+                      onSelect={() => {
+                        setSelectedTemplateId(template.id);
+                        handleSelectTemplate(template);
+                      }}
+                      isLoading={isApplyingTemplate && selectedTemplateId === template.id}
                     />
                   ))}
                 </div>

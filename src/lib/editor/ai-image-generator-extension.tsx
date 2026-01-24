@@ -2,16 +2,16 @@
 
 'use client';
 
-import { Node, mergeAttributes } from '@tiptap/core';
-import { NodeViewWrapper, ReactNodeViewRenderer } from '@tiptap/react';
-import { useEffect, useState } from 'react';
-import Image from 'next/image';
-import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { ImageIcon, Loader2, Sparkles, Wand2 } from 'lucide-react';
 import { Slider } from '@/components/ui/slider';
 import { useDebounce } from '@/hooks';
+import { Node, mergeAttributes } from '@tiptap/core';
+import { NodeViewWrapper, ReactNodeViewRenderer } from '@tiptap/react';
+import { ImageIcon, Loader2, Sparkles, Wand2 } from 'lucide-react';
+import Image from 'next/image';
+import { useEffect, useState } from 'react';
 
 const AIImageGeneratorComponent = (props: any) => {
   const [prompt, setPrompt] = useState(props.node.attrs.prompt || 'A beautiful landscape');
@@ -50,77 +50,77 @@ const AIImageGeneratorComponent = (props: any) => {
     setIsLoading(true);
     const url = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?width=${width}&height=${height}&nologo=poll&nofeed=yes&seed=${seed}`;
     const finalUrl = `${url}&v=${Date.now()}`;
-    
+
     setImageUrl(finalUrl);
     // Update attribute directly on generation to ensure the URL is saved immediately
     props.updateAttributes({ imageUrl: finalUrl });
 
     // A timeout to simulate loading, as the image might be cached by the browser
     setTimeout(() => {
-        setIsLoading(false);
+      setIsLoading(false);
     }, 1500);
   };
-  
+
   return (
     <NodeViewWrapper className="ai-image-generator-node-view grid grid-cols-1 md:grid-cols-2 gap-4 my-4 p-4 border rounded-lg bg-muted/50">
       <div className="flex flex-col gap-4">
         <h4 className="font-semibold flex items-center gap-2"><Wand2 className="h-5 w-5 text-primary" /> Generator Controls</h4>
         <div className="space-y-2">
-            <Label htmlFor="prompt-input">Prompt</Label>
-            <Input id="prompt-input" value={prompt} onChange={(e) => setPrompt(e.target.value)} placeholder="Image description..."/>
+          <Label htmlFor="prompt-input">Prompt</Label>
+          <Input id="prompt-input" value={prompt} onChange={(e) => setPrompt(e.target.value)} placeholder="Image description..." />
         </div>
         <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-                <Label htmlFor="width-input">Width</Label>
-                <Input id="width-input" type="number" value={width} onChange={(e) => setWidth(parseInt(e.target.value, 10))}/>
-            </div>
-            <div className="space-y-2">
-                <Label htmlFor="height-input">Height</Label>
-                <Input id="height-input" type="number" value={height} onChange={(e) => setHeight(parseInt(e.target.value, 10))}/>
-            </div>
+          <div className="space-y-2">
+            <Label htmlFor="width-input">Width</Label>
+            <Input id="width-input" type="number" value={width} onChange={(e) => setWidth(parseInt(e.target.value, 10))} />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="height-input">Height</Label>
+            <Input id="height-input" type="number" value={height} onChange={(e) => setHeight(parseInt(e.target.value, 10))} />
+          </div>
         </div>
         <div className="space-y-2">
-            <Label htmlFor="seed-slider">Seed: {seed}</Label>
-            <Slider id="seed-slider" min={0} max={9999999999} step={1} value={[seed]} onValueChange={(val) => setSeed(val[0])} />
+          <Label htmlFor="seed-slider">Seed: {seed}</Label>
+          <Slider id="seed-slider" min={0} max={9999999999} step={1} value={[seed]} onValueChange={(val) => setSeed(val[0])} />
         </div>
         <Button onClick={generateImage} disabled={isLoading}>
-            {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <Sparkles className="mr-2 h-4 w-4"/>}
-            Generate
+          {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Sparkles className="mr-2 h-4 w-4" />}
+          Generate
         </Button>
       </div>
       <div className="flex flex-col gap-2">
-         <h4 className="font-semibold flex items-center gap-2"><ImageIcon className="h-5 w-5 text-primary" /> Output</h4>
-         <div className="relative w-full h-full min-h-[256px] border rounded-md bg-background flex items-center justify-center overflow-hidden">
-            {isLoading && (
-                 <div className="absolute inset-0 flex items-center justify-center bg-black/30 z-10">
-                    <Loader2 className="h-8 w-8 animate-spin text-white" />
-                 </div>
-            )}
-            {imageUrl ? (
-                <Image
-                    src={imageUrl}
-                    alt={prompt}
-                    layout="fill"
-                    objectFit="contain"
-                    unoptimized
-                    onLoad={() => setIsLoading(false)}
-                    onError={() => setIsLoading(false)}
-                />
-            ) : (
-                <p className="text-sm text-muted-foreground text-center p-4">Image will appear here</p>
-            )}
-         </div>
+        <h4 className="font-semibold flex items-center gap-2"><ImageIcon className="h-5 w-5 text-primary" /> Output</h4>
+        <div className="relative w-full h-full min-h-[256px] border rounded-md bg-background flex items-center justify-center overflow-hidden">
+          {isLoading && (
+            <div className="absolute inset-0 flex items-center justify-center bg-black/30 z-10">
+              <Loader2 className="h-8 w-8 animate-spin text-white" />
+            </div>
+          )}
+          {imageUrl ? (
+            <Image
+              src={imageUrl}
+              alt={prompt}
+              layout="fill"
+              objectFit="contain"
+              unoptimized
+              onLoad={() => setIsLoading(false)}
+              onError={() => setIsLoading(false)}
+            />
+          ) : (
+            <p className="text-sm text-muted-foreground text-center p-4">Image will appear here</p>
+          )}
+        </div>
       </div>
     </NodeViewWrapper>
   );
 };
 
 declare module '@tiptap/core' {
-    interface Commands<ReturnType> {
-      aiImageGenerator: {
-        insertAIImageGenerator: (options?: { prompt?: string }) => ReturnType;
-      };
-    }
+  interface Commands<ReturnType> {
+    aiImageGenerator: {
+      insertAIImageGenerator: (options?: { prompt?: string }) => ReturnType;
+    };
+  }
 }
 
 const AIImageGeneratorNode = Node.create({

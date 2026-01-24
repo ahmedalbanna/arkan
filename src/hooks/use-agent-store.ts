@@ -1,15 +1,15 @@
 
 'use client';
 
-import { create } from 'zustand';
-import type { AgentProperties } from '@/lib/models';
-import { fetchAgentsApi, createAgentApi, updateAgentApi, deleteAgentApi } from '@/services/api/agentService';
 import { useAuth } from '@/context/AuthContext';
-import { useEffect, useState } from 'react';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { toast } from './util/use-toast';
+import type { AgentProperties } from '@/lib/models';
 import { agentKeys } from '@/lib/query-keys';
 import { getFromCache, saveToCache } from '@/lib/utils/cache';
+import { createAgentApi, deleteAgentApi, fetchAgentsApi, updateAgentApi } from '@/services/api/agentService';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useEffect } from 'react';
+import { create } from 'zustand';
+import { toast } from './util/use-toast';
 
 const AGENTS_CACHE_KEY = 'agents-list';
 
@@ -17,7 +17,7 @@ interface AgentState {
   selectedAgentId: string | null;
   responses: Record<string, Record<string, { prompt: string; response: string }[]>>;
   // Keeping selectedCommandId for now to avoid breaking other parts, but it's deprecated
-  selectedCommandId: string | null; 
+  selectedCommandId: string | null;
   selectAgent: (agentId: string | null) => void;
   setSelectedCommandId: (commandId: string | null) => void;
   setResponse: (agentId: string, commandId: string, response: { prompt: string; response: string }) => void;
@@ -66,9 +66,9 @@ export function useAgentManager() {
       return fetchedAgents;
     },
     initialData: () => {
-        // Try to get data from cache first
-        const cachedAgents = getFromCache<AgentProperties[]>(AGENTS_CACHE_KEY);
-        return cachedAgents;
+      // Try to get data from cache first
+      const cachedAgents = getFromCache<AgentProperties[]>(AGENTS_CACHE_KEY);
+      return cachedAgents;
     },
     enabled: !!firebaseUser,
     staleTime: 1000 * 60 * 5, // Data is stale after 5 minutes
@@ -86,14 +86,14 @@ export function useAgentManager() {
 
   const createMutation = useMutation({
     mutationFn: async (data: Omit<AgentProperties, 'id'>) => {
-        if (!firebaseUser) throw new Error("Not authenticated");
-        const token = await firebaseUser.getIdToken();
-        // The API now expects the `id` in the body
-        return createAgentApi(data as any, token);
+      if (!firebaseUser) throw new Error("Not authenticated");
+      const token = await firebaseUser.getIdToken();
+      // The API now expects the `id` in the body
+      return createAgentApi(data as any, token);
     },
     onSuccess: (newAgent) => {
-        queryClient.invalidateQueries({ queryKey: agentKeys.all });
-        selectAgent(newAgent.id);
+      queryClient.invalidateQueries({ queryKey: agentKeys.all });
+      selectAgent(newAgent.id);
     }
   });
 
@@ -156,7 +156,7 @@ export function useAgentManager() {
       throw error;
     }
   };
-  
+
   const fetchAgents = () => {
     refetch();
   };

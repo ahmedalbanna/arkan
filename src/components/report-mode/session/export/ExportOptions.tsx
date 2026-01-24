@@ -1,8 +1,8 @@
 'use client';
 
 import { Label } from '@/components/ui/label';
-import { Switch } from '@/components/ui/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Switch } from '@/components/ui/switch';
 // Template key types (string literals for template selection)
 type DocxTemplateKey = 'modern' | 'classic' | 'academic';
 type PptxTemplateKey = 'modern' | 'corporate' | 'minimal';

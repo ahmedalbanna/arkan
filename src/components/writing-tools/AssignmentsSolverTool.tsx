@@ -9,7 +9,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { useLocalization } from '@/context/LocalizationContext';
 import { useAssignmentsSolverLogic } from '@/hooks/writing-tools/use-assignments-solver-logic';
 import { markdownComponents } from '@/lib/utils/markdown-styles';
-import { Check, Copy, Loader2, BookCheck, UploadCloud, Download } from 'lucide-react';
+import { BookCheck, Check, Copy, Download, Loader2, UploadCloud } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 
 export function AssignmentsSolverTool() {

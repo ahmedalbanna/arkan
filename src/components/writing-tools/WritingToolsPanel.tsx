@@ -8,21 +8,21 @@ import {
     AccordionTrigger,
 } from "@/components/ui/accordion";
 import { PenSquare } from "lucide-react";
-import { SummarizerTool } from "./SummarizerTool";
-import { ParaphraserTool } from "./ParaphraserTool";
-import { HumanizerTool } from "./HumanizerTool";
 import { AIDetectorTool } from "./AIDetectorTool";
-import { GrammarCheckerTool } from "./GrammarCheckerTool";
-import { FactCheckerTool } from "./FactCheckerTool";
-import { PlagiarismCheckerTool } from "./PlagiarismCheckerTool";
-import { CitationGeneratorTool } from "./CitationGeneratorTool";
-import { TopicExplainerTool } from "./TopicExplainerTool";
-import { IdeaGeneratorTool } from "./IdeaGeneratorTool";
-import { BiasCheckerTool } from "./BiasCheckerTool";
-import { SentenceStructureCheckerTool } from "./SentenceStructureCheckerTool";
 import { AssignmentsSolverTool } from "./AssignmentsSolverTool";
-import { ProjectBlueprintTool } from "./ProjectBlueprintTool";
+import { BiasCheckerTool } from "./BiasCheckerTool";
+import { CitationGeneratorTool } from "./CitationGeneratorTool";
+import { FactCheckerTool } from "./FactCheckerTool";
 import { GenerateUIDescriptionTool } from "./GenerateUIDescriptionTool";
+import { GrammarCheckerTool } from "./GrammarCheckerTool";
+import { HumanizerTool } from "./HumanizerTool";
+import { IdeaGeneratorTool } from "./IdeaGeneratorTool";
+import { ParaphraserTool } from "./ParaphraserTool";
+import { PlagiarismCheckerTool } from "./PlagiarismCheckerTool";
+import { ProjectBlueprintTool } from "./ProjectBlueprintTool";
+import { SentenceStructureCheckerTool } from "./SentenceStructureCheckerTool";
+import { SummarizerTool } from "./SummarizerTool";
+import { TopicExplainerTool } from "./TopicExplainerTool";
 
 const tools = [
     { id: 'summarizer', title: 'Summarizer', component: <SummarizerTool /> },

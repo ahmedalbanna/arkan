@@ -1,34 +1,34 @@
 
 'use client';
 
-import Link from 'next/link';
-import {
-  Menu,
-  Home,
-  ChevronDown,
-} from 'lucide-react';
-import { ReactNode, useEffect, useState } from 'react';
-import { usePathname, notFound } from 'next/navigation';
+import { LanguageToggle } from '@/components/shared/LanguageToggle';
+import { ThemeToggle } from '@/components/shared/ThemeToggle';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuLabel,
+    DropdownMenuSeparator,
+    DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
+import { Skeleton } from '@/components/ui/skeleton';
+import { navConfig, type NavLink } from '@/config/admin-nav';
 import { useAuth } from '@/context/AuthContext';
 import { useLocalization } from '@/context/LocalizationContext';
-import { cn } from '@/lib/utils/cn';
-import { ThemeToggle } from '@/components/shared/ThemeToggle';
 import { useLogout } from '@/hooks';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { LanguageToggle } from '@/components/shared/LanguageToggle';
-import { Skeleton } from '@/components/ui/skeleton';
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
-import { navConfig, type NavLink } from '@/config/admin-nav';
+import { cn } from '@/lib/utils/cn';
+import {
+    ChevronDown,
+    Home,
+    Menu,
+} from 'lucide-react';
+import Link from 'next/link';
+import { notFound, usePathname } from 'next/navigation';
+import { ReactNode, useEffect, useState } from 'react';
 
 function AdminLayoutSkeleton() {
     return (
@@ -73,8 +73,8 @@ function NavContent({ isMobile = false, closeSheet }: { isMobile?: boolean, clos
             onClick={() => isMobile && closeSheet && closeSheet()}
             className={cn(
                 "flex items-center gap-3 rounded-lg px-3 py-2 text-sidebar-foreground transition-all hover:text-sidebar-primary",
-                pathname.startsWith(link.href) && link.href !=='/' && "bg-sidebar-accent text-sidebar-primary",
-                pathname ==='/' && link.href ==='/' && "bg-sidebar-accent text-sidebar-primary"
+                pathname.startsWith(link.href) && link.href !== '/' && "bg-sidebar-accent text-sidebar-primary",
+                pathname === '/' && link.href === '/' && "bg-sidebar-accent text-sidebar-primary"
             )}
         >
             <link.icon className="h-4 w-4" />
@@ -131,7 +131,7 @@ function AdminLayoutContent({ children }: { children: ReactNode }) {
             <aside className="hidden border-r bg-sidebar md:block">
                 <div className="flex h-full max-h-screen flex-col gap-2">
                     <header className="flex h-14 items-center border-b px-4 lg:h-[60px] lg:px-6">
-                         <Link href="/" className="flex items-center gap-2 font-semibold text-sidebar-foreground">
+                        <Link href="/" className="flex items-center gap-2 font-semibold text-sidebar-foreground">
                             <Home className="h-6 w-6" />
                             <span className="">{t('header.title')}</span>
                         </Link>
@@ -150,7 +150,7 @@ function AdminLayoutContent({ children }: { children: ReactNode }) {
                             </Button>
                         </SheetTrigger>
                         <SheetContent side="left" className="flex flex-col">
-                           <NavContent isMobile={true} closeSheet={() => setIsSheetOpen(false)} />
+                            <NavContent isMobile={true} closeSheet={() => setIsSheetOpen(false)} />
                         </SheetContent>
                     </Sheet>
 

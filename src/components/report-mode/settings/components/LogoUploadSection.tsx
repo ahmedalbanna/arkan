@@ -14,7 +14,7 @@ interface LogoUploadSectionProps {
 
 /**
  * LogoUploadSection Component
- * 
+ *
  * Handles project logo upload with preview and remove functionality.
  */
 export function LogoUploadSection({

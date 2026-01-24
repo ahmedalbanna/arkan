@@ -1,12 +1,10 @@
-import React from 'react';
-import { render, screen, waitFor } from '@testing-library/react';
-import { act } from 'react';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { AuthProvider, useAuth } from '../AuthContext';
-import * as FirebaseAuth from 'firebase/auth';
-import * as UserService from '@/services/userService';
-import * as BuilderStore from '@/hooks/core/useBuilderStore';
 import { User } from '@/lib/models';
+import * as UserService from '@/services/userService';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { render, screen, waitFor } from '@testing-library/react';
+import * as FirebaseAuth from 'firebase/auth';
+import React, { act } from 'react';
+import { AuthProvider, useAuth } from '../AuthContext';
 
 // --- Mocks ---
 jest.mock('firebase/auth', () => ({
@@ -123,24 +121,24 @@ describe('AuthContext', () => {
     });
 
     await waitFor(() => {
-        expect(screen.getByTestId('profile-name')).toHaveTextContent('Test Profile');
+      expect(screen.getByTestId('profile-name')).toHaveTextContent('Test Profile');
     });
 
     expect(screen.getByTestId('is-guest')).toHaveTextContent('false');
   });
 
   it('should clear user profile on logout', async () => {
-     const mockFirebaseUser = { uid: 'test-uid', displayName: 'Test User', email: 'test@test.com' };
-     const mockUserProfileData = { id: 'test-uid', name: 'Test Profile', email: 'test@test.com', role: 'user', credits: 100, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() };
+    const mockFirebaseUser = { uid: 'test-uid', displayName: 'Test User', email: 'test@test.com' };
+    const mockUserProfileData = { id: 'test-uid', name: 'Test Profile', email: 'test@test.com', role: 'user', credits: 100, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() };
 
     let authCallback: (user: any) => void;
 
     mockOnAuthStateChanged.mockImplementation((auth, callback) => {
-        authCallback = callback;
-        act(() => {
-            callback(mockFirebaseUser);
-        });
-        return authUnsubscribe;
+      authCallback = callback;
+      act(() => {
+        callback(mockFirebaseUser);
+      });
+      return authUnsubscribe;
     });
 
     mockSubscribeToUserProfile.mockImplementation((uid, callback) => {
@@ -159,19 +157,19 @@ describe('AuthContext', () => {
     );
 
     await waitFor(() => {
-        expect(screen.getByTestId('profile-name')).toHaveTextContent('Test Profile');
+      expect(screen.getByTestId('profile-name')).toHaveTextContent('Test Profile');
     });
 
     // Simulate logout
     act(() => {
-        authCallback(null);
+      authCallback(null);
     });
 
     rerender(<AuthProvider><TestComponent /></AuthProvider>);
 
     await waitFor(() => {
-        expect(screen.getByTestId('user-id')).toHaveTextContent('null');
-        expect(screen.getByTestId('profile-name')).toHaveTextContent('null');
+      expect(screen.getByTestId('user-id')).toHaveTextContent('null');
+      expect(screen.getByTestId('profile-name')).toHaveTextContent('null');
     });
   });
 });

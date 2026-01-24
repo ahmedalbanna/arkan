@@ -2,7 +2,7 @@
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Loader2, PlusCircle, Save, Trash2 } from 'lucide-react';
-import React, { useEffect } from 'react';
+import { useEffect } from 'react';
 import { useFieldArray, useForm } from 'react-hook-form';
 import { z } from 'zod';
 
@@ -19,11 +19,10 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { useAgentCategories } from '@/hooks';
 import { useAgentManager } from '@/hooks/use-agent-store';
 import type { AgentProperties } from '@/lib/models';
-import { v4 as uuidv4 } from 'uuid';
 import { toast } from '../ui/use-toast';
-import { useAgentCategories } from '@/hooks';
 
 const formSchema = z.object({
   id: z.string().min(3, "ID must be at least 3 characters").regex(/^[a-z0-9-]+$/, "ID can only contain lowercase letters, numbers, and hyphens.").optional(),
@@ -197,14 +196,14 @@ export function AgentDialog({
                       render={({ field }) => (
                         <FormItem className="flex-1">
                           <FormControl>
-                            <Input {...field} placeholder="e.g., Always use a formal tone."/>
+                            <Input {...field} placeholder="e.g., Always use a formal tone." />
                           </FormControl>
-                          <FormMessage/>
+                          <FormMessage />
                         </FormItem>
                       )}
                     />
                     <Button type="button" variant="ghost" size="icon" onClick={() => remove(index)}>
-                        <Trash2 className="h-4 w-4 text-destructive"/>
+                      <Trash2 className="h-4 w-4 text-destructive" />
                     </Button>
                   </div>
                 ))}

@@ -9,7 +9,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { useImageToSvgLogic } from '@/hooks/writing-tools/use-image-to-svg-logic';
-import { Check, Copy, Download, Image as ImageIcon, Loader2, Sparkles, UploadCloud } from 'lucide-react';
+import { Copy, Download, Image as ImageIcon, Loader2, Sparkles, UploadCloud } from 'lucide-react';
 import Image from 'next/image';
 
 export function ImageToSvgTool() {
@@ -100,7 +100,7 @@ export function ImageToSvgTool() {
                 </AccordionContent>
               </AccordionItem>
             </Accordion>
-            
+
             <Button type="submit" disabled={mutation.isPending} className="w-full">
               {mutation.isPending ? <Loader2 className="me-2 h-4 w-4 animate-spin" /> : <Sparkles className="me-2 h-4 w-4" />}
               Convert to SVG
@@ -108,11 +108,11 @@ export function ImageToSvgTool() {
           </form>
         </CardContent>
       </Card>
-      
+
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center justify-between">
-            <span className="flex items-center gap-2"><ImageIcon className="h-5 w-5"/> SVG Result</span>
+            <span className="flex items-center gap-2"><ImageIcon className="h-5 w-5" /> SVG Result</span>
             {svgResult && (
               <div className="flex items-center gap-1">
                 <Button variant="ghost" size="icon" onClick={handleCopy} title="Copy SVG code"><Copy className="h-4 w-4" /></Button>
@@ -123,14 +123,14 @@ export function ImageToSvgTool() {
           <CardDescription>The generated SVG will appear here.</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-            <h4 className="font-semibold text-sm">Preview</h4>
-            <div className="border rounded-md min-h-[200px] p-4 flex items-center justify-center bg-muted/30">
-                {mutation.isPending ? <Loader2 className="h-8 w-8 animate-spin text-primary" /> : svgResult ? (
-                    <div dangerouslySetInnerHTML={{ __html: svgResult }} className="w-full h-full" />
-                ) : <p className="text-muted-foreground text-center">Preview will be shown here.</p>}
-            </div>
-            <h4 className="font-semibold text-sm">SVG Code</h4>
-            <Textarea readOnly value={svgResult} rows={10} className="font-mono text-xs" placeholder="SVG code will appear here..." />
+          <h4 className="font-semibold text-sm">Preview</h4>
+          <div className="border rounded-md min-h-[200px] p-4 flex items-center justify-center bg-muted/30">
+            {mutation.isPending ? <Loader2 className="h-8 w-8 animate-spin text-primary" /> : svgResult ? (
+              <div dangerouslySetInnerHTML={{ __html: svgResult }} className="w-full h-full" />
+            ) : <p className="text-muted-foreground text-center">Preview will be shown here.</p>}
+          </div>
+          <h4 className="font-semibold text-sm">SVG Code</h4>
+          <Textarea readOnly value={svgResult} rows={10} className="font-mono text-xs" placeholder="SVG code will appear here..." />
         </CardContent>
       </Card>
     </div>

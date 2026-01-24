@@ -1,51 +1,51 @@
 
 import { format } from "date-fns";
-import { 
-  UserValidationError, 
-  validateEmail, 
+import {
+  UserValidationError,
   validateCredits,
-  type UserRole 
+  validateEmail,
+  type UserRole
 } from './user-validation';
 
 /**
  * User Profile Interface
- * 
+ *
  * Defines the complete structure of a user profile with all fields.
  */
 export interface UserProfile {
   /** Unique user identifier (Firebase UID) */
   id: string;
-  
+
   /** User's display name */
   name: string;
-  
+
   /** User's email address */
   email: string;
-  
+
   /** User's role (admin or user) */
   role: UserRole;
-  
+
   /** Available credits for AI generation */
   credits?: number;
-  
+
   /** ISO timestamp when user was created */
   createdAt: string;
-  
+
   /** ISO timestamp when user was last updated */
   updatedAt: string;
-  
+
   /** User biography/description */
   bio?: string;
-  
+
   /** URL to user's profile picture */
   profilePictureUrl?: string;
-  
+
   /** Whether user has completed onboarding */
   hasCompletedOnboarding?: boolean;
-  
+
   /** API keys for external services */
   apiKeys?: Record<string, string>;
-  
+
   /** Timestamp of last daily credit refresh */
   lastDailyCreditUpdate?: string;
 }
@@ -58,23 +58,23 @@ export type UserProperties = Partial<UserProfile> & { id?: string };
 
 /**
  * User Model
- * 
+ *
  * Immutable class representing a user in the system with authentication,
  * profile information, and credit management.
- * 
+ *
  * @example
  * ```typescript
  * // Create new user
- * const user = new User({ 
+ * const user = new User({
  *   id: 'user-123',
  *   name: 'John Doe',
  *   email: 'john@example.com',
  *   role: 'user'
  * });
- * 
+ *
  * // Update user
  * const updated = user.with({ credits: 100 });
- * 
+ *
  * // Add credits
  * const withCredits = user.addCredits(50);
  * ```
@@ -95,7 +95,7 @@ export class User {
 
   /**
    * Creates a new User instance
-   * 
+   *
    * @param props - User properties
    * @throws {UserValidationError} If validation fails
    */
@@ -104,25 +104,25 @@ export class User {
     if (!props.id || props.id.trim() === '') {
       throw new UserValidationError('User ID is required', 'id');
     }
-    
+
     if (!props.name || props.name.trim() === '') {
       throw new UserValidationError('User name is required', 'name');
     }
-    
+
     if (!props.email || props.email.trim() === '') {
       throw new UserValidationError('User email is required', 'email');
     }
-    
+
     // Validate email format
     if (!validateEmail(props.email)) {
       throw new UserValidationError('Invalid email format', 'email');
     }
-    
+
     // Validate credits if provided
     if (props.credits !== undefined) {
       validateCredits(props.credits);
     }
-    
+
     this.id = props.id;
     this.name = props.name;
     this.email = props.email;
@@ -139,16 +139,16 @@ export class User {
 
   /**
    * Creates a new User instance with updated properties (immutable update)
-   * 
+   *
    * @param props - Partial properties to update
    * @returns New User instance with merged properties
    * @throws {UserValidationError} If validation fails
-   * 
+   *
    * @example
    * ```typescript
-   * const updated = user.with({ 
+   * const updated = user.with({
    *   name: 'New Name',
-   *   credits: 150 
+   *   credits: 150
    * });
    * ```
    */
@@ -162,9 +162,9 @@ export class User {
 
   /**
    * Returns the user's initials for avatar display
-   * 
+   *
    * @returns User initials (e.g., "JD" for "John Doe")
-   * 
+   *
    * @example
    * ```typescript
    * const initials = user.getInitials(); // "JD"
@@ -179,10 +179,10 @@ export class User {
       .toUpperCase()
       .slice(0, 2); // Max 2 characters
   }
-  
+
   /**
    * Returns formatted creation date
-   * 
+   *
    * @returns Formatted date string (e.g., "23 Jan 2026")
    */
   public getFormattedDate(): string {
@@ -196,7 +196,7 @@ export class User {
 
   /**
    * Returns formatted updated date
-   * 
+   *
    * @returns Formatted date string
    */
   public getFormattedUpdatedDate(): string {
@@ -210,7 +210,7 @@ export class User {
 
   /**
    * Checks if user is an admin
-   * 
+   *
    * @returns True if user has admin role
    */
   public isAdmin(): boolean {
@@ -219,7 +219,7 @@ export class User {
 
   /**
    * Checks if user has completed onboarding
-   * 
+   *
    * @returns True if onboarding is complete
    */
   public isOnboarded(): boolean {
@@ -228,7 +228,7 @@ export class User {
 
   /**
    * Checks if user has sufficient credits
-   * 
+   *
    * @param amount - Credits required
    * @returns True if user has enough credits
    */
@@ -238,11 +238,11 @@ export class User {
 
   /**
    * Adds credits to user account
-   * 
+   *
    * @param amount - Credits to add (must be positive)
    * @returns New User instance with updated credits
    * @throws {UserValidationError} If amount is invalid
-   * 
+   *
    * @example
    * ```typescript
    * const updated = user.addCredits(50);
@@ -261,11 +261,11 @@ export class User {
 
   /**
    * Deducts credits from user account
-   * 
+   *
    * @param amount - Credits to deduct (must be positive)
    * @returns New User instance with updated credits
    * @throws {UserValidationError} If amount is invalid or insufficient credits
-   * 
+   *
    * @example
    * ```typescript
    * const updated = user.deductCredits(10);
@@ -289,7 +289,7 @@ export class User {
 
   /**
    * Marks onboarding as complete
-   * 
+   *
    * @returns New User instance with onboarding completed
    */
   public completeOnboarding(): User {
@@ -298,7 +298,7 @@ export class User {
 
   /**
    * Updates user's API key for a service
-   * 
+   *
    * @param service - Service name (e.g., 'gemini', 'chatgpt')
    * @param apiKey - API key value
    * @returns New User instance with updated API keys
@@ -310,7 +310,7 @@ export class User {
 
   /**
    * Removes user's API key for a service
-   * 
+   *
    * @param service - Service name to remove
    * @returns New User instance without the API key
    */
@@ -322,7 +322,7 @@ export class User {
 
   /**
    * Gets API key for a specific service
-   * 
+   *
    * @param service - Service name
    * @returns API key or undefined
    */
@@ -332,7 +332,7 @@ export class User {
 
   /**
    * Updates last daily credit refresh timestamp
-   * 
+   *
    * @returns New User instance with updated timestamp
    */
   public markDailyCreditUpdate(): User {
@@ -341,7 +341,7 @@ export class User {
 
   /**
    * Converts User instance to plain object (for persistence/serialization)
-   * 
+   *
    * @returns Plain JavaScript object with all user data
    */
   public toStateObject(): UserProfile {
@@ -363,7 +363,7 @@ export class User {
 
   /**
    * JSON serialization method (used by JSON.stringify)
-   * 
+   *
    * @returns Plain JavaScript object
    */
   public toJSON(): UserProfile {

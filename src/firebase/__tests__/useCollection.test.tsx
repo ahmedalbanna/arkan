@@ -1,7 +1,7 @@
 
-import { renderHook, waitFor, act } from '@testing-library/react';
-import { useCollection } from '../firestore/use-collection';
+import { act, renderHook, waitFor } from '@testing-library/react';
 import { onSnapshot } from 'firebase/firestore';
+import { useCollection } from '../firestore/use-collection';
 
 jest.mock('firebase/firestore', () => ({
   ...jest.requireActual('firebase/firestore'),
@@ -16,14 +16,14 @@ describe('useCollection Hook', () => {
   });
 
   it('should return loading state initially', () => {
-    const mockQuery = { type: 'collection', path: 'test', __memo: true, _query: { path: { canonicalString: () => 'test'} }};
+    const mockQuery = { type: 'collection', path: 'test', __memo: true, _query: { path: { canonicalString: () => 'test' } } };
     const { result } = renderHook(() => useCollection(mockQuery as any));
-    
+
     expect(result.current.isLoading).toBe(true);
     expect(result.current.data).toBeNull();
     expect(result.current.error).toBeNull();
   });
-  
+
   it('should return data when snapshot has documents', async () => {
     const mockDocs = [
       { id: 'doc1', data: () => ({ name: 'Doc 1' }) },
@@ -32,21 +32,21 @@ describe('useCollection Hook', () => {
     const mockSnapshot = {
       docs: mockDocs.map(doc => ({ ...doc, exists: true })),
     };
-    
+
     mockOnSnapshot.mockImplementation((query, callback) => {
       act(() => {
         callback(mockSnapshot);
       });
-      return () => {}; // unsubscribe function
+      return () => { }; // unsubscribe function
     });
-    
-    const mockQuery = { type: 'collection', path: 'test', __memo: true, _query: { path: { canonicalString: () => 'test'} }};
+
+    const mockQuery = { type: 'collection', path: 'test', __memo: true, _query: { path: { canonicalString: () => 'test' } } };
     const { result } = renderHook(() => useCollection(mockQuery as any));
-    
+
     await waitFor(() => {
       expect(result.current.isLoading).toBe(false);
     });
-    
+
     expect(result.current.data).toHaveLength(2);
     expect(result.current.data?.[0]).toEqual({ id: 'doc1', name: 'Doc 1' });
     expect(result.current.error).toBeNull();
@@ -56,19 +56,19 @@ describe('useCollection Hook', () => {
     const mockSnapshot = {
       docs: [],
     };
-    
+
     mockOnSnapshot.mockImplementation((query, callback) => {
       act(() => {
         callback(mockSnapshot);
       });
-      return () => {};
+      return () => { };
     });
-    
-    const mockQuery = { type: 'collection', path: 'test', __memo: true, _query: { path: { canonicalString: () => 'test'} }};
+
+    const mockQuery = { type: 'collection', path: 'test', __memo: true, _query: { path: { canonicalString: () => 'test' } } };
     const { result } = renderHook(() => useCollection(mockQuery as any));
-    
+
     await waitFor(() => expect(result.current.isLoading).toBe(false));
-    
+
     expect(result.current.data).toEqual([]);
     expect(result.current.error).toBeNull();
   });
@@ -82,10 +82,10 @@ describe('useCollection Hook', () => {
       act(() => {
         errorCallback(mockError);
       });
-      return () => {};
+      return () => { };
     });
 
-    const mockQuery = { type: 'collection', path: 'test', __memo: true, _query: { path: { canonicalString: () => 'test'} }};
+    const mockQuery = { type: 'collection', path: 'test', __memo: true, _query: { path: { canonicalString: () => 'test' } } };
     const { result } = renderHook(() => useCollection(mockQuery as any));
 
     await waitFor(() => expect(result.current.isLoading).toBe(false));
@@ -102,11 +102,11 @@ describe('useCollection Hook', () => {
     expect(result.current.error).toBeNull();
     expect(mockOnSnapshot).not.toHaveBeenCalled();
   });
-  
+
   it('should throw an error if the query is not memoized', () => {
-    const mockQuery = { type: 'collection', path: 'test', _query: { path: { canonicalString: () => 'test'} }};
+    const mockQuery = { type: 'collection', path: 'test', _query: { path: { canonicalString: () => 'test' } } };
     // We need to catch the error thrown by the hook
-    const spy = jest.spyOn(console, 'error').mockImplementation(() => {});
+    const spy = jest.spyOn(console, 'error').mockImplementation(() => { });
     expect(() => {
       renderHook(() => useCollection(mockQuery as any));
     }).toThrow();

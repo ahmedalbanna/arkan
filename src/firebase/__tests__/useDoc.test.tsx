@@ -1,7 +1,7 @@
 
-import { renderHook, waitFor, act } from '@testing-library/react';
-import { useDoc } from '../firestore/use-doc';
+import { act, renderHook, waitFor } from '@testing-library/react';
 import { onSnapshot } from 'firebase/firestore';
+import { useDoc } from '../firestore/use-doc';
 
 // Mock the onSnapshot function from firebase/firestore
 jest.mock('firebase/firestore', () => ({
@@ -23,7 +23,7 @@ describe('useDoc Hook', () => {
     expect(result.current.data).toBeNull();
     expect(result.current.error).toBeNull();
   });
-  
+
   it('should return data when snapshot exists', async () => {
     const mockData = { name: 'Test Document' };
     const mockSnapshot = {
@@ -31,21 +31,21 @@ describe('useDoc Hook', () => {
       data: () => mockData,
       id: 'doc1',
     };
-    
+
     mockOnSnapshot.mockImplementation((docRef, callback) => {
       act(() => {
         callback(mockSnapshot);
       });
       return () => {}; // unsubscribe function
     });
-    
+
     const mockDocRef = { path: 'test/1', __memo: true };
     const { result } = renderHook(() => useDoc(mockDocRef as any));
-    
+
     await waitFor(() => {
       expect(result.current.isLoading).toBe(false);
     });
-    
+
     expect(result.current.data).toEqual({ ...mockData, id: 'doc1' });
     expect(result.current.error).toBeNull();
   });
@@ -54,19 +54,19 @@ describe('useDoc Hook', () => {
     const mockSnapshot = {
       exists: () => false,
     };
-    
+
     mockOnSnapshot.mockImplementation((docRef, callback) => {
       act(() => {
         callback(mockSnapshot);
       });
       return () => {};
     });
-    
+
     const mockDocRef = { path: 'test/1', __memo: true };
     const { result } = renderHook(() => useDoc(mockDocRef as any));
-    
+
     await waitFor(() => expect(result.current.isLoading).toBe(false));
-    
+
     expect(result.current.data).toBeNull();
     expect(result.current.error).toBeNull();
   });
@@ -100,7 +100,7 @@ describe('useDoc Hook', () => {
     expect(result.current.error).toBeNull();
     expect(mockOnSnapshot).not.toHaveBeenCalled();
   });
-  
+
   it('should throw an error if the doc ref is not memoized', () => {
     const mockDocRef = { path: 'test/1' }; // No __memo property
     // We need to catch the error thrown by the hook

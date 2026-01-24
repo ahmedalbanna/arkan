@@ -1,18 +1,18 @@
 
 'use client';
 
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '@/context/AuthContext';
-import { getAuthenticatedToken } from '@/lib/utils/authUtils';
 import { toast } from '@/hooks/util/use-toast';
-import {
-    fetchDocxTemplatesApi,
-    updateDocxTemplateApi,
-    deleteDocxTemplateApi,
-    createDocxTemplateApi,
-    refreshTemplateImage,
-} from '@/services';
 import type { DocxTemplateProperties } from '@/lib/models';
+import { getAuthenticatedToken } from '@/lib/utils/authUtils';
+import {
+    createDocxTemplateApi,
+    deleteDocxTemplateApi,
+    fetchDocxTemplatesApi,
+    refreshTemplateImage,
+    updateDocxTemplateApi,
+} from '@/services';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 export function useDocxStyles() {
     const { data: templates, ...rest } = useQuery<Record<string, DocxTemplateProperties>>({

@@ -1,6 +1,7 @@
 
 'use client';
 
+import { Button } from '@/components/ui/button';
 import {
   Dialog,
   DialogContent,
@@ -8,24 +9,22 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
 // import { useChapterActions } from '@/hooks/report-mode/use-chapter-actions'; // TODO: Create this hook
-import { useAiActions } from '@/hooks/report-mode/use-ai-actions';
+import { useAuth } from '@/context/AuthContext';
 import { Chapter } from '@/lib/models';
-import { Loader2, Wand2, PlusCircle, Link as LinkIcon, Edit } from 'lucide-react';
-import { ScrollArea } from '../../ui/scroll-area';
+import { markdownComponents } from '@/lib/utils/markdown-styles';
+import { Edit, Link as LinkIcon, Loader2, PlusCircle, Wand2 } from 'lucide-react';
+import ReactMarkdown from 'react-markdown';
+import { DiffView } from '../../shared/DiffView';
+import { Badge } from '../../ui/badge';
+import { Form } from '../../ui/form';
+import { Input } from '../../ui/input';
 import { Label } from '../../ui/label';
+import { ScrollArea } from '../../ui/scroll-area';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../../ui/select';
 import { Slider } from '../../ui/slider';
-import ReactMarkdown from 'react-markdown';
-import { markdownComponents } from '@/lib/utils/markdown-styles';
-import { DiffView } from '../../shared/DiffView';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../ui/tabs';
-import { Form } from '../../ui/form';
-import { Badge } from '../../ui/badge';
-import { Input } from '../../ui/input';
 import { SectionContextSelector } from '../section-controls/SectionContextSelector';
-import { useAuth } from '@/context/AuthContext';
 
 interface ChapterToolsDialogProps {
   isOpen: boolean;
@@ -65,7 +64,7 @@ export function ChapterToolsDialog({ isOpen, onOpenChange, chapter }: ChapterToo
             Apply AI actions to the entire content of this chapter. The result can be saved as a new section.
           </DialogDescription>
         </DialogHeader>
-        
+
         <Form {...form}>
           <form id="chapter-tools-form" onSubmit={form.handleSubmit(onSubmit)} className="grid grid-cols-1 md:grid-cols-12 gap-6 flex-1 min-h-0">
             {/* Controls Panel */}
@@ -89,15 +88,15 @@ export function ChapterToolsDialog({ isOpen, onOpenChange, chapter }: ChapterToo
                   </div>
 
                   {manipulationType === 'rewrite' && (
-                      <div className="space-y-2">
-                          <Label>Rewrite Style</Label>
-                          <Select onValueChange={(val) => form.setValue('rewriteStyle', val)} defaultValue={form.getValues('rewriteStyle')}>
-                              <SelectTrigger><SelectValue placeholder="Select a style" /></SelectTrigger>
-                              <SelectContent>
-                                  {styles.map((s: string) => <SelectItem key={s} value={s}>{s}</SelectItem>)}
-                              </SelectContent>
-                          </Select>
-                      </div>
+                    <div className="space-y-2">
+                      <Label>Rewrite Style</Label>
+                      <Select onValueChange={(val) => form.setValue('rewriteStyle', val)} defaultValue={form.getValues('rewriteStyle')}>
+                        <SelectTrigger><SelectValue placeholder="Select a style" /></SelectTrigger>
+                        <SelectContent>
+                          {styles.map((s: string) => <SelectItem key={s} value={s}>{s}</SelectItem>)}
+                        </SelectContent>
+                      </Select>
+                    </div>
                   )}
 
                   {manipulationType === 'summarize' && (
@@ -111,62 +110,62 @@ export function ChapterToolsDialog({ isOpen, onOpenChange, chapter }: ChapterToo
                   )}
 
                   {manipulationType === 'style-editor' && (
-                      <div className="space-y-4">
-                          <div className="space-y-2">
-                              <Label>Target Audience</Label>
-                              <Input {...form.register('targetAudience')} placeholder="e.g., general public, academics" />
-                          </div>
-                          <div className="space-y-2">
-                              <Label>Desired Tone</Label>
-                              <Input {...form.register('tone')} placeholder="e.g., professional, casual" />
-                          </div>
+                    <div className="space-y-4">
+                      <div className="space-y-2">
+                        <Label>Target Audience</Label>
+                        <Input {...form.register('targetAudience')} placeholder="e.g., general public, academics" />
                       </div>
+                      <div className="space-y-2">
+                        <Label>Desired Tone</Label>
+                        <Input {...form.register('tone')} placeholder="e.g., professional, casual" />
+                      </div>
+                    </div>
                   )}
 
                   {manipulationType === 'readability-enhancer' && (
-                       <div className="space-y-2">
-                          <Label>Target Reading Level</Label>
-                          <Select onValueChange={(val) => form.setValue('targetLevel', val)} defaultValue={form.getValues('targetLevel')}>
-                              <SelectTrigger><SelectValue /></SelectTrigger>
-                              <SelectContent>
-                                  <SelectItem value="elementary">Elementary</SelectItem>
-                                  <SelectItem value="middle-school">Middle School</SelectItem>
-                                  <SelectItem value="high-school">High School</SelectItem>
-                                  <SelectItem value="college">College</SelectItem>
-                                  <SelectItem value="graduate">Graduate</SelectItem>
-                              </SelectContent>
-                          </Select>
-                      </div>
+                    <div className="space-y-2">
+                      <Label>Target Reading Level</Label>
+                      <Select onValueChange={(val) => form.setValue('targetLevel', val)} defaultValue={form.getValues('targetLevel')}>
+                        <SelectTrigger><SelectValue /></SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="elementary">Elementary</SelectItem>
+                          <SelectItem value="middle-school">Middle School</SelectItem>
+                          <SelectItem value="high-school">High School</SelectItem>
+                          <SelectItem value="college">College</SelectItem>
+                          <SelectItem value="graduate">Graduate</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
                   )}
-                  
+
                   {manipulationType === 'conciseness-checker' && (
-                      <div className="space-y-3">
-                          <div className="flex justify-between">
-                              <Label>Target Reduction</Label>
-                              <Badge variant="outline">{form.watch('targetReduction') || 0}%</Badge>
-                          </div>
-                          <Slider 
-                              value={[form.watch('targetReduction') || 0]} 
-                              onValueChange={(val) => form.setValue('targetReduction', val[0])} 
-                              min={0} max={50} step={5} 
-                          />
+                    <div className="space-y-3">
+                      <div className="flex justify-between">
+                        <Label>Target Reduction</Label>
+                        <Badge variant="outline">{form.watch('targetReduction') || 0}%</Badge>
                       </div>
+                      <Slider
+                        value={[form.watch('targetReduction') || 0]}
+                        onValueChange={(val) => form.setValue('targetReduction', val[0])}
+                        min={0} max={50} step={5}
+                      />
+                    </div>
                   )}
 
                   {manipulationType === 'clarity-advisor' && (
-                      <div className="space-y-2">
-                          <Label>Focus Areas (comma-separated)</Label>
-                          <Input 
-                              {...form.register('focusAreas')} 
-                              placeholder="e.g., sentence structure, word choice" 
-                          />
-                      </div>
+                    <div className="space-y-2">
+                      <Label>Focus Areas (comma-separated)</Label>
+                      <Input
+                        {...form.register('focusAreas')}
+                        placeholder="e.g., sentence structure, word choice"
+                      />
+                    </div>
                   )}
                 </TabsContent>
                 <TabsContent value="context" className="flex-1 mt-4">
-                   <SectionContextSelector
-                        sectionId={chapter.id || ''}
-                    />
+                  <SectionContextSelector
+                    sectionId={chapter.id || ''}
+                  />
                 </TabsContent>
               </Tabs>
             </div>
@@ -202,20 +201,20 @@ export function ChapterToolsDialog({ isOpen, onOpenChange, chapter }: ChapterToo
                 </TabsContent>
               </Tabs>
             </div>
-            
+
             <div className="md:col-span-12 flex justify-end gap-2 flex-shrink-0">
-                <Button variant="ghost" onClick={() => onOpenChange(false)}>Cancel</Button>
-                {processedText && (
-                  <Button type="button" variant="secondary" onClick={handleApplyToNewSection} disabled={isProcessing}>
-                      <PlusCircle className="h-4 w-4 mr-2" />
-                      Apply to New Section
-                  </Button>
-                )}
-                <Button form="chapter-tools-form" type="submit" disabled={isProcessing || isGuest}>
-                  {isProcessing ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Wand2 className="h-4 w-4 mr-2" />}
-                  Apply Action
+              <Button variant="ghost" onClick={() => onOpenChange(false)}>Cancel</Button>
+              {processedText && (
+                <Button type="button" variant="secondary" onClick={handleApplyToNewSection} disabled={isProcessing}>
+                  <PlusCircle className="h-4 w-4 mr-2" />
+                  Apply to New Section
                 </Button>
-              </div>
+              )}
+              <Button form="chapter-tools-form" type="submit" disabled={isProcessing || isGuest}>
+                {isProcessing ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Wand2 className="h-4 w-4 mr-2" />}
+                Apply Action
+              </Button>
+            </div>
           </form>
         </Form>
       </DialogContent>

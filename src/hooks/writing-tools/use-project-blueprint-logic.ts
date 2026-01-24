@@ -1,11 +1,11 @@
 'use client';
 
+import { useLocalization } from '@/context/LocalizationContext';
+import { useToast, useWritingTool } from '@/hooks';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { useWritingTool, useToast } from '@/hooks';
-import { useLocalization } from '@/context/LocalizationContext';
 
 const projectBlueprintSchema = z.object({
   projectName: z.string().min(2, 'Project name must be at least 2 characters long.'),
@@ -31,17 +31,17 @@ export function useProjectBlueprintLogic() {
 
   const generateMutation = useWritingTool('/api/writing-tools/project-blueprint', {
     onSuccess: (data: any) => {
-        setBlueprint(data.blueprint);
-        toast({ title: t('writingTools.projectBlueprint.successToast') });
+      setBlueprint(data.blueprint);
+      toast({ title: t('writingTools.projectBlueprint.successToast') });
     },
     onError: (error) => {
-         toast({ title: t('writingTools.projectBlueprint.errorToast'), description: error.message, variant: 'destructive' });
+      toast({ title: t('writingTools.projectBlueprint.errorToast'), description: error.message, variant: 'destructive' });
     }
   });
 
   const form = useForm<ProjectBlueprintFormValues>({
     resolver: zodResolver(projectBlueprintSchema),
-    defaultValues: { 
+    defaultValues: {
       projectName: '',
       projectType: '',
       description: '',
@@ -60,15 +60,15 @@ export function useProjectBlueprintLogic() {
   const handleCopy = () => {
     if (!blueprint) return;
     navigator.clipboard.writeText(blueprint).then(() => {
-        setIsCopied(true);
-        toast({ title: 'Project blueprint copied to clipboard!' });
-        setTimeout(() => setIsCopied(false), 2000);
+      setIsCopied(true);
+      toast({ title: 'Project blueprint copied to clipboard!' });
+      setTimeout(() => setIsCopied(false), 2000);
     });
   };
 
   const handleDownload = () => {
     if (!blueprint) return;
-    
+
     const blob = new Blob([blueprint], { type: 'text/markdown' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -78,7 +78,7 @@ export function useProjectBlueprintLogic() {
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
-    
+
     toast({ title: 'Project blueprint downloaded successfully!' });
   };
 

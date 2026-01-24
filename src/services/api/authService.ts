@@ -2,8 +2,6 @@
 'use client';
 
 import { initializeFirebase } from '@/firebase';
-
-const { auth } = initializeFirebase();
 import type { LoginCredentials, SignupCredentials, UserProfile } from '@/lib/types';
 import {
   GoogleAuthProvider,
@@ -14,9 +12,10 @@ import {
   signOut,
   type UserCredential
 } from "firebase/auth";
-import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { apiService } from './apiService';
 import { fetchUserProfileApi } from './userService';
+
+const { auth } = initializeFirebase();
 
 // Re-export for convenience
 export { fetchUserProfileApi };
@@ -44,7 +43,7 @@ export async function loginWithEmail(credentials: LoginCredentials): Promise<Use
   }
 }
 
-export async function loginWithGoogle(): Promise<{user: UserCredential['user'], isNewUser: boolean}> {
+export async function loginWithGoogle(): Promise<{ user: UserCredential['user'], isNewUser: boolean }> {
   const provider = new GoogleAuthProvider();
   try {
     const result = await signInWithPopup(auth, provider);
@@ -65,11 +64,11 @@ export async function serviceLogoutUser() {
  * This now handles both auth creation and profile creation in one go.
  */
 export async function serviceSignupUser(credentials: SignupCredentials) {
-    return apiService({
-        endpoint: '/api/auth/signup',
-        method: 'POST',
-        data: credentials
-    });
+  return apiService({
+    endpoint: '/api/auth/signup',
+    method: 'POST',
+    data: credentials
+  });
 }
 
 
@@ -90,11 +89,11 @@ export async function sendPasswordResetEmailApi(userId: string, token: string) {
  * This is now the single source of truth for creating profiles.
  */
 export async function createOrUpdateUserProfileApi(userId: string, data: Partial<UserProfile>, token: string): Promise<UserProfile> {
-    return apiService({
-        endpoint: `/api/users/${userId}`,
-        method: 'PUT',
-        data,
-        token
-    });
+  return apiService({
+    endpoint: `/api/users/${userId}`,
+    method: 'PUT',
+    data,
+    token
+  });
 }
 

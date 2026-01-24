@@ -1,19 +1,19 @@
 
 'use client';
 
-import { useState } from 'react';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
 import { useCreateUser } from '@/hooks/data/use-users';
 import { toast } from '@/hooks/util/use-toast';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { z } from 'zod';
 
 const createUserSchema = z.object({
-  name: z.string().min(1, "Name is required"),
-  email: z.string().email("Invalid email address"),
-  password: z.string().min(6, "Password must be at least 6 characters long"),
-  role: z.enum(['user', 'admin']).default('user'),
-  credits: z.coerce.number().int().min(0).default(10),
+    name: z.string().min(1, "Name is required"),
+    email: z.string().email("Invalid email address"),
+    password: z.string().min(6, "Password must be at least 6 characters long"),
+    role: z.enum(['user', 'admin']).default('user'),
+    credits: z.coerce.number().int().min(0).default(10),
 });
 
 type CreateUserFormValues = z.infer<typeof createUserSchema>;

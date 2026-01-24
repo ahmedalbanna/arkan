@@ -12,21 +12,17 @@ import { useBuilderStore, useToast } from '@/hooks';
 import { ExternalContextType } from '@/lib/models';
 import { cn } from "@/lib/utils/cn";
 import { AtomIcon, FileText, ImageIcon, Loader2, UploadCloud, X } from 'lucide-react';
-import { useState, useCallback } from 'react';
+import { useCallback, useState } from 'react';
 import { useDropzone } from 'react-dropzone';
+import { Badge } from "../../ui/badge";
 import { Button } from "../../ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../../ui/card";
+import { Input } from "../../ui/input";
 import { Label } from "../../ui/label";
 import { ScrollArea } from "../../ui/scroll-area";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../ui/tabs";
 import { Textarea } from "../../ui/textarea";
-import { Input } from "../../ui/input";
-import { Badge } from "../../ui/badge";
-import { PdfPreview } from './PdfPreview';
-import Image from 'next/image';
-import ReactMarkdown from 'react-markdown';
-import { markdownComponents } from '@/lib/utils/markdown-styles';
 import AnalystAgent from "./AnalystAgent";
 import { FileContentViewer } from './FileContentViewer';
 
@@ -128,7 +124,7 @@ export default function UploadManager() {
             <TabsList className="grid w-full grid-cols-2">
                 <TabsTrigger value="files">{t('builder.tabs.files')}</TabsTrigger>
                 <TabsTrigger value="analyst">
-                    <AtomIcon className="h-4 w-4 me-2"/>
+                    <AtomIcon className="h-4 w-4 me-2" />
                     Analyst
                 </TabsTrigger>
             </TabsList>

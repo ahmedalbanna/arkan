@@ -2,9 +2,9 @@
 'use client';
 
 import { useLocalization } from '@/context/LocalizationContext';
-import { useEffect, useMemo, useState } from 'react';
-import { useBuilderStore } from './useBuilderStore';
 import { Behavior } from '@/lib/models';
+import { useMemo } from 'react';
+import { useBuilderStore } from './useBuilderStore';
 
 export function useGuidelineEditor(itemKey: string) {
     const { t } = useLocalization();

@@ -1,12 +1,12 @@
 
 'use client';
 
-import { useForm, Controller } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
-import { useWritingTool, useToast } from '@/hooks';
-import { useState } from 'react';
 import { useLocalization } from '@/context/LocalizationContext';
+import { useToast, useWritingTool } from '@/hooks';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { z } from 'zod';
 
 const docWriterSchema = z.object({
   topic: z.string().min(5, 'Please provide a more detailed topic.'),

@@ -1,9 +1,9 @@
 
 'use client';
 
-import { useState } from 'react';
-import Image from 'next/image';
 import { Skeleton } from '@/components/ui/skeleton';
+import Image from 'next/image';
+import { useState } from 'react';
 
 interface DynamicImageProps {
   src: string;

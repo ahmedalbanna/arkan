@@ -1,10 +1,10 @@
 
 'use client';
 
-import { useQuery } from '@tanstack/react-query';
+import { useAuth } from '@/context/AuthContext';
 import { analyticsKeys } from '@/lib/query-keys';
 import { fetchUserStats } from '@/services/api/analyticsService';
-import { useAuth } from '@/context/AuthContext';
+import { useQuery } from '@tanstack/react-query';
 
 export function useUserStats() {
     const { firebaseUser } = useAuth();

@@ -1,16 +1,16 @@
 
 'use client';
 
-import { CornerDownLeft, Loader2, MessageSquare, X } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import ReactMarkdown from 'react-markdown';
-import { markdownComponents } from "@/lib/utils/markdown-styles";
-import { useProjectChat } from "@/hooks/report-mode/useProjectChat";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Textarea } from "@/components/ui/textarea";
+import { useProjectChat } from "@/hooks/report-mode/useProjectChat";
 import { cn } from "@/lib/utils/cn";
-import { useState, useRef, useEffect } from "react";
+import { markdownComponents } from "@/lib/utils/markdown-styles";
+import { CornerDownLeft, Loader2, MessageSquare, X } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import ReactMarkdown from 'react-markdown';
 
 interface ProjectChatProps {
     isOpen: boolean;
@@ -34,7 +34,7 @@ export function ProjectChat({ isOpen, onClose }: ProjectChatProps) {
             scrollAreaRef.current.scrollTop = scrollAreaRef.current.scrollHeight;
         }
     }, [messages, isLoading]);
-    
+
     if (!isOpen) return null;
 
     return (
@@ -57,13 +57,13 @@ export function ProjectChat({ isOpen, onClose }: ProjectChatProps) {
                                     <AvatarFallback>🤖</AvatarFallback>
                                 </Avatar>
                             )}
-                             <div className={cn(
-                                 "prose prose-sm dark:prose-invert max-w-[80%] p-3 rounded-lg",
-                                 message.role === 'model' ? 'bg-muted' : 'bg-primary text-primary-foreground'
-                             )}>
+                            <div className={cn(
+                                "prose prose-sm dark:prose-invert max-w-[80%] p-3 rounded-lg",
+                                message.role === 'model' ? 'bg-muted' : 'bg-primary text-primary-foreground'
+                            )}>
                                 <ReactMarkdown components={markdownComponents}>{message.content}</ReactMarkdown>
                             </div>
-                             {message.role === 'user' && (
+                            {message.role === 'user' && (
                                 <Avatar className="h-8 w-8">
                                     <AvatarFallback>You</AvatarFallback>
                                 </Avatar>
@@ -84,7 +84,7 @@ export function ProjectChat({ isOpen, onClose }: ProjectChatProps) {
             </ScrollArea>
             <div className="p-4 border-t">
                 <div className="relative">
-                    <Textarea 
+                    <Textarea
                         placeholder="Ask for advice or suggest a change..."
                         value={inputValue}
                         onChange={(e) => setInputValue(e.target.value)}
@@ -97,9 +97,9 @@ export function ProjectChat({ isOpen, onClose }: ProjectChatProps) {
                         className="pr-20 min-h-[50px] max-h-24"
                         disabled={isLoading}
                     />
-                    <Button 
-                        size="sm" 
-                        className="absolute bottom-2 right-2" 
+                    <Button
+                        size="sm"
+                        className="absolute bottom-2 right-2"
                         onClick={handleSend}
                         disabled={isLoading || !inputValue.trim()}
                     >

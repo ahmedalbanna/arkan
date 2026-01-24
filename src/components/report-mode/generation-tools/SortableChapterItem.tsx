@@ -7,6 +7,7 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { Button } from '@/components/ui/button';
+import { useBuilderStore } from "@/hooks";
 import { Chapter } from '@/lib/models';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
@@ -17,7 +18,6 @@ import {
 import React, { useMemo } from 'react';
 import { Checkbox } from "../../ui/checkbox";
 import { SectionAccordionItem } from './SectionAccordionItem';
-import { useBuilderStore } from "@/hooks";
 
 interface SortableChapterItemProps {
   chapter: Chapter;
@@ -36,12 +36,12 @@ export function SortableChapterItem({
   toggleChapterSelection,
   toggleSectionSelection,
 }: SortableChapterItemProps) {
-    const { 
-        updateProject
-    } = useBuilderStore(state => ({
-        updateProject: state.updateProject,
-    }));
-    
+  const {
+    updateProject
+  } = useBuilderStore(state => ({
+    updateProject: state.updateProject,
+  }));
+
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: chapter.id });
 
   const style: React.CSSProperties = {

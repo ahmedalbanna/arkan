@@ -1,23 +1,23 @@
 'use client';
 
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
 import { Form } from '@/components/ui/form';
 import { useBuilderStore } from '@/hooks';
-import { ScrollArea } from '../../ui/scroll-area';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../ui/card';
-import { useEffect, useState } from 'react';
 import { useImageUpload } from '@/hooks/core/useImageUpload';
 import type { ProjectProperties } from '@/lib/models';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useEffect, useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../ui/card';
+import { ScrollArea } from '../../ui/scroll-area';
+import { BehaviorsForm, LogoUploadSection, ProjectMetadataForm, WritingStyleForm } from './components';
 import { settingsSchema, type SettingsFormValues } from './types';
-import { ProjectMetadataForm, WritingStyleForm, BehaviorsForm, LogoUploadSection } from './components';
 
 /**
  * ProjectSettingsPanel Component
- * 
+ *
  * Main container for project settings. Manages form state and delegates
  * rendering to specialized sub-components for better maintainability.
- * 
+ *
  * Refactored from 463 lines to ~150 lines by extracting:
  * - TagInput → components/TagInput.tsx
  * - ProjectMetadataForm → components/ProjectMetadataForm.tsx
@@ -103,7 +103,7 @@ export default function ProjectSettingsPanel() {
       constraints: data.constraints,
       citationStyle: data.citationStyle,
     };
-    
+
     updateProject(p => p.with(updateData));
   };
 

@@ -49,7 +49,7 @@ const biasCheckFlow = ai.defineFlow({
 }, async (input) => {
   try {
     const result = await biasCheckPrompt(input);
-    
+
     if (!result) {
       throw new Error('No output received from the model.');
     }

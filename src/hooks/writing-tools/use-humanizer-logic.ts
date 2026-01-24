@@ -1,12 +1,12 @@
 
 'use client';
 
+import { useLocalization } from '@/context/LocalizationContext';
+import { useToast, useWritingTool } from '@/hooks';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { useWritingTool, useToast } from '@/hooks';
-import { useLocalization } from '@/context/LocalizationContext';
 
 const humanizerSchema = z.object({
   text: z.string().min(10, 'Please enter at least 10 characters to humanize.'),
@@ -40,9 +40,9 @@ export function useHumanizerLogic() {
   const handleCopy = () => {
     if (!processedText) return;
     navigator.clipboard.writeText(processedText).then(() => {
-        setIsCopied(true);
-        toast({ title: 'Copied to clipboard!' });
-        setTimeout(() => setIsCopied(false), 2000);
+      setIsCopied(true);
+      toast({ title: 'Copied to clipboard!' });
+      setTimeout(() => setIsCopied(false), 2000);
     });
   };
 

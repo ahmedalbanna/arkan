@@ -1,17 +1,16 @@
 
 'use client';
 
-import { useForm } from 'react-hook-form';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { useBuilderStore, useToast } from '@/hooks';
+import { useBuilderStore } from '@/hooks';
 import { useGenerateTocLogic } from '@/hooks/writing-tools/use-generate-toc-logic';
 import { Loader2, Sparkles } from 'lucide-react';
-import { ScrollArea } from '../../ui/scroll-area';
 import { useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader } from '../../ui/card';
+import { ScrollArea } from '../../ui/scroll-area';
 
 interface GenerateTocDialogProps {
     isOpen: boolean;
@@ -59,7 +58,7 @@ export function GenerateTocDialog({ isOpen, onOpenChange, onApply }: GenerateToc
                                 <p><strong>Description:</strong> {project?.projectDescription || "No description provided."}</p>
                             </CardContent>
                         </Card>
-                        
+
                         <div>
                             <Label htmlFor="additional-instructions">Additional Instructions (Optional)</Label>
                             <Textarea

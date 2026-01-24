@@ -13,6 +13,7 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { useReportGenerationTools } from '@/hooks/report-mode/use-report-generation-tools';
+import { Chapter, Section } from '@/lib/models';
 import {
   DndContext,
   closestCenter,
@@ -29,9 +30,8 @@ import {
 import { useMemo } from "react";
 import { Checkbox } from "../../ui/checkbox";
 import { Label } from "../../ui/label";
-import { BuildProjectDialog } from "../dialogs/BuildProjectDialog";
-import { Chapter, Section } from '@/lib/models';
 import { ScrollArea } from "../../ui/scroll-area";
+import { BuildProjectDialog } from "../dialogs/BuildProjectDialog";
 import { SectionAccordionItem } from "./SectionAccordionItem";
 import { SortableChapterItem } from "./SortableChapterItem";
 
@@ -86,7 +86,7 @@ export default function GenerationTools() {
               <PlusCircle className="me-2 h-4 w-4" /> Add Chapter
             </Button>
           </div>
-          
+
           <div className="relative flex-grow flex flex-col min-h-0">
             {isProjectBuildMode && (
               <div className="flex items-center gap-2 mb-2 p-2 border rounded-md bg-muted/30">
@@ -164,7 +164,7 @@ export default function GenerationTools() {
                 </Button>
               )}
 
-          </div>
+            </div>
 
           </div>
 

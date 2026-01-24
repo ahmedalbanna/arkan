@@ -1,12 +1,12 @@
 /**
  * Validation utilities and schemas for Project model
- * 
+ *
  * This module provides Zod schemas and validation helpers to ensure
  * Project data integrity and consistency.
  */
 
 import { z } from 'zod';
-import { BehaviorSchema, LanguageSchema, ToneSchema, CitationStyleSchema } from './control-types';
+import { BehaviorSchema, CitationStyleSchema, LanguageSchema, ToneSchema } from './control-types';
 
 /**
  * Metadata schema for project tracking
@@ -40,7 +40,7 @@ export const ProjectPropertiesSchema = z.object({
   meta: ProjectMetaSchema.optional(),
   tableOfContentsMarkdown: z.string().max(10000).optional(),
   activeSectionId: z.string().uuid().optional(),
-  
+
   // Global settings
   language: LanguageSchema.optional(),
   complexity: z.number().min(0).max(100).optional(),
@@ -68,7 +68,7 @@ export class ProjectValidationError extends Error {
 
 /**
  * Validates project properties against schema
- * 
+ *
  * @param props - Project properties to validate
  * @returns Validated properties
  * @throws {ProjectValidationError} If validation fails
@@ -91,20 +91,20 @@ export function validateProjectProperties(props: unknown): z.infer<typeof Projec
 
 /**
  * Checks for duplicate IDs in content
- * 
+ *
  * @param content - Array of chapters/sections with IDs
  * @returns Array of duplicate IDs found
  */
 export function findDuplicateIds(content: Array<{ id: string; sections?: Array<{ id: string }> }>): string[] {
   const ids = new Set<string>();
   const duplicates = new Set<string>();
-  
+
   content.forEach(item => {
     if (ids.has(item.id)) {
       duplicates.add(item.id);
     }
     ids.add(item.id);
-    
+
     // Check nested sections
     if (item.sections) {
       item.sections.forEach(section => {
@@ -115,19 +115,19 @@ export function findDuplicateIds(content: Array<{ id: string; sections?: Array<{
       });
     }
   });
-  
+
   return Array.from(duplicates);
 }
 
 /**
  * Validates that all IDs in project content are unique
- * 
+ *
  * @param content - Project content to check
  * @throws {ProjectValidationError} If duplicate IDs found
  */
 export function validateUniqueIds(content: Array<{ id: string; sections?: Array<{ id: string }> }>): void {
   const duplicates = findDuplicateIds(content);
-  
+
   if (duplicates.length > 0) {
     throw new ProjectValidationError(
       `Duplicate IDs found in project content: ${duplicates.join(', ')}`,
@@ -138,7 +138,7 @@ export function validateUniqueIds(content: Array<{ id: string; sections?: Array<
 
 /**
  * Validates external context references
- * 
+ *
  * @param sectionContext - Section context referencing external files
  * @param availableContextIds - IDs of available external context
  * @returns Array of invalid/missing context IDs
@@ -149,13 +149,13 @@ export function validateExternalContextReferences(
 ): string[] {
   const contextIds = Object.keys(sectionContext);
   const availableSet = new Set(availableContextIds);
-  
+
   return contextIds.filter(id => !availableSet.has(id));
 }
 
 /**
  * Validates section references in context
- * 
+ *
  * @param sectionContext - Section context referencing other sections
  * @param availableSectionIds - IDs of available sections
  * @returns Array of invalid/missing section IDs
@@ -166,7 +166,7 @@ export function validateSectionReferences(
 ): string[] {
   const contextIds = Object.keys(sectionContext);
   const availableSet = new Set(availableSectionIds);
-  
+
   return contextIds.filter(id => !availableSet.has(id));
 }
 

@@ -1,10 +1,10 @@
 'use client';
 
-import { useState } from 'react';
+import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Badge } from '@/components/ui/badge';
 import { X } from 'lucide-react';
+import { useState } from 'react';
 
 interface TagInputProps {
   label: string;
@@ -15,7 +15,7 @@ interface TagInputProps {
 
 /**
  * TagInput Component
- * 
+ *
  * Allows users to add and remove tags by typing and pressing Enter.
  */
 export function TagInput({ label, value, onChange, placeholder }: TagInputProps) {
@@ -40,8 +40,8 @@ export function TagInput({ label, value, onChange, placeholder }: TagInputProps)
         {value.map((item, index) => (
           <Badge key={index} variant="secondary" className="flex items-center gap-1">
             {item}
-            <button 
-              onClick={() => handleRemove(index)} 
+            <button
+              onClick={() => handleRemove(index)}
               className="rounded-full hover:bg-muted-foreground/20"
               type="button"
             >

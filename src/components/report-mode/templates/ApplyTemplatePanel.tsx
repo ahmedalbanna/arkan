@@ -1,22 +1,22 @@
 
 'use client';
 
-import { useMemo, useState } from 'react';
-import { useApplyReportTemplate, useReportTemplates } from '@/hooks/data/use-templates';
-import { AlertCircle, FileText, Loader2, Search, ArrowLeft } from 'lucide-react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
-import { useLocalization } from '@/context/LocalizationContext';
-import type { ReportTemplateProperties } from '@/lib/models';
 import { MarkdownViewer } from '@/components/shared/MarkdownViewer';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { useLocalization } from '@/context/LocalizationContext';
 import { useBuilderStore } from '@/hooks';
+import { useApplyReportTemplate, useReportTemplates } from '@/hooks/data/use-templates';
+import type { ReportTemplateProperties } from '@/lib/models';
+import { AlertCircle, ArrowLeft, FileText, Loader2, Search } from 'lucide-react';
+import { useMemo, useState } from 'react';
 
 function TemplateCard({ template, onSelect }: { template: ReportTemplateProperties; onSelect: () => void }) {
   return (
-    <Card 
+    <Card
       className="hover:shadow-md transition-shadow cursor-pointer"
       onClick={onSelect}
       onKeyDown={(e) => e.key === 'Enter' && onSelect()}
@@ -36,7 +36,7 @@ function TemplateCard({ template, onSelect }: { template: ReportTemplateProperti
 function TemplatePreview({ template, onApply, onBack, isLoading }: { template: ReportTemplateProperties; onApply: () => void; onBack: () => void; isLoading: boolean; }) {
   const tocMarkdown = useMemo(() => {
     if (!template.content) return '';
-    return template.content.map(chapter => 
+    return template.content.map(chapter =>
       `# ${chapter.title}\n${(chapter.sections || []).map(section => `  - ${section.title}`).join('\n')}`
     ).join('\n\n');
   }, [template]);
@@ -56,7 +56,7 @@ function TemplatePreview({ template, onApply, onBack, isLoading }: { template: R
         <MarkdownViewer content={tocMarkdown} />
       </ScrollArea>
       <Button onClick={onApply} disabled={isLoading} className="w-full">
-        {isLoading ? <Loader2 className="h-4 w-4 animate-spin"/> : 'Apply This Template'}
+        {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Apply This Template'}
       </Button>
     </div>
   );
@@ -81,23 +81,23 @@ export default function ApplyTemplatePanel() {
         template.description.toLowerCase().includes(searchQuery.toLowerCase())
     );
   }, [templates, searchQuery]);
-  
+
   if (previewTemplate) {
     return (
-      <TemplatePreview 
+      <TemplatePreview
         template={previewTemplate}
         onApply={() => {
-            const tocMarkdown = previewTemplate.content?.map(chapter => 
-                `# ${chapter.title}\n${(chapter.sections || []).map(section => `  - ${section.title}`).join('\n')}`
-            ).join('\n\n');
-            if (tocMarkdown) {
-                updateProject(p => {
-                    const newContent = p.parseAndSetContentFromToc(tocMarkdown);
-                    return p.with({ content: [...newContent] });
-                });
-            }
-            // @ts-expect-error - ReportTemplateProperties type mismatch between imports
-            handleSelectTemplate(previewTemplate)
+          const tocMarkdown = previewTemplate.content?.map(chapter =>
+            `# ${chapter.title}\n${(chapter.sections || []).map(section => `  - ${section.title}`).join('\n')}`
+          ).join('\n\n');
+          if (tocMarkdown) {
+            updateProject(p => {
+              const newContent = p.parseAndSetContentFromToc(tocMarkdown);
+              return p.with({ content: [...newContent] });
+            });
+          }
+          // @ts-expect-error - ReportTemplateProperties type mismatch between imports
+          handleSelectTemplate(previewTemplate)
         }}
         onBack={() => setPreviewTemplate(null)}
         isLoading={isApplyingTemplate}
@@ -107,48 +107,48 @@ export default function ApplyTemplatePanel() {
 
   return (
     <div className="flex flex-col">
-        <div className="relative mb-4 flex-shrink-0">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input
-            placeholder="Search templates..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-10"
-          />
-        </div>
-        <div className="flex-grow overflow-hidden">
-          <ScrollArea className="h-full">
-            <div className="pr-4 space-y-4">
-              {isLoading ? (
-                <div className="flex justify-center items-center h-64">
-                  <Loader2 className="h-8 w-8 animate-spin" />
-                </div>
-              ) : isError ? (
-                <div className="text-center py-10 px-4 border rounded-lg bg-card text-destructive">
-                  <AlertCircle className="mx-auto h-12 w-12" />
-                  <h3 className="mt-4 text-lg font-semibold">Failed to load templates</h3>
-                  <p className="mt-2 text-sm">{error?.message}</p>
-                </div>
-              ) : filteredTemplates.length > 0 ? (
-                filteredTemplates.map(template => (
-                    <TemplateCard 
-                        key={template.id} 
-                        template={template} 
-                        onSelect={() => setPreviewTemplate(template)}
-                    />
-                  ))
-              ) : (
-                <div className="text-center py-10 px-4 border-2 border-dashed rounded-lg bg-card">
-                  <FileText className="mx-auto h-12 w-12 text-muted-foreground" />
-                  <h3 className="mt-4 text-lg font-semibold">No Templates Found</h3>
-                  <p className="mt-2 text-sm text-muted-foreground">
-                    No report templates match your search.
-                  </p>
-                </div>
-              )}
-            </div>
-          </ScrollArea>
-        </div>
+      <div className="relative mb-4 flex-shrink-0">
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+        <Input
+          placeholder="Search templates..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className="pl-10"
+        />
+      </div>
+      <div className="flex-grow overflow-hidden">
+        <ScrollArea className="h-full">
+          <div className="pr-4 space-y-4">
+            {isLoading ? (
+              <div className="flex justify-center items-center h-64">
+                <Loader2 className="h-8 w-8 animate-spin" />
+              </div>
+            ) : isError ? (
+              <div className="text-center py-10 px-4 border rounded-lg bg-card text-destructive">
+                <AlertCircle className="mx-auto h-12 w-12" />
+                <h3 className="mt-4 text-lg font-semibold">Failed to load templates</h3>
+                <p className="mt-2 text-sm">{error?.message}</p>
+              </div>
+            ) : filteredTemplates.length > 0 ? (
+              filteredTemplates.map(template => (
+                <TemplateCard
+                  key={template.id}
+                  template={template}
+                  onSelect={() => setPreviewTemplate(template)}
+                />
+              ))
+            ) : (
+              <div className="text-center py-10 px-4 border-2 border-dashed rounded-lg bg-card">
+                <FileText className="mx-auto h-12 w-12 text-muted-foreground" />
+                <h3 className="mt-4 text-lg font-semibold">No Templates Found</h3>
+                <p className="mt-2 text-sm text-muted-foreground">
+                  No report templates match your search.
+                </p>
+              </div>
+            )}
+          </div>
+        </ScrollArea>
+      </div>
     </div>
   );
 }

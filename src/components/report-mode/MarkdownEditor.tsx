@@ -1,16 +1,16 @@
 
 'use client';
 
+import { Button } from '@/components/ui/button';
 import { useEditorStore } from '@/hooks/core/use-editor-store';
+import { ContextualToolbar } from '@/lib/editor/ToolBar';
+import { editorExtensions, handleHtmlPaste, handlePlainPaste } from '@/lib/tiptap-extensions';
+import { cn } from '@/lib/utils/cn';
 import { BubbleMenu, EditorContent, useEditor } from '@tiptap/react';
 import { marked } from 'marked';
-import React, { useState } from 'react';
+import React from 'react';
 import TurndownService from 'turndown';
 import { gfm } from 'turndown-plugin-gfm';
-import { editorExtensions, handleHtmlPaste, handlePlainPaste } from '@/lib/tiptap-extensions';
-import { Button } from '@/components/ui/button';
-import { ContextualToolbar } from '@/lib/editor/ToolBar';
-import { cn } from '@/lib/utils/cn';
 
 // Turndown Service Initialization
 const turndownService = new TurndownService({ headingStyle: 'atx' });
@@ -43,13 +43,13 @@ const MarkdownEditorComponent = ({ content, onChange, editorClassName }: Markdow
         const html = event.clipboardData?.getData('text/html');
 
         if (html) {
-            return await handleHtmlPaste(editor!, html);
+          return await handleHtmlPaste(editor!, html);
         }
 
         if (text) {
           return await handlePlainPaste(editor!, text);
         }
-        
+
         return false;
       },
     },

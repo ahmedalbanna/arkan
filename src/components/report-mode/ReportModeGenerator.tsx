@@ -1,19 +1,19 @@
 'use client';
 
-import { useLocalization } from '@/context/LocalizationContext';
-import { cn } from '@/lib/utils/cn';
-import React, { Suspense, lazy } from 'react';
-import { CollapsibleSidePanel } from '../ui/CollapsibleSidePanel';
 import { BuilderPageSkeleton } from '@/app/builder/loading';
 import { OnboardingGuide } from '@/components/onboarding/OnboardingGuide';
+import { useLocalization } from '@/context/LocalizationContext';
 import { useReportGenerator } from '@/hooks/report-mode/useReportGenerator';
+import { cn } from '@/lib/utils/cn';
+import { Suspense, lazy } from 'react';
+import { CollapsibleSidePanel } from '../ui/CollapsibleSidePanel';
 import { ProjectChat } from './chat/ProjectChat';
 import {
+  BottomNavBar,
+  FloatingActionButtons,
   FloatingControlPanel,
   FloatingLanguagePanel,
-  FloatingActionButtons,
   ProjectHeader,
-  BottomNavBar,
 } from './generator';
 
 const ReportResults = lazy(() => import('./ReportResults'));
@@ -37,10 +37,10 @@ function ReportSkeleton() {
 
 /**
  * ReportModeGenerator Component
- * 
+ *
  * Main report builder interface. Manages the layout, floating controls,
  * and coordinates between generator tools and document preview.
- * 
+ *
  * Refactored from 338 lines to ~120 lines by extracting:
  * - FloatingControlPanel → generator/FloatingControlPanel.tsx
  * - FloatingLanguagePanel → generator/FloatingLanguagePanel.tsx

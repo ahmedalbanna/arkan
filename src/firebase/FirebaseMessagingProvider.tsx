@@ -1,8 +1,8 @@
 'use client';
 
 import { useAuth } from '@/context/AuthContext';
-import { useToast } from '@/hooks';
 import { initializeFirebase } from '@/firebase';
+import { useToast } from '@/hooks';
 import { saveDeviceToken } from '@/services/api/deviceTokenService';
 import { getMessaging, getToken, Messaging, onMessage } from 'firebase/messaging';
 import { useEffect, useState } from 'react';

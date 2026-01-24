@@ -1,14 +1,13 @@
 'use client';
 
-import { useState, useEffect } from 'react';
 import { useAuth } from '@/context/AuthContext';
-import { getDatabase } from 'firebase/database';
 import { initializeFirebase } from '@/firebase'; // Assuming this correctly initializes firebaseApp
-import { ref, onValue, off } from 'firebase/database';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import type { Notification } from '@/lib/types';
 import { toast } from '@/hooks/util/use-toast';
 import { notificationKeys } from '@/lib/query-keys';
+import type { Notification } from '@/lib/types';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { getDatabase, off, onValue, ref } from 'firebase/database';
+import { useEffect, useState } from 'react';
 
 
 
@@ -93,7 +92,7 @@ async function clearAllNotificationsApi(notificationIds: string[], token: string
         body: JSON.stringify({ notificationIds }),
     });
 
-     if (!response.ok) {
+    if (!response.ok) {
         const error = await response.json();
         throw new Error(error.message || 'Failed to clear notifications');
     }
@@ -111,12 +110,12 @@ export function useMarkNotificationsAsRead() {
             return markNotificationsAsReadApi(notificationIds, token);
         },
         onSuccess: () => {
-             // Invalidate notifications to refetch.
-             // With RTDB, this isn't strictly necessary as the UI updates automatically,
-             // but it's good practice for consistency with React Query's model.
+            // Invalidate notifications to refetch.
+            // With RTDB, this isn't strictly necessary as the UI updates automatically,
+            // but it's good practice for consistency with React Query's model.
             queryClient.invalidateQueries({ queryKey: notificationKeys.lists() });
         },
-         onError: (error: Error) => {
+        onError: (error: Error) => {
             toast({
                 title: "Error",
                 description: error.message,
@@ -130,7 +129,7 @@ export function useClearAllNotifications() {
     const queryClient = useQueryClient();
     const { firebaseUser } = useAuth();
 
-     return useMutation({
+    return useMutation({
         mutationFn: async (notificationIds: string[]) => {
             if (!firebaseUser) throw new Error("User not authenticated");
             const token = await firebaseUser.getIdToken();
@@ -138,9 +137,9 @@ export function useClearAllNotifications() {
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: notificationKeys.lists() });
-            toast({ title: 'Success', description: 'All notifications cleared.'});
+            toast({ title: 'Success', description: 'All notifications cleared.' });
         },
-         onError: (error: Error) => {
+        onError: (error: Error) => {
             toast({
                 title: "Error Clearing Notifications",
                 description: error.message,

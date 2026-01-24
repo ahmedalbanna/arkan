@@ -1,10 +1,10 @@
 'use client';
 
+import { Button } from '@/components/ui/button';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { GripVertical, X } from 'lucide-react';
 import Image from 'next/image';
-import { Button } from '@/components/ui/button';
 
 export interface SortableFileType {
     id: string;

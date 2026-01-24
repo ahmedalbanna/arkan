@@ -3,18 +3,17 @@
 
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { useContextSelector } from '@/hooks';
-import type { ExternalContextType } from '@/lib/models';
-import { FileText, Folder, Copy } from 'lucide-react';
-import { useMemo, useState } from 'react';
-import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { useBuilderStore } from '@/hooks';
+import { useBuilderStore, useContextSelector } from '@/hooks';
 import { useToast } from '@/hooks/util/use-toast';
+import type { ExternalContextType } from '@/lib/models';
+import { Copy, FileText, Folder } from 'lucide-react';
+import { useMemo, useState } from 'react';
 
 interface SectionContextSelectorProps {
   sectionId: string;
@@ -28,30 +27,30 @@ export function SectionContextSelector({ sectionId }: SectionContextSelectorProp
     handleContextChange,
     currentSelection,
   } = useContextSelector(sectionId);
-  
+
   const { project, updateProject } = useBuilderStore();
   const { toast } = useToast();
   const [selectedSourceSection, setSelectedSourceSection] = useState<string>('');
 
   const fileTypes: ExternalContextType[] = ['context', 'example', 'question', 'textbook'];
-  
+
   // Get all sections except current one for copying context from
   const otherSections = useMemo(() => {
     return reportSections.filter(s => {
       const section = s as any; // Type assertion for context property
       return s.id !== sectionId && (
-        Object.keys(section.context?.sections || {}).length > 0 || 
+        Object.keys(section.context?.sections || {}).length > 0 ||
         Object.keys(section.context?.externalContext || {}).length > 0
       );
     });
   }, [reportSections, sectionId]);
-  
+
   const handleCopyContext = () => {
     if (!selectedSourceSection || !project) return;
-    
+
     const sourceSection = project.getSection(selectedSourceSection);
     if (!sourceSection) return;
-    
+
     // Copy the context from source section to current section
     updateProject(p => p.updateSection(sectionId, s => s.with({
       context: {
@@ -59,15 +58,15 @@ export function SectionContextSelector({ sectionId }: SectionContextSelectorProp
         externalContext: { ...sourceSection.context?.externalContext }
       }
     })));
-    
-    const linkedCount = Object.keys(sourceSection.context?.sections || {}).length + 
-                       Object.keys(sourceSection.context?.externalContext || {}).length;
-    
+
+    const linkedCount = Object.keys(sourceSection.context?.sections || {}).length +
+      Object.keys(sourceSection.context?.externalContext || {}).length;
+
     toast({
       title: 'Context Copied',
       description: `Copied ${linkedCount} context link${linkedCount > 1 ? 's' : ''} from "${sourceSection.title}"`,
     });
-    
+
     setSelectedSourceSection('');
   };
 
@@ -101,8 +100,8 @@ export function SectionContextSelector({ sectionId }: SectionContextSelectorProp
                 <SelectContent>
                   {otherSections.map(section => {
                     const sec = section as any; // Type assertion for context property
-                    const contextCount = Object.keys(sec.context?.sections || {}).length + 
-                                       Object.keys(sec.context?.externalContext || {}).length;
+                    const contextCount = Object.keys(sec.context?.sections || {}).length +
+                      Object.keys(sec.context?.externalContext || {}).length;
                     return (
                       <SelectItem key={section.id} value={section.id} className="text-xs">
                         {section.title} ({contextCount} link{contextCount > 1 ? 's' : ''})

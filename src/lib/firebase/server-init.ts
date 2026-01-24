@@ -1,5 +1,5 @@
-import admin from 'firebase-admin';
 import { firebaseAdminConfig } from '@/lib/config';
+import admin from 'firebase-admin';
 
 // This file should be imported only on the server-side.
 // It initializes the Firebase Admin SDK.
@@ -29,13 +29,13 @@ if (!admin.apps.length) {
       try {
         const serviceAccount = require('../../../docudec-firebase-adminsdk-2maa7-d07a19d3fc.json');
         admin.initializeApp({
-            credential: admin.credential.cert(serviceAccount),
-            databaseURL: process.env.NEXT_PUBLIC_FIREBASE_DATABASE_URL,
-            storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
+          credential: admin.credential.cert(serviceAccount),
+          databaseURL: process.env.NEXT_PUBLIC_FIREBASE_DATABASE_URL,
+          storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
         });
         console.log("Firebase Admin SDK initialized using local service account file.");
       } catch (fileError) {
-          console.error("Could not initialize Firebase Admin SDK. Environment variables are missing and the local service account file was not found.");
+        console.error("Could not initialize Firebase Admin SDK. Environment variables are missing and the local service account file was not found.");
       }
     }
   } catch (error: any) {

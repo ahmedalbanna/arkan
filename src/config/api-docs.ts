@@ -1,26 +1,19 @@
 'use client';
 
 import {
-  Shield,
-  Key,
-  Users,
-  FolderKanban,
-  Wand2,
-  type LucideIcon,
-  Database,
-  FileUp,
-  FileDown,
-  Bell,
-  Palette,
   Bot,
-  PencilRuler,
-  Activity,
-  UserCog,
   CreditCard,
-  Settings,
-  Image,
-  SlidersHorizontal,
+  Database,
+  FolderKanban,
   History,
+  Key,
+  Palette,
+  PencilRuler,
+  Settings,
+  UserCog,
+  Users,
+  Wand2,
+  type LucideIcon
 } from 'lucide-react';
 
 export interface ApiEndpoint {
@@ -72,7 +65,7 @@ export const apiDocsConfig: ApiSection[] = [
           status: 'success',
         },
       },
-       {
+      {
         method: 'POST',
         path: '/api/auth/guest',
         description: 'Create a temporary guest session.',
@@ -90,7 +83,7 @@ export const apiDocsConfig: ApiSection[] = [
           message: 'Logout successful',
         },
       },
-       {
+      {
         method: 'POST',
         path: '/forgot-password',
         description: 'Send a password reset link to the user\'s email.',
@@ -104,7 +97,7 @@ export const apiDocsConfig: ApiSection[] = [
       },
     ],
   },
-   {
+  {
     id: 'user',
     title: 'User & Profile API',
     icon: UserCog,
@@ -155,10 +148,10 @@ export const apiDocsConfig: ApiSection[] = [
         description: 'Get dashboard statistics for the currently authenticated user.',
         auth: 'user',
         responseBody: {
-            totalGenerations: 50,
-            creditsUsed: 120,
-            agentUsageChartData: [{ name: 'summarizer', count: 20 }],
-            recentActivity: [{ id: 'log1', agentId: 'summarizer', createdAt: '...'}]
+          totalGenerations: 50,
+          creditsUsed: 120,
+          agentUsageChartData: [{ name: 'summarizer', count: 20 }],
+          recentActivity: [{ id: 'log1', agentId: 'summarizer', createdAt: '...' }]
         }
       },
       {
@@ -203,15 +196,15 @@ export const apiDocsConfig: ApiSection[] = [
           name: 'Updated Project Name',
         },
       },
-       {
+      {
         method: 'GET',
         path: '/api/projects/[id]',
         description: 'Get a specific project by its ID.',
         auth: 'user',
         responseBody: {
-            id: 'proj1',
-            name: 'My First Project',
-            content: '...'
+          id: 'proj1',
+          name: 'My First Project',
+          content: '...'
         }
       },
       {
@@ -235,7 +228,7 @@ export const apiDocsConfig: ApiSection[] = [
         description: 'Delete a specific project.',
         auth: 'user',
         responseBody: {
-            message: 'Project deleted successfully.'
+          message: 'Project deleted successfully.'
         }
       }
     ],
@@ -260,87 +253,87 @@ export const apiDocsConfig: ApiSection[] = [
       },
     ],
   },
-   {
+  {
     id: 'rag',
     title: 'RAG & Document Indexing API',
     icon: Database,
     endpoints: [
-        {
-            method: 'GET',
-            path: '/api/rag/health',
-            description: 'Check the health status of the RAG system components (Vector Store, Ollama).',
-            auth: 'public',
-            responseBody: {
-                status: 'healthy',
-                checks: {}
-            }
-        },
-        {
-            method: 'POST',
-            path: '/api/admin/rag/index',
-            description: 'Upload and index a document (PDF, DOCX, TXT, MD) into the RAG system.',
-            auth: 'admin',
-            requestBody: {
-                file: '(binary file data)',
-                projectId: 'my-knowledge-base',
-            },
-            responseBody: {
-                success: true,
-                chunksCreated: 15,
-                fileName: 'document.pdf',
-            }
-        },
-        {
-            method: 'GET',
-            path: '/api/admin/rag/documents',
-            description: 'Get a list of all documents indexed in the RAG system.',
-            auth: 'admin',
-            responseBody: {
-                documents: [{ id: 'doc1', sourceFile: 'mydoc.pdf', chunksCount: 15 }]
-            }
-        },
-        {
-            method: 'DELETE',
-            path: '/api/admin/rag/documents',
-            description: 'Delete all indexed chunks associated with a specific project ID.',
-            auth: 'admin',
-            parameters: { projectId: 'project-to-delete' },
-            responseBody: {
-                success: true,
-                message: 'Deleted all chunks for project: project-to-delete'
-            }
-        },
-        {
-            method: 'POST',
-            path: '/api/rag/retrieve-context',
-            description: 'Retrieve relevant context from the vector store for a given query.',
-            auth: 'user',
-            requestBody: {
-                query: 'What is machine learning?',
-                projectId: 'optional-project-filter',
-                topK: 5
-            },
-            responseBody: {
-                context: 'Combined context string...',
-                sources: [{ content: '...', score: 0.89 }]
-            }
-        },
-        {
-            method: 'POST',
-            path: '/api/admin/rag/test-query',
-            description: 'An advanced endpoint for admins to test RAG queries with detailed options like caching and re-ranking.',
-            auth: 'admin',
-            requestBody: {
-                query: 'What is RAG?',
-                rerank: true,
-                rerankStrategy: 'hybrid'
-            },
-            responseBody: {
-                context: '...',
-                sources: [{ content: '...', score: 0.95 }],
-                cacheHit: false
-            }
+      {
+        method: 'GET',
+        path: '/api/rag/health',
+        description: 'Check the health status of the RAG system components (Vector Store, Ollama).',
+        auth: 'public',
+        responseBody: {
+          status: 'healthy',
+          checks: {}
         }
+      },
+      {
+        method: 'POST',
+        path: '/api/admin/rag/index',
+        description: 'Upload and index a document (PDF, DOCX, TXT, MD) into the RAG system.',
+        auth: 'admin',
+        requestBody: {
+          file: '(binary file data)',
+          projectId: 'my-knowledge-base',
+        },
+        responseBody: {
+          success: true,
+          chunksCreated: 15,
+          fileName: 'document.pdf',
+        }
+      },
+      {
+        method: 'GET',
+        path: '/api/admin/rag/documents',
+        description: 'Get a list of all documents indexed in the RAG system.',
+        auth: 'admin',
+        responseBody: {
+          documents: [{ id: 'doc1', sourceFile: 'mydoc.pdf', chunksCount: 15 }]
+        }
+      },
+      {
+        method: 'DELETE',
+        path: '/api/admin/rag/documents',
+        description: 'Delete all indexed chunks associated with a specific project ID.',
+        auth: 'admin',
+        parameters: { projectId: 'project-to-delete' },
+        responseBody: {
+          success: true,
+          message: 'Deleted all chunks for project: project-to-delete'
+        }
+      },
+      {
+        method: 'POST',
+        path: '/api/rag/retrieve-context',
+        description: 'Retrieve relevant context from the vector store for a given query.',
+        auth: 'user',
+        requestBody: {
+          query: 'What is machine learning?',
+          projectId: 'optional-project-filter',
+          topK: 5
+        },
+        responseBody: {
+          context: 'Combined context string...',
+          sources: [{ content: '...', score: 0.89 }]
+        }
+      },
+      {
+        method: 'POST',
+        path: '/api/admin/rag/test-query',
+        description: 'An advanced endpoint for admins to test RAG queries with detailed options like caching and re-ranking.',
+        auth: 'admin',
+        requestBody: {
+          query: 'What is RAG?',
+          rerank: true,
+          rerankStrategy: 'hybrid'
+        },
+        responseBody: {
+          context: '...',
+          sources: [{ content: '...', score: 0.95 }],
+          cacheHit: false
+        }
+      }
     ]
   },
   {
@@ -348,33 +341,33 @@ export const apiDocsConfig: ApiSection[] = [
     title: 'Templates API',
     icon: Palette,
     endpoints: [
-        {
-            method: 'GET',
-            path: '/api/templates/docx',
-            description: 'Get all available DOCX style templates.',
-            auth: 'public',
-            responseBody: {
-                modern: { name: 'Modern' },
-                classic: { name: 'Classic' }
-            }
-        },
-        {
-            method: 'GET',
-            path: '/api/templates/pptx',
-            description: 'Get all available PPTX style templates.',
-            auth: 'public',
-            responseBody: {
-                modern: { name: 'Modern' },
-                dark: { name: 'Dark' }
-            }
-        },
-        {
-            method: 'GET',
-            path: '/api/templates/report',
-            description: 'Get all available Report structure templates.',
-            auth: 'public',
-            responseBody: [{ id: 'technical-report', name: 'Technical Report' }]
+      {
+        method: 'GET',
+        path: '/api/templates/docx',
+        description: 'Get all available DOCX style templates.',
+        auth: 'public',
+        responseBody: {
+          modern: { name: 'Modern' },
+          classic: { name: 'Classic' }
         }
+      },
+      {
+        method: 'GET',
+        path: '/api/templates/pptx',
+        description: 'Get all available PPTX style templates.',
+        auth: 'public',
+        responseBody: {
+          modern: { name: 'Modern' },
+          dark: { name: 'Dark' }
+        }
+      },
+      {
+        method: 'GET',
+        path: '/api/templates/report',
+        description: 'Get all available Report structure templates.',
+        auth: 'public',
+        responseBody: [{ id: 'technical-report', name: 'Technical Report' }]
+      }
     ]
   },
   {
@@ -382,7 +375,7 @@ export const apiDocsConfig: ApiSection[] = [
     title: 'Admin API: User Management',
     icon: Users,
     endpoints: [
-       {
+      {
         method: 'GET',
         path: '/api/admin/users',
         description: 'Admin: Get a paginated list of all users.',
@@ -427,38 +420,38 @@ export const apiDocsConfig: ApiSection[] = [
     title: 'Admin API: Payment Management',
     icon: CreditCard,
     endpoints: [
-        {
-            method: 'GET',
-            path: '/api/admin/transactions',
-            description: 'Admin: Get a list of transactions filtered by status.',
-            auth: 'admin',
-            parameters: { status: 'pending', limit: 10 },
-            responseBody: { transactions: [{}] }
-        },
-        {
-            method: 'POST',
-            path: '/api/admin/payments/verify',
-            description: 'Admin: Verify or reject a pending payment request.',
-            auth: 'admin',
-            requestBody: { transactionId: '...', userId: '...', creditsToGrant: 100, status: 'verified' },
-            responseBody: { message: 'Transaction verified successfully.' }
-        },
-        {
-            method: 'POST',
-            path: '/api/admin/gift-credits',
-            description: 'Admin: Gift AI credits to a specific user.',
-            auth: 'admin',
-            requestBody: { userId: 'user123', credits: 50, message: 'Bonus for feedback!' },
-            responseBody: { message: 'Successfully gifted 50 credits...' }
-        },
-        {
-            method: 'GET',
-            path: '/api/admin/transactions/report',
-            description: 'Admin: Get a transaction report for a specific date range.',
-            auth: 'admin',
-            parameters: { startDate: 'ISO_DATE', endDate: 'ISO_DATE' },
-            responseBody: [{ id: '...', amount: 10, status: 'verified' }]
-        },
+      {
+        method: 'GET',
+        path: '/api/admin/transactions',
+        description: 'Admin: Get a list of transactions filtered by status.',
+        auth: 'admin',
+        parameters: { status: 'pending', limit: 10 },
+        responseBody: { transactions: [{}] }
+      },
+      {
+        method: 'POST',
+        path: '/api/admin/payments/verify',
+        description: 'Admin: Verify or reject a pending payment request.',
+        auth: 'admin',
+        requestBody: { transactionId: '...', userId: '...', creditsToGrant: 100, status: 'verified' },
+        responseBody: { message: 'Transaction verified successfully.' }
+      },
+      {
+        method: 'POST',
+        path: '/api/admin/gift-credits',
+        description: 'Admin: Gift AI credits to a specific user.',
+        auth: 'admin',
+        requestBody: { userId: 'user123', credits: 50, message: 'Bonus for feedback!' },
+        responseBody: { message: 'Successfully gifted 50 credits...' }
+      },
+      {
+        method: 'GET',
+        path: '/api/admin/transactions/report',
+        description: 'Admin: Get a transaction report for a specific date range.',
+        auth: 'admin',
+        parameters: { startDate: 'ISO_DATE', endDate: 'ISO_DATE' },
+        responseBody: [{ id: '...', amount: 10, status: 'verified' }]
+      },
     ]
   },
   {
@@ -466,22 +459,22 @@ export const apiDocsConfig: ApiSection[] = [
     title: 'Admin API: Agent Management',
     icon: Bot,
     endpoints: [
-        {
-            method: 'POST',
-            path: '/api/admin/agents',
-            description: 'Admin: Create a new AI agent.',
-            auth: 'admin',
-            requestBody: { id: 'my-agent', name: 'My Agent' },
-            responseBody: { id: 'my-agent' }
-        },
-        {
-            method: 'PUT',
-            path: '/api/admin/agents/[id]',
-            description: 'Admin: Update an existing AI agent.',
-            auth: 'admin',
-            requestBody: { name: 'Updated Agent Name' },
-            responseBody: { id: 'my-agent', name: 'Updated Agent Name' }
-        },
+      {
+        method: 'POST',
+        path: '/api/admin/agents',
+        description: 'Admin: Create a new AI agent.',
+        auth: 'admin',
+        requestBody: { id: 'my-agent', name: 'My Agent' },
+        responseBody: { id: 'my-agent' }
+      },
+      {
+        method: 'PUT',
+        path: '/api/admin/agents/[id]',
+        description: 'Admin: Update an existing AI agent.',
+        auth: 'admin',
+        requestBody: { name: 'Updated Agent Name' },
+        responseBody: { id: 'my-agent', name: 'Updated Agent Name' }
+      },
     ]
   },
   {
@@ -489,16 +482,16 @@ export const apiDocsConfig: ApiSection[] = [
     title: 'Admin API: Template Management',
     icon: PencilRuler,
     endpoints: [
-        { method: 'POST', path: '/api/admin/templates/docx', description: 'Admin: Create a new DOCX style template.', auth: 'admin' },
-        { method: 'PUT', path: '/api/admin/templates/docx/[key]', description: 'Admin: Update a DOCX style template.', auth: 'admin' },
-        { method: 'DELETE', path: '/api/admin/templates/docx/[key]', description: 'Admin: Delete a DOCX style template.', auth: 'admin' },
-        { method: 'POST', path: '/api/admin/templates/pptx', description: 'Admin: Create a new PPTX style template.', auth: 'admin' },
-        { method: 'PUT', path: '/api/admin/templates/pptx/[key]', description: 'Admin: Update a PPTX style template.', auth: 'admin' },
-        { method: 'DELETE', path: '/api/admin/templates/pptx/[key]', description: 'Admin: Delete a PPTX style template.', auth: 'admin' },
-        { method: 'GET', path: '/api/admin/templates/report/[id]', description: 'Admin: Get a single report template.', auth: 'admin' },
-        { method: 'POST', path: '/api/admin/templates/report', description: 'Admin: Create a new report template.', auth: 'admin' },
-        { method: 'PUT', path: '/api/admin/templates/report/[id]', description: 'Admin: Update a report template.', auth: 'admin' },
-        { method: 'DELETE', path: '/api/admin/templates/report/[id]', description: 'Admin: Delete a report template.', auth: 'admin' },
+      { method: 'POST', path: '/api/admin/templates/docx', description: 'Admin: Create a new DOCX style template.', auth: 'admin' },
+      { method: 'PUT', path: '/api/admin/templates/docx/[key]', description: 'Admin: Update a DOCX style template.', auth: 'admin' },
+      { method: 'DELETE', path: '/api/admin/templates/docx/[key]', description: 'Admin: Delete a DOCX style template.', auth: 'admin' },
+      { method: 'POST', path: '/api/admin/templates/pptx', description: 'Admin: Create a new PPTX style template.', auth: 'admin' },
+      { method: 'PUT', path: '/api/admin/templates/pptx/[key]', description: 'Admin: Update a PPTX style template.', auth: 'admin' },
+      { method: 'DELETE', path: '/api/admin/templates/pptx/[key]', description: 'Admin: Delete a PPTX style template.', auth: 'admin' },
+      { method: 'GET', path: '/api/admin/templates/report/[id]', description: 'Admin: Get a single report template.', auth: 'admin' },
+      { method: 'POST', path: '/api/admin/templates/report', description: 'Admin: Create a new report template.', auth: 'admin' },
+      { method: 'PUT', path: '/api/admin/templates/report/[id]', description: 'Admin: Update a report template.', auth: 'admin' },
+      { method: 'DELETE', path: '/api/admin/templates/report/[id]', description: 'Admin: Delete a report template.', auth: 'admin' },
     ]
   },
   {
@@ -506,45 +499,45 @@ export const apiDocsConfig: ApiSection[] = [
     title: 'Admin API: System & Logs',
     icon: History,
     endpoints: [
-        {
-            method: 'GET',
-            path: '/api/admin/dashboard-stats',
-            description: 'Admin: Get aggregated statistics for the admin dashboard.',
-            auth: 'admin',
-            responseBody: { totalUsers: 100, totalGenerations: 5000 }
-        },
-        {
-            method: 'PUT',
-            path: '/api/admin/features/[id]',
-            description: 'Admin: Enable or disable a specific feature flag.',
-            auth: 'admin',
-            requestBody: { isEnabled: true },
-            responseBody: { id: 'feature-id', isEnabled: true }
-        },
-        {
-            method: 'GET',
-            path: '/api/admin/logs',
-            description: 'Admin: Get a paginated list of AI generation logs.',
-            auth: 'admin',
-            parameters: { limit: 20, agentId: 'summarizer' },
-            responseBody: { logs: [{}], hasNextPage: true }
-        },
-        {
-            method: 'POST',
-            path: '/api/admin/notifications/send',
-            description: 'Admin: Send a manual notification to a user.',
-            auth: 'admin',
-            requestBody: { userId: 'user123', title: 'Update', body: '...' },
-            responseBody: { messageId: '...' }
-        },
-        {
-            method: 'PUT',
-            path: '/api/admin/settings',
-            description: 'Admin: Update global application settings.',
-            auth: 'admin',
-            requestBody: { newUserCredits: 20 },
-            responseBody: { newUserCredits: 20 }
-        },
+      {
+        method: 'GET',
+        path: '/api/admin/dashboard-stats',
+        description: 'Admin: Get aggregated statistics for the admin dashboard.',
+        auth: 'admin',
+        responseBody: { totalUsers: 100, totalGenerations: 5000 }
+      },
+      {
+        method: 'PUT',
+        path: '/api/admin/features/[id]',
+        description: 'Admin: Enable or disable a specific feature flag.',
+        auth: 'admin',
+        requestBody: { isEnabled: true },
+        responseBody: { id: 'feature-id', isEnabled: true }
+      },
+      {
+        method: 'GET',
+        path: '/api/admin/logs',
+        description: 'Admin: Get a paginated list of AI generation logs.',
+        auth: 'admin',
+        parameters: { limit: 20, agentId: 'summarizer' },
+        responseBody: { logs: [{}], hasNextPage: true }
+      },
+      {
+        method: 'POST',
+        path: '/api/admin/notifications/send',
+        description: 'Admin: Send a manual notification to a user.',
+        auth: 'admin',
+        requestBody: { userId: 'user123', title: 'Update', body: '...' },
+        responseBody: { messageId: '...' }
+      },
+      {
+        method: 'PUT',
+        path: '/api/admin/settings',
+        description: 'Admin: Update global application settings.',
+        auth: 'admin',
+        requestBody: { newUserCredits: 20 },
+        responseBody: { newUserCredits: 20 }
+      },
     ]
   },
   {
@@ -552,38 +545,38 @@ export const apiDocsConfig: ApiSection[] = [
     title: 'Utilities API',
     icon: Settings,
     endpoints: [
-        {
-            method: 'POST',
-            path: '/api/export/docx',
-            description: 'Export project content or raw markdown to a DOCX file.',
-            auth: 'user',
-            requestBody: { project: {}, selectedContent: [] },
-            responseBody: '(binary file data)'
-        },
-        {
-            method: 'POST',
-            path: '/api/export/pptx',
-            description: 'Export project content or raw markdown to a PPTX file.',
-            auth: 'user',
-            requestBody: { markdown: '# Slide 1', fileName: 'presentation' },
-            responseBody: '(binary file data)'
-        },
-        {
-            method: 'POST',
-            path: '/api/process-file',
-            description: 'Process an uploaded file (PDF, DOCX, TXT) and extract its text content as markdown.',
-            auth: 'user',
-            requestBody: { file: '(binary file data)' },
-            responseBody: { markdown: 'Extracted markdown content...' }
-        },
-        {
-            method: 'POST',
-            path: '/api/image-to-svg',
-            description: 'Convert a raster image (PNG, JPG) to a vector SVG.',
-            auth: 'user',
-            requestBody: { file: '(binary file data)', mode: 'line' },
-            responseBody: '<svg>...</svg>'
-        },
+      {
+        method: 'POST',
+        path: '/api/export/docx',
+        description: 'Export project content or raw markdown to a DOCX file.',
+        auth: 'user',
+        requestBody: { project: {}, selectedContent: [] },
+        responseBody: '(binary file data)'
+      },
+      {
+        method: 'POST',
+        path: '/api/export/pptx',
+        description: 'Export project content or raw markdown to a PPTX file.',
+        auth: 'user',
+        requestBody: { markdown: '# Slide 1', fileName: 'presentation' },
+        responseBody: '(binary file data)'
+      },
+      {
+        method: 'POST',
+        path: '/api/process-file',
+        description: 'Process an uploaded file (PDF, DOCX, TXT) and extract its text content as markdown.',
+        auth: 'user',
+        requestBody: { file: '(binary file data)' },
+        responseBody: { markdown: 'Extracted markdown content...' }
+      },
+      {
+        method: 'POST',
+        path: '/api/image-to-svg',
+        description: 'Convert a raster image (PNG, JPG) to a vector SVG.',
+        auth: 'user',
+        requestBody: { file: '(binary file data)', mode: 'line' },
+        responseBody: '<svg>...</svg>'
+      },
     ]
   }
 ];

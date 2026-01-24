@@ -1,10 +1,10 @@
 'use client';
 
+import { Badge } from '@/components/ui/badge';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Section } from '@/lib/models/section';
 import { SectionStatus } from '@/types';
-import { Badge } from '@/components/ui/badge';
-import { Clock, FileText, Zap, Calendar, AlertCircle, CheckCircle2, Loader2, Edit3 } from 'lucide-react';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { AlertCircle, Calendar, CheckCircle2, Clock, Edit3, FileText, Loader2, Zap } from 'lucide-react';
 
 interface SectionMetadataDisplayProps {
   section: Section;

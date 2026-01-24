@@ -2,9 +2,9 @@
  * @jest-environment jsdom
  */
 
-import { renderHook, act } from '@testing-library/react';
-import { useBuilderStore } from '../useBuilderStore';
 import { Project } from '@/lib/models';
+import { act, renderHook } from '@testing-library/react';
+import { useBuilderStore } from '../useBuilderStore';
 
 // Mock dependencies
 jest.mock('@/services/local-project-service', () => ({
@@ -26,7 +26,7 @@ describe('useBuilderStore', () => {
   beforeEach(() => {
     // Clear localStorage before each test
     localStorage.clear();
-    
+
     // Reset the store state
     const { result } = renderHook(() => useBuilderStore());
     act(() => {
@@ -37,7 +37,7 @@ describe('useBuilderStore', () => {
   describe('initializeStore', () => {
     it('should initialize with a new project if no stored project', () => {
       const { result } = renderHook(() => useBuilderStore());
-      
+
       act(() => {
         result.current.initializeStore();
       });
@@ -48,7 +48,7 @@ describe('useBuilderStore', () => {
 
     it('should not reinitialize if already initialized', () => {
       const { result } = renderHook(() => useBuilderStore());
-      
+
       act(() => {
         result.current.initializeStore();
       });
@@ -66,7 +66,7 @@ describe('useBuilderStore', () => {
   describe('updateProject', () => {
     it('should update project immutably', () => {
       const { result } = renderHook(() => useBuilderStore());
-      
+
       act(() => {
         result.current.initializeStore();
       });
@@ -84,7 +84,7 @@ describe('useBuilderStore', () => {
 
     it('should increment version on update', () => {
       const { result } = renderHook(() => useBuilderStore());
-      
+
       act(() => {
         result.current.initializeStore();
       });
@@ -100,7 +100,7 @@ describe('useBuilderStore', () => {
 
     it('should handle updater functions that return void', () => {
       const { result } = renderHook(() => useBuilderStore());
-      
+
       act(() => {
         result.current.initializeStore();
       });
@@ -118,7 +118,7 @@ describe('useBuilderStore', () => {
   describe('loadProject', () => {
     it('should load a new project', () => {
       const { result } = renderHook(() => useBuilderStore());
-      
+
       const projectData = {
         id: 'test-project-id',
         name: 'Test Project',
@@ -137,7 +137,7 @@ describe('useBuilderStore', () => {
 
     it('should reset selectedFileId when loading project', () => {
       const { result } = renderHook(() => useBuilderStore());
-      
+
       act(() => {
         result.current.selectFile('some-file-id');
       });
@@ -209,7 +209,7 @@ describe('useBuilderStore', () => {
   describe('newSession', () => {
     it('should create a new empty project', () => {
       const { result } = renderHook(() => useBuilderStore());
-      
+
       act(() => {
         result.current.loadProject({ id: 'old-project', name: 'Old Project' });
       });
@@ -231,7 +231,7 @@ describe('useBuilderStore', () => {
 
     it('should not create new session if user cancels', () => {
       const { result } = renderHook(() => useBuilderStore());
-      
+
       act(() => {
         result.current.loadProject({ id: 'old-project' });
         result.current.setHasUnsavedChanges(true);

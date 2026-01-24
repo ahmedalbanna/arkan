@@ -1,12 +1,12 @@
 
 'use client';
 
-import { useState, useEffect } from 'react';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
 import { useToast } from '@/hooks/util/use-toast';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useEffect, useState } from 'react';
+import { useForm } from 'react-hook-form';
 import { v4 as uuidv4 } from 'uuid';
+import { z } from 'zod';
 
 const imageGeneratorSchema = z.object({
   prompt: z.string().min(1, 'Prompt is required.'),
@@ -76,7 +76,7 @@ export function useAIImageGeneratorLogic() {
     setImageUrl('');
     try {
       const url = `${API_BASE_URL}${encodeURIComponent(data.prompt)}?width=${data.width}&height=${data.height}&nologo=poll&nofeed=yes&seed=${data.seed}`;
-      
+
       // We don't need to fetch and convert to blob if the browser can display the URL directly
       // This also helps with downloading as we can just link to the URL
       setImageUrl(url);
@@ -109,7 +109,7 @@ export function useAIImageGeneratorLogic() {
     saveHistory(newHistory);
     toast({ title: "Image Saved", description: "The image has been saved to your local history." });
   };
-  
+
   const handleDelete = (id: string) => {
     const newHistory = history.filter(item => item.id !== id);
     saveHistory(newHistory);

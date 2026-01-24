@@ -2,8 +2,8 @@
 'use client';
 
 import type { CitationStyle, DiagramTypeSchema, ParaphraseMode, SummarizeLength } from "@/ai/schemas";
-import { apiService } from "./apiService";
 import { z } from "zod";
+import { apiService } from "./apiService";
 
 // Base types for form data
 export interface ParaphraseTextVariables {
@@ -111,9 +111,9 @@ export async function writingToolApi<TRequest, TResponse>(
 ): Promise<TResponse> {
     const { token, data } = variables;
     return apiService({
-      endpoint,
-      method: 'POST',
-      data,
-      token
+        endpoint,
+        method: 'POST',
+        data,
+        token
     });
 }

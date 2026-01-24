@@ -7,6 +7,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { useLocalization } from '@/context/LocalizationContext';
 import { useBuilderStore } from '@/hooks';
+import { useAiActions } from '@/hooks/report-mode/use-ai-actions';
+import { Section, type Project } from '@/lib/models';
 import { cn } from '@/lib/utils/cn';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
@@ -16,8 +18,6 @@ import { Checkbox } from '../../ui/checkbox';
 import { SectionContextSelector } from '../section-controls/SectionContextSelector';
 import { SectionGenerationControls } from '../section-controls/SectionGenerationControls';
 import { GuidelineEditor } from '../section-controls/SectionGuidelineEditor';
-import { useAiActions } from '@/hooks/report-mode/use-ai-actions';
-import { Section, type Project } from '@/lib/models';
 
 
 interface SectionAccordionItemProps {
@@ -39,7 +39,7 @@ export function SectionAccordionItem({
 }: SectionAccordionItemProps) {
     const { t } = useLocalization();
     const { userProfile, project } = useBuilderStore();
-    
+
     const { generateSectionMutation, generateChapterMutation, generateProjectMutation } = useAiActions();
 
     const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: section.id });
@@ -50,7 +50,7 @@ export function SectionAccordionItem({
         zIndex: isDragging ? 2 : 0,
         position: 'relative',
     };
-    
+
     if (!section) return null;
 
     const isGenerating = generateSectionMutation?.isPending && generateSectionMutation.variables === section.id;
@@ -67,10 +67,10 @@ export function SectionAccordionItem({
 
     const getContextNames = (proj: Project | null, sec: Section): string[] => {
         if (!proj || !sec.context) return [];
-    
+
         const sectionNames = Object.keys(sec.context.sections || {}).map(id => proj.getSection(id)?.title || 'Untitled Section');
         const fileNames = Object.keys(sec.context.externalContext || {}).map(id => proj.externalContext.find(f => f.id === id)?.fileName || 'Untitled File');
-    
+
         return [...sectionNames, ...fileNames];
     };
 
@@ -92,7 +92,7 @@ export function SectionAccordionItem({
                 <AccordionTrigger className={cn("flex-1 hover:no-underline py-0", isProjectBuildMode && "ml-2")}>
                     <div className="flex items-center gap-2 flex-1 min-w-0">
                         <div {...listeners} className="p-1 cursor-grab touch-none -ml-2 flex items-center gap-1 text-muted-foreground">
-                            <span className="text-xs w-8 text-left">{chapterIndex >= 0 ? `${chapterIndex + 1}.${sectionIndex + 1}`: `${sectionIndex + 1}`}</span>
+                            <span className="text-xs w-8 text-left">{chapterIndex >= 0 ? `${chapterIndex + 1}.${sectionIndex + 1}` : `${sectionIndex + 1}`}</span>
                             <GripVertical className="h-5 w-5" />
                         </div>
                         {isGenerating && <Loader2 className="h-4 w-4 animate-spin" />}
@@ -100,21 +100,21 @@ export function SectionAccordionItem({
                             {section.title}
                         </span>
                         {totalContext > 0 && (
-                          <TooltipProvider>
-                            <Tooltip>
-                              <TooltipTrigger asChild>
-                                <div className="flex items-center gap-1 ml-2">
-                                  <LinkIcon className="h-3.5 w-3.5 text-blue-500" />
-                                  <span className="text-xs text-blue-500 font-medium">{totalContext}</span>
-                                </div>
-                              </TooltipTrigger>
-                              <TooltipContent side="top">
-                                <div className="text-xs space-y-1">
-                                  {contextNames.map(name => <p key={name}>{name}</p>)}
-                                </div>
-                              </TooltipContent>
-                            </Tooltip>
-                          </TooltipProvider>
+                            <TooltipProvider>
+                                <Tooltip>
+                                    <TooltipTrigger asChild>
+                                        <div className="flex items-center gap-1 ml-2">
+                                            <LinkIcon className="h-3.5 w-3.5 text-blue-500" />
+                                            <span className="text-xs text-blue-500 font-medium">{totalContext}</span>
+                                        </div>
+                                    </TooltipTrigger>
+                                    <TooltipContent side="top">
+                                        <div className="text-xs space-y-1">
+                                            {contextNames.map(name => <p key={name}>{name}</p>)}
+                                        </div>
+                                    </TooltipContent>
+                                </Tooltip>
+                            </TooltipProvider>
                         )}
                     </div>
                 </AccordionTrigger>

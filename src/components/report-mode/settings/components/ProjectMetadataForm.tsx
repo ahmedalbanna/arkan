@@ -1,13 +1,13 @@
 'use client';
 
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { CustomSelect } from '@/components/ui/CustomSelect';
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { CustomSelect } from '@/components/ui/CustomSelect';
 import { UseFormReturn } from 'react-hook-form';
+import { educationalLevelOptions, projectTypeOptions, specializationOptions, universityOptions } from '../constants';
 import type { SettingsFormValues } from '../types';
-import { projectTypeOptions, specializationOptions, educationalLevelOptions, universityOptions } from '../constants';
 
 interface ProjectMetadataFormProps {
   form: UseFormReturn<SettingsFormValues>;
@@ -16,7 +16,7 @@ interface ProjectMetadataFormProps {
 
 /**
  * ProjectMetadataForm Component
- * 
+ *
  * Handles basic project information fields like name, description, type, etc.
  */
 export function ProjectMetadataForm({ form, onBlur }: ProjectMetadataFormProps) {

@@ -1,12 +1,12 @@
 'use client';
 
-import { useWritingTool } from './use-writing-tool';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
+import { useWritingTool } from './use-writing-tool';
 
-import { GenerateSessionPlanOutput, GenerateSessionPlanInputSchema } from '@/ai/schemas/lecture-generator';
+import { GenerateSessionPlanInputSchema, GenerateSessionPlanOutput } from '@/ai/schemas/lecture-generator';
 
 type SessionPlanFormValues = z.infer<typeof GenerateSessionPlanInputSchema>;
 

@@ -28,7 +28,7 @@ export function FileContentViewer({ fileName, content }: FileContentViewerProps)
     return (
       <ScrollArea className="h-full rounded-md border p-4">
         <div className="prose dark:prose-invert max-w-none">
-            <ReactMarkdown components={markdownComponents}>{content}</ReactMarkdown>
+          <ReactMarkdown components={markdownComponents}>{content}</ReactMarkdown>
         </div>
       </ScrollArea>
     );

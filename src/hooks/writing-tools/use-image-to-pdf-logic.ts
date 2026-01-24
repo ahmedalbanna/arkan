@@ -1,12 +1,12 @@
 
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useLocalization } from '@/context/LocalizationContext';
+import { useToast } from '@/hooks/util/use-toast';
+import { jsPDF } from 'jspdf';
+import { useCallback, useState } from 'react';
 import { useDropzone } from 'react-dropzone';
 import { v4 as uuidv4 } from 'uuid';
-import { useToast } from '@/hooks/util/use-toast';
-import { useLocalization } from '@/context/LocalizationContext';
-import { jsPDF } from 'jspdf';
 
 export interface SortableFileType {
     id: string;
@@ -69,7 +69,7 @@ export function useImageToPdfLogic() {
                 const img = new Image();
                 img.src = imgData;
                 await new Promise(resolve => img.onload = resolve);
-                
+
                 const pdfWidth = pdf.internal.pageSize.getWidth();
                 const pdfHeight = pdf.internal.pageSize.getHeight();
                 const imgWidth = img.width;
@@ -78,7 +78,7 @@ export function useImageToPdfLogic() {
 
                 let newWidth = pdfWidth;
                 let newHeight = newWidth / ratio;
-                if(newHeight > pdfHeight) {
+                if (newHeight > pdfHeight) {
                     newHeight = pdfHeight;
                     newWidth = newHeight * ratio;
                 }

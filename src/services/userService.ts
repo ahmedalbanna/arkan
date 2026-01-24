@@ -110,7 +110,7 @@ export async function deductUserCredits(userId: string, creditsToDeduct: number)
         const newBalance = currentCredits - creditsToDeduct;
         updates.credits = newBalance;
         updates.updatedAt = new Date().toISOString();
-        
+
         transaction.update(userRef, updates);
 
         return newBalance;

@@ -1,8 +1,8 @@
 
 'use client';
 
-import { create } from 'zustand';
 import { Editor } from '@tiptap/react';
+import { create } from 'zustand';
 
 interface EditorState {
   activeEditor: Editor | null;

@@ -1,9 +1,8 @@
 'use client';
 
-import { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { MessageSquare, ZoomOut, ZoomIn } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { MessageSquare, ZoomIn, ZoomOut } from 'lucide-react';
 
 interface FloatingActionButtonsProps {
   onChatToggle: () => void;
@@ -13,7 +12,7 @@ interface FloatingActionButtonsProps {
 
 /**
  * FloatingActionButtons Component
- * 
+ *
  * Displays chat and zoom action buttons.
  */
 export function FloatingActionButtons({

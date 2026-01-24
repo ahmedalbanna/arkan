@@ -6,9 +6,9 @@
  */
 
 import {
+  GenerationProcessType,
   UnifiedGenerationInput,
   UnifiedGenerationOutput,
-  GenerationProcessType,
 } from '@/ai/schemas/unified-generation';
 
 /**
@@ -76,7 +76,7 @@ export async function correctGrammar(
   text: string,
   token: string
 ): Promise<UnifiedGenerationOutput> {
-  const systemPrompt = `You are an expert grammar and spelling checker. 
+  const systemPrompt = `You are an expert grammar and spelling checker.
 Your task is to correct grammar, spelling, punctuation, and style issues while preserving the original meaning and tone.
 
 Instructions:

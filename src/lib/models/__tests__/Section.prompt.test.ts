@@ -2,8 +2,8 @@
  * Tests for Section model prompt building methods
  */
 
-import { Section } from '../section';
 import { Behavior, Control } from '../control-types';
+import { Section } from '../section';
 
 describe('Section - Prompt Building', () => {
   describe('buildSystemPrompt', () => {

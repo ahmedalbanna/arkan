@@ -103,7 +103,7 @@ export function createGeneratedMetadata(
   aiModel: string
 ): SectionMetadata {
   const now = new Date().toISOString();
-  
+
   return {
     ...currentMetadata,
     status: SectionStatus.GENERATED,
@@ -122,7 +122,7 @@ export function createEditedMetadata(
   currentMetadata: SectionMetadata
 ): SectionMetadata {
   const now = new Date().toISOString();
-  
+
   return {
     ...currentMetadata,
     status: SectionStatus.EDITED,
@@ -182,7 +182,7 @@ export function addVersionToHistory(
 ): SectionMetadata {
   const currentVersion = metadata.version || 1;
   const previousVersions = metadata.previousVersions || [];
-  
+
   // Only keep last 5 versions
   const updatedVersions = [
     {
@@ -192,7 +192,7 @@ export function addVersionToHistory(
     },
     ...previousVersions,
   ].slice(0, 5);
-  
+
   return {
     ...metadata,
     version: currentVersion + 1,

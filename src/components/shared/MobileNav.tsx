@@ -1,21 +1,21 @@
 
 'use client';
 
+import { Button } from '@/components/ui/button';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import {
   Sheet,
   SheetContent,
   SheetTitle,
   SheetTrigger,
 } from '@/components/ui/sheet';
-import { Button } from '@/components/ui/button';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { Menu, LayoutDashboard, Users, CreditCard, Bot, History, PencilRuler, Palette, Settings, SlidersHorizontal } from 'lucide-react';
-import Link from 'next/link';
-import { useLocalization } from '@/context/LocalizationContext';
 import { useAuth } from '@/context/AuthContext';
-import { useState } from 'react';
-import { usePathname } from 'next/navigation';
+import { useLocalization } from '@/context/LocalizationContext';
 import { cn } from '@/lib/utils/cn';
+import { Bot, CreditCard, History, LayoutDashboard, Menu, Palette, PencilRuler, Settings, SlidersHorizontal, Users } from 'lucide-react';
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
+import { useState } from 'react';
 
 interface NavLink {
   href: string;
@@ -25,15 +25,15 @@ interface NavLink {
 }
 
 const adminLinks = [
-    { href: '/admin/dashboard', labelKey: 'adminDashboard.pageTitle', icon: LayoutDashboard },
-    { href: '/admin/manage-users', labelKey: 'header.manageUsers', icon: Users },
-    { href: '/admin/manage-payments', labelKey: 'header.managePayments', icon: CreditCard },
-    { href: '/admin/manage-agents', labelKey: 'header.agentManager', icon: Bot },
-    { href: '/admin/manage-features', labelKey: 'header.manageFeatures', icon: SlidersHorizontal },
-    { href: '/admin/manage-generations', labelKey: 'header.activityHistory', icon: History },
-    { href: '/admin/manage-sections', labelKey: 'header.manageSections', icon: PencilRuler },
-    { href: '/admin/manage-templates', labelKey: 'header.exportTemplates', icon: Palette },
-    { href: '/admin/settings', labelKey: 'header.adminSettings', icon: Settings },
+  { href: '/admin/dashboard', labelKey: 'adminDashboard.pageTitle', icon: LayoutDashboard },
+  { href: '/admin/manage-users', labelKey: 'header.manageUsers', icon: Users },
+  { href: '/admin/manage-payments', labelKey: 'header.managePayments', icon: CreditCard },
+  { href: '/admin/manage-agents', labelKey: 'header.agentManager', icon: Bot },
+  { href: '/admin/manage-features', labelKey: 'header.manageFeatures', icon: SlidersHorizontal },
+  { href: '/admin/manage-generations', labelKey: 'header.activityHistory', icon: History },
+  { href: '/admin/manage-sections', labelKey: 'header.manageSections', icon: PencilRuler },
+  { href: '/admin/manage-templates', labelKey: 'header.exportTemplates', icon: Palette },
+  { href: '/admin/settings', labelKey: 'header.adminSettings', icon: Settings },
 ];
 
 export function MobileNav({ navLinks }: { navLinks: NavLink[] }) {
@@ -64,7 +64,7 @@ export function MobileNav({ navLinks }: { navLinks: NavLink[] }) {
         </Button>
       ));
   }
-  
+
   return (
     <div className="md:hidden">
       <Sheet open={isOpen} onOpenChange={setIsOpen}>

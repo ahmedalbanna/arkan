@@ -1,7 +1,7 @@
 
 'use client';
 
-import type { SentenceStructureCheckOutput, SentenceStructureIssue } from '@/ai/schemas';
+import type { SentenceStructureIssue } from '@/ai/schemas';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -112,7 +112,7 @@ export function SentenceStructureCheckerTool() {
                     <BarChart2 className={`h-5 w-5 ${getVarietyColor(results.varietyAssessment.lengthVariety)}`} />
                     <span>Length Variety: <span className="font-semibold capitalize">{results.varietyAssessment.lengthVariety}</span></span>
                   </div>
-                   <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2">
                     <BarChart2 className={`h-5 w-5 ${getVarietyColor(results.varietyAssessment.structureVariety)}`} />
                     <span>Structure Variety: <span className="font-semibold capitalize">{results.varietyAssessment.structureVariety}</span></span>
                   </div>

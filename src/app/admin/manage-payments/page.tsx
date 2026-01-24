@@ -1,6 +1,6 @@
 import { PaymentVerificationConsole } from "@/components/admin/payments/PaymentVerificationConsole";
-import { CreditCard } from "lucide-react";
 import { getTranslator } from '@/lib/utils/i18n';
+import { CreditCard } from "lucide-react";
 
 export default async function ManagePaymentsPage() {
   const t = await getTranslator();

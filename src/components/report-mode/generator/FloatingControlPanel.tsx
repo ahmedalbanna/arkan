@@ -1,12 +1,12 @@
 'use client';
 
-import { useState } from 'react';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
-import { Badge } from '@/components/ui/badge';
 import { Slider } from '@/components/ui/slider';
-import { SlidersHorizontal } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { SlidersHorizontal } from 'lucide-react';
+import { useState } from 'react';
 
 interface FloatingControlPanelProps {
   complexity: number;
@@ -17,7 +17,7 @@ interface FloatingControlPanelProps {
 
 /**
  * FloatingControlPanel Component
- * 
+ *
  * Displays complexity and formality controls in a floating panel.
  */
 export function FloatingControlPanel({

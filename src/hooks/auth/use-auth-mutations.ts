@@ -1,27 +1,27 @@
 'use client';
 
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { useRouter } from 'next/navigation';
+import { useAuth } from '@/context/AuthContext';
+import { initializeFirebase } from '@/firebase';
+import { useToast } from '@/hooks/util/use-toast';
+import { userKeys } from '@/lib/query-keys';
+import type { LoginCredentials, SignupCredentials, UserProfile } from '@/lib/types';
+import { handleErrorUtility } from '@/lib/utils/errorUtils';
 import {
+  createOrUpdateUserProfileApi,
+  fetchUserProfileApi,
+  forgotPasswordService,
   loginWithEmail,
   loginWithGoogle,
+  sendPasswordResetEmailApi,
   serviceLogoutUser,
   serviceSignupUser,
-  forgotPasswordService,
-  sendPasswordResetEmailApi,
-  createOrUpdateUserProfileApi,
-  fetchUserProfileApi, // Import the fetch service
 } from '@/services/api/authService';
-import type { LoginCredentials, SignupCredentials, UserProfile } from '@/lib/types';
-import { useToast } from '@/hooks/util/use-toast';
-import { handleErrorUtility } from '@/lib/utils/errorUtils';
-import { useAuth } from '@/context/AuthContext';
-import { userKeys } from '@/lib/query-keys';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { getAuth, signInWithPhoneNumber, type ConfirmationResult, type User as FirebaseUser } from "firebase/auth";
-import { initializeFirebase } from '@/firebase';
+import { useRouter } from 'next/navigation';
+import { useState } from 'react';
 
 const { firebaseApp: app } = initializeFirebase();
-import { useState } from 'react';
 
 
 export function useLogin() {
@@ -42,92 +42,92 @@ export function useLogin() {
 
 // Helper to create profile on first sign-in
 async function handleFirstSignIn(user: FirebaseUser) {
-    // Check if a profile already exists by trying to fetch it.
-    // We expect this to fail for a new user.
-    const token = await user.getIdToken();
-    try {
-        const existingProfile = await fetchUserProfileApi(user.uid, token);
+  // Check if a profile already exists by trying to fetch it.
+  // We expect this to fail for a new user.
+  const token = await user.getIdToken();
+  try {
+    const existingProfile = await fetchUserProfileApi(user.uid, token);
 
-        if (!existingProfile) {
-            // Profile doesn't exist, so create it.
-            const profileData: Partial<UserProfile> = {
-                id: user.uid,
-                name: user.displayName || `User ${user.uid.slice(0,6)}`,
-                email: user.email || '',
-            };
-            await createOrUpdateUserProfileApi(user.uid, profileData, token);
-        }
-    } catch (error) {
-        // Handle cases where the initial fetch fails for reasons other than 404
-        console.error("Error during first sign-in profile check:", error);
+    if (!existingProfile) {
+      // Profile doesn't exist, so create it.
+      const profileData: Partial<UserProfile> = {
+        id: user.uid,
+        name: user.displayName || `User ${user.uid.slice(0, 6)}`,
+        email: user.email || '',
+      };
+      await createOrUpdateUserProfileApi(user.uid, profileData, token);
     }
+  } catch (error) {
+    // Handle cases where the initial fetch fails for reasons other than 404
+    console.error("Error during first sign-in profile check:", error);
+  }
 }
 
 
 export function useGoogleSignIn() {
-    const router = useRouter();
-    const queryClient = useQueryClient();
-    const { toast } = useToast();
+  const router = useRouter();
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
 
-    return useMutation({
-        mutationFn: loginWithGoogle,
-        onSuccess: async (userCredential) => {
-            const isNewUser = userCredential.isNewUser;
-            if (isNewUser) {
-                await handleFirstSignIn(userCredential.user);
-            }
-            queryClient.invalidateQueries({ queryKey: userKeys.all });
-            router.push('/builder');
-            toast({ title: `Welcome, ${userCredential.user.displayName}!` });
-        },
-        onError: (error) => handleErrorUtility(error, "Google Sign-In Failed")
-    });
+  return useMutation({
+    mutationFn: loginWithGoogle,
+    onSuccess: async (userCredential) => {
+      const isNewUser = userCredential.isNewUser;
+      if (isNewUser) {
+        await handleFirstSignIn(userCredential.user);
+      }
+      queryClient.invalidateQueries({ queryKey: userKeys.all });
+      router.push('/builder');
+      toast({ title: `Welcome, ${userCredential.user.displayName}!` });
+    },
+    onError: (error) => handleErrorUtility(error, "Google Sign-In Failed")
+  });
 }
 
 export function usePhoneSignIn() {
-    const [isLoading, setIsLoading] = useState(false);
-    const [error, setError] = useState<string | null>(null);
-    const router = useRouter();
-    const queryClient = useQueryClient();
-    const { toast } = useToast();
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const router = useRouter();
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
 
-    const sendOtp = async (phoneNumber: string) => {
-        setIsLoading(true);
-        setError(null);
-        try {
-            const auth = getAuth(app);
-            const confirmationResult = await signInWithPhoneNumber(auth, phoneNumber, (window as any).recaptchaVerifier);
-            return confirmationResult;
-        } catch (err: any) {
-            setError(err.message);
-            return null;
-        } finally {
-            setIsLoading(false);
-        }
-    };
+  const sendOtp = async (phoneNumber: string) => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      const auth = getAuth(app);
+      const confirmationResult = await signInWithPhoneNumber(auth, phoneNumber, (window as any).recaptchaVerifier);
+      return confirmationResult;
+    } catch (err: any) {
+      setError(err.message);
+      return null;
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
-    const verifyOtp = async (confirmationResult: ConfirmationResult, otp: string) => {
-        setIsLoading(true);
-        setError(null);
-        try {
-            const userCredential = await confirmationResult.confirm(otp);
-            // After successful OTP verification, handle first sign-in logic
-            const { getAdditionalUserInfo } = await import('firebase/auth');
-            const info = getAdditionalUserInfo(userCredential);
-            if (info?.isNewUser) {
-                await handleFirstSignIn(userCredential.user);
-            }
-            queryClient.invalidateQueries({ queryKey: userKeys.all });
-            router.push('/builder');
-            toast({ title: `Welcome!` });
-        } catch (err: any) {
-            setError(err.message);
-        } finally {
-            setIsLoading(false);
-        }
-    };
+  const verifyOtp = async (confirmationResult: ConfirmationResult, otp: string) => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      const userCredential = await confirmationResult.confirm(otp);
+      // After successful OTP verification, handle first sign-in logic
+      const { getAdditionalUserInfo } = await import('firebase/auth');
+      const info = getAdditionalUserInfo(userCredential);
+      if (info?.isNewUser) {
+        await handleFirstSignIn(userCredential.user);
+      }
+      queryClient.invalidateQueries({ queryKey: userKeys.all });
+      router.push('/builder');
+      toast({ title: `Welcome!` });
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
-    return { sendOtp, verifyOtp, isLoading, error };
+  return { sendOtp, verifyOtp, isLoading, error };
 }
 
 
@@ -146,51 +146,51 @@ export function useLogout() {
 }
 
 export function useSignup(options?: { onSuccess?: (data: any) => void }) {
-    const router = useRouter();
-    const { toast } = useToast();
+  const router = useRouter();
+  const { toast } = useToast();
 
-    return useMutation({
-        mutationFn: async (credentials: SignupCredentials) => {
-            const userCredential = await serviceSignupUser(credentials);
-            const token = await userCredential.user.getIdToken();
-            const profileData: Partial<UserProfile> = {
-                id: userCredential.user.uid,
-                name: credentials.name,
-                email: credentials.email,
-            };
-            // After creating the auth user, create the profile in Firestore
-            await createOrUpdateUserProfileApi(userCredential.user.uid, profileData, token);
-            return userCredential;
-        },
-        onSuccess: (data) => {
-            toast({
-                title: "Account Created",
-                description: "Your account has been successfully created. Please log in.",
-            });
-            router.push('/login');
-            options?.onSuccess?.(data);
-        },
-        onError: (error) => {
-            // Error handling is now in the component to allow for form-specific errors
-            handleErrorUtility(error, 'Signup Failed');
-        }
-    });
+  return useMutation({
+    mutationFn: async (credentials: SignupCredentials) => {
+      const userCredential = await serviceSignupUser(credentials);
+      const token = await userCredential.user.getIdToken();
+      const profileData: Partial<UserProfile> = {
+        id: userCredential.user.uid,
+        name: credentials.name,
+        email: credentials.email,
+      };
+      // After creating the auth user, create the profile in Firestore
+      await createOrUpdateUserProfileApi(userCredential.user.uid, profileData, token);
+      return userCredential;
+    },
+    onSuccess: (data) => {
+      toast({
+        title: "Account Created",
+        description: "Your account has been successfully created. Please log in.",
+      });
+      router.push('/login');
+      options?.onSuccess?.(data);
+    },
+    onError: (error) => {
+      // Error handling is now in the component to allow for form-specific errors
+      handleErrorUtility(error, 'Signup Failed');
+    }
+  });
 }
 
 export function useForgotPassword() {
-    const { toast } = useToast();
-    const router = useRouter();
-    return useMutation({
-        mutationFn: (email: string) => forgotPasswordService(email),
-        onSuccess: () => {
-            toast({
-                title: "Password Reset Email Sent",
-                description: "Please check your inbox for instructions to reset your password.",
-            });
-            router.push('/login');
-        },
-        onError: (error) => handleErrorUtility(error, "Password Reset Failed"),
-    });
+  const { toast } = useToast();
+  const router = useRouter();
+  return useMutation({
+    mutationFn: (email: string) => forgotPasswordService(email),
+    onSuccess: () => {
+      toast({
+        title: "Password Reset Email Sent",
+        description: "Please check your inbox for instructions to reset your password.",
+      });
+      router.push('/login');
+    },
+    onError: (error) => handleErrorUtility(error, "Password Reset Failed"),
+  });
 }
 
 export function useForgotPasswordLoggedIn() {

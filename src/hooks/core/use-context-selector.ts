@@ -3,8 +3,8 @@
 
 import { useLocalization } from '@/context/LocalizationContext';
 import { useBuilderStore } from '@/hooks/core/useBuilderStore';
-import { useMemo, useCallback } from 'react';
-import type { SectionContext, ExternalContextType } from '@/lib/models';
+import type { ExternalContextType } from '@/lib/models';
+import { useCallback, useMemo } from 'react';
 
 export function useContextSelector(itemKey: string) {
     const { t } = useLocalization();
@@ -22,7 +22,7 @@ export function useContextSelector(itemKey: string) {
             .filter(s => s.id !== itemKey)
             .map(s => ({ id: s.id, title: s.title }));
     }, [project?.sections, itemKey]);
-    
+
     const sectionsContent = useMemo(() => {
         if (!project?.sections) return {};
         return project.sections.reduce((acc, section) => {
@@ -41,13 +41,13 @@ export function useContextSelector(itemKey: string) {
         updateProject(p => p.updateSection(sectionId, (sec) => {
             const newContext = { ...sec.context };
             const newDict = { ...(newContext[type] || {}) };
-            
+
             if (value === false) {
                 delete newDict[subKey];
             } else {
                 newDict[subKey] = value;
             }
-            
+
             newContext[type] = newDict;
             return sec.with({ context: newContext });
         }));

@@ -3,10 +3,9 @@
 
 import { useLocalization } from '@/context/LocalizationContext';
 import { toast, useBuilderStore } from '@/hooks';
-import { useMemo, useState, useCallback } from 'react';
 import type { DragEndEvent } from '@dnd-kit/core';
+import { useCallback, useMemo, useState } from 'react';
 import { useAiActions } from './use-ai-actions';
-import { applyReportTemplate } from '@/lib/project/template';
 
 export function useReportGenerationTools() {
     const { t } = useLocalization();
@@ -49,7 +48,7 @@ export function useReportGenerationTools() {
             return newSelection;
         });
     }, [project]);
-    
+
     const toggleSelectAll = useCallback((select: boolean) => {
         if (!project) return;
         if (select) {
@@ -78,14 +77,14 @@ export function useReportGenerationTools() {
     const chaptersToBuild = useMemo(() => {
         if (!project) return [];
         return project.chapters
-          .map(c => c.with({ sections: c.sections.filter(s => selectedSectionsForBuild.has(s.id))}))
-          .filter(c => c.sections.length > 0);
+            .map(c => c.with({ sections: c.sections.filter(s => selectedSectionsForBuild.has(s.id)) }))
+            .filter(c => c.sections.length > 0);
     }, [project, selectedSectionsForBuild]);
 
     const onGenerateProject = useCallback(() => {
         if (project && selectedSectionsForBuild.size > 0) {
-          generateProjectMutation.mutate({ project, selectedSectionIds: selectedSectionsForBuild });
-          setIsBuildProjectDialogOpen(false); // Close dialog on confirm
+            generateProjectMutation.mutate({ project, selectedSectionIds: selectedSectionsForBuild });
+            setIsBuildProjectDialogOpen(false); // Close dialog on confirm
         }
     }, [project, selectedSectionsForBuild, generateProjectMutation, setIsBuildProjectDialogOpen]);
 

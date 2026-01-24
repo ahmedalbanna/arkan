@@ -1,9 +1,9 @@
 'use client';
 
-import React, { Component, ErrorInfo, ReactNode } from 'react';
-import { AlertCircle } from 'lucide-react';
-import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { Button } from '@/components/ui/button';
+import { AlertCircle } from 'lucide-react';
+import React, { Component, ErrorInfo, ReactNode } from 'react';
 
 interface Props {
   children: ReactNode;
@@ -18,7 +18,7 @@ interface State {
 
 /**
  * Error Boundary Component
- * 
+ *
  * Catches JavaScript errors anywhere in the child component tree,
  * logs those errors, and displays a fallback UI.
  */
@@ -81,9 +81,9 @@ export class ErrorBoundary extends Component<Props, State> {
                 <Button onClick={this.handleReset} variant="outline" size="sm">
                   Try Again
                 </Button>
-                <Button 
-                  onClick={() => window.location.reload()} 
-                  variant="default" 
+                <Button
+                  onClick={() => window.location.reload()}
+                  variant="default"
                   size="sm"
                 >
                   Refresh Page

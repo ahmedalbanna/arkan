@@ -17,27 +17,27 @@ export async function fetchAgentByIdApi(id: string, token: string): Promise<Agen
 
 export async function createAgentApi(data: Omit<AgentProperties, 'id'> & { id: string }, token: string): Promise<AgentProperties> {
     return apiService({
-      endpoint: '/api/agents',
-      method: 'POST',
-      data,
-      token
+        endpoint: '/api/agents',
+        method: 'POST',
+        data,
+        token
     });
 }
 
 export async function updateAgentApi(id: string, data: Partial<AgentProperties>, token: string): Promise<AgentProperties> {
     return apiService({
-      endpoint: `/api/agents/${id}`,
-      method: 'PUT',
-      data,
-      token
+        endpoint: `/api/agents/${id}`,
+        method: 'PUT',
+        data,
+        token
     });
 }
 
 export async function deleteAgentApi(id: string, token: string): Promise<{ message: string }> {
     return apiService({
-      endpoint: `/api/agents/${id}`,
-      method: 'DELETE',
-      token
+        endpoint: `/api/agents/${id}`,
+        method: 'DELETE',
+        token
     });
 }
 

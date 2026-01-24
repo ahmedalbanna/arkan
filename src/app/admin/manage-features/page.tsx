@@ -1,6 +1,6 @@
 import FeatureManager from '@/components/admin/FeatureManager';
-import { SlidersHorizontal } from 'lucide-react';
 import { getTranslator } from '@/lib/utils/i18n';
+import { SlidersHorizontal } from 'lucide-react';
 
 export default async function ManageFeaturesPage() {
   const t = await getTranslator();

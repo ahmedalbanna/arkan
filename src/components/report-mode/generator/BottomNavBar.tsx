@@ -2,7 +2,7 @@
 
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils/cn';
-import { Settings, BookOpenText } from 'lucide-react';
+import { BookOpenText, Settings } from 'lucide-react';
 
 interface BottomNavBarProps {
   activeView: 'generator' | 'result';
@@ -11,7 +11,7 @@ interface BottomNavBarProps {
 
 /**
  * BottomNavBar Component
- * 
+ *
  * Mobile-only bottom navigation for switching between generator and result views.
  */
 export function BottomNavBar({ activeView, onViewChange }: BottomNavBarProps) {

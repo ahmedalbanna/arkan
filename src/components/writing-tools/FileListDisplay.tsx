@@ -3,10 +3,10 @@
 
 import { Card, CardContent } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { FileText, Trash2, Eye } from "lucide-react";
-import { Button } from "../ui/button";
-import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "../ui/dialog";
+import { Eye, FileText, Trash2 } from "lucide-react";
 import { MarkdownViewer } from "../shared/MarkdownViewer";
+import { Button } from "../ui/button";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "../ui/dialog";
 
 interface UploadedFile {
     name: string;

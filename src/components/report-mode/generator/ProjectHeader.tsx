@@ -1,9 +1,9 @@
 'use client';
 
 import { Input } from '@/components/ui/input';
+import type { Project } from '@/lib/models';
 import { formatDistanceToNow } from 'date-fns';
 import { SessionActions } from '../session/SessionActions';
-import type { Project } from '@/lib/models';
 
 interface ProjectHeaderProps {
   project: Project | null;
@@ -14,7 +14,7 @@ interface ProjectHeaderProps {
 
 /**
  * ProjectHeader Component
- * 
+ *
  * Displays project name input, last updated timestamp, and session actions.
  */
 export function ProjectHeader({ project, onNameChange, onBlur, isSaving }: ProjectHeaderProps) {

@@ -1,11 +1,10 @@
 
-import React from 'react';
-import { render, screen, act } from '@testing-library/react';
-import { FirebaseProvider, useFirebase, useUser } from '../provider';
-import { initializeFirebase } from '../index';
-import { onAuthStateChanged } from 'firebase/auth';
-import type { Auth, Firestore } from 'firebase/auth';
+import { act, render, screen } from '@testing-library/react';
 import type { FirebaseApp } from 'firebase/app';
+import type { Auth, Firestore } from 'firebase/auth';
+import { onAuthStateChanged } from 'firebase/auth';
+import { initializeFirebase } from '../index';
+import { FirebaseProvider, useFirebase, useUser } from '../provider';
 
 
 // Mock the firebase services
@@ -13,7 +12,7 @@ jest.mock('../index', () => ({
   initializeFirebase: jest.fn(() => ({
     firebaseApp: {} as FirebaseApp,
     auth: {
-        onAuthStateChanged: jest.fn(),
+      onAuthStateChanged: jest.fn(),
     } as unknown as Auth,
     firestore: {} as unknown as Firestore,
   })),
@@ -21,8 +20,8 @@ jest.mock('../index', () => ({
 
 // Mock the onAuthStateChanged function
 jest.mock('firebase/auth', () => ({
-    getAuth: jest.fn(),
-    onAuthStateChanged: jest.fn(),
+  getAuth: jest.fn(),
+  onAuthStateChanged: jest.fn(),
 }));
 
 
@@ -51,11 +50,11 @@ describe('FirebaseProvider', () => {
     jest.clearAllMocks();
     // Reset the mock to a clean state for each test
     mockOnAuthStateChanged.mockImplementation((auth, callback) => {
-        // Simulate no user logged in initially
-        act(() => {
-             callback(null);
-        });
-        return jest.fn(); // Return an unsubscribe function
+      // Simulate no user logged in initially
+      act(() => {
+        callback(null);
+      });
+      return jest.fn(); // Return an unsubscribe function
     });
   });
 
@@ -77,12 +76,12 @@ describe('FirebaseProvider', () => {
     const { auth, firestore, firebaseApp } = initializeFirebase();
 
     const mockUser = { uid: 'test-user-123', email: 'test@example.com' };
-    
+
     mockOnAuthStateChanged.mockImplementation((auth, callback) => {
       act(() => {
         callback(mockUser);
       });
-      return () => {}; // Unsubscribe function
+      return () => { }; // Unsubscribe function
     });
 
     render(
@@ -92,15 +91,15 @@ describe('FirebaseProvider', () => {
     );
 
     expect(screen.getByText('User: test-user-123')).toBeInTheDocument();
-     expect(screen.getByText('UserHook User: test-user-123')).toBeInTheDocument();
+    expect(screen.getByText('UserHook User: test-user-123')).toBeInTheDocument();
   });
 
   it('should show loading state initially', () => {
     const { auth, firestore, firebaseApp } = initializeFirebase();
-    
+
     mockOnAuthStateChanged.mockImplementation(() => {
-        // Don't call the callback to simulate loading state
-        return () => {};
+      // Don't call the callback to simulate loading state
+      return () => { };
     });
 
     render(
@@ -110,7 +109,7 @@ describe('FirebaseProvider', () => {
     );
     expect(screen.getByText('Loading...')).toBeInTheDocument();
   });
-  
+
   it('should handle auth errors', () => {
     const { auth, firestore, firebaseApp } = initializeFirebase();
     const mockError = new Error('Auth failed');
@@ -119,7 +118,7 @@ describe('FirebaseProvider', () => {
       act(() => {
         errorCallback(mockError);
       });
-      return () => {};
+      return () => { };
     });
 
     render(

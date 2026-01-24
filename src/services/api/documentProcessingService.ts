@@ -7,11 +7,11 @@ import { apiService } from './apiService';
  */
 export async function processFileApi(formData: FormData, token: string): Promise<{ markdown: string }> {
     return apiService({
-      endpoint: '/api/process-file',
-      method: 'POST',
-      data: formData,
-      token,
-      isFormData: true
+        endpoint: '/api/process-file',
+        method: 'POST',
+        data: formData,
+        token,
+        isFormData: true
     });
 }
 

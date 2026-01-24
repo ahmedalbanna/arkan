@@ -22,9 +22,9 @@ export async function updateFeatureApi(
 ): Promise<Feature> {
     const { featureId, payload } = variables;
     return apiService({
-      endpoint: `/api/admin/features/${featureId}`,
-      method: 'PUT',
-      data: payload,
-      token
+        endpoint: `/api/admin/features/${featureId}`,
+        method: 'PUT',
+        data: payload,
+        token
     });
 }

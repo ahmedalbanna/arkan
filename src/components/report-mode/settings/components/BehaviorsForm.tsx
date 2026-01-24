@@ -1,15 +1,15 @@
 'use client';
 
-import { Controller, UseFormReturn, useFieldArray } from 'react-hook-form';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { FormField } from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import { Trash2 } from 'lucide-react';
+import { Controller, UseFormReturn, useFieldArray } from 'react-hook-form';
 import type { SettingsFormValues } from '../types';
 import { TagInput } from './TagInput';
-import { FormField } from '@/components/ui/form';
 
 interface BehaviorsFormProps {
   form: UseFormReturn<SettingsFormValues>;
@@ -18,7 +18,7 @@ interface BehaviorsFormProps {
 
 /**
  * BehaviorsForm Component
- * 
+ *
  * Handles AI behaviors, personas, rules, and constraints configuration.
  */
 export function BehaviorsForm({ form, onBlur }: BehaviorsFormProps) {

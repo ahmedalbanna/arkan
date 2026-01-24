@@ -1,32 +1,32 @@
 
 'use client';
 
+import { useAuth } from '@/context/AuthContext';
 import { toast } from '@/hooks/util/use-toast';
 import type { ProjectProperties } from '@/lib/models';
 import { Project } from '@/lib/models';
 import { projectKeys } from '@/lib/query-keys';
+import { getAuthenticatedToken } from '@/lib/utils/authUtils';
+import { deleteProjectApi, fetchProjectsApi, saveProjectApi } from '@/services/api/projectService';
+import { localProjectService } from '@/services/local-project-service';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useBuilderStore } from '../core/useBuilderStore';
-import { useAuth } from '@/context/AuthContext';
-import { getAuthenticatedToken } from '@/lib/utils/authUtils';
-import { fetchProjectsApi, saveProjectApi, deleteProjectApi } from '@/services/api/projectService';
-import { localProjectService } from '@/services/local-project-service';
 
 /**
  * Projects Hook
- * 
+ *
  * Fetches and manages user projects with offline-first approach.
  * Syncs between local IndexedDB storage and Firebase backend.
- * 
+ *
  * @returns Projects data and query state
- * 
+ *
  * @example
  * ```tsx
  * const { projects, isLoading, error } = useProjects();
- * 
+ *
  * if (isLoading) return <Loading />;
  * if (error) return <Error message={error} />;
- * 
+ *
  * return <ProjectList projects={projects} />;
  * ```
  */
@@ -40,7 +40,7 @@ export function useProjects() {
             try {
                 const token = await getAuthenticatedToken(firebaseUser);
                 const serverProjects = await fetchProjectsApi(token);
-                
+
                 const mergedProjects = serverProjects.map(p => new Project(p));
 
                 // Sync local db with server source of truth
@@ -63,16 +63,16 @@ export function useProjects() {
 
 /**
  * Save Project Hook
- * 
+ *
  * Handles saving projects to Firebase backend.
  * Requires online connection and authenticated user.
- * 
+ *
  * @returns Save mutation and loading state
- * 
+ *
  * @example
  * ```tsx
  * const { saveProjectMutation, isSaving } = useSaveProject();
- * 
+ *
  * const handleSave = () => {
  *   saveProjectMutation.mutate(project.toStateObject());
  * };

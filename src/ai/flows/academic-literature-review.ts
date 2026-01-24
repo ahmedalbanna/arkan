@@ -26,13 +26,13 @@ import { z } from 'zod';
 
 // Temporary fallback schemas
 const AcademicLiteratureReviewInputSchema = z.object({
-  topic: z.string(),
-  focusAreas: z.array(z.string()).optional(),
-  minLength: z.number().optional(),
-  includeGaps: z.boolean().optional(),
+    topic: z.string(),
+    focusAreas: z.array(z.string()).optional(),
+    minLength: z.number().optional(),
+    includeGaps: z.boolean().optional(),
 });
 const AcademicLiteratureReviewOutputSchema = z.object({
-  review: z.string(),
+    review: z.string(),
 });
 
 export type AcademicLiteratureReviewInput = z.infer<typeof AcademicLiteratureReviewInputSchema>;

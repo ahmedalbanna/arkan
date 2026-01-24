@@ -4,11 +4,11 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { Banknote, Building, Globe, Loader2, PlusCircle, Save, Settings, Smartphone, Trash2 } from 'lucide-react';
 import React from 'react';
 import { useFieldArray, useForm } from 'react-hook-form';
-import { z } from 'zod';
 import { v4 as uuidv4 } from 'uuid';
+import { z } from 'zod';
 
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -16,13 +16,13 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Skeleton } from '@/components/ui/skeleton';
 import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
+import { useAuth } from '@/context/AuthContext';
 import { useLocalization } from '@/context/LocalizationContext';
 import { useToast } from '@/hooks';
 import { usePublicSettings } from '@/hooks/data/use-settings';
-import { getAuthenticatedToken } from '@/lib/utils/authUtils';
-import { useAuth } from '@/context/AuthContext';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
 import type { AppSettings } from '@/lib/types';
+import { getAuthenticatedToken } from '@/lib/utils/authUtils';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 
 
 // Schemas for validation
@@ -194,89 +194,90 @@ export default function AdminSettingsPage() {
                             {fields.map((field, index) => {
                                 const methodType = watchedMethods?.[index]?.type;
                                 return (
-                                <Card key={field.id} className="p-4 space-y-4 relative bg-muted/50">
-                                    <div className="flex justify-between items-start">
-                                        <div className="flex items-center gap-2 text-lg font-semibold">{getPaymentMethodIcon(methodType || 'bank')} {watchedMethods?.[index]?.displayName || 'New Method'}</div>
-                                        <Button type="button" variant="ghost" size="icon" className="h-7 w-7 text-destructive" onClick={() => remove(index)}><Trash2 className="h-4 w-4" /></Button>
-                                    </div>
-
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                        <FormField control={form.control} name={`paymentMethods.${index}.displayName`} render={({ field }) => (
-                                            <FormItem><FormLabel>Display Name</FormLabel><FormControl><Input {...field} placeholder="e.g., بنك الكريمي" /></FormControl><FormMessage /></FormItem>
-                                        )} />
-                                        <FormField control={form.control} name={`paymentMethods.${index}.name`} render={({ field }) => (
-                                            <FormItem><FormLabel>Internal Name</FormLabel><FormControl><Input {...field} placeholder="e.g., Al-Kuraimi Bank" /></FormControl><FormMessage /></FormItem>
-                                        )} />
-                                    </div>
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                         <FormField control={form.control} name={`paymentMethods.${index}.type`} render={({ field }) => (
-                                            <FormItem>
-                                                <FormLabel>Type</FormLabel>
-                                                <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                                    <FormControl><SelectTrigger><SelectValue/></SelectTrigger></FormControl>
-                                                    <SelectContent>
-                                                        <SelectItem value="e-wallet">E-Wallet</SelectItem>
-                                                        <SelectItem value="bank">Bank</SelectItem>
-                                                        <SelectItem value="local-transfer">Local Transfer</SelectItem>
-                                                        <SelectItem value="international-transfer">International Transfer</SelectItem>
-                                                    </SelectContent>
-                                                </Select>
-                                                <FormMessage/>
-                                            </FormItem>
-                                        )} />
-                                        <FormField control={form.control} name={`paymentMethods.${index}.isActive`} render={({ field }) => (
-                                            <FormItem className="flex items-end">
-                                                <div className="flex items-center gap-2 p-2 border rounded-md bg-background h-10 w-full"><FormControl><Switch checked={field.value} onCheckedChange={field.onChange} /></FormControl><FormLabel>Active</FormLabel></div>
-                                            </FormItem>
-                                        )} />
-                                    </div>
-
-                                    {(methodType === 'bank' || methodType === 'international-transfer') && (
-                                        <div className="space-y-3 pt-2 border-t mt-4">
-                                            <FormField control={form.control} name={`paymentMethods.${index}.accountHolder`} render={({ field }) => (
-                                                <FormItem><FormLabel>Account Holder</FormLabel><FormControl><Input {...field} placeholder="Account Holder Name"/></FormControl><FormMessage /></FormItem>
-                                            )}/>
-                                            <Label>Currencies</Label>
-                                            <div className="pl-4 space-y-2">
-                                                <FormField control={form.control} name={`paymentMethods.${index}.currencies.SAR.iban`} render={({ field }) => (<FormItem className="flex items-center gap-2"><FormLabel className="w-12">SAR</FormLabel><FormControl><Input {...field} placeholder="SAR IBAN"/></FormControl></FormItem>)}/>
-                                                <FormField control={form.control} name={`paymentMethods.${index}.currencies.USD.iban`} render={({ field }) => (<FormItem className="flex items-center gap-2"><FormLabel className="w-12">USD</FormLabel><FormControl><Input {...field} placeholder="USD IBAN"/></FormControl></FormItem>)}/>
-                                                <FormField control={form.control} name={`paymentMethods.${index}.currencies.YER.iban`} render={({ field }) => (<FormItem className="flex items-center gap-2"><FormLabel className="w-12">YER</FormLabel><FormControl><Input {...field} placeholder="YER IBAN/Account No."/></FormControl></FormItem>)}/>
-                                            </div>
+                                    <Card key={field.id} className="p-4 space-y-4 relative bg-muted/50">
+                                        <div className="flex justify-between items-start">
+                                            <div className="flex items-center gap-2 text-lg font-semibold">{getPaymentMethodIcon(methodType || 'bank')} {watchedMethods?.[index]?.displayName || 'New Method'}</div>
+                                            <Button type="button" variant="ghost" size="icon" className="h-7 w-7 text-destructive" onClick={() => remove(index)}><Trash2 className="h-4 w-4" /></Button>
                                         </div>
-                                    )}
 
-                                    {(methodType === 'e-wallet' || methodType === 'local-transfer') && (
-                                        <div className="space-y-3 pt-2 border-t mt-4">
-                                            <Label>Wallet Details</Label>
-                                            <div className="pl-4 space-y-4">
-                                                <FormField control={form.control} name={`paymentMethods.${index}.wallet.provider`} render={({ field }) => (
-                                                    <FormItem><FormLabel>Provider</FormLabel>
-                                                        <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                                            <FormControl><SelectTrigger><SelectValue/></SelectTrigger></FormControl>
-                                                            <SelectContent>
-                                                                <SelectItem value="cac-bank">CAC Bank</SelectItem>
-                                                                <SelectItem value="mobi-cash">Mobi Cash</SelectItem>
-                                                                <SelectItem value="yemen-mobile">Yemen Mobile</SelectItem>
-                                                                <SelectItem value="mtn-mobile-money">MTN Mobile Money</SelectItem>
-                                                                <SelectItem value="you-telecom">YOU Telecom</SelectItem>
-                                                                <SelectItem value="aljazira-bank">Aljazira Bank</SelectItem>
-                                                                <SelectItem value="tadhamon-bank">Tadhamon Bank</SelectItem>
-                                                                <SelectItem value="other">Other</SelectItem>
-                                                            </SelectContent>
-                                                        </Select>
-                                                    <FormMessage/></FormItem>
-                                                )}/>
-                                                <FormField control={form.control} name={`paymentMethods.${index}.wallet.accountName`} render={({ field }) => (<FormItem><FormLabel>Account Name</FormLabel><FormControl><Input {...field} placeholder="Wallet account name"/></FormControl><FormMessage/></FormItem>)}/>
-                                                <FormField control={form.control} name={`paymentMethods.${index}.wallet.accountNumber`} render={({ field }) => (<FormItem><FormLabel>Account/Phone Number</FormLabel><FormControl><Input {...field} placeholder="Wallet number"/></FormControl><FormMessage/></FormItem>)}/>
-                                            </div>
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                            <FormField control={form.control} name={`paymentMethods.${index}.displayName`} render={({ field }) => (
+                                                <FormItem><FormLabel>Display Name</FormLabel><FormControl><Input {...field} placeholder="e.g., بنك الكريمي" /></FormControl><FormMessage /></FormItem>
+                                            )} />
+                                            <FormField control={form.control} name={`paymentMethods.${index}.name`} render={({ field }) => (
+                                                <FormItem><FormLabel>Internal Name</FormLabel><FormControl><Input {...field} placeholder="e.g., Al-Kuraimi Bank" /></FormControl><FormMessage /></FormItem>
+                                            )} />
                                         </div>
-                                    )}
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                            <FormField control={form.control} name={`paymentMethods.${index}.type`} render={({ field }) => (
+                                                <FormItem>
+                                                    <FormLabel>Type</FormLabel>
+                                                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                                        <FormControl><SelectTrigger><SelectValue /></SelectTrigger></FormControl>
+                                                        <SelectContent>
+                                                            <SelectItem value="e-wallet">E-Wallet</SelectItem>
+                                                            <SelectItem value="bank">Bank</SelectItem>
+                                                            <SelectItem value="local-transfer">Local Transfer</SelectItem>
+                                                            <SelectItem value="international-transfer">International Transfer</SelectItem>
+                                                        </SelectContent>
+                                                    </Select>
+                                                    <FormMessage />
+                                                </FormItem>
+                                            )} />
+                                            <FormField control={form.control} name={`paymentMethods.${index}.isActive`} render={({ field }) => (
+                                                <FormItem className="flex items-end">
+                                                    <div className="flex items-center gap-2 p-2 border rounded-md bg-background h-10 w-full"><FormControl><Switch checked={field.value} onCheckedChange={field.onChange} /></FormControl><FormLabel>Active</FormLabel></div>
+                                                </FormItem>
+                                            )} />
+                                        </div>
 
-                                    <FormField control={form.control} name={`paymentMethods.${index}.instructions`} render={({ field }) => (
-                                        <FormItem><FormLabel>Instructions (Optional)</FormLabel><FormControl><Textarea {...field} placeholder="e.g., Include your user ID in the transfer reference." rows={2} /></FormControl></FormItem>
-                                    )}/>
-                                </Card>
-                            )})}
+                                        {(methodType === 'bank' || methodType === 'international-transfer') && (
+                                            <div className="space-y-3 pt-2 border-t mt-4">
+                                                <FormField control={form.control} name={`paymentMethods.${index}.accountHolder`} render={({ field }) => (
+                                                    <FormItem><FormLabel>Account Holder</FormLabel><FormControl><Input {...field} placeholder="Account Holder Name" /></FormControl><FormMessage /></FormItem>
+                                                )} />
+                                                <Label>Currencies</Label>
+                                                <div className="pl-4 space-y-2">
+                                                    <FormField control={form.control} name={`paymentMethods.${index}.currencies.SAR.iban`} render={({ field }) => (<FormItem className="flex items-center gap-2"><FormLabel className="w-12">SAR</FormLabel><FormControl><Input {...field} placeholder="SAR IBAN" /></FormControl></FormItem>)} />
+                                                    <FormField control={form.control} name={`paymentMethods.${index}.currencies.USD.iban`} render={({ field }) => (<FormItem className="flex items-center gap-2"><FormLabel className="w-12">USD</FormLabel><FormControl><Input {...field} placeholder="USD IBAN" /></FormControl></FormItem>)} />
+                                                    <FormField control={form.control} name={`paymentMethods.${index}.currencies.YER.iban`} render={({ field }) => (<FormItem className="flex items-center gap-2"><FormLabel className="w-12">YER</FormLabel><FormControl><Input {...field} placeholder="YER IBAN/Account No." /></FormControl></FormItem>)} />
+                                                </div>
+                                            </div>
+                                        )}
+
+                                        {(methodType === 'e-wallet' || methodType === 'local-transfer') && (
+                                            <div className="space-y-3 pt-2 border-t mt-4">
+                                                <Label>Wallet Details</Label>
+                                                <div className="pl-4 space-y-4">
+                                                    <FormField control={form.control} name={`paymentMethods.${index}.wallet.provider`} render={({ field }) => (
+                                                        <FormItem><FormLabel>Provider</FormLabel>
+                                                            <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                                                <FormControl><SelectTrigger><SelectValue /></SelectTrigger></FormControl>
+                                                                <SelectContent>
+                                                                    <SelectItem value="cac-bank">CAC Bank</SelectItem>
+                                                                    <SelectItem value="mobi-cash">Mobi Cash</SelectItem>
+                                                                    <SelectItem value="yemen-mobile">Yemen Mobile</SelectItem>
+                                                                    <SelectItem value="mtn-mobile-money">MTN Mobile Money</SelectItem>
+                                                                    <SelectItem value="you-telecom">YOU Telecom</SelectItem>
+                                                                    <SelectItem value="aljazira-bank">Aljazira Bank</SelectItem>
+                                                                    <SelectItem value="tadhamon-bank">Tadhamon Bank</SelectItem>
+                                                                    <SelectItem value="other">Other</SelectItem>
+                                                                </SelectContent>
+                                                            </Select>
+                                                            <FormMessage /></FormItem>
+                                                    )} />
+                                                    <FormField control={form.control} name={`paymentMethods.${index}.wallet.accountName`} render={({ field }) => (<FormItem><FormLabel>Account Name</FormLabel><FormControl><Input {...field} placeholder="Wallet account name" /></FormControl><FormMessage /></FormItem>)} />
+                                                    <FormField control={form.control} name={`paymentMethods.${index}.wallet.accountNumber`} render={({ field }) => (<FormItem><FormLabel>Account/Phone Number</FormLabel><FormControl><Input {...field} placeholder="Wallet number" /></FormControl><FormMessage /></FormItem>)} />
+                                                </div>
+                                            </div>
+                                        )}
+
+                                        <FormField control={form.control} name={`paymentMethods.${index}.instructions`} render={({ field }) => (
+                                            <FormItem><FormLabel>Instructions (Optional)</FormLabel><FormControl><Textarea {...field} placeholder="e.g., Include your user ID in the transfer reference." rows={2} /></FormControl></FormItem>
+                                        )} />
+                                    </Card>
+                                )
+                            })}
                             <Button type="button" variant="outline" onClick={addNewMethod} className="w-full">
                                 <PlusCircle className="me-2 h-4 w-4" /> Add Payment Method
                             </Button>

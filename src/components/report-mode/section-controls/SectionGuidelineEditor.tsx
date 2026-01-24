@@ -23,7 +23,7 @@ export function GuidelineEditor({ itemKey }: GuidelineEditorProps) {
     guidelines,
     setGuidelines,
   } = useGuidelineEditor(itemKey);
-  
+
   const [newGuideline, setNewGuideline] = useState('');
 
   if (!section) return null;
@@ -80,7 +80,7 @@ export function GuidelineEditor({ itemKey }: GuidelineEditorProps) {
             value={newGuideline}
             onChange={(e) => setNewGuideline(e.target.value)}
             placeholder={t('builder.reportGenerator.addGuidelinePlaceholder')}
-            onKeyDown={(e) => { if(e.key === 'Enter') { e.preventDefault(); handleAddGuideline(); }}}
+            onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); handleAddGuideline(); } }}
           />
           <Button type="button" onClick={handleAddGuideline}>Add</Button>
         </div>

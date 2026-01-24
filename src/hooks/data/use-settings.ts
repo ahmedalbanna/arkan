@@ -1,9 +1,9 @@
 
 'use client';
 
-import { useQuery } from '@tanstack/react-query';
-import { fetchPublicSettings } from '@/services/api/settingsService';
 import type { PublicSettings } from '@/lib/types';
+import { fetchPublicSettings } from '@/services/api/settingsService';
+import { useQuery } from '@tanstack/react-query';
 
 export function usePublicSettings() {
     return useQuery<PublicSettings>({

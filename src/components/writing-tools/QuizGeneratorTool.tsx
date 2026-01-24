@@ -71,22 +71,22 @@ export function QuizGeneratorTool() {
             name="numQuestions"
             control={form.control}
             render={({ field }) => (
-                <div className="space-y-2">
-                    <div className="flex justify-between items-center">
-                        <Label>{t('writingTools.aiQuizGenerator.numQuestionsLabel')}</Label>
-                        <Badge variant="outline">{field.value}</Badge>
-                    </div>
-                    <Slider
-                        value={[field.value]}
-                        onValueChange={(value) => field.onChange(value[0])}
-                        min={1}
-                        max={20}
-                        step={1}
-                        disabled={mutation.isPending}
-                    />
+              <div className="space-y-2">
+                <div className="flex justify-between items-center">
+                  <Label>{t('writingTools.aiQuizGenerator.numQuestionsLabel')}</Label>
+                  <Badge variant="outline">{field.value}</Badge>
                 </div>
+                <Slider
+                  value={[field.value]}
+                  onValueChange={(value) => field.onChange(value[0])}
+                  min={1}
+                  max={20}
+                  step={1}
+                  disabled={mutation.isPending}
+                />
+              </div>
             )}
-           />
+          />
 
           <Button type="submit" disabled={mutation.isPending} className="w-full">
             {mutation.isPending ? <Loader2 className="me-2 h-4 w-4 animate-spin" /> : <Sparkles className="me-2 h-4 w-4" />}
@@ -97,15 +97,15 @@ export function QuizGeneratorTool() {
         {(mutation.isPending || generatedQuiz.length > 0) && (
           <div className="space-y-4 pt-6 border-t">
             <div className="flex justify-between items-center">
-                 <h3 className="font-semibold text-muted-foreground flex items-center gap-2">
-                    <FileText className="h-5 w-5"/>
-                    {t('writingTools.aiQuizGenerator.generatedQuizTitle')}
-                </h3>
-                {generatedQuiz.length > 0 && (
-                    <Button variant="outline" size="sm" onClick={() => setShowAnswers(prev => !prev)}>
-                        {showAnswers ? t('writingTools.aiQuizGenerator.hideAnswers') : t('writingTools.aiQuizGenerator.showAnswers')}
-                    </Button>
-                )}
+              <h3 className="font-semibold text-muted-foreground flex items-center gap-2">
+                <FileText className="h-5 w-5" />
+                {t('writingTools.aiQuizGenerator.generatedQuizTitle')}
+              </h3>
+              {generatedQuiz.length > 0 && (
+                <Button variant="outline" size="sm" onClick={() => setShowAnswers(prev => !prev)}>
+                  {showAnswers ? t('writingTools.aiQuizGenerator.hideAnswers') : t('writingTools.aiQuizGenerator.showAnswers')}
+                </Button>
+              )}
             </div>
 
             <ScrollArea className="h-[60vh] rounded-md border p-4 bg-muted/30">
@@ -115,30 +115,30 @@ export function QuizGeneratorTool() {
                 </div>
               ) : (
                 <div className="space-y-6">
-                    {generatedQuiz.map((q, index) => (
-                        <div key={index} className="space-y-3">
-                            <p className="font-semibold">{index + 1}. {q.question}</p>
-                        {(q.type === 'multiple-choice' || q.type === 'true-false') && Array.isArray(q.options) && (
-                          <ul className="space-y-2 pl-4">
-                            {q.options.map((option: string, i: number) => (
-                              <li key={i} className="flex items-center gap-2 text-sm">
-                                {showAnswers && (
-                                  q.answer === option
-                                    ? <Check className="h-4 w-4 text-green-500" />
-                                    : <X className="h-4 w-4 text-destructive" />
-                                )}
-                                <span className={showAnswers && q.answer === option ? 'font-bold' : ''}>{option}</span>
-                              </li>
-                            ))}
-                          </ul>
-                        )}
-                        {q.type === 'direct-question' && showAnswers && (
-                          <div className="pl-4 text-sm text-muted-foreground italic">
-                            <strong>Answer:</strong> {q.answer}
-                          </div>
-                        )}
+                  {generatedQuiz.map((q, index) => (
+                    <div key={index} className="space-y-3">
+                      <p className="font-semibold">{index + 1}. {q.question}</p>
+                      {(q.type === 'multiple-choice' || q.type === 'true-false') && Array.isArray(q.options) && (
+                        <ul className="space-y-2 pl-4">
+                          {q.options.map((option: string, i: number) => (
+                            <li key={i} className="flex items-center gap-2 text-sm">
+                              {showAnswers && (
+                                q.answer === option
+                                  ? <Check className="h-4 w-4 text-green-500" />
+                                  : <X className="h-4 w-4 text-destructive" />
+                              )}
+                              <span className={showAnswers && q.answer === option ? 'font-bold' : ''}>{option}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      )}
+                      {q.type === 'direct-question' && showAnswers && (
+                        <div className="pl-4 text-sm text-muted-foreground italic">
+                          <strong>Answer:</strong> {q.answer}
                         </div>
-                    ))}
+                      )}
+                    </div>
+                  ))}
                 </div>
               )}
             </ScrollArea>

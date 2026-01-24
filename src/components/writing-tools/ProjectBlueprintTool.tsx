@@ -10,7 +10,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { useLocalization } from '@/context/LocalizationContext';
 import { useProjectBlueprintLogic } from '@/hooks/writing-tools/use-project-blueprint-logic';
 import { markdownComponents } from '@/lib/utils/markdown-styles';
-import { Check, Copy, Loader2, Building2, Download, FileText } from 'lucide-react';
+import { Building2, Check, Copy, Download, FileText, Loader2 } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 
 export function ProjectBlueprintTool() {
@@ -41,7 +41,7 @@ export function ProjectBlueprintTool() {
         </CardHeader>
         <CardContent>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-            
+
             {/* Project Name */}
             <div className="space-y-2">
               <Label htmlFor="projectName">{t('writingTools.projectBlueprint.projectNameLabel')}</Label>
@@ -192,9 +192,9 @@ export function ProjectBlueprintTool() {
               </Select>
             </div>
 
-            <Button 
-              type="submit" 
-              disabled={generateMutation.isPending} 
+            <Button
+              type="submit"
+              disabled={generateMutation.isPending}
               className="w-full"
               size="lg"
             >

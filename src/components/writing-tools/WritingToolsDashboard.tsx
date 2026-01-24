@@ -1,8 +1,8 @@
 'use client';
 
-import { useState } from 'react';
-import Link from 'next/link';
 import { Sparkles } from 'lucide-react';
+import Link from 'next/link';
+import { useState } from 'react';
 
 import { useLocalization } from '@/context/LocalizationContext';
 import { AIResearcherTool } from './AIResearcherTool';
@@ -23,20 +23,20 @@ interface ToolCardProps {
 }
 
 function ToolsNavigation() {
-  const { t } = useLocalization();
-  return (
-    <nav className="grid gap-4 text-sm text-muted-foreground">
-      <Link href="#" className="font-semibold text-primary">
-        {t('writingTools.dashboard.allTools')}
-      </Link>
-      {/* Add other links as needed */}
-    </nav>
-  );
+    const { t } = useLocalization();
+    return (
+        <nav className="grid gap-4 text-sm text-muted-foreground">
+            <Link href="#" className="font-semibold text-primary">
+                {t('writingTools.dashboard.allTools')}
+            </Link>
+            {/* Add other links as needed */}
+        </nav>
+    );
 }
 
 function ToolCard({ title, icon, description, onClick }: ToolCardProps) {
     return (
-        <div 
+        <div
             onClick={onClick}
             className="cursor-pointer rounded-lg border bg-card text-card-foreground shadow-sm hover:shadow-md transition-shadow"
         >
@@ -99,7 +99,7 @@ export function WritingToolsDashboard() {
                     ) : (
                         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
                             {availableTools.map((tool) => (
-                                <ToolCard 
+                                <ToolCard
                                     key={tool.id}
                                     title={tool.title}
                                     icon={tool.icon}

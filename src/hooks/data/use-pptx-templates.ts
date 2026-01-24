@@ -1,18 +1,18 @@
 
 'use client';
 
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '@/context/AuthContext';
-import { getAuthenticatedToken } from '@/lib/utils/authUtils';
 import { toast } from '@/hooks/util/use-toast';
-import {
-    fetchPptxTemplatesApi,
-    updatePptxTemplateApi,
-    deletePptxTemplateApi,
-    createPptxTemplateApi,
-    refreshTemplateImage,
-} from '@/services/api/templateService';
 import type { PptxTemplateProperties } from '@/lib/models';
+import { getAuthenticatedToken } from '@/lib/utils/authUtils';
+import {
+    createPptxTemplateApi,
+    deletePptxTemplateApi,
+    fetchPptxTemplatesApi,
+    refreshTemplateImage,
+    updatePptxTemplateApi,
+} from '@/services/api/templateService';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 
 export function usePptxStyles() {

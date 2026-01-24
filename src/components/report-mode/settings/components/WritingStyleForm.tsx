@@ -1,14 +1,14 @@
 'use client';
 
-import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Slider } from '@/components/ui/slider';
-import { Badge } from '@/components/ui/badge';
-import { UseFormReturn } from 'react-hook-form';
-import type { SettingsFormValues } from '../types';
 import { LanguageSchema } from '@/lib/models';
+import { UseFormReturn } from 'react-hook-form';
 import { citationStyleOptions } from '../constants';
+import type { SettingsFormValues } from '../types';
 
 // Tone options (replace with actual enum if available)
 const toneOptions = ['professional', 'academic', 'casual', 'persuasive', 'technical', 'explanatory'] as const;
@@ -20,7 +20,7 @@ interface WritingStyleFormProps {
 
 /**
  * WritingStyleForm Component
- * 
+ *
  * Handles writing style configurations like language, tone, formality, etc.
  */
 export function WritingStyleForm({ form, onBlur }: WritingStyleFormProps) {

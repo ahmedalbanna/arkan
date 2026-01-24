@@ -2,28 +2,27 @@
 // src/hooks/data/useSections.ts
 'use client';
 
-import { useQuery } from '@tanstack/react-query';
-import { sectionKeys } from '@/lib/query-keys';
-import { fetchSections as fetchSectionsApi, createSection as createSectionApi, updateSection as updateSectionApi, deleteSection as deleteSectionApi } from '@/services/api/sectionService';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { toast } from '@/hooks/util/use-toast';
 import { useAuth } from '@/context/AuthContext';
-import { getAuthenticatedToken } from '@/lib/utils/authUtils';
+import { toast } from '@/hooks/util/use-toast';
 import { Section, type SectionProperties } from '@/lib/models';
+import { sectionKeys } from '@/lib/query-keys';
+import { getAuthenticatedToken } from '@/lib/utils/authUtils';
+import { createSection as createSectionApi, deleteSection as deleteSectionApi, fetchSections as fetchSectionsApi, updateSection as updateSectionApi } from '@/services/api/sectionService';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 export function useSections() {
-  const { firebaseUser } = useAuth();
-  return useQuery({
-    queryKey: sectionKeys.lists(),
-    queryFn: async () => {
-      if (!firebaseUser) throw new Error("User not authenticated");
-      const token = await firebaseUser.getIdToken();
-      const sectionsData = await fetchSectionsApi(token);
-      // Instantiate Section objects
-      return sectionsData.map(s => new Section(s));
-    },
-    enabled: !!firebaseUser,
-  });
+    const { firebaseUser } = useAuth();
+    return useQuery({
+        queryKey: sectionKeys.lists(),
+        queryFn: async () => {
+            if (!firebaseUser) throw new Error("User not authenticated");
+            const token = await firebaseUser.getIdToken();
+            const sectionsData = await fetchSectionsApi(token);
+            // Instantiate Section objects
+            return sectionsData.map(s => new Section(s));
+        },
+        enabled: !!firebaseUser,
+    });
 }
 
 export function useCreateSection() {
@@ -48,7 +47,7 @@ export function useUpdateSection() {
     const queryClient = useQueryClient();
     const { firebaseUser } = useAuth();
     return useMutation({
-        mutationFn: async ({ sectionId, data }: { sectionId: string, data: Partial<SectionProperties>}) => {
+        mutationFn: async ({ sectionId, data }: { sectionId: string, data: Partial<SectionProperties> }) => {
             const token = await getAuthenticatedToken(firebaseUser);
             return updateSectionApi(sectionId, data, token);
         },

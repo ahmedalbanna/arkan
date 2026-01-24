@@ -50,7 +50,7 @@ ${metadataEntries}
     public static buildSectionPrompt(section: Section, project: Project): string {
         // Build project metadata context
         const projectMetadata = this.buildProjectMetadata(project);
-        
+
         const contextSectionsContent = Object.entries(section.context?.sections || {})
             .map(([sectionId, type]) => {
                 const contextSection = project.getSection(sectionId);
@@ -72,9 +72,9 @@ ${metadataEntries}
             })
             .filter(Boolean)
             .join('\\n\\n');
-        
+
         const fullContext = [contextSectionsContent, externalContextContent].filter(Boolean).join('\\n\\n');
-        
+
         // Use the new dynamic system prompt and action prompt from the section model
         const systemPrompt = section.buildSystemPrompt();
         const actionPrompt = section.buildActionPrompt();

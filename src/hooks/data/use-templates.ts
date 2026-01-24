@@ -1,33 +1,33 @@
 
 'use client';
 
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '@/context/AuthContext';
-import { getAuthenticatedToken } from '@/lib/utils/authUtils';
 import { toast } from '@/hooks/util/use-toast';
 import {
-    fetchReportTemplatesApi,
+    type CreatePresentationTemplateData,
+    type CreateReportTemplateData,
+    type PptxTemplateProperties,
+    type ReportTemplateProperties,
+    type UpdatePresentationTemplateData,
+    type UpdateReportTemplateData,
+} from '@/lib/types';
+import { getAuthenticatedToken } from '@/lib/utils/authUtils';
+import {
+    createPresentationTemplateApi,
     createReportTemplateApi,
-    updateReportTemplateApi,
+    deletePresentationTemplateApi,
     deleteReportTemplateApi,
     fetchPresentationTemplatesApi,
-    createPresentationTemplateApi,
+    fetchReportTemplatesApi,
     updatePresentationTemplateApi,
-    deletePresentationTemplateApi,
+    updateReportTemplateApi,
 } from '@/services/api/templateService';
-import {
-    type ReportTemplateProperties,
-    type PptxTemplateProperties,
-    type CreateReportTemplateData,
-    type UpdateReportTemplateData,
-    type CreatePresentationTemplateData,
-    type UpdatePresentationTemplateData,
-} from '@/lib/types';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
-import { useBuilderStore } from '../core/useBuilderStore';
-import { useState } from 'react';
-import { useSections } from './use-sections';
 import { applyReportTemplate as applyReportTemplateUtil } from '@/lib/project/template';
+import { useState } from 'react';
+import { useBuilderStore } from '../core/useBuilderStore';
+import { useSections } from './use-sections';
 
 
 // ============================================================================
@@ -66,7 +66,7 @@ export function useApplyReportTemplate(onSuccessCallback?: () => void) {
             setIsApplying(false);
         }
     };
-    
+
     return {
         handleSelectTemplate,
         isApplyingTemplate: isApplying,

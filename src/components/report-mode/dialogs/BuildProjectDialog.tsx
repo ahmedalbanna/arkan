@@ -13,7 +13,7 @@ import {
 } from '@/components/ui/dialog';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useBuilderStore } from '@/hooks';
-import type { Chapter, Section, Project } from '@/lib/models';
+import type { Chapter, Project, Section } from '@/lib/models';
 import { PromptBuilder } from '@/lib/prompt-builder';
 import { AlertTriangle, Building, Code, Eye, Link as LinkIcon, Loader2, StickyNote } from 'lucide-react';
 import { useMemo, useState } from 'react';
@@ -33,14 +33,14 @@ interface BuildProjectDialogProps {
 }
 
 function getContextNames(project: Project, section: Section): string[] {
-    if (!section) return [];
-    const context = section.context;
-    if (!context) return [];
+  if (!section) return [];
+  const context = section.context;
+  if (!context) return [];
 
-    const sectionNames = Object.keys(context.sections || {}).map(id => project.getSection(id)?.title || 'Untitled Section');
-    const fileNames = Object.keys(context.externalContext || {}).map(id => project.externalContext.find(f => f.id === id)?.fileName || 'Untitled File');
+  const sectionNames = Object.keys(context.sections || {}).map(id => project.getSection(id)?.title || 'Untitled Section');
+  const fileNames = Object.keys(context.externalContext || {}).map(id => project.externalContext.find(f => f.id === id)?.fileName || 'Untitled File');
 
-    return [...sectionNames, ...fileNames];
+  return [...sectionNames, ...fileNames];
 };
 
 
@@ -59,7 +59,7 @@ export function BuildProjectDialog({
     const allSelectedSections = new Set(chaptersToBuild.flatMap(c => c.sections.map(s => s.id)));
     return PromptBuilder.buildProjectPrompt(project, allSelectedSections);
   }, [project, chaptersToBuild]);
-  
+
 
   if (chaptersToBuild.length === 0) return null;
 

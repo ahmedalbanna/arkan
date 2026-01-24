@@ -14,7 +14,7 @@ interface ContentSelectorProps {
 
 /**
  * ContentSelector Component
- * 
+ *
  * Displays project structure with checkboxes for content selection.
  */
 export function ContentSelector({

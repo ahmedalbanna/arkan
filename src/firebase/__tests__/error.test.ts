@@ -1,20 +1,20 @@
 
-import { FirestorePermissionError } from '../errors';
 import { errorEmitter } from '../error-emitter';
+import { FirestorePermissionError } from '../errors';
 
 // Mock getAuth to avoid Firebase initialization issues in tests
 jest.mock('firebase/auth', () => ({
-    getAuth: jest.fn(() => ({
-        currentUser: {
-            uid: 'test-user-id',
-            displayName: 'Test User',
-            email: 'test@example.com',
-            emailVerified: true,
-            phoneNumber: null,
-            providerData: [{ providerId: 'password' }],
-            tenantId: null,
-        }
-    })),
+  getAuth: jest.fn(() => ({
+    currentUser: {
+      uid: 'test-user-id',
+      displayName: 'Test User',
+      email: 'test@example.com',
+      emailVerified: true,
+      phoneNumber: null,
+      providerData: [{ providerId: 'password' }],
+      tenantId: null,
+    }
+  })),
 }));
 
 describe('Firebase Errors and Emitter', () => {
@@ -63,16 +63,16 @@ describe('Firebase Errors and Emitter', () => {
       // Assert
       expect(listener).toHaveBeenCalledTimes(1);
       expect(listener).toHaveBeenCalledWith(error);
-      
+
       const receivedError = listener.mock.calls[0][0];
       expect(receivedError.request.path).toContain('items/item789');
 
       // Unsubscribe
       errorEmitter.off('permission-error', listener);
-      
+
       // Emit again
       errorEmitter.emit('permission-error', error);
-      
+
       // Assert listener was not called again
       expect(listener).toHaveBeenCalledTimes(1);
     });

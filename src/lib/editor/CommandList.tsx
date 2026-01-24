@@ -1,8 +1,8 @@
 
 'use client';
 
-import React, { useState, useEffect, useImperativeHandle } from 'react';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import React, { useEffect, useImperativeHandle, useState } from 'react';
 
 const CommandList = React.forwardRef((props: any, ref) => {
   const [selectedIndex, setSelectedIndex] = useState(0);

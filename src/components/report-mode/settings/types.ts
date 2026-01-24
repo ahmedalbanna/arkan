@@ -2,8 +2,8 @@
  * Types for Project Settings
  */
 
+import { BehaviorSchema, LanguageSchema } from '@/lib/models';
 import { z } from 'zod';
-import { LanguageSchema, BehaviorSchema, CitationStyleSchema } from '@/lib/models';
 
 export const settingsSchema = z.object({
   name: z.string().min(1, 'Project name is required.'),

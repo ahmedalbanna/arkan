@@ -1,8 +1,8 @@
 'use client';
 
-import { useDropzone } from 'react-dropzone';
 import { useLocalization } from '@/context/LocalizationContext';
 import { Loader2, UploadCloud } from 'lucide-react';
+import { useDropzone } from 'react-dropzone';
 
 interface FileUploadZoneProps {
   onFileUpload: (content: string) => void;
@@ -32,9 +32,9 @@ export function FileUploadZone({ onFileUpload, isUploading, setIsUploading }: Fi
     const isTextFile = file.type.startsWith('text/') || file.name.endsWith('.md');
 
     if (isTextFile) {
-        reader.readAsText(file);
+      reader.readAsText(file);
     } else {
-        reader.readAsDataURL(file); // Read as data URI for PDF, DOCX, etc.
+      reader.readAsDataURL(file); // Read as data URI for PDF, DOCX, etc.
     }
   }
 

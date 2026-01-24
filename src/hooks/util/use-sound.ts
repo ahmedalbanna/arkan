@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useEffect, useCallback } from 'react';
+import { useCallback, useEffect } from 'react';
 
 // Dynamically import ion-sound inside a useEffect to ensure it only runs on the client
 const useSound = () => {
@@ -25,17 +25,17 @@ const useSound = () => {
 
   const playSuccess = useCallback(() => {
     if (typeof window !== 'undefined') {
-        import('ion-sound').then(ion => {
-            ion.default.sound.play('success');
-        });
+      import('ion-sound').then(ion => {
+        ion.default.sound.play('success');
+      });
     }
   }, []);
 
   const playError = useCallback(() => {
-     if (typeof window !== 'undefined') {
-        import('ion-sound').then(ion => {
-            ion.default.sound.play('error');
-        });
+    if (typeof window !== 'undefined') {
+      import('ion-sound').then(ion => {
+        ion.default.sound.play('error');
+      });
     }
   }, []);
 

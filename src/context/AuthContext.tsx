@@ -1,14 +1,14 @@
 'use client';
 
-import { userKeys } from '@/lib/query-keys';
+import { useAuth as useFirebaseAuth } from '@/firebase/provider'; // Aliased to avoid naming conflict
+import { useBuilderStore } from '@/hooks';
 import { User } from '@/lib/models';
+import { userKeys } from '@/lib/query-keys';
 import { getAuthenticatedToken } from '@/lib/utils/authUtils';
 import { fetchUserProfileApi, subscribeToUserProfile } from '@/services';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { User as FirebaseUser, onAuthStateChanged } from 'firebase/auth';
 import { createContext, ReactNode, useCallback, useContext, useEffect, useState } from 'react';
-import { useBuilderStore } from '@/hooks';
-import { useAuth as useFirebaseAuth } from '@/firebase/provider'; // Aliased to avoid naming conflict
 
 interface AuthContextType {
   firebaseUser: FirebaseUser | null;
@@ -90,14 +90,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       if (user) {
         setIsGuest(false);
         if (guestCookieExists) {
-            document.cookie = '__guest=; Max-Age=-99999999; path=/;';
+          document.cookie = '__guest=; Max-Age=-99999999; path=/;';
         }
         await queryClient.invalidateQueries({ queryKey: userKeys.profile(user.uid) });
       } else {
         setIsGuest(guestCookieExists);
         if (!guestCookieExists) {
-            queryClient.clear();
-            setUserProfile(null);
+          queryClient.clear();
+          setUserProfile(null);
         }
       }
       setAuthIsLoading(false);
@@ -107,13 +107,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   }, [auth, queryClient, setUserProfile]); // Added auth to dependency array
 
   const value = {
-      firebaseUser,
-      userProfile: userProfile ?? null,
-      isLoading: authIsLoading || (!!firebaseUser && isProfileLoading),
-      isGuest,
-      refetchUser,
+    firebaseUser,
+    userProfile: userProfile ?? null,
+    isLoading: authIsLoading || (!!firebaseUser && isProfileLoading),
+    isGuest,
+    refetchUser,
   };
-  
+
   return (
     <AuthContext.Provider value={value}>
       {children}
@@ -130,3 +130,4 @@ export const useAuth = (): AuthContextType => {
 };
 
 export type { FirebaseUser };
+

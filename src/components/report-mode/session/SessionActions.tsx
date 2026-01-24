@@ -11,12 +11,12 @@ import {
 import { useLocalization } from '@/context/LocalizationContext';
 import { useBuilderStore } from '@/hooks';
 import { useSaveProject } from '@/hooks/data/use-projects';
+import { downloadProjectAsFile } from '@/lib/project/io';
 import { Download, Loader2, PlusCircle, Save, Upload } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useRef } from 'react';
 import { BrowseProjectsDialog } from './BrowseProjectsDialog';
 import { ExportDialog } from './ExportDialog';
-import { downloadProjectAsFile } from '@/lib/project/io'; 
 
 interface SessionActionsProps {
     isSaving: boolean;
@@ -47,10 +47,10 @@ export function SessionActions({ isSaving }: SessionActionsProps) {
         if (!project) return;
         saveProjectMutation.mutate(project.toStateObject());
     };
-    
+
     const handleDownload = () => {
         if (project) {
-            downloadProjectAsFile(project); 
+            downloadProjectAsFile(project);
         }
     };
 
@@ -106,8 +106,8 @@ export function SessionActions({ isSaving }: SessionActionsProps) {
                     {isSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
                     <span className="hidden md:inline ms-2">{t('projects.saveButton')}</span>
                 </Button>
-                
-                 <Tooltip>
+
+                <Tooltip>
                     <TooltipTrigger asChild>
                         <Button
                             variant="outline"
@@ -117,7 +117,7 @@ export function SessionActions({ isSaving }: SessionActionsProps) {
                             className="h-8 w-8 md:w-auto md:px-3"
                         >
                             <Download className="h-4 w-4" />
-                             <span className="hidden md:inline ms-2">{t('builder.buttons.downloadProject')}</span>
+                            <span className="hidden md:inline ms-2">{t('builder.buttons.downloadProject')}</span>
                         </Button>
                     </TooltipTrigger>
                     <TooltipContent>

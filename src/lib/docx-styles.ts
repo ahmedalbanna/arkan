@@ -15,8 +15,8 @@ const commonParagraphStyles = [
         next: 'Normal',
         quickFormat: true,
         run: { size: 24 }, // 12pt - standard professional size
-        paragraph: { 
-            spacing: { 
+        paragraph: {
+            spacing: {
                 after: 200, // 10pt after for better paragraph separation
                 before: 0,
                 line: 360 // 1.5 line spacing for better readability
@@ -54,10 +54,10 @@ const commonParagraphStyles = [
         name: 'Quote',
         basedOn: 'Normal',
         next: 'Normal',
-        run: { 
-            italics: true, 
+        run: {
+            italics: true,
             color: '4A4A4A',
-            size: 24 
+            size: 24
         },
         paragraph: {
             indent: { left: 1440, right: 720 }, // Larger left indent for quotes
@@ -200,7 +200,7 @@ const commonParagraphStyles = [
             firstRow: {
                 run: { bold: true, color: 'FFFFFF', size: 24 },
                 paragraph: { alignment: AlignmentType.CENTER },
-                tableCell: { 
+                tableCell: {
                     shading: { type: 'clear', fill: '4A90E2' }, // Blue header
                     borders: {
                         bottom: { style: 'single', size: 6, color: '2E5C8A' }
@@ -349,92 +349,92 @@ const academicCustomStyles: CustomStyles = {
 
 const modernStyles: IStylesOptions = {
     default: {
-        document: { 
-            run: { 
-                font: { name: 'Calibri' }, 
+        document: {
+            run: {
+                font: { name: 'Calibri' },
                 size: 24, // Increased from 22 to 24 (12pt) for better readability
                 color: '2D2D2D' // Slightly softer black
-            } 
+            }
         },
-        heading1: { 
-            run: { 
-                font: { name: 'Calibri Light' }, 
+        heading1: {
+            run: {
+                font: { name: 'Calibri Light' },
                 size: 40, // Increased from 32 (20pt)
-                bold: true, 
+                bold: true,
                 color: "1F4788" // Deeper professional blue
-            }, 
-            paragraph: { 
+            },
+            paragraph: {
                 spacing: { after: 360, before: 480, line: 360 }, // More spacing
-                outlineLevel: 1, 
+                outlineLevel: 1,
                 keepNext: true,
                 keepLines: true
-            } 
+            }
         },
-        heading2: { 
-            run: { 
-                font: { name: 'Calibri Light' }, 
+        heading2: {
+            run: {
+                font: { name: 'Calibri Light' },
                 size: 32, // Increased from 26 (16pt)
-                bold: true, 
-                color: "2E74B5" 
-            }, 
-            paragraph: { 
-                spacing: { after: 280, before: 360, line: 320 }, 
-                outlineLevel: 2, 
+                bold: true,
+                color: "2E74B5"
+            },
+            paragraph: {
+                spacing: { after: 280, before: 360, line: 320 },
+                outlineLevel: 2,
                 keepNext: true,
                 keepLines: true
-            } 
+            }
         },
-        heading3: { 
-            run: { 
-                font: { name: 'Calibri' }, 
+        heading3: {
+            run: {
+                font: { name: 'Calibri' },
                 size: 28, // Increased from 24 (14pt)
-                bold: true, 
-                color: "4472C4" 
-            }, 
-            paragraph: { 
-                spacing: { after: 240, before: 280, line: 300 }, 
-                outlineLevel: 3, 
-                keepNext: true 
-            } 
+                bold: true,
+                color: "4472C4"
+            },
+            paragraph: {
+                spacing: { after: 240, before: 280, line: 300 },
+                outlineLevel: 3,
+                keepNext: true
+            }
         },
-        heading4: { 
-            run: { 
-                font: { name: 'Calibri' }, 
+        heading4: {
+            run: {
+                font: { name: 'Calibri' },
                 size: 26, // Increased from 22 (13pt)
-                bold: true, 
-                color: "5B9BD5" 
-            }, 
-            paragraph: { 
-                spacing: { after: 200, before: 240, line: 280 }, 
-                outlineLevel: 4, 
-                keepNext: true 
-            } 
+                bold: true,
+                color: "5B9BD5"
+            },
+            paragraph: {
+                spacing: { after: 200, before: 240, line: 280 },
+                outlineLevel: 4,
+                keepNext: true
+            }
         },
-        heading5: { 
-            run: { 
-                font: { name: 'Calibri' }, 
+        heading5: {
+            run: {
+                font: { name: 'Calibri' },
                 size: 24, // Same as body (12pt)
                 bold: true,
-                color: "636363" 
-            }, 
-            paragraph: { 
-                spacing: { after: 180, before: 200, line: 276 }, 
-                outlineLevel: 5, 
-                keepNext: true 
-            } 
+                color: "636363"
+            },
+            paragraph: {
+                spacing: { after: 180, before: 200, line: 276 },
+                outlineLevel: 5,
+                keepNext: true
+            }
         },
-        heading6: { 
-            run: { 
-                font: { name: 'Calibri' }, 
-                size: 24, 
-                italics: true, 
-                color: "737373" 
-            }, 
-            paragraph: { 
-                spacing: { after: 160, before: 180, line: 276 }, 
-                outlineLevel: 6, 
-                keepNext: true 
-            } 
+        heading6: {
+            run: {
+                font: { name: 'Calibri' },
+                size: 24,
+                italics: true,
+                color: "737373"
+            },
+            paragraph: {
+                spacing: { after: 160, before: 180, line: 276 },
+                outlineLevel: 6,
+                keepNext: true
+            }
         },
     },
     paragraphStyles: [

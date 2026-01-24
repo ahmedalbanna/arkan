@@ -3,6 +3,7 @@
 'use client';
 
 import BubbleMenuExtension from '@tiptap/extension-bubble-menu';
+import { Color } from '@tiptap/extension-color';
 import Dropcursor from '@tiptap/extension-dropcursor';
 import { FileHandler } from '@tiptap/extension-file-handler';
 import Image from '@tiptap/extension-image';
@@ -12,18 +13,17 @@ import TableCell from '@tiptap/extension-table-cell';
 import TableHeader from '@tiptap/extension-table-header';
 import TableRow from '@tiptap/extension-table-row';
 import TextAlign from '@tiptap/extension-text-align';
-import StarterKit from '@tiptap/starter-kit';
+import TextStyle from '@tiptap/extension-text-style';
 import { Editor } from '@tiptap/react';
+import StarterKit from '@tiptap/starter-kit';
 import 'katex/dist/katex.min.css';
+import mammoth from 'mammoth';
+import { marked } from 'marked';
 import Katex from 'tiptap-katex';
+import AIImageGeneratorNode from './editor/ai-image-generator-extension';
 import PlantUML from './editor/plantUml-extension'; // Import the new extension
 import SlashCommand from './editor/slash-command';
-import { marked } from 'marked';
-import mammoth from 'mammoth';
 import { editorPlantUml } from './utils/processPlantUml';
-import AIImageGeneratorNode from './editor/ai-image-generator-extension';
-import { Color } from '@tiptap/extension-color';
-import TextStyle from '@tiptap/extension-text-style';
 
 /**
  * Handles dropping a file into the Tiptap editor.
@@ -36,7 +36,7 @@ export const handleFileDrop = (editor: Editor, file: File) => {
     console.warn('File dropped without a name or content, skipping.');
     return;
   }
-  
+
   const fileExtension = file.name.split('.').pop()?.toLowerCase();
   const reader = new FileReader();
 
@@ -67,7 +67,7 @@ export const handleFileDrop = (editor: Editor, file: File) => {
     console.error('Error reading file:', error);
     window.alert('Error reading file.');
   };
-  
+
   if (file.type.startsWith('image/')) {
     reader.readAsDataURL(file);
   } else if (fileExtension === 'md' || file.type === 'text/markdown') {
@@ -101,26 +101,26 @@ export const handleFilePaste = (editor: Editor, file: File) => {
   reader.readAsDataURL(file);
 };
 
-export async function handleHtmlPaste(editor:Editor, html:string) {
+export async function handleHtmlPaste(editor: Editor, html: string) {
   if (html && editor) {
     editor.chain().focus().insertContent(html, {
-        parseOptions: {
-            preserveWhitespace: false,
-        },
+      parseOptions: {
+        preserveWhitespace: false,
+      },
     }).run();
     return true;
   }
   return false;
 }
 
-export async function handlePlainPaste(editor:Editor, plain:string) {
+export async function handlePlainPaste(editor: Editor, plain: string) {
   if (plain && editor) {
     if (plain.includes('@startuml') && plain.includes('@enduml')) {
-        const processed = await editorPlantUml(plain);
-        if (processed) {
-            editor.chain().focus().insertContent(marked.parse(processed) as string).run();
-            return true;
-        }
+      const processed = await editorPlantUml(plain);
+      if (processed) {
+        editor.chain().focus().insertContent(marked.parse(processed) as string).run();
+        return true;
+      }
     }
     const parsedHtml = marked.parse(plain) as string;
     editor.chain().focus().insertContent(parsedHtml).run();

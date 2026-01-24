@@ -1,121 +1,121 @@
 
 'use client';
 
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
-import { BrainCircuit, FileSpreadsheet, GitGraph, Laptop, Presentation, FileQuestion, BookCheck, PencilLine, FileText, ShieldCheck, Users, Workflow, Bell, Palette } from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useLocalization } from '@/context/LocalizationContext';
+import { Bell, BrainCircuit, FileQuestion, FileSpreadsheet, FileText, GitGraph, Laptop, Palette, Presentation, ShieldCheck, Users } from 'lucide-react';
 
 const features = [
-  {
-    id: 'proposal',
-    title: 'docs.proposalGenerator.title',
-    icon: FileSpreadsheet,
-    description: 'docs.proposalGenerator.description',
-    steps: [
-      'docs.proposalGenerator.step1',
-      'docs.proposalGenerator.step2',
-      'docs.proposalGenerator.step3',
-    ],
-  },
-  {
-    id: 'report',
-    title: 'docs.reportGenerator.title',
-    icon: FileText,
-    description: 'docs.reportGenerator.description',
-    steps: [
-        'docs.reportGenerator.step1',
-        'docs.reportGenerator.step2',
-        'docs.reportGenerator.step3',
-        'docs.reportGenerator.step4',
-    ],
-  },
-  {
-    id: 'diagram',
-    title: 'docs.diagramGenerator.title',
-    icon: GitGraph,
-    description: 'docs.diagramGenerator.description',
-    steps: [
-        'docs.diagramGenerator.step1',
-        'docs.diagramGenerator.step2',
-        'docs.diagramGenerator.step3',
-    ],
-  },
-  {
-    id: 'code',
-    title: 'docs.codeGenerator.title',
-    icon: Laptop,
-    description: 'docs.codeGenerator.description',
-    steps: [
-        'docs.codeGenerator.step1',
-        'docs.codeGenerator.step2',
-    ],
-  },
     {
-    id: 'presentation',
-    title: 'docs.presentationGenerator.title',
-    icon: Presentation,
-    description: 'docs.presentationGenerator.description',
-    steps: [
-        'docs.presentationGenerator.step1',
-        'docs.presentationGenerator.step2',
-        'docs.presentationGenerator.step3',
-    ],
-  },
-  {
-    id: 'academic-solver',
-    title: 'docs.academicSolver.title',
-    icon: FileQuestion,
-    description: 'docs.academicSolver.description',
-    steps: [
-        'docs.academicSolver.step1',
-        'docs.academicSolver.step2',
-        'docs.academicSolver.step3',
-    ],
-  },
-  {
-      id: 'team-management',
-      title: 'docs.teamManagement.title',
-      icon: Users,
-      description: 'docs.teamManagement.description',
-      steps: [
-          'docs.teamManagement.step1',
-          'docs.teamManagement.step2',
-          'docs.teamManagement.step3',
-          'docs.teamManagement.step4',
-      ],
-  },
-  {
-      id: 'design-studio',
-      title: 'docs.designStudio.title',
-      icon: Palette,
-      description: 'docs.designStudio.description',
-      steps: [
-          'docs.designStudio.step1',
-          'docs.designStudio.step2',
-          'docs.designStudio.step3',
-          'docs.designStudio.step4',
-      ],
-  },
-  {
-    id: 'push-notifications',
-    title: 'docs.pushNotifications.title',
-    icon: Bell,
-    description: 'docs.pushNotifications.description',
-    steps: [],
-  },
-  {
-    id: 'admin',
-    title: 'docs.admin.title',
-    icon: ShieldCheck,
-    description: 'docs.admin.description',
-    steps: [
-        'docs.admin.step1',
-        'docs.admin.step2',
-        'docs.admin.step3',
-        'docs.admin.step4',
-    ],
-  },
+        id: 'proposal',
+        title: 'docs.proposalGenerator.title',
+        icon: FileSpreadsheet,
+        description: 'docs.proposalGenerator.description',
+        steps: [
+            'docs.proposalGenerator.step1',
+            'docs.proposalGenerator.step2',
+            'docs.proposalGenerator.step3',
+        ],
+    },
+    {
+        id: 'report',
+        title: 'docs.reportGenerator.title',
+        icon: FileText,
+        description: 'docs.reportGenerator.description',
+        steps: [
+            'docs.reportGenerator.step1',
+            'docs.reportGenerator.step2',
+            'docs.reportGenerator.step3',
+            'docs.reportGenerator.step4',
+        ],
+    },
+    {
+        id: 'diagram',
+        title: 'docs.diagramGenerator.title',
+        icon: GitGraph,
+        description: 'docs.diagramGenerator.description',
+        steps: [
+            'docs.diagramGenerator.step1',
+            'docs.diagramGenerator.step2',
+            'docs.diagramGenerator.step3',
+        ],
+    },
+    {
+        id: 'code',
+        title: 'docs.codeGenerator.title',
+        icon: Laptop,
+        description: 'docs.codeGenerator.description',
+        steps: [
+            'docs.codeGenerator.step1',
+            'docs.codeGenerator.step2',
+        ],
+    },
+    {
+        id: 'presentation',
+        title: 'docs.presentationGenerator.title',
+        icon: Presentation,
+        description: 'docs.presentationGenerator.description',
+        steps: [
+            'docs.presentationGenerator.step1',
+            'docs.presentationGenerator.step2',
+            'docs.presentationGenerator.step3',
+        ],
+    },
+    {
+        id: 'academic-solver',
+        title: 'docs.academicSolver.title',
+        icon: FileQuestion,
+        description: 'docs.academicSolver.description',
+        steps: [
+            'docs.academicSolver.step1',
+            'docs.academicSolver.step2',
+            'docs.academicSolver.step3',
+        ],
+    },
+    {
+        id: 'team-management',
+        title: 'docs.teamManagement.title',
+        icon: Users,
+        description: 'docs.teamManagement.description',
+        steps: [
+            'docs.teamManagement.step1',
+            'docs.teamManagement.step2',
+            'docs.teamManagement.step3',
+            'docs.teamManagement.step4',
+        ],
+    },
+    {
+        id: 'design-studio',
+        title: 'docs.designStudio.title',
+        icon: Palette,
+        description: 'docs.designStudio.description',
+        steps: [
+            'docs.designStudio.step1',
+            'docs.designStudio.step2',
+            'docs.designStudio.step3',
+            'docs.designStudio.step4',
+        ],
+    },
+    {
+        id: 'push-notifications',
+        title: 'docs.pushNotifications.title',
+        icon: Bell,
+        description: 'docs.pushNotifications.description',
+        steps: [],
+    },
+    {
+        id: 'admin',
+        title: 'docs.admin.title',
+        icon: ShieldCheck,
+        description: 'docs.admin.description',
+        steps: [
+            'docs.admin.step1',
+            'docs.admin.step2',
+            'docs.admin.step3',
+            'docs.admin.step4',
+        ],
+    },
 ];
 
 export default function DocsPage() {

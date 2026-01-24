@@ -2,29 +2,29 @@
 
 'use client';
 
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import {
   Dialog,
   DialogClose,
   DialogContent,
-  DialogFooter,
   DialogDescription,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useBuilderStore, useExport } from '@/hooks';
 import { templates as docxTemplates, type DocxTemplateKey } from '@/lib/docx-styles';
+import { Chapter, Section, type ProjectContent } from '@/lib/models';
 import { templates as pptxTemplates, type PptxTemplateKey } from '@/lib/pptx-styles';
 import { Download, FileText, Loader2, Presentation } from 'lucide-react';
-import { useState, useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../../ui/select';
-import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { Chapter, Section, type ProjectContent } from '@/lib/models';
 
 export function ExportDialog() {
   const { project } = useBuilderStore();
@@ -35,7 +35,7 @@ export function ExportDialog() {
   // Initialize selection when dialog opens or project changes
   useMemo(() => {
     if (project) {
-      const allContentIds = project.content.flatMap(item => 
+      const allContentIds = project.content.flatMap(item =>
         item instanceof Chapter ? [item.id, ...item.sections.map(s => s.id)] : [item.id]
       );
       setSelectedContent(new Set(allContentIds));
@@ -122,10 +122,10 @@ export function ExportDialog() {
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
         <Button
-            variant="outline"
-            size="icon"
-            className="h-8 w-8 md:w-auto md:px-3"
-            disabled={!hasContent}
+          variant="outline"
+          size="icon"
+          className="h-8 w-8 md:w-auto md:px-3"
+          disabled={!hasContent}
         >
           <Download className="h-4 w-4" />
           <span className="hidden md:inline ms-2">Export</span>
@@ -187,7 +187,7 @@ export function ExportDialog() {
               <TabsTrigger value="docx"><FileText className="me-2 h-4 w-4" /> Word (.docx)</TabsTrigger>
               <TabsTrigger value="pptx"><Presentation className="me-2 h-4 w-4" /> PowerPoint (.pptx)</TabsTrigger>
             </TabsList>
-            
+
             <TabsContent value="docx" className="pt-6">
               <div className="space-y-4">
                 <div className="space-y-2">
@@ -221,7 +221,7 @@ export function ExportDialog() {
                 </Button>
               </DialogFooter>
             </TabsContent>
-            
+
             <TabsContent value="pptx" className="pt-6">
               <div className="space-y-4">
                 <div className="space-y-2">
@@ -267,7 +267,7 @@ export function ExportDialog() {
         </div>
 
         <DialogFooter className="md:hidden">
-            <DialogClose asChild><Button variant="ghost">Cancel</Button></DialogClose>
+          <DialogClose asChild><Button variant="ghost">Cancel</Button></DialogClose>
         </DialogFooter>
       </DialogContent>
     </Dialog>
