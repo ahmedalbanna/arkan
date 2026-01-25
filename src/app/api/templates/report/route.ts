@@ -1,7 +1,7 @@
 
 // src/app/api/admin/templates/report/route.ts
 import { adminDb } from '@/lib/firebase/server-init';
-import { CreateReportTemplateSchema, ReportTemplate, type ReportTemplateProperties } from '@/lib/models';
+import { CreateReportTemplateSchema, type ReportTemplateProperties } from '@/lib/models';
 import { createApiResponse, handleApiError, withAuth } from '@/lib/utils/api-utils';
 import { defaultReportTemplates } from '@/lib/db/seed-data/report-templates';
 

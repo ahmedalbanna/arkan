@@ -6,7 +6,6 @@
  */
 
 import { ai } from '@/ai/genkit';
-import { z } from 'genkit';
 import { withRetry, DEFAULT_RETRY_CONFIG } from '@/lib/utils/retry-utils';
 import { logger } from '@/lib/utils/logger';
 import {
@@ -28,7 +27,7 @@ export async function generateUnified(
   input: UnifiedGenerationInput
 ): Promise<UnifiedGenerationOutput> {
   const startTime = Date.now();
-  
+
   logger.info(`Starting ${input.processType} generation for ${input.processId}`);
 
   // Merge user config with process-specific defaults
@@ -107,7 +106,7 @@ function extractContent(result: unknown): string {
     const resultObj = result as any;
 
     // Try common field names
-    const content = 
+    const content =
       resultObj.text ||
       resultObj.content ||
       resultObj.output ||

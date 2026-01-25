@@ -10,7 +10,7 @@ import { format } from 'date-fns';
 import { useLocalization } from '@/context/LocalizationContext';
 import { useUserProfile } from '@/hooks';
 import { Skeleton } from '@/components/ui/skeleton';
-import { use, Suspense, lazy } from 'react';
+import { use} from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';

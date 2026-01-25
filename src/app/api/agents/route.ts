@@ -2,7 +2,6 @@
 import { adminDb } from '@/lib/firebase/server-init';
 import { handleApiError, createApiResponse, withAuth } from '@/lib/utils/api-utils';
 import { z } from 'zod';
-import type { AgentProperties } from '@/lib/models';
 
 const agentSchema = z.object({
     id: z.string().min(3).regex(/^[a-z0-9-]+$/, "ID must be lowercase alphanumeric with hyphens"),

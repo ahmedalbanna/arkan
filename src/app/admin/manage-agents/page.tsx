@@ -19,7 +19,7 @@ export default function ManageAgentsPage() {
         error,
         fetchAgents,
     } = useAgentManager();
-    const { firebaseUser, isLoading: authIsLoading } = useAuth();
+    const { isLoading: authIsLoading } = useAuth();
 
     function handleFetch() {
         fetchAgents();

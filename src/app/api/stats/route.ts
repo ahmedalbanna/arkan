@@ -13,7 +13,7 @@ async function verifyUser(request: Request) {
     try {
         let decodedToken = await adminAuth.verifyIdToken(token, true);
         return { authorized: true, userId: decodedToken.uid };
-    } catch (_error) {
+    } catch (error) {
         return { authorized: false, message: 'Unauthorized', userId: null };
     }
 }
