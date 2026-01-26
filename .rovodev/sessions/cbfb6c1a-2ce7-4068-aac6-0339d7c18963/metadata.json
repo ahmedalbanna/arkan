@@ -1,0 +1,50 @@
+{
+  "title": "Fixing Build Errors",
+  "is_manual_title": false,
+  "fork_data": null,
+  "workspace_path": "/teamspace/studios/this_studio/arkan",
+  "bookmarks": [
+    {
+      "message_index": 141,
+      "name": "Continue fixing remaining errors",
+      "type": "prompt",
+      "created_at": 1767994299
+    },
+    {
+      "message_index": 187,
+      "name": "Continue fixing the remaining 52 errors",
+      "type": "prompt",
+      "created_at": 1767994891
+    },
+    {
+      "message_index": 217,
+      "name": "Continue fixing the remaining 45 errors (focus on hight priority ones)",
+      "type": "prompt",
+      "created_at": 1767995358
+    },
+    {
+      "message_index": 237,
+      "name": "Continue fixing the remaining 34 errors (focus on medium priority)",
+      "type": "prompt",
+      "created_at": 1767995665
+    },
+    {
+      "message_index": 281,
+      "name": "typecheck-result.txt Continue with remaining 30 errors (diminishing returns)",
+      "type": "prompt",
+      "created_at": 1767997256
+    },
+    {
+      "message_index": 335,
+      "name": "typecheck-result.txt",
+      "type": "prompt",
+      "created_at": 1767998277
+    },
+    {
+      "message_index": 357,
+      "name": "Create doanenta±ion of the patterns we implemented. Generate a migration guide for the team. Document the @ts-expect-error suppressions for future reference.",
+      "type": "prompt",
+      "created_at": 1767998910
+    }
+  ]
+}

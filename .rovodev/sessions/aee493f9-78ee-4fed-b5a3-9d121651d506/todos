@@ -1,0 +1,56 @@
+[
+    {
+        "active_form": "Checking migration infrastructure readiness",
+        "content": "Check current migration infrastructure and status",
+        "id": 1,
+        "status": "completed"
+    },
+    {
+        "active_form": "Analyzing and categorizing flows",
+        "content": "Analyze all flows to categorize for migration phases",
+        "id": 2,
+        "status": "completed"
+    },
+    {
+        "active_form": "Creating configuration templates",
+        "content": "Create flow configuration templates for simple flows",
+        "id": 3,
+        "status": "completed"
+    },
+    {
+        "active_form": "Migrating simple text generation flows",
+        "content": "Migrate Phase 1: Simple text generation flows (15 flows)",
+        "id": 4,
+        "status": "completed"
+    },
+    {
+        "active_form": "Testing Phase 1 migrations",
+        "content": "Test migrated Phase 1 flows and compare outputs",
+        "id": 5,
+        "status": "completed"
+    },
+    {
+        "active_form": "Migrating analysis flows",
+        "content": "Migrate Phase 2: Analysis flows (10 flows)",
+        "id": 6,
+        "status": "completed"
+    },
+    {
+        "active_form": "Testing Phase 2 migrations",
+        "content": "Test migrated Phase 2 flows and validate performance",
+        "id": 7,
+        "status": "completed"
+    },
+    {
+        "active_form": "Deploying to staging",
+        "content": "Deploy migrated flows to staging environment",
+        "id": 8,
+        "status": "completed"
+    },
+    {
+        "active_form": "Creating completion report",
+        "content": "Create Week 6 completion report and metrics",
+        "id": 9,
+        "status": "completed"
+    }
+]

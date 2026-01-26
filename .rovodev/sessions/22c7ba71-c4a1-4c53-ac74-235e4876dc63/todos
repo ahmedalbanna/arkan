@@ -1,0 +1,50 @@
+[
+    {
+        "active_form": "Analyzing existing RAG implementation",
+        "content": "Analyze existing RAG implementation and codebase",
+        "id": 1,
+        "status": "completed"
+    },
+    {
+        "active_form": "Designing vector search engine architecture",
+        "content": "Design comprehensive vector search engine architecture",
+        "id": 2,
+        "status": "completed"
+    },
+    {
+        "active_form": "Implementing advanced search features",
+        "content": "Implement advanced search features (hybrid search, filtering, ranking)",
+        "id": 3,
+        "status": "completed"
+    },
+    {
+        "active_form": "Adding semantic search capabilities",
+        "content": "Add semantic search capabilities and query enhancement",
+        "id": 4,
+        "status": "completed"
+    },
+    {
+        "active_form": "Creating search UI components",
+        "content": "Create search UI components and admin dashboard",
+        "id": 5,
+        "status": "completed"
+    },
+    {
+        "active_form": "Implementing search analytics",
+        "content": "Implement analytics and monitoring for search performance",
+        "id": 6,
+        "status": "completed"
+    },
+    {
+        "active_form": "Adding tests for search engine",
+        "content": "Add comprehensive tests for search engine",
+        "id": 7,
+        "status": "completed"
+    },
+    {
+        "active_form": "Creating documentation",
+        "content": "Create documentation and usage examples",
+        "id": 8,
+        "status": "completed"
+    }
+]

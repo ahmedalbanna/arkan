@@ -9,7 +9,7 @@ agent:
   # Temperature setting for AI model responses (0.0-1.0)
   temperature: 0.3
   # Model ID to use for the agent. See /models command to list available models.
-  modelId: auto
+  modelId: anthropic.claude-haiku-4-5-20251001-v1:0
   # Enable the deep planning tool for complex task planning
   enableDeepPlanTool: false
   # Enable/disable experimental features
@@ -62,6 +62,10 @@ console:
   # Shell command to generate a command prompt that replaces the default '> '.
   # For example, set 'STARSHIP_SHELL=rovodev starship prompt' to use Starship.
   customCommandPrompt: null
+  # Color theme for syntax highlighting. Options: 'dark' (Dracula), 'light',
+  # 'auto' (detect system theme), or any [Pygments theme
+  # name](https://pygments.org/styles/)(e.g., 'monokai', 'solarized-light')
+  theme: dark
   # Maximum width of the console output in characters, or 'fill' to fill the
   # terminal width
   maxOutputWidth: 120
@@ -88,10 +92,10 @@ toolPermissions:
   default: ask
   # Permission settings for specific tools
   tools:
-    create_file: ask
+    create_file: allow
     delete_file: ask
     move_file: ask
-    find_and_replace_code: ask
+    find_and_replace_code: allow
     open_files: allow
     expand_code_chunks: allow
     expand_folder: allow
@@ -109,6 +113,36 @@ toolPermissions:
       permission: allow
     - command: pwd
       permission: allow
+    - command: npm run test 2>&1
+      permission: allow
+    - command: npm run test -- --listTests 2>&1
+      permission: allow
+    - command: npm run test -- --passWithNoTests 2>&1
+      permission: allow
+    - command: npm run test -- --testPathPattern="flow.integration" --listTests 2>&1
+      permission: allow
+    - command: npm run test -- --testPathPattern="flow.integration" 2>&1
+      permission: allow
+    - command: find src/__tests__ -name "*.test.ts" -o -name "*.integration.test.ts"
+      permission: allow
+    - command: find src/app/api -name "*.test.ts"
+      permission: allow
+    - command: npm run test -- src/app/api/__tests__/fixtures/test-documents.ts 2>&1
+      permission: allow
+    - command: npm run test -- src/app/api/__tests__/generation-flow.integration.test.ts
+        2>&1
+      permission: allow
+    - command: npm run test -- src/app/api/__tests__/auth-flow.integration.test.ts
+        2>&1
+      permission: allow
+    - command: npm run test -- src/lib/models/__tests__/Section.prompt.test.ts 2>&1
+      permission: allow
+    - command: npm(\s.*)?
+      permission: allow
+    - command: mkdir(\s.*)?
+      permission: allow
+    - command: find(\s.*)?
+      permission: allow
     # Run bash commands in a sandboxed environment - currently available for
     # MacOS and Linux only. Enabling this option for Windows will prevent the
     # agent from running powershell commands.
@@ -125,16 +159,16 @@ toolPermissions:
 
 announcementTracking:
   announcementViewCounts:
-    88e7a1da2281d86bac8049ce3f6f1650: 1
-    a512042e5151b93dd5e511adc9731fbb: 1
+    88e7a1da2281d86bac8049ce3f6f1650: 10
+    a512042e5151b93dd5e511adc9731fbb: 5
 
 sessionFeedback:
   permanentlyDisabled: false
   # ISO timestamp of the last provided feedback
-  lastFeedbackAsked: null
+  lastFeedbackAsked: '2026-01-24T03:26:56.580038+00:00'
 
 atlassianBillingSite:
-  siteUrl: https://albannatech.atlassian.net
+  siteUrl: https://ahmedalbannacode.atlassian.net
 
 smartTasks:
   # Enable Smart Tasks discovery

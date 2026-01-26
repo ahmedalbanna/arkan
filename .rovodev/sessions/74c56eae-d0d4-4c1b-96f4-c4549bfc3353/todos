@@ -1,0 +1,44 @@
+[
+    {
+        "active_form": "Identifying unused files",
+        "content": "Identify deprecated/unused files",
+        "id": 1,
+        "status": "completed"
+    },
+    {
+        "active_form": "Removing old route",
+        "content": "Remove old section generation route",
+        "id": 2,
+        "status": "completed"
+    },
+    {
+        "active_form": "Removing old flows",
+        "content": "Remove old AI flows",
+        "id": 3,
+        "status": "completed"
+    },
+    {
+        "active_form": "Removing old schemas",
+        "content": "Remove old schemas",
+        "id": 4,
+        "status": "completed"
+    },
+    {
+        "active_form": "Removing old services",
+        "content": "Remove old service methods",
+        "id": 5,
+        "status": "completed"
+    },
+    {
+        "active_form": "Updating references",
+        "content": "Update imports and references",
+        "id": 6,
+        "status": "completed"
+    },
+    {
+        "active_form": "Verifying system",
+        "content": "Verify nothing is broken",
+        "id": 7,
+        "status": "completed"
+    }
+]

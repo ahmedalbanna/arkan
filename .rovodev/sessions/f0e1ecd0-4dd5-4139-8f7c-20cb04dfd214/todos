@@ -1,0 +1,62 @@
+[
+    {
+        "active_form": "Exploring project structure",
+        "content": "Explore project structure and core configuration files",
+        "id": 1,
+        "status": "completed"
+    },
+    {
+        "active_form": "Analyzing architecture",
+        "content": "Analyze architecture and technology stack",
+        "id": 2,
+        "status": "completed"
+    },
+    {
+        "active_form": "Reviewing AI integration",
+        "content": "Review AI/Genkit integration and flows",
+        "id": 3,
+        "status": "completed"
+    },
+    {
+        "active_form": "Examining data models",
+        "content": "Examine data models and Firebase schema",
+        "id": 4,
+        "status": "completed"
+    },
+    {
+        "active_form": "Assessing code quality",
+        "content": "Assess code quality, patterns, and best practices",
+        "id": 5,
+        "status": "completed"
+    },
+    {
+        "active_form": "Reviewing security",
+        "content": "Review authentication and security implementation",
+        "id": 6,
+        "status": "completed"
+    },
+    {
+        "active_form": "Analyzing UI/UX",
+        "content": "Analyze UI/UX components and patterns",
+        "id": 7,
+        "status": "completed"
+    },
+    {
+        "active_form": "Checking tests",
+        "content": "Check test coverage and quality assurance",
+        "id": 8,
+        "status": "completed"
+    },
+    {
+        "active_form": "Evaluating performance",
+        "content": "Evaluate performance and optimization",
+        "id": 9,
+        "status": "completed"
+    },
+    {
+        "active_form": "Identifying issues",
+        "content": "Identify issues, technical debt, and recommendations",
+        "id": 10,
+        "status": "completed"
+    }
+]

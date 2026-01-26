@@ -1,0 +1,38 @@
+[
+    {
+        "active_form": "Analyzing condition evaluator",
+        "content": "Analyze condition evaluator implementation",
+        "id": 1,
+        "status": "completed"
+    },
+    {
+        "active_form": "Adding function call support",
+        "content": "Add function call support (length, contains, etc.)",
+        "id": 2,
+        "status": "completed"
+    },
+    {
+        "active_form": "Implementing regex matching",
+        "content": "Implement regex matching support",
+        "id": 3,
+        "status": "completed"
+    },
+    {
+        "active_form": "Adding array operations",
+        "content": "Add array operations (in, includes, some, every)",
+        "id": 4,
+        "status": "completed"
+    },
+    {
+        "active_form": "Creating tests",
+        "content": "Create comprehensive tests",
+        "id": 5,
+        "status": "completed"
+    },
+    {
+        "active_form": "Updating documentation",
+        "content": "Update documentation",
+        "id": 6,
+        "status": "completed"
+    }
+]

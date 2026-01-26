@@ -1,0 +1,26 @@
+[
+    {
+        "active_form": "Creating comprehensive project summary",
+        "content": "Create final project summary covering all 5 weeks",
+        "id": 1,
+        "status": "completed"
+    },
+    {
+        "active_form": "Creating demo script and walkthrough",
+        "content": "Generate end-to-end demo showcasing the system",
+        "id": 2,
+        "status": "completed"
+    },
+    {
+        "active_form": "Creating deployment guide",
+        "content": "Create production deployment documentation",
+        "id": 3,
+        "status": "completed"
+    },
+    {
+        "active_form": "Documenting system architecture",
+        "content": "Create system architecture documentation",
+        "id": 4,
+        "status": "completed"
+    }
+]

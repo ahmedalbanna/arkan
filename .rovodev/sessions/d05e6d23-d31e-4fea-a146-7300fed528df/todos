@@ -1,0 +1,38 @@
+[
+    {
+        "active_form": "Implementing optimizations",
+        "content": "Implement performance optimizations",
+        "id": 1,
+        "status": "completed"
+    },
+    {
+        "active_form": "Creating user guides",
+        "content": "Create comprehensive user documentation",
+        "id": 2,
+        "status": "completed"
+    },
+    {
+        "active_form": "Creating admin guides",
+        "content": "Create admin documentation",
+        "id": 3,
+        "status": "completed"
+    },
+    {
+        "active_form": "Implementing cache",
+        "content": "Implement caching layer",
+        "id": 4,
+        "status": "completed"
+    },
+    {
+        "active_form": "Creating checklist",
+        "content": "Create production deployment checklist",
+        "id": 5,
+        "status": "completed"
+    },
+    {
+        "active_form": "Creating final report",
+        "content": "Create Week 9 completion report",
+        "id": 6,
+        "status": "completed"
+    }
+]

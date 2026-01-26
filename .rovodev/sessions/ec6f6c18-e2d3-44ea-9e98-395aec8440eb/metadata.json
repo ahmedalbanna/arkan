@@ -1,0 +1,26 @@
+{
+    "bookmarks": [
+        {
+            "created_at": 1768380399,
+            "message_index": 71,
+            "name": "start implementation",
+            "type": "prompt"
+        },
+        {
+            "created_at": 1768380747,
+            "message_index": 93,
+            "name": "go on",
+            "type": "prompt"
+        },
+        {
+            "created_at": 1768381080,
+            "message_index": 107,
+            "name": "go on",
+            "type": "prompt"
+        }
+    ],
+    "fork_data": null,
+    "is_manual_title": false,
+    "title": "Dynamic Flows Implementation Plan",
+    "workspace_path": "/teamspace/studios/this_studio/arkan"
+}

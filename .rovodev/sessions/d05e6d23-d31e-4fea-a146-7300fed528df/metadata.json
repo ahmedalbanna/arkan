@@ -1,0 +1,44 @@
+{
+    "bookmarks": [
+        {
+            "created_at": 1768375118,
+            "message_index": 79,
+            "name": "go on implement plan",
+            "type": "prompt"
+        },
+        {
+            "created_at": 1768375372,
+            "message_index": 97,
+            "name": "go on implement plan",
+            "type": "prompt"
+        },
+        {
+            "created_at": 1768375652,
+            "message_index": 109,
+            "name": "go on implement plan",
+            "type": "prompt"
+        },
+        {
+            "created_at": 1768375966,
+            "message_index": 121,
+            "name": "go on implement plan",
+            "type": "prompt"
+        },
+        {
+            "created_at": 1768376146,
+            "message_index": 127,
+            "name": "update doc dynamic-flows.md.",
+            "type": "prompt"
+        },
+        {
+            "created_at": 1768376340,
+            "message_index": 133,
+            "name": "create demo app for this plan",
+            "type": "prompt"
+        }
+    ],
+    "fork_data": null,
+    "is_manual_title": false,
+    "title": "Implement Dynamic Flows Plan",
+    "workspace_path": "/teamspace/studios/this_studio/arkan"
+}

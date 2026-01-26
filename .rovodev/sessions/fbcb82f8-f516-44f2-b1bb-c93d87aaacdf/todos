@@ -1,0 +1,44 @@
+[
+    {
+        "active_form": "Adding WebSocket to backend",
+        "content": "Add WebSocket support to backend",
+        "id": 1,
+        "status": "completed"
+    },
+    {
+        "active_form": "Creating WebSocket service",
+        "content": "Create WebSocket service in frontend",
+        "id": 2,
+        "status": "completed"
+    },
+    {
+        "active_form": "Adding WebSocket hooks",
+        "content": "Add WebSocket hooks for real-time updates",
+        "id": 3,
+        "status": "completed"
+    },
+    {
+        "active_form": "Integrating WebSocket with React Query",
+        "content": "Integrate WebSocket with React Query",
+        "id": 4,
+        "status": "completed"
+    },
+    {
+        "active_form": "Adding connection status UI",
+        "content": "Add connection status UI",
+        "id": 5,
+        "status": "completed"
+    },
+    {
+        "active_form": "Creating API documentation",
+        "content": "Create comprehensive API documentation",
+        "id": 6,
+        "status": "completed"
+    },
+    {
+        "active_form": "Testing WebSocket",
+        "content": "Test WebSocket functionality",
+        "id": 7,
+        "status": "completed"
+    }
+]

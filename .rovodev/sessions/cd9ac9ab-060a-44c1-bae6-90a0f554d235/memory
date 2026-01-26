@@ -1,0 +1,630 @@
+Here are information or guidelines that you should consider when resolving requests:
+<user_instruction>
+# Arkan Project - Rovodev Agent Instructions
+
+## Memory Bank Philosophy
+
+I am a Rovodev agent with memory that resets between sessions. The memory bank is my foundational system for retaining project context and accumulated knowledge. I must read and understand the memory bank at the start of every task.
+
+**Critical**: This project has identified **CRITICAL SECURITY VULNERABILITIES** that block production deployment. Security must be the top priority.
+
+## Current Memory Bank Structure
+
+### Core Files (MUST READ ALWAYS)
+
+1. **`memory-bank/README.md`** - Memory bank index and navigation guide
+2. **`memory-bank/projectbrief.md`** - Project overview, goals, and roadmap
+3. **`memory-bank/techContext.md`** - Complete technology stack and configurations
+4. **`memory-bank/activeContext.md`** - **🔴 CRITICAL** - Current work streams, blockers, and security issues
+5. **`memory-bank/systemPatterns.md`** - Architecture patterns and best practices
+6. **`memory-bank/progress.md`** - Development progress and metrics
+7. **`memory-bank/productContext.md`** - Product features, users, and competitive analysis
+8. **`memory-bank/recentUpdates.md`** - Latest changes and changelog
+
+### Reading Priority
+
+**For EVERY task, read in this order:**
+1. `activeContext.md` - Know current blockers and priorities
+2. `systemPatterns.md` - Understand coding patterns
+3. Relevant specific files based on task type
+
+## Memory Bank Usage Rules
+
+### 1. Mandatory Reading at Session Start
+
+**ALWAYS start by reading:**
+- `memory-bank/activeContext.md` - Current priorities and blockers
+- `memory-bank/systemPatterns.md` - Coding patterns to follow
+- Task-specific memory bank files
+
+**Before making ANY changes:**
+- Understand current project context
+- Review existing architecture and patterns
+- Check for related work in progress
+
+### 2. Update Memory Bank When Needed
+
+**Propose updates when:**
+- Learning new important information
+- Making architectural decisions
+- Completing significant milestones
+- Discovering bugs or security issues
+- Changing established patterns
+
+**Update format:**
+- Add date and description to `recentUpdates.md`
+- Update relevant progress in `progress.md`
+- Document decisions in appropriate files
+
+### 3. Use Context in Decisions
+
+**Every decision must:**
+- Align with established architecture patterns
+- Follow coding standards in `systemPatterns.md`
+- Consider security implications (CRITICAL)
+- Maintain test coverage expectations
+- Update documentation as needed
+
+## Core Project Information
+
+### Project Identity
+
+- **Project**: Arkan - AI-Powered Document Generation Platform
+- **Purpose**: Transform document creation from hours to minutes using intelligent AI agents
+- **Status**: ⚠️ Beta/Development (v0.1.0) - **BLOCKED for production due to security issues**
+- **Phase**: 75% of Phase 1 complete
+- **Next Milestone**: Production readiness (Security + Testing + Documentation)
+
+### 🔴 CRITICAL SECURITY ISSUES (TOP PRIORITY)
+
+**Production is BLOCKED until these are fixed:**
+
+1. **Hardcoded Firebase credentials** in `src/lib/config.ts`
+   - Contains exposed API keys and private keys
+   - IMMEDIATE rotation required
+   
+2. **Service account JSON committed** to repository
+   - File: `docudec-firebase-adminsdk-2maa7-d07a19d3fc.json`
+   - Full admin access exposed
+   - Must be removed from git history
+   
+3. **No environment variable system**
+   - All secrets in source code
+   - Must implement `.env` configuration
+   
+4. **Hardcoded Ollama server URL**
+   - Location: `src/ai/genkit.ts`
+   - Should be environment variable
+
+**When working on ANY task, prioritize security fixes if applicable.**
+
+### Technology Stack (Latest)
+
+**Frontend:**
+- Next.js 15.5.9 (App Router, Server Components)
+- React 18.3.1
+- TypeScript 5.9.3 (strict mode)
+- Tailwind CSS 3.4.19
+- shadcn/ui + Radix UI
+
+**Backend:**
+- Firebase 11.10.0 (Auth, Firestore, Storage, Hosting)
+- Firebase Admin SDK 13.4.0
+
+**AI/ML:**
+- Genkit 1.27.0
+- Ollama (Gemma 2B, Phi3 Mini, Llama3 8B, Qwen 2.5)
+- Model selection by task type
+
+**State Management:**
+- Zustand 4.5.7 (client state)
+- TanStack Query 5.90.19 (server state)
+- Dexie 4.2.1 (IndexedDB for offline)
+
+**UI Components:**
+- TipTap 2.27.2 (rich text editor)
+- Framer Motion 12.28.1 (animations)
+- Lucide React (icons)
+
+**Export:**
+- docx 8.5.0 (Word documents)
+- pptxgenjs 3.12.0 (PowerPoint)
+- jspdf 4.0.0 (PDF)
+
+### Core Architecture Patterns
+
+**Layered Architecture:**
+```
+Presentation (React Components)
+    ↓
+State Management (Zustand + React Query + Dexie)
+    ↓
+API/Services (Next.js API Routes + Services)
+    ↓
+Backend (Firebase + Genkit AI)
+```
+
+**Key Patterns:**
+- **Class-based Models** with immutable updates (Project, User, Section)
+- **Hook Factory Pattern** for reusable logic
+- **Service Layer** abstraction over Firebase
+- **AI Flow Pattern** for generation pipelines
+- **Multi-format Export Pipeline** (Markdown → AST → Format)
+
+## Project Work Rules
+
+### 1. Respect Existing Architecture
+
+**Before any code changes:**
+- Read `systemPatterns.md` for established patterns
+- Follow folder structure in `techContext.md`
+- Respect design decisions in `activeContext.md`
+- Check for existing similar implementations
+
+**File Organization:**
+```
+src/
+├── app/              # Next.js App Router pages
+├── components/       # React components (ui, shared, feature-specific)
+├── hooks/            # Custom React hooks (core, data, util, report-mode)
+├── lib/              # Utilities, models, converters
+├── services/         # Business logic and API services
+├── context/          # React contexts
+├── firebase/         # Firebase configuration and hooks
+└── types/            # TypeScript type definitions
+```
+
+### 2. Code Quality Standards
+
+**TypeScript:**
+- ✅ Use strict mode (already enabled)
+- ✅ Define explicit types for all functions
+- ✅ Use interfaces for object shapes
+- ✅ Avoid `any` type (use `unknown` if needed)
+- ✅ Use Zod for runtime validation
+
+**Code Style:**
+- ✅ Follow ESLint rules (check `.eslintrc.json`)
+- ✅ Use functional components with hooks
+- ✅ Prefer `const` over `let`
+- ✅ Use early returns for better readability
+- ✅ Keep functions under 50 lines when possible
+- ❌ Avoid large files (>500 lines) - split them
+
+**Testing:**
+- ⚠️ CRITICAL: Test coverage is <20%, must improve
+- ✅ Write tests for new features
+- ✅ Use Jest + React Testing Library
+- ✅ Test API routes with mock Firebase
+- ✅ Add E2E tests for critical workflows
+
+### 3. Error Handling Patterns
+
+**API Routes:**
+```typescript
+// Use withAuth wrapper
+export async function POST(request: Request) {
+  return withAuth(async (req, { user, db }) => {
+    try {
+      // Validate with Zod
+      const validated = schema.parse(await req.json());
+      
+      // Business logic
+      const result = await performOperation(validated);
+      
+      // Return typed response
+      return ApiResponse.success(result);
+    } catch (error) {
+      // Centralized error handling
+      return handleError(error);
+    }
+  })(request);
+}
+```
+
+**Components:**
+```typescript
+// Add Error Boundaries (currently missing!)
+<ErrorBoundary fallback={<ErrorFallback />}>
+  <YourComponent />
+</ErrorBoundary>
+```
+
+**Validation:**
+```typescript
+// Always use Zod for input validation
+const schema = z.object({
+  title: z.string().min(1),
+  content: z.string().optional(),
+});
+
+const validated = schema.parse(data);
+```
+
+### 4. Performance Best Practices
+
+**Code Splitting:**
+```typescript
+// Lazy load heavy components
+const TipTapEditor = dynamic(() => import('./Editor'), {
+  ssr: false,
+  loading: () => <EditorSkeleton />
+});
+```
+
+**Memoization:**
+```typescript
+// Use React.memo for expensive components
+export const ExpensiveComponent = React.memo(({ data }) => {
+  const computed = useMemo(() => expensiveCalc(data), [data]);
+  return <div>{computed}</div>;
+});
+```
+
+**State Management:**
+- ✅ Use Zustand for client state
+- ✅ Use React Query for server state
+- ✅ Use Dexie for offline storage
+- ❌ Don't mix concerns between state managers
+
+**React Query:**
+```typescript
+// Use proper cache configuration
+const { data } = useQuery({
+  queryKey: ['project', id],
+  queryFn: () => api.getProject(id),
+  staleTime: 5 * 60 * 1000, // 5 minutes
+});
+```
+
+## Recent Important Updates
+
+### January 22, 2026 - Comprehensive Review & Memory Bank Initialization
+
+**✅ Completed:**
+- Full codebase review (~29,466 lines)
+- Memory bank documentation created (~70KB)
+- Security vulnerabilities identified
+- Architecture patterns documented
+- Technical debt catalogued
+
+**🔴 Critical Findings:**
+- Exposed Firebase credentials in source code
+- Service account JSON committed to repository
+- Test coverage <20%
+- TypeScript compilation errors
+- 60+ console.log statements
+
+### Completed Features (Phase 1)
+
+**Core Platform:**
+- ✅ AI-powered document generation
+- ✅ Multi-format export (DOCX, PPTX, PDF)
+- ✅ Rich text editor (TipTap)
+- ✅ Template system
+- ✅ Credit-based payment system
+- ✅ Multi-language support (English/Arabic RTL)
+- ✅ Firebase backend integration
+- ✅ User authentication & profiles
+
+**AI System:**
+- ✅ Multi-model support (Gemma, Phi3, Llama3, Qwen)
+- ✅ Task-based model selection
+- ✅ Context injection system
+- ✅ Prompt template system (Handlebars)
+- ✅ Retry logic with exponential backoff
+- ✅ AI project consultant chat
+
+**Data Models:**
+- ✅ Class-based models with business logic
+- ✅ Immutable update patterns
+- ✅ TypeScript type definitions
+- ✅ Zod validation schemas
+
+## Work Guidelines by Task Type
+
+### 🔐 Working on Security Issues (HIGHEST PRIORITY)
+
+**Before starting:**
+1. Read `activeContext.md` for security blockers
+2. Understand the scope of credential exposure
+3. Plan environment variable migration
+4. Coordinate credential rotation with team
+
+**Implementation:**
+1. Create `.env.example` with all required variables
+2. Update code to use `process.env.VARIABLE_NAME`
+3. Remove hardcoded credentials
+4. Update `.gitignore` to exclude `.env`
+5. Document environment setup in README
+6. Verify no secrets in git history
+
+**Testing:**
+1. Test with environment variables
+2. Verify Firebase connection works
+3. Check all API routes function
+4. Test AI generation with new config
+
+### 🆕 Working on New Features
+
+**Planning:**
+1. Read `projectbrief.md` for feature alignment
+2. Check `systemPatterns.md` for patterns to follow
+3. Review existing similar features
+4. Design data models if needed
+
+**Implementation:**
+1. Create feature branch
+2. Implement following established patterns
+3. Add TypeScript types
+4. Add Zod validation
+5. Write tests (unit + integration)
+6. Update documentation
+
+**Files to Update:**
+- Add to `recentUpdates.md`
+- Update `progress.md` completion status
+- Add API docs if creating endpoints
+
+### 🐛 Fixing Bugs
+
+**Investigation:**
+1. Reproduce the bug
+2. Check `activeContext.md` for known issues
+3. Review error logs and stack traces
+4. Understand root cause in system context
+
+**Implementation:**
+1. Fix using centralized error handling
+2. Add error boundaries if UI crash
+3. Add validation if input issue
+4. Write regression test
+5. Test edge cases
+
+**Documentation:**
+- Add to `recentUpdates.md`
+- Remove from known issues in `activeContext.md`
+
+### ⚡ Performance Optimization
+
+**Analysis:**
+1. Use React DevTools Profiler
+2. Check bundle size with `npm run build`
+3. Review React Query cache strategy
+4. Identify heavy components
+
+**Implementation:**
+1. Implement code splitting with `dynamic()`
+2. Add `React.memo` for expensive renders
+3. Use `useMemo` for expensive calculations
+4. Optimize images with Next.js Image
+5. Lazy load heavy libraries
+
+**Verification:**
+- Run Lighthouse audit (target: 90+)
+- Test on slow network
+- Check bundle size reduction
+
+### 🧪 Adding Tests
+
+**Current Priority:** HIGH (Coverage <20%)
+
+**Test Types:**
+```typescript
+// Unit Tests (Jest)
+describe('Project Model', () => {
+  it('should create project with defaults', () => {
+    // Test model logic
+  });
+});
+
+// Integration Tests (API routes)
+describe('POST /api/projects', () => {
+  it('should create project with valid data', async () => {
+    // Mock Firebase, test endpoint
+  });
+});
+
+// E2E Tests (Playwright/Cypress)
+test('user can generate document', async ({ page }) => {
+  // Test full workflow
+});
+```
+
+**Focus Areas:**
+1. Core business logic (models, services)
+2. API routes (especially generation endpoints)
+3. Critical user workflows (auth, generation, export)
+4. Error handling paths
+
+## Continuous Updates
+
+### When to Propose Memory Bank Updates
+
+**Propose updates when:**
+- Adding significant new features
+- Making architectural decisions
+- Solving complex technical problems
+- Changing development patterns
+- Discovering critical bugs
+- Completing major milestones
+- Learning important project insights
+
+**Update Process:**
+1. Identify which memory bank file to update
+2. Propose clear, concise changes
+3. Include date and description
+4. Cross-reference related changes
+5. Verify information accuracy
+
+### Memory Bank Maintenance
+
+**Regular Activities:**
+- Review file contents periodically
+- Update progress status regularly
+- Add important new information
+- Remove outdated or incorrect information
+- Keep security status current
+- Track technical debt
+
+**Quality Standards:**
+- Be specific and concrete
+- Include dates and context
+- Use consistent formatting
+- Link related information
+- Keep it maintainable
+
+## Common Pitfalls to Avoid
+
+### ❌ Anti-Patterns
+
+1. **Ignoring Security**
+   - Don't commit secrets
+   - Don't skip security reviews
+   - Don't use hardcoded credentials
+
+2. **Poor Testing Practices**
+   - Don't skip writing tests
+   - Don't test implementation details
+   - Don't mock everything
+
+3. **Code Quality Issues**
+   - Don't use `any` type
+   - Don't create large files (>500 lines)
+   - Don't leave console.log in production
+   - Don't skip error handling
+
+4. **State Management Mistakes**
+   - Don't mix state management approaches
+   - Don't store server data in Zustand
+   - Don't forget to invalidate queries
+
+5. **Performance Problems**
+   - Don't load all data at once (use pagination)
+   - Don't skip code splitting for heavy components
+   - Don't over-optimize prematurely
+
+### ✅ Best Practices
+
+1. **Security First**
+   - Always use environment variables
+   - Review Firebase rules regularly
+   - Validate all inputs with Zod
+   - Implement rate limiting
+
+2. **Test-Driven Development**
+   - Write tests for new features
+   - Maintain >70% coverage target
+   - Test error paths
+   - Add E2E tests for critical flows
+
+3. **Clean Code**
+   - Follow established patterns
+   - Keep functions small and focused
+   - Use descriptive names
+   - Add comments for complex logic
+
+4. **Performance Aware**
+   - Implement code splitting
+   - Use proper memoization
+   - Optimize images
+   - Monitor bundle size
+
+5. **Documentation**
+   - Update memory bank with changes
+   - Document API endpoints
+   - Add JSDoc for public functions
+   - Keep README current
+
+## Quick Reference Commands
+
+### Development
+```bash
+# Start development server (Next.js + Genkit)
+npm run dev
+
+# Start Genkit only
+npm run genkit:dev
+
+# Run tests
+npm run test
+
+# Run tests in watch mode
+npm run test:watch
+
+# Type check
+npm run typecheck
+
+# Lint code
+npm run lint
+
+# Build for production
+npm run build
+```
+
+### Common File Locations
+
+**Configuration:**
+- `next.config.ts` - Next.js configuration
+- `tsconfig.json` - TypeScript configuration
+- `tailwind.config.ts` - Tailwind CSS configuration
+- `firebase.json` - Firebase configuration
+- `.env.local` - Environment variables (create this!)
+
+**Core Code:**
+- `src/app/` - Next.js pages and API routes
+- `src/components/` - React components
+- `src/hooks/` - Custom React hooks
+- `src/lib/` - Utilities and models
+- `src/services/` - Business logic
+
+**Firebase:**
+- `firestore.rules` - Firestore security rules
+- `firestore.indexes.json` - Firestore indexes
+- `storage.rules` - Storage security rules
+
+**Tests:**
+- `jest.config.js` - Jest configuration
+- `jest.setup.js` - Test setup
+- `src/**/__tests__/` - Test files
+
+## Emergency Contacts & Resources
+
+### Critical Issues
+- **Security vulnerabilities**: Immediate team notification
+- **Production outage**: Check Firebase status, review error logs
+- **Data loss**: Check Firestore backups, IndexedDB state
+
+### Documentation
+- Memory Bank: `memory-bank/`
+- API Docs: `src/config/api-docs.ts`
+- Genkit Flows: `src/ai/flows/`
+
+### External Resources
+- [Next.js 15 Docs](https://nextjs.org/docs)
+- [Firebase Docs](https://firebase.google.com/docs)
+- [Genkit Docs](https://firebase.google.com/docs/genkit)
+- [shadcn/ui](https://ui.shadcn.com)
+
+## Summary
+
+As a Rovodev agent working on Arkan:
+
+1. **ALWAYS read the memory bank** at the start of every session
+2. **Security is CRITICAL** - address security issues before features
+3. **Follow established patterns** documented in `systemPatterns.md`
+4. **Write tests** to improve coverage from <20% to 70%+
+5. **Update documentation** when making significant changes
+6. **Respect the architecture** and maintain code quality
+7. **Think before acting** - understand context before implementing
+
+The memory bank ensures work continuity and quality technical decisions. Read it, understand it, update it, and use it to guide every decision.
+
+---
+
+**Memory Bank Last Updated**: January 22, 2026  
+**Agent Instructions Version**: 1.0  
+**Project Status**: Beta - Production Blocked (Security Issues)
+
+</user_instruction>
+Location-specific best practices, tips, and patterns may be found throughout the current workspace in AGENTS.md or AGENTS.local.md files. Before making any changes in a subdirectory, please read the contents of any memory files if present.
