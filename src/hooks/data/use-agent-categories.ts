@@ -1,6 +1,5 @@
-
 'use client';
-
+import { getFirebaseAuthToken } from '@/lib/utils/authUtils';
 import { useAuth } from '@/context/AuthContext';
 import { fetchAgentCategoriesApi } from '@/services/api/agentService';
 import { useQuery } from '@tanstack/react-query';
@@ -11,7 +10,7 @@ export function useAgentCategories() {
         queryKey: ['agent-categories'],
         queryFn: async () => {
             if (!firebaseUser) throw new Error("User not authenticated.");
-            const token = await firebaseUser.getIdToken();
+            const token = await getFirebaseAuthToken();
             return fetchAgentCategoriesApi(token);
         },
         enabled: !!firebaseUser,

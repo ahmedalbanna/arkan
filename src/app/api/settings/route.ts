@@ -1,11 +1,10 @@
 
-import { adminDb } from '@/lib/firebase/server-init';
+import { getDoc, createDoc } from '@/lib/firebase/db-helpers';
 import { createApiResponse, handleApiError } from '@/lib/utils/api-utils';
 
 async function getSettings() {
-    const settingsRef = adminDb.collection('settings').doc('defaults');
-    const doc = await settingsRef.get();
-    if (!doc.exists) {
+    let settings = await getDoc('settings', 'defaults');
+    if (!settings) {
         // If settings don't exist, create them with default values
         const defaultSettings = {
             newUserCredits: 10,
@@ -13,10 +12,10 @@ async function getSettings() {
             accountHolder: 'Arkan Professional Platform',
             iban: 'SA03 8000 0000 6080 1016 7519',
         };
-        await settingsRef.set(defaultSettings);
-        return defaultSettings;
+        settings = await createDoc('settings', defaultSettings);
+        return settings;
     }
-    return doc.data();
+    return settings;
 }
 
 // GET /api/settings - This endpoint is public for fetching bank details etc.

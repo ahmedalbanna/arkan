@@ -1,5 +1,5 @@
 // src/app/api/agents/[id]/route.ts
-import { adminDb } from '@/lib/firebase/server-init';
+import { getDoc, updateDoc, deleteDoc } from '@/lib/firebase/db-helpers';
 import { handleApiError, createApiResponse, withAuth } from '@/lib/utils/api-utils';
 import { z } from 'zod';
 
@@ -17,13 +17,12 @@ const agentUpdateSchema = z.object({
 export const GET = withAuth(async ({ params }) => {
     try {
         let { id } = params;
-        let agentRef = adminDb.collection('agents').doc(id);
-        let doc = await agentRef.get();
+        let agent = await getDoc('agents', id);
 
-        if (!doc.exists) {
+        if (!agent) {
             return handleApiError({ message: 'Agent not found' }, 404);
         }
-        return createApiResponse({ id: doc.id, ...doc.data() }, 200);
+        return createApiResponse(agent, 200);
     } catch (error) {
         return handleApiError(error);
     }
@@ -39,14 +38,11 @@ export const PUT = withAuth(async ({ request, params }) => {
             return handleApiError(validation.error);
         }
 
-        let agentRef = adminDb.collection('agents').doc(id);
-        await agentRef.update({
+        let updated = await updateDoc('agents', id, {
             ...validation.data,
             updatedAt: new Date().toISOString(),
         });
-
-        let updatedDoc = await agentRef.get();
-        return createApiResponse({ id: updatedDoc.id, ...updatedDoc.data() }, 200);
+        return createApiResponse(updated, 200);
     } catch (error) {
         return handleApiError(error);
     }
@@ -55,7 +51,7 @@ export const PUT = withAuth(async ({ request, params }) => {
 export const DELETE = withAuth(async ({ params }) => {
     try {
         let { id } = params;
-        await adminDb.collection('agents').doc(id).delete();
+        await deleteDoc('agents', id);
         return createApiResponse({ message: 'Agent deleted successfully' }, 200);
     } catch (error) {
         return handleApiError(error);

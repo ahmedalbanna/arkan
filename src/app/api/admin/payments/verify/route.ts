@@ -1,6 +1,6 @@
 import { createApiResponse, handleApiError, withAuth } from '@/lib/utils/api-utils';
-import { adminDb, adminRealtimeDb } from '@/lib/firebase/server-init';
-import { FieldValue } from 'firebase-admin/firestore';
+import { adminRealtimeDb } from '@/lib/firebase/server-init';
+import { updateDoc, runTransaction, addUserCreditsHelper } from '@/lib/firebase/db-helpers';
 import { z } from 'zod';
 
 const verifyPaymentSchema = z.object({
@@ -23,16 +23,13 @@ export const POST = withAuth(async ({ request, user }) => {
     let { transactionId, userId, creditsToGrant, status, adminNotes } = validation.data;
     let adminId = user.id;
 
-    let transactionRef = adminDb.collection('transactions').doc(transactionId);
     let rtdb = adminRealtimeDb;
     let notificationRef = rtdb.ref(`notifications/${userId}`).push();
 
     if (status === 'verified') {
-      await adminDb.runTransaction(async (t: any) => {
-        let userRef = adminDb.collection('users').doc(userId);
-        t.update(userRef, { credits: FieldValue.increment(creditsToGrant) });
-
-        t.update(transactionRef, {
+      await runTransaction(async (t) => {
+        await addUserCreditsHelper(userId, creditsToGrant);
+        await updateDoc('transactions', transactionId, {
           status: 'verified',
           adminNotes: adminNotes || 'Payment approved.',
           verifiedAt: new Date().toISOString(),
@@ -49,7 +46,7 @@ export const POST = withAuth(async ({ request, user }) => {
       });
 
     } else { // 'rejected'
-      await transactionRef.update({
+      await updateDoc('transactions', transactionId, {
         status: 'rejected',
         adminNotes: adminNotes || 'Payment could not be verified.',
         verifiedAt: new Date().toISOString(),

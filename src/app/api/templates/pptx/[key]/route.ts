@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { adminDb } from '@/lib/firebase/server-init';
+import { getNestedDoc, updateNestedDoc, deleteNestedDoc } from '@/lib/firebase/db-helpers';
 import { withAuth, handleApiError, createApiResponse } from '@/lib/utils/api-utils';
 
 const updatePptxTemplateSchema = z.object({
@@ -8,54 +8,68 @@ const updatePptxTemplateSchema = z.object({
 
 export const PUT = withAuth(async ({ request, params }) => {
     try {
-        let key = params.key;
+        const key = params.key;
         if (!key) {
             return handleApiError({ message: 'Template key is required.' }, 400);
         }
 
-        let templateRef = adminDb.collection('templates').doc('pptx').collection('styles').doc(key);
-        let templateDoc = await templateRef.get();
+        const stylesPath = {
+            parentCollection: 'templates',
+            parentDocId: 'pptx',
+            subcollection: 'styles',
+        };
 
-        if (!templateDoc.exists) {
+        const templateDoc = await getNestedDoc(stylesPath, key);
+
+        if (!templateDoc) {
             return handleApiError({ message: 'PPTX template not found.' }, 404);
         }
 
-        let body = await request.json();
-        let validation = updatePptxTemplateSchema.safeParse(body);
+        const body = await request.json();
+        const validation = updatePptxTemplateSchema.safeParse(body);
 
         if (!validation.success) {
             return handleApiError(validation.error);
         }
 
-        await templateRef.update({ styles: validation.data.styles, updatedAt: new Date().toISOString() });
-        let updatedDoc = await templateRef.get();
+        const updated = await updateNestedDoc(stylesPath, key, {
+            styles: validation.data.styles,
+            updatedAt: new Date().toISOString(),
+        });
 
-        return createApiResponse(updatedDoc.data(), 200);
+        return createApiResponse(updated, 200);
 
     } catch (error) {
         return handleApiError(error);
     }
 }, { requireAdmin: true });
 
+
 export const DELETE = withAuth(async ({ params }) => {
     try {
-        let key = params.key;
+        const key = params.key;
         if (!key) {
             return handleApiError({ message: 'Template key is required.' }, 400);
         }
 
-        if (['modern', 'dark', 'professional'].includes(key)) {
+        // Prevent deletion of default templates
+        if (['modern', 'elegant', 'minimal'].includes(key)) {
             return handleApiError({ message: 'Default templates cannot be deleted.' }, 403);
         }
 
-        let templateRef = adminDb.collection('templates').doc('pptx').collection('styles').doc(key);
-        let templateDoc = await templateRef.get();
+        const stylesPath = {
+            parentCollection: 'templates',
+            parentDocId: 'pptx',
+            subcollection: 'styles',
+        };
 
-        if (!templateDoc.exists) {
+        const templateDoc = await getNestedDoc(stylesPath, key);
+
+        if (!templateDoc) {
             return handleApiError({ message: 'PPTX template not found.' }, 404);
         }
 
-        await templateRef.delete();
+        await deleteNestedDoc(stylesPath, key);
 
         return createApiResponse({ message: `Template "${key}" deleted successfully.` }, 200);
 

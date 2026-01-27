@@ -1,6 +1,5 @@
-
 'use client';
-
+import { getFirebaseAuthToken } from '@/lib/utils/authUtils';
 import { useAuth } from '@/context/AuthContext';
 import { toast } from '@/hooks/util/use-toast';
 import { featureKeys } from '@/lib/query-keys';
@@ -26,7 +25,7 @@ export function useUpdateFeature() {
     return useMutation({
         mutationFn: async (variables: UpdateFeatureVariables) => {
             if (!firebaseUser) throw new Error("User not authenticated");
-            const token = await firebaseUser.getIdToken();
+            const token = await getFirebaseAuthToken();
             return updateFeatureApi(variables, token);
         },
         // Optimistic update

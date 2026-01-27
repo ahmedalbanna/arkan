@@ -1,9 +1,9 @@
 'use server';
 
 import { z } from 'zod';
-import { adminDb, adminRealtimeDb, adminAuth } from '@/lib/firebase/server-init';
+import { adminRealtimeDb, adminAuth } from '@/lib/firebase/server-init';
+import { addUserCreditsHelper, getDoc } from '@/lib/firebase/db-helpers';
 import { withAuth, handleApiError, createApiResponse } from '@/lib/utils/api-utils';
-import { FieldValue } from 'firebase-admin/firestore';
 import { getUserProfile } from '@/services/userService';
 
 const giftCreditsSchema = z.object({
@@ -28,11 +28,8 @@ export const POST = withAuth(async ({ request, user: adminUser }) => {
       return handleApiError({ message: 'User not found.' }, 404);
     }
     
-    // Add credits to user's account
-    let userRef = adminDb.collection('users').doc(userId);
-    await userRef.update({
-        credits: FieldValue.increment(credits)
-    });
+    // Add credits to user's account using helper
+    await addUserCreditsHelper(userId, credits);
     
     // Send notification
     let rtdb = adminRealtimeDb;
@@ -48,9 +45,9 @@ export const POST = withAuth(async ({ request, user: adminUser }) => {
     await notificationRef.set(notificationPayload);
     
     // Try to send a push notification if the user has a device token
-    let tokenDoc = await adminDb.collection('deviceTokens').doc(userId).get();
-    if (tokenDoc.exists) {
-        let { token } = tokenDoc.data() as { token: string };
+    let tokenDoc = await getDoc('deviceTokens', userId);
+    if (tokenDoc) {
+        let { token } = tokenDoc as any;
         let pushMessage = {
             token: token,
             notification: {

@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { adminDb } from '@/lib/firebase/server-init';
+import { getDoc } from '@/lib/firebase/db-helpers';
 import admin from 'firebase-admin';
 import { withAuth, handleApiError, createApiResponse } from '@/lib/utils/api-utils';
 import { CustomFirebaseError } from '@/lib/firebase/error';
@@ -35,14 +35,14 @@ export const POST = withAuth(async ({ request }) => {
 
 
     // Get the user's device token from Firestore to send a push notification
-    let tokenDoc = await adminDb.collection('deviceTokens').doc(userId).get();
-    if (!tokenDoc.exists) {
+    let tokenDoc = await getDoc('deviceTokens', userId);
+    if (!tokenDoc) {
       // If there's no token, we just skip the push notification silently
       // The notification is already saved in the database for the user to see later
       return createApiResponse({ messageId: 'No device token, notification saved to DB.' }, 200);
     }
 
-    let { token } = tokenDoc.data() as { token: string };
+    let { token } = tokenDoc as any;
 
     let message: admin.messaging.Message = {
       token: token,

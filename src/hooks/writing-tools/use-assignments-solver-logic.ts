@@ -4,6 +4,7 @@ import { useAuth } from '@/context/AuthContext';
 import { useLocalization } from '@/context/LocalizationContext';
 import { useToast, useWritingTool } from '@/hooks';
 import { processFileApi } from '@/services';
+import { getFirebaseAuthToken } from '@/lib/utils/authUtils';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useCallback, useState } from 'react';
 import { useDropzone } from 'react-dropzone';
@@ -53,7 +54,7 @@ export function useAssignmentsSolverLogic() {
     formData.append('file', file);
 
     try {
-      const token = await firebaseUser.getIdToken();
+      const token = await getFirebaseAuthToken();
       const result = await processFileApi(formData, token);
       form.setValue('text', result.markdown, { shouldValidate: true });
       toast({ title: t('writingTools.assignmentsSolver.fileProcessedToast'), description: `Assignment extracted from ${file.name}.` });

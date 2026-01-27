@@ -1,7 +1,8 @@
 
+
 // src/hooks/data/useSections.ts
 'use client';
-
+import { getFirebaseAuthToken } from '@/lib/utils/authUtils';
 import { useAuth } from '@/context/AuthContext';
 import { toast } from '@/hooks/util/use-toast';
 import { Section, type SectionProperties } from '@/lib/models';
@@ -16,7 +17,7 @@ export function useSections() {
         queryKey: sectionKeys.lists(),
         queryFn: async () => {
             if (!firebaseUser) throw new Error("User not authenticated");
-            const token = await firebaseUser.getIdToken();
+            const token = await getFirebaseAuthToken();
             const sectionsData = await fetchSectionsApi(token);
             // Instantiate Section objects
             return sectionsData.map(s => new Section(s));

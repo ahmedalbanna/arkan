@@ -1,5 +1,5 @@
 'use client';
-
+import { getFirebaseAuthToken } from '@/lib/utils/authUtils';
 import { useAuth } from '@/context/AuthContext';
 import { initializeFirebase } from '@/firebase'; // Assuming this correctly initializes firebaseApp
 import { toast } from '@/hooks/util/use-toast';
@@ -106,7 +106,7 @@ export function useMarkNotificationsAsRead() {
     return useMutation({
         mutationFn: async (notificationIds: string[]) => {
             if (!firebaseUser) throw new Error("User not authenticated");
-            const token = await firebaseUser.getIdToken();
+            const token = await getFirebaseAuthToken();
             return markNotificationsAsReadApi(notificationIds, token);
         },
         onSuccess: () => {
@@ -132,7 +132,7 @@ export function useClearAllNotifications() {
     return useMutation({
         mutationFn: async (notificationIds: string[]) => {
             if (!firebaseUser) throw new Error("User not authenticated");
-            const token = await firebaseUser.getIdToken();
+            const token = await getFirebaseAuthToken();
             return clearAllNotificationsApi(notificationIds, token);
         },
         onSuccess: () => {

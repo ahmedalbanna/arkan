@@ -5,6 +5,7 @@ import { useAuth } from '@/context/AuthContext';
 import { useLocalization } from '@/context/LocalizationContext';
 import { useToast } from '@/hooks/util/use-toast';
 import { processFileApi } from '@/services/api/documentProcessingService';
+import { getFirebaseAuthToken } from '@/lib/utils/authUtils';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useCallback, useState } from 'react';
 import { useDropzone } from 'react-dropzone';
@@ -45,7 +46,7 @@ export function useAIDetectorLogic() {
     formData.append('file', file);
 
     try {
-      const token = await firebaseUser.getIdToken();
+      const token = await getFirebaseAuthToken();
       const result = await processFileApi(formData, token);
       form.setValue('text', result.markdown, { shouldValidate: true });
       toast({ title: t('writingTools.aiDetector.toastFileProcessed'), description: t('writingTools.aiDetector.toastFileExtracted', { fileName: file.name }) });

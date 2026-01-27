@@ -4,7 +4,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useMutation } from '@tanstack/react-query';
-import { updatePassword, EmailAuthProvider, reauthenticateWithCredential } from 'firebase/auth';
+import { getAuth, EmailAuthProvider, reauthenticateWithCredential, updatePassword } from 'firebase/auth';
 import { useAuth } from '@/context/AuthContext';
 import { useToast } from '@/hooks';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
@@ -85,9 +85,21 @@ export function ChangePasswordForm() {
       if (!firebaseUser || !firebaseUser.email) {
         throw new Error('User not properly authenticated.');
       }
-      const credential = EmailAuthProvider.credential(firebaseUser.email, data.currentPassword);
-      await reauthenticateWithCredential(firebaseUser, credential);
-      await updatePassword(firebaseUser, data.newPassword);
+      
+      // Get the real Firebase Auth user
+      const auth = getAuth();
+      const currentUser = auth.currentUser;
+      
+      if (!currentUser || !currentUser.email) {
+        throw new Error('User not properly authenticated.');
+      }
+
+      // Re-authenticate with current password
+      const credential = EmailAuthProvider.credential(currentUser.email, data.currentPassword);
+      await reauthenticateWithCredential(currentUser, credential);
+      
+      // Update to new password
+      await updatePassword(currentUser, data.newPassword);
     },
     onSuccess: () => {
       toast({ title: 'Success', description: 'Your password has been updated.' });
@@ -97,7 +109,7 @@ export function ChangePasswordForm() {
       let description = 'An unexpected error occurred.';
       if (error.code === 'auth/wrong-password' || error.code === 'auth/invalid-credential') {
         description = 'The current password you entered is incorrect.';
-      } else if (error.code) {
+      } else if (error.message) {
         description = error.message;
       }
       toast({ title: 'Error', description, variant: 'destructive' });
@@ -112,7 +124,8 @@ export function ChangePasswordForm() {
     forgotPasswordMutation.mutate();
   };
   
-  if (firebaseUser?.providerData.some(p => p.providerId !== 'password')) {
+  // Only show form for users with password authentication
+  if (firebaseUser?.providerData && firebaseUser.providerData.some(p => p.providerId !== 'password')) {
     return null;
   }
 

@@ -1,7 +1,7 @@
 'use server';
 
 import { z } from 'zod';
-import { adminDb } from '@/lib/firebase/server-init';
+import { paginateQuery } from '@/lib/firebase/db-helpers';
 import { withAuth, handleApiError, createApiResponse } from '@/lib/utils/api-utils';
 import { getUserProfile } from '@/services/userService';
 
@@ -14,52 +14,50 @@ const getLogsQuerySchema = z.object({
 
 export const GET = withAuth(async ({ request }) => {
     try {
-        let { searchParams } = new URL(request.url);
-        let queryValidation = getLogsQuerySchema.safeParse(Object.fromEntries(searchParams));
+        const { searchParams } = new URL(request.url);
+        const queryValidation = getLogsQuerySchema.safeParse(Object.fromEntries(searchParams));
 
         if (!queryValidation.success) {
             return handleApiError(queryValidation.error);
         }
 
-        let { limit, agentId, userId, lastVisibleId } = queryValidation.data;
+        const { limit, agentId, userId, lastVisibleId } = queryValidation.data;
 
-        let query: FirebaseFirestore.Query<FirebaseFirestore.DocumentData> = adminDb.collection('agent_generations');
-
+        // Build query filters
+        const filters = [];
         if (agentId) {
-            query = query.where('agentId', '==', agentId);
+            filters.push({ field: 'agentId', operator: '==' as const, value: agentId });
         }
         if (userId) {
-            query = query.where('userId', '==', userId);
+            filters.push({ field: 'userId', operator: '==' as const, value: userId });
         }
 
-        query = query.orderBy('createdAt', 'desc');
-
-        if (lastVisibleId) {
-            let lastDoc = await adminDb.collection('agent_generations').doc(lastVisibleId).get();
-            if (lastDoc.exists) {
-                query = query.startAfter(lastDoc);
+        // Use paginateQuery helper with proper cursor handling
+        const result = await paginateQuery(
+            'agent_generations',
+            limit,
+            lastVisibleId,
+            {
+                filters: filters.length > 0 ? filters : undefined,
+                orderBy: { field: 'createdAt', direction: 'desc' },
             }
-        }
+        );
 
-        let snapshot = await query.limit(limit + 1).get(); // Fetch one extra to check for next page
-
-        let logsPromises = snapshot.docs.slice(0, limit).map(async (doc) => {
-            let data = doc.data();
-            let userProfile = await getUserProfile(data.userId);
+        // Enrich logs with user profile data
+        const logsPromises = result.items.map(async (doc) => {
+            const userProfile = await getUserProfile((doc as any).userId);
             return {
-                id: doc.id,
-                userName: userProfile?.name || 'Unknown User', // Add user's name
-                ...data
+                ...doc,
+                userName: userProfile?.name || 'Unknown User',
             };
         });
 
-        let logs = await Promise.all(logsPromises);
-        let hasNextPage = snapshot.docs.length > limit;
+        const logs = await Promise.all(logsPromises);
 
         return createApiResponse({
             logs,
-            hasNextPage,
-            lastVisibleId: hasNextPage && logs.length > 0 ? logs[logs.length - 1].id : null,
+            hasNextPage: result.hasNextPage,
+            lastVisibleId: result.lastVisibleId,
         }, 200);
 
     } catch (error) {

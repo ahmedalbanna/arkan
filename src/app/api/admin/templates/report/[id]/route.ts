@@ -1,23 +1,30 @@
 // src/app/api/admin/templates/report/[id]/route.ts
 
 import { createApiResponse, handleApiError, withAuth } from '@/lib/utils/api-utils';
-import { adminDb } from '@/lib/firebase/server-init';
+import { getNestedDoc, updateNestedDoc, deleteNestedDoc } from '@/lib/firebase/db-helpers';
 import { UpdateReportTemplateSchema } from '@/lib/models';
+import { defaultReportTemplates } from '@/lib/db/seed-data/report-templates';
 
 // GET a single report template
 export const GET = withAuth(async ({ params }) => {
     try {
-        let { id } = params;
+        const { id } = params;
         if (!id) {
             return handleApiError({ message: 'Template ID is required.' }, 400);
         }
-        let docRef = adminDb.collection('templates').doc('report').collection('items').doc(id);
-        let doc = await docRef.get();
 
-        if (!doc.exists) {
+        const templatesPath = {
+            parentCollection: 'templates',
+            parentDocId: 'report',
+            subcollection: 'items',
+        };
+
+        const doc = await getNestedDoc(templatesPath, id);
+
+        if (!doc) {
             return handleApiError({ message: 'Report template not found.' }, 404);
         }
-        return createApiResponse({ id: doc.id, ...doc.data() }, 200);
+        return createApiResponse(doc, 200);
     } catch (error) {
         return handleApiError(error);
     }
@@ -26,23 +33,26 @@ export const GET = withAuth(async ({ params }) => {
 // PUT to update a report template
 export const PUT = withAuth(async ({ request, params }) => {
     try {
-        let { id } = params;
+        const { id } = params;
         if (!id) {
             return handleApiError({ message: 'Template ID is required.' }, 400);
         }
 
-        let body = await request.json();
+        const body = await request.json();
         // The body now contains the full content structure
-        let validation = UpdateReportTemplateSchema.safeParse(body);
+        const validation = UpdateReportTemplateSchema.safeParse(body);
         if (!validation.success) {
             return handleApiError(validation.error);
         }
 
-        let docRef = adminDb.collection('templates').doc('report').collection('items').doc(id);
-        await docRef.update(validation.data);
+        const templatesPath = {
+            parentCollection: 'templates',
+            parentDocId: 'report',
+            subcollection: 'items',
+        };
 
-        let updatedDoc = await docRef.get();
-        return createApiResponse({ id: updatedDoc.id, ...updatedDoc.data() }, 200);
+        const updated = await updateNestedDoc(templatesPath, id, validation.data);
+        return createApiResponse(updated, 200);
 
     } catch (error) {
         return handleApiError(error);
@@ -52,7 +62,7 @@ export const PUT = withAuth(async ({ request, params }) => {
 // DELETE a report template
 export const DELETE = withAuth(async ({ params }) => {
     try {
-        let { id } = params;
+        const { id } = params;
         if (!id) {
             return handleApiError({ message: 'Template ID is required.' }, 400);
         }
@@ -63,12 +73,15 @@ export const DELETE = withAuth(async ({ params }) => {
             return handleApiError({ message: 'Default templates cannot be deleted.' }, 403);
         }
         
-        await adminDb.collection('templates').doc('report').collection('items').doc(id).delete();
+        const templatesPath = {
+            parentCollection: 'templates',
+            parentDocId: 'report',
+            subcollection: 'items',
+        };
+
+        await deleteNestedDoc(templatesPath, id);
         return createApiResponse({ message: 'Template deleted successfully.' }, 200);
     } catch (error) {
         return handleApiError(error);
     }
 }, { requireAdmin: true });
-
-// Add this import at the top
-import { defaultReportTemplates } from '@/lib/db/seed-data/report-templates';

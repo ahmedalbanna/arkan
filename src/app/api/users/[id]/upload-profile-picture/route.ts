@@ -1,5 +1,5 @@
 import { getStorage } from 'firebase-admin/storage';
-import { adminDb } from '@/lib/firebase/server-init';
+import { updateDoc } from '@/lib/firebase/db-helpers';
 import { withAuth, handleApiError, createApiResponse } from '@/lib/utils/api-utils';
 
 export const POST = withAuth(async ({ request, params, user }) => {
@@ -41,7 +41,7 @@ export const POST = withAuth(async ({ request, params, user }) => {
         await fileUpload.makePublic();
         const publicUrl = fileUpload.publicUrl();
 
-        await adminDb.collection('users').doc(targetUserId).update({
+        await updateDoc('users', targetUserId, {
             profilePictureUrl: publicUrl,
             updatedAt: new Date().toISOString(),
         });

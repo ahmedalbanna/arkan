@@ -1,5 +1,5 @@
 'use client';
-
+import { getFirebaseAuthToken } from '@/lib/utils/authUtils';
 import { useAuth } from '@/context/AuthContext';
 import { toast, useToast } from '@/hooks/util/use-toast';
 import { Transaction, type TransactionProperties } from '@/lib/models/transaction';
@@ -21,7 +21,7 @@ export function useTransactions(status: TransactionStatus) {
         queryKey: transactionKeys.list(status),
         queryFn: async ({ pageParam }) => {
             if (!firebaseUser) throw new Error("User not authenticated");
-            const token = await firebaseUser.getIdToken();
+            const token = await getFirebaseAuthToken();
             const results = await getTransactions({ token, status, limit: TRANSACTIONS_PER_PAGE, lastVisibleId: pageParam });
             // Instantiate Transaction objects
             return {
@@ -43,7 +43,7 @@ export function useVerifyPayment() {
     return useMutation({
         mutationFn: async (variables: VerifyPaymentVariables) => {
             if (!firebaseUser) throw new Error("User not authenticated");
-            const token = await firebaseUser.getIdToken();
+            const token = await getFirebaseAuthToken();
             return verifyPayment(variables, token);
         },
         onSuccess: (data, variables) => {
@@ -64,7 +64,7 @@ export function useUserTransactions() {
         queryKey: transactionKeys.lists(),
         queryFn: async () => {
             if (!firebaseUser) throw new Error("User not authenticated");
-            const token = await firebaseUser.getIdToken();
+            const token = await getFirebaseAuthToken();
             const { fetchUserTransactions } = await import('@/services/api/transactionService');
             const results = await fetchUserTransactions(token);
             // Instantiate Transaction objects
@@ -82,7 +82,7 @@ export function useSubmitPaymentProof(options?: { onSuccess?: () => void }) {
     return useMutation({
         mutationFn: async (formData: FormData) => {
             if (!firebaseUser) throw new Error("User not authenticated");
-            const token = await firebaseUser.getIdToken();
+            const token = await getFirebaseAuthToken();
             return submitPaymentProof({ formData, token });
         },
         onSuccess: () => {

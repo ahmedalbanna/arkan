@@ -1,7 +1,8 @@
+
 // @ts-nocheck
 
 'use client';
-
+import { getFirebaseAuthToken } from '@/lib/utils/authUtils';
 import { useAuth } from '@/context/AuthContext';
 import { apiService } from '@/services';
 import { useMutation } from '@tanstack/react-query';
@@ -21,7 +22,7 @@ export function useProjectChat() {
     const mutation = useMutation({
         mutationFn: async (userMessage: string) => {
             if (!firebaseUser || !project) throw new Error('User or project not available');
-            const token = await firebaseUser.getIdToken();
+            const token = await getFirebaseAuthToken();
             const projectContext = project.fullMarkdownContent;
 
             return apiService<{ response: string }>({

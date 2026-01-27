@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { adminDb } from '@/lib/firebase/server-init';
+import { getDoc, updateDoc } from '@/lib/firebase/db-helpers';
 import { handleApiError, withAuth, createApiResponse } from '@/lib/utils/api-utils';
 
 const updateFeatureSchema = z.object({
@@ -13,10 +13,8 @@ export const PUT = withAuth(async ({ request, params }) => {
       return handleApiError({ message: 'Feature ID is required.' }, 400);
     }
 
-    let featureRef = adminDb.collection('features').doc(id);
-    let featureDoc = await featureRef.get();
-
-    if (!featureDoc.exists) {
+    let feature = await getDoc('features', id);
+    if (!feature) {
       return handleApiError({ message: 'Feature not found.' }, 404);
     }
 
@@ -27,10 +25,9 @@ export const PUT = withAuth(async ({ request, params }) => {
       return handleApiError(validation.error);
     }
 
-    await featureRef.update({ isEnabled: validation.data.isEnabled });
-    let updatedDoc = await featureRef.get();
+    let updated = await updateDoc('features', id, { isEnabled: validation.data.isEnabled });
 
-    return createApiResponse({id: updatedDoc.id, ...updatedDoc.data()}, 200);
+    return createApiResponse(updated, 200);
   } catch (error) {
     return handleApiError(error);
   }

@@ -2,6 +2,7 @@
 'use client';
 
 import { useInfiniteQuery } from '@tanstack/react-query';
+import { getFirebaseAuthToken } from '@/lib/utils/authUtils';
 import { generationLogKeys } from '@/lib/query-keys';
 import { fetchGenerationLogs } from '@/services';
 import type { GenerationLog } from '@/services';
@@ -112,7 +113,7 @@ export default function GenerationLogViewer() {
         queryKey: generationLogKeys.list({ agentId: debouncedAgentId, userId: debouncedUserId }),
         queryFn: async ({ pageParam }) => {
             if (!firebaseUser) throw new Error("User not authenticated");
-            const token = await firebaseUser.getIdToken();
+            const token = await getFirebaseAuthToken();
             return fetchGenerationLogs({ token, limit: LOGS_PER_PAGE, agentId: debouncedAgentId, userId: debouncedUserId, lastVisibleId: pageParam });
         },
         initialPageParam: undefined as string | undefined,

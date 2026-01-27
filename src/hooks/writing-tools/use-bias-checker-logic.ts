@@ -5,6 +5,7 @@ import type { BiasCheckOutput } from '@/ai/schemas';
 import { useAuth } from '@/context/AuthContext';
 import { useToast, useWritingTool } from '@/hooks';
 import { processFileApi } from '@/services';
+import { getFirebaseAuthToken } from '@/lib/utils/authUtils';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useCallback, useState } from 'react';
 import { useDropzone } from 'react-dropzone';
@@ -47,7 +48,7 @@ export function useBiasCheckerLogic() {
     formData.append('file', file);
 
     try {
-      const token = await firebaseUser.getIdToken();
+      const token = await getFirebaseAuthToken();
       const result = await processFileApi(formData, token);
       form.setValue('text', result.markdown, { shouldValidate: true });
       toast({ title: 'File Processed', description: `Text extracted from ${file.name}.` });

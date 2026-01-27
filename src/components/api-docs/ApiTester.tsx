@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { getFirebaseAuthToken } from '@/lib/utils/authUtils';
 import { useTheme } from 'next-themes';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
@@ -37,7 +38,7 @@ export function ApiTester({ endpoint }: ApiTesterProps) {
     try {
       let token: string | undefined;
       if (endpoint.auth !== 'public' && firebaseUser) {
-        token = await firebaseUser.getIdToken();
+        token = await getFirebaseAuthToken();
       } else if (endpoint.auth !== 'public') {
         throw new Error('Authentication required for this endpoint.');
       }

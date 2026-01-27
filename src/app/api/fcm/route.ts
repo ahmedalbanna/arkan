@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { adminDb } from '@/lib/firebase/server-init';
+import { updateDoc } from '@/lib/firebase/db-helpers';
 import { z } from 'zod';
 
 const deviceTokenSchema = z.object({
@@ -19,10 +19,10 @@ export async function POST(request: Request) {
     let { userId, token } = validation.data;
 
     // Save or update the token in Firestore
-    await adminDb.collection('deviceTokens').doc(userId).set({
+    await updateDoc('deviceTokens', userId, {
       token,
       updatedAt: new Date().toISOString(),
-    }, { merge: true });
+    });
 
     return NextResponse.json({ message: 'Device token saved successfully.' }, { status: 200 });
 

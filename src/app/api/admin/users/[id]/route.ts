@@ -2,7 +2,8 @@
 import { z } from 'zod';
 import { revalidatePath } from 'next/cache';
 import { withAuth, handleApiError, createApiResponse } from '@/lib/utils/api-utils';
-import { adminAuth, adminDb } from '@/lib/firebase/server-init';
+import { adminAuth } from '@/lib/firebase/server-init';
+import { updateUserHelper } from '@/lib/firebase/db-helpers';
 import { getUserProfile, deleteUser } from "@/services/userService";
 
 const adminUpdateUserSchema = z.object({
@@ -42,8 +43,6 @@ export const PUT = withAuth(async ({ request, params }) => {
       return handleApiError(validation.error);
     }
     
-    const updateData: Record<string, any> = { ...validation.data, updatedAt: new Date().toISOString() };
-    
     // Update email in Firebase Auth if it's being changed
     if (validation.data.email) {
       const existingUser = await adminAuth.getUser(userId);
@@ -52,12 +51,11 @@ export const PUT = withAuth(async ({ request, params }) => {
       }
     }
 
-    await adminDb.collection("users").doc(userId).update(updateData);
+    const updatedUser = await updateUserHelper(userId, validation.data);
 
     revalidatePath('/admin/manage-users');
     revalidatePath(`/admin/manage-users/${userId}/edit`);
 
-    const updatedUser = await getUserProfile(userId);
     return createApiResponse(updatedUser, 200);
   } catch (error: any) {
     if (error.code === 'auth/email-already-exists') {

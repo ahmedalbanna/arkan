@@ -1,14 +1,14 @@
 'use client';
 
-import { useAuth as useFirebaseAuth } from '@/firebase/provider'; // Aliased to avoid naming conflict
 import { useBuilderStore } from '@/hooks';
 import { User } from '@/lib/models';
 import { userKeys } from '@/lib/query-keys';
-import { getAuthenticatedToken } from '@/lib/utils/authUtils';
-import { fetchUserProfileApi, subscribeToUserProfile } from '@/services';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { User as FirebaseUser, onAuthStateChanged } from 'firebase/auth';
-import { createContext, ReactNode, useCallback, useContext, useEffect, useState } from 'react';
+import type { FirebaseUser } from '@/lib/utils/authUtils';
+import { useSessionQuery, useUserProfileQuery, useRefetchUserProfile } from '@/hooks/auth/use-auth-queries';
+import { useAuthStore } from '@/hooks/core/useAuthStore';
+import { useQueryClient } from '@tanstack/react-query';
+import { getAuth } from 'firebase/auth';
+import { createContext, ReactNode, useCallback, useContext, useEffect } from 'react';
 
 interface AuthContextType {
   firebaseUser: FirebaseUser | null;
@@ -20,96 +20,68 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-// Handles setting/clearing the session cookie.
-async function manageSession(user: FirebaseUser | null) {
-  if (user) {
-    const idToken = await user.getIdToken(true);
-    // Set session cookie
-    await fetch('/api/auth/session', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ idToken }),
-    });
-  } else {
-    // This API route is designed to clear both session and guest cookies
-    await fetch('/api/auth/logout', {
-      method: 'POST',
-    });
-  }
-}
+// Note: Session management is handled by API routes (/api/auth/session and /api/auth/logout)
+// Session cookies are set via API responses, not client-side
+// Auth state is now managed by Zustand store + React Query hooks
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
-  const auth = useFirebaseAuth(); // Consume auth from FirebaseProvider
-  const [firebaseUser, setFirebaseUser] = useState<FirebaseUser | null>(null);
-  const [authIsLoading, setAuthIsLoading] = useState(true);
-  const [isGuest, setIsGuest] = useState(false);
   const queryClient = useQueryClient();
-  const { setUserProfile } = useBuilderStore(); // Get setter from builder store
+  const { setUserProfile: setBuilderProfile } = useBuilderStore();
+  const { 
+    firebaseUser, 
+    userProfile, 
+    isLoading, 
+    isGuest,
+    isProfileLoading,
+    setFirebaseUser,
+  } = useAuthStore();
 
+  // Validate session and restore auth on mount
+  const sessionQuery = useSessionQuery();
+
+  // Extract uid from store for profile query
+  const sessionData = sessionQuery.data;
+  const uid = sessionData?.authenticated ? sessionData.uid : firebaseUser?.uid;
+
+  // Get the actual Firebase Auth user object (with getIdToken method)
+  const firebaseAuth = getAuth();
+  const firebaseAuthUser = firebaseAuth.currentUser;
+
+  // Fetch user profile if authenticated
+  const profileQuery = useUserProfileQuery(uid || null, firebaseAuthUser);
+  const refetchUserProfile = useRefetchUserProfile(uid || null);
+
+  // Update store when session is validated
   useEffect(() => {
-    if (firebaseUser?.uid) {
-      const unsubscribe = subscribeToUserProfile(firebaseUser.uid, (user) => {
-        const userInstance = user ? new User(user) : null;
-        queryClient.setQueryData(userKeys.profile(firebaseUser.uid), userInstance);
-        setUserProfile(userInstance); // Update builder store
-      });
-      return () => unsubscribe();
-    } else {
-      setUserProfile(null); // Clear on logout
+    if (sessionData?.authenticated && sessionData.uid) {
+      const firebaseUserObj: FirebaseUser = {
+        uid: sessionData.uid,
+        email: sessionData.email || null,
+        displayName: null,
+        emailVerified: false,
+        isAnonymous: false,
+      };
+      setFirebaseUser(firebaseUserObj);
     }
-  }, [firebaseUser, queryClient, setUserProfile]);
+  }, [sessionData, setFirebaseUser]);
 
-  // Use React Query to get the user profile from the cache
-  const { data: userProfile, isLoading: isProfileLoading } = useQuery<User | null>({
-    queryKey: userKeys.profile(firebaseUser?.uid ?? ''),
-    queryFn: async () => {
-      if (!firebaseUser) return null;
-      const token = await getAuthenticatedToken(firebaseUser);
-      const userProfileData = await fetchUserProfileApi(firebaseUser.uid, token);
-      const userInstance = userProfileData ? new User(userProfileData) : null;
-      setUserProfile(userInstance); // Update builder store on fetch
-      return userInstance;
-    },
-    enabled: !!firebaseUser,
-    staleTime: Infinity,
-  });
+  // Sync profile to builder store
+  useEffect(() => {
+    if (userProfile) {
+      setBuilderProfile(userProfile);
+    } else if (!firebaseUser) {
+      setBuilderProfile(null);
+    }
+  }, [userProfile, firebaseUser, setBuilderProfile]);
 
   const refetchUser = useCallback(() => {
-    if (firebaseUser?.uid) {
-      queryClient.invalidateQueries({ queryKey: userKeys.profile(firebaseUser.uid) });
-    }
-  }, [firebaseUser, queryClient]);
-
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (user) => {
-      setFirebaseUser(user);
-      await manageSession(user);
-
-      const guestCookieExists = typeof window !== 'undefined' && document.cookie.includes('__guest=true');
-
-      if (user) {
-        setIsGuest(false);
-        if (guestCookieExists) {
-          document.cookie = '__guest=; Max-Age=-99999999; path=/;';
-        }
-        await queryClient.invalidateQueries({ queryKey: userKeys.profile(user.uid) });
-      } else {
-        setIsGuest(guestCookieExists);
-        if (!guestCookieExists) {
-          queryClient.clear();
-          setUserProfile(null);
-        }
-      }
-      setAuthIsLoading(false);
-    });
-
-    return () => unsubscribe();
-  }, [auth, queryClient, setUserProfile]); // Added auth to dependency array
+    refetchUserProfile();
+  }, [refetchUserProfile]);
 
   const value = {
     firebaseUser,
     userProfile: userProfile ?? null,
-    isLoading: authIsLoading || (!!firebaseUser && isProfileLoading),
+    isLoading: isLoading || isProfileLoading,
     isGuest,
     refetchUser,
   };
@@ -128,6 +100,4 @@ export const useAuth = (): AuthContextType => {
   }
   return context;
 };
-
-export type { FirebaseUser };
 

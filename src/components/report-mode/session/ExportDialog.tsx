@@ -52,7 +52,8 @@ export function ExportDialog() {
   const [includeToc, setIncludeToc] = useState(false);
   const [isRtl, setIsRtl] = useState(false);
 
-  const hasContent = project?.hasContent() ?? false;
+  // Allow export if project exists (even if empty - user may want to export structure)
+  const canExport = !!project;
 
   const handleToggleChapter = (chapterId: string) => {
     const chapter = project?.getChapter(chapterId);
@@ -85,7 +86,7 @@ export function ExportDialog() {
   };
 
   async function handleExportClick(format: 'docx' | 'pptx') {
-    if (!project || !hasContent || selectedContent.size === 0) return;
+    if (!project || !canExport || selectedContent.size === 0) return;
 
     // Filter project content based on selection
     const selectedProjectContent: ProjectContent = (project.content || [])
@@ -127,7 +128,7 @@ export function ExportDialog() {
           variant="outline"
           size="icon"
           className="h-8 w-8 md:w-auto md:px-3"
-          disabled={!hasContent}
+          disabled={!canExport}
         >
           <Download className="h-4 w-4" />
           <span className="hidden md:inline ms-2">Export</span>

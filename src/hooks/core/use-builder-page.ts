@@ -1,6 +1,5 @@
-
 'use client';
-
+import { getFirebaseAuthToken } from '@/lib/utils/authUtils';
 import { useAuth } from '@/context/AuthContext';
 import { useBuilderStore, useInitializeBuilderStore } from '@/hooks';
 import { userKeys } from '@/lib/query-keys';
@@ -26,7 +25,7 @@ export function useBuilderPageLogic() {
   const onboardingMutation = useMutation({
     mutationFn: async () => {
       if (!firebaseUser) throw new Error('User not authenticated');
-      const token = await firebaseUser.getIdToken();
+      const token = await getFirebaseAuthToken();
       const response = await fetch(`/api/users/${firebaseUser.uid}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },

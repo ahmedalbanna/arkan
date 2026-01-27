@@ -1,7 +1,7 @@
 'use server';
 
 import { z } from 'zod';
-import { adminDb } from '@/lib/firebase/server-init';
+import { getDoc, updateDoc } from '@/lib/firebase/db-helpers';
 import { withAuth, handleApiError, createApiResponse } from '@/lib/utils/api-utils';
 
 const bankAccountSchema = z.object({
@@ -56,9 +56,8 @@ const settingsSchema = z.object({
 
 
 async function getSettings() {
-    let settingsRef = adminDb.collection('settings').doc('defaults');
-    let doc = await settingsRef.get();
-    if (!doc.exists) {
+    const settings = await getDoc('settings', 'defaults');
+    if (!settings) {
         // If settings don't exist, return an empty structure.
         // The admin UI should guide the user to seed the database.
         return {
@@ -66,13 +65,13 @@ async function getSettings() {
             bankAccounts: []
         };
     }
-    return doc.data();
+    return settings;
 }
 
 // GET /api/settings - This endpoint is public to allow fetching bank details
 export async function GET() {
     try {
-        let settings = await getSettings();
+        const settings = await getSettings();
         return createApiResponse(settings, 200);
     } catch (error) {
         return handleApiError(error);
@@ -82,15 +81,13 @@ export async function GET() {
 // PUT /api/settings - This endpoint remains admin-only
 export const PUT = withAuth(async ({ request }) => {
     try {
-        let body = await request.json();
-        let validation = settingsSchema.safeParse(body);
+        const body = await request.json();
+        const validation = settingsSchema.safeParse(body);
         if (!validation.success) {
             return handleApiError(validation.error);
         }
 
-        let settingsRef = adminDb.collection('settings').doc('defaults');
-        await settingsRef.set(validation.data, { merge: true });
-
+        await updateDoc('settings', 'defaults', validation.data);
         return createApiResponse(validation.data, 200);
     } catch (error) {
         return handleApiError(error);

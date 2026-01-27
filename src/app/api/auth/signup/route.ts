@@ -2,7 +2,8 @@
 'use server';
 
 import { createApiResponse, handleApiError } from '@/lib/utils/api-utils';
-import { adminAuth, adminDb } from '@/lib/firebase/server-init';
+import { adminAuth } from '@/lib/firebase/server-init';
+import { getDoc, createUserDocHelper } from '@/lib/firebase/db-helpers';
 import { z } from 'zod';
 import type { UserProfile } from '@/lib/models';
 
@@ -25,8 +26,8 @@ export async function POST(req: Request) {
         }
         
         const { email, password, name } = validation.data;
-        const settings = (await adminDb.collection('settings').doc('defaults').get()).data();
-        const defaultCredits = settings?.newUserCredits ?? 10;
+        const settings = await getDoc('settings', 'defaults');
+        const defaultCredits = (settings as any)?.newUserCredits ?? 10;
 
 
         // 1. Create the Firebase Auth user
@@ -47,7 +48,7 @@ export async function POST(req: Request) {
             hasCompletedOnboarding: false,
         };
 
-        await adminDb.collection('users').doc(userRecord.uid).set(userProfile);
+        await createUserDocHelper(userRecord.uid, userProfile);
 
         return createApiResponse({ user: { uid: userRecord.uid, email: userRecord.email } }, 201);
 

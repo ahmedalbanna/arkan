@@ -2,6 +2,7 @@
 'use client';
 
 import { useState } from 'react';
+import { getFirebaseAuthToken } from '@/lib/utils/authUtils';
 import { DateRange } from 'react-day-picker';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -61,7 +62,7 @@ export function FinancialReportExporter() {
 
         setIsLoading(true);
         try {
-            const token = await firebaseUser.getIdToken();
+            const token = await getFirebaseAuthToken();
             const transactions = await fetchTransactionsForReport({
                 startDate: dateRange.from.toISOString(),
                 endDate: dateRange.to.toISOString(),

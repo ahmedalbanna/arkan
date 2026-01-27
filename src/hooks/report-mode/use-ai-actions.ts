@@ -1,6 +1,7 @@
+
 // @ts-nocheck
 'use client';
-
+import { getFirebaseAuthToken } from '@/lib/utils/authUtils';
 import { useAuth } from '@/context/AuthContext';
 import { useLocalization } from '@/context/LocalizationContext';
 import { useToast } from '@/hooks/util/use-toast';
@@ -153,7 +154,7 @@ export function useAiActions({ editor: initialEditor }: AiActionsProps = {}) {
       // Mark section as generating before API call
       updateProject(p => p.updateSection(sectionId, s => s.markAsGenerating()));
 
-      const token = await firebaseUser.getIdToken();
+      const token = await getFirebaseAuthToken();
 
       // Build complete prompts using PromptBuilder
       const systemPrompt = PromptBuilder.buildSectionSystemPrompt(section, currentProject);
@@ -204,7 +205,7 @@ export function useAiActions({ editor: initialEditor }: AiActionsProps = {}) {
       const sectionsToBuild = chapter.sections.filter(s => sectionIds.includes(s.id));
       if (sectionsToBuild.length === 0) throw new Error('No sections selected in this chapter.');
 
-      const token = await firebaseUser.getIdToken();
+      const token = await getFirebaseAuthToken();
       const body = {
         chapterTitle: chapter.title,
         sectionInstructions: sectionsToBuild.map(s => ({

@@ -1,6 +1,7 @@
 'use client';
 
 import { ErrorBoundary } from '@/components/shared/ErrorBoundary';
+import { getFirebaseAuthToken } from '@/lib/utils/authUtils';
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import { CornerDownLeft, Loader2, Wand2 } from 'lucide-react';
@@ -65,7 +66,7 @@ function AgentPlayground({ agent }: AgentPlaygroundProps) {
 
   async function onSubmit(values: PlaygroundFormValues) {
     if (!agent || !firebaseUser) return;
-    const token = await firebaseUser.getIdToken();
+    const token = await getFirebaseAuthToken();
     const systemPrompt = `${agent.prompt}\n\n${(agent.guidelines || []).join('\n')}`;
     mutation.mutate({ systemPrompt, userPrompt: values.userPrompt, token });
   }

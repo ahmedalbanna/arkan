@@ -2,6 +2,14 @@
 
 import { adminDb } from './server-init';
 import type { UserProfile, ProjectProperties } from '@/lib/models';
+import type {
+  DocumentReference,
+  Query,
+  Transaction as FirestoreTransaction,
+  DocumentSnapshot,
+  DocumentData,
+} from 'firebase-admin/firestore';
+import { FieldValue } from 'firebase-admin/firestore';
 import {
   validateUser,
   validateCreateUser,
@@ -100,7 +108,7 @@ export async function listDocs<T extends { id?: string }>(
   options?: QueryOptions
 ): Promise<(T & { id: string })[]> {
   try {
-    let query: any = adminDb.collection(collection);
+    let query: Query<DocumentData> = adminDb.collection(collection);
 
     // Apply filters
     if (options?.filters) {
@@ -120,7 +128,7 @@ export async function listDocs<T extends { id?: string }>(
     }
 
     const snapshot = await query.get();
-    return snapshot.docs.map((doc: any) => ({
+    return snapshot.docs.map((doc: DocumentSnapshot<DocumentData>) => ({
       id: doc.id,
       ...doc.data(),
     })) as (T & { id: string })[];
@@ -132,6 +140,7 @@ export async function listDocs<T extends { id?: string }>(
 
 /**
  * Create a new document with auto-generated ID
+ * Note: Collection-specific helpers handle validation per collection
  * @param collection - Firestore collection name
  * @param data - Document data to create
  * @returns Created document with generated ID
@@ -206,7 +215,7 @@ export async function paginateQuery<T extends { id?: string }>(
   options?: QueryOptions
 ): Promise<PaginatedResult<T & { id: string }>> {
   try {
-    let query: any = adminDb.collection(collection);
+    let query: Query<DocumentData> = adminDb.collection(collection);
 
     // Apply filters
     if (options?.filters) {
@@ -234,13 +243,14 @@ export async function paginateQuery<T extends { id?: string }>(
 
     const items = snapshot.docs
       .slice(0, limit)
-      .map((doc: any) => ({
+      .map((doc: DocumentSnapshot<DocumentData>) => ({
         id: doc.id,
         ...doc.data(),
       })) as (T & { id: string })[];
 
     const hasNextPage = snapshot.docs.length > limit;
-    const lastVisibleId = hasNextPage ? snapshot.docs[snapshot.docs.length - 2].id : null;
+    // FIX: Use correct index for cursor - should be limit-1 (the last item in current page)
+    const lastVisibleId = hasNextPage ? snapshot.docs[limit - 1].id : null;
 
     return { items, hasNextPage, lastVisibleId };
   } catch (error) {
@@ -277,7 +287,7 @@ export async function batchWrite<T extends { id?: string }>(
  * @param operation - Async function that performs transaction operations
  */
 export async function runTransaction<T>(
-  operation: (transaction: any) => Promise<T>
+  operation: (transaction: FirestoreTransaction) => Promise<T>
 ): Promise<T> {
   try {
     return await adminDb.runTransaction(operation);
@@ -432,10 +442,9 @@ export async function deductUserCreditsHelper(
     }
 
     if (currentCredits < creditsToDeduct) {
-      throw {
-        status: 402,
-        message: 'Insufficient credits. Please purchase more credits to continue.',
-      };
+      const error = new Error('Insufficient credits. Please purchase more credits to continue.');
+      (error as any).status = 402;
+      throw error;
     }
 
     const newBalance = currentCredits - creditsToDeduct;
@@ -457,10 +466,9 @@ export async function addUserCreditsHelper(
 ): Promise<void> {
   try {
     const userRef = adminDb.collection('users').doc(userId);
-    // Using dynamic import to avoid firebase-admin/firestore import at module level
-    const firebaseAdmin = require('firebase-admin');
+    // Use FieldValue.increment for atomic credit increment
     await userRef.update({
-      credits: firebaseAdmin.firestore.FieldValue.increment(creditsToAdd),
+      credits: FieldValue.increment(creditsToAdd),
       updatedAt: new Date().toISOString(),
     });
   } catch (error) {
@@ -536,15 +544,15 @@ export async function deleteProjectHelper(projectId: string): Promise<void> {
 /**
  * Get section by ID
  */
-export async function getSectionHelper(sectionId: string): Promise<any | null> {
-  return getDoc('sections', sectionId);
+export async function getSectionHelper(sectionId: string): Promise<Record<string, any> | null> {
+  return getDoc<Record<string, any>>('sections', sectionId);
 }
 
 /**
  * List sections by project ID
  */
-export async function listSectionsByProjectHelper(projectId: string): Promise<any[]> {
-  return listDocs('sections', {
+export async function listSectionsByProjectHelper(projectId: string): Promise<Record<string, any>[]> {
+  return listDocs<Record<string, any>>('sections', {
     filters: [{ field: 'projectId', operator: '==' as const, value: projectId }],
     orderBy: { field: 'order', direction: 'asc' },
   });
@@ -553,7 +561,7 @@ export async function listSectionsByProjectHelper(projectId: string): Promise<an
 /**
  * Save section (create or update)
  */
-export async function saveSectionHelper(sectionData: any): Promise<any> {
+export async function saveSectionHelper(sectionData: Record<string, any>): Promise<Record<string, any>> {
   try {
     const collection = adminDb.collection('sections');
     const docRef = sectionData.id ? collection.doc(sectionData.id) : collection.doc();
@@ -589,22 +597,22 @@ export async function deleteSectionHelper(sectionId: string): Promise<void> {
 /**
  * Get template by ID
  */
-export async function getTemplateHelper(templateId: string): Promise<any | null> {
-  return getDoc('templates', templateId);
+export async function getTemplateHelper(templateId: string): Promise<Record<string, any> | null> {
+  return getDoc<Record<string, any>>('templates', templateId);
 }
 
 /**
  * List templates with optional filtering
  */
-export async function listTemplatesHelper(type?: string): Promise<any[]> {
+export async function listTemplatesHelper(type?: string): Promise<Record<string, any>[]> {
   const filters = type ? [{ field: 'type', operator: '==' as const, value: type }] : undefined;
-  return listDocs('templates', { filters });
+  return listDocs<Record<string, any>>('templates', { filters });
 }
 
 /**
  * Save template (create or update)
  */
-export async function saveTemplateHelper(templateData: any): Promise<any> {
+export async function saveTemplateHelper(templateData: Record<string, any>): Promise<Record<string, any>> {
   try {
     const collection = adminDb.collection('templates');
     const docRef = templateData.id ? collection.doc(templateData.id) : collection.doc();
@@ -640,15 +648,15 @@ export async function deleteTemplateHelper(templateId: string): Promise<void> {
 /**
  * Get transaction by ID
  */
-export async function getTransactionHelper(transactionId: string): Promise<any | null> {
-  return getDoc('transactions', transactionId);
+export async function getTransactionHelper(transactionId: string): Promise<Record<string, any> | null> {
+  return getDoc<Record<string, any>>('transactions', transactionId);
 }
 
 /**
  * List transactions by user ID
  */
-export async function listUserTransactionsHelper(userId: string): Promise<any[]> {
-  return listDocs('transactions', {
+export async function listUserTransactionsHelper(userId: string): Promise<Record<string, any>[]> {
+  return listDocs<Record<string, any>>('transactions', {
     filters: [{ field: 'userId', operator: '==' as const, value: userId }],
     orderBy: { field: 'createdAt', direction: 'desc' },
   });
@@ -657,7 +665,7 @@ export async function listUserTransactionsHelper(userId: string): Promise<any[]>
 /**
  * Create transaction record
  */
-export async function createTransactionHelper(transactionData: any): Promise<any> {
+export async function createTransactionHelper(transactionData: Record<string, any>): Promise<Record<string, any>> {
   try {
     const dataToCreate = {
       ...transactionData,
@@ -666,7 +674,7 @@ export async function createTransactionHelper(transactionData: any): Promise<any
     // Validate transaction data before creating
     validateCreateTransaction(dataToCreate);
     
-    return createDoc('transactions', dataToCreate);
+    return createDoc<Record<string, any>>('transactions', dataToCreate);
   } catch (error) {
     console.error('Error creating transaction:', error);
     throw error;
@@ -680,15 +688,15 @@ export async function createTransactionHelper(transactionData: any): Promise<any
 /**
  * Get notification by ID
  */
-export async function getNotificationHelper(notificationId: string): Promise<any | null> {
-  return getDoc('notifications', notificationId);
+export async function getNotificationHelper(notificationId: string): Promise<Record<string, any> | null> {
+  return getDoc<Record<string, any>>('notifications', notificationId);
 }
 
 /**
  * List notifications for user
  */
-export async function listUserNotificationsHelper(userId: string): Promise<any[]> {
-  return listDocs('notifications', {
+export async function listUserNotificationsHelper(userId: string): Promise<Record<string, any>[]> {
+  return listDocs<Record<string, any>>('notifications', {
     filters: [{ field: 'userId', operator: '==' as const, value: userId }],
     orderBy: { field: 'createdAt', direction: 'desc' },
   });
@@ -697,7 +705,7 @@ export async function listUserNotificationsHelper(userId: string): Promise<any[]
 /**
  * Create notification
  */
-export async function createNotificationHelper(notificationData: any): Promise<any> {
+export async function createNotificationHelper(notificationData: Record<string, any>): Promise<Record<string, any>> {
   try {
     const dataToCreate = {
       ...notificationData,
@@ -707,7 +715,7 @@ export async function createNotificationHelper(notificationData: any): Promise<a
     // Validate notification data before creating
     validateCreateNotification(dataToCreate);
     
-    return createDoc('notifications', dataToCreate);
+    return createDoc<Record<string, any>>('notifications', dataToCreate);
   } catch (error) {
     console.error('Error creating notification:', error);
     throw error;
@@ -718,7 +726,7 @@ export async function createNotificationHelper(notificationData: any): Promise<a
  * Mark notification as read
  */
 export async function markNotificationAsReadHelper(notificationId: string): Promise<void> {
-  await updateDoc('notifications', notificationId, { read: true });
+  await updateDoc<Record<string, any>>('notifications', notificationId, { read: true });
 }
 
 // ============================================================================
@@ -728,21 +736,21 @@ export async function markNotificationAsReadHelper(notificationId: string): Prom
 /**
  * Get agent by ID
  */
-export async function getAgentHelper(agentId: string): Promise<any | null> {
-  return getDoc('agents', agentId);
+export async function getAgentHelper(agentId: string): Promise<Record<string, any> | null> {
+  return getDoc<Record<string, any>>('agents', agentId);
 }
 
 /**
  * List all agents
  */
-export async function listAgentsHelper(): Promise<any[]> {
-  return listDocs('agents', { orderBy: { field: 'name', direction: 'asc' } });
+export async function listAgentsHelper(): Promise<Record<string, any>[]> {
+  return listDocs<Record<string, any>>('agents', { orderBy: { field: 'name', direction: 'asc' } });
 }
 
 /**
  * Save agent (create or update)
  */
-export async function saveAgentHelper(agentData: any): Promise<any> {
+export async function saveAgentHelper(agentData: Record<string, any>): Promise<Record<string, any>> {
   try {
     const collection = adminDb.collection('agents');
     const docRef = agentData.id ? collection.doc(agentData.id) : collection.doc();
@@ -769,4 +777,236 @@ export async function saveAgentHelper(agentData: any): Promise<any> {
  */
 export async function deleteAgentHelper(agentId: string): Promise<void> {
   return deleteDoc('agents', agentId);
+}
+
+// ============================================================================
+// NESTED COLLECTION HELPERS
+// ============================================================================
+
+/**
+ * Type definition for nested collection paths
+ */
+export interface NestedCollectionPath {
+  parentCollection: string;
+  parentDocId: string;
+  subcollection: string;
+}
+
+/**
+ * Get a single nested document by ID
+ * @param path - Nested collection path
+ * @param docId - Document ID in the nested collection
+ * @returns Document data with ID or null if not found
+ */
+export async function getNestedDoc<T extends { id?: string }>(
+  path: NestedCollectionPath,
+  docId: string
+): Promise<(T & { id: string }) | null> {
+  const { parentCollection, parentDocId, subcollection } = path;
+  try {
+    const doc = await adminDb
+      .collection(parentCollection)
+      .doc(parentDocId)
+      .collection(subcollection)
+      .doc(docId)
+      .get();
+
+    if (!doc.exists) {
+      return null;
+    }
+    return { id: doc.id, ...doc.data() } as T & { id: string };
+  } catch (error) {
+    console.error(`Error fetching nested document from ${subcollection}:`, error);
+    throw error;
+  }
+}
+
+/**
+ * List nested documents with optional filtering, ordering, and limiting
+ * @param path - Nested collection path
+ * @param options - Query options (filters, ordering, limiting)
+ * @returns Array of documents with IDs
+ */
+export async function listNestedDocs<T extends { id?: string }>(
+  path: NestedCollectionPath,
+  options?: QueryOptions
+): Promise<(T & { id: string })[]> {
+  const { parentCollection, parentDocId, subcollection } = path;
+  try {
+    let query: Query<DocumentData> = adminDb
+      .collection(parentCollection)
+      .doc(parentDocId)
+      .collection(subcollection) as any;
+
+    // Apply filters
+    if (options?.filters) {
+      for (const filter of options.filters) {
+        query = query.where(filter.field, filter.operator, filter.value);
+      }
+    }
+
+    // Apply ordering
+    if (options?.orderBy) {
+      query = query.orderBy(options.orderBy.field, options.orderBy.direction);
+    }
+
+    // Apply limit
+    if (options?.limit) {
+      query = query.limit(options.limit);
+    }
+
+    const snapshot = await query.get();
+    return snapshot.docs.map((doc: DocumentSnapshot<DocumentData>) => ({
+      id: doc.id,
+      ...doc.data(),
+    })) as (T & { id: string })[];
+  } catch (error) {
+    console.error(`Error listing nested documents from ${subcollection}:`, error);
+    throw error;
+  }
+}
+
+/**
+ * Create a new nested document with auto-generated ID
+ * @param path - Nested collection path
+ * @param data - Document data to create
+ * @returns Created document with generated ID
+ */
+export async function createNestedDoc<T extends { id?: string }>(
+  path: NestedCollectionPath,
+  data: Omit<T, 'id'>
+): Promise<T & { id: string }> {
+  const { parentCollection, parentDocId, subcollection } = path;
+  try {
+    const docRef = adminDb
+      .collection(parentCollection)
+      .doc(parentDocId)
+      .collection(subcollection)
+      .doc();
+
+    const dataToSave = {
+      ...data,
+      id: docRef.id,
+    };
+
+    await docRef.set(dataToSave);
+    return dataToSave as T & { id: string };
+  } catch (error) {
+    console.error(`Error creating nested document in ${subcollection}:`, error);
+    throw error;
+  }
+}
+
+/**
+ * Create a nested document with a specific ID
+ * @param path - Nested collection path
+ * @param docId - Specific document ID to use
+ * @param data - Document data to create
+ * @returns Created document with specified ID
+ */
+export async function createNestedDocWithId<T extends { id?: string }>(
+  path: NestedCollectionPath,
+  docId: string,
+  data: Omit<T, 'id'>
+): Promise<T & { id: string }> {
+  const { parentCollection, parentDocId, subcollection } = path;
+  try {
+    const docRef = adminDb
+      .collection(parentCollection)
+      .doc(parentDocId)
+      .collection(subcollection)
+      .doc(docId);
+
+    const dataToSave = {
+      ...data,
+      id: docId,
+    };
+
+    await docRef.set(dataToSave);
+    return dataToSave as T & { id: string };
+  } catch (error) {
+    console.error(`Error creating nested document in ${subcollection}:`, error);
+    throw error;
+  }
+}
+
+/**
+ * Update a nested document with merge strategy (non-destructive)
+ * @param path - Nested collection path
+ * @param docId - Document ID in the nested collection
+ * @param data - Partial data to update
+ * @returns Updated document data
+ */
+export async function updateNestedDoc<T extends { id?: string }>(
+  path: NestedCollectionPath,
+  docId: string,
+  data: Partial<Omit<T, 'id'>>
+): Promise<T & { id: string }> {
+  const { parentCollection, parentDocId, subcollection } = path;
+  try {
+    const ref = adminDb
+      .collection(parentCollection)
+      .doc(parentDocId)
+      .collection(subcollection)
+      .doc(docId);
+
+    await ref.update(data);
+    const updated = await getNestedDoc<T>(path, docId);
+    if (!updated) throw new Error('Failed to retrieve updated nested document');
+    return updated;
+  } catch (error) {
+    console.error(`Error updating nested document in ${subcollection}:`, error);
+    throw error;
+  }
+}
+
+/**
+ * Delete a nested document by ID
+ * @param path - Nested collection path
+ * @param docId - Document ID in the nested collection
+ */
+export async function deleteNestedDoc(
+  path: NestedCollectionPath,
+  docId: string
+): Promise<void> {
+  const { parentCollection, parentDocId, subcollection } = path;
+  try {
+    await adminDb
+      .collection(parentCollection)
+      .doc(parentDocId)
+      .collection(subcollection)
+      .doc(docId)
+      .delete();
+  } catch (error) {
+    console.error(`Error deleting nested document from ${subcollection}:`, error);
+    throw error;
+  }
+}
+
+/**
+ * Batch write multiple nested documents (create or update)
+ * @param path - Nested collection path
+ * @param operations - Array of {docId?, data} operations
+ */
+export async function batchWriteNested<T extends { id?: string }>(
+  path: NestedCollectionPath,
+  operations: Array<{ docId?: string; data: T }>
+): Promise<void> {
+  const { parentCollection, parentDocId, subcollection } = path;
+  try {
+    const batch = adminDb.batch();
+    for (const op of operations) {
+      const docId = op.docId || adminDb.collection(subcollection).doc().id;
+      const docRef = adminDb
+        .collection(parentCollection)
+        .doc(parentDocId)
+        .collection(subcollection)
+        .doc(docId);
+      batch.set(docRef, op.data, { merge: true });
+    }
+    await batch.commit();
+  } catch (error) {
+    console.error(`Error batch writing to nested collection ${subcollection}:`, error);
+    throw error;
+  }
 }

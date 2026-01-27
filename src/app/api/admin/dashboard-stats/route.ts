@@ -1,86 +1,87 @@
 // src/app/api/admin/dashboard-stats/route.ts
 
 import { withAuth, handleApiError, createApiResponse } from '@/lib/utils/api-utils';
-import { adminDb } from '@/lib/firebase/server-init';
+import { listDocs, getAgentHelper } from '@/lib/firebase/db-helpers';
 import { getUserProfile } from '@/services/userService';
 
 async function getSummaryCounts() {
-    let [usersSnapshot, generationsSnapshot, pendingTransactionsSnapshot] = await Promise.all([
-        adminDb.collection('users').count().get(),
-        adminDb.collection('agent_generations').count().get(),
-        adminDb.collection('transactions').where('status', '==', 'pending').count().get()
+    const [users, transactions, agentGenerations] = await Promise.all([
+        listDocs('users'),
+        listDocs('transactions', {
+            filters: [{ field: 'status', operator: '==', value: 'pending' }],
+        }),
+        listDocs('agent_generations'),
     ]);
 
     return {
-        totalUsers: usersSnapshot.data().count,
-        totalGenerations: generationsSnapshot.data().count,
-        pendingPayments: pendingTransactionsSnapshot.data().count,
+        totalUsers: users.length,
+        totalGenerations: agentGenerations.length,
+        pendingPayments: transactions.length,
     };
 }
 
 async function getAgentUsage() {
     // Fetch logs from the last 30 days for agent usage stats to improve performance
-    let thirtyDaysAgo = new Date();
+    const thirtyDaysAgo = new Date();
     thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
 
-    let agentGenerations = await adminDb.collection('agent_generations')
-        .where('createdAt', '>=', thirtyDaysAgo.toISOString())
-        .get();
+    const agentGenerations = await listDocs('agent_generations', {
+        filters: [{ field: 'createdAt', operator: '>=', value: thirtyDaysAgo.toISOString() }],
+    });
 
-    let agentUsage: Record<string, number> = {};
+    const agentUsage: Record<string, number> = {};
     agentGenerations.forEach(doc => {
-        let agentId = doc.data().agentId;
+        const agentId = (doc as any).agentId;
         agentUsage[agentId] = (agentUsage[agentId] || 0) + 1;
     });
 
-    let agentUsagePromises = Object.entries(agentUsage)
-        .map(async ([agentId, count]) => ({
-            name: await adminDb.collection('agents').doc(agentId).get().then(doc => doc.data()?.name || 'Unknown'),
-            agentId,
-            count,
-        }));
+    const agentUsagePromises = Object.entries(agentUsage)
+        .map(async ([agentId, count]) => {
+            const agent = await getAgentHelper(agentId);
+            return {
+                name: agent?.name || 'Unknown',
+                agentId,
+                count,
+            };
+        });
+    
     return (await Promise.all(agentUsagePromises))
-        .sort((a, b) => b.count - a.count) // Sort after all promises are resolved
+        .sort((a, b) => b.count - a.count)
         .slice(0, 10); // Get top 10 most used agents
-
 }
 
 async function getRecentActivity() {
-    let recentGenerationsSnapshot = await adminDb.collection('agent_generations')
-        .orderBy('createdAt', 'desc')
-        .limit(5)
-        .get();
+    const recentGenerations = await listDocs('agent_generations', {
+        orderBy: { field: 'createdAt', direction: 'desc' },
+        limit: 5,
+    });
 
-    let activityPromises = recentGenerationsSnapshot.docs.map(async (doc) => {
-        let data = doc.data();
-        let userProfile = await getUserProfile(data.userId);
+    const activityPromises = recentGenerations.map(async (doc) => {
+        const userProfile = await getUserProfile((doc as any).userId);
         return {
-            id: doc.id,
-            userName: userProfile?.name || 'Unknown User', // Fetch user name
-            ...data
+            ...doc,
+            userName: userProfile?.name || 'Unknown User',
         };
     });
 
     return Promise.all(activityPromises);
 }
 
-
 export const GET = withAuth(async () => {
     try {
-        let [summaryCounts, agentUsageChartData, recentActivity] = await Promise.all([
+        const [summaryCounts, agentUsageChartData, recentActivity] = await Promise.all([
             getSummaryCounts(),
             getAgentUsage(),
             getRecentActivity(),
         ]);
 
-        let stats = {
+        const stats = {
             ...summaryCounts,
             agentUsageChartData,
-            recentActivity
+            recentActivity,
         };
 
         return createApiResponse(stats, 200);
-
     } catch (error) {
         return handleApiError(error);
     }

@@ -9,6 +9,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { type CreateLectureUnitOutput, type CreateLectureUnitInput } from '@/ai/schemas/lecture-generator';
 import { useToast } from '@/hooks';
 import { useAuth } from '@/context/AuthContext';
+import { getFirebaseAuthToken } from '@/lib/utils/authUtils';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { SessionPlanDisplay } from '@/components/writing-tools/SessionPlanDisplay';
@@ -77,7 +78,7 @@ export default function LectureGeneratorPage() {
         };
 
         try {
-            const token = await user.getIdToken();
+            const token = await user.getIdToken?.() || await getFirebaseAuthToken();
             const response = await fetch('/api/actions/create-lecture-unit', {
                 method: 'POST',
                 headers: {

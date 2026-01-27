@@ -5,6 +5,7 @@ import { useAuth } from '@/context/AuthContext';
 import type { AgentProperties } from '@/lib/models';
 import { agentKeys } from '@/lib/query-keys';
 import { getFromCache, saveToCache } from '@/lib/utils/cache';
+import { getFirebaseAuthToken } from '@/lib/utils/authUtils';
 import { createAgentApi, deleteAgentApi, fetchAgentsApi, updateAgentApi } from '@/services/api/agentService';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useEffect } from 'react';
@@ -60,7 +61,7 @@ export function useAgentManager() {
     queryKey: agentKeys.all,
     queryFn: async () => {
       if (!firebaseUser) throw new Error("Not authenticated");
-      const token = await firebaseUser.getIdToken();
+      const token = await getFirebaseAuthToken();
       const fetchedAgents = await fetchAgentsApi(token);
       saveToCache(AGENTS_CACHE_KEY, fetchedAgents);
       return fetchedAgents;
@@ -87,7 +88,7 @@ export function useAgentManager() {
   const createMutation = useMutation({
     mutationFn: async (data: Omit<AgentProperties, 'id'>) => {
       if (!firebaseUser) throw new Error("Not authenticated");
-      const token = await firebaseUser.getIdToken();
+      const token = await getFirebaseAuthToken();
       // The API now expects the `id` in the body
       return createAgentApi(data as any, token);
     },
@@ -100,7 +101,7 @@ export function useAgentManager() {
   const updateMutation = useMutation({
     mutationFn: async ({ id, data }: { id: string, data: Partial<AgentProperties> }) => {
       if (!firebaseUser) throw new Error("Not authenticated");
-      const token = await firebaseUser.getIdToken();
+      const token = await getFirebaseAuthToken();
       return updateAgentApi(id, data, token);
     },
     onSuccess: () => {
@@ -111,7 +112,7 @@ export function useAgentManager() {
   const deleteMutation = useMutation({
     mutationFn: async (id: string) => {
       if (!firebaseUser) throw new Error("Not authenticated");
-      const token = await firebaseUser.getIdToken();
+      const token = await getFirebaseAuthToken();
       return deleteAgentApi(id, token);
     },
     onSuccess: (_, id) => {

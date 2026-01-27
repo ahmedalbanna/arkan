@@ -54,7 +54,8 @@ export function SessionActions({ isSaving }: SessionActionsProps) {
         }
     };
 
-    const hasContent = project?.hasContent() ?? false;
+    // Allow download/export if project exists (even if empty - user may want to save structure)
+    const canDownload = !!project;
 
     return (
         <TooltipProvider>
@@ -113,7 +114,7 @@ export function SessionActions({ isSaving }: SessionActionsProps) {
                             variant="outline"
                             size="icon"
                             onClick={handleDownload}
-                            disabled={!hasContent}
+                            disabled={!canDownload}
                             className="h-8 w-8 md:w-auto md:px-3"
                         >
                             <Download className="h-4 w-4" />

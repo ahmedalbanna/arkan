@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
-import { adminAuth, adminDb } from '@/lib/firebase/server-init';
-
+import { adminAuth } from '@/lib/firebase/server-init';
+import { listDocs, getDoc } from '@/lib/firebase/db-helpers';
 import { getUserProfile } from '@/services/userService';
 
 async function verifyUser(request: Request) {
@@ -30,36 +30,35 @@ export async function GET(request: Request) {
             return NextResponse.json({ message: 'User profile not found.' }, { status: 404 });
         }
 
-        let generationsSnapshot = await adminDb.collection('agent_generations')
-            .where('userId', '==', userCheck.userId)
-            .orderBy('createdAt', 'desc')
-            .get();
+        let generations = await listDocs('agent_generations', {
+            filters: [{ field: 'userId', operator: '==' as const, value: userCheck.userId }],
+            orderBy: { field: 'createdAt', direction: 'desc' },
+        });
 
-        let totalGenerations = generationsSnapshot.size;
+        let totalGenerations = generations.length;
 
         let agentUsage: Record<string, number> = {};
         let creditsUsed = 0;
-        generationsSnapshot.forEach(doc => {
-            let data = doc.data();
-            let agentId = data.agentId;
+        generations.forEach((doc: any) => {
+            let agentId = doc.agentId;
             agentUsage[agentId] = (agentUsage[agentId] || 0) + 1;
-            creditsUsed += data.creditCost || 0;
+            creditsUsed += doc.creditCost || 0;
         });
 
-        let agentUsagePromises = Object.entries(agentUsage).map(async ([agentId, count]) => ({
-                name: await adminDb.collection('agents').doc(agentId).get().then(doc => doc.data()?.name || 'Unknown'),
+        let agentUsagePromises = Object.entries(agentUsage).map(async ([agentId, count]) => {
+            let agent = await getDoc('agents', agentId);
+            return {
+                name: (agent as any)?.name || 'Unknown',
                 agentId,
                 count,
-            }));
+            };
+        });
 
         let agentUsageChartData = (await Promise.all(agentUsagePromises))
             .sort((a, b) => b.count - a.count) // Sort after all promises are resolved
             .slice(0, 10);
 
-        let recentActivity = generationsSnapshot.docs.slice(0, 5).map(doc => ({
-            id: doc.id,
-            ...doc.data()
-        }));
+        let recentActivity = generations.slice(0, 5);
 
 
         return NextResponse.json({

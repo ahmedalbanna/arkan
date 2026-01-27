@@ -1,7 +1,7 @@
 import { getStorage } from 'firebase-admin/storage';
 import { createTransaction } from '@/services/transactionService';
 import { getDatabase } from 'firebase-admin/database';
-import { adminDb } from '@/lib/firebase/server-init';
+import { listDocs } from '@/lib/firebase/db-helpers';
 import { withAuth, handleApiError, createApiResponse } from '@/lib/utils/api-utils';
 
 export const config = {
@@ -55,8 +55,11 @@ export const POST = withAuth(async ({ request }) => {
 
     let { id: transactionId } = await createTransaction(transactionData);
 
-    let adminsSnapshot = await adminDb.collection('users').where('role', '==', 'admin').get();
-    if (!adminsSnapshot.empty) {
+    let admins = await listDocs('users', {
+      filters: [{ field: 'role', operator: '==' as const, value: 'admin' }],
+    });
+    
+    if (admins.length > 0) {
       let rtdb = getDatabase();
       let notificationPayload = {
         title: "New Payment Request",
@@ -67,8 +70,8 @@ export const POST = withAuth(async ({ request }) => {
         link: '/admin/manage-payments'
       };
 
-      let notificationPromises = adminsSnapshot.docs.map(adminDoc => {
-          let adminId = adminDoc.id;
+      let notificationPromises = admins.map(admin => {
+          let adminId = admin.id;
           let notificationRef = rtdb.ref(`notifications/${adminId}`).push();
           return notificationRef.set(notificationPayload);
       });

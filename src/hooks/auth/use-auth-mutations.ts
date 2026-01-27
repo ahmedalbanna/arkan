@@ -2,38 +2,84 @@
 'use client';
 
 import { useAuth } from '@/context/AuthContext';
-import { initializeFirebase } from '@/firebase';
+import { useAuthStore } from '@/hooks/core/useAuthStore';
 import { useToast } from '@/hooks/util/use-toast';
 import { userKeys } from '@/lib/query-keys';
 import type { LoginCredentials, SignupCredentials, UserProfile } from '@/lib/types';
+import { User } from '@/lib/models';
 import { handleErrorUtility } from '@/lib/utils/errorUtils';
 import {
-  createOrUpdateUserProfileApi,
-  fetchUserProfileApi,
   forgotPasswordService,
   loginWithEmail,
   loginWithGoogle,
-  sendPasswordResetEmailApi,
+  sendPhoneOtp,
   serviceLogoutUser,
   serviceSignupUser,
+  verifyPhoneOtp,
+  type ConfirmationResult,
 } from '@/services/api/authService';
+import {
+  createOrUpdateUserProfileApi,
+  fetchUserProfileApi,
+  sendPasswordResetEmailApi,
+} from '@/services/api/userService';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { getAuth, signInWithPhoneNumber, type ConfirmationResult, type User as FirebaseUser } from "firebase/auth";
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
-
-const { firebaseApp: app } = initializeFirebase();
 
 
 export function useLogin() {
   const router = useRouter();
   const queryClient = useQueryClient();
   const { toast } = useToast();
+  const { setFirebaseUser, setUserProfile, setIsProfileLoading } = useAuthStore();
 
   return useMutation({
-    mutationFn: (credentials: LoginCredentials) => loginWithEmail(credentials),
-    onSuccess: (user) => {
-      queryClient.invalidateQueries({ queryKey: userKeys.all }); // Refetch user data
+    mutationFn: async (credentials: LoginCredentials) => {
+      const userCredential = await loginWithEmail(credentials);
+      
+      // Create session cookie by exchanging ID token
+      const idToken = await userCredential.user.getIdToken();
+      
+      // Parallel fetch: create session AND fetch user profile
+      const [sessionResponse, userProfileData] = await Promise.all([
+        fetch('/api/auth/session', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ idToken }),
+        }),
+        fetchUserProfileApi(userCredential.user.uid, idToken),
+      ]);
+
+      if (!sessionResponse.ok) {
+        throw new Error('Failed to create session cookie');
+      }
+
+      return {
+        userCredential,
+        userProfileData,
+      };
+    },
+    onSuccess: ({ userCredential, userProfileData }) => {
+      // Update auth store with user data
+      const firebaseUser = {
+        uid: userCredential.user.uid,
+        email: userCredential.user.email,
+        displayName: userCredential.user.displayName,
+        emailVerified: userCredential.user.emailVerified,
+        isAnonymous: userCredential.user.isAnonymous,
+      };
+      setFirebaseUser(firebaseUser);
+
+      // Update user profile in store
+      if (userProfileData) {
+        const userInstance = new User(userProfileData);
+        setUserProfile(userInstance);
+      }
+
+      // Invalidate queries to sync React Query
+      queryClient.invalidateQueries({ queryKey: userKeys.all });
+      
       router.push('/builder');
       toast({ title: "Welcome back!" });
     },
@@ -42,7 +88,7 @@ export function useLogin() {
 }
 
 // Helper to create profile on first sign-in
-async function handleFirstSignIn(user: FirebaseUser) {
+async function handleFirstSignIn(user: any) {
   // Check if a profile already exists by trying to fetch it.
   // We expect this to fail for a new user.
   const token = await user.getIdToken();
@@ -69,15 +115,60 @@ export function useGoogleSignIn() {
   const router = useRouter();
   const queryClient = useQueryClient();
   const { toast } = useToast();
+  const { setFirebaseUser, setUserProfile } = useAuthStore();
 
   return useMutation({
-    mutationFn: loginWithGoogle,
-    onSuccess: async (userCredential) => {
-      const isNewUser = userCredential.isNewUser;
+    mutationFn: async () => {
+      const userCredential = await loginWithGoogle();
+      
+      // Create session cookie by exchanging ID token
+      const idToken = await userCredential.user.getIdToken();
+      
+      // Parallel fetch: create session AND fetch user profile
+      const [sessionResponse, userProfileData] = await Promise.all([
+        fetch('/api/auth/session', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ idToken }),
+        }),
+        fetchUserProfileApi(userCredential.user.uid, idToken),
+      ]);
+
+      if (!sessionResponse.ok) {
+        throw new Error('Failed to create session cookie');
+      }
+
+      return {
+        userCredential,
+        userProfileData,
+        isNewUser: userCredential.isNewUser,
+      };
+    },
+    onSuccess: async ({ userCredential, userProfileData, isNewUser }) => {
+      // Update auth store with user data
+      const firebaseUser = {
+        uid: userCredential.user.uid,
+        email: userCredential.user.email,
+        displayName: userCredential.user.displayName,
+        emailVerified: userCredential.user.emailVerified,
+        isAnonymous: userCredential.user.isAnonymous,
+      };
+      setFirebaseUser(firebaseUser);
+
+      // Update user profile in store
+      if (userProfileData) {
+        const userInstance = new User(userProfileData);
+        setUserProfile(userInstance);
+      }
+
+      // Handle new user setup
       if (isNewUser) {
         await handleFirstSignIn(userCredential.user);
       }
+
+      // Invalidate queries to sync React Query
       queryClient.invalidateQueries({ queryKey: userKeys.all });
+      
       router.push('/builder');
       toast({ title: `Welcome, ${userCredential.user.displayName}!` });
     },
@@ -96,8 +187,7 @@ export function usePhoneSignIn() {
     setIsLoading(true);
     setError(null);
     try {
-      const auth = getAuth(app);
-      const confirmationResult = await signInWithPhoneNumber(auth, phoneNumber, (window as any).recaptchaVerifier);
+      const confirmationResult = await sendPhoneOtp(phoneNumber, (window as any).recaptchaVerifier);
       return confirmationResult;
     } catch (err: any) {
       setError(err.message);
@@ -110,14 +200,48 @@ export function usePhoneSignIn() {
   const verifyOtp = async (confirmationResult: ConfirmationResult, otp: string) => {
     setIsLoading(true);
     setError(null);
+    const { setFirebaseUser, setUserProfile } = useAuthStore();
+    
     try {
-      const userCredential = await confirmationResult.confirm(otp);
-      // After successful OTP verification, handle first sign-in logic
-      const { getAdditionalUserInfo } = await import('firebase/auth');
-      const info = getAdditionalUserInfo(userCredential);
-      if (info?.isNewUser) {
-        await handleFirstSignIn(userCredential.user);
+      const result = await verifyPhoneOtp(confirmationResult, otp);
+      
+      // Create session cookie by exchanging ID token
+      const idToken = await result.user.getIdToken();
+      
+      // Parallel fetch: create session AND fetch user profile
+      const [sessionResponse, userProfileData] = await Promise.all([
+        fetch('/api/auth/session', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ idToken }),
+        }),
+        fetchUserProfileApi(result.user.uid, idToken),
+      ]);
+
+      if (!sessionResponse.ok) {
+        throw new Error('Failed to create session cookie');
       }
+
+      // Update auth store with user data
+      const firebaseUser = {
+        uid: result.user.uid,
+        email: result.user.email,
+        displayName: result.user.displayName,
+        emailVerified: result.user.emailVerified,
+        isAnonymous: result.user.isAnonymous,
+      };
+      setFirebaseUser(firebaseUser);
+
+      // Update user profile in store
+      if (userProfileData) {
+        const userInstance = new User(userProfileData);
+        setUserProfile(userInstance);
+      }
+      
+      if (result.isNewUser) {
+        await handleFirstSignIn(result.user);
+      }
+      
       queryClient.invalidateQueries({ queryKey: userKeys.all });
       router.push('/builder');
       toast({ title: `Welcome!` });
@@ -135,11 +259,17 @@ export function usePhoneSignIn() {
 export function useLogout() {
   const router = useRouter();
   const queryClient = useQueryClient();
+  const { clearAuth } = useAuthStore();
 
   return useMutation({
     mutationFn: serviceLogoutUser,
     onSuccess: () => {
-      queryClient.clear(); // Clear all user data from cache
+      // Clear all auth state
+      clearAuth();
+      
+      // Clear all user data from React Query cache
+      queryClient.clear();
+      
       router.push('/login');
     },
     onError: (error) => handleErrorUtility(error, "Logout Failed")
@@ -221,7 +351,7 @@ export function useSendPasswordReset() {
   return useMutation({
     mutationFn: async (userId: string) => {
       if (!firebaseUser) throw new Error("Admin not authenticated.");
-      const token = await firebaseUser.getIdToken();
+      const token = await getFirebaseAuthToken();
       return sendPasswordResetEmailApi(userId, token);
     },
     onSuccess: (data) => {

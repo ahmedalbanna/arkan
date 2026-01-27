@@ -1,5 +1,5 @@
 // src/app/api/admin/templates/report/route.ts
-import { adminDb } from '@/lib/firebase/server-init';
+import { listNestedDocs, batchWriteNested, getNestedDoc } from '@/lib/firebase/db-helpers';
 import { CreateReportTemplateSchema, type ReportTemplateProperties } from '@/lib/models';
 import { createApiResponse, handleApiError, withAuth } from '@/lib/utils/api-utils';
 import { defaultReportTemplates } from '@/lib/db/seed-data/report-templates';
@@ -9,22 +9,27 @@ import { defaultReportTemplates } from '@/lib/db/seed-data/report-templates';
 // as all users need to be able to fetch the templates for building reports.
 export async function GET() {
     try {
-        let collectionRef = adminDb.collection('templates').doc('report').collection('items');
-        let snapshot = await collectionRef.get();
+        const templatesPath = {
+            parentCollection: 'templates',
+            parentDocId: 'report',
+            subcollection: 'items',
+        };
+
+        let templates = await listNestedDocs(templatesPath);
 
         // Lazy seeding
-        if (snapshot.empty) {
-            let batch = adminDb.batch();
-            defaultReportTemplates.forEach(template => {
-                const docRef = collectionRef.doc(template.id);
-                batch.set(docRef, template);
-            });
-            await batch.commit();
-            snapshot = await collectionRef.get(); // Re-fetch
+        if (templates.length === 0) {
+            const operations = defaultReportTemplates.map(template => ({
+                docId: template.id,
+                data: template as any,
+            }));
+            await batchWriteNested(templatesPath, operations);
+            // Re-fetch
+            templates = await listNestedDocs(templatesPath);
         }
 
-        let templates = snapshot.docs.map(doc => doc.data() as ReportTemplateProperties);
-        return createApiResponse(templates, 200);
+        const result = templates.map(doc => doc as ReportTemplateProperties);
+        return createApiResponse(result, 200);
     } catch (error) {
         return handleApiError(error);
     }
@@ -33,22 +38,31 @@ export async function GET() {
 
 export const POST = withAuth(async ({ request }) => {
     try {
-        let body = await request.json();
+        const body = await request.json();
         const validation = CreateReportTemplateSchema.safeParse(body);
         if (!validation.success) {
             return handleApiError(validation.error);
         }
 
         const { id, ...data } = validation.data;
-        const collectionRef = adminDb.collection('templates').doc('report').collection('items');
+        const templatesPath = {
+            parentCollection: 'templates',
+            parentDocId: 'report',
+            subcollection: 'items',
+        };
 
-        const docRef = collectionRef.doc(id);
-        const doc = await docRef.get();
-        if (doc.exists) {
+        const existing = await getNestedDoc(templatesPath, id);
+        if (existing) {
             return handleApiError({ message: 'A report template with this ID already exists.' }, 409);
         }
 
-        await docRef.set({ ...data, content: data.content || [] }); // Ensure content is at least an empty array
+        // Ensure content is at least an empty array
+        const templateData = { ...data, content: data.content || [] } as any;
+        
+        // Manual creation since we need to set specific ID
+        const { createNestedDoc } = await import('@/lib/firebase/db-helpers');
+        const created = await createNestedDoc(templatesPath, templateData);
+        
         return createApiResponse({ id, ...data }, 201);
     } catch (error) {
         return handleApiError(error);

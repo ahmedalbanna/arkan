@@ -1,6 +1,5 @@
-
 'use client';
-
+import { getFirebaseAuthToken } from '@/lib/utils/authUtils';
 import { useAuth } from '@/context/AuthContext';
 import { useToast } from '@/hooks';
 import { transactionKeys } from '@/lib/query-keys';
@@ -15,7 +14,7 @@ export function useSubmitPaymentProof() {
     return useMutation({
         mutationFn: async (formData: FormData) => {
             if (!firebaseUser) throw new Error("User not authenticated");
-            const token = await firebaseUser.getIdToken();
+            const token = await getFirebaseAuthToken();
             return submitPaymentProof({ formData, token });
         },
         onSuccess: () => {

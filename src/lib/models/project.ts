@@ -260,7 +260,7 @@ export class Project {
     };
 
     // Initialize global settings with validation
-    this.language = props.language || 'default';
+    this.language = props.language || 'en';
 
     // Validate complexity and formality are in range
     const complexity = props.complexity ?? 50;
@@ -773,7 +773,14 @@ export class Project {
       logoUrl: this.logoUrl,
       universityLogoUrl: this.universityLogoUrl,
       tableOfContentsMarkdown: this.tableOfContentsMarkdown,
-      content: this.content.map(c => c.toStateObject()),
+      content: this.content.map(c => {
+        const stateObj = c.toStateObject();
+        // Add 'type' field for schema validation
+        return {
+          ...stateObj,
+          type: c instanceof Chapter ? 'chapter' : 'section'
+        };
+      }),
       externalContext: this.externalContext.map(ec => ec.toStateObject()),
       meta: this.meta,
       activeSectionId: this.activeSectionId,

@@ -6,7 +6,7 @@ import { toast } from '@/hooks/util/use-toast';
 import type { ProjectProperties } from '@/lib/models';
 import { Project } from '@/lib/models';
 import { projectKeys } from '@/lib/query-keys';
-import { getAuthenticatedToken } from '@/lib/utils/authUtils';
+import { getFirebaseAuthToken } from '@/lib/utils/authUtils';
 import { deleteProjectApi, fetchProjectsApi, saveProjectApi } from '@/services/api/projectService';
 import { localProjectService } from '@/services/local-project-service';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
@@ -38,7 +38,7 @@ export function useProjects() {
             if (!firebaseUser) return [];
             // Then, fetch from server and merge
             try {
-                const token = await getAuthenticatedToken(firebaseUser);
+                const token = await getFirebaseAuthToken();
                 const serverProjects = await fetchProjectsApi(token);
 
                 const mergedProjects = serverProjects.map(p => new Project(p));
@@ -89,7 +89,7 @@ export function useSaveProject() {
                 toast({ title: 'Offline', description: 'You are offline. Please connect to the internet to save the project.', variant: 'destructive' });
                 throw new Error("User is offline.");
             }
-            const token = await getAuthenticatedToken(firebaseUser);
+            const token = await getFirebaseAuthToken();
             return saveProjectApi(projectData, token);
         },
         onSuccess: (savedProject) => {
@@ -120,7 +120,7 @@ export function useDeleteProject() {
             const localDelete = localProjectService.deleteProject(projectId);
             let serverDelete: Promise<any> | null = null;
             if (navigator.onLine && firebaseUser) {
-                const token = await getAuthenticatedToken(firebaseUser);
+                const token = await getFirebaseAuthToken();
                 serverDelete = deleteProjectApi(projectId, token);
             }
             await Promise.all([localDelete, serverDelete]);

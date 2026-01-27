@@ -1,6 +1,6 @@
 // src/app/api/templates/docx/route.ts
-import { adminDb } from '@/lib/firebase/server-init';
-import { templates as defaultTemplates, type DocxTemplateKey  } from '@/lib/docx-styles';
+import { listNestedDocs, batchWriteNested } from '@/lib/firebase/db-helpers';
+import { templates as defaultTemplates, type DocxTemplateKey } from '@/lib/docx-styles';
 import { createApiResponse, handleApiError, withAuth } from '@/lib/utils/api-utils';
 import { z } from 'zod';
 import { createGenerativeTemplate } from '@/services/templateService';
@@ -9,27 +9,35 @@ import { createGenerativeTemplate } from '@/services/templateService';
 // as all users need to be able to fetch the templates for exporting.
 export async function GET() {
     try {
-        let stylesCollection = adminDb.collection('templates').doc('docx').collection('styles');
-        let snapshot = await stylesCollection.get();
+        const stylesPath = {
+            parentCollection: 'templates',
+            parentDocId: 'docx',
+            subcollection: 'styles',
+        };
+
+        let templates = await listNestedDocs(stylesPath);
 
         // Lazy seeding: If no templates exist, populate them from the default config.
-        if (snapshot.empty) {
-            let batch = adminDb.batch();
-            (Object.keys(defaultTemplates) as DocxTemplateKey []).forEach(key => {
-                let template = defaultTemplates[key];
-                let docRef = stylesCollection.doc(key);
-                batch.set(docRef, { ...template, id: key, createdAt: new Date().toISOString() });
-            });
-            await batch.commit();
-            snapshot = await stylesCollection.get(); // Re-fetch after seeding
+        if (templates.length === 0) {
+            const operations = (Object.keys(defaultTemplates) as DocxTemplateKey[]).map(key => ({
+                docId: key,
+                data: {
+                    ...defaultTemplates[key],
+                    id: key,
+                    createdAt: new Date().toISOString(),
+                } as any,
+            }));
+            await batchWriteNested(stylesPath, operations);
+            // Re-fetch after seeding
+            templates = await listNestedDocs(stylesPath);
         }
 
-        let templates: { [key: string]: any } = {};
-        snapshot.docs.forEach((doc) => {
-            templates[doc.id] = doc.data();
+        const result: { [key: string]: any } = {};
+        templates.forEach((doc) => {
+            result[(doc as any).id] = doc;
         });
 
-        return createApiResponse(templates, 200);
+        return createApiResponse(result, 200);
     } catch (error) {
         return handleApiError(error);
     }
@@ -44,16 +52,16 @@ const createDocxTemplateSchema = z.object({
 
 export const POST = withAuth(async ({ request }) => {
     try {
-        let body = await request.json();
-        let validation = createDocxTemplateSchema.safeParse(body);
-        if(!validation.success) {
+        const body = await request.json();
+        const validation = createDocxTemplateSchema.safeParse(body);
+        if (!validation.success) {
             return handleApiError(validation.error);
         }
 
-        let { id, name, description } = validation.data;
+        const { id, name, description } = validation.data;
 
         // Create a new template based on the 'modern' default
-        let newTemplateData = {
+        const newTemplateData = {
             name,
             description,
             styles: defaultTemplates.modern.styles,
@@ -61,7 +69,7 @@ export const POST = withAuth(async ({ request }) => {
             dataAiHint: 'document modern',
         };
 
-        let newTemplate = await createGenerativeTemplate('docx', id, newTemplateData);
+        const newTemplate = await createGenerativeTemplate('docx', id, newTemplateData);
 
         return createApiResponse(newTemplate, 201);
     } catch (error) {

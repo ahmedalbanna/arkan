@@ -2,6 +2,7 @@
 'use client';
 
 import { TableRow, TableCell } from "@/components/ui/table";
+import { getFirebaseAuthToken } from '@/lib/utils/authUtils';
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Pencil, KeyRound } from "lucide-react";
@@ -30,7 +31,7 @@ export function UserTableRow({ user }: UserTableRowProps) {
 
     async function prefetchUser(userId: string) {
         if (!firebaseUser) return;
-        const token = await firebaseUser.getIdToken();
+        const token = await getFirebaseAuthToken();
         await queryClient.prefetchQuery({
             queryKey: userKeys.profile(userId),
             queryFn: () => fetchUserProfileApi(userId, token),

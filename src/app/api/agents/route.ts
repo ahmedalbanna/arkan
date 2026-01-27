@@ -1,5 +1,5 @@
 // src/app/api/agents/route.ts
-import { adminDb } from '@/lib/firebase/server-init';
+import { listDocs, getDoc, createDoc } from '@/lib/firebase/db-helpers';
 import { handleApiError, createApiResponse, withAuth } from '@/lib/utils/api-utils';
 import { z } from 'zod';
 
@@ -22,17 +22,18 @@ export const GET = withAuth(async ({ request }) => {
         let category = searchParams.get('category');
         let enabledOnly = searchParams.get('enabledOnly') !== 'false';
 
-        let query: FirebaseFirestore.Query = adminDb.collection('agents');
-
+        let filters = [];
         if (category) {
-            query = query.where('category', '==', category);
+            filters.push({ field: 'category', operator: '==' as const, value: category });
         }
         if (enabledOnly) {
-            query = query.where('isEnabled', '==', true);
+            filters.push({ field: 'isEnabled', operator: '==' as const, value: true });
         }
 
-        let snapshot = await query.orderBy('name').get();
-        let agents = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        let agents = await listDocs('agents', {
+            filters: filters.length > 0 ? filters : undefined,
+            orderBy: { field: 'name', direction: 'asc' },
+        });
 
         return createApiResponse(agents, 200);
     } catch (error) {
@@ -50,20 +51,19 @@ export const POST = withAuth(async ({ request }) => {
         }
 
         let { id, ...agentData } = validation.data;
-        let agentRef = adminDb.collection('agents').doc(id);
-
-        let doc = await agentRef.get();
-        if (doc.exists) {
+        
+        let existing = await getDoc('agents', id);
+        if (existing) {
             return handleApiError({ message: 'Agent with this ID already exists.' }, 409);
         }
 
-        await agentRef.set({
+        let agent = await createDoc('agents', {
             ...agentData,
             createdAt: new Date().toISOString(),
             updatedAt: new Date().toISOString(),
         });
 
-        return createApiResponse({ id, ...agentData }, 201);
+        return createApiResponse(agent, 201);
     } catch (error) {
         return handleApiError(error);
     }

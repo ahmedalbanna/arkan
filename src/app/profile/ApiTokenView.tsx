@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { useToast } from '@/hooks';
+import { getFirebaseAuthToken } from '@/lib/utils/authUtils';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -18,8 +19,16 @@ export function ApiTokenView() {
 
   const handleShowToken = async () => {
     if (firebaseUser) {
-      const idToken = await firebaseUser.getIdToken(true); // Force refresh
-      setToken(idToken);
+      try {
+        const idToken = await getFirebaseAuthToken(true); // Force refresh
+        setToken(idToken);
+      } catch (error) {
+        toast({ 
+          title: 'Error', 
+          description: error instanceof Error ? error.message : 'Failed to get token',
+          variant: 'destructive'
+        });
+      }
     }
   };
 

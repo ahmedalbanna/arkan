@@ -2,6 +2,7 @@
 'use client';
 
 import { useState } from 'react';
+import { getFirebaseAuthToken } from '@/lib/utils/authUtils';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -64,7 +65,7 @@ export function GiftCreditsDialog({ user }: GiftCreditsDialogProps) {
   const mutation = useMutation({
     mutationFn: (data: GiftCreditsFormValues) => {
         if (!firebaseUser) throw new Error("Admin not authenticated.");
-        return firebaseUser.getIdToken().then(token => giftCreditsApi({ ...data, userId: user.id }, token));
+        return getFirebaseAuthToken().then(token => giftCreditsApi({ ...data, userId: user.id }, token));
     },
     onSuccess: (data) => {
         toast({ title: 'Credits Gifted', description: data.message });

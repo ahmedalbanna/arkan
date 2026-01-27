@@ -2,6 +2,7 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
+import { getFirebaseAuthToken } from '@/lib/utils/authUtils';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import {
     Dialog,
@@ -124,7 +125,7 @@ export default function AnalystAgent() {
         }
         if (!firebaseUser) return;
         setMarkdownResult(null); // Clear previous markdown result
-        const token = await firebaseUser.getIdToken();
+        const token = await getFirebaseAuthToken();
         analysisMutation.mutate({ prompt: data.prompt, contextFiles: [...externalContext], token });
     }
 
