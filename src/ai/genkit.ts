@@ -22,7 +22,7 @@ export const ai = genkit({
           type: 'generate',
         },
         {
-          name: 'phi3:mini',
+          name: 'phi4-mini:latest',
           type: 'generate',
         },
         {
@@ -30,7 +30,7 @@ export const ai = genkit({
           type: 'generate',
         },
       ],
-      serverAddress: "http://185.190.140.93:11434",
+      serverAddress: "http://localhost:11434",
     }),
   ],
 });
@@ -43,10 +43,10 @@ export const ai = genkit({
 export const OLLAMA_MODELS = {
   // Fast, efficient for basic text operations
   GEMMA_2B: 'ollama/gemma:2b',
-  
+
   // Strong reasoning and structured output
   PHI3_MINI: 'ollama/phi3:mini',
-  
+
   // High quality for complex academic tasks
   LLAMA3_8B: 'ollama/llama3:8b',
 } as const;
@@ -57,19 +57,19 @@ export const OLLAMA_MODELS = {
 export const MODEL_BY_TASK = {
   // 🔄 Conversion & Processing: Fast text transformation
   CONVERSION: OLLAMA_MODELS.GEMMA_2B,
-  
+
   // ✍️ Text Generation & Writing: Basic to moderate creativity
   TEXT_GENERATION: OLLAMA_MODELS.GEMMA_2B,
-  
+
   // 📊 Reports & Documentation: Structured output, formatting
   REPORTS: OLLAMA_MODELS.PHI3_MINI,
-  
+
   // ✅ Checking & Analysis: Reasoning and linguistic analysis
   ANALYSIS: OLLAMA_MODELS.PHI3_MINI,
-  
+
   // 🎯 Specific Tasks: Precise structured output (JSON, PlantUML, etc.)
   STRUCTURED: OLLAMA_MODELS.PHI3_MINI,
-  
+
   // 🎓 Academic & Research: Complex reasoning, high quality (use with RAG)
   ACADEMIC: OLLAMA_MODELS.LLAMA3_8B,
 } as const;

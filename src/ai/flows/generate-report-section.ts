@@ -20,7 +20,7 @@ You are also an expert analyst. Before you begin writing, you must first review 
     name: 'generateReportSectionPrompt', // Static name
     input: { schema: GenerateSectionInputSchema },
     // No output schema - model returns plain text
-    model: 'ollama/phi3:mini-4k',
+    model: 'ollama/gemma:2b',
     system: systemPrompt,
     prompt: `
 Write the requested section: '{{sectionToGenerate}}'. Your writing style should be natural and engaging, not robotic.
@@ -82,7 +82,7 @@ You have access to the following documents. Review them and use the most relevan
 
   // Call the AI and get plain text response
   const result = await reportSectionPrompt(input);
-  
+
   // Wrap the plain text in the expected output structure
   const output: GenerateSectionOutput = {
     sectionName: input.sectionToGenerate,
