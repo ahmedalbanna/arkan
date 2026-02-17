@@ -1,82 +1,78 @@
-import { getStorage } from 'firebase-admin/storage';
-import { createTransaction } from '@/services/transactionService';
-import { getDatabase } from 'firebase-admin/database';
-import { adminDb } from '@/lib/firebase/server-init';
 import { withAuth, handleApiError, createApiResponse } from '@/lib/utils/api-utils';
+import { updateUser, getUserProfile } from '@/services/userService';
+import { saveFile, deleteFile, validateFileType, validateFileSize, ALLOWED_IMAGE_TYPES } from '@/lib/storage/file-storage';
+import { revalidatePath } from 'next/cache';
 
-export const config = {
-    api: {
-        bodyParser: false,
-    },
-};
+/**
+ * POST /api/admin/users/[id]/upload-profile-picture
+ * Admin-only endpoint to upload a profile picture for any user
+ */
+export const POST = withAuth(
+  async ({ request, params }) => {
+    try {
+      const { id: targetUserId } = await params;
 
-export const POST = withAuth(async ({ request }) => {
-  try {
-    let formData = await request.formData();
-    let file = formData.get('file') as File | null;
-    let userId = formData.get('userId') as string | null;
-    let planId = formData.get('planId') as string | null;
-    let planName = formData.get('planName') as string | null;
-    let credits = formData.get('credits') as string | null;
-    let price = formData.get('price') as string | null;
-    let userName = formData.get('userName') as string | null;
-    let userEmail = formData.get('userEmail') as string | null;
+      const formData = await request.formData();
+      const file = formData.get('file') as File | null;
 
-    if (!file || !userId || !planId || !credits || !price) {
-      return handleApiError({ message: 'Missing required fields.' }, 400);
-    }
+      if (!file) {
+        return handleApiError({ message: 'No file uploaded.' }, 400);
+      }
 
-    let storage = getStorage();
-    let bucket = storage.bucket(process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET || 'arkan-docudec.appspot.com');
-    let fileName = `payment_proofs/${userId}/${Date.now()}-${file.name}`;
+      // Validate file type
+      if (!validateFileType(file, ALLOWED_IMAGE_TYPES)) {
+        return handleApiError(
+          { message: 'Invalid file type. Only JPG, PNG, and WebP are allowed.' },
+          400
+        );
+      }
 
-    let fileBuffer = Buffer.from(await file.arrayBuffer());
+      // Validate file size (max 5MB)
+      if (!validateFileSize(file, 5)) {
+        return handleApiError(
+          { message: 'File size exceeds 5MB limit.' },
+          400
+        );
+      }
 
-    await bucket.file(fileName).save(fileBuffer, {
-      metadata: { contentType: file.type },
-    });
+      // Get user's current profile to delete old picture if it exists
+      const currentUser = await getUserProfile(targetUserId);
+      if (!currentUser) {
+        return handleApiError({ message: 'User not found.' }, 404);
+      }
 
-    let [fileUrl] = await bucket.file(fileName).getSignedUrl({
-      action: 'read',
-      expires: '03-09-2491'
-    });
+      // Save new file
+      const fileUrl = await saveFile(file, `profile-pictures/${targetUserId}`);
 
-    let transactionData = {
-      userId,
-      planId,
-      planName: planName || 'Unknown Plan',
-      credits: parseInt(credits, 10),
-      price: parseFloat(price),
-      userName: userName || 'N/A',
-      userEmail: userEmail || 'N/A',
-      status: 'pending' as const,
-      proofUrl: fileUrl,
-    };
+      // Delete old profile picture if it exists
+      if (currentUser.image) {
+        try {
+          await deleteFile(currentUser.image);
+        } catch (error) {
+          console.warn('Failed to delete old profile picture:', error);
+          // Don't fail the operation if deletion fails
+        }
+      }
 
-    let { id: transactionId } = await createTransaction(transactionData);
-
-    let adminsSnapshot = await adminDb.collection('users').where('role', '==', 'admin').get();
-    if (!adminsSnapshot.empty) {
-      let rtdb = getDatabase();
-      let notificationPayload = {
-        title: "New Payment Request",
-        description: `User ${userName || userEmail} submitted a payment request for $${price}.`,
-        icon: "credit-card",
-        isRead: false,
-        createdAt: new Date().toISOString(),
-        link: '/admin/manage-payments'
-      };
-
-      let notificationPromises = adminsSnapshot.docs.map(adminDoc => {
-          let adminId = adminDoc.id;
-          let notificationRef = rtdb.ref(`notifications/${adminId}`).push();
-          return notificationRef.set(notificationPayload);
+      // Update user profile with new image URL
+      const updatedUser = await updateUser(targetUserId, {
+        image: fileUrl,
       });
-      await Promise.all(notificationPromises);
-    }
 
-    return createApiResponse({ message: 'Request submitted successfully for review.', transactionId }, 200);
-  } catch (error) {
-    return handleApiError(error);
-  }
-});
+      revalidatePath(`/profile/${targetUserId}`);
+      revalidatePath('/admin/manage-users');
+
+      return createApiResponse(
+        {
+          message: 'Profile picture uploaded successfully',
+          image: fileUrl,
+        },
+        200
+      );
+    } catch (error) {
+      console.error('Profile picture upload error:', error);
+      return handleApiError(error);
+    }
+  },
+  { requireAdmin: true }
+);

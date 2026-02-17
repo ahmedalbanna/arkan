@@ -1,54 +1,80 @@
-import { getStorage } from 'firebase-admin/storage';
-import { adminDb } from '@/lib/firebase/server-init';
 import { withAuth, handleApiError, createApiResponse } from '@/lib/utils/api-utils';
+import { updateUser, getUserProfile } from '@/services/userService';
+import { saveFile, deleteFile, validateFileType, validateFileSize, ALLOWED_IMAGE_TYPES } from '@/lib/storage/file-storage';
+import { revalidatePath } from 'next/cache';
 
-export const POST = withAuth(async ({ request, params, user }) => {
-    const { id: targetUserId } = params;
+/**
+ * POST /api/users/[id]/upload-profile-picture
+ * Upload a profile picture for a user
+ */
+export const POST = withAuth(async ({ request, params, user: requester }) => {
+  try {
+    const { id: targetUserId } = await params;
 
     // Check if the user is an admin or is updating their own profile
-    if (user.role !== 'admin' && user.id !== targetUserId) {
-        return handleApiError({ message: 'Forbidden' }, 403);
+    if (requester.role !== 'ADMIN' && requester.role !== 'SUPER_ADMIN' && requester.id !== targetUserId) {
+      return handleApiError({ message: 'Forbidden' }, 403);
     }
 
-    try {
-        const formData = await request.formData();
-        const file = formData.get('file') as File | null;
+    const formData = await request.formData();
+    const file = formData.get('file') as File | null;
 
-        if (!file) {
-            return handleApiError({ message: 'No file uploaded.' }, 400);
-        }
-
-        const allowedTypes = ['image/jpeg', 'image/png', 'image/webp'];
-        if (!allowedTypes.includes(file.type)) {
-            return handleApiError({ message: 'Invalid file type. Only JPG, PNG, and WebP are allowed.' }, 400);
-        }
-
-        const storage = getStorage();
-        const bucketName = process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET;
-        if (!bucketName) {
-            throw new Error("Firebase Storage bucket name not configured.");
-        }
-        const bucket = storage.bucket(bucketName);
-        const fileName = `profile_pictures/${targetUserId}/${Date.now()}-${file.name}`;
-
-        const fileBuffer = Buffer.from(await file.arrayBuffer());
-
-        const fileUpload = bucket.file(fileName);
-        await fileUpload.save(fileBuffer, {
-            metadata: { contentType: file.type },
-        });
-
-        await fileUpload.makePublic();
-        const publicUrl = fileUpload.publicUrl();
-
-        await adminDb.collection('users').doc(targetUserId).update({
-            profilePictureUrl: publicUrl,
-            updatedAt: new Date().toISOString(),
-        });
-
-        return createApiResponse({ profilePictureUrl: publicUrl }, 200);
-
-    } catch (error) {
-        return handleApiError(error);
+    if (!file) {
+      return handleApiError({ message: 'No file uploaded.' }, 400);
     }
+
+    // Validate file type
+    if (!validateFileType(file, ALLOWED_IMAGE_TYPES)) {
+      return handleApiError(
+        { message: 'Invalid file type. Only JPG, PNG, and WebP are allowed.' },
+        400
+      );
+    }
+
+    // Validate file size (max 5MB)
+    if (!validateFileSize(file, 5)) {
+      return handleApiError(
+        { message: 'File size exceeds 5MB limit.' },
+        400
+      );
+    }
+
+    // Get user's current profile to delete old picture if it exists
+    const currentUser = await getUserProfile(targetUserId);
+    if (!currentUser) {
+      return handleApiError({ message: 'User not found.' }, 404);
+    }
+
+    // Save new file
+    const fileUrl = await saveFile(file, `profile-pictures/${targetUserId}`);
+
+    // Delete old profile picture if it exists
+    if (currentUser.image) {
+      try {
+        await deleteFile(currentUser.image);
+      } catch (error) {
+        console.warn('Failed to delete old profile picture:', error);
+        // Don't fail the operation if deletion fails
+      }
+    }
+
+    // Update user profile with new image URL
+    const updatedUser = await updateUser(targetUserId, {
+      image: fileUrl,
+    });
+
+    revalidatePath(`/profile/${targetUserId}`);
+    revalidatePath('/admin/manage-users');
+
+    return createApiResponse(
+      {
+        message: 'Profile picture uploaded successfully',
+        image: fileUrl,
+      },
+      200
+    );
+  } catch (error) {
+    console.error('Profile picture upload error:', error);
+    return handleApiError(error);
+  }
 });
