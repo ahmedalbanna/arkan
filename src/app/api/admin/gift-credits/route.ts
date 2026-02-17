@@ -1,10 +1,10 @@
 'use server';
 
 import { z } from 'zod';
-import { adminDb, adminRealtimeDb, adminAuth } from '@/lib/firebase/server-init';
+import { prisma } from '@/lib/db/prisma';
 import { withAuth, handleApiError, createApiResponse } from '@/lib/utils/api-utils';
-import { FieldValue } from 'firebase-admin/firestore';
-import { getUserProfile } from '@/services/userService';
+import { getUserProfile, addUserCredits } from '@/services/userService';
+import { sendGiftCreditsNotification } from '@/services/notificationService';
 
 const giftCreditsSchema = z.object({
   userId: z.string().min(1, 'User ID is required.'),
@@ -12,69 +12,55 @@ const giftCreditsSchema = z.object({
   message: z.string().optional(),
 });
 
-export const POST = withAuth(async ({ request, user: adminUser }) => {
-  try {
-    let body = await request.json();
-    let validation = giftCreditsSchema.safeParse(body);
-    if (!validation.success) {
-      return handleApiError(validation.error);
+/**
+ * POST /api/admin/gift-credits
+ * Admin-only endpoint to gift credits to a user
+ */
+export const POST = withAuth(
+  async ({ request, user: adminUser }) => {
+    try {
+      const body = await request.json();
+      const validation = giftCreditsSchema.safeParse(body);
+
+      if (!validation.success) {
+        return handleApiError(validation.error);
+      }
+
+      const { userId, credits, message } = validation.data;
+
+      // Get the user's profile to ensure they exist
+      const userProfile = await getUserProfile(userId);
+      if (!userProfile) {
+        return handleApiError({ message: 'User not found.' }, 404);
+      }
+
+      // Add credits to user's account using transaction
+      await addUserCredits(userId, credits);
+
+      // Create notification for the user
+      await sendGiftCreditsNotification(userId, credits, adminUser.name || 'An administrator', message);
+
+      // Log the gift transaction if GenerationLog is being used for this
+      // Or create a specific record if there's a gift ledger table
+      await prisma.creditLedger.create({
+        data: {
+          userId,
+          type: 'credit',
+          amount: credits,
+          balance: userProfile.credits + credits,
+          reason: `Admin gift${message ? ': ' + message : ''}`,
+          referenceType: 'admin_gift',
+        },
+      });
+
+      return createApiResponse(
+        { message: `Successfully gifted ${credits} credits to ${userProfile.name || userProfile.email}.` },
+        200
+      );
+    } catch (error) {
+      console.error('Error gifting credits:', error);
+      return handleApiError(error);
     }
-
-    let { userId, credits, message } = validation.data;
-
-    // Get the user's profile to ensure they exist
-    let userProfile = await getUserProfile(userId);
-    if (!userProfile) {
-      return handleApiError({ message: 'User not found.' }, 404);
-    }
-    
-    // Add credits to user's account
-    let userRef = adminDb.collection('users').doc(userId);
-    await userRef.update({
-        credits: FieldValue.increment(credits)
-    });
-    
-    // Send notification
-    let rtdb = adminRealtimeDb;
-    let notificationRef = rtdb.ref(`notifications/${userId}`).push();
-    let notificationPayload = {
-      title: "🎁 You've received a gift!",
-      description: message ? `Admin ${adminUser.name} sent you ${credits} credits with a message: "${message}"` : `An admin has sent you ${credits} credits!`,
-      icon: "gem",
-      isRead: false,
-      createdAt: new Date().toISOString(),
-      link: '/profile'
-    };
-    await notificationRef.set(notificationPayload);
-    
-    // Try to send a push notification if the user has a device token
-    let tokenDoc = await adminDb.collection('deviceTokens').doc(userId).get();
-    if (tokenDoc.exists) {
-        let { token } = tokenDoc.data() as { token: string };
-        let pushMessage = {
-            token: token,
-            notification: {
-                title: notificationPayload.title,
-                body: `You received ${credits} credits from an admin.`,
-            },
-            webpush: {
-                fcmOptions: {
-                    link: '/profile',
-                },
-            },
-        };
-        try {
-            // @ts-expect-error - Firebase Admin SDK messaging property
-            await adminAuth.app.messaging().send(pushMessage);
-        } catch (pushError) {
-            console.warn(`Failed to send push notification to user ${userId}, but credits were added.`, pushError);
-        }
-    }
-
-
-    return createApiResponse({ message: `Successfully gifted ${credits} credits to ${userProfile.name}.` }, 200);
-
-  } catch (error) {
-    return handleApiError(error);
-  }
-}, { requireAdmin: true });
+  },
+  { requireAdmin: true }
+);

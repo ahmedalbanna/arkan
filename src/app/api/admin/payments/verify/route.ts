@@ -1,72 +1,122 @@
 import { createApiResponse, handleApiError, withAuth } from '@/lib/utils/api-utils';
-import { adminDb, adminRealtimeDb } from '@/lib/firebase/server-init';
-import { FieldValue } from 'firebase-admin/firestore';
+import { prisma } from '@/lib/db/prisma';
 import { z } from 'zod';
+import { addUserCredits } from '@/services/userService';
+import { sendPaymentNotification } from '@/services/notificationService';
 
 const verifyPaymentSchema = z.object({
   transactionId: z.string(),
   userId: z.string(),
   creditsToGrant: z.number().int().positive(),
-  status: z.enum(['verified', 'rejected']),
+  status: z.enum(['VERIFIED', 'REJECTED']),
   adminNotes: z.string().optional(),
 });
 
-export const POST = withAuth(async ({ request, user }) => {
-  try {
-    let body = await request.json();
-    let validation = verifyPaymentSchema.safeParse(body);
+/**
+ * POST /api/admin/payments/verify
+ * Admin-only endpoint to verify payment transactions
+ */
+export const POST = withAuth(
+  async ({ request, user: adminUser }) => {
+    try {
+      const body = await request.json();
+      const validation = verifyPaymentSchema.safeParse(body);
 
-    if (!validation.success) {
-      return handleApiError({ errors: validation.error.flatten().fieldErrors }, 400);
-    }
+      if (!validation.success) {
+        return handleApiError(validation.error);
+      }
 
-    let { transactionId, userId, creditsToGrant, status, adminNotes } = validation.data;
-    let adminId = user.id;
+      const { transactionId, userId, creditsToGrant, status, adminNotes } = validation.data;
+      const adminId = adminUser.id;
 
-    let transactionRef = adminDb.collection('transactions').doc(transactionId);
-    let rtdb = adminRealtimeDb;
-    let notificationRef = rtdb.ref(`notifications/${userId}`).push();
-
-    if (status === 'verified') {
-      await adminDb.runTransaction(async (t) => {
-        let userRef = adminDb.collection('users').doc(userId);
-        t.update(userRef, { credits: FieldValue.increment(creditsToGrant) });
-
-        t.update(transactionRef, {
-          status: 'verified',
-          adminNotes: adminNotes || 'Payment approved.',
-          verifiedAt: new Date().toISOString(),
-          verifiedBy: adminId
+      // Use transaction to ensure atomic updates
+      const result = await prisma.$transaction(async (tx) => {
+        // Update transaction status
+        const updatedTransaction = await tx.transaction.update({
+          where: { id: transactionId },
+          data: {
+            status: status,
+            verifiedBy: adminId,
+            verifiedAt: new Date(),
+            rejectionReason: adminNotes || null,
+          },
         });
-      });
-      await notificationRef.set({
-        title: "Payment Approved",
-        description: `Your purchase of ${creditsToGrant} credits has been approved.`,
-        icon: "credit-card",
-        isRead: false,
-        createdAt: new Date().toISOString(),
-        link: '/payment-history'
+
+        let notification = null;
+
+        if (status === 'VERIFIED') {
+          // Add credits to user
+          await tx.user.update({
+            where: { id: userId },
+            data: {
+              credits: {
+                increment: creditsToGrant,
+              },
+            },
+          });
+
+          // Create notification
+          notification = await tx.notification.create({
+            data: {
+              userId,
+              title: 'Payment Approved',
+              description: `Your purchase of ${creditsToGrant} credits has been approved.`,
+              icon: 'credit-card',
+              link: '/payment-history',
+            },
+          });
+
+          // Log credit ledger entry
+          const user = await tx.user.findUnique({
+            where: { id: userId },
+            select: { credits: true },
+          });
+
+          await tx.creditLedger.create({
+            data: {
+              userId,
+              type: 'credit',
+              amount: creditsToGrant,
+              balance: (user?.credits || 0) + creditsToGrant,
+              reason: `Payment verified - Transaction ${transactionId}`,
+              referenceId: transactionId,
+              referenceType: 'transaction',
+            },
+          });
+        } else {
+          // REJECTED status
+          notification = await tx.notification.create({
+            data: {
+              userId,
+              title: 'Payment Rejected',
+              description: adminNotes || 'Your recent purchase could not be verified. Please contact support.',
+              icon: 'alert-circle',
+              link: '/payment-history',
+            },
+          });
+        }
+
+        return {
+          transaction: updatedTransaction,
+          notification,
+        };
       });
 
-    } else { // 'rejected'
-      await transactionRef.update({
-        status: 'rejected',
-        adminNotes: adminNotes || 'Payment could not be verified.',
-        verifiedAt: new Date().toISOString(),
-        verifiedBy: adminId,
-      });
-      await notificationRef.set({
-        title: "Payment Rejected",
-        description: `Your recent purchase could not be verified. Please contact support.`,
-        icon: "credit-card",
-        isRead: false,
-        createdAt: new Date().toISOString(),
-        link: '/payment-history'
-      });
+      return createApiResponse(
+        {
+          message: `Payment ${status.toLowerCase()} successfully`,
+          transaction: {
+            id: result.transaction.id,
+            status: result.transaction.status,
+            verifiedAt: result.transaction.verifiedAt,
+          },
+        },
+        200
+      );
+    } catch (error) {
+      console.error('Error verifying payment:', error);
+      return handleApiError(error);
     }
-
-    return createApiResponse({ message: `Transaction ${status} successfully.` }, 200);
-  } catch (error) {
-    return handleApiError(error);
-  }
-}, { requireAdmin: true });
+  },
+  { requireAdmin: true }
+);
