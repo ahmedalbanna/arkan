@@ -9,9 +9,11 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { AlertCircle, Loader2, Phone } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
+import { signIn } from 'next-auth/react';
+import { useToast } from '@/hooks/util/use-toast';
 
 import { LoginCredentials } from '@/lib/types';
 
@@ -22,6 +24,8 @@ const formSchema = z.object({
 
 export default function LoginForm() {
   const router = useRouter();
+  const { toast } = useToast();
+  const [isLoading, setIsLoading] = useState(false);
   const loginMutation = useLogin();
   const googleSignInMutation = useGoogleSignIn();
 
@@ -44,13 +48,52 @@ export default function LoginForm() {
   }, [loginMutation.error, form]);
 
 
-  function onSubmit(values: LoginCredentials) {
+  async function onSubmit(values: LoginCredentials) {
     // Clear previous server errors before submitting
     form.clearErrors("root.serverError");
-    loginMutation.mutate(values);
+    
+    setIsLoading(true);
+    try {
+      const result = await signIn('credentials', {
+        email: values.email,
+        password: values.password,
+        redirect: false,
+      });
+
+      if (result?.error) {
+        form.setError("root.serverError", {
+          type: "manual",
+          message: result.error
+        });
+        toast({
+          title: 'Login Error',
+          description: result.error,
+          variant: 'destructive',
+        });
+      } else if (result?.ok) {
+        toast({
+          title: 'Login Successful',
+          description: 'Welcome back!',
+        });
+        router.push('/builder');
+      }
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'An error occurred during login';
+      form.setError("root.serverError", {
+        type: "manual",
+        message: errorMessage
+      });
+      toast({
+        title: 'Login Error',
+        description: errorMessage,
+        variant: 'destructive',
+      });
+    } finally {
+      setIsLoading(false);
+    }
   }
 
-  const isPending = loginMutation.isPending || googleSignInMutation.isPending;
+  const isPending = isLoading || loginMutation.isPending || googleSignInMutation.isPending;
   const formLevelError = form.formState.errors.root?.serverError;
 
   return (
@@ -95,7 +138,7 @@ export default function LoginForm() {
           )}
         />
         <Button type="submit" className="w-full" disabled={isPending}>
-          {loginMutation.isPending && <Loader2 className="me-2 h-4 w-4 animate-spin" />}
+          {isLoading && <Loader2 className="me-2 h-4 w-4 animate-spin" />}
           Login
         </Button>
         <Button variant="outline" className="w-full" type="button" onClick={() => googleSignInMutation.mutate()} disabled={isPending}>

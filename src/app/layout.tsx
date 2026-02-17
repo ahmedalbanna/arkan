@@ -1,13 +1,7 @@
 
 
-import FirebaseMessagingProvider from '@/components/firebase/FirebaseMessagingProvider';
-import LanguageDirectionManager from '@/components/shared/LanguageDirectionManager';
 import { Header } from '@/components/shared/Header';
-import QueryProvider from '@/components/shared/QueryProvider';
-import { ThemeProvider } from '@/components/shared/ThemeProvider';
-import { Toaster } from '@/components/ui/toaster';
-import { AuthProvider } from '@/context/AuthContext';
-import { LocalizationProvider } from '@/context/LocalizationContext';
+import { RootProviders } from '@/components/shared/RootProviders';
 import { cn } from '@/lib/utils/cn';
 import type { Metadata } from 'next';
 import { redirect } from 'next/dist/client/components/navigation';
@@ -123,29 +117,15 @@ export default async function RootLayout({
   // Run the server-side authentication check and redirects
   await handleAuthRedirects(pathname);
 
+  const fontClassName = cn(fontBody.variable, fontHeadline.variable, fontAlmarai.variable, fontCairo.variable);
+
   return (
-    <html lang="en" dir="ltr" className={cn(fontBody.variable, fontHeadline.variable, fontAlmarai.variable, fontCairo.variable)} suppressHydrationWarning>
+    <html lang="en" dir="ltr" className={fontClassName} suppressHydrationWarning>
       <body className={cn('font-body antialiased min-h-screen  flex flex-col')}>
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="system"
-          enableSystem
-          disableTransitionOnChange
-        >
-          <QueryProvider>
-            <LocalizationProvider>
-              <AuthProvider>
-                <FirebaseMessagingProvider>
-                  <LanguageDirectionManager>
-                    <Header />
-                    <main className="flex-grow">{children}</main>
-                    <Toaster />
-                  </LanguageDirectionManager>
-                </FirebaseMessagingProvider>
-              </AuthProvider>
-            </LocalizationProvider>
-          </QueryProvider>
-        </ThemeProvider>
+        <RootProviders fontClassName="">
+          <Header />
+          <main className="flex-grow">{children}</main>
+        </RootProviders>
       </body>
     </html>
   );

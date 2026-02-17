@@ -16,7 +16,7 @@ async function main() {
   const adminPassword = await bcrypt.hash('admin123', 10);
   const admin = await prisma.user.upsert({
     where: { email: 'admin@arkan.dev' },
-    update: {},
+    update: { passwordHash: adminPassword },
     create: {
       email: 'admin@arkan.dev',
       name: 'Admin User',
@@ -24,15 +24,19 @@ async function main() {
       role: 'ADMIN',
       credits: 10000,
       emailVerified: new Date(),
+      passwordHash: adminPassword,
     },
   });
   console.log('✅ Admin user created:', admin.email);
+  console.log('   Email: admin@arkan.dev');
+  console.log('   Password: admin123');
 
   // Seed Test User
   console.log('👤 Creating test user...');
+  const testPassword = await bcrypt.hash('test123', 10);
   const testUser = await prisma.user.upsert({
     where: { email: 'test@arkan.dev' },
-    update: {},
+    update: { passwordHash: testPassword },
     create: {
       email: 'test@arkan.dev',
       name: 'Test User',
@@ -40,9 +44,12 @@ async function main() {
       role: 'USER',
       credits: 100,
       emailVerified: new Date(),
+      passwordHash: testPassword,
     },
   });
   console.log('✅ Test user created:', testUser.email);
+  console.log('   Email: test@arkan.dev');
+  console.log('   Password: test123');
 
   // Seed Agent Categories
   console.log('📁 Creating agent categories...');

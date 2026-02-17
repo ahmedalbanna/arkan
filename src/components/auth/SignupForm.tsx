@@ -11,6 +11,10 @@ import { Loader2 } from 'lucide-react';
 import Link from 'next/link';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
+import { signIn } from 'next-auth/react';
+import { useRouter } from 'next/navigation';
+import { useState } from 'react';
+import { useToast } from '@/hooks/util/use-toast';
 
 const formSchema = z.object({
   name: z.string().min(2, { message: 'Name must be at least 2 characters.' }),
@@ -22,6 +26,9 @@ export interface SignupCredentials extends z.infer<typeof formSchema> { }
 
 export default function SignupForm() {
   const { t } = useLocalization();
+  const router = useRouter();
+  const { toast } = useToast();
+  const [isLoading, setIsLoading] = useState(false);
 
   const form = useForm<SignupCredentials>({
     resolver: zodResolver(formSchema),
@@ -33,14 +40,56 @@ export default function SignupForm() {
   });
 
   const signupMutation = useSignup();
-
   const googleSignInMutation = useGoogleSignIn();
 
-  function onSubmit(values: SignupCredentials) {
-    signupMutation.mutate(values);
+  async function onSubmit(values: SignupCredentials) {
+    setIsLoading(true);
+    try {
+      // Call the signup API
+      const response = await fetch('/api/auth/signup', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(values),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Signup failed');
+      }
+
+      // Automatically sign in after successful signup
+      const result = await signIn('credentials', {
+        email: values.email,
+        password: values.password,
+        redirect: false,
+      });
+
+      if (result?.ok) {
+        toast({
+          title: 'Account Created',
+          description: 'Welcome to Arkan!',
+        });
+        router.push('/builder');
+      } else {
+        toast({
+          title: 'Account Created',
+          description: 'Please log in with your credentials',
+        });
+        router.push('/login');
+      }
+    } catch (error) {
+      toast({
+        title: 'Signup Error',
+        description: error instanceof Error ? error.message : 'An error occurred',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsLoading(false);
+    }
   }
 
-  const isPending = signupMutation.isPending || googleSignInMutation.isPending;
+  const isPending = isLoading || signupMutation.isPending || googleSignInMutation.isPending;
 
   return (
     <Form {...form}>
@@ -85,7 +134,7 @@ export default function SignupForm() {
           )}
         />
         <Button type="submit" className="w-full" disabled={isPending}>
-          {signupMutation.isPending && <Loader2 className="me-2 h-4 w-4 animate-spin" />}
+          {isLoading && <Loader2 className="me-2 h-4 w-4 animate-spin" />}
           {t('signup.submitButton')}
         </Button>
         <Button variant="outline" className="w-full" type="button" onClick={() => googleSignInMutation.mutate()} disabled={isPending}>

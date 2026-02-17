@@ -84,7 +84,7 @@ export const authOptions: NextAuthOptions = {
     /**
      * JWT Callback - Add custom claims for Hasura
      */
-    async jwt({ token, user, account }) {
+    async jwt({ token, user, account: _account }) {
       // Initial sign in
       if (user) {
         token.userId = user.id;

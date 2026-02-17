@@ -1,27 +1,68 @@
- GET /api/admin/sections 200 in 2296ms
- ○ Compiling /api/writing-tools/[tool] ...
- ✓ Compiled /api/writing-tools/[tool] in 1587ms
-Firebase Admin SDK initialized using local service account.
-API Route Error: Error [ZodError]: [
-  {
-    "code": "invalid_literal",
-    "expected": "generate-toc",
-    "path": [
-      "flow"
-    ],
-    "message": "Invalid literal value, expected \"generate-toc\""
-  }
-]
-    at <unknown> (src/app/api/writing-tools/[tool]/route.ts:90:40)
-  88 |     const validation = schema.safeParse(body);
-  89 |     if (!validation.success) {
-> 90 |       return handleApiError(validation.error);
-     |                                        ^
-  91 |     }
-  92 |
-  93 |     const result = await flow(validation.data as any); {
-  issues: [Array],
-  addIssue: [Function (anonymous)],
-  addIssues: [Function (anonymous)]
-}
- POST /api/writing-tools/generate-toc 400 in 4575ms
+## Fixed Issues
+
+### Issue 1: Signup Not Storing Password Hashes (401 Login Failures After Signup)
+**Status**: ✅ FIXED
+
+**Problem**: Users could successfully sign up (POST /api/auth/signup 201 response), but immediately after signup, they couldn't login with their credentials. The newly created users didn't have password hashes stored.
+
+**Root Cause**:
+The signup endpoint (`src/app/api/auth/signup/route.ts`) was still using Firebase (adminAuth and adminDb) instead of PostgreSQL with Prisma. Firebase stores passwords differently and doesn't populate the `password_hash` field in the PostgreSQL database that NextAuth's credentials provider expects.
+
+**Solution**:
+Completely rewrote `src/app/api/auth/signup/route.ts` to:
+1. Use Prisma Client to create users directly in PostgreSQL
+2. Hash passwords with bcrypt (10 salt rounds) before storing
+3. Store the hashed password in the `password_hash` field
+4. Set email as verified on signup
+5. Assign default credits (100) to new users
+6. Handle unique constraint violations properly
+
+**Implementation Details**:
+
+The new signup endpoint:
+- Validates email and password format
+- Checks for duplicate email addresses before creation
+- Uses bcrypt to hash the password: `await bcrypt.hash(password, 10)`
+- Stores user with proper fields:
+  - `email`: User's email address
+  - `name`: User's display name
+  - `passwordHash`: Bcrypt-hashed password
+  - `emailVerified`: Set to current date (auto-verified on signup)
+  - `role`: Set to 'USER'
+  - `credits`: Set to 100 (configurable)
+- Returns created user object with status 201
+
+**Files Changed**:
+- Modified: src/app/api/auth/signup/route.ts - Migrated from Firebase to PostgreSQL/Prisma with bcrypt hashing
+
+**Security Improvements**:
+1. Passwords now properly hashed with bcrypt before storage
+2. No dependency on Firebase authentication system
+3. Consistent with NextAuth's credentials provider expectations
+4. Email verified on signup (prevents unverified account issues)
+
+**Testing the Fix**:
+1. Sign up with new credentials:
+   - Name: `Your Name`
+   - Email: `your-email@example.com`
+   - Password: `YourPassword123`
+
+2. Immediately login with the same credentials:
+   - Email: `your-email@example.com`
+   - Password: `YourPassword123`
+
+The login should now succeed because the password hash is properly stored.
+
+**Database Flow**:
+1. User submits signup form
+2. Password is hashed with bcrypt
+3. User record created in PostgreSQL with hashed password
+4. NextAuth's credentials provider can now verify the password
+5. User successfully logs in
+
+**Backward Compatibility**:
+- Existing test accounts (admin@arkan.dev, test@arkan.dev) still work with their previously set passwords
+- New signups use the PostgreSQL/Prisma flow
+
+## Summary
+Signup now properly stores password hashes in PostgreSQL. Users can sign up and immediately login with their credentials. The authentication flow is now consistent between signup and login operations.

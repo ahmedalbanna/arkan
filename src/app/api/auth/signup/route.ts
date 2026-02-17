@@ -2,9 +2,9 @@
 'use server';
 
 import { createApiResponse, handleApiError } from '@/lib/utils/api-utils';
-import { adminAuth, adminDb } from '@/lib/firebase/server-init';
+import { prisma } from '@/lib/db/prisma';
 import { z } from 'zod';
-import type { UserProfile } from '@/lib/models';
+import bcrypt from 'bcrypt';
 
 const signupSchema = z.object({
     email: z.string().email("Invalid email address"),
@@ -13,8 +13,8 @@ const signupSchema = z.object({
 });
 
 /**
- * API endpoint for creating a new user in Firebase Authentication and Firestore.
- * This is now an atomic operation.
+ * API endpoint for creating a new user in PostgreSQL with Prisma.
+ * Hashes password with bcrypt and stores it in the database.
  */
 export async function POST(req: Request) {
     try {
@@ -25,42 +25,49 @@ export async function POST(req: Request) {
         }
         
         const { email, password, name } = validation.data;
-        const settings = (await adminDb.collection('settings').doc('defaults').get()).data();
-        const defaultCredits = settings?.newUserCredits ?? 10;
 
-
-        // 1. Create the Firebase Auth user
-        const userRecord = await adminAuth.createUser({
-            email,
-            password,
-            displayName: name
+        // Check if user already exists
+        const existingUser = await prisma.user.findUnique({
+            where: { email },
         });
-        
-        // 2. Create the corresponding Firestore profile
-        const userProfile: Omit<UserProfile, 'id'> = {
-            name,
-            email,
-            role: 'user',
-            credits: defaultCredits,
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString(),
-            hasCompletedOnboarding: false,
-        };
 
-        await adminDb.collection('users').doc(userRecord.uid).set(userProfile);
+        if (existingUser) {
+            return handleApiError({ message: "Email address is already in use by another account." }, 409);
+        }
 
-        return createApiResponse({ user: { uid: userRecord.uid, email: userRecord.email } }, 201);
+        // Hash the password
+        const passwordHash = await bcrypt.hash(password, 10);
+
+        // Create the user in PostgreSQL
+        const user = await prisma.user.create({
+            data: {
+                email,
+                name,
+                passwordHash,
+                emailVerified: new Date(), // Mark as verified for signup
+                role: 'USER',
+                credits: 100, // Default credits for new users
+            },
+            select: {
+                id: true,
+                email: true,
+                name: true,
+            },
+        });
+
+        return createApiResponse({ user }, 201);
 
     } catch (error) {
+        // Handle specific error types
         if (error && typeof error === 'object' && 'code' in error) {
-            if (error.code === 'auth/email-already-exists') {
+            const err = error as any;
+            if (err.code === 'P2002') {
+                // Unique constraint violation
                 return handleApiError({ message: "Email address is already in use by another account." }, 409);
-            } else if (error.code === 'auth/invalid-email') {
-                return handleApiError({ message: "The email address is not valid." }, 400);
-            } else if (error.code === 'auth/weak-password') {
-                return handleApiError({ message: "The password is too weak. It must be at least 6 characters long." }, 400);
             }
         }
+        
+        console.error('Signup error:', error);
         return handleApiError(error);
     }
 }
