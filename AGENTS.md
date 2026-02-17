@@ -408,6 +408,107 @@ When cleaning code in any folder, ensure:
 - Optimize imports
 - Remove dead code
 
+## Schema Validation Patterns
+
+### Critical Knowledge: Genkit Flow Schemas
+All Genkit flow input schemas follow a strict pattern that must be maintained:
+
+**Required Pattern:**
+```typescript
+export const MyFlowInputSchema = z.object({
+  flow: z.literal('my-flow-name'),  // MUST match flow key in API route
+  // ... other required fields
+  optionalField: z.string().optional(),
+});
+```
+
+**Key Requirements:**
+1. **Every input schema MUST have a `flow` field** with a literal value matching the flow's identifier
+2. **Flow literal value MUST exactly match** the key used in the API route's `toolConfig` mapping
+3. **Custom mutations must include the flow field** - use generic `useWritingTool` hook when possible to auto-inject it
+4. **Schema extensions must be traced** - many schemas extend `BaseTextInputSchema`, `BaseControlsSchema`, etc., so verify inherited fields
+
+### Hook Patterns for API Calls
+
+**Pattern 1: Generic Hook (Recommended)**
+```typescript
+// Automatically adds flow field - use for new tools
+const { mutation } = useWritingTool('my-flow-name', MyFlowInputSchema);
+mutation.mutate({ /* other fields */ });
+```
+
+**Pattern 2: Custom Mutations (Requires Flow Field)**
+```typescript
+// When custom mutation is needed, manually include flow field
+return writingToolApi('/api/writing-tools/my-tool', {
+  data: {
+    flow: 'my-flow-name',  // MUST be included
+    field1: value1,
+    field2: value2,
+  },
+  token
+});
+```
+
+### Schema Validation Checklist
+Before submitting API calls or adding new flows:
+- [ ] Input schema exists in `src/ai/schemas/flows.ts`
+- [ ] Schema has `flow: z.literal('flow-name')` field
+- [ ] Flow literal matches the flow's identifier
+- [ ] All fields sent in API call are defined in schema
+- [ ] Extended schemas have been traced for inherited fields
+- [ ] Optional fields are marked with `.optional()`
+- [ ] Flow implementation is exported from `src/ai/flows/`
+- [ ] Flow is registered in API route `toolConfig` mapping
+
+### Common Mistakes to Avoid
+1. **Forgetting the flow field** - All API calls to writing-tools endpoint must include it
+2. **Mismatched literal values** - Flow literal must match the API route key exactly
+3. **Not tracing schema extensions** - Extended schemas may have hidden required fields
+4. **Schema-only changes** - If updating a schema, verify the hook/mutation still matches
+5. **Using direct fetch instead of hooks** - Use `useWritingTool` or existing service abstractions
+
+### Investigation Tips for Schema Issues
+1. **Start with schemas first** - Don't search for issues in hooks; understand schema requirements first
+2. **Map data flow** - Understand: UI Component → Hook → Service → API Route → Schema
+3. **Check both directions** - Schemas can be incomplete too (e.g., GenerateTocInputSchema missing field)
+4. **Use API route as source of truth** - The `toolConfig` in `/api/writing-tools/[tool]/route.ts` shows all registered flows
+
+## TypeScript & Type Safety Patterns
+
+### Next.js 15 Breaking Changes
+- **API Route Parameters**: Next.js 15 changed route handler `params` from synchronous to async (`Promise<{...}>`)
+  - Old pattern: `async (request, { params }: { params: { [key: string]: string } })`
+  - New pattern: `async (request, { params }: { params: Promise<{ [key: string]: string }> })`
+  - Middleware patterns (like `withAuth`) need updating to await params before passing to handlers
+  - All 40+ API routes need this update when upgrading to Next.js 15
+
+### Enum Schema Export Pitfalls
+- **Duplicate Exports**: When multiple schema files export enums with same names (e.g., `CitationStyle`, `ProjectTypeSchema`), use explicit re-exports with `export type` and `export` separately
+- **Missing Type Exports**: Schema enum types must be explicitly exported alongside their schema objects
+  - Pattern: `export type { MyType } from './enums'; export { MySchemaSchema } from './enums';`
+- **Schema Extensions**: When schemas extend other schemas, verify all inherited fields are available in barrel exports
+
+### Implicit Any Type Issues
+- **Array Methods**: `map()`, `filter()`, `forEach()` callbacks on arrays from external sources often have implicit `any` types
+  - Solution: Add explicit type annotations: `map((item: any) => ...)` or use type guards
+- **Zod Schema Options**: `ZodSchema.options.map()` returns `any` type elements, requires explicit typing
+
+### Firebase Admin SDK Quirks
+- **Firestore Functions**: Functions like `collection`, `doc`, `setDoc`, `getDocs`, `query`, `where` are NOT exported from `firebase-admin/firestore`
+- **Correct Pattern**: Import from `firebase-admin/firestore` only: `Timestamp`, `getFirestore`, `type Firestore`
+- **Workaround**: Stub unavailable functions locally or use alternative Firebase Admin methods
+
+### Component Type Mismatches
+- **Shallow Object Returns**: Be careful when mapping over objects that return shallow types (e.g., `{ id, title }`)
+  - If you need nested properties, fetch full objects: `project?.getSection(s.id)` rather than assuming the mapped type includes them
+- **Switch Statement Default Cases**: Exhaustive switch statements must have default cases to satisfy TypeScript, even for enums marked as complete
+
+### Common Patterns to Avoid
+1. **Forgetting to Initialize Variables Before Try/Catch**: Variables used in catch blocks must be declared outside try block
+2. **Mismatched Type Assertions**: When using `as const` for literal types, ensure the value actually matches the expected literal
+3. **Callback Parameter Types**: Don't rely on TypeScript inference for callback parameters from dynamic data structures
+
 ## Resources
 
 ### External Documentation

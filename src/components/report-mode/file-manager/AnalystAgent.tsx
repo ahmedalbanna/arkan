@@ -87,12 +87,9 @@ export default function AnalystAgent() {
     });
 
     const analysisMutation = useMutation({
-        mutationFn: async (variables: { prompt: string; contextFiles: any[]; token: string; }) => {
+        mutationFn: async (variables: any) => {
             const { analyzeContextApi } = await import('@/services');
-            return analyzeContextApi({
-                prompt: variables.prompt,
-                contextFiles: variables.contextFiles,
-            }, variables.token);
+            return analyzeContextApi(variables);
         },
         onSuccess: (data) => {
             refetchUser(); // To update credits

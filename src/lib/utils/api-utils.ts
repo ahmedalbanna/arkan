@@ -27,8 +27,9 @@ type ApiHandler = (context: AuthContext) => Promise<NextResponse | Response>;
  * @returns A Next.js API route handler.
  */
 export const withAuth = (handler: ApiHandler, options: ApiHandlerOptions = {}) => {
-  return async (request: NextRequest, { params }: { params: { [key: string]: string } }) => {
+  return async (request: NextRequest, { params }: { params: Promise<{ [key: string]: string }> }) => {
     try {
+      const resolvedParams = await params;
       const authorization = request.headers.get('Authorization');
       if (!authorization?.startsWith('Bearer ')) {
         return handleApiError({ message: 'Unauthorized: Missing token' }, 401);
@@ -49,7 +50,7 @@ export const withAuth = (handler: ApiHandler, options: ApiHandlerOptions = {}) =
         return handleApiError({ message: 'Forbidden: Admin access required' }, 403);
       }
 
-      return handler({ request, user, token, params });
+      return handler({ request, user, token, params: resolvedParams });
     } catch (error: any) {
       // All errors, including auth errors, are now piped through the central handler
       return handleApiError(error);

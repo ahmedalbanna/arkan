@@ -101,7 +101,7 @@ export const presentationContentCreator = ai.defineFlow(
 
         const presentationPromptResult = await presentationContentPrompt({
             projectName,
-            presentationType,
+            presentationType: presentationType as 'demo' | 'pitch' | 'technical_review' | 'status_update' | 'training',
             duration,
             audience,
             keyPoints,

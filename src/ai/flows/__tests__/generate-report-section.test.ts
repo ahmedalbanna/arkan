@@ -25,6 +25,7 @@ describe('generateReportSection Flow', () => {
 
   it('should call the AI prompt with the correct input and return the generated content', async () => {
     const mockInput: GenerateSectionInput = {
+      flow: 'generate-section',
       sectionToGenerate: 'introduction',
       prompt: 'Write an introduction for a report on AI.',
       otherSections: {
@@ -61,6 +62,7 @@ describe('generateReportSection Flow', () => {
 
   it('should throw an error if the AI fails to generate content', async () => {
     const mockInput: GenerateSectionInput = {
+      flow: 'generate-section',
       sectionToGenerate: 'conclusion',
       prompt: 'Write a conclusion.',
       guidelines: [],
@@ -79,6 +81,7 @@ describe('generateReportSection Flow', () => {
 
   it('should construct the system prompt correctly', async () => {
      const mockInput: GenerateSectionInput = {
+      flow: 'generate-section',
       sectionToGenerate: 'test-section',
       prompt: 'Base prompt for the section.',
       guidelines: [],

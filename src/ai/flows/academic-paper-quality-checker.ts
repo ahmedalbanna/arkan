@@ -167,8 +167,9 @@ export const academicPaperQualityCheckerFlow = ai.defineFlow(
 
         // Argument Score
         if (results.argumentAnalysis) {
-            const strengthMap = { strong: 90, moderate: 70, weak: 50 };
-            scores.argument = strengthMap[results.argumentAnalysis.overallStrength] || 60;
+            const strengthMap: { [key: string]: number } = { strong: 90, moderate: 70, weak: 50 };
+            const strength = results.argumentAnalysis.overallStrength as string;
+            scores.argument = strengthMap[strength] || 60;
         }
 
         // Overall Score (weighted average)

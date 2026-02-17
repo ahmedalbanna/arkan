@@ -1,4 +1,5 @@
-// // src/app/api/templates/refresh-image/route.ts
+// src/app/api/templates/refresh-image/route.ts
+// This endpoint is currently disabled
 // import { generateImage } from '@/ai/flows/generate-image';
 // import { adminDb } from '@/lib/firebase/server-init';
 // import { createApiResponse, handleApiError, withAuth } from '@/lib/utils/api-utils';
@@ -71,3 +72,14 @@
 //     return handleApiError(error);
 //   }
 // }, { requireAdmin: true });
+
+// Placeholder exports to make this a valid module
+export const dynamic = 'force-dynamic';
+
+// Stub handlers for disabled endpoint
+export async function POST() {
+  return new Response(
+    JSON.stringify({ error: 'This endpoint is currently disabled' }),
+    { status: 503 }
+  );
+}

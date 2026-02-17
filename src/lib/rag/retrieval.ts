@@ -90,7 +90,7 @@ export async function retrieveContext(
     }
 
     // 3. Format results
-    const sources = searchResults.map(result => ({
+    const sources = searchResults.map((result: any) => ({
       content: result.chunk.content,
       score: result.score,
       sourceFile: result.chunk.metadata.sourceFile,
@@ -99,7 +99,7 @@ export async function retrieveContext(
 
     // 4. Combine context from top results
     const context = searchResults
-      .map((result, idx) => {
+      .map((result: any, idx: number) => {
         const source = result.chunk.metadata.sourceFile || 'Unknown';
         return `[Context ${idx + 1}] (Relevance: ${(result.score * 100).toFixed(1)}%, Source: ${source})\n${result.chunk.content}`;
       })

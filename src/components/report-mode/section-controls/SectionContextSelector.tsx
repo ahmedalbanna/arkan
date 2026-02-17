@@ -37,11 +37,17 @@ export function SectionContextSelector({ sectionId }: SectionContextSelectorProp
   
   // Get all sections except current one for copying context from
   const otherSections = useMemo(() => {
-    return reportSections.filter(s => s.id !== sectionId && (
+    return reportSections.filter(s => s.id !== sectionId).map(s => {
+      const fullSection = project?.getSection(s.id);
+      return {
+        ...s,
+        context: fullSection?.context
+      };
+    }).filter(s => (
       Object.keys(s.context?.sections || {}).length > 0 || 
       Object.keys(s.context?.externalContext || {}).length > 0
     ));
-  }, [reportSections, sectionId]);
+  }, [reportSections, sectionId, project]);
   
   const handleCopyContext = () => {
     if (!selectedSourceSection || !project) return;

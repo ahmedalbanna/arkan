@@ -166,10 +166,11 @@ async function testIndexing() {
           success: true,
         });
       } else {
-        console.log(`   ✗ Failed: ${result.error}\n`);
+        const errorMsg = result.errors?.join(', ') || 'Unknown error';
+        console.log(`   ✗ Failed: ${errorMsg}\n`);
         indexResults.push({
           title: doc.title,
-          error: result.error,
+          error: errorMsg,
           success: false,
         });
       }

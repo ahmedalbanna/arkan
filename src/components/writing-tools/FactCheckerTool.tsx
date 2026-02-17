@@ -20,6 +20,8 @@ function getStatusInfo(status: ClaimStatus) {
       return { icon: HelpCircle, color: 'text-yellow-500', badgeVariant: 'secondary' as const };
     case 'False':
       return { icon: XCircle, color: 'text-destructive', badgeVariant: 'destructive' as const };
+    default:
+      return { icon: HelpCircle, color: 'text-muted-foreground', badgeVariant: 'secondary' as const };
   }
 };
 

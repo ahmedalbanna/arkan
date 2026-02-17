@@ -8,6 +8,7 @@ import { withAuth, handleApiError, createApiResponse } from '@/lib/utils/api-uti
 import { logGeneration } from '@/services/generation-service';
 
 const generateImageSchema = z.object({
+  flow: z.literal('generate-image'),
   prompt: z.string().min(3, "Prompt must be at least 3 characters long."),
 });
 
@@ -20,7 +21,7 @@ export const POST = withAuth(async ({ request, user }) => {
       return handleApiError(validation.error);
     }
 
-    const result = await generateImage(validation.data);
+    const result = await generateImage({prompt: validation.data.prompt, flow: 'generate-image'});
 
     const creditCost = 5;
     await deductCredit(user.id, creditCost);

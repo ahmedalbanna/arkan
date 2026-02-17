@@ -42,12 +42,14 @@ export const POST = withAuth(async ({ request, user }) => {
         if (file.type === 'application/pdf') {
             agentId = 'pdf-to-markdown';
             result = await rewriteDocumentToMarkdown({
+                flow: 'rewrite-document-to-markdown',
                 pdfDataUri: dataUri
             });
             markdownContent = 'markdown' in result ? result.markdown : '';
         } else if (file.type.startsWith('image/')) {
             agentId = 'image-to-text';
             result = await imageToText({
+                flow: 'image-to-text',
                 imageDataUri: dataUri
             });
             markdownContent = 'text' in result ? result.text : '';

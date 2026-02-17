@@ -62,7 +62,7 @@ const improveReportMarkdownFlow = ai.defineFlow({
       enableLogging: true,
       fallbackFn: (rawOutput) => {
         if (typeof rawOutput === 'string') {
-          return { improvedText: rawOutput };
+          return { improvedMarkdown: rawOutput };
         }
         return null;
       },

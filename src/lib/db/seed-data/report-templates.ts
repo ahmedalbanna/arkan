@@ -191,7 +191,7 @@ export const defaultReportTemplates: ReportTemplateProperties[] = [
                         prompt: 'Define the core problem that this graduation project addresses. Be specific about the challenges, gaps, or issues that need to be solved.',
                         behaviors: [{ name: 'systems analyst', type: 'persona' }],
                         guidelines: ['Clearly define the problem', 'Explain why existing solutions are inadequate', 'Quantify the impact if possible', 'Be specific and focused'],
-                        controls: { ...defaultControls, formality: 80, complexity: 70, tone: 'analytical', wordCount: '400' }
+                        controls: { ...defaultControls, formality: 80, complexity: 70, tone: 'academic', wordCount: '400' }
                     }, 
                     { 
                         title: 'Project Objectives', 
@@ -275,7 +275,7 @@ export const defaultReportTemplates: ReportTemplateProperties[] = [
                         prompt: 'Present the project results with data, measurements, and evaluations. Use tables, charts, and metrics to demonstrate outcomes.',
                         behaviors: [{ name: 'data analyst', type: 'persona' }],
                         guidelines: ['Present results objectively', 'Use tables and charts to visualize data', 'Compare against objectives and requirements', 'Report on system performance'],
-                        controls: { ...defaultControls, formality: 85, complexity: 70, tone: 'analytical', wordCount: '600' }
+                        controls: { ...defaultControls, formality: 85, complexity: 70, tone: 'academic', wordCount: '600' }
                     }, 
                     { 
                         title: 'Discussion', 
@@ -283,7 +283,7 @@ export const defaultReportTemplates: ReportTemplateProperties[] = [
                         prompt: 'Interpret and discuss the results. Compare with existing solutions, explain successes and limitations, and provide critical analysis.',
                         behaviors: [{ name: 'academic researcher', type: 'persona' }],
                         guidelines: ['Interpret the results', 'Compare with related work', 'Discuss strengths and limitations', 'Explain unexpected findings', 'Address research questions'],
-                        controls: { ...defaultControls, formality: 85, complexity: 75, tone: 'analytical', wordCount: '700' }
+                        controls: { ...defaultControls, formality: 85, complexity: 75, tone: 'academic', wordCount: '700' }
                     } 
                 ] 
             },
@@ -386,7 +386,7 @@ export const defaultReportTemplates: ReportTemplateProperties[] = [
                         prompt: 'Present your findings objectively and systematically. Use tables, figures, and statistical analysis to support your results. Report all relevant findings without interpretation.',
                         behaviors: [{ name: 'data analyst', type: 'persona' }],
                         guidelines: ['Present results in logical order', 'Use tables and figures effectively', 'Report statistical significance when applicable', 'Be objective - no interpretation here', 'Include both positive and negative findings'],
-                        controls: { ...defaultControls, formality: 95, tone: 'analytical', complexity: 75, wordCount: '600', outputStyle: { ...defaultControls.outputStyle, table: true } }
+                        controls: { ...defaultControls, formality: 95, tone: 'academic', complexity: 75, wordCount: '600', outputStyle: { ...defaultControls.outputStyle, table: true } }
                     } 
                 ] 
             },
@@ -399,7 +399,7 @@ export const defaultReportTemplates: ReportTemplateProperties[] = [
                         prompt: 'Interpret your results, compare them with previous research, explain implications, acknowledge limitations, and suggest future research directions.',
                         behaviors: [{ name: 'academic researcher', type: 'persona' }],
                         guidelines: ['Interpret your findings in light of your research question', 'Compare results with existing literature', 'Explain unexpected findings', 'Acknowledge study limitations honestly', 'Discuss theoretical and practical implications', 'Suggest directions for future research'],
-                        controls: { ...defaultControls, formality: 90, tone: 'analytical', complexity: 80, wordCount: '900' }
+                        controls: { ...defaultControls, formality: 90, tone: 'academic', complexity: 80, wordCount: '900' }
                     }, 
                     { 
                         title: 'Conclusion', 
@@ -564,7 +564,7 @@ export const defaultReportTemplates: ReportTemplateProperties[] = [
                         prompt: 'Write a welcoming introduction to the software. Explain what it does, who it\'s for, key features, and what users will learn from this documentation.',
                         behaviors: [{ name: 'technical writer', type: 'persona' }],
                         guidelines: ['Welcome the user warmly', 'Clearly state what the software does', 'Identify target audience', 'List key features briefly', 'Set expectations for the documentation'],
-                        controls: { ...defaultControls, formality: 65, tone: 'friendly', complexity: 50, wordCount: '300' }
+                        controls: { ...defaultControls, formality: 65, tone: 'casual', complexity: 50, wordCount: '300' }
                     }, 
                     { 
                         title: 'Installation Guide', 
@@ -572,7 +572,7 @@ export const defaultReportTemplates: ReportTemplateProperties[] = [
                         prompt: 'Provide step-by-step installation instructions for all supported platforms. Include system requirements, prerequisites, and common installation issues.',
                         behaviors: [{ name: 'technical writer', type: 'persona' }],
                         guidelines: ['List system requirements first', 'Provide step-by-step instructions', 'Include screenshots or code blocks', 'Cover all supported platforms', 'Address common installation problems', 'Verify installation steps'],
-                        controls: { ...defaultControls, formality: 70, tone: 'instructional', complexity: 60, outputStyle: { ...defaultControls.outputStyle, list: true, code: true } }
+                        controls: { ...defaultControls, formality: 70, tone: 'explanatory', complexity: 60, outputStyle: { ...defaultControls.outputStyle, list: true, code: true } }
                     }, 
                     { 
                         title: 'Quick Start Tutorial', 
@@ -580,7 +580,7 @@ export const defaultReportTemplates: ReportTemplateProperties[] = [
                         prompt: 'Create a simple tutorial that gets users from zero to their first success quickly. Focus on the most common use case and keep it simple.',
                         behaviors: [{ name: 'technical trainer', type: 'persona' }],
                         guidelines: ['Choose the simplest use case', 'Break into clear numbered steps', 'Include code examples or screenshots', 'Show expected results', 'Keep it short and achievable', 'End with a sense of accomplishment'],
-                        controls: { ...defaultControls, formality: 60, tone: 'instructional', complexity: 50, outputStyle: { ...defaultControls.outputStyle, code: true } }
+                        controls: { ...defaultControls, formality: 60, tone: 'explanatory', complexity: 50, outputStyle: { ...defaultControls.outputStyle, code: true } }
                     } 
                 ] 
             },
@@ -593,7 +593,7 @@ export const defaultReportTemplates: ReportTemplateProperties[] = [
                         prompt: 'Document a core feature comprehensively. Explain what it does, why it\'s useful, how to use it, and provide code examples or screenshots.',
                         behaviors: [{ name: 'technical writer', type: 'persona' }],
                         guidelines: ['Start with feature overview', 'Explain use cases', 'Provide step-by-step usage instructions', 'Include code examples', 'Show common patterns', 'List parameters and options'],
-                        controls: { ...defaultControls, formality: 70, tone: 'instructional', complexity: 65, outputStyle: { ...defaultControls.outputStyle, code: true, heading: true } }
+                        controls: { ...defaultControls, formality: 70, tone: 'explanatory', complexity: 65, outputStyle: { ...defaultControls.outputStyle, code: true, heading: true } }
                     }, 
                     { 
                         title: 'Feature B: Description & Usage', 
@@ -601,7 +601,7 @@ export const defaultReportTemplates: ReportTemplateProperties[] = [
                         prompt: 'Document another core feature with the same level of detail. Maintain consistency with Feature A documentation.',
                         behaviors: [{ name: 'technical writer', type: 'persona' }],
                         guidelines: ['Follow same structure as Feature A', 'Explain feature purpose', 'Provide usage examples', 'Include code samples', 'Document all options', 'Show best practices'],
-                        controls: { ...defaultControls, formality: 70, tone: 'instructional', complexity: 65, outputStyle: { ...defaultControls.outputStyle, code: true, heading: true } }
+                        controls: { ...defaultControls, formality: 70, tone: 'explanatory', complexity: 65, outputStyle: { ...defaultControls.outputStyle, code: true, heading: true } }
                     } 
                 ] 
             },
@@ -635,7 +635,7 @@ export const defaultReportTemplates: ReportTemplateProperties[] = [
                         prompt: 'Compile common questions and provide clear, helpful answers. Organize by topic and make them easy to scan.',
                         behaviors: [{ name: 'support specialist', type: 'persona' }],
                         guidelines: ['Organize by topic', 'Use question format for each entry', 'Provide clear, concise answers', 'Include links to relevant docs', 'Address most common issues first', 'Keep answers actionable'],
-                        controls: { ...defaultControls, formality: 65, tone: 'helpful', complexity: 55, outputStyle: { ...defaultControls.outputStyle, heading: true } }
+                        controls: { ...defaultControls, formality: 65, tone: 'explanatory', complexity: 55, outputStyle: { ...defaultControls.outputStyle, heading: true } }
                     }, 
                     { 
                         title: 'Error Codes Guide', 
@@ -643,7 +643,7 @@ export const defaultReportTemplates: ReportTemplateProperties[] = [
                         prompt: 'Document all error codes systematically. For each error: code, description, common causes, and how to resolve it.',
                         behaviors: [{ name: 'technical support engineer', type: 'persona' }],
                         guidelines: ['List errors systematically', 'Explain what each error means', 'Describe common causes', 'Provide clear solutions', 'Include examples', 'Make it searchable'],
-                        controls: { ...defaultControls, formality: 75, tone: 'instructional', complexity: 65, outputStyle: { ...defaultControls.outputStyle, table: true, code: true } }
+                        controls: { ...defaultControls, formality: 75, tone: 'explanatory', complexity: 65, outputStyle: { ...defaultControls.outputStyle, table: true, code: true } }
                     } 
                 ] 
             },
@@ -656,7 +656,7 @@ export const defaultReportTemplates: ReportTemplateProperties[] = [
                         prompt: 'Provide information on how to get help. Include support channels, response times, what information to provide, and links to community resources.',
                         behaviors: [{ name: 'customer support manager', type: 'persona' }],
                         guidelines: ['List all support channels', 'Provide contact information', 'Set response time expectations', 'Explain what info to include in requests', 'Link to community forums', 'Include emergency contact if applicable'],
-                        controls: { ...defaultControls, formality: 70, tone: 'helpful', complexity: 50 }
+                        controls: { ...defaultControls, formality: 70, tone: 'explanatory', complexity: 50 }
                     } 
                 ] 
             }
@@ -812,7 +812,7 @@ export const defaultReportTemplates: ReportTemplateProperties[] = [
                         prompt: "Present results systematically with tables and figures. Compare with baselines and SOTA. Report all relevant metrics including confidence intervals or statistical significance.",
                         behaviors: [{ name: 'AI researcher', type: 'persona' }],
                         guidelines: ['Present results in tables', 'Compare with baselines', 'Report SOTA comparison', 'Include confidence intervals', 'Show ablation study results', 'Use visualizations effectively'],
-                        controls: { ...defaultControls, formality: 95, tone: 'analytical', complexity: 85, outputStyle: { ...defaultControls.outputStyle, table: true, paragraph: true } }
+                        controls: { ...defaultControls, formality: 95, tone: 'academic', complexity: 85, outputStyle: { ...defaultControls.outputStyle, table: true, paragraph: true } }
                     },
                     {
                         title: "Analysis & Discussion",
@@ -820,7 +820,7 @@ export const defaultReportTemplates: ReportTemplateProperties[] = [
                         prompt: "Analyze results deeply. Explain what worked and why, discuss failure cases, provide visualizations, and interpret model behavior.",
                         behaviors: [{ name: 'AI researcher', type: 'persona' }],
                         guidelines: ['Interpret results thoroughly', 'Explain unexpected findings', 'Analyze failure cases', 'Show qualitative results', 'Discuss model behavior', 'Connect to research question'],
-                        controls: { ...defaultControls, formality: 90, tone: 'analytical', complexity: 85, wordCount: '800' }
+                        controls: { ...defaultControls, formality: 90, tone: 'academic', complexity: 85, wordCount: '800' }
                     }
                 ]
             },
@@ -896,7 +896,7 @@ export const defaultReportTemplates: ReportTemplateProperties[] = [
                         prompt: "Compare at least 3 similar existing systems or solutions. Create a detailed comparison analyzing features, advantages, disadvantages, and how your project differs or improves upon them.",
                         behaviors: [{ name: 'research analyst', type: 'persona' }],
                         guidelines: ['Review at least 3 similar systems', 'Create comparison table', 'Analyze strengths and weaknesses', 'Highlight where your project excels', 'Be objective and fair', 'Cite sources properly'],
-                        controls: { ...defaultControls, formality: 85, tone: 'analytical', complexity: 75, wordCount: '800', outputStyle: { ...defaultControls.outputStyle, table: true, paragraph: true } }
+                        controls: { ...defaultControls, formality: 85, tone: 'academic', complexity: 75, wordCount: '800', outputStyle: { ...defaultControls.outputStyle, table: true, paragraph: true } }
                     },
                     { 
                         title: "Technology Review", 
@@ -991,7 +991,7 @@ export const defaultReportTemplates: ReportTemplateProperties[] = [
                         prompt: "Evaluate system performance with benchmarks, response times, resource usage, and scalability metrics.",
                         behaviors: [{ name: 'performance engineer', type: 'persona' }],
                         guidelines: ['Present performance metrics', 'Include benchmark results', 'Measure response times', 'Analyze resource usage', 'Test scalability', 'Use graphs and charts'],
-                        controls: { ...defaultControls, formality: 80, tone: 'analytical', complexity: 75, outputStyle: { ...defaultControls.outputStyle, table: true, paragraph: true } }
+                        controls: { ...defaultControls, formality: 80, tone: 'academic', complexity: 75, outputStyle: { ...defaultControls.outputStyle, table: true, paragraph: true } }
                     }
                 ]
             },
@@ -1012,7 +1012,7 @@ export const defaultReportTemplates: ReportTemplateProperties[] = [
                         prompt: "Discuss major challenges encountered during development and how they were overcome. Reflect on lessons learned.",
                         behaviors: [{ name: 'software engineer', type: 'persona' }],
                         guidelines: ['Identify major challenges', 'Explain solutions implemented', 'Reflect on what worked', 'Discuss lessons learned', 'Be honest and thoughtful'],
-                        controls: { ...defaultControls, formality: 75, tone: 'reflective', complexity: 70, wordCount: '500' }
+                        controls: { ...defaultControls, formality: 75, tone: 'casual', complexity: 70, wordCount: '500' }
                     }
                 ]
             },
@@ -1084,7 +1084,7 @@ export const defaultReportTemplates: ReportTemplateProperties[] = [
                         prompt: "Write a heartfelt dedication section for the thesis. Keep it personal yet formal.",
                         behaviors: [{ name: 'academic writer', type: 'persona' }],
                         guidelines: ['Keep it brief', 'Be sincere and personal', 'Maintain appropriate formality', 'Typically one paragraph'],
-                        controls: { ...defaultControls, formality: 80, tone: 'personal', wordCount: '100' }
+                        controls: { ...defaultControls, formality: 80, tone: 'casual', wordCount: '100' }
                     },
                     {
                         title: "Acknowledgments",
@@ -1092,7 +1092,7 @@ export const defaultReportTemplates: ReportTemplateProperties[] = [
                         prompt: "Write comprehensive acknowledgments thanking supervisors, committee members, family, friends, and funding sources.",
                         behaviors: [{ name: 'academic writer', type: 'persona' }],
                         guidelines: ['Thank supervisor first', 'Acknowledge committee members', 'Mention funding sources', 'Thank family and friends', 'Be gracious and specific'],
-                        controls: { ...defaultControls, formality: 85, tone: 'appreciative', wordCount: '300' }
+                        controls: { ...defaultControls, formality: 85, tone: 'casual', wordCount: '300' }
                     }
                 ]
             },
@@ -1113,7 +1113,7 @@ export const defaultReportTemplates: ReportTemplateProperties[] = [
                         prompt: "Clearly articulate the research problem. Explain why it matters and why existing solutions are inadequate.",
                         behaviors: [{ name: 'research analyst', type: 'persona' }],
                         guidelines: ['Define the problem clearly', 'Explain significance', 'Show gap in knowledge', 'Be specific and focused', 'Justify research need'],
-                        controls: { ...defaultControls, formality: 90, tone: 'analytical', complexity: 80, wordCount: '500' }
+                        controls: { ...defaultControls, formality: 90, tone: 'academic', complexity: 80, wordCount: '500' }
                     },
                     {
                         title: "Research Questions/Hypotheses",
@@ -1174,7 +1174,7 @@ export const defaultReportTemplates: ReportTemplateProperties[] = [
                         prompt: "Explicitly identify the research gap that your study addresses. Justify why this gap needs to be filled.",
                         behaviors: [{ name: 'academic researcher', type: 'persona' }],
                         guidelines: ['Identify gap clearly', 'Explain why it matters', 'Connect to your research', 'Be specific', 'Justify research contribution'],
-                        controls: { ...defaultControls, formality: 90, tone: 'analytical', complexity: 80, wordCount: '500' }
+                        controls: { ...defaultControls, formality: 90, tone: 'academic', complexity: 80, wordCount: '500' }
                     },
                     {
                         title: "Conceptual Framework",
@@ -1248,7 +1248,7 @@ export const defaultReportTemplates: ReportTemplateProperties[] = [
                         prompt: "Present descriptive statistics of the data. Use tables and figures to summarize demographic and key variables.",
                         behaviors: [{ name: 'statistician', type: 'persona' }],
                         guidelines: ['Present systematically', 'Use tables effectively', 'Include all relevant statistics', 'Be clear and organized', 'Describe patterns'],
-                        controls: { ...defaultControls, formality: 90, tone: 'analytical', complexity: 75, outputStyle: { ...defaultControls.outputStyle, table: true } }
+                        controls: { ...defaultControls, formality: 90, tone: 'academic', complexity: 75, outputStyle: { ...defaultControls.outputStyle, table: true } }
                     },
                     {
                         title: "Inferential Analysis",
@@ -1256,7 +1256,7 @@ export const defaultReportTemplates: ReportTemplateProperties[] = [
                         prompt: "Present inferential statistical analysis. Report test statistics, p-values, effect sizes, and confidence intervals.",
                         behaviors: [{ name: 'statistician', type: 'persona' }],
                         guidelines: ['Report all statistics', 'Include p-values', 'Report effect sizes', 'Use proper notation', 'Be precise', 'Use tables'],
-                        controls: { ...defaultControls, formality: 95, tone: 'analytical', complexity: 85, outputStyle: { ...defaultControls.outputStyle, table: true, math: true } }
+                        controls: { ...defaultControls, formality: 95, tone: 'academic', complexity: 85, outputStyle: { ...defaultControls.outputStyle, table: true, math: true } }
                     },
                     {
                         title: "Research Questions/Hypotheses Testing",
@@ -1264,7 +1264,7 @@ export const defaultReportTemplates: ReportTemplateProperties[] = [
                         prompt: "Address each research question or test each hypothesis systematically. Present findings clearly.",
                         behaviors: [{ name: 'academic researcher', type: 'persona' }],
                         guidelines: ['Address each RQ/H', 'Present findings clearly', 'Use evidence', 'Be objective', 'Organize systematically'],
-                        controls: { ...defaultControls, formality: 90, tone: 'analytical', complexity: 80, wordCount: '1200' }
+                        controls: { ...defaultControls, formality: 90, tone: 'academic', complexity: 80, wordCount: '1200' }
                     },
                     {
                         title: "Additional Findings",
@@ -1272,7 +1272,7 @@ export const defaultReportTemplates: ReportTemplateProperties[] = [
                         prompt: "Report any additional or unexpected findings. Even if not directly related to research questions, significant findings should be reported.",
                         behaviors: [{ name: 'academic researcher', type: 'persona' }],
                         guidelines: ['Report unexpected findings', 'Be objective', 'Provide context', 'Use appropriate detail'],
-                        controls: { ...defaultControls, formality: 90, tone: 'analytical', complexity: 75 }
+                        controls: { ...defaultControls, formality: 90, tone: 'academic', complexity: 75 }
                     }
                 ]
             },
@@ -1285,7 +1285,7 @@ export const defaultReportTemplates: ReportTemplateProperties[] = [
                         prompt: "Interpret the results in the context of research questions and literature. Explain what the findings mean.",
                         behaviors: [{ name: 'academic researcher', type: 'persona' }],
                         guidelines: ['Interpret thoroughly', 'Connect to RQs', 'Relate to literature', 'Explain mechanisms', 'Be insightful'],
-                        controls: { ...defaultControls, formality: 90, tone: 'analytical', complexity: 85, wordCount: '1500' }
+                        controls: { ...defaultControls, formality: 90, tone: 'academic', complexity: 85, wordCount: '1500' }
                     },
                     {
                         title: "Comparison with Previous Studies",
@@ -1293,7 +1293,7 @@ export const defaultReportTemplates: ReportTemplateProperties[] = [
                         prompt: "Compare findings with previous research. Discuss agreements, contradictions, and unique contributions.",
                         behaviors: [{ name: 'academic researcher', type: 'persona' }],
                         guidelines: ['Compare systematically', 'Discuss agreements', 'Explain contradictions', 'Highlight contributions', 'Be balanced'],
-                        controls: { ...defaultControls, formality: 90, tone: 'analytical', complexity: 85, wordCount: '1000' }
+                        controls: { ...defaultControls, formality: 90, tone: 'academic', complexity: 85, wordCount: '1000' }
                     },
                     {
                         title: "Theoretical Implications",
@@ -1317,7 +1317,7 @@ export const defaultReportTemplates: ReportTemplateProperties[] = [
                         prompt: "Honestly acknowledge limitations of the study. Explain their potential impact on findings.",
                         behaviors: [{ name: 'academic researcher', type: 'persona' }],
                         guidelines: ['Be honest', 'Identify all limitations', 'Explain impact', 'Maintain credibility', 'Avoid over-apologizing'],
-                        controls: { ...defaultControls, formality: 90, tone: 'honest', complexity: 75, wordCount: '500' }
+                        controls: { ...defaultControls, formality: 90, tone: 'casual', complexity: 75, wordCount: '500' }
                     }
                 ]
             },
@@ -1338,7 +1338,7 @@ export const defaultReportTemplates: ReportTemplateProperties[] = [
                         prompt: "Draw conclusions based on the findings. Make definitive statements about what the research has demonstrated.",
                         behaviors: [{ name: 'academic researcher', type: 'persona' }],
                         guidelines: ['Draw clear conclusions', 'Be definitive', 'Stay within evidence', 'Highlight contributions', 'End strongly'],
-                        controls: { ...defaultControls, formality: 90, tone: 'conclusive', complexity: 80, wordCount: '600' }
+                        controls: { ...defaultControls, formality: 90, tone: 'persuasive', complexity: 80, wordCount: '600' }
                     },
                     {
                         title: "Recommendations for Practice",
@@ -1346,7 +1346,7 @@ export const defaultReportTemplates: ReportTemplateProperties[] = [
                         prompt: "Provide specific, actionable recommendations for practitioners based on the findings.",
                         behaviors: [{ name: 'applied researcher', type: 'persona' }],
                         guidelines: ['Be specific', 'Make actionable', 'Base on findings', 'Identify audience', 'Prioritize recommendations'],
-                        controls: { ...defaultControls, formality: 85, tone: 'prescriptive', outputStyle: { ...defaultControls.outputStyle, list: true } }
+                        controls: { ...defaultControls, formality: 85, tone: 'technical', outputStyle: { ...defaultControls.outputStyle, list: true } }
                     },
                     {
                         title: "Recommendations for Future Research",
@@ -1428,7 +1428,7 @@ export const defaultReportTemplates: ReportTemplateProperties[] = [
                         prompt: 'Explain the theoretical background and scientific principles underlying the experiment. Include relevant equations and concepts.',
                         behaviors: [{ name: 'science educator', type: 'persona' }],
                         guidelines: ['Explain relevant theory', 'Include key equations', 'Define important terms', 'Cite textbooks or references', 'Connect theory to experiment'],
-                        controls: { ...defaultControls, formality: 85, tone: 'educational', complexity: 75, wordCount: '400', outputStyle: { ...defaultControls.outputStyle, math: true } }
+                        controls: { ...defaultControls, formality: 85, tone: 'explanatory', complexity: 75, wordCount: '400', outputStyle: { ...defaultControls.outputStyle, math: true } }
                     },
                     {
                         title: 'Objectives',
@@ -1478,7 +1478,7 @@ export const defaultReportTemplates: ReportTemplateProperties[] = [
                         prompt: 'Present all experimental data in organized tables. Include raw data, calculated values, and units. Add graphs or figures to visualize trends.',
                         behaviors: [{ name: 'data analyst', type: 'persona' }],
                         guidelines: ['Organize data in clear tables', 'Include all measurements', 'Specify units for all values', 'Number tables and figures', 'Add descriptive captions', 'Show calculations for derived values', 'Report uncertainties'],
-                        controls: { ...defaultControls, formality: 90, tone: 'analytical', complexity: 75, outputStyle: { ...defaultControls.outputStyle, table: true, paragraph: true } }
+                        controls: { ...defaultControls, formality: 90, tone: 'academic', complexity: 75, outputStyle: { ...defaultControls.outputStyle, table: true, paragraph: true } }
                     },
                     {
                         title: 'Calculations',
@@ -1499,7 +1499,7 @@ export const defaultReportTemplates: ReportTemplateProperties[] = [
                         prompt: 'Interpret and analyze the results. Compare experimental values with theoretical or literature values. Calculate percent errors.',
                         behaviors: [{ name: 'research scientist', type: 'persona' }],
                         guidelines: ['Interpret what results mean', 'Compare with expected/theoretical values', 'Calculate percent error', 'Discuss trends or patterns', 'Relate to objectives', 'Be objective'],
-                        controls: { ...defaultControls, formality: 85, tone: 'analytical', complexity: 75, wordCount: '500' }
+                        controls: { ...defaultControls, formality: 85, tone: 'academic', complexity: 75, wordCount: '500' }
                     },
                     {
                         title: 'Sources of Error',
@@ -1507,7 +1507,7 @@ export const defaultReportTemplates: ReportTemplateProperties[] = [
                         prompt: 'Identify and discuss sources of experimental error. Distinguish between random and systematic errors. Suggest improvements.',
                         behaviors: [{ name: 'experimental physicist', type: 'persona' }],
                         guidelines: ['Identify specific error sources', 'Distinguish random vs systematic errors', 'Quantify impact if possible', 'Avoid vague statements', 'Suggest specific improvements', 'Be honest and realistic'],
-                        controls: { ...defaultControls, formality: 80, tone: 'critical', complexity: 75, wordCount: '400' }
+                        controls: { ...defaultControls, formality: 80, tone: 'academic', complexity: 75, wordCount: '400' }
                     }
                 ]
             },
@@ -1520,7 +1520,7 @@ export const defaultReportTemplates: ReportTemplateProperties[] = [
                         prompt: 'Summarize the experiment and state whether objectives were met. Report key findings and their significance.',
                         behaviors: [{ name: 'research scientist', type: 'persona' }],
                         guidelines: ['Restate objectives briefly', 'Summarize key results', 'State whether objectives were met', 'Note significant findings', 'Keep it concise', 'Write in past tense'],
-                        controls: { ...defaultControls, formality: 85, tone: 'conclusive', wordCount: '200' }
+                        controls: { ...defaultControls, formality: 85, tone: 'persuasive', wordCount: '200' }
                     }
                 ]
             },
@@ -1581,7 +1581,7 @@ export const defaultReportTemplates: ReportTemplateProperties[] = [
                         prompt: 'Provide background information about the organization, industry context, and why this case is significant.',
                         behaviors: [{ name: 'case study researcher', type: 'persona' }],
                         guidelines: ['Describe organization/context', 'Explain industry background', 'Set the scene', 'Establish relevance', 'Provide necessary context'],
-                        controls: { ...defaultControls, formality: 75, tone: 'informative', complexity: 65, wordCount: '400' }
+                        controls: { ...defaultControls, formality: 75, tone: 'explanatory', complexity: 65, wordCount: '400' }
                     },
                     {
                         title: 'Case Study Objectives',
@@ -1597,7 +1597,7 @@ export const defaultReportTemplates: ReportTemplateProperties[] = [
                         prompt: 'Describe the methodology used to gather information for this case study (interviews, observations, document analysis, etc.).',
                         behaviors: [{ name: 'qualitative researcher', type: 'persona' }],
                         guidelines: ['Describe data collection methods', 'Mention sources of information', 'Explain analysis approach', 'Address validity', 'Note timeframe'],
-                        controls: { ...defaultControls, formality: 80, tone: 'methodological', complexity: 70 }
+                        controls: { ...defaultControls, formality: 80, tone: 'academic', complexity: 70 }
                     }
                 ]
             },
@@ -1610,7 +1610,7 @@ export const defaultReportTemplates: ReportTemplateProperties[] = [
                         prompt: 'Provide detailed description of the organization, including size, structure, products/services, and market position.',
                         behaviors: [{ name: 'business analyst', type: 'persona' }],
                         guidelines: ['Describe organization comprehensively', 'Include relevant statistics', 'Explain organizational structure', 'Describe products/services', 'Discuss market position'],
-                        controls: { ...defaultControls, formality: 75, tone: 'descriptive', complexity: 70, wordCount: '500' }
+                        controls: { ...defaultControls, formality: 75, tone: 'explanatory', complexity: 70, wordCount: '500' }
                     },
                     {
                         title: 'Key Stakeholders',
@@ -1618,7 +1618,7 @@ export const defaultReportTemplates: ReportTemplateProperties[] = [
                         prompt: 'Identify and describe key stakeholders involved in the case, including their roles, interests, and influence.',
                         behaviors: [{ name: 'stakeholder analyst', type: 'persona' }],
                         guidelines: ['Identify all key stakeholders', 'Describe their roles', 'Explain their interests', 'Discuss their influence', 'Show relationships'],
-                        controls: { ...defaultControls, formality: 75, tone: 'analytical', complexity: 70, outputStyle: { ...defaultControls.outputStyle, table: true } }
+                        controls: { ...defaultControls, formality: 75, tone: 'academic', complexity: 70, outputStyle: { ...defaultControls.outputStyle, table: true } }
                     },
                     {
                         title: 'Situation Analysis',
@@ -1626,7 +1626,7 @@ export const defaultReportTemplates: ReportTemplateProperties[] = [
                         prompt: 'Analyze the situation before the problem emerged. Describe the environment, processes, and relevant factors.',
                         behaviors: [{ name: 'systems analyst', type: 'persona' }],
                         guidelines: ['Describe initial situation', 'Analyze environment', 'Identify relevant factors', 'Establish baseline', 'Be comprehensive'],
-                        controls: { ...defaultControls, formality: 75, tone: 'analytical', complexity: 75, wordCount: '600' }
+                        controls: { ...defaultControls, formality: 75, tone: 'academic', complexity: 75, wordCount: '600' }
                     }
                 ]
             },
@@ -1639,7 +1639,7 @@ export const defaultReportTemplates: ReportTemplateProperties[] = [
                         prompt: 'Clearly define the core problem or challenge faced. Be specific about what went wrong or what needed to change.',
                         behaviors: [{ name: 'problem analyst', type: 'persona' }],
                         guidelines: ['Define problem clearly', 'Be specific', 'Provide evidence', 'Quantify impact if possible', 'Avoid ambiguity'],
-                        controls: { ...defaultControls, formality: 80, tone: 'analytical', complexity: 75, wordCount: '400' }
+                        controls: { ...defaultControls, formality: 80, tone: 'academic', complexity: 75, wordCount: '400' }
                     },
                     {
                         title: 'Root Cause Analysis',
@@ -1647,7 +1647,7 @@ export const defaultReportTemplates: ReportTemplateProperties[] = [
                         prompt: 'Conduct root cause analysis to identify underlying causes of the problem. Use analytical frameworks if appropriate.',
                         behaviors: [{ name: 'root cause analyst', type: 'persona' }],
                         guidelines: ['Identify root causes', 'Use analytical frameworks (5 Whys, Fishbone)', 'Distinguish symptoms from causes', 'Provide evidence', 'Be thorough'],
-                        controls: { ...defaultControls, formality: 80, tone: 'analytical', complexity: 80, wordCount: '600', outputStyle: { ...defaultControls.outputStyle, diagram: true } }
+                        controls: { ...defaultControls, formality: 80, tone: 'academic', complexity: 80, wordCount: '600', outputStyle: { ...defaultControls.outputStyle, diagram: true } }
                     },
                     {
                         title: 'Impact Assessment',
@@ -1655,7 +1655,7 @@ export const defaultReportTemplates: ReportTemplateProperties[] = [
                         prompt: 'Assess the impact of the problem on the organization, stakeholders, and operations. Quantify where possible.',
                         behaviors: [{ name: 'impact analyst', type: 'persona' }],
                         guidelines: ['Quantify impact', 'Assess multiple dimensions', 'Consider all stakeholders', 'Use metrics', 'Be objective'],
-                        controls: { ...defaultControls, formality: 80, tone: 'analytical', complexity: 75, outputStyle: { ...defaultControls.outputStyle, table: true } }
+                        controls: { ...defaultControls, formality: 80, tone: 'academic', complexity: 75, outputStyle: { ...defaultControls.outputStyle, table: true } }
                     }
                 ]
             },
@@ -1668,7 +1668,7 @@ export const defaultReportTemplates: ReportTemplateProperties[] = [
                         prompt: 'Describe alternative solutions that were considered. Evaluate pros and cons of each option.',
                         behaviors: [{ name: 'strategic consultant', type: 'persona' }],
                         guidelines: ['List alternative solutions', 'Evaluate each option', 'Compare pros and cons', 'Explain selection criteria', 'Be balanced'],
-                        controls: { ...defaultControls, formality: 75, tone: 'analytical', complexity: 75, outputStyle: { ...defaultControls.outputStyle, table: true } }
+                        controls: { ...defaultControls, formality: 75, tone: 'academic', complexity: 75, outputStyle: { ...defaultControls.outputStyle, table: true } }
                     },
                     {
                         title: 'Solution Selected',
@@ -1684,7 +1684,7 @@ export const defaultReportTemplates: ReportTemplateProperties[] = [
                         prompt: 'Describe how the solution was implemented. Include timeline, phases, and key activities.',
                         behaviors: [{ name: 'project manager', type: 'persona' }],
                         guidelines: ['Describe implementation steps', 'Include timeline', 'Mention key activities', 'Discuss challenges faced', 'Show how challenges were overcome'],
-                        controls: { ...defaultControls, formality: 75, tone: 'descriptive', complexity: 70, wordCount: '700', outputStyle: { ...defaultControls.outputStyle, table: true } }
+                        controls: { ...defaultControls, formality: 75, tone: 'explanatory', complexity: 70, wordCount: '700', outputStyle: { ...defaultControls.outputStyle, table: true } }
                     },
                     {
                         title: 'Resources Required',
@@ -1692,7 +1692,7 @@ export const defaultReportTemplates: ReportTemplateProperties[] = [
                         prompt: 'Detail the resources (human, financial, technical) required for implementation.',
                         behaviors: [{ name: 'resource manager', type: 'persona' }],
                         guidelines: ['List all resource types', 'Quantify resources', 'Explain resource allocation', 'Discuss budget', 'Be specific'],
-                        controls: { ...defaultControls, formality: 75, tone: 'factual', outputStyle: { ...defaultControls.outputStyle, table: true } }
+                        controls: { ...defaultControls, formality: 75, tone: 'explanatory', outputStyle: { ...defaultControls.outputStyle, table: true } }
                     }
                 ]
             },
@@ -1705,7 +1705,7 @@ export const defaultReportTemplates: ReportTemplateProperties[] = [
                         prompt: 'Present quantitative results of the intervention. Use metrics, KPIs, and data to show impact.',
                         behaviors: [{ name: 'data analyst', type: 'persona' }],
                         guidelines: ['Present metrics and KPIs', 'Use before/after comparisons', 'Quantify improvements', 'Use charts and tables', 'Be data-driven'],
-                        controls: { ...defaultControls, formality: 80, tone: 'analytical', complexity: 75, outputStyle: { ...defaultControls.outputStyle, table: true, paragraph: true } }
+                        controls: { ...defaultControls, formality: 80, tone: 'academic', complexity: 75, outputStyle: { ...defaultControls.outputStyle, table: true, paragraph: true } }
                     },
                     {
                         title: 'Qualitative Outcomes',
@@ -1713,7 +1713,7 @@ export const defaultReportTemplates: ReportTemplateProperties[] = [
                         prompt: 'Describe qualitative outcomes such as employee satisfaction, customer feedback, cultural changes, etc.',
                         behaviors: [{ name: 'qualitative researcher', type: 'persona' }],
                         guidelines: ['Describe qualitative changes', 'Include stakeholder feedback', 'Use quotes if available', 'Discuss intangible benefits', 'Be balanced'],
-                        controls: { ...defaultControls, formality: 75, tone: 'descriptive', complexity: 70, wordCount: '500' }
+                        controls: { ...defaultControls, formality: 75, tone: 'explanatory', complexity: 70, wordCount: '500' }
                     },
                     {
                         title: 'Success Metrics',
@@ -1721,7 +1721,7 @@ export const defaultReportTemplates: ReportTemplateProperties[] = [
                         prompt: 'Evaluate success against predefined metrics and objectives. Discuss extent to which goals were achieved.',
                         behaviors: [{ name: 'performance analyst', type: 'persona' }],
                         guidelines: ['Compare against objectives', 'Evaluate success criteria', 'Be objective', 'Acknowledge shortfalls', 'Quantify achievement'],
-                        controls: { ...defaultControls, formality: 80, tone: 'evaluative', complexity: 75, outputStyle: { ...defaultControls.outputStyle, table: true } }
+                        controls: { ...defaultControls, formality: 80, tone: 'academic', complexity: 75, outputStyle: { ...defaultControls.outputStyle, table: true } }
                     }
                 ]
             },
@@ -1734,7 +1734,7 @@ export const defaultReportTemplates: ReportTemplateProperties[] = [
                         prompt: 'Provide critical analysis of the case. What worked well? What could have been done differently? Apply relevant theories or frameworks.',
                         behaviors: [{ name: 'critical analyst', type: 'persona' }],
                         guidelines: ['Analyze critically', 'Apply theoretical frameworks', 'Discuss what worked', 'Identify what could improve', 'Be balanced and fair', 'Use evidence'],
-                        controls: { ...defaultControls, formality: 80, tone: 'critical', complexity: 80, wordCount: '800' }
+                        controls: { ...defaultControls, formality: 80, tone: 'academic', complexity: 80, wordCount: '800' }
                     },
                     {
                         title: 'Lessons Learned',
@@ -1742,7 +1742,7 @@ export const defaultReportTemplates: ReportTemplateProperties[] = [
                         prompt: 'Extract key lessons learned from this case. What insights can be applied to similar situations?',
                         behaviors: [{ name: 'learning consultant', type: 'persona' }],
                         guidelines: ['Identify key lessons', 'Make lessons actionable', 'Generalize appropriately', 'Prioritize insights', 'Be specific'],
-                        controls: { ...defaultControls, formality: 75, tone: 'reflective', complexity: 70, outputStyle: { ...defaultControls.outputStyle, list: true } }
+                        controls: { ...defaultControls, formality: 75, tone: 'casual', complexity: 70, outputStyle: { ...defaultControls.outputStyle, list: true } }
                     },
                     {
                         title: 'Best Practices',
@@ -1750,7 +1750,7 @@ export const defaultReportTemplates: ReportTemplateProperties[] = [
                         prompt: 'Identify and document best practices that emerged from this case.',
                         behaviors: [{ name: 'best practice consultant', type: 'persona' }],
                         guidelines: ['Identify best practices', 'Explain why they worked', 'Make them replicable', 'Provide examples', 'Be practical'],
-                        controls: { ...defaultControls, formality: 75, tone: 'instructive', outputStyle: { ...defaultControls.outputStyle, list: true } }
+                        controls: { ...defaultControls, formality: 75, tone: 'explanatory', outputStyle: { ...defaultControls.outputStyle, list: true } }
                     }
                 ]
             },
@@ -1763,7 +1763,7 @@ export const defaultReportTemplates: ReportTemplateProperties[] = [
                         prompt: 'Summarize the key takeaways from this case study. What are the most important points readers should remember?',
                         behaviors: [{ name: 'executive communicator', type: 'persona' }],
                         guidelines: ['List 3-5 key takeaways', 'Be concise', 'Highlight most important points', 'Make memorable', 'Prioritize insights'],
-                        controls: { ...defaultControls, formality: 75, tone: 'conclusive', outputStyle: { ...defaultControls.outputStyle, list: true } }
+                        controls: { ...defaultControls, formality: 75, tone: 'persuasive', outputStyle: { ...defaultControls.outputStyle, list: true } }
                     },
                     {
                         title: 'Recommendations',
@@ -1771,7 +1771,7 @@ export const defaultReportTemplates: ReportTemplateProperties[] = [
                         prompt: 'Provide recommendations for similar organizations or situations. Make them specific and actionable.',
                         behaviors: [{ name: 'strategic consultant', type: 'persona' }],
                         guidelines: ['Make recommendations specific', 'Ensure actionability', 'Prioritize recommendations', 'Base on evidence', 'Consider feasibility'],
-                        controls: { ...defaultControls, formality: 80, tone: 'prescriptive', outputStyle: { ...defaultControls.outputStyle, list: true } }
+                        controls: { ...defaultControls, formality: 80, tone: 'technical', outputStyle: { ...defaultControls.outputStyle, list: true } }
                     },
                     {
                         title: 'Transferability',
@@ -1779,7 +1779,7 @@ export const defaultReportTemplates: ReportTemplateProperties[] = [
                         prompt: 'Discuss the extent to which findings and lessons can be transferred to other contexts.',
                         behaviors: [{ name: 'research methodologist', type: 'persona' }],
                         guidelines: ['Discuss generalizability', 'Identify similar contexts', 'Note limitations', 'Be realistic', 'Provide guidance'],
-                        controls: { ...defaultControls, formality: 80, tone: 'analytical', complexity: 75 }
+                        controls: { ...defaultControls, formality: 80, tone: 'academic', complexity: 75 }
                     }
                 ]
             },
@@ -1840,7 +1840,7 @@ export const defaultReportTemplates: ReportTemplateProperties[] = [
                         prompt: 'Provide background on the proposed project, including rationale, context, and why feasibility study is needed.',
                         behaviors: [{ name: 'business analyst', type: 'persona' }],
                         guidelines: ['Explain project concept', 'Provide context', 'State project purpose', 'Explain need for feasibility study', 'Set expectations'],
-                        controls: { ...defaultControls, formality: 80, tone: 'informative', complexity: 70, wordCount: '500' }
+                        controls: { ...defaultControls, formality: 80, tone: 'explanatory', complexity: 70, wordCount: '500' }
                     },
                     {
                         title: 'Purpose of Feasibility Study',
@@ -1856,7 +1856,7 @@ export const defaultReportTemplates: ReportTemplateProperties[] = [
                         prompt: 'Describe the methodology used to conduct the feasibility study, including research methods and data sources.',
                         behaviors: [{ name: 'research analyst', type: 'persona' }],
                         guidelines: ['Describe research approach', 'Mention data sources', 'Explain analysis methods', 'Note timeframe', 'Address limitations'],
-                        controls: { ...defaultControls, formality: 80, tone: 'methodological', complexity: 70 }
+                        controls: { ...defaultControls, formality: 80, tone: 'academic', complexity: 70 }
                     }
                 ]
             },
@@ -1869,7 +1869,7 @@ export const defaultReportTemplates: ReportTemplateProperties[] = [
                         prompt: 'Analyze the target market including size, growth trends, segmentation, and characteristics.',
                         behaviors: [{ name: 'market analyst', type: 'persona' }],
                         guidelines: ['Define target market', 'Estimate market size', 'Analyze trends', 'Segment market', 'Use data and statistics'],
-                        controls: { ...defaultControls, formality: 80, tone: 'analytical', complexity: 75, wordCount: '700', outputStyle: { ...defaultControls.outputStyle, table: true } }
+                        controls: { ...defaultControls, formality: 80, tone: 'academic', complexity: 75, wordCount: '700', outputStyle: { ...defaultControls.outputStyle, table: true } }
                     },
                     {
                         title: 'Target Market',
@@ -1877,7 +1877,7 @@ export const defaultReportTemplates: ReportTemplateProperties[] = [
                         prompt: 'Define and analyze the specific target customer segments. Include demographics, psychographics, and buying behavior.',
                         behaviors: [{ name: 'market researcher', type: 'persona' }],
                         guidelines: ['Define customer segments', 'Describe characteristics', 'Analyze needs and preferences', 'Estimate segment sizes', 'Prioritize segments'],
-                        controls: { ...defaultControls, formality: 75, tone: 'analytical', complexity: 70, wordCount: '600' }
+                        controls: { ...defaultControls, formality: 75, tone: 'academic', complexity: 70, wordCount: '600' }
                     },
                     {
                         title: 'Competition Analysis',
@@ -1885,7 +1885,7 @@ export const defaultReportTemplates: ReportTemplateProperties[] = [
                         prompt: 'Analyze competitors including their strengths, weaknesses, market share, and strategies.',
                         behaviors: [{ name: 'competitive analyst', type: 'persona' }],
                         guidelines: ['Identify key competitors', 'Analyze their offerings', 'Assess strengths/weaknesses', 'Estimate market shares', 'Identify competitive advantages'],
-                        controls: { ...defaultControls, formality: 80, tone: 'analytical', complexity: 75, wordCount: '700', outputStyle: { ...defaultControls.outputStyle, table: true } }
+                        controls: { ...defaultControls, formality: 80, tone: 'academic', complexity: 75, wordCount: '700', outputStyle: { ...defaultControls.outputStyle, table: true } }
                     },
                     {
                         title: 'Market Demand',
@@ -1893,7 +1893,7 @@ export const defaultReportTemplates: ReportTemplateProperties[] = [
                         prompt: 'Assess market demand for the proposed product or service. Include demand projections.',
                         behaviors: [{ name: 'demand analyst', type: 'persona' }],
                         guidelines: ['Assess current demand', 'Project future demand', 'Identify demand drivers', 'Consider seasonality', 'Provide estimates'],
-                        controls: { ...defaultControls, formality: 80, tone: 'analytical', complexity: 75, outputStyle: { ...defaultControls.outputStyle, table: true } }
+                        controls: { ...defaultControls, formality: 80, tone: 'academic', complexity: 75, outputStyle: { ...defaultControls.outputStyle, table: true } }
                     }
                 ]
             },
@@ -1914,7 +1914,7 @@ export const defaultReportTemplates: ReportTemplateProperties[] = [
                         prompt: 'Assess availability of technical resources including expertise, facilities, and technology.',
                         behaviors: [{ name: 'resource analyst', type: 'persona' }],
                         guidelines: ['Assess resource availability', 'Identify skill requirements', 'Evaluate facilities', 'Consider procurement', 'Identify gaps'],
-                        controls: { ...defaultControls, formality: 75, tone: 'analytical', complexity: 70 }
+                        controls: { ...defaultControls, formality: 75, tone: 'academic', complexity: 70 }
                     },
                     {
                         title: 'Technical Risks',
@@ -1922,7 +1922,7 @@ export const defaultReportTemplates: ReportTemplateProperties[] = [
                         prompt: 'Identify and assess technical risks and challenges. Propose mitigation strategies.',
                         behaviors: [{ name: 'risk analyst', type: 'persona' }],
                         guidelines: ['Identify technical risks', 'Assess probability and impact', 'Propose mitigation strategies', 'Consider contingencies', 'Be realistic'],
-                        controls: { ...defaultControls, formality: 80, tone: 'analytical', complexity: 75, outputStyle: { ...defaultControls.outputStyle, table: true } }
+                        controls: { ...defaultControls, formality: 80, tone: 'academic', complexity: 75, outputStyle: { ...defaultControls.outputStyle, table: true } }
                     },
                     {
                         title: 'Solution Architecture',
@@ -1943,7 +1943,7 @@ export const defaultReportTemplates: ReportTemplateProperties[] = [
                         prompt: 'Provide detailed cost analysis including initial investment, operating costs, and cost breakdown.',
                         behaviors: [{ name: 'financial analyst', type: 'persona' }],
                         guidelines: ['Break down all costs', 'Include one-time and recurring costs', 'Categorize costs', 'Provide cost estimates', 'Show assumptions'],
-                        controls: { ...defaultControls, formality: 85, tone: 'financial', complexity: 75, outputStyle: { ...defaultControls.outputStyle, table: true } }
+                        controls: { ...defaultControls, formality: 85, tone: 'professional', complexity: 75, outputStyle: { ...defaultControls.outputStyle, table: true } }
                     },
                     {
                         title: 'Revenue Projections',
@@ -1951,7 +1951,7 @@ export const defaultReportTemplates: ReportTemplateProperties[] = [
                         prompt: 'Project revenues over a defined period (typically 3-5 years). Include pricing strategy and sales forecasts.',
                         behaviors: [{ name: 'financial analyst', type: 'persona' }],
                         guidelines: ['Project revenues by period', 'Explain pricing strategy', 'Show volume assumptions', 'Consider growth rates', 'Present multiple scenarios'],
-                        controls: { ...defaultControls, formality: 85, tone: 'financial', complexity: 80, outputStyle: { ...defaultControls.outputStyle, table: true } }
+                        controls: { ...defaultControls, formality: 85, tone: 'professional', complexity: 80, outputStyle: { ...defaultControls.outputStyle, table: true } }
                     },
                     {
                         title: 'Break-Even Analysis',
@@ -1959,7 +1959,7 @@ export const defaultReportTemplates: ReportTemplateProperties[] = [
                         prompt: 'Calculate break-even point and analyze time to profitability.',
                         behaviors: [{ name: 'financial analyst', type: 'persona' }],
                         guidelines: ['Calculate break-even point', 'Show calculations', 'Estimate time to break-even', 'Analyze sensitivity', 'Use graphs'],
-                        controls: { ...defaultControls, formality: 85, tone: 'financial', complexity: 80, outputStyle: { ...defaultControls.outputStyle, table: true, math: true } }
+                        controls: { ...defaultControls, formality: 85, tone: 'professional', complexity: 80, outputStyle: { ...defaultControls.outputStyle, table: true, math: true } }
                     },
                     {
                         title: 'ROI Calculation',
@@ -1967,7 +1967,7 @@ export const defaultReportTemplates: ReportTemplateProperties[] = [
                         prompt: 'Calculate Return on Investment (ROI), Net Present Value (NPV), and Internal Rate of Return (IRR).',
                         behaviors: [{ name: 'investment analyst', type: 'persona' }],
                         guidelines: ['Calculate ROI', 'Determine NPV', 'Calculate IRR', 'Show formulas', 'Interpret results', 'Consider time value of money'],
-                        controls: { ...defaultControls, formality: 90, tone: 'financial', complexity: 85, outputStyle: { ...defaultControls.outputStyle, table: true, math: true } }
+                        controls: { ...defaultControls, formality: 90, tone: 'professional', complexity: 85, outputStyle: { ...defaultControls.outputStyle, table: true, math: true } }
                     },
                     {
                         title: 'Financial Risks',
@@ -1975,7 +1975,7 @@ export const defaultReportTemplates: ReportTemplateProperties[] = [
                         prompt: 'Identify and assess financial risks including funding risks, cost overruns, and revenue shortfalls.',
                         behaviors: [{ name: 'risk analyst', type: 'persona' }],
                         guidelines: ['Identify financial risks', 'Assess impact', 'Quantify where possible', 'Propose mitigation', 'Consider scenarios'],
-                        controls: { ...defaultControls, formality: 85, tone: 'analytical', complexity: 80, outputStyle: { ...defaultControls.outputStyle, table: true } }
+                        controls: { ...defaultControls, formality: 85, tone: 'academic', complexity: 80, outputStyle: { ...defaultControls.outputStyle, table: true } }
                     }
                 ]
             },
@@ -1988,7 +1988,7 @@ export const defaultReportTemplates: ReportTemplateProperties[] = [
                         prompt: 'Define operational requirements including processes, staffing, and day-to-day operations.',
                         behaviors: [{ name: 'operations manager', type: 'persona' }],
                         guidelines: ['Define operational processes', 'Identify staffing needs', 'Describe workflows', 'Consider logistics', 'Address scalability'],
-                        controls: { ...defaultControls, formality: 75, tone: 'operational', complexity: 70, wordCount: '600' }
+                        controls: { ...defaultControls, formality: 75, tone: 'professional', complexity: 70, wordCount: '600' }
                     },
                     {
                         title: 'Resource Availability',
@@ -1996,7 +1996,7 @@ export const defaultReportTemplates: ReportTemplateProperties[] = [
                         prompt: 'Assess availability of required resources including human resources, facilities, and equipment.',
                         behaviors: [{ name: 'resource planner', type: 'persona' }],
                         guidelines: ['Assess resource needs', 'Evaluate availability', 'Identify gaps', 'Consider recruitment', 'Plan acquisition'],
-                        controls: { ...defaultControls, formality: 75, tone: 'analytical', complexity: 70, outputStyle: { ...defaultControls.outputStyle, table: true } }
+                        controls: { ...defaultControls, formality: 75, tone: 'academic', complexity: 70, outputStyle: { ...defaultControls.outputStyle, table: true } }
                     },
                     {
                         title: 'Organizational Capability',
@@ -2004,7 +2004,7 @@ export const defaultReportTemplates: ReportTemplateProperties[] = [
                         prompt: 'Assess whether the organization has the capability and capacity to execute the project.',
                         behaviors: [{ name: 'organizational consultant', type: 'persona' }],
                         guidelines: ['Assess organizational readiness', 'Evaluate capabilities', 'Identify capability gaps', 'Consider change management', 'Be honest'],
-                        controls: { ...defaultControls, formality: 80, tone: 'analytical', complexity: 75, wordCount: '500' }
+                        controls: { ...defaultControls, formality: 80, tone: 'academic', complexity: 75, wordCount: '500' }
                     },
                     {
                         title: 'Operational Risks',
@@ -2012,7 +2012,7 @@ export const defaultReportTemplates: ReportTemplateProperties[] = [
                         prompt: 'Identify operational risks and challenges. Propose mitigation strategies.',
                         behaviors: [{ name: 'risk analyst', type: 'persona' }],
                         guidelines: ['Identify operational risks', 'Assess probability and impact', 'Propose mitigation', 'Consider contingencies', 'Be comprehensive'],
-                        controls: { ...defaultControls, formality: 80, tone: 'analytical', complexity: 75, outputStyle: { ...defaultControls.outputStyle, table: true } }
+                        controls: { ...defaultControls, formality: 80, tone: 'academic', complexity: 75, outputStyle: { ...defaultControls.outputStyle, table: true } }
                     }
                 ]
             },
@@ -2025,7 +2025,7 @@ export const defaultReportTemplates: ReportTemplateProperties[] = [
                         prompt: 'Identify legal requirements including permits, licenses, and approvals needed.',
                         behaviors: [{ name: 'legal consultant', type: 'persona' }],
                         guidelines: ['Identify all legal requirements', 'List permits and licenses', 'Note regulatory approvals', 'Consider timeline', 'Assess complexity'],
-                        controls: { ...defaultControls, formality: 85, tone: 'legal', complexity: 70, outputStyle: { ...defaultControls.outputStyle, list: true } }
+                        controls: { ...defaultControls, formality: 85, tone: 'professional', complexity: 70, outputStyle: { ...defaultControls.outputStyle, list: true } }
                     },
                     {
                         title: 'Regulatory Compliance',
@@ -2033,7 +2033,7 @@ export const defaultReportTemplates: ReportTemplateProperties[] = [
                         prompt: 'Analyze regulatory compliance requirements and assess ability to meet them.',
                         behaviors: [{ name: 'compliance officer', type: 'persona' }],
                         guidelines: ['Identify applicable regulations', 'Assess compliance requirements', 'Evaluate current compliance', 'Identify gaps', 'Plan for compliance'],
-                        controls: { ...defaultControls, formality: 85, tone: 'regulatory', complexity: 75 }
+                        controls: { ...defaultControls, formality: 85, tone: 'professional', complexity: 75 }
                     },
                     {
                         title: 'Intellectual Property',
@@ -2041,7 +2041,7 @@ export const defaultReportTemplates: ReportTemplateProperties[] = [
                         prompt: 'Address intellectual property considerations including patents, trademarks, and copyrights.',
                         behaviors: [{ name: 'IP specialist', type: 'persona' }],
                         guidelines: ['Identify IP considerations', 'Assess IP protection needs', 'Review existing IP', 'Consider infringement risks', 'Recommend IP strategy'],
-                        controls: { ...defaultControls, formality: 85, tone: 'legal', complexity: 75 }
+                        controls: { ...defaultControls, formality: 85, tone: 'professional', complexity: 75 }
                     },
                     {
                         title: 'Contracts and Agreements',
@@ -2049,7 +2049,7 @@ export const defaultReportTemplates: ReportTemplateProperties[] = [
                         prompt: 'Identify key contracts and agreements required for the project.',
                         behaviors: [{ name: 'legal consultant', type: 'persona' }],
                         guidelines: ['List required contracts', 'Identify parties', 'Note key terms', 'Consider legal risks', 'Plan negotiation strategy'],
-                        controls: { ...defaultControls, formality: 85, tone: 'legal', complexity: 70 }
+                        controls: { ...defaultControls, formality: 85, tone: 'professional', complexity: 70 }
                     }
                 ]
             },
@@ -2062,7 +2062,7 @@ export const defaultReportTemplates: ReportTemplateProperties[] = [
                         prompt: 'Comprehensively identify all project risks across all feasibility dimensions.',
                         behaviors: [{ name: 'risk manager', type: 'persona' }],
                         guidelines: ['Identify risks systematically', 'Cover all dimensions', 'Be comprehensive', 'Categorize risks', 'Use risk register format'],
-                        controls: { ...defaultControls, formality: 80, tone: 'analytical', complexity: 75, outputStyle: { ...defaultControls.outputStyle, table: true } }
+                        controls: { ...defaultControls, formality: 80, tone: 'academic', complexity: 75, outputStyle: { ...defaultControls.outputStyle, table: true } }
                     },
                     {
                         title: 'Risk Assessment',
@@ -2070,7 +2070,7 @@ export const defaultReportTemplates: ReportTemplateProperties[] = [
                         prompt: 'Assess each identified risk for probability and impact. Prioritize risks.',
                         behaviors: [{ name: 'risk analyst', type: 'persona' }],
                         guidelines: ['Assess probability', 'Assess impact', 'Calculate risk scores', 'Prioritize risks', 'Use risk matrix', 'Be objective'],
-                        controls: { ...defaultControls, formality: 85, tone: 'analytical', complexity: 80, outputStyle: { ...defaultControls.outputStyle, table: true } }
+                        controls: { ...defaultControls, formality: 85, tone: 'academic', complexity: 80, outputStyle: { ...defaultControls.outputStyle, table: true } }
                     },
                     {
                         title: 'Mitigation Strategies',
@@ -2078,7 +2078,7 @@ export const defaultReportTemplates: ReportTemplateProperties[] = [
                         prompt: 'Propose risk mitigation strategies for high-priority risks.',
                         behaviors: [{ name: 'risk manager', type: 'persona' }],
                         guidelines: ['Propose specific mitigation strategies', 'Assign responsibilities', 'Estimate mitigation costs', 'Develop contingency plans', 'Be practical'],
-                        controls: { ...defaultControls, formality: 80, tone: 'prescriptive', complexity: 75, outputStyle: { ...defaultControls.outputStyle, table: true } }
+                        controls: { ...defaultControls, formality: 80, tone: 'technical', complexity: 75, outputStyle: { ...defaultControls.outputStyle, table: true } }
                     }
                 ]
             },
@@ -2091,7 +2091,7 @@ export const defaultReportTemplates: ReportTemplateProperties[] = [
                         prompt: 'Summarize findings from each feasibility dimension (market, technical, financial, operational, legal).',
                         behaviors: [{ name: 'strategic consultant', type: 'persona' }],
                         guidelines: ['Summarize each dimension', 'Highlight key findings', 'Note critical issues', 'Be balanced', 'Be concise'],
-                        controls: { ...defaultControls, formality: 85, tone: 'conclusive', complexity: 75, wordCount: '600' }
+                        controls: { ...defaultControls, formality: 85, tone: 'persuasive', complexity: 75, wordCount: '600' }
                     },
                     {
                         title: 'Go/No-Go Recommendation',
@@ -2099,7 +2099,7 @@ export const defaultReportTemplates: ReportTemplateProperties[] = [
                         prompt: 'Provide clear go/no-go recommendation with supporting rationale. Include conditions if applicable.',
                         behaviors: [{ name: 'executive consultant', type: 'persona' }],
                         guidelines: ['State recommendation clearly', 'Provide strong rationale', 'Cite key factors', 'Include conditions if needed', 'Be decisive', 'Support with data'],
-                        controls: { ...defaultControls, formality: 90, tone: 'decisive', complexity: 75, wordCount: '400' }
+                        controls: { ...defaultControls, formality: 90, tone: 'persuasive', complexity: 75, wordCount: '400' }
                     },
                     {
                         title: 'Next Steps',
@@ -2107,7 +2107,7 @@ export const defaultReportTemplates: ReportTemplateProperties[] = [
                         prompt: 'Outline recommended next steps if proceeding with the project.',
                         behaviors: [{ name: 'project consultant', type: 'persona' }],
                         guidelines: ['Outline specific next steps', 'Provide timeline', 'Identify quick wins', 'Prioritize actions', 'Assign responsibilities'],
-                        controls: { ...defaultControls, formality: 80, tone: 'actionable', outputStyle: { ...defaultControls.outputStyle, list: true } }
+                        controls: { ...defaultControls, formality: 80, tone: 'professional', outputStyle: { ...defaultControls.outputStyle, list: true } }
                     }
                 ]
             },
@@ -2142,7 +2142,7 @@ export const defaultReportTemplates: ReportTemplateProperties[] = [
                         prompt: 'Write an engaging introduction that introduces your topic, explains why it\'s important, and states your main argument (thesis statement). Make it interesting to hook your reader!',
                         behaviors: [{ name: 'high school teacher', type: 'persona' }],
                         guidelines: ['Start with an interesting hook', 'Give background on your topic', 'Explain why this topic matters', 'End with a clear thesis statement', 'Keep it simple and clear'],
-                        controls: { ...defaultControls, formality: 65, tone: 'educational', complexity: 50, wordCount: '300' }
+                        controls: { ...defaultControls, formality: 65, tone: 'explanatory', complexity: 50, wordCount: '300' }
                     }
                 ]
             },
@@ -2155,7 +2155,7 @@ export const defaultReportTemplates: ReportTemplateProperties[] = [
                         prompt: 'Explain the background information your reader needs to understand your topic. Define key terms and concepts.',
                         behaviors: [{ name: 'educator', type: 'persona' }],
                         guidelines: ['Define important terms', 'Explain key concepts', 'Give historical context if needed', 'Use simple language', 'Cite your sources'],
-                        controls: { ...defaultControls, formality: 65, tone: 'educational', complexity: 50, wordCount: '400' }
+                        controls: { ...defaultControls, formality: 65, tone: 'explanatory', complexity: 50, wordCount: '400' }
                     },
                     {
                         title: 'What Others Have Found',
@@ -2163,7 +2163,7 @@ export const defaultReportTemplates: ReportTemplateProperties[] = [
                         prompt: 'Summarize what other researchers or experts have said about your topic. Use at least 3-5 credible sources.',
                         behaviors: [{ name: 'research teacher', type: 'persona' }],
                         guidelines: ['Summarize each source clearly', 'Explain how sources relate to your topic', 'Compare different viewpoints', 'Use your own words', 'Always cite sources'],
-                        controls: { ...defaultControls, formality: 70, tone: 'educational', complexity: 55, wordCount: '500', citationStyle: 'MLA' }
+                        controls: { ...defaultControls, formality: 70, tone: 'explanatory', complexity: 55, wordCount: '500', citationStyle: 'MLA9' }
                     }
                 ]
             },
@@ -2184,7 +2184,7 @@ export const defaultReportTemplates: ReportTemplateProperties[] = [
                         prompt: 'Provide specific evidence, examples, data, or quotes that support your arguments.',
                         behaviors: [{ name: 'research teacher', type: 'persona' }],
                         guidelines: ['Use specific examples', 'Include facts and statistics', 'Add relevant quotes', 'Explain how evidence supports your point', 'Cite all sources'],
-                        controls: { ...defaultControls, formality: 70, tone: 'analytical', complexity: 55, wordCount: '400' }
+                        controls: { ...defaultControls, formality: 70, tone: 'academic', complexity: 55, wordCount: '400' }
                     }
                 ]
             },
@@ -2197,7 +2197,7 @@ export const defaultReportTemplates: ReportTemplateProperties[] = [
                         prompt: 'Wrap up your paper by restating your thesis, summarizing main points, and explaining the significance of your findings.',
                         behaviors: [{ name: 'writing coach', type: 'persona' }],
                         guidelines: ['Restate your thesis in different words', 'Summarize your main points', 'Explain why your research matters', 'End with a strong final thought', 'Don\'t introduce new information'],
-                        controls: { ...defaultControls, formality: 65, tone: 'conclusive', complexity: 50, wordCount: '250' }
+                        controls: { ...defaultControls, formality: 65, tone: 'persuasive', complexity: 50, wordCount: '250' }
                     }
                 ]
             },
@@ -2210,7 +2210,7 @@ export const defaultReportTemplates: ReportTemplateProperties[] = [
                         prompt: 'List all sources you used in MLA format. Include books, websites, articles, and other materials.',
                         behaviors: [{ name: 'librarian', type: 'persona' }],
                         guidelines: ['Use MLA format', 'Alphabetize by author\'s last name', 'Include all sources you cited', 'Double-check formatting', 'Indent second line of each entry'],
-                        controls: { ...defaultControls, formality: 80, tone: 'academic', citationStyle: 'MLA' }
+                        controls: { ...defaultControls, formality: 80, tone: 'academic', citationStyle: 'MLA9' }
                     }
                 ]
             }
@@ -2253,7 +2253,7 @@ export const defaultReportTemplates: ReportTemplateProperties[] = [
                         prompt: 'Introduce your topic and state your research question or hypothesis. Explain why this question is interesting or important.',
                         behaviors: [{ name: 'science educator', type: 'persona' }],
                         guidelines: ['Introduce the topic', 'State your research question clearly', 'Or state your hypothesis', 'Explain why it matters', 'Give some background'],
-                        controls: { ...defaultControls, formality: 70, tone: 'scientific', complexity: 55, wordCount: '300' }
+                        controls: { ...defaultControls, formality: 70, tone: 'academic', complexity: 55, wordCount: '300' }
                     },
                     {
                         title: 'Background Research',
@@ -2261,7 +2261,7 @@ export const defaultReportTemplates: ReportTemplateProperties[] = [
                         prompt: 'Explain the science behind your project. What did you learn from books, websites, or articles about your topic?',
                         behaviors: [{ name: 'science teacher', type: 'persona' }],
                         guidelines: ['Explain relevant scientific concepts', 'Summarize what others have learned', 'Define key terms', 'Cite your sources', 'Connect to your project'],
-                        controls: { ...defaultControls, formality: 75, tone: 'educational', complexity: 60, wordCount: '400' }
+                        controls: { ...defaultControls, formality: 75, tone: 'explanatory', complexity: 60, wordCount: '400' }
                     }
                 ]
             },
@@ -2282,7 +2282,7 @@ export const defaultReportTemplates: ReportTemplateProperties[] = [
                         prompt: 'Describe step-by-step what you did in your experiment. Write clearly so someone could repeat your experiment.',
                         behaviors: [{ name: 'lab instructor', type: 'persona' }],
                         guidelines: ['Write in numbered steps', 'Use past tense', 'Be detailed and specific', 'Include measurements', 'Someone should be able to repeat it', 'Mention safety precautions'],
-                        controls: { ...defaultControls, formality: 75, tone: 'instructional', complexity: 55, outputStyle: { ...defaultControls.outputStyle, list: true } }
+                        controls: { ...defaultControls, formality: 75, tone: 'explanatory', complexity: 55, outputStyle: { ...defaultControls.outputStyle, list: true } }
                     }
                 ]
             },
@@ -2295,7 +2295,7 @@ export const defaultReportTemplates: ReportTemplateProperties[] = [
                         prompt: 'Present your data in tables or graphs. Describe what you observed without explaining why yet.',
                         behaviors: [{ name: 'science teacher', type: 'persona' }],
                         guidelines: ['Show data in tables or graphs', 'Label everything clearly', 'Describe what you saw', 'Be objective - just report facts', 'Include all trials', 'Note any unusual observations'],
-                        controls: { ...defaultControls, formality: 75, tone: 'factual', complexity: 60, outputStyle: { ...defaultControls.outputStyle, table: true } }
+                        controls: { ...defaultControls, formality: 75, tone: 'explanatory', complexity: 60, outputStyle: { ...defaultControls.outputStyle, table: true } }
                     }
                 ]
             },
@@ -2308,7 +2308,7 @@ export const defaultReportTemplates: ReportTemplateProperties[] = [
                         prompt: 'Explain what your results mean. Did they support your hypothesis? Why or why not? What might have affected your results?',
                         behaviors: [{ name: 'science educator', type: 'persona' }],
                         guidelines: ['Explain what results mean', 'Compare to your hypothesis', 'Discuss unexpected results', 'Identify sources of error', 'Connect to background research', 'Be honest about problems'],
-                        controls: { ...defaultControls, formality: 70, tone: 'analytical', complexity: 60, wordCount: '400' }
+                        controls: { ...defaultControls, formality: 70, tone: 'academic', complexity: 60, wordCount: '400' }
                     },
                     {
                         title: 'Conclusion',
@@ -2316,7 +2316,7 @@ export const defaultReportTemplates: ReportTemplateProperties[] = [
                         prompt: 'Summarize what you learned and answer your research question. Suggest improvements or future experiments.',
                         behaviors: [{ name: 'science teacher', type: 'persona' }],
                         guidelines: ['Restate your research question', 'Summarize your findings', 'State whether hypothesis was supported', 'Explain what you learned', 'Suggest future experiments', 'Keep it brief'],
-                        controls: { ...defaultControls, formality: 70, tone: 'conclusive', complexity: 55, wordCount: '250' }
+                        controls: { ...defaultControls, formality: 70, tone: 'persuasive', complexity: 55, wordCount: '250' }
                     }
                 ]
             },
@@ -2329,7 +2329,7 @@ export const defaultReportTemplates: ReportTemplateProperties[] = [
                         prompt: 'List all books, websites, and articles you used for background research.',
                         behaviors: [{ name: 'librarian', type: 'persona' }],
                         guidelines: ['List all sources', 'Use consistent format', 'Include author, title, publication date', 'For websites, include URL and access date', 'Alphabetize by author'],
-                        controls: { ...defaultControls, formality: 80, tone: 'academic', citationStyle: 'MLA' }
+                        controls: { ...defaultControls, formality: 80, tone: 'academic', citationStyle: 'MLA9' }
                     }
                 ]
             }
@@ -2364,7 +2364,7 @@ export const defaultReportTemplates: ReportTemplateProperties[] = [
                         prompt: 'Develop your first main argument with a clear topic sentence, supporting evidence, analysis, and connection to your thesis.',
                         behaviors: [{ name: 'composition teacher', type: 'persona' }],
                         guidelines: ['Start with a clear topic sentence', 'Present evidence (quotes, data, examples)', 'Analyze and explain the evidence', 'Connect back to thesis', 'Use transitions', 'Aim for 300-400 words'],
-                        controls: { ...defaultControls, formality: 75, tone: 'analytical', complexity: 65, wordCount: '350' }
+                        controls: { ...defaultControls, formality: 75, tone: 'academic', complexity: 65, wordCount: '350' }
                     },
                     {
                         title: 'Second Main Point',
@@ -2372,7 +2372,7 @@ export const defaultReportTemplates: ReportTemplateProperties[] = [
                         prompt: 'Develop your second main argument following the same structure: topic sentence, evidence, analysis, connection to thesis.',
                         behaviors: [{ name: 'composition teacher', type: 'persona' }],
                         guidelines: ['Start with topic sentence', 'Provide different evidence', 'Analyze thoroughly', 'Show progression of argument', 'Use transitions from previous paragraph'],
-                        controls: { ...defaultControls, formality: 75, tone: 'analytical', complexity: 65, wordCount: '350' }
+                        controls: { ...defaultControls, formality: 75, tone: 'academic', complexity: 65, wordCount: '350' }
                     },
                     {
                         title: 'Third Main Point (Optional)',
@@ -2380,7 +2380,7 @@ export const defaultReportTemplates: ReportTemplateProperties[] = [
                         prompt: 'If needed, develop a third main argument or address a counter-argument to strengthen your position.',
                         behaviors: [{ name: 'writing instructor', type: 'persona' }],
                         guidelines: ['Maintain paragraph structure', 'Or present and refute counter-argument', 'Show depth of thinking', 'Keep coherence with previous points'],
-                        controls: { ...defaultControls, formality: 75, tone: 'analytical', complexity: 65, wordCount: '350' }
+                        controls: { ...defaultControls, formality: 75, tone: 'academic', complexity: 65, wordCount: '350' }
                     }
                 ]
             },
@@ -2393,7 +2393,7 @@ export const defaultReportTemplates: ReportTemplateProperties[] = [
                         prompt: 'Conclude by restating your thesis (in new words), summarizing key points, and explaining the broader significance of your argument.',
                         behaviors: [{ name: 'writing coach', type: 'persona' }],
                         guidelines: ['Restate thesis in fresh words', 'Synthesize main points', 'Explain broader significance', 'End with thought-provoking statement', 'Don\'t introduce new arguments', 'Aim for 150-200 words'],
-                        controls: { ...defaultControls, formality: 75, tone: 'conclusive', complexity: 60, wordCount: '200' }
+                        controls: { ...defaultControls, formality: 75, tone: 'persuasive', complexity: 60, wordCount: '200' }
                     }
                 ]
             },
@@ -2406,7 +2406,7 @@ export const defaultReportTemplates: ReportTemplateProperties[] = [
                         prompt: 'List all sources cited in your essay using the required citation style (APA, MLA, or Chicago).',
                         behaviors: [{ name: 'academic librarian', type: 'persona' }],
                         guidelines: ['Follow the required citation style', 'Alphabetize entries', 'Include all in-text citations', 'Use hanging indent', 'Double-check formatting'],
-                        controls: { ...defaultControls, formality: 85, tone: 'academic', citationStyle: 'MLA' }
+                        controls: { ...defaultControls, formality: 85, tone: 'academic', citationStyle: 'MLA9' }
                     }
                 ]
             }
@@ -2436,7 +2436,7 @@ export const defaultReportTemplates: ReportTemplateProperties[] = [
                         prompt: 'Write formal acknowledgments thanking supervisors, committee members, funding bodies, colleagues, and family for their support.',
                         behaviors: [{ name: 'doctoral candidate', type: 'persona' }],
                         guidelines: ['Thank doctoral supervisor first', 'Acknowledge committee members', 'Mention funding sources', 'Thank research participants', 'Acknowledge family support', 'Be gracious and specific'],
-                        controls: { ...defaultControls, formality: 90, tone: 'appreciative', wordCount: '400' }
+                        controls: { ...defaultControls, formality: 90, tone: 'casual', wordCount: '400' }
                     }
                 ]
             },
@@ -2457,7 +2457,7 @@ export const defaultReportTemplates: ReportTemplateProperties[] = [
                         prompt: 'Articulate the research problem clearly. Explain its significance, why existing approaches are inadequate, and why it warrants doctoral-level investigation.',
                         behaviors: [{ name: 'doctoral researcher', type: 'persona' }],
                         guidelines: ['Define problem precisely', 'Explain significance', 'Critique existing approaches', 'Justify doctoral-level study', 'Show complexity', 'Establish urgency'],
-                        controls: { ...defaultControls, formality: 95, tone: 'critical', complexity: 90, wordCount: '1000' }
+                        controls: { ...defaultControls, formality: 95, tone: 'academic', complexity: 90, wordCount: '1000' }
                     },
                     {
                         title: 'Research Questions',
@@ -2481,7 +2481,7 @@ export const defaultReportTemplates: ReportTemplateProperties[] = [
                         prompt: 'Present the theoretical framework underpinning your research. Explain key theories, concepts, and how they inform your investigation.',
                         behaviors: [{ name: 'theoretical scholar', type: 'persona' }],
                         guidelines: ['Introduce relevant theories', 'Explain theoretical foundations', 'Show how theories inform research', 'Justify framework choice', 'Integrate multiple perspectives if needed'],
-                        controls: { ...defaultControls, formality: 100, tone: 'scholarly', complexity: 95, wordCount: '1500' }
+                        controls: { ...defaultControls, formality: 100, tone: 'academic', complexity: 95, wordCount: '1500' }
                     },
                     {
                         title: 'Significance and Original Contribution',
@@ -2489,7 +2489,7 @@ export const defaultReportTemplates: ReportTemplateProperties[] = [
                         prompt: 'Articulate the significance of your research and its original contribution to knowledge. Be explicit about theoretical, methodological, and practical contributions.',
                         behaviors: [{ name: 'doctoral researcher', type: 'persona' }],
                         guidelines: ['State original contributions explicitly', 'Explain theoretical significance', 'Describe methodological innovations', 'Discuss practical implications', 'Justify doctoral worthiness'],
-                        controls: { ...defaultControls, formality: 95, tone: 'scholarly', complexity: 90, wordCount: '800' }
+                        controls: { ...defaultControls, formality: 95, tone: 'academic', complexity: 90, wordCount: '800' }
                     },
                     {
                         title: 'Scope and Delimitations',
@@ -2526,7 +2526,7 @@ export const defaultReportTemplates: ReportTemplateProperties[] = [
                         prompt: 'Trace the historical development of thought in your research area. Show how understanding has evolved.',
                         behaviors: [{ name: 'scholarly historian', type: 'persona' }],
                         guidelines: ['Trace chronological development', 'Identify key turning points', 'Show evolution of thought', 'Connect to current debates'],
-                        controls: { ...defaultControls, formality: 95, tone: 'analytical', complexity: 90, wordCount: '2000' }
+                        controls: { ...defaultControls, formality: 95, tone: 'academic', complexity: 90, wordCount: '2000' }
                     },
                     {
                         title: 'Critical Review of Literature',
@@ -2534,7 +2534,7 @@ export const defaultReportTemplates: ReportTemplateProperties[] = [
                         prompt: 'Conduct systematic critical review of literature organized thematically. Analyze, synthesize, and critique existing research.',
                         behaviors: [{ name: 'critical scholar', type: 'persona' }],
                         guidelines: ['Organize thematically', 'Critically analyze studies', 'Identify strengths and weaknesses', 'Synthesize findings', 'Show debates and contradictions', 'Be comprehensive'],
-                        controls: { ...defaultControls, formality: 100, tone: 'critical', complexity: 95, wordCount: '5000', citationStyle: 'APA7' }
+                        controls: { ...defaultControls, formality: 100, tone: 'academic', complexity: 95, wordCount: '5000', citationStyle: 'APA7' }
                     },
                     {
                         title: 'Methodological Review',
@@ -2542,7 +2542,7 @@ export const defaultReportTemplates: ReportTemplateProperties[] = [
                         prompt: 'Review methodological approaches used in existing research. Critique methods and identify methodological gaps.',
                         behaviors: [{ name: 'methodological expert', type: 'persona' }],
                         guidelines: ['Review methods systematically', 'Critique methodological choices', 'Identify gaps', 'Justify your methodological approach'],
-                        controls: { ...defaultControls, formality: 95, tone: 'analytical', complexity: 90, wordCount: '1500' }
+                        controls: { ...defaultControls, formality: 95, tone: 'academic', complexity: 90, wordCount: '1500' }
                     },
                     {
                         title: 'Research Gaps and Justification',
@@ -2558,7 +2558,7 @@ export const defaultReportTemplates: ReportTemplateProperties[] = [
                         prompt: 'Develop your conceptual framework synthesizing literature. Show relationships between concepts and how framework guides research.',
                         behaviors: [{ name: 'theoretical scholar', type: 'persona' }],
                         guidelines: ['Synthesize from literature', 'Define all concepts', 'Show relationships', 'Include conceptual diagram', 'Explain how it guides research'],
-                        controls: { ...defaultControls, formality: 100, tone: 'analytical', complexity: 95, wordCount: '1500', outputStyle: { ...defaultControls.outputStyle, diagram: true } }
+                        controls: { ...defaultControls, formality: 100, tone: 'academic', complexity: 95, wordCount: '1500', outputStyle: { ...defaultControls.outputStyle, diagram: true } }
                     }
                 ]
             },
@@ -2571,7 +2571,7 @@ export const defaultReportTemplates: ReportTemplateProperties[] = [
                         prompt: 'Articulate your philosophical paradigm (ontology, epistemology, axiology). Justify paradigm choice.',
                         behaviors: [{ name: 'philosophy of science scholar', type: 'persona' }],
                         guidelines: ['Explain ontological position', 'Articulate epistemology', 'Discuss axiology', 'Justify paradigm choice', 'Show coherence with methods'],
-                        controls: { ...defaultControls, formality: 100, tone: 'philosophical', complexity: 95, wordCount: '1500' }
+                        controls: { ...defaultControls, formality: 100, tone: 'academic', complexity: 95, wordCount: '1500' }
                     },
                     {
                         title: 'Research Design',
@@ -2579,7 +2579,7 @@ export const defaultReportTemplates: ReportTemplateProperties[] = [
                         prompt: 'Describe overall research design in detail. Explain design choice and how it addresses research questions.',
                         behaviors: [{ name: 'research methodologist', type: 'persona' }],
                         guidelines: ['Describe design comprehensively', 'Justify design choice', 'Explain how it addresses RQs', 'Discuss design strengths', 'Acknowledge limitations'],
-                        controls: { ...defaultControls, formality: 95, tone: 'methodological', complexity: 90, wordCount: '1200' }
+                        controls: { ...defaultControls, formality: 95, tone: 'academic', complexity: 90, wordCount: '1200' }
                     },
                     {
                         title: 'Research Strategy and Approach',
@@ -2587,7 +2587,7 @@ export const defaultReportTemplates: ReportTemplateProperties[] = [
                         prompt: 'Detail research strategy (e.g., case study, ethnography, experiment). Explain approach systematically.',
                         behaviors: [{ name: 'methodological expert', type: 'persona' }],
                         guidelines: ['Describe strategy in detail', 'Explain procedural steps', 'Justify choices', 'Show rigor', 'Ensure replicability'],
-                        controls: { ...defaultControls, formality: 95, tone: 'methodological', complexity: 90, wordCount: '1500' }
+                        controls: { ...defaultControls, formality: 95, tone: 'academic', complexity: 90, wordCount: '1500' }
                     },
                     {
                         title: 'Data Collection',
@@ -2595,7 +2595,7 @@ export const defaultReportTemplates: ReportTemplateProperties[] = [
                         prompt: 'Describe data collection methods comprehensively. Include instruments, procedures, sampling, and access.',
                         behaviors: [{ name: 'research methodologist', type: 'persona' }],
                         guidelines: ['Describe all methods', 'Explain sampling strategy', 'Detail instruments', 'Describe procedures', 'Discuss access and ethics', 'Ensure replicability'],
-                        controls: { ...defaultControls, formality: 95, tone: 'methodological', complexity: 90, wordCount: '2000' }
+                        controls: { ...defaultControls, formality: 95, tone: 'academic', complexity: 90, wordCount: '2000' }
                     },
                     {
                         title: 'Data Analysis',
@@ -2603,7 +2603,7 @@ export const defaultReportTemplates: ReportTemplateProperties[] = [
                         prompt: 'Explain data analysis approach in detail. Describe analytical frameworks, techniques, and software used.',
                         behaviors: [{ name: 'data analyst', type: 'persona' }],
                         guidelines: ['Describe analytical approach', 'Explain techniques', 'Mention software/tools', 'Show analytical rigor', 'Explain interpretation process'],
-                        controls: { ...defaultControls, formality: 95, tone: 'analytical', complexity: 90, wordCount: '1500' }
+                        controls: { ...defaultControls, formality: 95, tone: 'academic', complexity: 90, wordCount: '1500' }
                     },
                     {
                         title: 'Quality Criteria',
@@ -2611,7 +2611,7 @@ export const defaultReportTemplates: ReportTemplateProperties[] = [
                         prompt: 'Address quality criteria (validity, reliability, trustworthiness, credibility) appropriate to your paradigm.',
                         behaviors: [{ name: 'methodological expert', type: 'persona' }],
                         guidelines: ['Address appropriate quality criteria', 'Explain measures taken', 'Discuss triangulation', 'Show methodological rigor', 'Be paradigm-appropriate'],
-                        controls: { ...defaultControls, formality: 95, tone: 'methodological', complexity: 90, wordCount: '1200' }
+                        controls: { ...defaultControls, formality: 95, tone: 'academic', complexity: 90, wordCount: '1200' }
                     },
                     {
                         title: 'Ethical Considerations',
@@ -2619,7 +2619,7 @@ export const defaultReportTemplates: ReportTemplateProperties[] = [
                         prompt: 'Discuss ethical considerations comprehensively. Include approvals, informed consent, confidentiality, and ethical dilemmas.',
                         behaviors: [{ name: 'research ethics specialist', type: 'persona' }],
                         guidelines: ['Discuss all ethical issues', 'Mention IRB approval', 'Explain informed consent', 'Address confidentiality', 'Discuss ethical dilemmas', 'Show ethical reflexivity'],
-                        controls: { ...defaultControls, formality: 95, tone: 'ethical', complexity: 85, wordCount: '1000' }
+                        controls: { ...defaultControls, formality: 95, tone: 'academic', complexity: 85, wordCount: '1000' }
                     }
                 ]
             },
@@ -2640,7 +2640,7 @@ export const defaultReportTemplates: ReportTemplateProperties[] = [
                         prompt: 'Present first major set of findings systematically. Use evidence, quotes, data to support findings.',
                         behaviors: [{ name: 'qualitative researcher', type: 'persona' }],
                         guidelines: ['Present findings systematically', 'Use evidence extensively', 'Include participant quotes if qualitative', 'Present data clearly', 'Stay descriptive - save interpretation for discussion'],
-                        controls: { ...defaultControls, formality: 95, tone: 'descriptive', complexity: 85, wordCount: '3000', outputStyle: { ...defaultControls.outputStyle, table: true, paragraph: true } }
+                        controls: { ...defaultControls, formality: 95, tone: 'explanatory', complexity: 85, wordCount: '3000', outputStyle: { ...defaultControls.outputStyle, table: true, paragraph: true } }
                     },
                     {
                         title: 'Findings Theme/Study 2',
@@ -2648,7 +2648,7 @@ export const defaultReportTemplates: ReportTemplateProperties[] = [
                         prompt: 'Present second major set of findings. Maintain systematic approach.',
                         behaviors: [{ name: 'doctoral researcher', type: 'persona' }],
                         guidelines: ['Follow similar structure', 'Present systematically', 'Use evidence', 'Be comprehensive', 'Show rigor'],
-                        controls: { ...defaultControls, formality: 95, tone: 'descriptive', complexity: 85, wordCount: '3000' }
+                        controls: { ...defaultControls, formality: 95, tone: 'explanatory', complexity: 85, wordCount: '3000' }
                     }
                 ]
             },
@@ -2661,7 +2661,7 @@ export const defaultReportTemplates: ReportTemplateProperties[] = [
                         prompt: 'Summarize key findings before detailed discussion. Show how they address research questions.',
                         behaviors: [{ name: 'doctoral researcher', type: 'persona' }],
                         guidelines: ['Summarize key findings', 'Connect to research questions', 'Preview discussion structure', 'Be concise'],
-                        controls: { ...defaultControls, formality: 95, tone: 'synthetic', complexity: 85, wordCount: '800' }
+                        controls: { ...defaultControls, formality: 95, tone: 'academic', complexity: 85, wordCount: '800' }
                     },
                     {
                         title: 'Interpretation and Analysis',
@@ -2669,7 +2669,7 @@ export const defaultReportTemplates: ReportTemplateProperties[] = [
                         prompt: 'Interpret findings in depth. Analyze meanings, patterns, and implications. Connect to theoretical framework.',
                         behaviors: [{ name: 'doctoral researcher', type: 'persona' }],
                         guidelines: ['Interpret findings thoroughly', 'Analyze patterns and meanings', 'Connect to theoretical framework', 'Show depth of analysis', 'Be insightful'],
-                        controls: { ...defaultControls, formality: 95, tone: 'analytical', complexity: 95, wordCount: '3000' }
+                        controls: { ...defaultControls, formality: 95, tone: 'academic', complexity: 95, wordCount: '3000' }
                     },
                     {
                         title: 'Relation to Existing Literature',
@@ -2677,7 +2677,7 @@ export const defaultReportTemplates: ReportTemplateProperties[] = [
                         prompt: 'Relate findings to existing literature. Show agreements, contradictions, and how your work advances knowledge.',
                         behaviors: [{ name: 'scholarly analyst', type: 'persona' }],
                         guidelines: ['Compare with literature systematically', 'Explain agreements', 'Address contradictions', 'Show advancement of knowledge', 'Be balanced'],
-                        controls: { ...defaultControls, formality: 95, tone: 'analytical', complexity: 90, wordCount: '2500' }
+                        controls: { ...defaultControls, formality: 95, tone: 'academic', complexity: 90, wordCount: '2500' }
                     },
                     {
                         title: 'Theoretical Contributions',
@@ -2685,7 +2685,7 @@ export const defaultReportTemplates: ReportTemplateProperties[] = [
                         prompt: 'Articulate theoretical contributions explicitly. Show how your work advances, refines, or challenges existing theory.',
                         behaviors: [{ name: 'theoretical scholar', type: 'persona' }],
                         guidelines: ['State theoretical contributions explicitly', 'Show theoretical advancement', 'Discuss implications for theory', 'Be scholarly', 'Make original contributions clear'],
-                        controls: { ...defaultControls, formality: 100, tone: 'scholarly', complexity: 95, wordCount: '1500' }
+                        controls: { ...defaultControls, formality: 100, tone: 'academic', complexity: 95, wordCount: '1500' }
                     },
                     {
                         title: 'Methodological Reflections',
@@ -2693,7 +2693,7 @@ export const defaultReportTemplates: ReportTemplateProperties[] = [
                         prompt: 'Reflect on methodological approach. Discuss strengths, challenges, and methodological contributions.',
                         behaviors: [{ name: 'methodological expert', type: 'persona' }],
                         guidelines: ['Reflect on methodology critically', 'Discuss strengths', 'Acknowledge challenges', 'Identify methodological contributions', 'Show reflexivity'],
-                        controls: { ...defaultControls, formality: 95, tone: 'reflective', complexity: 90, wordCount: '1200' }
+                        controls: { ...defaultControls, formality: 95, tone: 'casual', complexity: 90, wordCount: '1200' }
                     },
                     {
                         title: 'Practical Implications',
@@ -2701,7 +2701,7 @@ export const defaultReportTemplates: ReportTemplateProperties[] = [
                         prompt: 'Discuss practical implications for practice, policy, or application. Be specific about who benefits and how.',
                         behaviors: [{ name: 'applied researcher', type: 'persona' }],
                         guidelines: ['Identify practical implications', 'Be specific about applications', 'Identify beneficiaries', 'Provide recommendations', 'Be realistic'],
-                        controls: { ...defaultControls, formality: 90, tone: 'prescriptive', complexity: 85, wordCount: '1500' }
+                        controls: { ...defaultControls, formality: 90, tone: 'technical', complexity: 85, wordCount: '1500' }
                     },
                     {
                         title: 'Limitations',
@@ -2709,7 +2709,7 @@ export const defaultReportTemplates: ReportTemplateProperties[] = [
                         prompt: 'Acknowledge limitations honestly and comprehensively. Discuss their potential impact on findings.',
                         behaviors: [{ name: 'doctoral researcher', type: 'persona' }],
                         guidelines: ['Be honest about limitations', 'Discuss all major limitations', 'Explain potential impact', 'Maintain credibility', 'Don\'t over-apologize'],
-                        controls: { ...defaultControls, formality: 95, tone: 'honest', complexity: 85, wordCount: '1000' }
+                        controls: { ...defaultControls, formality: 95, tone: 'casual', complexity: 85, wordCount: '1000' }
                     }
                 ]
             },
@@ -2722,7 +2722,7 @@ export const defaultReportTemplates: ReportTemplateProperties[] = [
                         prompt: 'Summarize the entire research journey: problem, approach, key findings, and contributions.',
                         behaviors: [{ name: 'academic writer', type: 'persona' }],
                         guidelines: ['Summarize research comprehensively', 'Cover all major aspects', 'Be synthesizing', 'Avoid new information'],
-                        controls: { ...defaultControls, formality: 95, tone: 'synthetic', complexity: 85, wordCount: '1000' }
+                        controls: { ...defaultControls, formality: 95, tone: 'academic', complexity: 85, wordCount: '1000' }
                     },
                     {
                         title: 'Original Contributions to Knowledge',
@@ -2730,7 +2730,7 @@ export const defaultReportTemplates: ReportTemplateProperties[] = [
                         prompt: 'State original contributions explicitly and clearly. This is your claim to doctoral worthiness.',
                         behaviors: [{ name: 'doctoral researcher', type: 'persona' }],
                         guidelines: ['State contributions explicitly', 'Be clear and specific', 'Distinguish types of contributions', 'Make claims confidently', 'Justify doctoral worthiness'],
-                        controls: { ...defaultControls, formality: 100, tone: 'declarative', complexity: 90, wordCount: '800' }
+                        controls: { ...defaultControls, formality: 100, tone: 'explanatory', complexity: 90, wordCount: '800' }
                     },
                     {
                         title: 'Implications for Research and Practice',
@@ -2738,7 +2738,7 @@ export const defaultReportTemplates: ReportTemplateProperties[] = [
                         prompt: 'Synthesize implications for research and practice. Show broader impact of your work.',
                         behaviors: [{ name: 'scholarly practitioner', type: 'persona' }],
                         guidelines: ['Discuss research implications', 'Address practice implications', 'Show broader impact', 'Be visionary yet realistic'],
-                        controls: { ...defaultControls, formality: 95, tone: 'forward-looking', complexity: 85, wordCount: '1000' }
+                        controls: { ...defaultControls, formality: 95, tone: 'persuasive', complexity: 85, wordCount: '1000' }
                     },
                     {
                         title: 'Recommendations for Future Research',
@@ -2746,7 +2746,7 @@ export const defaultReportTemplates: ReportTemplateProperties[] = [
                         prompt: 'Provide specific recommendations for future research. Build research agenda extending from your work.',
                         behaviors: [{ name: 'research strategist', type: 'persona' }],
                         guidelines: ['Provide specific recommendations', 'Build from your findings', 'Identify promising directions', 'Inspire future researchers', 'Be visionary'],
-                        controls: { ...defaultControls, formality: 95, tone: 'prescriptive', complexity: 85, outputStyle: { ...defaultControls.outputStyle, list: true } }
+                        controls: { ...defaultControls, formality: 95, tone: 'technical', complexity: 85, outputStyle: { ...defaultControls.outputStyle, list: true } }
                     },
                     {
                         title: 'Final Reflections',
@@ -2754,7 +2754,7 @@ export const defaultReportTemplates: ReportTemplateProperties[] = [
                         prompt: 'Offer final reflections on your doctoral journey and the significance of your work.',
                         behaviors: [{ name: 'reflective scholar', type: 'persona' }],
                         guidelines: ['Reflect on journey', 'Show personal growth', 'Emphasize significance', 'End powerfully', 'Be inspiring'],
-                        controls: { ...defaultControls, formality: 90, tone: 'reflective', complexity: 80, wordCount: '500' }
+                        controls: { ...defaultControls, formality: 90, tone: 'casual', complexity: 80, wordCount: '500' }
                     }
                 ]
             },
@@ -2815,7 +2815,7 @@ export const defaultReportTemplates: ReportTemplateProperties[] = [
                         prompt: 'Establish the research context and current state of knowledge in the field. Show deep understanding of the domain.',
                         behaviors: [{ name: 'expert researcher', type: 'persona' }],
                         guidelines: ['Demonstrate field expertise', 'Review current state of knowledge', 'Identify key challenges', 'Show recent developments', 'Establish credibility'],
-                        controls: { ...defaultControls, formality: 95, tone: 'scholarly', complexity: 95, wordCount: '1000' }
+                        controls: { ...defaultControls, formality: 95, tone: 'academic', complexity: 95, wordCount: '1000' }
                     },
                     {
                         title: 'Significance and Innovation',
@@ -2831,7 +2831,7 @@ export const defaultReportTemplates: ReportTemplateProperties[] = [
                         prompt: 'Critically analyze current approaches and their limitations. Show why new research is needed.',
                         behaviors: [{ name: 'critical scholar', type: 'persona' }],
                         guidelines: ['Review current approaches', 'Identify limitations', 'Critique methodologies', 'Show gaps', 'Build case for your research'],
-                        controls: { ...defaultControls, formality: 95, tone: 'critical', complexity: 95, wordCount: '1000' }
+                        controls: { ...defaultControls, formality: 95, tone: 'academic', complexity: 95, wordCount: '1000' }
                     }
                 ]
             },
@@ -2852,7 +2852,7 @@ export const defaultReportTemplates: ReportTemplateProperties[] = [
                         prompt: 'Present preliminary data, pilot studies, or proof-of-concept results that support feasibility of proposed research.',
                         behaviors: [{ name: 'experimental scientist', type: 'persona' }],
                         guidelines: ['Show preliminary results', 'Demonstrate feasibility', 'Present data clearly', 'Explain significance', 'Build confidence'],
-                        controls: { ...defaultControls, formality: 95, tone: 'evidence-based', complexity: 90, wordCount: '1200', outputStyle: { ...defaultControls.outputStyle, table: true } }
+                        controls: { ...defaultControls, formality: 95, tone: 'academic', complexity: 90, wordCount: '1200', outputStyle: { ...defaultControls.outputStyle, table: true } }
                     }
                 ]
             },
@@ -2873,7 +2873,7 @@ export const defaultReportTemplates: ReportTemplateProperties[] = [
                         prompt: 'Describe overall research approach and design. Explain choice and justify appropriateness.',
                         behaviors: [{ name: 'methodological expert', type: 'persona' }],
                         guidelines: ['Describe approach comprehensively', 'Justify design choices', 'Show methodological rigor', 'Ensure feasibility', 'Address potential challenges'],
-                        controls: { ...defaultControls, formality: 95, tone: 'methodological', complexity: 95, wordCount: '1500' }
+                        controls: { ...defaultControls, formality: 95, tone: 'academic', complexity: 95, wordCount: '1500' }
                     },
                     {
                         title: 'Experimental Methods and Procedures',
@@ -2889,7 +2889,7 @@ export const defaultReportTemplates: ReportTemplateProperties[] = [
                         prompt: 'Describe data analysis plan including statistical methods, analytical frameworks, and interpretation strategies.',
                         behaviors: [{ name: 'data scientist', type: 'persona' }],
                         guidelines: ['Describe analytical approach', 'Specify statistical methods', 'Mention software/tools', 'Plan for different scenarios', 'Ensure rigor'],
-                        controls: { ...defaultControls, formality: 95, tone: 'analytical', complexity: 95, wordCount: '1000' }
+                        controls: { ...defaultControls, formality: 95, tone: 'academic', complexity: 95, wordCount: '1000' }
                     }
                 ]
             },
@@ -2910,7 +2910,7 @@ export const defaultReportTemplates: ReportTemplateProperties[] = [
                         prompt: 'Articulate the potential impact and contribution to the field. Show transformative potential.',
                         behaviors: [{ name: 'impact strategist', type: 'persona' }],
                         guidelines: ['Explain scientific impact', 'Discuss broader implications', 'Show transformative potential', 'Mention applications', 'Be visionary yet realistic'],
-                        controls: { ...defaultControls, formality: 95, tone: 'visionary', complexity: 90, wordCount: '800' }
+                        controls: { ...defaultControls, formality: 95, tone: 'persuasive', complexity: 90, wordCount: '800' }
                     },
                     {
                         title: 'Dissemination Plan',
@@ -2918,7 +2918,7 @@ export const defaultReportTemplates: ReportTemplateProperties[] = [
                         prompt: 'Describe plan for disseminating results through publications, conferences, and other channels.',
                         behaviors: [{ name: 'research communicator', type: 'persona' }],
                         guidelines: ['Plan for high-impact publications', 'Identify target conferences', 'Consider public engagement', 'Mention collaborations', 'Show strategy'],
-                        controls: { ...defaultControls, formality: 90, tone: 'strategic', complexity: 85 }
+                        controls: { ...defaultControls, formality: 90, tone: 'professional', complexity: 85 }
                     }
                 ]
             },
@@ -2931,7 +2931,7 @@ export const defaultReportTemplates: ReportTemplateProperties[] = [
                         prompt: 'Provide detailed timeline with phases, milestones, and deliverables. Show realistic planning.',
                         behaviors: [{ name: 'project manager', type: 'persona' }],
                         guidelines: ['Break into phases', 'Set clear milestones', 'Include decision points', 'Be realistic', 'Show dependencies'],
-                        controls: { ...defaultControls, formality: 90, tone: 'organizational', complexity: 85, outputStyle: { ...defaultControls.outputStyle, table: true } }
+                        controls: { ...defaultControls, formality: 90, tone: 'professional', complexity: 85, outputStyle: { ...defaultControls.outputStyle, table: true } }
                     },
                     {
                         title: 'Risk Assessment and Mitigation',
@@ -2939,7 +2939,7 @@ export const defaultReportTemplates: ReportTemplateProperties[] = [
                         prompt: 'Identify potential risks and challenges with mitigation strategies.',
                         behaviors: [{ name: 'risk analyst', type: 'persona' }],
                         guidelines: ['Identify key risks', 'Assess probability and impact', 'Propose mitigation strategies', 'Show contingency plans', 'Be proactive'],
-                        controls: { ...defaultControls, formality: 90, tone: 'analytical', complexity: 85, outputStyle: { ...defaultControls.outputStyle, table: true } }
+                        controls: { ...defaultControls, formality: 90, tone: 'academic', complexity: 85, outputStyle: { ...defaultControls.outputStyle, table: true } }
                     }
                 ]
             },
@@ -2952,7 +2952,7 @@ export const defaultReportTemplates: ReportTemplateProperties[] = [
                         prompt: 'Describe resources and facilities needed. Show access and availability.',
                         behaviors: [{ name: 'resource planner', type: 'persona' }],
                         guidelines: ['List required resources', 'Mention equipment/facilities', 'Show access', 'Justify needs', 'Be specific'],
-                        controls: { ...defaultControls, formality: 90, tone: 'factual', complexity: 80 }
+                        controls: { ...defaultControls, formality: 90, tone: 'explanatory', complexity: 80 }
                     },
                     {
                         title: 'Collaborative Network',
@@ -2973,7 +2973,7 @@ export const defaultReportTemplates: ReportTemplateProperties[] = [
                         prompt: 'Provide detailed budget breakdown with clear categories and amounts.',
                         behaviors: [{ name: 'grant administrator', type: 'persona' }],
                         guidelines: ['Break down by category', 'Be detailed and specific', 'Use realistic figures', 'Follow funder guidelines', 'Present in table'],
-                        controls: { ...defaultControls, formality: 90, tone: 'financial', complexity: 80, outputStyle: { ...defaultControls.outputStyle, table: true } }
+                        controls: { ...defaultControls, formality: 90, tone: 'professional', complexity: 80, outputStyle: { ...defaultControls.outputStyle, table: true } }
                     },
                     {
                         title: 'Budget Justification',
@@ -3029,7 +3029,7 @@ export const defaultReportTemplates: ReportTemplateProperties[] = [
                         prompt: 'Provide introduction establishing context, reviewing literature, and identifying research gap.',
                         behaviors: [{ name: 'principal investigator', type: 'persona' }],
                         guidelines: ['Establish context', 'Review key literature', 'Identify gap', 'Build compelling case', 'Show expertise'],
-                        controls: { ...defaultControls, formality: 95, tone: 'scholarly', complexity: 95, wordCount: '1500', citationStyle: 'APA7' }
+                        controls: { ...defaultControls, formality: 95, tone: 'academic', complexity: 95, wordCount: '1500', citationStyle: 'APA7' }
                     },
                     {
                         title: 'Specific Aims and Objectives',
@@ -3037,7 +3037,7 @@ export const defaultReportTemplates: ReportTemplateProperties[] = [
                         prompt: 'State specific aims clearly and concisely. Each aim should be testable and achievable.',
                         behaviors: [{ name: 'research strategist', type: 'persona' }],
                         guidelines: ['List 2-4 specific aims', 'Make aims clear and testable', 'Show logical progression', 'Align with overall goal', 'Be realistic'],
-                        controls: { ...defaultControls, formality: 95, tone: 'declarative', complexity: 90, outputStyle: { ...defaultControls.outputStyle, list: true } }
+                        controls: { ...defaultControls, formality: 95, tone: 'explanatory', complexity: 90, outputStyle: { ...defaultControls.outputStyle, list: true } }
                     },
                     {
                         title: 'Significance and Innovation',
@@ -3066,7 +3066,7 @@ export const defaultReportTemplates: ReportTemplateProperties[] = [
                         prompt: 'Present preliminary studies demonstrating feasibility. Include data, publications, and evidence of productivity.',
                         behaviors: [{ name: 'senior researcher', type: 'persona' }],
                         guidelines: ['Show relevant preliminary data', 'Demonstrate feasibility', 'Highlight publications', 'Show productivity', 'Build confidence'],
-                        controls: { ...defaultControls, formality: 95, tone: 'evidence-based', complexity: 95, wordCount: '2000', outputStyle: { ...defaultControls.outputStyle, table: true } }
+                        controls: { ...defaultControls, formality: 95, tone: 'academic', complexity: 95, wordCount: '2000', outputStyle: { ...defaultControls.outputStyle, table: true } }
                     }
                 ]
             },
@@ -3087,7 +3087,7 @@ export const defaultReportTemplates: ReportTemplateProperties[] = [
                         prompt: 'Describe institutional environment and available resources supporting the research.',
                         behaviors: [{ name: 'institutional representative', type: 'persona' }],
                         guidelines: ['Describe facilities', 'Mention equipment', 'Show institutional support', 'Highlight resources', 'Demonstrate capacity'],
-                        controls: { ...defaultControls, formality: 90, tone: 'descriptive', complexity: 80 }
+                        controls: { ...defaultControls, formality: 90, tone: 'explanatory', complexity: 80 }
                     },
                     {
                         title: 'Collaborations and Partnerships',
@@ -3108,7 +3108,7 @@ export const defaultReportTemplates: ReportTemplateProperties[] = [
                         prompt: 'Provide detailed timeline showing phases, milestones, and deliverables over funding period.',
                         behaviors: [{ name: 'project coordinator', type: 'persona' }],
                         guidelines: ['Break into phases/years', 'Set clear milestones', 'Show progression', 'Be realistic', 'Align with budget'],
-                        controls: { ...defaultControls, formality: 90, tone: 'organizational', complexity: 85, outputStyle: { ...defaultControls.outputStyle, table: true } }
+                        controls: { ...defaultControls, formality: 90, tone: 'professional', complexity: 85, outputStyle: { ...defaultControls.outputStyle, table: true } }
                     },
                     {
                         title: 'Project Management Plan',
@@ -3116,7 +3116,7 @@ export const defaultReportTemplates: ReportTemplateProperties[] = [
                         prompt: 'Describe project management approach including oversight, communication, and quality control.',
                         behaviors: [{ name: 'program manager', type: 'persona' }],
                         guidelines: ['Describe management structure', 'Explain oversight', 'Address communication', 'Show quality control', 'Demonstrate capability'],
-                        controls: { ...defaultControls, formality: 90, tone: 'organizational', complexity: 80 }
+                        controls: { ...defaultControls, formality: 90, tone: 'professional', complexity: 80 }
                     }
                 ]
             },
@@ -3129,7 +3129,7 @@ export const defaultReportTemplates: ReportTemplateProperties[] = [
                         prompt: 'Describe broader impacts beyond scientific community. Include education, outreach, and societal benefits.',
                         behaviors: [{ name: 'outreach coordinator', type: 'persona' }],
                         guidelines: ['Address multiple impact areas', 'Include education/training', 'Mention outreach', 'Show societal benefit', 'Be specific and realistic'],
-                        controls: { ...defaultControls, formality: 90, tone: 'visionary', complexity: 85, wordCount: '1000' }
+                        controls: { ...defaultControls, formality: 90, tone: 'persuasive', complexity: 85, wordCount: '1000' }
                     },
                     {
                         title: 'Data Management and Sharing Plan',
@@ -3150,7 +3150,7 @@ export const defaultReportTemplates: ReportTemplateProperties[] = [
                         prompt: 'Provide detailed budget for each year following funder format. Include all cost categories.',
                         behaviors: [{ name: 'budget specialist', type: 'persona' }],
                         guidelines: ['Follow funder budget format', 'Break down by year', 'Include all categories', 'Use institutional rates', 'Be accurate'],
-                        controls: { ...defaultControls, formality: 95, tone: 'financial', complexity: 85, outputStyle: { ...defaultControls.outputStyle, table: true } }
+                        controls: { ...defaultControls, formality: 95, tone: 'professional', complexity: 85, outputStyle: { ...defaultControls.outputStyle, table: true } }
                     },
                     {
                         title: 'Budget Justification',
@@ -3158,7 +3158,7 @@ export const defaultReportTemplates: ReportTemplateProperties[] = [
                         prompt: 'Justify each budget line item. Explain necessity and show alignment with project activities.',
                         behaviors: [{ name: 'grant financial officer', type: 'persona' }],
                         guidelines: ['Justify personnel costs', 'Explain equipment needs', 'Justify travel', 'Link costs to activities', 'Show necessity'],
-                        controls: { ...defaultControls, formality: 90, tone: 'justificatory', complexity: 80 }
+                        controls: { ...defaultControls, formality: 90, tone: 'persuasive', complexity: 80 }
                     }
                 ]
             },
@@ -3179,7 +3179,7 @@ export const defaultReportTemplates: ReportTemplateProperties[] = [
                         prompt: 'Describe available facilities and equipment supporting the research.',
                         behaviors: [{ name: 'facilities manager', type: 'persona' }],
                         guidelines: ['List major facilities', 'Describe equipment', 'Show capabilities', 'Mention shared resources', 'Demonstrate adequacy'],
-                        controls: { ...defaultControls, formality: 90, tone: 'descriptive', complexity: 75 }
+                        controls: { ...defaultControls, formality: 90, tone: 'explanatory', complexity: 75 }
                     }
                 ]
             }

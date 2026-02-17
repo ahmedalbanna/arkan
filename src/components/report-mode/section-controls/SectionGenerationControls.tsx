@@ -30,7 +30,7 @@ const diagramTypes = DiagramTypeSchema.options.map(value => {
     return { value, label };
 });
 
-const toneOptions = ToneSchema.options.map(tone => ({
+const toneOptions = ToneSchema.options.map((tone: any) => ({
     value: tone,
     label: tone.charAt(0).toUpperCase() + tone.slice(1),
 }));
@@ -101,7 +101,7 @@ export function SectionGenerationControls({
                             <SelectValue placeholder={t('reportGenerator.tool_tone_placeholder')} />
                         </SelectTrigger>
                         <SelectContent>
-                            {toneOptions.map(opt => (
+                            {toneOptions.map((opt: any) => (
                                 <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
                             ))}
                             <SelectItem value="custom">Custom...</SelectItem>
@@ -113,7 +113,7 @@ export function SectionGenerationControls({
              <div className="space-y-2">
                 <Label>Output Format</Label>
                 <div className="flex items-center flex-wrap gap-4">
-                    {Object.keys(controls.outputStyle).map(key => (
+                    {Object.keys(controls.outputStyle).map((key: any) => (
                          <div key={key} className="flex items-center gap-2">
                             <Checkbox id={`output-${key}-${section.id}`} checked={controls.outputStyle[key as keyof typeof controls.outputStyle]} onCheckedChange={(checked) => onOutputStyleChange(key as keyof typeof controls.outputStyle, !!checked)} />
                             <Label htmlFor={`output-${key}-${section.id}`} className="capitalize">{key.replace(/([A-Z])/g, ' $1')}</Label>

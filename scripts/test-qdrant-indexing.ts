@@ -137,8 +137,9 @@ async function indexTestDocuments() {
         console.log(`   ✅ Indexed successfully: ${result.chunksCreated} chunks created\n`);
         results.push({ ...doc.metadata, chunksCreated: result.chunksCreated });
       } else {
-        console.log(`   ❌ Failed: ${result.error}\n`);
-        results.push({ ...doc.metadata, error: result.error });
+        const errorMsg = result.errors?.join(', ') || 'Unknown error';
+        console.log(`   ❌ Failed: ${errorMsg}\n`);
+        results.push({ ...doc.metadata, error: errorMsg });
       }
     } catch (error) {
       console.error(`   ❌ Error: ${error instanceof Error ? error.message : 'Unknown error'}\n`);
@@ -270,10 +271,10 @@ async function main() {
     console.log('   ✅ TEST COMPLETED SUCCESSFULLY');
     console.log('═══════════════════════════════════════════════════════\n');
 
-    const successCount = indexResults.filter(r => !r.error).length;
+    const successCount = indexResults.filter(r => !('error' in r)).length;
     console.log(`📊 Summary:`);
     console.log(`   Documents indexed: ${successCount}/${testDocuments.length}`);
-    console.log(`   Total chunks: ${indexResults.reduce((sum, r) => sum + (r.chunksCreated || 0), 0)}`);
+    console.log(`   Total chunks: ${indexResults.reduce((sum, r) => sum + ('chunksCreated' in r ? r.chunksCreated : 0), 0)}`);
     console.log('\n💡 Next steps:');
     console.log('   1. View in Qdrant UI: http://localhost:3100');
     console.log('   2. Check health: curl http://localhost:9002/api/rag/health');

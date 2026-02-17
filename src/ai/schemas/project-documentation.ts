@@ -181,7 +181,7 @@ export const PresentationTypeSchema = z.enum([
     'technical_review',
     'status_update',
     'training',
-    'conference'
+    'conference',
 ]);
 export type PresentationType = z.infer<typeof PresentationTypeSchema>;
 

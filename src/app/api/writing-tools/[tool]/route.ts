@@ -74,7 +74,7 @@ const toolConfig = {
 type ToolName = keyof typeof toolConfig;
 
 export const POST = withAuth(async ({ request, user, params }) => {
-  const toolName = (await params).tool as ToolName;
+  const toolName = params.tool as ToolName;
 
   const config = toolConfig[toolName];
   if (!config) {

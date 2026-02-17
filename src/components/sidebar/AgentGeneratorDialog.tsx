@@ -99,7 +99,7 @@ export function AgentGeneratorDialog({ isOpen, onOpenChange }: { isOpen: boolean
   });
 
   function onGenerateSubmit(data: GenerateFormValues) {
-    generateMutation.mutate(data);
+    generateMutation.mutate({ ...data, flow: 'generate-agent-config' as const });
   }
 
   function onSaveSubmit(data: SaveFormValues) {

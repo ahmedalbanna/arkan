@@ -65,18 +65,20 @@ export {
 } from './prompt-architect';
 
 // Export Google search tools
-export {
-    googleSearchTool,
-    googleSearchTools, searchImages,
-    searchMaps, searchNews, searchShopping, searchWeb
-} from './google-search';
+// TODO: Implement google-search tools
+// export {
+//     googleSearchTool,
+//     googleSearchTools, searchImages,
+//     searchMaps, searchNews, searchShopping, searchWeb
+// } from './google-search';
 
 // Aggregate all tools for easy registration
 import { citationsAndReferencesTools } from './citations-and-references';
 import { comprehensiveAnalysisTools } from './comprehensive-analysis';
 import { documentStructureTools } from './document-structure';
 import { documentationGenerationTools } from './documentation-generation';
-import { googleSearchTools } from './google-search';
+// import { googleSearchTools } from './google-search';
+const googleSearchTools = {};
 import { grammarAndStyleTools } from './grammar-and-style';
 import { projectAnalysisTools } from './project-analysis';
 import { promptArchitectTools } from './prompt-architect';
