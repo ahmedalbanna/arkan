@@ -1,0 +1,455 @@
+
+> nextn@0.1.0 lint
+> next lint
+
+`next lint` is deprecated and will be removed in Next.js 16.
+For new projects, use create-next-app to choose your preferred linter.
+For existing projects, migrate to the ESLint CLI:
+npx @next/codemod@canary next-lint-to-eslint-cli .
+
+
+ ⚠ The Next.js plugin was not detected in your ESLint configuration. See https://nextjs.org/docs/app/api-reference/config/eslint#migrating-existing-config
+
+./src/ai/flows/academic-paper-quality-checker.ts
+51:24  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+138:23  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+282:37  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+284:34  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./src/ai/flows/paraphrase-text.ts
+48:102  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./src/ai/flows/professional-document-writer.ts
+248:37  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./src/ai/flows/project-documentation-generator.ts
+87:24  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./src/ai/model-request-queue.ts
+53:32  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./src/ai/tools/index.ts
+149:25  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./src/app/manage-users/actions.ts
+40:51  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+71:51  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./src/app/page.tsx
+8:29  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./src/app/profile/ChangePasswordForm.tsx
+45:22  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./src/app/writing-tools/translator/page.tsx
+43:23  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./src/components/admin/EditUserForm.tsx
+107:21  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./src/components/admin/sections/SectionFormDialog.tsx
+93:78  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./src/components/pricing/PurchaseCreditsDialog.tsx
+120:45  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./src/components/report-mode/MarkdownEditor.tsx
+31:17  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./src/components/report-mode/dialogs/ChapterToolsDialog.tsx
+76:101  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+171:81  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./src/components/report-mode/file-manager/AnalystAgent.tsx
+39:31  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+89:39  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./src/components/report-mode/section-controls/SectionGenerationControls.tsx
+32:51  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+103:52  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+115:66  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+178:128  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./src/components/shared/CoverPage.tsx
+55:27  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+57:27  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+185:85  Warning: Unexpected empty arrow function.  @typescript-eslint/no-empty-function
+201:83  Warning: Unexpected empty arrow function.  @typescript-eslint/no-empty-function
+209:39  Warning: Unexpected empty arrow function.  @typescript-eslint/no-empty-function
+220:88  Warning: Unexpected empty arrow function.  @typescript-eslint/no-empty-function
+222:86  Warning: Unexpected empty arrow function.  @typescript-eslint/no-empty-function
+224:130  Warning: Unexpected empty arrow function.  @typescript-eslint/no-empty-function
+228:86  Warning: Unexpected empty arrow function.  @typescript-eslint/no-empty-function
+229:82  Warning: Unexpected empty arrow function.  @typescript-eslint/no-empty-function
+233:39  Warning: Unexpected empty arrow function.  @typescript-eslint/no-empty-function
+
+./src/components/sidebar/AgentDialog.tsx
+95:21  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+164:43  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./src/components/sidebar/AgentGeneratorDialog.tsx
+81:22  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+94:22  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./src/components/writing-tools/AIResearcherTool.tsx
+102:42  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+102:123  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+133:42  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+133:123  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+181:42  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+181:126  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+231:42  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+231:127  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+300:55  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./src/components/writing-tools/AITextTune.tsx
+22:46  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+57:53  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+309:111  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./src/components/writing-tools/ImageToPdfTool.tsx
+44:33  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./src/components/writing-tools/ImageToSvgTool.tsx
+49:106  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+56:92  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./src/components/writing-tools/MarkdownToWordTool.tsx
+139:95  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./src/components/writing-tools/ProjectBlueprintTool.tsx
+115:81  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./src/config/api-docs.ts
+16:31  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+17:32  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+18:33  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./src/context/LocalizationContext.tsx
+12:47  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+15:51  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+34:54  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+38:19  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./src/hooks/auth/use-auth-mutations.ts
+98:98  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+100:23  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+122:23  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+147:58  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./src/hooks/core/__tests__/useBuilderStore.test.ts
+191:47  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./src/hooks/core/useGenerationUIStore.ts
+17:58  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./src/hooks/data/use-templates.ts
+85:26  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+101:26  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+117:26  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+143:26  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+159:26  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+175:26  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./src/hooks/report-mode/use-ai-actions.ts
+68:31  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+68:36  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+73:23  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+81:33  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+81:38  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+86:25  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+97:52  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+158:22  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+189:45  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+206:22  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./src/hooks/report-mode/use-chapter-actions.ts
+68:23  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+70:38  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+85:18  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+113:39  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./src/hooks/use-agent-store.ts
+92:39  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+130:21  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+141:21  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+151:21  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./src/hooks/writing-tools/use-ai-detector-logic.ts
+53:21  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./src/hooks/writing-tools/use-ai-researcher-logic.ts
+144:21  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+209:24  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+221:27  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+223:18  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+262:76  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+263:80  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+264:84  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+265:81  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./src/hooks/writing-tools/use-assignments-solver-logic.ts
+28:23  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+61:21  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./src/hooks/writing-tools/use-bias-checker-logic.ts
+55:21  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./src/hooks/writing-tools/use-citation-generator-logic.ts
+26:23  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./src/hooks/writing-tools/use-document-writer-logic.ts
+27:23  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./src/hooks/writing-tools/use-fact-checker-logic.ts
+57:21  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./src/hooks/writing-tools/use-generate-toc-logic.ts
+38:29  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./src/hooks/writing-tools/use-grammar-checker-logic.ts
+54:21  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./src/hooks/writing-tools/use-image-to-svg-logic.ts
+70:22  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./src/hooks/writing-tools/use-paraphraser-logic.ts
+55:21  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./src/hooks/writing-tools/use-plagiarism-checker-logic.ts
+57:21  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./src/hooks/writing-tools/use-plant-uml-generator-logic.ts
+48:23  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./src/hooks/writing-tools/use-presentation-outline-logic.ts
+49:65  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./src/hooks/writing-tools/use-project-blueprint-logic.ts
+33:23  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./src/hooks/writing-tools/use-quiz-generator-logic.ts
+19:23  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./src/hooks/writing-tools/use-sentence-structure-checker-logic.ts
+64:21  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./src/hooks/writing-tools/use-summarizer-logic.ts
+30:23  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+63:21  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./src/hooks/writing-tools/use-text-stylist-logic.ts
+32:54  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+39:32  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+39:48  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+66:35  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+69:29  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+69:34  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+79:35  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+82:29  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+82:34  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+92:35  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+95:29  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+95:34  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+105:35  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+108:29  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+108:34  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+118:35  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+121:29  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+121:34  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+131:35  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+134:29  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+134:34  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+152:60  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+152:74  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./src/lib/db/seed.ts
+89:67  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./src/lib/editor/CommandList.tsx
+7:46  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+41:34  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./src/lib/editor/ai-image-generator-extension.tsx
+16:43  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./src/lib/editor/plantUml-extension.tsx
+12:35  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+90:44  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+93:10  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./src/lib/editor/slash-command.tsx
+55:32  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+62:65  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+80:78  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+89:32  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+122:27  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./src/lib/firebase/error.ts
+10:26  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+12:62  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+26:33  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+36:44  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+36:72  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./src/lib/firebase/server-init.ts
+29:19  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./src/lib/markdown-to-pptx-converter.ts
+115:43  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+117:37  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./src/lib/markdown-to-word-converter.ts
+72:37  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./src/lib/models/__tests__/project.test.ts
+110:48  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./src/lib/models/chapter.ts
+66:20  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./src/lib/models/external-context.ts
+12:31  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+20:55  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./src/lib/models/project.ts
+300:57  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./src/lib/models/section.ts
+47:29  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+62:53  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./src/lib/models/template.ts
+4:52  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+11:34  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./src/lib/pptx-convert/slide-layout-engine.ts
+586:47  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+599:45  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./src/lib/rag/__tests__/integration.test.ts
+24:73  Warning: Unexpected empty arrow function.  @typescript-eslint/no-empty-function
+
+./src/lib/rag/__tests__/qdrant-adapter.test.ts
+41:42  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+124:42  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+148:42  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+174:42  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+196:42  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+206:42  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./src/lib/rag/cache.ts
+192:27  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+204:47  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+224:38  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+224:49  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+232:38  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+232:57  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./src/lib/rag/qdrant-adapter.ts
+209:42  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+239:69  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+242:23  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./src/lib/rag/retrieval.ts
+93:48  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+102:21  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./src/lib/rag/vector-store.ts
+164:30  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+196:26  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+202:49  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./src/lib/types.ts
+26:11  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+96:13  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+172:18  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./src/lib/utils/ai-utils.ts
+10:18  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+14:21  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./src/lib/utils/api-utils.ts
+16:9  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+54:21  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+67:39  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+106:41  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./src/lib/utils/errorUtils.ts
+13:43  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./src/lib/utils/markdown-styles.ts
+8:36  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+31:152  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./src/lib/word-converter/ast-converter.ts
+147:48  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+325:53  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+364:55  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./src/lib/word-converter/node-handlers.ts
+4:26  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+37:22  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./src/services/api/adminService.ts
+15:16  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+16:17  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./src/services/api/analyticsService.ts
+13:16  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+14:17  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./src/services/api/apiService.ts
+24:45  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+24:62  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./src/services/api/authService.ts
+31:19  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+50:19  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./src/services/api/diagramService.ts
+12:48  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./src/services/api/generationLogService.ts
+9:12  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+10:13  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./src/services/api/reportService.ts
+12:54  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+12:83  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./src/services/api/templateService.ts
+16:74  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+56:74  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+186:12  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./src/services/document-tracking-service.ts
+49:19  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+93:19  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./src/services/generation-service.ts
+10:12  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+11:13  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./src/services/local-project-service.ts
+25:32  Warning: Unexpected empty arrow function.  @typescript-eslint/no-empty-function
+
+./src/services/templateService.ts
+7:97  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./src/types/module-stubs.d.ts
+9:23  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+14:39  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+18:36  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+22:29  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+26:51  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+30:36  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+38:56  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+38:72  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+42:31  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+47:47  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+52:19  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+57:19  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+62:19  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+info  - Need to disable some ESLint rules? Learn more here: https://nextjs.org/docs/app/api-reference/config/eslint#disabling-rules

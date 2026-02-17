@@ -5,7 +5,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useWritingTool, useToast } from '@/hooks';
-import { useState, useMemo, useEffect, useCallback } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { DiffPart, computeDiff } from '@/lib/utils/diff';
 import { useBuilderStore } from '../core/useBuilderStore';
 import { Chapter, SectionContext } from '@/lib/models';

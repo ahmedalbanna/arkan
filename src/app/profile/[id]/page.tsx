@@ -10,7 +10,7 @@ import { format } from 'date-fns';
 import { useLocalization } from '@/context/LocalizationContext';
 import { useUserProfile } from '@/hooks';
 import { Skeleton } from '@/components/ui/skeleton';
-import { use, Suspense, lazy } from 'react';
+import { use, _Suspense, _lazy } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
@@ -42,7 +42,7 @@ function ProfileSkeleton() {
 function ProfilePageContent({ userId }: { userId: string }) {
   const { t } = useLocalization();
   const { data: user, isLoading } = useUserProfile(userId);
-  const { userProfile: currentUser, firebaseUser } = useAuth();
+  const { userProfile: currentUser, firebaseUser: _firebaseUser } = useAuth();
   
   const canEdit = currentUser?.role === 'admin' || currentUser?.id === userId;
 

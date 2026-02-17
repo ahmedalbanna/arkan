@@ -59,8 +59,8 @@ export function useApplyReportTemplate(onSuccessCallback?: () => void) {
             if (onSuccessCallback) {
                 onSuccessCallback();
             }
-        } catch (error: any) {
-            toast({ title: 'Failed to Apply Template', description: error.message, variant: 'destructive' });
+        } catch (error) {
+            toast({ title: 'Failed to Apply Template', description: error instanceof Error ? error.message : 'Unknown error', variant: 'destructive' });
         } finally {
             setIsApplying(false);
         }

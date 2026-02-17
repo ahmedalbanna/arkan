@@ -90,6 +90,7 @@ export const POST = withAuth(async ({ request, user, params }) => {
       return handleApiError(validation.error);
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const result = await flow(validation.data as any);
 
     await deductCredit(user.id, creditCost);

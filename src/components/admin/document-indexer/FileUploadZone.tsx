@@ -32,12 +32,7 @@ export function FileUploadZone({ indexingOptions, onOptionsChange }: Props) {
   const [uploading, setUploading] = useState(false);
   const [dragActive, setDragActive] = useState(false);
 
-  const acceptedTypes = [
-    'application/pdf',
-    'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-    'text/plain',
-    'text/markdown',
-  ];
+
 
   const handleDrag = useCallback((e: React.DragEvent) => {
     e.preventDefault();

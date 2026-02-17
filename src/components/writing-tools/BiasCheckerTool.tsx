@@ -1,14 +1,14 @@
 
 'use client';
 
-import type { BiasCheckOutput, BiasIssue } from '@/ai/schemas';
+import type { BiasIssue } from '@/ai/schemas';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Textarea } from '@/components/ui/textarea';
 import { useBiasCheckerLogic } from '@/hooks/writing-tools/use-bias-checker-logic';
-import { AlertCircle, ArrowRight, Loader2, Scale, Sparkles, UploadCloud } from 'lucide-react';
+import { ArrowRight, Loader2, Sparkles, UploadCloud } from 'lucide-react';
 
 function getScoreColor(score: number) {
   if (score < 50) return 'text-destructive';

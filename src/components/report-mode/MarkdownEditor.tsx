@@ -5,7 +5,7 @@
 import { useEditorStore } from '@/hooks/core/use-editor-store';
 import { BubbleMenu, EditorContent, useEditor } from '@tiptap/react';
 import { marked } from 'marked';
-import React, { useCallback, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import TurndownService from 'turndown';
 import { gfm } from 'turndown-plugin-gfm';
 import { editorExtensions, handleHtmlPaste, handlePlainPaste } from '@/lib/tiptap-extensions';
@@ -40,7 +40,7 @@ const MarkdownEditorComponent = ({ content, onChange, editorClassName }: Markdow
         class: cn('prose dark:prose-invert max-w-none focus:outline-none font-serif text-base prose-p:text-base prose-headings:font-headline prose-a:text-primary hover:prose-a:text-primary/80 prose-table:w-full prose-table:table-fixed prose-tr:border-b prose-th:text-left prose-th:p-2 prose-td:p-2', editorClassName),
       },
       // @ts-expect-error - TipTap handlePaste return type mismatch
-      handlePaste: async (view, event, slice): Promise<boolean> => {
+      handlePaste: async (_view, event, _slice): Promise<boolean> => {
         const text = event.clipboardData?.getData('text/plain');
         const html = event.clipboardData?.getData('text/html');
 
@@ -72,7 +72,6 @@ const MarkdownEditorComponent = ({ content, onChange, editorClassName }: Markdow
         }
       }
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [content]); // This effect should ONLY run when the external `content` prop changes.
 
 

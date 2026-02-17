@@ -8,7 +8,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 
 const exportSchema = z.object({
-  project: z.any().refine(val => val && typeof val === 'object' && val.id, {
+  project: z.unknown().refine((val): val is ProjectProperties => val !== null && typeof val === 'object' && 'id' in val, {
     message: "A valid project object is required.",
   }),
   options: z.custom<ConversionOptions>().optional().default({}),
@@ -42,7 +42,7 @@ export async function POST(req: NextRequest) {
       return new NextResponse('Error creating DOCX file buffer.', { status: 500 });
     }
 
-    return new NextResponse(docxBuffer as any, {
+    return new NextResponse(docxBuffer, {
       status: 200,
       headers: {
         'Content-Type': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',

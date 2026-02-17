@@ -5,15 +5,12 @@ import { Button } from '@/components/ui/button';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { useLocalization } from '@/context/LocalizationContext';
-import { useToast } from '@/hooks';
 import { useGoogleSignIn, useSignup } from '@/hooks/auth/use-auth-mutations';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Loader2 } from 'lucide-react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
-import { getAuth, updateProfile } from 'firebase/auth';
 
 const formSchema = z.object({
   name: z.string().min(2, { message: 'Name must be at least 2 characters.' }),
@@ -24,9 +21,7 @@ const formSchema = z.object({
 export interface SignupCredentials extends z.infer<typeof formSchema> { }
 
 export default function SignupForm() {
-  const router = useRouter();
   const { t } = useLocalization();
-  const { toast } = useToast();
 
   const form = useForm<SignupCredentials>({
     resolver: zodResolver(formSchema),

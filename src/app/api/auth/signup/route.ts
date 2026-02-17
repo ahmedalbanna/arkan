@@ -51,13 +51,15 @@ export async function POST(req: Request) {
 
         return createApiResponse({ user: { uid: userRecord.uid, email: userRecord.email } }, 201);
 
-    } catch (error: any) {
-        if (error.code === 'auth/email-already-exists') {
-            return handleApiError({ message: "Email address is already in use by another account." }, 409);
-        } else if (error.code === 'auth/invalid-email') {
-            return handleApiError({ message: "The email address is not valid." }, 400);
-        } else if (error.code === 'auth/weak-password') {
-            return handleApiError({ message: "The password is too weak. It must be at least 6 characters long." }, 400);
+    } catch (error) {
+        if (error && typeof error === 'object' && 'code' in error) {
+            if (error.code === 'auth/email-already-exists') {
+                return handleApiError({ message: "Email address is already in use by another account." }, 409);
+            } else if (error.code === 'auth/invalid-email') {
+                return handleApiError({ message: "The email address is not valid." }, 400);
+            } else if (error.code === 'auth/weak-password') {
+                return handleApiError({ message: "The password is too weak. It must be at least 6 characters long." }, 400);
+            }
         }
         return handleApiError(error);
     }

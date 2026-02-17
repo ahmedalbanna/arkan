@@ -5,7 +5,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { FileText, Trash2, Eye } from "lucide-react";
 import { Button } from "../ui/button";
-import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "../ui/dialog";
+import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle } from "../ui/dialog";
 import { MarkdownViewer } from "../shared/MarkdownViewer";
 
 interface UploadedFile {

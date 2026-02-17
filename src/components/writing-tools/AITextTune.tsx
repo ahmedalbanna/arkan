@@ -135,7 +135,7 @@ export function AITextTune() {
                                 name="style"
                                 control={form.control}
                                 render={({ field }) => (
-                                    <Select onValueChange={field.onChange} defaultValue={field.value} disabled={isProcessing}>
+                                    <Select onValueChange={(value) => field.onChange(value)} defaultValue={field.value} disabled={isProcessing}>
                                         <SelectTrigger id="style-select">
                                             <SelectValue placeholder={t('writingTools.textStylist.stylePlaceholder')} />
                                         </SelectTrigger>

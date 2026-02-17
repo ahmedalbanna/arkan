@@ -11,13 +11,11 @@ import {
 } from '@/components/ui/dialog';
 import { useState } from 'react';
 import { useAuth } from '@/context/AuthContext';
-import { useToast } from '@/hooks';
 import { useLocalization } from '@/context/LocalizationContext';
 import { Slider } from '@/components/ui/slider';
 import { Button } from '@/components/ui/button';
-import { Gem, ShoppingCart, ArrowLeft, Banknote, AlertCircle, Copy, Check, UploadCloud, Loader2, PartyPopper } from 'lucide-react';
+import { Gem, ShoppingCart, ArrowLeft, Banknote, AlertCircle, Copy, UploadCloud, Loader2, PartyPopper, Check } from 'lucide-react';
 import { useSubmitPaymentProof, usePublicSettings } from '@/hooks';
-import type { BankAccount } from '@/lib/types';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '../ui/accordion';
 import { Skeleton } from '../ui/skeleton';
@@ -73,7 +71,6 @@ type FileFormValues = z.infer<typeof fileSchema>;
 export function PurchaseCreditsDialog({ trigger }: { trigger: React.ReactNode }) {
   const { t } = useLocalization();
   const { firebaseUser } = useAuth();
-  const { toast } = useToast();
   const [isOpen, setIsOpen] = useState(false);
   const [step, setStep] = useState(1);
   const [credits, setCredits] = useState(100);

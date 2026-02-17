@@ -1,14 +1,12 @@
 
 'use client';
 
-import { Chapter, Project, Section, TocSection, type ProjectProperties, User } from '@/lib/models';
+import { Project, type ProjectProperties, User } from '@/lib/models';
 import { localProjectService } from '@/services/local-project-service';
 import { useEffect } from 'react';
 import { create } from 'zustand';
 import { toast } from '../util/use-toast';
 import { useEditorStore } from './use-editor-store';
-import { marked } from 'marked';
-import { parseMarkdownToContent } from '../util/useMarkdownParser';
 
 interface BuilderState {
     project: Project | null;

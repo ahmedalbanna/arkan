@@ -408,7 +408,7 @@ function splitRunsByHeight(
     const sentences = textToSplit.split(/([.!?]\s+)/);
     const baseText = runsBeforeSplit.map(r => r.text || '').join('');
     let textForCurrentRun = '';
-    let sentenceIndex = 0;
+    // let sentenceIndex = 0;
 
     // Try to fit complete sentences first
     for (let i = 0; i < sentences.length; i += 2) { // Skip delimiters
@@ -417,11 +417,9 @@ function splitRunsByHeight(
         const testLineCount = calculateLineCount(testText, fontFace, fontSize, layout.CONTENT_WIDTH);
 
         if (testLineCount > maxLines && textForCurrentRun.length > 0) {
-            sentenceIndex = i;
             break;
         }
         textForCurrentRun += sentence;
-        // sentenceIndex tracking not currently used but kept for future reference
     }
 
     // If we couldn't fit any complete sentences, fall back to word-based splitting

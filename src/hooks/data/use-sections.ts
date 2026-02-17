@@ -38,8 +38,8 @@ export function useCreateSection() {
             toast({ title: 'Section Created', description: 'The new section has been successfully added.' });
             queryClient.invalidateQueries({ queryKey: sectionKeys.lists() });
         },
-        onError: (error: any) => {
-            toast({ title: "Creation Failed", description: error.message || 'Could not create section.', variant: "destructive" });
+        onError: (error) => {
+            toast({ title: "Creation Failed", description: error instanceof Error ? error.message : 'Could not create section.', variant: "destructive" });
         }
     });
 }
@@ -59,8 +59,8 @@ export function useUpdateSection() {
                 queryClient.invalidateQueries({ queryKey: sectionKeys.detail(data.id) });
             }
         },
-        onError: (error: any) => {
-            toast({ title: "Update Failed", description: error.message || 'Could not update section.', variant: "destructive" });
+        onError: (error) => {
+            toast({ title: "Update Failed", description: error instanceof Error ? error.message : 'Could not update section.', variant: "destructive" });
         }
     });
 }
@@ -78,8 +78,8 @@ export function useDeleteSection() {
             toast({ title: 'Section Deleted', description: 'The section has been removed.' });
             queryClient.invalidateQueries({ queryKey: sectionKeys.lists() });
         },
-        onError: (error: any) => {
-            toast({ title: "Delete Failed", description: error.message || 'Could not delete section.', variant: "destructive" });
+        onError: (error) => {
+            toast({ title: "Delete Failed", description: error instanceof Error ? error.message : 'Could not delete section.', variant: "destructive" });
         }
     });
 }

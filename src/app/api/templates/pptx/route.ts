@@ -24,7 +24,7 @@ export async function GET() {
             snapshot = await stylesCollection.get(); // Re-fetch after seeding
         }
 
-        let templates: { [key: string]: any } = {};
+        let templates: Record<string, unknown> = {};
         snapshot.docs.forEach((doc) => {
             templates[doc.id] = doc.data();
         });

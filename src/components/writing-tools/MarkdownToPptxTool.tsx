@@ -182,7 +182,7 @@ This slide demonstrates how a very long paragraph will gracefully break across m
       if (data.useCustomTheme && data.customThemeJson) {
         try {
           themeStyles = JSON.parse(data.customThemeJson);
-        } catch (e) {
+        } catch {
           toast({
             title: 'Invalid Custom Theme JSON',
             description: 'The provided JSON for the custom theme could not be parsed.',
@@ -237,7 +237,7 @@ This slide demonstrates how a very long paragraph will gracefully break across m
       if (data.useCustomTheme && data.customThemeJson) {
         try {
           themeStyles = JSON.parse(data.customThemeJson);
-        } catch (e) {
+        } catch {
           toast({
             title: 'Invalid Custom Theme JSON',
             description: 'The provided JSON for the custom theme could not be parsed.',

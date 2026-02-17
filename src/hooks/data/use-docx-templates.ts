@@ -27,7 +27,7 @@ export function useUpdateDocxTemplate() {
     const queryClient = useQueryClient();
     const { firebaseUser } = useAuth();
     return useMutation({
-        mutationFn: async ({ key, styles }: { key: string, styles: any }) => {
+        mutationFn: async ({ key, styles }: { key: string, styles: Record<string, unknown> }) => {
             const token = await getAuthenticatedToken(firebaseUser);
             return updateDocxTemplateApi(key, { styles }, token);
         },
@@ -35,7 +35,7 @@ export function useUpdateDocxTemplate() {
             toast({ title: "Template Saved", description: `Style changes for "${key}" have been saved.` });
             queryClient.invalidateQueries({ queryKey: ['docx-styles'] });
         },
-        onError: (error: any) => toast({ title: "Save Failed", description: error.message, variant: 'destructive' }),
+        onError: (error) => toast({ title: "Save Failed", description: error instanceof Error ? error.message : 'Unknown error', variant: 'destructive' }),
     });
 }
 
@@ -51,7 +51,7 @@ export function useDeleteDocxTemplate() {
             toast({ title: 'Template Deleted', description: `Template "${key}" has been deleted.` });
             queryClient.invalidateQueries({ queryKey: ['docx-styles'] });
         },
-        onError: (error: any) => toast({ title: 'Delete Failed', description: error.message, variant: 'destructive' }),
+        onError: (error) => toast({ title: 'Delete Failed', description: error instanceof Error ? error.message : 'Unknown error', variant: 'destructive' }),
     });
 }
 
@@ -81,6 +81,6 @@ export function useRefreshDocxTemplateImage() {
             toast({ title: 'Image Refreshing', description: 'The new template preview is being generated.' });
             queryClient.invalidateQueries({ queryKey: ['docx-styles'] });
         },
-        onError: (error: any) => toast({ title: "Image Refresh Failed", description: error.message, variant: "destructive" })
+        onError: (error) => toast({ title: "Image Refresh Failed", description: error instanceof Error ? error.message : 'Unknown error', variant: "destructive" })
     });
 }

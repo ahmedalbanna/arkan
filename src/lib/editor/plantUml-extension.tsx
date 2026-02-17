@@ -2,7 +2,7 @@
 
 import { Node, mergeAttributes } from '@tiptap/core';
 import { NodeViewWrapper, ReactNodeViewRenderer } from '@tiptap/react';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import pako from 'pako';
 import { Textarea } from '@/components/ui/textarea';
 import Image from 'next/image';
@@ -24,8 +24,8 @@ const PlantUMLComponent = (props: any) => {
       const compressed = pako.deflate(data, { level: 9 });
       const encoded = encode64(compressed);
       return `https://www.plantuml.com/plantuml/png/~1${encoded}`;
-    } catch (e) {
-      console.error("Failed to generate PlantUML URL", e);
+    } catch {
+      console.error("Failed to generate PlantUML URL");
       return '';
     }
   })();

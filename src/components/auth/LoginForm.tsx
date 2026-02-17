@@ -34,11 +34,11 @@ export default function LoginForm() {
   });
 
   useEffect(() => {
-    const errorData = loginMutation.error as any;
-    if (errorData?.message) {
+    const errorData = loginMutation.error;
+    if (errorData && typeof errorData === 'object' && 'message' in errorData) {
       form.setError("root.serverError", {
         type: "manual",
-        message: errorData.message
+        message: String(errorData.message)
       });
     }
   }, [loginMutation.error, form]);

@@ -80,10 +80,10 @@ export function FinancialReportExporter() {
             // The convertMarkdownToPdf now expects a string, so we pass the formatted markdown.
             await convertMarkdownToPdf(markdownReport, `Financial_Report_${format(new Date(), 'yyyy-MM-dd')}`);
 
-        } catch (error: any) {
+        } catch (error) {
             toast({
                 title: t('adminFinancialReport.exportFailed'),
-                description: error.message || 'An unexpected error occurred.',
+                description: error instanceof Error ? error.message : 'An unexpected error occurred.',
                 variant: 'destructive',
             });
         } finally {

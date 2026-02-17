@@ -47,8 +47,6 @@ export function ChapterToolsDialog({ isOpen, onOpenChange, chapter }: ChapterToo
     processedText,
     diff,
     handleApplyToNewSection,
-    context,
-    setContext,
   } = useChapterActions(chapter, onOpenChange);
 
   if (!chapter) return null;

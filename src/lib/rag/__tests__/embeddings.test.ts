@@ -3,7 +3,7 @@
  */
 
 import { chunkText, estimateTokens } from '../embeddings';
-
+import { describe, it } from 'node:test';
 describe('Embeddings Service', () => {
   describe('chunkText', () => {
     it('should return single chunk for short text', () => {

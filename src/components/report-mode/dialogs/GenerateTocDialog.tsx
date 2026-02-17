@@ -1,12 +1,11 @@
 
 'use client';
 
-import { useForm } from 'react-hook-form';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { useBuilderStore, useToast } from '@/hooks';
+import { useBuilderStore } from '@/hooks';
 import { useGenerateTocLogic } from '@/hooks/writing-tools/use-generate-toc-logic';
 import { Loader2, Sparkles } from 'lucide-react';
 import { ScrollArea } from '../../ui/scroll-area';

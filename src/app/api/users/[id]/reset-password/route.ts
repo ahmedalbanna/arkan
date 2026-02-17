@@ -24,7 +24,7 @@ export const POST = withAuth(async ({ params }) => {
 
         return createApiResponse({ message: `A password reset email has been sent to ${user.email}.` }, 200);
 
-    } catch (error: any) {
+    } catch (error) {
         return handleApiError(error);
     }
 }, { requireAdmin: true });

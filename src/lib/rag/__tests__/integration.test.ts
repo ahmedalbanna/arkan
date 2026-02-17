@@ -13,7 +13,7 @@
 import { indexDocument } from '../indexer';
 import { retrieveContext } from '../retrieval';
 import { getVectorStore, resetVectorStore } from '../vector-store';
-import { RAGConfig } from '../config';
+import { beforeEach, describe, it } from 'node:test';
 
 // Skip these tests if Qdrant is not available
 const QDRANT_AVAILABLE = process.env.VECTOR_STORE_PROVIDER === 'qdrant';

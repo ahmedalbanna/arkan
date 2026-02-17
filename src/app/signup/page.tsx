@@ -3,7 +3,7 @@
 
 import SignupForm from '@/components/auth/SignupForm';
 import { useLocalization } from '@/context/LocalizationContext';
-import { UserPlus } from 'lucide-react';
+import { _UserPlus } from 'lucide-react';
 import Image from 'next/image';
 
 

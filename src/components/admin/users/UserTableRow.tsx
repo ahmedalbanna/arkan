@@ -10,8 +10,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/context/AuthContext";
 import { userKeys } from "@/lib/query-keys";
 import { fetchUserProfileApi } from "@/services/api/userService";
-import { useRouter } from "next/navigation";
-import { toast } from "@/hooks/util/use-toast";
+
 import { useLocalization } from "@/context/LocalizationContext";
 import { User } from '@/lib/models';
 import { GiftCreditsDialog } from "../payments/GiftCreditsDialog";
@@ -25,7 +24,7 @@ interface UserTableRowProps {
 export function UserTableRow({ user }: UserTableRowProps) {
     const { t } = useLocalization();
     const queryClient = useQueryClient();
-    const { firebaseUser, userProfile: adminProfile } = useAuth();
+    const { firebaseUser, userProfile: _adminProfile } = useAuth();
     const sendPasswordResetMutation = useSendPasswordReset();
 
     async function prefetchUser(userId: string) {

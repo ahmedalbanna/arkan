@@ -14,9 +14,9 @@ import { RAGConfig, validateRAGConfig } from '@/lib/rag/config';
 export async function GET(_request: NextRequest) {
   try {
     const checks = {
-      config: { status: 'unknown' as 'ok' | 'error', details: {} as any },
-      vectorStore: { status: 'unknown' as 'ok' | 'error', details: {} as any },
-      ollama: { status: 'unknown' as 'ok' | 'error', details: {} as any },
+      config: { status: 'unknown' as 'ok' | 'error', details: {} as Record<string, unknown> },
+      vectorStore: { status: 'unknown' as 'ok' | 'error', details: {} as Record<string, unknown> },
+      ollama: { status: 'unknown' as 'ok' | 'error', details: {} as Record<string, unknown> },
     };
 
     // 1. Validate configuration
@@ -76,9 +76,9 @@ export async function GET(_request: NextRequest) {
       });
 
       if (response.ok) {
-        const data = await response.json();
+        const data = await response.json() as { models?: Array<{ name: string }> };
         const hasEmbeddingModel = data.models?.some(
-          (m: any) => m.name.includes(RAGConfig.ollama.embeddingModel)
+          (m) => m.name.includes(RAGConfig.ollama.embeddingModel)
         );
 
         checks.ollama.status = hasEmbeddingModel ? 'ok' : 'error';
@@ -86,7 +86,7 @@ export async function GET(_request: NextRequest) {
           url: RAGConfig.ollama.baseUrl,
           model: RAGConfig.ollama.embeddingModel,
           modelAvailable: hasEmbeddingModel,
-          availableModels: data.models?.map((m: any) => m.name).slice(0, 5) || [],
+          availableModels: data.models?.map((m) => m.name).slice(0, 5) || [],
         };
       } else {
         checks.ollama.status = 'error';

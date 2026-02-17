@@ -1,7 +1,7 @@
 
 
 import React from 'react';
-import { Editor, Range, Extension } from '@tiptap/core';
+import { Editor, Extension } from '@tiptap/core';
 import { ReactRenderer } from '@tiptap/react';
 import Suggestion, { SuggestionOptions } from '@tiptap/suggestion';
 import tippy, { GetReferenceClientRect, Instance } from 'tippy.js';

@@ -31,7 +31,6 @@ import type { AgentProperties } from '@/lib/models';
 import { useMutation } from '@tanstack/react-query';
 import { useState } from 'react';
 import { Checkbox } from '../ui/checkbox';
-import { useDebounce } from '@/hooks';
 
 const generateSchema = z.object({
   flow: z.string(),
@@ -65,7 +64,6 @@ export function AgentGeneratorDialog({ isOpen, onOpenChange }: { isOpen: boolean
     resolver: zodResolver(saveSchema),
   });
 
-  const debouncedId = useDebounce(saveForm.watch('id'), 500);
 
   const generateMutation = useMutation({
     mutationFn: generateAgentConfig,

@@ -3,7 +3,7 @@
 
 import { useAuth } from '@/context/AuthContext';
 import { notFound } from 'next/navigation';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle as _CardTitle, CardDescription as _CardDescription } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useLocalization } from '@/context/LocalizationContext';
@@ -37,7 +37,7 @@ function ProfileSkeleton() {
 }
 
 export default function ProfilePage() {
-    const { t } = useLocalization();
+    const { t: _t } = useLocalization();
     const { userProfile, firebaseUser, isLoading } = useAuth();
 
     if (isLoading) {

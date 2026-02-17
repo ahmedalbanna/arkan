@@ -56,7 +56,7 @@ export function SectionFormDialog({ sectionToEdit, children }: SectionFormDialog
   function onSubmit(data: SectionFormData) {
     if (sectionToEdit) {
       // When updating, we don't send the ID in the payload, only in the URL
-      const { id, ...updateData } = data;
+      const { ...updateData } = data;
       updateMutation.mutate(
         { sectionId: sectionToEdit.id, data: updateData },
         { onSuccess: () => { form.reset(); setIsOpen(false); } }

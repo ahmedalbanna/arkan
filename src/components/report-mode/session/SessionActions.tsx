@@ -11,7 +11,7 @@ import {
 import { useLocalization } from '@/context/LocalizationContext';
 import { useBuilderStore } from '@/hooks';
 import { useSaveProject } from '@/hooks/data/use-projects';
-import { Download, Loader2, PlusCircle, Save, Upload } from 'lucide-react';
+import { Loader2, PlusCircle, Save, Upload } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useRef } from 'react';
 import { BrowseProjectsDialog } from './BrowseProjectsDialog';
@@ -46,8 +46,6 @@ export function SessionActions({ isSaving }: SessionActionsProps) {
         if (!project) return;
         saveProjectMutation.mutate(project.toStateObject());
     };
-
-    const hasContent = project?.hasContent() ?? false;
 
     return (
         <TooltipProvider>

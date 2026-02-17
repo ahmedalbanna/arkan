@@ -19,8 +19,8 @@ interface Activity {
     agentId: string;
     createdAt: string;
     id: string;
-    input: any;
-    output: any;
+    input: Record<string, unknown>;
+    output: Record<string, unknown>;
 }
 
 interface RecentActivityProps {

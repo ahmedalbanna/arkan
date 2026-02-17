@@ -3,7 +3,7 @@
 
 import { auth } from '@/lib/firebase/client-init';
 import { userKeys } from '@/lib/query-keys';
-import { User, type UserProfile } from '@/lib/models';
+import { User } from '@/lib/models';
 import { getAuthenticatedToken } from '@/lib/utils/authUtils';
 import { fetchUserProfileApi, subscribeToUserProfile } from '@/services';
 import { useQuery, useQueryClient } from '@tanstack/react-query';

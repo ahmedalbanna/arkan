@@ -159,7 +159,7 @@ async function renderCode(slide: PptxGenJS.Slide, node: Code, y: number, h: numb
     slide.addText(node.value, {
         x: layout.CONTENT_X, y, w: layout.CONTENT_WIDTH, h, ...styles.body,
         ...codeStyle,
-        rtlMode: false, // Code is always LTR
+        rtlMode: isRtl, // Code is always LTR
         align: 'left'   // Code is always LTR
     });
 }

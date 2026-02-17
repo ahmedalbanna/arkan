@@ -30,7 +30,7 @@ export function useLogin() {
 
   return useMutation({
     mutationFn: (credentials: LoginCredentials) => loginWithEmail(credentials),
-    onSuccess: (user) => {
+    onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: userKeys.all }); // Refetch user data
       router.push('/builder');
       toast({ title: "Welcome back!" });

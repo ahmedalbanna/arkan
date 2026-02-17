@@ -14,9 +14,8 @@ import { useLocalization } from '@/context/LocalizationContext';
 import { useBuilderStore } from '@/hooks';
 import MarkdownEditor from './MarkdownEditor';
 import { CoverPage } from '../shared/CoverPage';
-import { BookOpenCheck, Brush, LayoutList, Bot, FileVideo, PencilLine, FileText } from 'lucide-react';
+import { BookOpenCheck, Brush, LayoutList, Bot, FileVideo, FileText } from 'lucide-react';
 import { TableOfContentForm } from './TableOfContentForm';
-import { useState } from 'react';
 
 const ReportSteps = () => {
   const { t } = useLocalization();

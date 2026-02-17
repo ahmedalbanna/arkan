@@ -62,8 +62,8 @@ export function useSaveProject() {
             queryClient.invalidateQueries({ queryKey: projectKeys.lists() });
             toast({ title: 'Project Saved', description: `"${savedProject.name}" has been saved to the cloud.` });
         },
-        onError: (error: any) => {
-            toast({ title: 'Error', description: `Failed to save project: ${error.message}`, variant: 'destructive' });
+        onError: (error) => {
+            toast({ title: 'Error', description: `Failed to save project: ${error instanceof Error ? error.message : 'Unknown error'}`, variant: 'destructive' });
         }
     });
 
@@ -82,7 +82,7 @@ export function useDeleteProject() {
         mutationFn: async (projectId: string) => {
             // Delete from local and server simultaneously
             const localDelete = localProjectService.deleteProject(projectId);
-            let serverDelete: Promise<any> | null = null;
+            let serverDelete: Promise<unknown> | null = null;
             if (navigator.onLine && firebaseUser) {
                 const token = await getAuthenticatedToken(firebaseUser);
                 serverDelete = deleteProjectApi(projectId, token);
@@ -96,8 +96,8 @@ export function useDeleteProject() {
             // Also remove from the specific detail query if it exists
             queryClient.removeQueries({ queryKey: projectKeys.detail(projectId) });
         },
-        onError: (error: any) => {
-            toast({ title: 'Delete Failed', description: error.message, variant: 'destructive' });
+        onError: (error) => {
+            toast({ title: 'Delete Failed', description: error instanceof Error ? error.message : 'Unknown error', variant: 'destructive' });
         },
     });
 }

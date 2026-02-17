@@ -16,7 +16,7 @@ export async function GET() {
     
     // Get Qdrant stats
     const vectorStore = getVectorStore();
-    let qdrantStats: any = {};
+    let qdrantStats: Record<string, unknown> = {};
     if (typeof vectorStore.getStats === 'function') {
       qdrantStats = await vectorStore.getStats();
     }

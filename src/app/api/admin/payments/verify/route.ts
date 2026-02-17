@@ -28,7 +28,7 @@ export const POST = withAuth(async ({ request, user }) => {
     let notificationRef = rtdb.ref(`notifications/${userId}`).push();
 
     if (status === 'verified') {
-      await adminDb.runTransaction(async (t: any) => {
+      await adminDb.runTransaction(async (t) => {
         let userRef = adminDb.collection('users').doc(userId);
         t.update(userRef, { credits: FieldValue.increment(creditsToGrant) });
 

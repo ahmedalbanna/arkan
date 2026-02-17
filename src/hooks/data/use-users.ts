@@ -51,11 +51,11 @@ export function useUserProfile(userId: string) {
  * Mutation hook for creating a new user.
  * Requires admin privileges.
  */
-export function useCreateUser(options?: { onSuccess?: (data: any) => void }) {
+export function useCreateUser(options?: { onSuccess?: (data: unknown) => void }) {
   const queryClient = useQueryClient();
   const { firebaseUser } = useAuth();
   return useMutation({
-    mutationFn: async (data: any) => {
+    mutationFn: async (data: Record<string, unknown>) => {
       const token = await getAuthenticatedToken(firebaseUser);
       return createUserService(data, token);
     },
@@ -128,10 +128,10 @@ export function useSendNotification() {
     onSuccess: () => {
       toast({ title: 'Notification Sent', description: 'The user has been notified of the changes.' });
     },
-    onError: (error: any) => {
+    onError: (error) => {
       let errorMessage = 'Failed to send notification.';
       // We don't want to bother the admin with "token not found" errors, as they are common.
-      if (error?.message && !error.message.includes('token not found')) {
+      if (error instanceof Error && error.message && !error.message.includes('token not found')) {
         errorMessage = error.message;
       }
       toast({ title: 'Notification Error', description: errorMessage, variant: 'destructive' });

@@ -2,16 +2,15 @@
 'use client';
 
 import { Project, type ProjectProperties } from '@/lib/models';
-import { Landmark, UploadCloud, Frame, Loader2, Book, Building, Brush, BookCopy } from 'lucide-react';
+import { Landmark, UploadCloud, Loader2, Book, Building, Brush } from 'lucide-react';
 import Image from 'next/image';
-import React, { useRef, useState } from 'react';
+import React, { useRef } from 'react';
 import ContentEditable, { ContentEditableEvent } from 'react-contenteditable';
 import { useBuilderStore } from '@/hooks';
 import { cn } from '@/lib/utils/cn';
 import { useImageUpload } from '@/hooks/core/useImageUpload';
 import { ToggleGroup, ToggleGroupItem } from '../ui/toggle-group';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/tooltip';
-import { Button } from '../ui/button';
 
 interface CoverPageProps {
     project: Project | null;

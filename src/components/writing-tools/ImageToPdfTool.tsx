@@ -18,8 +18,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useImageToPdfLogic } from '@/hooks/writing-tools/use-image-to-pdf-logic';
-import { FileText, Loader2, UploadCloud, X } from 'lucide-react';
-import Image from 'next/image';
+import { FileText, Loader2, UploadCloud } from 'lucide-react';
 import { SortableImageItem } from './SortableImageItem';
 
 export function ImageToPdfTool() {

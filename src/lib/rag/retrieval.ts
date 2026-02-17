@@ -6,7 +6,7 @@
  */
 
 import { generateEmbedding } from './embeddings';
-import { getVectorStore, type SearchResult } from './vector-store';
+import { getVectorStore } from './vector-store';
 
 export interface RetrievalOptions {
   topK?: number;
@@ -118,8 +118,8 @@ export async function retrieveContext(
     }
 
     return result;
-  } catch (error) {
-    console.error('Error retrieving context:', error);
+  } catch {
+    console.error('Error retrieving context');
     
     // Return empty context on error instead of failing
     return {

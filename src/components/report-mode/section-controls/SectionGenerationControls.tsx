@@ -8,13 +8,12 @@ import { Slider } from '@/components/ui/slider';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
 import { Checkbox } from '../../ui/checkbox';
-import type { Tone, Language, GenerationControlState, Section } from '@/lib/models';
+import type { Tone, GenerationControlState, Section } from '@/lib/models';
 import { Card, CardContent, CardDescription, CardHeader } from '../../ui/card';
 import { Info, Eye } from 'lucide-react';
 import { DiagramType, DiagramTypeSchema, ToneSchema } from '@/ai/schemas';
 import { Textarea } from '../../ui/textarea';
 import { useBuilderStore } from '@/hooks';
-import { Badge } from '../../ui/badge';
 import { Button } from '../../ui/button';
 import { FullPromptPreviewDialog } from './FullPromptPreviewDialog';
 

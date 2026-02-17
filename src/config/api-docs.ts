@@ -3,7 +3,6 @@
 import {
   Shield,
   Key,
-  Users,
   FolderKanban,
   Wand2,
   type LucideIcon,

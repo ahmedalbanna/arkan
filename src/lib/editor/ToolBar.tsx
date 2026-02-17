@@ -7,7 +7,7 @@ import { useBrowserSpeech } from '@/hooks';
 import { useLocalization } from '@/context/LocalizationContext';
 import { Editor } from '@tiptap/react';
 import {
-  AlignCenter, AlignLeft, AlignRight, Bold, BookText, Brush, Italic, Languages, List, ListOrdered, Loader2, Quote, Sigma, Square, Strikethrough, Table as TableIcon, Volume2, Heading1, Heading2, Heading3, Pilcrow, Palette, Baseline
+  Bold, BookText, Brush, Italic, Languages, Loader2, Square, Strikethrough, Volume2, Heading1, Heading2, Heading3, Pilcrow
 } from 'lucide-react';
 import React, { memo, useMemo } from 'react';
 

@@ -15,7 +15,6 @@ import {
 } from './control-types';
 import { z } from 'zod';
 import type { Project } from './project';
-import { PromptBuilder } from '../prompt-builder';
 
 export const SectionPropertiesSchema = z.object({
   id: z.string().optional(),

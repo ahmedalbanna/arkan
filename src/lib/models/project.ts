@@ -7,7 +7,7 @@ import { ExternalContext, type ExternalContextProperties } from './external-cont
 import type { ReportTemplateProperties } from './reportTemplate';
 import { arrayMove } from '@dnd-kit/sortable';
 import { parseMarkdownToContent } from '@/hooks/util/useMarkdownParser';
-import { Language, Behavior, CitationStyleSchema } from './control-types';
+import { Language, Behavior } from './control-types';
 
 // Flexible Type for Project Content - strictly enforcing structure now
 export type ProjectContent = readonly (Chapter | Section)[];
@@ -323,7 +323,7 @@ ${universityText}
     return this.updateSection('cover-page', s => s.with({ content: coverContent }));
   }
 
-  public applyTemplate(template: ReportTemplateProperties, allSections: SectionProperties[]): Project {
+  public applyTemplate(template: ReportTemplateProperties): Project {
     if (!template.content) {
       return this;
     }
@@ -486,7 +486,7 @@ ${universityText}
             try {
                 const json = JSON.parse(e.target?.result as string);
                 resolve(new Project(json as ProjectProperties));
-            } catch (err) {
+            } catch {
                 reject(new Error("Invalid or corrupted project file."));
             }
         };

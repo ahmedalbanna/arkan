@@ -2,6 +2,7 @@
  * Tests for Vector Store
  */
 
+import { beforeEach, describe, it } from 'node:test';
 import { VectorStore } from '../vector-store';
 
 describe('VectorStore', () => {

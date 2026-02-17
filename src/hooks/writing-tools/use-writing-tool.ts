@@ -14,7 +14,7 @@ import { useMutation, type UseMutationOptions } from '@tanstack/react-query';
  * @param options Optional React Query mutation options.
  * @returns A React Query mutation object.
  */
-export function useWritingTool<TData = unknown, TVariables = any>(
+export function useWritingTool<TData = unknown, TVariables = unknown>(
   endpoint: string,
   options?: Omit<UseMutationOptions<TData, Error, TVariables>, 'mutationFn'>
 ) {

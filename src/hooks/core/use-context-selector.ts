@@ -4,7 +4,7 @@
 import { useLocalization } from '@/context/LocalizationContext';
 import { useBuilderStore } from '@/hooks/core/useBuilderStore';
 import { useMemo, useCallback } from 'react';
-import type { SectionContext, ExternalContextType } from '@/lib/models';
+import type { ExternalContextType } from '@/lib/models';
 
 export function useContextSelector(itemKey: string) {
     const { t } = useLocalization();

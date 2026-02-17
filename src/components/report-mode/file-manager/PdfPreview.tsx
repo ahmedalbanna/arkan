@@ -33,7 +33,7 @@ export function PdfPreview({ fileUri }: PdfPreviewProps) {
                 const loadedPdf = await loadingTask.promise;
                 setPdf(loadedPdf);
                 setNumPages(loadedPdf.numPages);
-            } catch (e: any) {
+            } catch (e) {
                 console.error('Failed to load PDF', e);
                 setError('Failed to load PDF. The file may be corrupted.');
             } finally {
@@ -60,10 +60,10 @@ export function PdfPreview({ fileUri }: PdfPreviewProps) {
                         await page.render({
                             canvasContext: context,
                             viewport: viewport,
-                        } as any).promise;
+                        }).promise;
                     }
                 }
-            } catch (e: any) {
+            } catch (e) {
                 console.error('Failed to render page', e);
                 setError('Failed to render PDF page.');
             } finally {

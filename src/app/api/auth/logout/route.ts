@@ -13,7 +13,7 @@ export async function POST(_req: Request) {
     let response = NextResponse.json({ message: "Logout successful" }, { status: 200 });
     response.cookies.set(options);
     return response;
-  } catch (error: any) {
+  } catch (error) {
     return handleApiError(error);
   }
 }

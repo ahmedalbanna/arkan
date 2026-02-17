@@ -66,7 +66,7 @@ export const PUT = withAuth(async ({ request, params, user: requester }) => {
             return handleApiError(validation.error);
         }
 
-        const updateData: any = { ...validation.data, updatedAt: new Date().toISOString() };
+        const updateData: Record<string, unknown> = { ...validation.data, updatedAt: new Date().toISOString() };
 
         // If email is being updated, update it in Firebase Auth as well
         if (validation.data.email && validation.data.email !== requester.email) {
@@ -80,8 +80,8 @@ export const PUT = withAuth(async ({ request, params, user: requester }) => {
 
         const updatedUser = await getUserProfile(userId);
         return createApiResponse(updatedUser, 200);
-    } catch (error: any) {
-        if (error.code === 'auth/email-already-exists') {
+    } catch (error) {
+        if (error && typeof error === 'object' && 'code' in error && error.code === 'auth/email-already-exists') {
             return handleApiError({ message: "This email is already in use by another account." }, 409);
         }
         return handleApiError(error);

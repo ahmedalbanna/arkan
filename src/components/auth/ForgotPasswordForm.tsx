@@ -7,7 +7,6 @@ import { useForgotPassword } from '@/hooks/auth/use-auth-mutations';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Loader2 } from 'lucide-react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 
@@ -18,7 +17,6 @@ const formSchema = z.object({
 type FormValues = z.infer<typeof formSchema>;
 
 export default function ForgotPasswordForm() {
-  const router = useRouter();
   const forgotPasswordMutation = useForgotPassword();
 
   const form = useForm<FormValues>({

@@ -5,8 +5,6 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useLocalization } from '@/context/LocalizationContext';
 
-const USERS_PER_PAGE = 10;
-
 export function UserTableSkeleton() {
     const { t } = useLocalization();
     return (

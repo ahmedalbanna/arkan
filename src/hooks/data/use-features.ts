@@ -46,13 +46,13 @@ export function useUpdateFeature() {
 
             return { previousFeatures };
         },
-        onError: (err: any, variables, context) => {
+        onError: (err, variables, context) => {
             if (context?.previousFeatures) {
                 queryClient.setQueryData(featureKeys.lists(), context.previousFeatures);
             }
             toast({
                 title: "Update Failed",
-                description: err.message || "Could not update the feature.",
+                description: err instanceof Error ? err.message : "Could not update the feature.",
                 variant: "destructive",
             });
         },

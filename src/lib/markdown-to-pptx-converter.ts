@@ -2,15 +2,11 @@ import { templates } from '@/lib/pptx-styles'; // Keep for default styles
 import type { PptxStyleOptions } from '@/lib/types';
 import { type ListItem, type Root as MdastRoot } from 'mdast';
 import PptxGenJS from 'pptxgenjs';
-import rehypeSanitize from 'rehype-sanitize';
-import rehypeStringify from 'rehype-stringify';
 import remarkGfm from 'remark-gfm'; // Import remarkGfm
 import remarkParse from 'remark-parse';
-import remarkRehype from 'remark-rehype';
 import { unified } from 'unified';
-import { exportComponentAsPDF } from './pdf-exporter';
 import { getNodeText, splitAstIntoSlides } from './pptx-convert/ast-utils';
-import { DEFAULT_CODE_FONT, DEFAULT_FONT, layout } from './pptx-convert/constants';
+import { layout } from './pptx-convert/constants';
 import { createSlidesWithContent, type FontOptions } from './pptx-convert/slide-layout-engine';
 import { processPlantUml } from './utils/processPlantUml';
 import { convertMarkdownToPdf } from './utils/pdf-utils'; // Import the moved function

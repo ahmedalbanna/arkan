@@ -5,7 +5,7 @@ import { create } from 'zustand';
 import type { AgentProperties } from '@/lib/models';
 import { fetchAgentsApi, createAgentApi, updateAgentApi, deleteAgentApi } from '@/services/api/agentService';
 import { useAuth } from '@/context/AuthContext';
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from './util/use-toast';
 import { agentKeys } from '@/lib/query-keys';

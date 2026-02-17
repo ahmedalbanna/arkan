@@ -8,7 +8,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { useLocalization } from '@/context/LocalizationContext';
 import type { ReportTemplateProperties } from '@/lib/models';
 import { MarkdownViewer } from '@/components/shared/MarkdownViewer';
 import { Label } from '@/components/ui/label';
@@ -63,7 +62,6 @@ function TemplatePreview({ template, onApply, onBack, isLoading }: { template: R
 }
 
 export default function ApplyTemplatePanel() {
-  const { t } = useLocalization();
   const { data: templates, isLoading, isError, error } = useReportTemplates();
   const [searchQuery, setSearchQuery] = useState('');
   const [previewTemplate, setPreviewTemplate] = useState<ReportTemplateProperties | null>(null);

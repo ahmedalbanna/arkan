@@ -7,16 +7,12 @@
 
 import { Timestamp, getFirestore, type Firestore } from 'firebase-admin/firestore';
 import { initializeApp, getApps } from 'firebase-admin/app';
+import { doc, collection, setDoc, getDocs, query, where } from 'firebase/firestore';
 
 // Note: These functions are not available in firebase-admin/firestore
 // They would need to be implemented using firebase-admin API
 // For now, we'll skip Firestore persistence
-const collection = (...args: any[]) => null as any;
-const doc = (...args: any[]) => null as any;
-const setDoc = (...args: any[]) => Promise.resolve();
-const getDocs = (...args: any[]) => Promise.resolve({ forEach: () => {} } as any);
-const query = (...args: any[]) => null as any;
-const where = (...args: any[]) => null as any;
+
 
 // Initialize Firebase Admin if not already initialized
 let db: Firestore | null = null;

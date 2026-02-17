@@ -8,7 +8,7 @@ import { ArrowRight, FileText, Bot, FileSpreadsheet, Presentation, GitGraph, Boo
 import Link from 'next/link';
 
 // The 'featuredProjects' prop is no longer used but kept to avoid breaking changes if the page is rendered from different places.
-export default function HomePageContent({ }: { featuredProjects: any[] }) {
+export default function HomePageContent({ }: { featuredProjects: unknown[] }) {
     const { t, locale } = useLocalization();
     const { firebaseUser } = useAuth();
 
@@ -88,13 +88,13 @@ export default function HomePageContent({ }: { featuredProjects: any[] }) {
                     </h1>
                     <p
                         className="text-lg md:text-xl text-muted-foreground max-w-3xl mx-auto mb-10 animate-fade-in-up"
-                        style={{ animationDelay: '2.8s' } as React.CSSProperties}
+                        style={{ animationDelay: '2.8s' }}
                     >
                         {t('home.heroSubtitle')}
                     </p>
                     <div
                         className="flex flex-col sm:flex-row justify-center items-center gap-4 animate-fade-in-up"
-                        style={{ animationDelay: '3s' } as React.CSSProperties}
+                        style={{ animationDelay: '3s' }}
                     >
                         <Button asChild size="lg" className="font-headline text-lg w-full sm:w-auto shadow-lg hover:shadow-primary/30 transition-shadow">
                             <Link href={firebaseUser ? "/builder" : "/login"}>

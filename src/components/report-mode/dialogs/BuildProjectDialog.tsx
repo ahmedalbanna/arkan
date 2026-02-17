@@ -73,7 +73,7 @@ export function BuildProjectDialog({
           </DialogDescription>
         </DialogHeader>
 
-        <Tabs value={viewMode} onValueChange={(v) => setViewMode(v as any)} className="flex-1 flex flex-col min-h-0">
+        <Tabs value={viewMode} onValueChange={(v) => setViewMode(v as 'plan' | 'prompt')} className="flex-1 flex flex-col min-h-0">
           <div className="flex-shrink-0 flex justify-between items-center mb-2">
             <TabsList>
               <TabsTrigger value="plan"><Eye className="mr-2 h-4 w-4" /> Generation Plan</TabsTrigger>

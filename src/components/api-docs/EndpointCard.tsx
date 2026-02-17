@@ -10,7 +10,7 @@ import { Card } from "@/components/ui/card";
 import { ApiMethodBadge } from "@/components/ui/api-badge";
 import { CodeBlock } from "./CodeBlock";
 import { ApiTester } from "./ApiTester";
-import { Shield, Key, type LucideIcon } from "lucide-react";
+import { Shield, Key } from "lucide-react";
 import { type ApiEndpoint } from "@/config/api-docs";
 
 interface EndpointCardProps {

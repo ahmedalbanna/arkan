@@ -9,18 +9,16 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { useBuilderStore } from '@/hooks';
-import { Loader2, UploadCloud, Trash2, X } from 'lucide-react';
+import { Trash2, X } from 'lucide-react';
 import { ScrollArea } from '../../ui/scroll-area';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../ui/card';
 import { useEffect, useState } from 'react';
-import Image from 'next/image';
-import { Label } from '../../ui/label';
 import { CustomSelect } from '../../ui/CustomSelect';
-import { useImageUpload } from '@/hooks/core/useImageUpload';
-import { LanguageSchema, BehaviorSchema, type Behavior, type ProjectProperties, CitationStyleSchema } from '@/lib/models';
+import { LanguageSchema, BehaviorSchema, type ProjectProperties } from '@/lib/models';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../../ui/select';
 import { Slider } from '../../ui/slider';
-import { Badge } from '../../ui/badge';
+import { Label } from '@/components/ui/label';
+import { Badge } from '@/components/ui/badge';
 
 const settingsSchema = z.object({
   name: z.string().min(1, 'Project name is required.'),
@@ -83,8 +81,8 @@ function TagInput({ label, value, onChange, placeholder }: { label: string; valu
 
 export default function ProjectSettingsPanel() {
   const { project, updateProject } = useBuilderStore();
-  const [logoPreview, setLogoPreview] = useState<string | null>(null);
-  const { isUploading, handleFileUpload } = useImageUpload();
+  const [ _logoPreview, setLogoPreview] = useState<string | null>(null);
+  // const { isUploading, handleFileUpload } = useImageUpload();
 
   const form = useForm<SettingsFormValues>({
     resolver: zodResolver(settingsSchema),

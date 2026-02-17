@@ -31,7 +31,7 @@ export async function POST(request: Request) {
 
         // Use the Admin SDK to interact with the Realtime Database
         let db = getDatabase();
-        let updates: { [key: string]: any } = {};
+        let updates: Record<string, boolean> = {};
         notificationIds.forEach(id => {
             updates[`/notifications/${userId}/${id}/isRead`] = true;
         });

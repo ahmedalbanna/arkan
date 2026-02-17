@@ -25,7 +25,7 @@ export function ApiTester({ endpoint }: ApiTesterProps) {
   const [body, setBody] = useState(
     endpoint.requestBody ? JSON.stringify(endpoint.requestBody, null, 2) : ''
   );
-  const [response, setResponse] = useState<any>(null);
+  const [response, setResponse] = useState<Record<string, unknown> | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -63,11 +63,12 @@ export function ApiTester({ endpoint }: ApiTesterProps) {
 
       setResponse(data);
 
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Unknown error';
+      setError(errorMessage);
       toast({
         title: 'API Request Failed',
-        description: err.message,
+        description: errorMessage,
         variant: 'destructive',
       });
     } finally {

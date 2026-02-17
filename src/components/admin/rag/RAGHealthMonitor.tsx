@@ -15,7 +15,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 
 interface HealthCheck {
   status: 'ok' | 'error' | 'unknown';
-  details: any;
+  details: Record<string, unknown>;
 }
 
 interface HealthStatus {

@@ -9,7 +9,7 @@ import { z } from 'zod';
 import { runAgentFlow } from '@/ai/flows/run-agent-flow';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
-import { Form, FormControl, FormField, FormItem } from '@/components/ui/form';
+import { Form, FormField, FormItem } from '@/components/ui/form';
 import { Textarea } from '@/components/ui/textarea';
 import { useAgentManager } from '@/hooks/use-agent-store';
 import type { AgentProperties } from '@/lib/models/agent';

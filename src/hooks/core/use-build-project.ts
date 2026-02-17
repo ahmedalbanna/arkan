@@ -1,11 +1,9 @@
 
 'use client';
 
-import { useBuilderStore } from '@/hooks/core/useBuilderStore';
 import type { Project, Section } from '@/lib/models';
 
 export function useBuildProject() {
-    const { project } = useBuilderStore();
 
     const getContextNames = (proj: Project, section: Section): string[] => {
         const context = section.context;

@@ -22,7 +22,7 @@ async function verifyAdmin() {
       return { authorized: false, message: 'Forbidden' };
     }
     return { authorized: true };
-  } catch (error) {
+  } catch {
     return { authorized: false, message: 'Unauthorized' };
   }
 }
@@ -58,8 +58,8 @@ export async function handleUpdateUser(prevState: any, formData: FormData) {
     revalidatePath('/admin/manage-users');
     revalidatePath(`/admin/manage-users/${userId}/edit`);
     return { success: true, message: 'User updated successfully.' };
-  } catch (error) {
-    console.error('Failed to update user:', error);
+  } catch (_error) {
+    console.error('Failed to update user:', _error);
     return { errors: { _form: 'An unexpected error occurred.' } };
   }
 }
@@ -85,7 +85,6 @@ export async function handleDeleteUser(prevState: any, formData: FormData) {
     try {
         await deleteUser(validatedFields.data.userId);
     } catch {
-        console.error('Failed to delete user:', error);
         return { error: 'Failed to delete user.' };
     }
 

@@ -4,20 +4,19 @@
 
 import { useCallback, useMemo } from 'react';
 import { Editor } from '@tiptap/react';
-import { useWritingTool } from '@/hooks';
 import { useToast } from '@/hooks/util/use-toast';
 import { useLocalization } from '@/context/LocalizationContext';
-import { marked } from 'marked';
 import { useMutation } from '@tanstack/react-query';
 import { useAuth } from '@/context/AuthContext';
 import { useBuilderStore } from '../core/useBuilderStore';
 import { generateReportSectionApi } from '@/services/api/reportService';
 import type { SectionName } from '@/ai/schemas';
-import { PromptBuilder } from '@/lib/prompt-builder';
 import { writingToolApi } from '@/services/api/writingToolsService';
-import { Chapter, type Project, type Section } from '@/lib/models';
-import { parseMarkdownToContent } from '../util/useMarkdownParser';
+import { Chapter, Project } from '@/lib/models';
 import { useEditorStore } from '../core/use-editor-store';
+import { marked } from 'marked';
+import { parseMarkdownToContent } from '../util/useMarkdownParser';
+import { PromptBuilder } from '@/lib/prompt-builder';
 
 interface AiActionsProps {
   editor?: Editor | null;
@@ -209,7 +208,7 @@ export function useAiActions({ editor: initialEditor }: AiActionsProps = {}) {
 
  const generateProjectMutation = useMutation({
     mutationKey: ['generateProjectContent'],
-    mutationFn: async ({ project, selectedSectionIds }: { project: Project; selectedSectionIds: Set<string> }) => {
+    mutationFn: async ({ selectedSectionIds }: { project: Project; selectedSectionIds: Set<string> }) => {
       if (!firebaseUser) throw new Error("User not found.");
       if (selectedSectionIds.size === 0) throw new Error('No sections were selected for generation.');
       

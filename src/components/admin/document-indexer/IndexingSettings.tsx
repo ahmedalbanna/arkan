@@ -63,7 +63,7 @@ export function IndexingSettings({ options, onChange }: Props) {
           <Label>Document Type</Label>
           <Select
             value={options.type}
-            onValueChange={(value: any) => onChange({ ...options, type: value })}
+            onValueChange={(value) => onChange({ ...options, type: value })}
           >
             <SelectTrigger>
               <SelectValue />

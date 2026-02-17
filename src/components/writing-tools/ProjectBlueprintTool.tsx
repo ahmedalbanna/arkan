@@ -25,8 +25,7 @@ export function ProjectBlueprintTool() {
     handleDownload,
   } = useProjectBlueprintLogic();
 
-  const { register, setValue, watch, formState: { errors } } = form;
-  const complexityValue = watch('complexity');
+  const { register, setValue, formState: { errors } } = form;
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">

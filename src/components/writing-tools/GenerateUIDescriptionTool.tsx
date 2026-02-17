@@ -26,8 +26,10 @@ export function GenerateUIDescriptionTool() {
   const { toast } = useToast();
 
   const mutation = useWritingTool('/api/writing-tools/generate-ui-description', {
-    onSuccess: (data: any) => {
-      setGeneratedDescription(data.uiDescription);
+    onSuccess: (data) => {
+      if (data && typeof data === 'object' && 'uiDescription' in data) {
+        setGeneratedDescription(String(data.uiDescription));
+      }
       toast({ title: t('writingTools.uiDescription.successToast') });
     },
     onError: (error) => {

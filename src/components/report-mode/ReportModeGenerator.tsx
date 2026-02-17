@@ -3,7 +3,7 @@
 import { useLocalization } from '@/context/LocalizationContext';
 import { useMobile } from '@/hooks';
 import { cn } from '@/lib/utils/cn';
-import { BookOpenText, LayoutTemplate, Settings, UploadCloud } from 'lucide-react';
+import { BookOpenText, Settings } from 'lucide-react';
 import React, { Suspense, lazy, useState } from 'react';
 import { Button } from '../ui/button';
 import { CollapsibleSidePanel } from '../ui/CollapsibleSidePanel';

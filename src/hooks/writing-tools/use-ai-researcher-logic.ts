@@ -4,7 +4,7 @@
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { useWritingTool, useProjects, useToast } from '@/hooks';
+import { useWritingTool, useToast } from '@/hooks';
 import type { AIResearcherOutput, LiteratureReviewOutput, QuestionAnsweringOutput, FactRetrievalOutput } from '@/ai/schemas';
 import { useLocalization } from '@/context/LocalizationContext';
 import { useMemo, useRef, useState, useEffect } from 'react';
@@ -37,12 +37,6 @@ const factRetrievalSchema = z.object({
   requireSource: z.boolean().optional().default(true),
 });
 
-type ResearcherFormValues = z.infer<typeof researcherSchema>;
-type LiteratureReviewFormValues = z.infer<typeof literatureReviewSchema>;
-type QuestionAnsweringFormValues = z.infer<typeof questionAnsweringSchema>;
-type FactRetrievalFormValues = z.infer<typeof factRetrievalSchema>;
-
-type ResearchFormValues = ResearcherFormValues | LiteratureReviewFormValues | QuestionAnsweringFormValues | FactRetrievalFormValues;
 
 function convertToMarkdown(
   results: AIResearcherOutput | LiteratureReviewOutput | QuestionAnsweringOutput | FactRetrievalOutput,

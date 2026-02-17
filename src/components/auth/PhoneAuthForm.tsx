@@ -22,7 +22,7 @@ const otpSchema = z.object({
 
 export default function PhoneAuthForm() {
   const [step, setStep] = useState<'phone' | 'otp'>('phone');
-  const [confirmationResult, setConfirmationResult] = useState<any>(null);
+  const [confirmationResult, setConfirmationResult] = useState<unknown>(null);
   const { sendOtp, verifyOtp, isLoading, error } = usePhoneSignIn();
 
   const phoneForm = useForm<{ phoneNumber: string }>({

@@ -11,7 +11,7 @@ const resetPasswordSchema = z.object({
 });
 
 
-export const POST = withAuth(async ({ user: _user, request }: { user: any, request: NextRequest }) => {
+export const POST = withAuth(async ({ user: _user, request }: { user: unknown, request: NextRequest }) => {
   try {
     // Note: The user ID from the URL parameter is not used here,
     // as the schema only validates the ID in the request body.
