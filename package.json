@@ -23,6 +23,7 @@
     "docker:down": "docker-compose down",
     "docker:logs": "docker-compose logs -f",
     "migration:verify": "tsx scripts/verify-migration.ts",
+    "test:triggers": "tsx scripts/test-triggers-and-rls.ts",
     "qdrant:start": "docker-compose up -d qdrant",
     "qdrant:stop": "docker-compose stop qdrant",
     "qdrant:logs": "docker-compose logs -f qdrant",
