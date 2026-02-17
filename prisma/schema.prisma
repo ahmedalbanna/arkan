@@ -1,0 +1,525 @@
+// Prisma Schema for Arkan PostgreSQL Migration
+// This schema is based on the migration plan in docs/migration/
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ============================================================================
+// NEXTAUTH MODELS
+// ============================================================================
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String?   @unique
+  emailVerified DateTime? @map("email_verified")
+  image         String?
+  role          UserRole  @default(USER)
+  
+  // Arkan-specific fields
+  fullName      String?   @map("full_name")
+  phone         String?   @unique
+  phoneVerified DateTime? @map("phone_verified")
+  credits       Int       @default(0)
+  totalSpent    Decimal   @default(0) @map("total_spent") @db.Decimal(10, 2)
+  
+  // Metadata
+  createdAt     DateTime  @default(now()) @map("created_at")
+  updatedAt     DateTime  @updatedAt @map("updated_at")
+  lastLoginAt   DateTime? @map("last_login_at")
+  
+  // Relations
+  accounts      Account[]
+  sessions      Session[]
+  projects      Project[]
+  transactions  Transaction[]
+  creditLedger  CreditLedger[]
+  notifications Notification[]
+  apiTokens     ApiToken[]
+  
+  @@map("users")
+  @@index([email])
+  @@index([phone])
+  @@index([role])
+}
+
+enum UserRole {
+  USER
+  ADMIN
+  SUPER_ADMIN
+}
+
+// NextAuth Account Model
+model Account {
+  id                String  @id @default(cuid())
+  userId            String  @map("user_id")
+  type              String
+  provider          String
+  providerAccountId String  @map("provider_account_id")
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+  
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@unique([provider, providerAccountId])
+  @@map("accounts")
+  @@index([userId])
+}
+
+// NextAuth Session Model
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique @map("session_token")
+  userId       String   @map("user_id")
+  expires      DateTime
+  
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@map("sessions")
+  @@index([userId])
+}
+
+// NextAuth Verification Token Model
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+  
+  @@unique([identifier, token])
+  @@map("verification_tokens")
+}
+
+// ============================================================================
+// FINANCIAL MODELS
+// ============================================================================
+
+model Transaction {
+  id              String            @id @default(cuid())
+  userId          String            @map("user_id")
+  type            TransactionType
+  status          TransactionStatus @default(PENDING)
+  
+  // Amounts
+  amount          Decimal           @db.Decimal(10, 2)
+  credits         Int
+  
+  // Payment details
+  paymentMethod   String?           @map("payment_method")
+  paymentRef      String?           @unique @map("payment_ref")
+  receiptImage    String?           @map("receipt_image")
+  
+  // Admin handling
+  verifiedBy      String?           @map("verified_by")
+  verifiedAt      DateTime?         @map("verified_at")
+  rejectionReason String?           @map("rejection_reason")
+  
+  // Metadata
+  metadata        Json?
+  createdAt       DateTime          @default(now()) @map("created_at")
+  updatedAt       DateTime          @updatedAt @map("updated_at")
+  
+  // Relations
+  user            User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@map("transactions")
+  @@index([userId])
+  @@index([status])
+  @@index([type])
+  @@index([createdAt])
+}
+
+enum TransactionType {
+  PURCHASE
+  GIFT
+  REFUND
+  BONUS
+}
+
+enum TransactionStatus {
+  PENDING
+  VERIFIED
+  REJECTED
+  COMPLETED
+}
+
+// Credit Ledger (Audit Trail)
+model CreditLedger {
+  id            String   @id @default(cuid())
+  userId        String   @map("user_id")
+  
+  // Transaction details
+  type          String   // 'credit' or 'debit'
+  amount        Int
+  balance       Int      // Balance after transaction
+  
+  // Reference
+  reason        String
+  referenceId   String?  @map("reference_id")
+  referenceType String?  @map("reference_type") // 'transaction', 'generation', etc.
+  
+  // Metadata
+  metadata      Json?
+  createdAt     DateTime @default(now()) @map("created_at")
+  
+  // Relations
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@map("credit_ledger")
+  @@index([userId])
+  @@index([createdAt])
+  @@index([referenceId, referenceType])
+}
+
+// ============================================================================
+// PROJECT MODELS
+// ============================================================================
+
+model Project {
+  id          String   @id @default(cuid())
+  userId      String   @map("user_id")
+  
+  // Project details
+  title       String
+  description String?
+  type        String   // 'report', 'presentation', etc.
+  language    String   @default("ar")
+  
+  // Content
+  content     Json?    // Stores chapters, sections, etc.
+  metadata    Json?
+  
+  // Template
+  templateId  String?  @map("template_id")
+  
+  // Status
+  status      String   @default("draft")
+  
+  // Timestamps
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+  
+  // Relations
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  template    ReportTemplate? @relation(fields: [templateId], references: [id], onDelete: SetNull)
+  
+  @@map("projects")
+  @@index([userId])
+  @@index([type])
+  @@index([status])
+  @@index([createdAt])
+}
+
+// ============================================================================
+// TEMPLATE MODELS
+// ============================================================================
+
+model ReportTemplate {
+  id              String   @id @default(cuid())
+  
+  // Template details
+  key             String   @unique
+  name            String
+  description     String?
+  category        String?
+  educationalLevel String? @map("educational_level")
+  
+  // Content
+  coverConfig     Json?    @map("cover_config")
+  sections        Json?    // Array of section configurations
+  
+  // Metadata
+  isActive        Boolean  @default(true) @map("is_active")
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+  
+  // Relations
+  projects        Project[]
+  
+  @@map("report_templates")
+  @@index([key])
+  @@index([category])
+  @@index([educationalLevel])
+}
+
+model DocxTemplate {
+  id          String   @id @default(cuid())
+  
+  // Template details
+  key         String   @unique
+  name        String
+  description String?
+  
+  // File info
+  fileName    String   @map("file_name")
+  fileUrl     String   @map("file_url")
+  fileSize    Int?     @map("file_size")
+  
+  // Metadata
+  isActive    Boolean  @default(true) @map("is_active")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+  
+  @@map("docx_templates")
+  @@index([key])
+}
+
+model PptxTemplate {
+  id          String   @id @default(cuid())
+  
+  // Template details
+  key         String   @unique
+  name        String
+  description String?
+  
+  // File info
+  fileName    String   @map("file_name")
+  fileUrl     String   @map("file_url")
+  fileSize    Int?     @map("file_size")
+  
+  // Metadata
+  isActive    Boolean  @default(true) @map("is_active")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+  
+  @@map("pptx_templates")
+  @@index([key])
+}
+
+// ============================================================================
+// AGENT MODELS
+// ============================================================================
+
+model AgentCategory {
+  id          String   @id @default(cuid())
+  
+  // Category details
+  name        String   @unique
+  description String?
+  icon        String?
+  
+  // Display
+  order       Int      @default(0)
+  isActive    Boolean  @default(true) @map("is_active")
+  
+  // Timestamps
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+  
+  // Relations
+  agents      Agent[]
+  
+  @@map("agent_categories")
+  @@index([order])
+}
+
+model Agent {
+  id          String   @id @default(cuid())
+  
+  // Agent details
+  name        String
+  description String?
+  categoryId  String   @map("category_id")
+  
+  // Configuration
+  config      Json?    // Stores prompts, parameters, etc.
+  
+  // Display
+  order       Int      @default(0)
+  isActive    Boolean  @default(true) @map("is_active")
+  
+  // Timestamps
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+  
+  // Relations
+  category    AgentCategory @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  
+  @@map("agents")
+  @@index([categoryId])
+  @@index([order])
+}
+
+// ============================================================================
+// RAG & INDEXING MODELS
+// ============================================================================
+
+model IndexedDocument {
+  id            String   @id @default(cuid())
+  
+  // Document details
+  title         String
+  fileName      String   @map("file_name")
+  fileType      String   @map("file_type")
+  fileSize      Int      @map("file_size")
+  
+  // Indexing
+  collectionName String  @map("collection_name")
+  vectorCount   Int      @default(0) @map("vector_count")
+  status        String   @default("pending")
+  
+  // Metadata
+  metadata      Json?
+  error         String?
+  
+  // Timestamps
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+  indexedAt     DateTime? @map("indexed_at")
+  
+  @@map("indexed_documents")
+  @@index([collectionName])
+  @@index([status])
+  @@index([createdAt])
+}
+
+// ============================================================================
+// NOTIFICATION MODELS
+// ============================================================================
+
+model Notification {
+  id        String   @id @default(cuid())
+  userId    String   @map("user_id")
+  
+  // Content
+  title     String
+  message   String
+  type      String   @default("info")
+  
+  // Status
+  isRead    Boolean  @default(false) @map("is_read")
+  
+  // Metadata
+  metadata  Json?
+  createdAt DateTime @default(now()) @map("created_at")
+  readAt    DateTime? @map("read_at")
+  
+  // Relations
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@map("notifications")
+  @@index([userId])
+  @@index([isRead])
+  @@index([createdAt])
+}
+
+// ============================================================================
+// SETTINGS & CONFIGURATION
+// ============================================================================
+
+model Setting {
+  id        String   @id @default(cuid())
+  
+  // Setting details
+  key       String   @unique
+  value     Json
+  type      String   @default("string")
+  
+  // Metadata
+  description String?
+  isPublic  Boolean  @default(false) @map("is_public")
+  
+  // Timestamps
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+  
+  @@map("settings")
+  @@index([key])
+}
+
+model Feature {
+  id          String   @id @default(cuid())
+  
+  // Feature details
+  key         String   @unique
+  name        String
+  description String?
+  
+  // Status
+  isEnabled   Boolean  @default(false) @map("is_enabled")
+  
+  // Configuration
+  config      Json?
+  
+  // Timestamps
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+  
+  @@map("features")
+  @@index([key])
+  @@index([isEnabled])
+}
+
+// ============================================================================
+// API & SECURITY
+// ============================================================================
+
+model ApiToken {
+  id        String   @id @default(cuid())
+  userId    String   @map("user_id")
+  
+  // Token details
+  name      String
+  token     String   @unique
+  
+  // Permissions
+  scopes    String[] @default([])
+  
+  // Status
+  isActive  Boolean  @default(true) @map("is_active")
+  expiresAt DateTime? @map("expires_at")
+  
+  // Usage tracking
+  lastUsedAt DateTime? @map("last_used_at")
+  
+  // Timestamps
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+  
+  // Relations
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@map("api_tokens")
+  @@index([userId])
+  @@index([token])
+}
+
+model GenerationLog {
+  id          String   @id @default(cuid())
+  
+  // Generation details
+  userId      String?  @map("user_id")
+  flowName    String   @map("flow_name")
+  
+  // Input/Output
+  input       Json?
+  output      Json?
+  
+  // Performance
+  duration    Int?     // milliseconds
+  tokenCount  Int?     @map("token_count")
+  
+  // Status
+  status      String   @default("success")
+  error       String?
+  
+  // Metadata
+  metadata    Json?
+  createdAt   DateTime @default(now()) @map("created_at")
+  
+  @@map("generation_logs")
+  @@index([userId])
+  @@index([flowName])
+  @@index([status])
+  @@index([createdAt])
+}
