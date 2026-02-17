@@ -9,6 +9,8 @@ import { GenerateTocOutputSchema } from '@/ai/schemas';
 import type { TocSection } from '@/lib/models';
 import { useMutation } from '@tanstack/react-query';
 import { useMemo } from 'react';
+import { useAuth } from '@/context/AuthContext';
+import { writingToolApi } from '@/services/api/writingToolsService';
 
 // Updated schema to include the optional additional instructions
 const formSchema = z.object({
@@ -26,35 +28,27 @@ const formatTocToMarkdown = (toc: TocSection[]): string => {
 
 export function useGenerateTocLogic() {
   const { toast } = useToast();
+  const { firebaseUser } = useAuth();
 
   const mutation = useMutation({
     mutationFn: async (data: FormValues): Promise<z.infer<typeof GenerateTocOutputSchema>> => {
-      // Hardcoded response for testing
-      await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate network delay
+      if (!firebaseUser) throw new Error('User not authenticated');
+      const token = await firebaseUser.getIdToken();
       
-      console.log("Generating TOC with data:", data); // For debugging
-
-      const hardcodedData: z.infer<typeof GenerateTocOutputSchema> = {
-        tableOfContents: [
-          {
-            title: "Chapter 1: Introduction (Sample)",
-            sections: ["1.1 Problem Statement", "1.2 Project Objectives", "1.3 Scope of Work"],
+      return writingToolApi<any, z.infer<typeof GenerateTocOutputSchema>>(
+        '/api/writing-tools/generate-toc',
+        {
+          data: {
+            flow: 'generate-toc',
+            projectDescription: data.projectDescription,
+            additionalInstructions: data.additionalInstructions,
           },
-          {
-            title: "Chapter 2: System Analysis (Sample)",
-            sections: ["2.1 Functional Requirements", "2.2 Non-Functional Requirements", "2.3 User Stories"],
-          },
-          {
-            title: "Chapter 3: Conclusion (Sample)",
-            sections: ["3.1 Final Summary", "3.2 Future Work"],
-          },
-        ],
-      };
-      
-      return hardcodedData;
+          token
+        }
+      );
     },
     onSuccess: () => {
-        toast({ title: "Sample Table of Contents generated!" });
+        toast({ title: "Table of Contents generated successfully!" });
     },
     onError: (error: Error) => {
       toast({

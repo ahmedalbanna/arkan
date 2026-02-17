@@ -10,6 +10,8 @@ import type { DiffPart } from '@/lib/utils/diff';
 import { computeDiff } from '@/lib/utils/diff';
 import { useLocalization } from '@/context/LocalizationContext';
 import { useMutation } from '@tanstack/react-query';
+import { useAuth } from '@/context/AuthContext';
+import { writingToolApi } from '@/services/api/writingToolsService';
 
 const formSchema = z.object({
   text: z.string().min(10, 'Please enter at least 10 characters.'),
@@ -23,29 +25,9 @@ const formSchema = z.object({
 
 type FormValues = z.infer<typeof formSchema>;
 
-// Helper for mocked mutations
-const createMockMutation = (onSuccessCallback: (data: any, variables: any) => void) => {
-    return useMutation({
-        mutationFn: async (variables: any) => {
-            await new Promise(resolve => setTimeout(resolve, 500)); // Simulate network delay
-            // This is where you return the hardcoded data
-            if (variables.style) return { rewrittenText: `This is a hardcoded rewritten text in a '${variables.style}' style.` };
-            if (variables.ratio) return { summarizedText: `This is a hardcoded summary compressed to about ${variables.ratio}% of the original.` };
-            if (variables.targetAudience || variables.tone) return { editedText: 'This is a sample of improved style, tailored for the specified audience and tone.', improvements: ['Improved sentence flow', 'Adjusted vocabulary'] };
-            if (variables.targetLevel) return { enhancedText: 'This text is now easier to read, with simpler sentences and clearer words.', readabilityScore: 85, improvements: ['Simplified complex sentences'] };
-            if (variables.targetReduction !== undefined) return { conciseText: 'This is the concise version of your text.', originalWordCount: variables.text.split(' ').length, newWordCount: Math.floor(variables.text.split(' ').length * 0.8), reductionPercentage: 20 };
-            if (variables.focusAreas) return { improvedText: 'This text has been analyzed for clarity based on your focus areas.', clarityScore: 92, suggestions: [{ issue: 'Vague phrasing', suggestion: 'Use more specific language' }] };
-            return { message: "Mocked response" };
-        },
-        onSuccess: (data, variables) => onSuccessCallback(data, variables),
-        onError: (error, variables, context) => {
-            // Your existing error handling
-        }
-    });
-};
-
 export function useTextStylistLogic() {
   const { t } = useLocalization();
+  const { firebaseUser } = useAuth();
   const [originalText, setOriginalText] = useState('');
   const [processedText, setProcessedText] = useState<any>(null); // Can be string or object
   const [diff, setDiff] = useState<DiffPart[] | null>(null);
@@ -71,13 +53,92 @@ export function useTextStylistLogic() {
     setDiff(computeDiff(original, resultText));
     toast({ title: 'Processing Complete!' });
   };
+
+  const handleError = (error: Error) => {
+    toast({ 
+      title: 'Error', 
+      description: error.message, 
+      variant: 'destructive' 
+    });
+  };
   
-  const rewriteMutation = createMockMutation(handleSuccess);
-  const summarizeMutation = createMockMutation(handleSuccess);
-  const styleEditorMutation = createMockMutation(handleSuccess);
-  const readabilityMutation = createMockMutation(handleSuccess);
-  const concisenessMutation = createMockMutation(handleSuccess);
-  const clarityMutation = createMockMutation(handleSuccess);
+  const rewriteMutation = useMutation({
+    mutationFn: async (variables: any) => {
+      if (!firebaseUser) throw new Error('User not authenticated');
+      const token = await firebaseUser.getIdToken();
+      return writingToolApi<any, any>('/api/writing-tools/rewrite-text', {
+        data: { flow: 'rewrite-text', text: variables.text, style: variables.style },
+        token
+      });
+    },
+    onSuccess: (data, variables) => handleSuccess(data, variables),
+    onError: handleError,
+  });
+
+  const summarizeMutation = useMutation({
+    mutationFn: async (variables: any) => {
+      if (!firebaseUser) throw new Error('User not authenticated');
+      const token = await firebaseUser.getIdToken();
+      return writingToolApi<any, any>('/api/writing-tools/summarize-text-with-ratio', {
+        data: { flow: 'summarize-with-ratio', text: variables.text, ratio: variables.ratio },
+        token
+      });
+    },
+    onSuccess: (data, variables) => handleSuccess(data, variables),
+    onError: handleError,
+  });
+
+  const styleEditorMutation = useMutation({
+    mutationFn: async (variables: any) => {
+      if (!firebaseUser) throw new Error('User not authenticated');
+      const token = await firebaseUser.getIdToken();
+      return writingToolApi<any, any>('/api/writing-tools/style-editor', {
+        data: { flow: 'style-editor', text: variables.text, targetAudience: variables.targetAudience, tone: variables.tone },
+        token
+      });
+    },
+    onSuccess: (data, variables) => handleSuccess(data, variables),
+    onError: handleError,
+  });
+
+  const readabilityMutation = useMutation({
+    mutationFn: async (variables: any) => {
+      if (!firebaseUser) throw new Error('User not authenticated');
+      const token = await firebaseUser.getIdToken();
+      return writingToolApi<any, any>('/api/writing-tools/readability-enhancer', {
+        data: { flow: 'readability-enhancer', text: variables.text, targetLevel: variables.targetLevel },
+        token
+      });
+    },
+    onSuccess: (data, variables) => handleSuccess(data, variables),
+    onError: handleError,
+  });
+
+  const concisenessMutation = useMutation({
+    mutationFn: async (variables: any) => {
+      if (!firebaseUser) throw new Error('User not authenticated');
+      const token = await firebaseUser.getIdToken();
+      return writingToolApi<any, any>('/api/writing-tools/conciseness-checker', {
+        data: { flow: 'conciseness-checker', text: variables.text, targetReduction: variables.targetReduction },
+        token
+      });
+    },
+    onSuccess: (data, variables) => handleSuccess(data, variables),
+    onError: handleError,
+  });
+
+  const clarityMutation = useMutation({
+    mutationFn: async (variables: any) => {
+      if (!firebaseUser) throw new Error('User not authenticated');
+      const token = await firebaseUser.getIdToken();
+      return writingToolApi<any, any>('/api/writing-tools/clarity-advisor', {
+        data: { flow: 'clarity-advisor', text: variables.text, focusAreas: variables.focusAreas },
+        token
+      });
+    },
+    onSuccess: (data, variables) => handleSuccess(data, variables),
+    onError: handleError,
+  });
 
   const isProcessing = rewriteMutation.isPending || summarizeMutation.isPending || 
     styleEditorMutation.isPending || readabilityMutation.isPending || 

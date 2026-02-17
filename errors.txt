@@ -1,34 +1,27 @@
- GET /api/admin/indexed-documents 200 in 1862ms
-📄 Processing file: Ghada-Ali-Al-Salmi.txt (46.30 KB)
-   Project: Ghada-Ali-Al-Salmi
-   Settings: chunkSize=400, overlap=50, type=context
-   Step 1: Extracting text...
-   ✓ Extracted 47388 characters
-   Step 2: Generating embeddings with Ollama (nomic-embed-text)...
-   Step 3: Storing in Qdrant...
-Split document into 136 chunks
-Successfully added 136 chunks to Qdrant
-Successfully indexed 136 chunks
-   ✓ Successfully indexed 136 chunks
-   ✓ Total time: ~68s (estimate)
-Error recording indexed document: Error: Value for argument "data" is not a valid Firestore document. Cannot use "undefined" as a Firestore value (found in field "userId"). If you want to ignore undefined values, enable `ignoreUndefinedProperties`.
-    at recordIndexedDocument (src/services/document-tracking-service.ts:55:18)
-    at POST (src/app/api/admin/index-document/route.ts:159:13)
-  53 |     };
-  54 |
-> 55 |     await docRef.set(record);
-     |                  ^
-  56 |     
-  57 |     console.log(`📝 Recorded document: ${data.sourceFile} (${data.chunksCount} chunks)`);
-  58 |     
-   ⚠️  Warning: Failed to record in tracking database: Error: Value for argument "data" is not a valid Firestore document. Cannot use "undefined" as a Firestore value (found in field "userId"). If you want to ignore undefined values, enable `ignoreUndefinedProperties`.
-    at recordIndexedDocument (src/services/document-tracking-service.ts:55:18)
-    at POST (src/app/api/admin/index-document/route.ts:159:13)
-  53 |     };
-  54 |
-> 55 |     await docRef.set(record);
-     |                  ^
-  56 |     
-  57 |     console.log(`📝 Recorded document: ${data.sourceFile} (${data.chunksCount} chunks)`);
-  58 |     
- POST /api/admin/index-document 200 in 631ms
+ GET /api/admin/sections 200 in 2296ms
+ ○ Compiling /api/writing-tools/[tool] ...
+ ✓ Compiled /api/writing-tools/[tool] in 1587ms
+Firebase Admin SDK initialized using local service account.
+API Route Error: Error [ZodError]: [
+  {
+    "code": "invalid_literal",
+    "expected": "generate-toc",
+    "path": [
+      "flow"
+    ],
+    "message": "Invalid literal value, expected \"generate-toc\""
+  }
+]
+    at <unknown> (src/app/api/writing-tools/[tool]/route.ts:90:40)
+  88 |     const validation = schema.safeParse(body);
+  89 |     if (!validation.success) {
+> 90 |       return handleApiError(validation.error);
+     |                                        ^
+  91 |     }
+  92 |
+  93 |     const result = await flow(validation.data as any); {
+  issues: [Array],
+  addIssue: [Function (anonymous)],
+  addIssues: [Function (anonymous)]
+}
+ POST /api/writing-tools/generate-toc 400 in 4575ms

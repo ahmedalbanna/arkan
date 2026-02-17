@@ -13,7 +13,7 @@ const generateTocPrompt = ai.definePrompt({
   name: 'generateTocPrompt',
   input: { schema: GenerateTocInputSchema },
   output: { schema: GenerateTocOutputSchema },
-  model: 'ollama/phi3:mini',
+  model: 'ollama/phi4-mini:latest',
   config: {
     responseSchema: GenerateTocOutputSchema,
     temperature: RECOMMENDED_TEMPERATURES.BALANCED,

@@ -64,9 +64,12 @@ export function useAiActions({ editor: initialEditor }: AiActionsProps = {}) {
 
   const aiActionMutation = useMutation({
     mutationFn: async (variables: { textToManipulate: string; command: string; }) => {
-        // Hardcoded response for testing
-        await new Promise(resolve => setTimeout(resolve, 500)); // Simulate network delay
-        return { manipulatedText: `[Sample AI Response for: "${variables.command}"]\n\nThis is a hardcoded result for testing purposes. The original text was:\n"${variables.textToManipulate}"` };
+        if (!firebaseUser) throw new Error('User not authenticated');
+        const token = await firebaseUser.getIdToken();
+        return writingToolApi<any, any>('/api/writing-tools/manipulate-text', {
+          data: { flow: 'manipulate-text', textToManipulate: variables.textToManipulate, command: variables.command },
+          token
+        });
     },
     onSuccess: (data: any) => handleSuccess(data.manipulatedText),
     onError: handleError,
@@ -74,9 +77,12 @@ export function useAiActions({ editor: initialEditor }: AiActionsProps = {}) {
 
   const translateMutation = useMutation({
       mutationFn: async (variables: { text: string; targetLang: string; }) => {
-          // Hardcoded response for testing
-          await new Promise(resolve => setTimeout(resolve, 500));
-          return { text: `[Translated to ${variables.targetLang}] This is a hardcoded translation for testing.` };
+          if (!firebaseUser) throw new Error('User not authenticated');
+          const token = await firebaseUser.getIdToken();
+          return writingToolApi<any, any>('/api/writing-tools/translate-text', {
+            data: { flow: 'translate-text', text: variables.text, targetLang: variables.targetLang },
+            token
+          });
       },
       onSuccess: (data: any) => handleSuccess(data.text),
       onError: handleError,
@@ -170,6 +176,7 @@ export function useAiActions({ editor: initialEditor }: AiActionsProps = {}) {
 
         const token = await firebaseUser.getIdToken();
         const body = {
+            flow: 'generate-chapter',
             chapterTitle: chapter.title,
             sectionInstructions: sectionsToBuild.map(s => ({
               title: s.title, 

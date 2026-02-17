@@ -88,22 +88,11 @@ export default function AnalystAgent() {
 
     const analysisMutation = useMutation({
         mutationFn: async (variables: { prompt: string; contextFiles: any[]; token: string; }) => {
-            // Hardcoded test data
-            const testData = {
-                schema: "z.object({ project_name: z.string(), stakeholders: z.array(z.object({ name: z.string(), role: z.string() })), summary: z.string() })",
-                data: {
-                    project_name: "AI-Powered Writing Platform",
-                    stakeholders: [
-                        { name: "Academic Users", role: "Primary users for research and writing." },
-                        { name: "Business Professionals", role: "Secondary users for report generation." },
-                        { name: "Development Team", role: "Internal team responsible for building the platform." }
-                    ],
-                    summary: "The project aims to build a comprehensive AI platform called Arkan to assist academics and professionals in writing and document generation, featuring a modular architecture with 23+ AI tools."
-                }
-            };
-            // Simulate API delay
-            await new Promise(resolve => setTimeout(resolve, 1000));
-            return testData;
+            const { analyzeContextApi } = await import('@/services');
+            return analyzeContextApi({
+                prompt: variables.prompt,
+                contextFiles: variables.contextFiles,
+            }, variables.token);
         },
         onSuccess: (data) => {
             refetchUser(); // To update credits
