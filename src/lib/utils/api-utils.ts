@@ -1,7 +1,6 @@
 
-import { getUserProfile } from '@/services/userService';
-import { CustomFirebaseError, handleFirebaseError } from '@/lib/firebase/error';
-import { adminAuth } from '@/lib/firebase/server-init';
+import { getSession } from '@/lib/auth';
+import { prisma } from '@/lib/db/prisma';
 import { NextResponse, type NextRequest } from 'next/server';
 import { ZodError } from 'zod';
 
@@ -13,7 +12,7 @@ interface ApiHandlerOptions {
 
 interface AuthContext {
   request: NextRequest;
-  user: any; // Can be more specific, e.g., UserProfile from db/queries
+  user: any; // NextAuth session user
   token: string;
   params: { [key: string]: string };
 }
@@ -22,6 +21,7 @@ type ApiHandler = (context: AuthContext) => Promise<NextResponse | Response>;
 
 /**
  * Higher-order function to wrap API route handlers with authentication checks.
+ * Uses NextAuth sessions instead of Firebase tokens.
  * @param handler - The API route handler function.
  * @param options - Options to specify authentication requirements (e.g., requireAdmin).
  * @returns A Next.js API route handler.
@@ -30,29 +30,36 @@ export const withAuth = (handler: ApiHandler, options: ApiHandlerOptions = {}) =
   return async (request: NextRequest, { params }: { params: Promise<{ [key: string]: string }> }) => {
     try {
       const resolvedParams = await params;
-      const authorization = request.headers.get('Authorization');
-      if (!authorization?.startsWith('Bearer ')) {
-        return handleApiError({ message: 'Unauthorized: Missing token' }, 401);
-      }
-      const token = authorization.substring(7);
-      const decodedToken = await adminAuth.verifyIdToken(token, true);
-
-      if (!decodedToken || !decodedToken.uid) {
-        return handleApiError({ message: 'Unauthorized: Invalid token' }, 401);
+      
+      // Get session from NextAuth
+      const session = await getSession();
+      if (!session?.user?.id) {
+        return handleApiError({ message: 'Unauthorized: No session found' }, 401);
       }
 
-      const user = await getUserProfile(decodedToken.uid);
+      // Fetch full user profile from database
+      const user = await prisma.user.findUnique({
+        where: { id: session.user.id },
+        select: {
+          id: true,
+          email: true,
+          name: true,
+          role: true,
+          credits: true,
+          image: true,
+        },
+      });
+
       if (!user) {
         return handleApiError({ message: 'Forbidden: User profile not found' }, 403);
       }
 
-      if (options.requireAdmin && user.role !== 'admin') {
+      if (options.requireAdmin && user.role !== 'ADMIN' && user.role !== 'SUPER_ADMIN') {
         return handleApiError({ message: 'Forbidden: Admin access required' }, 403);
       }
 
-      return handler({ request, user, token, params: resolvedParams });
+      return handler({ request, user, token: session.user.id, params: resolvedParams });
     } catch (error: any) {
-      // All errors, including auth errors, are now piped through the central handler
       return handleApiError(error);
     }
   };
@@ -72,16 +79,14 @@ export const handleApiError = (error: any, defaultStatus = 500) => {
     return NextResponse.json({ message: 'Validation failed', errors: error.flatten().fieldErrors }, { status: 400 });
   }
 
-  // 2. Attempt to handle as a Firebase error
-  const firebaseError = handleFirebaseError(error);
-  if (firebaseError instanceof CustomFirebaseError) {
-    let status = 400; // Default for many auth errors
-    if (firebaseError.code.includes('not-found')) status = 404;
-    if (firebaseError.code.includes('permission-denied')) status = 403;
-    if (firebaseError.code.includes('already-exists')) status = 409;
-    if (firebaseError.code.includes('unauthenticated') || firebaseError.code.includes('token-expired')) status = 401;
-
-    return NextResponse.json({ message: firebaseError.message, code: firebaseError.code }, { status });
+  // 2. Handle Prisma errors
+  if (error?.code === 'P2002') {
+    // Unique constraint violation
+    return NextResponse.json({ message: 'Resource already exists' }, { status: 409 });
+  }
+  if (error?.code === 'P2025') {
+    // Record not found
+    return NextResponse.json({ message: 'Resource not found' }, { status: 404 });
   }
 
   // 3. Handle custom thrown errors (e.g., from our own logic)

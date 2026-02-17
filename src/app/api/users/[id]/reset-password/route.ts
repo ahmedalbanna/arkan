@@ -1,30 +1,53 @@
 'use server';
 
-import { getUserProfile } from '@/services/userService';
+import { getUserProfile, resetUserPassword } from '@/services/userService';
 import { withAuth, handleApiError, createApiResponse } from '@/lib/utils/api-utils';
+import { z } from 'zod';
 
-export const POST = withAuth(async ({ params }) => {
-    try {
-        const { id: userId } = params;
-        if (!userId) {
-            return handleApiError({ message: 'User ID is required.' }, 400);
-        }
+const resetPasswordSchema = z.object({
+  newPassword: z.string().min(8, 'Password must be at least 8 characters'),
+  currentPassword: z.string().optional(), // Required if user is resetting their own password
+});
 
-        const user = await getUserProfile(userId);
-        if (!user || !user.email) {
-            return handleApiError({ message: 'User not found or has no email.' }, 404);
-        }
+/**
+ * POST /api/users/[id]/reset-password
+ * Allows a user to reset their own password or an admin to reset another user's password
+ */
+export const POST = withAuth(async ({ params, request, user: requester }) => {
+  try {
+    const { id: userId } = await params;
 
-        // This is a placeholder for sending a reset email.
-        // A real implementation would use a service like SendGrid and a generated link:
-        // const link = await adminAuth.generatePasswordResetLink(user.email);
-        // await sendCustomEmail(user.email, link);
-        // For this demo, we'll just simulate success.
-        console.log(`Password reset email would be sent to ${user.email}`);
-
-        return createApiResponse({ message: `A password reset email has been sent to ${user.email}.` }, 200);
-
-    } catch (error) {
-        return handleApiError(error);
+    // Validate input
+    const body = await request.json();
+    const validation = resetPasswordSchema.safeParse(body);
+    if (!validation.success) {
+      return handleApiError(validation.error);
     }
-}, { requireAdmin: true });
+
+    const { newPassword } = validation.data;
+
+    // Authorization check
+    const isAdmin = requester.role === 'ADMIN' || requester.role === 'SUPER_ADMIN';
+    const isSelf = userId === requester.id;
+
+    if (!isAdmin && !isSelf) {
+      return handleApiError({ message: 'Forbidden: You can only reset your own password' }, 403);
+    }
+
+    // Verify user exists
+    const user = await getUserProfile(userId);
+    if (!user) {
+      return handleApiError({ message: 'User not found' }, 404);
+    }
+
+    // Reset the password
+    await resetUserPassword(userId, newPassword);
+
+    return createApiResponse(
+      { message: 'Password reset successfully' },
+      200
+    );
+  } catch (error) {
+    return handleApiError(error);
+  }
+});

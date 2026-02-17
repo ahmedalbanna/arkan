@@ -1,77 +1,82 @@
-import { NextResponse } from 'next/server';
-import { adminAuth, adminDb } from '@/lib/firebase/server-init';
-
+import { getSession } from '@/lib/auth';
+import { prisma } from '@/lib/db/prisma';
 import { getUserProfile } from '@/services/userService';
-
-async function verifyUser(request: Request) {
-
-    let authorization = request.headers.get('Authorization');
-    if (!authorization?.startsWith('Bearer ')) {
-        return { authorized: false, message: 'Unauthorized', userId: null };
-    }
-    let token = authorization.substring(7);
-    try {
-        let decodedToken = await adminAuth.verifyIdToken(token, true);
-        return { authorized: true, userId: decodedToken.uid };
-    } catch (_error) {
-        console.error('Error verify user stats:', _error);
-        return { authorized: false, message: 'Unauthorized', userId: null };
-    }
-}
+import { NextResponse } from 'next/server';
 
 export async function GET(request: Request) {
-    let userCheck = await verifyUser(request);
-    if (!userCheck.authorized || !userCheck.userId) {
-        return NextResponse.json({ message: userCheck.message }, { status: 401 });
+  try {
+    const session = await getSession();
+    
+    if (!session?.user?.id) {
+      return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
     }
 
-    try {
-        let userProfile = await getUserProfile(userCheck.userId);
-        if (!userProfile) {
-            return NextResponse.json({ message: 'User profile not found.' }, { status: 404 });
-        }
+    const userId = session.user.id;
 
-        let generationsSnapshot = await adminDb.collection('agent_generations')
-            .where('userId', '==', userCheck.userId)
-            .orderBy('createdAt', 'desc')
-            .get();
-
-        let totalGenerations = generationsSnapshot.size;
-
-        let agentUsage: Record<string, number> = {};
-        let creditsUsed = 0;
-        generationsSnapshot.forEach(doc => {
-            let data = doc.data();
-            let agentId = data.agentId;
-            agentUsage[agentId] = (agentUsage[agentId] || 0) + 1;
-            creditsUsed += data.creditCost || 0;
-        });
-
-        let agentUsagePromises = Object.entries(agentUsage).map(async ([agentId, count]) => ({
-                name: await adminDb.collection('agents').doc(agentId).get().then(doc => doc.data()?.name || 'Unknown'),
-                agentId,
-                count,
-            }));
-
-        let agentUsageChartData = (await Promise.all(agentUsagePromises))
-            .sort((a, b) => b.count - a.count) // Sort after all promises are resolved
-            .slice(0, 10);
-
-        let recentActivity = generationsSnapshot.docs.slice(0, 5).map(doc => ({
-            id: doc.id,
-            ...doc.data()
-        }));
-
-
-        return NextResponse.json({
-            totalGenerations,
-            creditsUsed,
-            agentUsageChartData,
-            recentActivity,
-        }, { status: 200 });
-
-    } catch (error) {
-        console.error('Error fetching user stats:', error);
-        return NextResponse.json({ message: 'An unexpected error occurred.' }, { status: 500 });
+    const userProfile = await getUserProfile(userId);
+    if (!userProfile) {
+      return NextResponse.json({ message: 'User profile not found.' }, { status: 404 });
     }
+
+    // Fetch generation logs for this user
+    const generationLogs = await prisma.generationLog.findMany({
+      where: { userId },
+      orderBy: { createdAt: 'desc' },
+    });
+
+    const totalGenerations = generationLogs.length;
+
+    // Calculate agent usage
+    const agentUsage: Record<string, number> = {};
+    let creditsUsed = 0;
+
+    generationLogs.forEach((log) => {
+      const agentId = log.agentId || 'unknown';
+      agentUsage[agentId] = (agentUsage[agentId] || 0) + 1;
+      creditsUsed += log.creditsUsed || 0;
+    });
+
+    // Get agent details for chart data
+    const agentUsageChartData = await Promise.all(
+      Object.entries(agentUsage)
+        .map(async ([agentId, count]) => {
+          const agent = await prisma.agent.findUnique({
+            where: { id: agentId },
+            select: { name: true },
+          });
+          return {
+            name: agent?.name || 'Unknown',
+            agentId,
+            count,
+          };
+        })
+    );
+
+    // Sort by count and get top 10
+    const topAgents = agentUsageChartData
+      .sort((a, b) => b.count - a.count)
+      .slice(0, 10);
+
+    // Get recent activity (last 5 generations)
+    const recentActivity = generationLogs.slice(0, 5).map((log) => ({
+      id: log.id,
+      agentId: log.agentId,
+      createdAt: log.createdAt,
+      creditsUsed: log.creditsUsed,
+      status: log.status,
+    }));
+
+    return NextResponse.json(
+      {
+        totalGenerations,
+        creditsUsed,
+        agentUsageChartData: topAgents,
+        recentActivity,
+      },
+      { status: 200 }
+    );
+  } catch (error) {
+    console.error('Error fetching user stats:', error);
+    return NextResponse.json({ message: 'An unexpected error occurred.' }, { status: 500 });
+  }
 }

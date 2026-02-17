@@ -1,101 +1,194 @@
 
 'use server';
-import { adminAuth, adminDb } from '@/lib/firebase/server-init';
-import type { UserProfile } from '@/lib/models';
+import { prisma } from '@/lib/db/prisma';
+import bcrypt from 'bcrypt';
+import type { User } from '@prisma/client';
+
+export type UserProfile = Omit<User, 'passwordHash'> & {
+  role: 'USER' | 'ADMIN' | 'SUPER_ADMIN';
+};
 
 export async function getUserProfile(id: string): Promise<UserProfile | null> {
-    if (!id) return null;
-    const userDoc = await adminDb.collection('users').doc(id).get();
-    if (!userDoc.exists) {
-        return null;
-    }
-    const data = userDoc.data();
-    return { id: userDoc.id, ...data } as UserProfile;
+  if (!id) return null;
+  
+  const user = await prisma.user.findUnique({
+    where: { id },
+    select: {
+      id: true,
+      name: true,
+      email: true,
+      emailVerified: true,
+      image: true,
+      role: true,
+      fullName: true,
+      phone: true,
+      phoneVerified: true,
+      credits: true,
+      totalSpent: true,
+      createdAt: true,
+      updatedAt: true,
+      lastLoginAt: true,
+    },
+  });
+
+  if (!user) {
+    return null;
+  }
+
+  return user as UserProfile;
 }
 
-export async function getPaginatedUsers({ limit, lastVisibleId }: { limit: number, lastVisibleId?: string }) {
-    let query = adminDb.collection('users')
-        .orderBy('createdAt', 'desc')
-        .limit(limit + 1); // Fetch one extra to check for hasNextPage
+export async function getPaginatedUsers({ limit, lastVisibleId }: { limit: number; lastVisibleId?: string }) {
+  let query = prisma.user.findMany({
+    take: limit + 1,
+    skip: lastVisibleId ? 1 : 0,
+    ...(lastVisibleId && {
+      cursor: { id: lastVisibleId },
+    }),
+    orderBy: { createdAt: 'desc' },
+    select: {
+      id: true,
+      name: true,
+      email: true,
+      emailVerified: true,
+      image: true,
+      role: true,
+      fullName: true,
+      phone: true,
+      phoneVerified: true,
+      credits: true,
+      createdAt: true,
+      updatedAt: true,
+    },
+  });
 
-    if (lastVisibleId) {
-        const lastDoc = await adminDb.collection('users').doc(lastVisibleId).get();
-        if (lastDoc.exists) {
-            query = query.startAfter(lastDoc);
-        }
-    }
+  const users = await query;
+  const hasNextPage = users.length > limit;
+  const paginatedUsers = users.slice(0, limit) as UserProfile[];
+  const newLastVisibleId = hasNextPage ? users[limit].id : null;
 
-    const snapshot = await query.get();
-    const users = snapshot.docs.slice(0, limit).map(doc => ({ id: doc.id, ...doc.data() })) as UserProfile[];
-    const hasNextPage = snapshot.docs.length > limit;
-    const newLastVisibleId = hasNextPage ? snapshot.docs[snapshot.docs.length - 2].id : null;
-
-    return { users, hasNextPage, lastVisibleId: newLastVisibleId };
+  return { users: paginatedUsers, hasNextPage, lastVisibleId: newLastVisibleId };
 }
 
-export async function createUser(data: Omit<UserProfile, 'id' | 'createdAt' | 'updatedAt'> & { password?: string }): Promise<{ user: { uid: string, email?: string | undefined } }> {
-    const { email, password, name, role, credits } = data;
+export async function createUser(data: {
+  email: string;
+  password?: string;
+  name?: string;
+  role?: 'USER' | 'ADMIN' | 'SUPER_ADMIN';
+  credits?: number;
+}): Promise<{ user: { id: string; email: string | null } }> {
+  const { email, password, name, role = 'USER', credits = 0 } = data;
 
-    const userRecord = await adminAuth.createUser({ email, password, displayName: name });
+  // Hash password if provided
+  let passwordHash: string | null = null;
+  if (password) {
+    passwordHash = await bcrypt.hash(password, 10);
+  }
 
-    const newUserProfile: Omit<UserProfile, 'id'> = {
-        name,
-        email,
-        credits: credits,
-        role: role,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-        bio: '',
-        profilePictureUrl: '',
-        hasCompletedOnboarding: false,
-    };
+  const user = await prisma.user.create({
+    data: {
+      email,
+      name,
+      passwordHash,
+      role,
+      credits,
+      emailVerified: new Date(), // Auto-verify new users
+    },
+    select: {
+      id: true,
+      email: true,
+    },
+  });
 
-    await adminDb.collection('users').doc(userRecord.uid).set(newUserProfile);
-
-    return { user: { uid: userRecord.uid, email: userRecord.email } };
+  return { user };
 }
 
-export async function updateUser(userId: string, data: Partial<UserProfile>): Promise<UserProfile> {
-    const updatePayload = {
-        ...data,
-        updatedAt: new Date().toISOString(),
-    };
-    await adminDb.collection('users').doc(userId).update(updatePayload);
-    const updatedUser = await getUserProfile(userId);
-    if (!updatedUser) throw new Error("Failed to refetch updated user profile.");
-    return updatedUser;
+export async function updateUser(
+  userId: string,
+  data: Partial<Omit<UserProfile, 'id' | 'createdAt' | 'updatedAt'>>
+): Promise<UserProfile> {
+  const updateData: any = { ...data };
+
+  const updatedUser = await prisma.user.update({
+    where: { id: userId },
+    data: updateData,
+    select: {
+      id: true,
+      name: true,
+      email: true,
+      emailVerified: true,
+      image: true,
+      role: true,
+      fullName: true,
+      phone: true,
+      phoneVerified: true,
+      credits: true,
+      totalSpent: true,
+      createdAt: true,
+      updatedAt: true,
+      lastLoginAt: true,
+    },
+  });
+
+  return updatedUser as UserProfile;
 }
 
 export async function deleteUser(userId: string) {
-    await adminAuth.deleteUser(userId);
-    await adminDb.collection('users').doc(userId).delete();
+  await prisma.user.delete({
+    where: { id: userId },
+  });
 }
 
 export async function resetUserPassword(userId: string, newPassword: string): Promise<void> {
-    await adminAuth.updateUser(userId, { password: newPassword });
+  const passwordHash = await bcrypt.hash(newPassword, 10);
+  
+  await prisma.user.update({
+    where: { id: userId },
+    data: { passwordHash },
+  });
 }
 
 export async function deductUserCredits(userId: string, creditsToDeduct: number): Promise<number> {
-    const userRef = adminDb.collection('users').doc(userId);
-
-    return await adminDb.runTransaction(async (transaction) => {
-        const userDoc = await transaction.get(userRef);
-        if (!userDoc.exists) {
-            throw new Error("User not found");
-        }
-
-        const currentCredits = userDoc.data()?.credits ?? 0;
-
-        if (currentCredits < creditsToDeduct) {
-            throw { status: 402, message: "Insufficient credits. Please purchase more credits to continue." };
-        }
-
-        const newBalance = currentCredits - creditsToDeduct;
-        transaction.update(userRef, {
-            credits: newBalance,
-            updatedAt: new Date().toISOString()
-        });
-
-        return newBalance;
+  // Use a transaction to ensure atomicity
+  return await prisma.$transaction(async (tx) => {
+    const user = await tx.user.findUnique({
+      where: { id: userId },
+      select: { credits: true },
     });
+
+    if (!user) {
+      throw new Error('User not found');
+    }
+
+    const currentCredits = user.credits;
+
+    if (currentCredits < creditsToDeduct) {
+      throw {
+        status: 402,
+        message: 'Insufficient credits. Please purchase more credits to continue.',
+      };
+    }
+
+    const newBalance = currentCredits - creditsToDeduct;
+    await tx.user.update({
+      where: { id: userId },
+      data: { credits: newBalance },
+    });
+
+    return newBalance;
+  });
+}
+
+export async function addUserCredits(userId: string, creditsToAdd: number): Promise<number> {
+  const user = await prisma.user.update({
+    where: { id: userId },
+    data: {
+      credits: {
+        increment: creditsToAdd,
+      },
+    },
+    select: { credits: true },
+  });
+
+  return user.credits;
 }

@@ -584,6 +584,141 @@ Before submitting API calls or adding new flows:
   - `validate-postgres-only.ts` - PostgreSQL-only validation for local/dev testing
   - This prevents test failures due to missing Firebase credentials in development
 
+## NextAuth & Authentication Migration Patterns
+
+### Hasura JWT Configuration
+- **JWT Secret Synchronization**: Hasura's `HASURA_GRAPHQL_JWT_SECRET` must exactly match the secret used by NextAuth to sign JWTs
+  - **Common Issue**: Hardcoded secrets in docker-compose.yml don't update when container is restarted with `docker restart`
+  - **Solution**: Use `docker compose down <service>` then `docker compose up -d <service>` to apply new environment variables
+  - **Verification**: Check with `docker exec <container> env | grep JWT_SECRET`
+
+### JWT Token Generation Best Practices
+- **Avoid Double Timestamps**: Don't manually add `iat` field when using `jwt.sign()` with options parameter
+  - ❌ Wrong: `jwt.sign({ iat: Date.now(), ...claims }, secret, { expiresIn: '1d' })`
+  - ✅ Correct: `jwt.sign({ ...claims }, secret, { expiresIn: '1d' })` (iat added automatically)
+  - **Symptom**: JWT signature verification failures even with correct secret
+  
+### Hasura Table Permissions Setup
+- **Permission Creation Required**: Tracking tables in Hasura is not enough - must explicitly create permissions for each role
+  - Track table: `pg_track_table` API call
+  - Create permission: `pg_create_select_permission` with role and filter rules
+  - **Pattern**: USER role filters by `user_id: { _eq: "X-Hasura-User-Id" }` for data isolation
+  - **Admin role**: No filter (`{}`) for full access
+
+### GraphQL Schema Field Naming
+- **snake_case vs camelCase**: Hasura exposes database fields as-is (snake_case), not camelCase
+  - Database: `user_id`, `created_at`
+  - GraphQL Query: Must use `user_id`, not `userId`
+  - **Mistake**: Copying field names from Prisma schema (PascalCase/camelCase) into GraphQL queries causes "field not found" errors
+
+### Client Component Directive Requirements  
+- **QueryProvider Must Be Client Component**: React Query's `QueryClientProvider` requires `'use client'` directive
+  - **Error**: "createContext only works in Client Components" when missing directive
+  - **Solution**: Add `'use client'` at top of `QueryProvider.tsx`
+  - **Pattern**: Any component using React Context hooks must be a client component
+
+### Authentication Migration Strategy
+- **Dual-System Coexistence**: Keep old Firebase auth context while introducing NextAuth to avoid breaking existing code
+  - Layer approach: `SessionProvider` → `NextAuthProvider` → `AuthProvider` (old) → App
+  - New components use `useSession()` from NextAuth
+  - Old components continue using Firebase context until migration complete
+  - **Benefit**: Gradual migration without big-bang rewrites
+
+## Next.js Server/Client Component Architecture
+
+### Critical: Server Components Cannot Use Client Context
+- **The Pattern**: Root layout components that are Server Components (async, using server-only functions) cannot directly use client-side providers that require React Context
+  - ❌ Wrong: Async RootLayout → QueryClientProvider (requires `'use client'`)
+  - ✅ Right: Async RootLayout → Client Wrapper Component (RootProviders) → QueryClientProvider
+- **Solution**: Create a dedicated client component wrapper (`RootProviders.tsx` with `'use client'`) that contains ALL context providers
+  - This wrapper receives children and fontClassName from the server component
+  - All providers (QueryProvider, ThemeProvider, SessionProvider, etc.) live inside this client component
+  - The server component stays clean and can use server-only functions (cookies(), headers(), etc.)
+- **Why It Matters**: React Context hooks (useContext, useSession, etc.) require browser JavaScript runtime and cannot run on the server
+- **Common Mistake**: Mixing server and client concerns in a single component leads to "React Context is unavailable in Server Components" error
+
+### Authentication Flow: Server vs Client Separation
+- **Server-Side Auth** (in RootLayout):
+  - Use `cookies()` and `headers()` to check session validity
+  - Implement redirects for auth/public routes
+  - Keep authentication checks on the server for security
+- **Client-Side Auth** (in NextAuthProvider):
+  - Use `useSession()` to get session data on client
+  - Populate user profile and context
+  - Handle real-time session updates
+- **Boundary**: The async RootLayout handles auth checks and redirects; RootProviders handles client-side session management
+
+## Authentication & Password Management
+
+### Critical: Signup Endpoint Must Hash Passwords
+- **The Problem**: Signup endpoints that don't store bcrypt-hashed passwords cause immediate login failures
+  - ❌ Wrong: Create user in Firebase, rely on Firebase's password storage (PostgreSQL `password_hash` stays NULL)
+  - ✅ Right: Hash password with bcrypt, explicitly store in `password_hash` field in PostgreSQL
+- **Solution Pattern**:
+  ```typescript
+  const passwordHash = await bcrypt.hash(password, 10);
+  const user = await prisma.user.create({
+    data: {
+      email,
+      name,
+      passwordHash,  // MUST be explicitly set
+      // ... other fields
+    },
+  });
+  ```
+- **Why**: NextAuth's credentials provider compares incoming passwords against `password_hash` field using bcrypt.compare()
+- **Common Mistake**: Hashing password for validation but forgetting to store it in the create/update operation
+
+### Seed Script Password Initialization
+- **Both create AND update operations must set passwordHash**:
+  - ❌ Wrong: `update: {}` - skips password hash on existing users
+  - ✅ Right: `update: { passwordHash: hashedPassword }` - updates password on re-run
+- **Pattern for idempotent seed scripts**:
+  ```typescript
+  const hash = await bcrypt.hash('password123', 10);
+  await prisma.user.upsert({
+    where: { email: 'user@example.com' },
+    update: { passwordHash: hash },  // Always update hash
+    create: {
+      email: 'user@example.com',
+      passwordHash: hash,  // Must be in create too
+      // ... other fields
+    },
+  });
+  ```
+
+## Environment Configuration Anti-Patterns
+
+### Critical: Prevent Duplicate Environment Variables
+- **The Problem**: Multiple conflicting values for same variable causes last-one-wins behavior
+  - ❌ Wrong: DATABASE_URL appears 4 times with different values, last one is a placeholder template
+  - ✅ Right: Single, definitive entry for each environment variable
+- **Common Location**: .env files often accumulate entries from documentation sections, examples, and configuration samples
+- **Detection Strategy**:
+  ```bash
+  grep "DATABASE_URL" .env  # Find ALL occurrences
+  wc -l .env               # Check file size for accumulation
+  ```
+- **Fix Strategy**:
+  1. Identify all duplicate entries: `grep -n "VARIABLE_NAME" .env`
+  2. Understand which one is correct (usually the most recent non-template one)
+  3. Remove ALL duplicates except the correct one
+  4. For sensitive variables, verify Prisma can connect: test with `npx prisma db execute --stdin`
+- **Prisma-Specific**: Duplicate DATABASE_URL entries cause "Can't reach database server at `HOST:5432`" error (the placeholder's HOST value gets used)
+
+### Environment Variables for Client Access
+- **Public vs Private**: Only prefix with `NEXT_PUBLIC_` if the variable should be accessible in browser code
+  - ❌ Wrong: `HASURA_ADMIN_SECRET` only in .env (inaccessible in GraphQL client)
+  - ✅ Right: `NEXT_PUBLIC_HASURA_ADMIN_SECRET` for client-side GraphQL operations
+- **Security Note**: Admin secrets in `NEXT_PUBLIC_*` are only safe for development. For production, keep admin secret server-side and create API routes that use it
+
+### NextAuth Configuration Validation
+- **Required Settings**: NEXTAUTH_SECRET and NEXTAUTH_URL must be valid (not placeholder templates)
+  - NEXTAUTH_SECRET: Real 32+ character string (generate with `openssl rand -base64 32`)
+  - NEXTAUTH_URL: Valid URL that matches deployment domain
+- **Development**: Can use simple values like `your-secret-key` and `http://localhost:3000`
+- **Error Signal**: If NextAuth gives "Unexpected end of JSON input" during session parsing, check for placeholder values in configuration
+
 ## Resources
 
 ### External Documentation

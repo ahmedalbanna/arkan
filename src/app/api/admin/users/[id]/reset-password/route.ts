@@ -1,31 +1,45 @@
 
 'use server';
 
+import { getUserProfile, resetUserPassword } from '@/services/userService';
 import { withAuth, handleApiError, createApiResponse } from '@/lib/utils/api-utils';
-import { getUserProfile } from '@/services/userService';
+import { z } from 'zod';
 
-export const POST = withAuth(async ({ params }) => {
-    try {
-        const { id: userId } = params;
-        if (!userId) {
-            return handleApiError({ message: 'User ID is required.' }, 400);
-        }
+const adminResetPasswordSchema = z.object({
+  newPassword: z.string().min(8, 'Password must be at least 8 characters'),
+});
 
-        const user = await getUserProfile(userId);
-        if (!user || !user.email) {
-            return handleApiError({ message: 'User not found or has no email.' }, 404);
-        }
+/**
+ * POST /api/admin/users/[id]/reset-password
+ * Admin-only endpoint to reset any user's password
+ */
+export const POST = withAuth(async ({ params, request }) => {
+  try {
+    const { id: userId } = await params;
 
-        // This is a placeholder for sending a reset email.
-        // A real implementation would use a service like SendGrid and a generated link:
-        // const link = await adminAuth.generatePasswordResetLink(user.email);
-        // await sendCustomEmail(user.email, link);
-        // For this demo, we'll just simulate success.
-        console.log(`Password reset email would be sent to ${user.email}`);
-
-        return createApiResponse({ message: `A password reset email has been sent to ${user.email}.` }, 200);
-
-    } catch (error) {
-        return handleApiError(error);
+    // Validate input
+    const body = await request.json();
+    const validation = adminResetPasswordSchema.safeParse(body);
+    if (!validation.success) {
+      return handleApiError(validation.error);
     }
+
+    const { newPassword } = validation.data;
+
+    // Verify user exists
+    const user = await getUserProfile(userId);
+    if (!user) {
+      return handleApiError({ message: 'User not found' }, 404);
+    }
+
+    // Reset the password
+    await resetUserPassword(userId, newPassword);
+
+    return createApiResponse(
+      { message: `Password reset successfully for user ${user.email}` },
+      200
+    );
+  } catch (error) {
+    return handleApiError(error);
+  }
 }, { requireAdmin: true });

@@ -5,26 +5,22 @@ import { z } from 'zod';
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { updateUser, deleteUser, getUserProfile } from '@/services/userService';
-import { cookies } from 'next/headers';
-import { adminAuth } from '@/lib/firebase/server-init';
+import { getSession } from '@/lib/auth';
 
 // Helper function to verify the requester is an admin
 async function verifyAdmin() {
+  const session = await getSession();
+  
+  if (!session?.user?.id) {
+    return { authorized: false, message: 'Unauthorized' };
+  }
 
-  const sessionCookie = (await cookies()).get('__session')?.value;
-  if (!sessionCookie) {
-    return { authorized: false, message: 'Unauthorized' };
+  const userProfile = await getUserProfile(session.user.id);
+  if (!userProfile || (userProfile.role !== 'ADMIN' && userProfile.role !== 'SUPER_ADMIN')) {
+    return { authorized: false, message: 'Forbidden' };
   }
-  try {
-    const decodedToken = await adminAuth.verifySessionCookie(sessionCookie, true);
-    const userProfile = await getUserProfile(decodedToken.uid);
-    if (userProfile?.role !== 'admin') {
-      return { authorized: false, message: 'Forbidden' };
-    }
-    return { authorized: true };
-  } catch {
-    return { authorized: false, message: 'Unauthorized' };
-  }
+
+  return { authorized: true };
 }
 
 
@@ -32,9 +28,8 @@ const updateUserSchema = z.object({
   userId: z.string(),
   name: z.string().min(1, 'Name is required'),
   email: z.string().email('Invalid email address'),
-  bio: z.string().optional(),
   credits: z.coerce.number().int('Credits must be an integer').min(0, 'Credits cannot be negative'),
-  role: z.enum(['user', 'admin']),
+  role: z.enum(['USER', 'ADMIN', 'SUPER_ADMIN']),
 });
 
 export async function handleUpdateUser(prevState: any, formData: FormData) {
