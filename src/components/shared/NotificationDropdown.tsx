@@ -11,7 +11,7 @@ import {
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useLocalization } from '@/context/LocalizationContext';
-import { useClearAllNotifications, useMarkNotificationsAsRead, useNotifications } from '@/hooks';
+import { useClearNotifications, useMarkNotificationsAsRead, useNotifications } from '@/hooks';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import {
@@ -46,7 +46,7 @@ export function NotificationDropdown() {
   const router = useRouter();
   const { notifications } = useNotifications();
   const markAsReadMutation = useMarkNotificationsAsRead();
-  const clearAllMutation = useClearAllNotifications();
+  const clearAllMutation = useClearNotifications();
 
   const unreadCount = notifications?.filter(n => !n.isRead).length ?? 0;
 

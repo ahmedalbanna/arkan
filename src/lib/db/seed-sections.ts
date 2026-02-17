@@ -1,22 +1,37 @@
-
 import { defaultSections } from '@/lib/db/seed-data/sections';
-import { adminDb } from '@/lib/firebase/server-init';
+import prisma from '@/lib/db/prisma';
 
 async function seed() {
-  const batch = adminDb.batch();
   // --- Sections ---
   console.log("Preparing to seed Sections...");
-  const sectionsCollection = adminDb.collection('sections');
-  defaultSections.forEach(section => {
-    const { ...sectionData } = section;
-    const docRef = sectionsCollection.doc(section.id || 'unknown');
-    batch.set(docRef, { ...sectionData });
-  });
-  console.log(`${defaultSections.length} Sections added to batch.`);
-  await batch.commit();
+  
+  for (const section of defaultSections) {
+    await prisma.section.upsert({
+      where: { id: section.id || 'unknown' },
+      update: {
+        title: section.title,
+        type: section.type,
+        prompt: section.prompt,
+        guidelines: section.guidelines || [],
+        model: section.model,
+      },
+      create: {
+        id: section.id || 'unknown',
+        title: section.title,
+        type: section.type,
+        prompt: section.prompt,
+        guidelines: section.guidelines || [],
+        model: section.model,
+      },
+    });
+  }
+  console.log(`${defaultSections.length} Sections seeded successfully.`);
 }
 
 seed().then(() => {
   console.log("Section seeding complete.");
   process.exit(0);
+}).catch((error) => {
+  console.error("Section seeding error:", error);
+  process.exit(1);
 });

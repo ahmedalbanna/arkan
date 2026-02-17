@@ -1,9 +1,9 @@
 
 import { getStorage } from 'firebase-admin/storage';
-import { getDatabase } from 'firebase-admin/database';
-import { adminDb } from '@/lib/firebase/server-init';
 import { withAuth, handleApiError, createApiResponse } from '@/lib/utils/api-utils';
 import { createTransaction } from '@/services/transactionService';
+import prisma from '@/lib/db/prisma';
+import admin from 'firebase-admin';
 
 export const config = {
     api: {
@@ -56,9 +56,14 @@ export const POST = withAuth(async ({ request }) => {
 
     let { id: transactionId } = await createTransaction(transactionData);
 
-    let adminsSnapshot = await adminDb.collection('users').where('role', '==', 'admin').get();
-    if (!adminsSnapshot.empty) {
-      let rtdb = getDatabase();
+    // Query admin users from PostgreSQL
+    let admins = await prisma.user.findMany({
+      where: { role: 'admin' },
+      select: { id: true, name: true, email: true },
+    });
+
+    if (admins.length > 0) {
+      let rtdb = admin.database();
       let notificationPayload = {
         title: "New Payment Request",
         description: `User ${userName || userEmail} submitted a payment request for $${price}.`,
@@ -68,9 +73,8 @@ export const POST = withAuth(async ({ request }) => {
         link: '/admin/manage-payments'
       };
 
-      let notificationPromises = adminsSnapshot.docs.map(adminDoc => {
-          let adminId = adminDoc.id;
-          let notificationRef = rtdb.ref(`notifications/${adminId}`).push();
+      let notificationPromises = admins.map(admin => {
+          let notificationRef = rtdb.ref(`notifications/${admin.id}`).push();
           return notificationRef.set(notificationPayload);
       });
       await Promise.all(notificationPromises);

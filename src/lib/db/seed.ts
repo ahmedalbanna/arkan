@@ -1,106 +1,134 @@
-
-// src/lib/db/seed.ts
 import { defaultBankAccounts } from '@/lib/db/seed-data/bank-accounts';
 import { defaultFeatures } from '@/lib/db/seed-data/features';
 import { defaultSections } from '@/lib/db/seed-data/sections';
 import { templates as defaultDocxTemplates, type DocxTemplateKey } from '@/lib/docx-styles';
-import { adminDb } from '@/lib/firebase/server-init';
+import prisma from '@/lib/db/prisma';
 import { templates as defaultPptxTemplates, type PptxTemplateKey } from '@/lib/pptx-styles';
 import { defaultAgents, defaultAgentCategories } from './seed-data/agents';
 import { defaultReportTemplates } from './seed-data/report-templates';
 
 async function seed() {
-    console.log("Starting Firestore seeding process...");
-    const batch = adminDb.batch();
+    console.log("Starting PostgreSQL seeding process...");
 
     try {
         // --- Settings ---
         console.log("Preparing to seed default settings...");
-        const settingsRef = adminDb.collection('settings').doc('defaults');
-        batch.set(settingsRef, {
-            newUserCredits: 10,
-            bankAccounts: defaultBankAccounts
+        await prisma.setting.upsert({
+            where: { key: 'defaults' },
+            update: {
+                value: {
+                    newUserCredits: 10,
+                    bankAccounts: defaultBankAccounts
+                }
+            },
+            create: {
+                key: 'defaults',
+                value: {
+                    newUserCredits: 10,
+                    bankAccounts: defaultBankAccounts
+                }
+            }
         });
-        console.log("Default settings added to batch.");
+        console.log("Default settings seeded successfully.");
 
         // --- Sections ---
         console.log("Preparing to seed Sections...");
-        const sectionsCollection = adminDb.collection('sections');
-        defaultSections.forEach(section => {
-            const { ...sectionData } = section;
-            const docRef = sectionsCollection.doc(section.id || 'unknown');
-            batch.set(docRef, { ...sectionData });
-        });
-        console.log(`${defaultSections.length} Sections added to batch.`);
+        for (const section of defaultSections) {
+            await prisma.section.upsert({
+                where: { id: section.id || 'unknown' },
+                update: {
+                    title: section.title,
+                    type: section.type,
+                    prompt: section.prompt,
+                    guidelines: section.guidelines || [],
+                    model: section.model,
+                },
+                create: {
+                    id: section.id || 'unknown',
+                    title: section.title,
+                    type: section.type,
+                    prompt: section.prompt,
+                    guidelines: section.guidelines || [],
+                    model: section.model,
+                },
+            });
+        }
+        console.log(`${defaultSections.length} Sections seeded successfully.`);
 
         // --- Agents ---
         console.log("Preparing to seed Agents...");
-        const agentsCollection = adminDb.collection('agents');
-        defaultAgents.forEach(agent => {
-            const docRef = agentsCollection.doc(agent.id);
-            batch.set(docRef, agent);
-        });
-        console.log(`${defaultAgents.length} Agents added to batch.`);
+        for (const agent of defaultAgents) {
+            await prisma.agent.upsert({
+                where: { id: agent.id },
+                update: { ...agent },
+                create: { ...agent },
+            });
+        }
+        console.log(`${defaultAgents.length} Agents seeded successfully.`);
 
         // --- Agent Categories ---
         console.log("Preparing to seed Agent Categories...");
-        const agentCategoriesCollection = adminDb.collection('agent_categories');
-        defaultAgentCategories.forEach(category => {
-            const docRef = agentCategoriesCollection.doc(category.id);
-            batch.set(docRef, category);
-        });
-        console.log(`${defaultAgentCategories.length} Agent Categories added to batch.`);
+        for (const category of defaultAgentCategories) {
+            await prisma.agentCategory.upsert({
+                where: { id: category.id },
+                update: { ...category },
+                create: { ...category },
+            });
+        }
+        console.log(`${defaultAgentCategories.length} Agent Categories seeded successfully.`);
 
         // --- Features ---
         console.log("Preparing to seed Features...");
-        const featuresCollection = adminDb.collection('features');
-        defaultFeatures.forEach(feature => {
-            const docRef = featuresCollection.doc(feature.id);
-            batch.set(docRef, feature);
-        });
-        console.log(`${defaultFeatures.length} Features added to batch.`);
+        for (const feature of defaultFeatures) {
+            await prisma.feature.upsert({
+                where: { id: feature.id },
+                update: { ...feature },
+                create: { ...feature },
+            });
+        }
+        console.log(`${defaultFeatures.length} Features seeded successfully.`);
 
         // --- DOCX Templates ---
         console.log("Preparing to seed DOCX templates...");
-        const docxCollection = adminDb.collection('templates').doc('docx').collection('styles');
-        (Object.keys(defaultDocxTemplates) as DocxTemplateKey[]).forEach(key => {
+        for (const key of Object.keys(defaultDocxTemplates) as DocxTemplateKey[]) {
             const template = defaultDocxTemplates[key];
-            const docRef = docxCollection.doc(key);
-            batch.set(docRef, { ...template, id: key, createdAt: new Date().toISOString() });
-        });
-        console.log(`${Object.keys(defaultDocxTemplates).length} DOCX templates added to batch.`);
+            await prisma.docxTemplate.upsert({
+                where: { id: key },
+                update: { ...template },
+                create: { id: key, ...template },
+            });
+        }
+        console.log(`${Object.keys(defaultDocxTemplates).length} DOCX templates seeded successfully.`);
 
         // --- PPTX Templates ---
         console.log("Preparing to seed PPTX templates...");
-        const pptxCollection = adminDb.collection('templates').doc('pptx').collection('styles');
-        (Object.keys(defaultPptxTemplates) as PptxTemplateKey[]).forEach(key => {
+        for (const key of Object.keys(defaultPptxTemplates) as PptxTemplateKey[]) {
             const template = defaultPptxTemplates[key];
-            const docRef = pptxCollection.doc(key);
-            batch.set(docRef, { ...template, id: key, createdAt: new Date().toISOString() });
-        });
-        console.log(`${Object.keys(defaultPptxTemplates).length} PPTX templates added to batch.`);
+            await prisma.pptxTemplate.upsert({
+                where: { id: key },
+                update: { ...template },
+                create: { id: key, ...template },
+            });
+        }
+        console.log(`${Object.keys(defaultPptxTemplates).length} PPTX templates seeded successfully.`);
 
         // --- Report Generation Templates ---
         console.log("Preparing to seed Report Generation templates...");
-        const reportTemplateCollection = adminDb.collection('templates').doc('report').collection('items');
-        defaultReportTemplates.forEach(template => {
-            const docRef = reportTemplateCollection.doc(template.id);
-            // The new structure has `content` which holds chapters and sections
-            const { sectionIds, ...restOfTemplate } = template as any; // Cast to any to handle old structure
+        for (const template of defaultReportTemplates) {
+            const { sectionIds, ...restOfTemplate } = template as any;
             const templateData = { ...restOfTemplate };
-             if (sectionIds) {
-                // This logic can be removed if the old structure is fully deprecated.
-                // It's here for backward compatibility during transition.
+            if (sectionIds) {
                 console.warn(`Template "${template.id}" uses old 'sectionIds' format. Converting...`);
             }
-            batch.set(docRef, templateData);
-        });
-        console.log(`${defaultReportTemplates.length} Report Generation templates added to batch.`);
+            await prisma.reportTemplate.upsert({
+                where: { id: template.id },
+                update: templateData,
+                create: { ...templateData },
+            });
+        }
+        console.log(`${defaultReportTemplates.length} Report Generation templates seeded successfully.`);
 
-
-        // Commit all changes at once
-        await batch.commit();
-        console.log("All configurations have been successfully seeded to Firestore!");
+        console.log("All configurations have been successfully seeded to PostgreSQL!");
 
     } catch (error) {
         console.error("Error during seeding:", error);
@@ -111,4 +139,7 @@ async function seed() {
 seed().then(() => {
     console.log("Seeding complete. Exiting.");
     process.exit(0);
+}).catch((error) => {
+    console.error("Seeding error:", error);
+    process.exit(1);
 });

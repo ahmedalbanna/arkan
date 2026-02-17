@@ -1,6 +1,5 @@
-// C:\Users\ahmed\source\repos\arkan\src\app\api\admin\sections\[id]\route.ts
 import { withAuth, handleApiError, createApiResponse } from '@/lib/utils/api-utils';
-import { adminDb } from '@/lib/firebase/server-init';
+import prisma from '@/lib/db/prisma';
 import { z } from 'zod';
 
 const SectionUpdateSchema = z.object({
@@ -14,7 +13,8 @@ const SectionUpdateSchema = z.object({
 // PUT to update a section (Admin only)
 export const PUT = withAuth(async ({ request, params }) => {
   try {
-    let sectionId = params.id;
+    const resolvedParams = await params;
+    let sectionId = resolvedParams.id;
     if (!sectionId) {
       return handleApiError({ message: 'Section ID is required' }, 400);
     }
@@ -23,10 +23,11 @@ export const PUT = withAuth(async ({ request, params }) => {
     if (!validation.success) {
       return handleApiError(validation.error);
     }
-    let docRef = adminDb.collection('sections').doc(sectionId);
-    await docRef.update(validation.data);
-    let updatedDoc = await docRef.get();
-    return createApiResponse({ id: updatedDoc.id, ...updatedDoc.data() }, 200);
+    let section = await prisma.section.update({
+      where: { id: sectionId },
+      data: validation.data,
+    });
+    return createApiResponse(section, 200);
   } catch (error) {
     return handleApiError(error);
   }
@@ -35,11 +36,14 @@ export const PUT = withAuth(async ({ request, params }) => {
 // DELETE a section (Admin only)
 export const DELETE = withAuth(async ({ params }) => {
   try {
-    let sectionId = params.id;
+    const resolvedParams = await params;
+    let sectionId = resolvedParams.id;
     if (!sectionId) {
       return handleApiError({ message: 'Section ID is required' }, 400);
     }
-    await adminDb.collection('sections').doc(sectionId).delete();
+    await prisma.section.delete({
+      where: { id: sectionId },
+    });
     return createApiResponse({ message: 'Section deleted successfully' }, 200);
   } catch (error) {
     return handleApiError(error);

@@ -2,29 +2,36 @@
 
 'use server';
 
-import { adminDb } from '@/lib/firebase/server-init';
+import { prisma } from '@/lib/db/prisma';
 
 interface GenerationLog {
     agentId: string;
     userId: string;
     input: any;
     output: any;
-    creditCost: number; // Add creditCost field
+    creditCost: number;
     createdAt: string; // ISO string
 }
 
 /**
- * Logs a successful AI agent generation to Firestore.
+ * Logs a successful AI agent generation to PostgreSQL.
  * This creates a knowledge base of all agent activities.
  * @param logData - The data to be logged.
  */
 export async function logGeneration(logData: Omit<GenerationLog, 'createdAt'>): Promise<void> {
     try {
-        const generationLog: GenerationLog = {
-            ...logData,
-            createdAt: new Date().toISOString(),
-        };
-        await adminDb.collection('agent_generations').add(generationLog);
+        await prisma.generationLog.create({
+            data: {
+                userId: logData.userId,
+                flowName: logData.agentId, // Use agentId as flowName
+                input: logData.input,
+                output: logData.output,
+                metadata: {
+                    creditCost: logData.creditCost,
+                },
+                status: 'success',
+            },
+        });
     } catch (error) {
         console.error(`Failed to log generation for agent ${logData.agentId}:`, error);
         // We don't throw an error here to avoid failing the main user request.

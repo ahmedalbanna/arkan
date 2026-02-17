@@ -1,8 +1,7 @@
 import { z } from 'zod';
-import { adminDb } from '@/lib/firebase/server-init';
+import prisma from '@/lib/db/prisma';
 import admin from 'firebase-admin';
 import { withAuth, handleApiError, createApiResponse } from '@/lib/utils/api-utils';
-import { CustomFirebaseError } from '@/lib/firebase/error';
 
 const sendNotificationSchema = z.object({
   userId: z.string().min(1, 'User ID is required.'),
@@ -33,19 +32,19 @@ export const POST = withAuth(async ({ request }) => {
       link: link || '/dashboard', // Default link if not provided
     });
 
+    // Get the user's device token from PostgreSQL
+    let deviceToken = await prisma.deviceToken.findUnique({
+      where: { userId },
+    });
 
-    // Get the user's device token from Firestore to send a push notification
-    let tokenDoc = await adminDb.collection('deviceTokens').doc(userId).get();
-    if (!tokenDoc.exists) {
+    if (!deviceToken) {
       // If there's no token, we just skip the push notification silently
       // The notification is already saved in the database for the user to see later
       return createApiResponse({ messageId: 'No device token, notification saved to DB.' }, 200);
     }
 
-    let { token } = tokenDoc.data() as { token: string };
-
     let message: admin.messaging.Message = {
-      token: token,
+      token: deviceToken.token,
       notification: {
         title,
         body: notificationBody,
@@ -63,10 +62,10 @@ export const POST = withAuth(async ({ request }) => {
 
   } catch (error) {
     console.error('Error sending push notification:', error);
-    if (error instanceof CustomFirebaseError) { // Type assertion can be done here
-        if (error.code === 'messaging/registration-token-not-registered') {
-             return handleApiError({ message: 'Device token is no longer valid. The user may have uninstalled the app or revoked permissions.' }, 410);
-        }
+    if (error instanceof Error) {
+      if (error.message.includes('registration-token-not-registered')) {
+        return handleApiError({ message: 'Device token is no longer valid. The user may have uninstalled the app or revoked permissions.' }, 410);
+      }
     }
     return handleApiError(error);
   }

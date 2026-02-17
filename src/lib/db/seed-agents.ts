@@ -1,28 +1,24 @@
-
-// src/lib/db/seed-agents.ts
-import { adminDb } from '@/lib/firebase/server-init';
+import prisma from '@/lib/db/prisma';
 import { defaultAgents } from './seed-data/agents';
 
 async function seed() {
     console.log("Starting Agent seeding process...");
-    const batch = adminDb.batch();
 
     try {
         console.log("Preparing to seed Agents...");
-        const agentsCollection = adminDb.collection('agents');
-        defaultAgents.forEach(agent => {
-            const docRef = agentsCollection.doc(agent.id);
-            const agentData = {
-                ...agent,
-                createdAt: new Date().toISOString(),
-                updatedAt: new Date().toISOString(),
-            };
-            batch.set(docRef, agentData);
-        });
-        console.log(`${defaultAgents.length} Agents added to batch.`);
-
-        await batch.commit();
-        console.log("All agents have been successfully seeded to Firestore!");
+        for (const agent of defaultAgents) {
+            await prisma.agent.upsert({
+                where: { id: agent.id },
+                update: {
+                    ...agent,
+                },
+                create: {
+                    ...agent,
+                },
+            });
+        }
+        console.log(`${defaultAgents.length} Agents seeded successfully.`);
+        console.log("All agents have been successfully seeded to PostgreSQL!");
 
     } catch (error) {
         console.error("Error during agent seeding:", error);
@@ -33,4 +29,7 @@ async function seed() {
 seed().then(() => {
     console.log("Agent seeding finished.");
     process.exit(0);
+}).catch((error) => {
+    console.error("Agent seeding error:", error);
+    process.exit(1);
 });

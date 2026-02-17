@@ -1,15 +1,14 @@
 'use server';
 
 import { z } from 'zod';
-import { adminDb } from '@/lib/firebase/server-init';
+import prisma from '@/lib/db/prisma';
 import { withAuth, handleApiError, createApiResponse } from '@/lib/utils/api-utils';
-import { getUserProfile } from '@/services/userService';
 
 const getLogsQuerySchema = z.object({
   limit: z.coerce.number().int().min(1).max(50).default(15),
   agentId: z.string().optional(),
   userId: z.string().optional(),
-  lastVisibleId: z.string().optional(),
+  skip: z.coerce.number().int().min(0).default(0),
 });
 
 export const GET = withAuth(async ({ request }) => {
@@ -21,45 +20,51 @@ export const GET = withAuth(async ({ request }) => {
             return handleApiError(queryValidation.error);
         }
 
-        let { limit, agentId, userId, lastVisibleId } = queryValidation.data;
+        let { limit, agentId, userId, skip } = queryValidation.data;
 
-        let query: FirebaseFirestore.Query<FirebaseFirestore.DocumentData> = adminDb.collection('agent_generations');
-
+        // Build filter conditions
+        let where: any = {};
         if (agentId) {
-            query = query.where('agentId', '==', agentId);
+            where.metadata = {
+              path: ['agentId'],
+              equals: agentId,
+            };
         }
         if (userId) {
-            query = query.where('userId', '==', userId);
+            where.userId = userId;
         }
 
-        query = query.orderBy('createdAt', 'desc');
-
-        if (lastVisibleId) {
-            let lastDoc = await adminDb.collection('agent_generations').doc(lastVisibleId).get();
-            if (lastDoc.exists) {
-                query = query.startAfter(lastDoc);
-            }
-        }
-
-        let snapshot = await query.limit(limit + 1).get(); // Fetch one extra to check for next page
-
-        let logsPromises = snapshot.docs.slice(0, limit).map(async (doc) => {
-            let data = doc.data();
-            let userProfile = await getUserProfile(data.userId);
-            return {
-                id: doc.id,
-                userName: userProfile?.name || 'Unknown User', // Add user's name
-                ...data
-            };
+        // Fetch logs with pagination
+        let logs = await prisma.generationLog.findMany({
+            where,
+            orderBy: { createdAt: 'desc' },
+            take: limit + 1, // Fetch one extra to check for next page
+            skip,
+            include: {
+              // No relations to include for now
+            },
         });
 
-        let logs = await Promise.all(logsPromises);
-        let hasNextPage = snapshot.docs.length > limit;
+        // Get user names for each log
+        let logsWithUserNames = await Promise.all(
+            logs.slice(0, limit).map(async (log) => {
+                let user = log.userId ? await prisma.user.findUnique({
+                    where: { id: log.userId },
+                    select: { name: true },
+                }) : null;
+                return {
+                    ...log,
+                    userName: user?.name || 'Unknown User',
+                };
+            })
+        );
+
+        let hasNextPage = logs.length > limit;
 
         return createApiResponse({
-            logs,
+            logs: logsWithUserNames,
             hasNextPage,
-            lastVisibleId: hasNextPage && logs.length > 0 ? logs[logs.length - 1].id : null,
+            nextSkip: hasNextPage ? skip + limit : null,
         }, 200);
 
     } catch (error) {

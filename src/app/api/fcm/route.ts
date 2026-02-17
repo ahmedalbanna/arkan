@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { adminDb } from '@/lib/firebase/server-init';
+import { prisma } from '@/lib/db/prisma';
 import { z } from 'zod';
 
 const deviceTokenSchema = z.object({
@@ -18,11 +18,18 @@ export async function POST(request: Request) {
 
     let { userId, token } = validation.data;
 
-    // Save or update the token in Firestore
-    await adminDb.collection('deviceTokens').doc(userId).set({
-      token,
-      updatedAt: new Date().toISOString(),
-    }, { merge: true });
+    // Save or update the token in PostgreSQL
+    await prisma.deviceToken.upsert({
+      where: { token },
+      create: {
+        userId,
+        token,
+        platform: 'web',
+      },
+      update: {
+        lastUsedAt: new Date(),
+      },
+    });
 
     return NextResponse.json({ message: 'Device token saved successfully.' }, { status: 200 });
 

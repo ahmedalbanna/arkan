@@ -1,33 +1,33 @@
-// src/app/api/admin/templates/presentation/[id]/route.ts
-
 import { createApiResponse, handleApiError, withAuth } from '@/lib/utils/api-utils';
-import { adminDb } from '@/lib/firebase/server-init';
+import prisma from '@/lib/db/prisma';
 import { UpdatePresentationTemplateSchema } from '@/ai/schemas';
 
 // GET a single presentation template
 export const GET = withAuth(async ({ params }) => {
     try {
-        let { id } = params;
+        const resolvedParams = await params;
+        let { id } = resolvedParams;
         if (!id) {
             return handleApiError({ message: 'Template ID is required.' }, 400);
         }
-        let docRef = adminDb.collection('templates').doc('presentation').collection('items').doc(id);
-        let doc = await docRef.get();
+        let template = await prisma.pptxTemplate.findUnique({
+            where: { id },
+        });
 
-        if (!doc.exists) {
+        if (!template) {
             return handleApiError({ message: 'Presentation template not found.' }, 404);
         }
-        return createApiResponse({ id: doc.id, ...doc.data() }, 200);
+        return createApiResponse(template, 200);
     } catch (error) {
         return handleApiError(error);
     }
 }, { requireAdmin: true });
 
-
 // PUT to update a presentation template
 export const PUT = withAuth(async ({ request, params }) => {
     try {
-        let { id } = params;
+        const resolvedParams = await params;
+        let { id } = resolvedParams;
         if (!id) {
             return handleApiError({ message: 'Template ID is required.' }, 400);
         }
@@ -38,26 +38,29 @@ export const PUT = withAuth(async ({ request, params }) => {
             return handleApiError(validation.error);
         }
 
-        let docRef = adminDb.collection('templates').doc('presentation').collection('items').doc(id);
-        await docRef.update(validation.data);
+        let template = await prisma.pptxTemplate.update({
+            where: { id },
+            data: validation.data,
+        });
 
-        let updatedDoc = await docRef.get();
-        return createApiResponse({ id: updatedDoc.id, ...updatedDoc.data() }, 200);
+        return createApiResponse(template, 200);
 
     } catch (error) {
         return handleApiError(error);
     }
 }, { requireAdmin: true });
 
-
 // DELETE a presentation template
 export const DELETE = withAuth(async ({ params }) => {
     try {
-        let { id } = params;
+        const resolvedParams = await params;
+        let { id } = resolvedParams;
         if (!id) {
             return handleApiError({ message: 'Template ID is required.' }, 400);
         }
-        await adminDb.collection('templates').doc('presentation').collection('items').doc(id).delete();
+        await prisma.pptxTemplate.delete({
+            where: { id },
+        });
         return createApiResponse({ message: 'Template deleted successfully.' }, 200);
     } catch (error) {
         return handleApiError(error);

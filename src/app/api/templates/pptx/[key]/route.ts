@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { adminDb } from '@/lib/firebase/server-init';
+import prisma from '@/lib/db/prisma';
 import { withAuth, handleApiError, createApiResponse } from '@/lib/utils/api-utils';
 
 const updatePptxTemplateSchema = z.object({
@@ -8,15 +8,17 @@ const updatePptxTemplateSchema = z.object({
 
 export const PUT = withAuth(async ({ request, params }) => {
     try {
-        let key = params.key;
+        const resolvedParams = await params;
+        let key = resolvedParams.key;
         if (!key) {
             return handleApiError({ message: 'Template key is required.' }, 400);
         }
 
-        let templateRef = adminDb.collection('templates').doc('pptx').collection('styles').doc(key);
-        let templateDoc = await templateRef.get();
+        let template = await prisma.pptxTemplate.findUnique({
+            where: { id: key },
+        });
 
-        if (!templateDoc.exists) {
+        if (!template) {
             return handleApiError({ message: 'PPTX template not found.' }, 404);
         }
 
@@ -27,10 +29,12 @@ export const PUT = withAuth(async ({ request, params }) => {
             return handleApiError(validation.error);
         }
 
-        await templateRef.update({ styles: validation.data.styles, updatedAt: new Date().toISOString() });
-        let updatedDoc = await templateRef.get();
+        let updatedTemplate = await prisma.pptxTemplate.update({
+            where: { id: key },
+            data: { styles: validation.data.styles },
+        });
 
-        return createApiResponse(updatedDoc.data(), 200);
+        return createApiResponse(updatedTemplate, 200);
 
     } catch (error) {
         return handleApiError(error);
@@ -39,7 +43,8 @@ export const PUT = withAuth(async ({ request, params }) => {
 
 export const DELETE = withAuth(async ({ params }) => {
     try {
-        let key = params.key;
+        const resolvedParams = await params;
+        let key = resolvedParams.key;
         if (!key) {
             return handleApiError({ message: 'Template key is required.' }, 400);
         }
@@ -48,14 +53,17 @@ export const DELETE = withAuth(async ({ params }) => {
             return handleApiError({ message: 'Default templates cannot be deleted.' }, 403);
         }
 
-        let templateRef = adminDb.collection('templates').doc('pptx').collection('styles').doc(key);
-        let templateDoc = await templateRef.get();
+        let template = await prisma.pptxTemplate.findUnique({
+            where: { id: key },
+        });
 
-        if (!templateDoc.exists) {
+        if (!template) {
             return handleApiError({ message: 'PPTX template not found.' }, 404);
         }
 
-        await templateRef.delete();
+        await prisma.pptxTemplate.delete({
+            where: { id: key },
+        });
 
         return createApiResponse({ message: `Template "${key}" deleted successfully.` }, 200);
 

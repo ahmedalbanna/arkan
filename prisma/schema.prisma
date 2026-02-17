@@ -45,6 +45,7 @@ model User {
   creditLedger  CreditLedger[]
   notifications Notification[]
   apiTokens     ApiToken[]
+  deviceTokens  DeviceToken[]
   
   @@map("users")
   @@index([email])
@@ -361,19 +362,29 @@ model IndexedDocument {
   id            String   @id @default(cuid())
   
   // Document details
-  title         String
-  fileName      String   @map("file_name")
-  fileType      String   @map("file_type")
+  projectId     String?  @map("project_id")
+  userId        String?  @map("user_id")
+  sourceFile    String   @map("source_file")
+  fileName      String?  @map("file_name")
+  fileType      String?  @map("file_type")
   fileSize      Int      @map("file_size")
   
-  // Indexing
-  collectionName String  @map("collection_name")
+  // Indexing details
+  chunksCount   Int      @default(0) @map("chunks_count")
+  chunkSize     Int?     @map("chunk_size")
+  overlap       Int?     
+  type          String?  // report, reference, context, user_upload
+  
+  // Collection/Vector info
+  collectionName String?  @map("collection_name")
   vectorCount   Int      @default(0) @map("vector_count")
   status        String   @default("pending")
   
   // Metadata
   metadata      Json?
   error         String?
+  errorMessage  String?  @map("error_message")
+  timestamp     BigInt?
   
   // Timestamps
   createdAt     DateTime @default(now()) @map("created_at")
@@ -381,6 +392,8 @@ model IndexedDocument {
   indexedAt     DateTime? @map("indexed_at")
   
   @@map("indexed_documents")
+  @@index([projectId])
+  @@index([userId])
   @@index([collectionName])
   @@index([status])
   @@index([createdAt])
@@ -389,6 +402,30 @@ model IndexedDocument {
 // ============================================================================
 // NOTIFICATION MODELS
 // ============================================================================
+
+model DeviceToken {
+  id        String   @id @default(cuid())
+  userId    String   @map("user_id")
+  
+  // Token details
+  token     String   @unique
+  platform  String?  // ios, android, web
+  
+  // Status
+  isActive  Boolean  @default(true) @map("is_active")
+  
+  // Timestamps
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+  lastUsedAt DateTime? @map("last_used_at")
+  
+  // Relations
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@map("device_tokens")
+  @@index([userId])
+  @@index([token])
+}
 
 model Notification {
   id        String   @id @default(cuid())
@@ -495,6 +532,22 @@ model ApiToken {
   @@map("api_tokens")
   @@index([userId])
   @@index([token])
+}
+
+model Section {
+  id          String   @id
+  title       String
+  type        String   // 'report', 'diagram', 'presentation'
+  prompt      String?
+  guidelines  String[] @default([])
+  model       String?
+  
+  // Timestamps
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+  
+  @@map("sections")
+  @@index([type])
 }
 
 model GenerationLog {

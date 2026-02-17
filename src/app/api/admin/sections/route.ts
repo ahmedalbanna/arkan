@@ -1,6 +1,5 @@
-// C:\Users\ahmed\source\repos\arkan\src\app\api\admin\sections\route.ts
 import { withAuth, handleApiError, createApiResponse } from '@/lib/utils/api-utils';
-import { adminDb } from '@/lib/firebase/server-init';
+import prisma from '@/lib/db/prisma';
 import { z } from 'zod';
 
 const SectionSchema = z.object({
@@ -15,8 +14,9 @@ const SectionSchema = z.object({
 // GET all sections
 export const GET = withAuth(async ({ user: _user }) => {
   try {
-    let snapshot = await adminDb.collection('sections').orderBy('title').get();
-    let sections = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    let sections = await prisma.section.findMany({
+      orderBy: { title: 'asc' },
+    });
     return createApiResponse(sections, 200);
   } catch (error) {
     return handleApiError(error);
@@ -32,9 +32,13 @@ export const POST = withAuth(async ({ request }) => {
       return handleApiError(validation.error);
     }
     let { id, ...data } = validation.data;
-    let docRef = adminDb.collection('sections').doc(id);
-    await docRef.set(data);
-    return createApiResponse({ id, ...data }, 201);
+    let section = await prisma.section.create({
+      data: {
+        id,
+        ...data,
+      },
+    });
+    return createApiResponse(section, 201);
   } catch (error) {
     return handleApiError(error);
   }
