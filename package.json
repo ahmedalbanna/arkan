@@ -24,6 +24,8 @@
     "docker:logs": "docker-compose logs -f",
     "migration:verify": "tsx scripts/verify-migration.ts",
     "test:triggers": "tsx scripts/test-triggers-and-rls.ts",
+    "create:admin": "tsx scripts/create-admin-user.ts",
+    "test:auth": "tsx scripts/test-nextauth.ts",
     "qdrant:start": "docker-compose up -d qdrant",
     "qdrant:stop": "docker-compose stop qdrant",
     "qdrant:logs": "docker-compose logs -f qdrant",
