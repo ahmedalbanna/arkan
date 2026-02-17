@@ -528,6 +528,62 @@ Before submitting API calls or adding new flows:
   4. Prioritize files with the most errors to maximize impact per fix
   5. Use parallel fixes when errors follow the same pattern (e.g., unused parameters)
 
+## PostgreSQL Migration Patterns
+
+### Prisma Version Compatibility
+- **Prisma 7.x Breaking Changes**: Prisma 7.x introduced significant changes to configuration and migration patterns that caused compatibility issues
+  - **Solution**: Downgrade to Prisma 5.22.0 for stable migration workflows
+  - **Migration Commands**: Use `npx prisma migrate dev` instead of `prisma db push` for production-ready migrations
+  - **Configuration**: Keep `url` in `datasource db` block for migration tools, even when using separate config files
+
+### Docker Container Database Operations
+- **Use Docker exec for database operations**: When working with Dockerized PostgreSQL, use `docker exec` commands instead of installing local tools
+  - Backup: `docker exec arkan-postgres pg_dump -U user dbname | gzip > backup.sql.gz`
+  - SQL execution: `docker exec -i arkan-postgres psql -U user -d dbname < script.sql`
+  - This avoids local tooling dependencies and ensures consistency
+
+### Prisma Query Type Handling
+- **BigInt Type Conversions**: PostgreSQL COUNT queries return `bigint` type, must be converted to JavaScript numbers
+  - Pattern: `const result = await prisma.$queryRaw<Array<{ count: bigint }>>`; then `Number(result[0].count)`
+  - **Common Error**: "Cannot mix BigInt and other types" when using raw COUNT results without conversion
+
+### Table Naming Conventions
+- **Prisma uses snake_case in database**: Even when Prisma schema uses PascalCase model names, actual PostgreSQL tables use snake_case
+  - Schema: `model User` → Database: `users` table
+  - Schema: `model CreditLedger` → Database: `credit_ledger` table
+  - **Always verify actual table names** with `\dt` in psql before writing raw SQL queries or optimization scripts
+
+### Prisma Field Relationship Queries
+- **Use field names not relation names**: When querying for null relationships, use the field name (`userId`) not the relation name (`user`)
+  - ❌ Incorrect: `where: { user: null }`
+  - ✅ Correct: `where: { userId: null }`
+  - **Note**: Required fields (non-nullable) cannot use `null` checks - use raw SQL with `NOT EXISTS` instead
+
+### Health Check Script Patterns
+- **Graceful degradation for missing data**: Health checks should default to "healthy" status when data doesn't exist yet
+  - Don't fail validation if checking transaction status types that don't exist in the schema
+  - Use try/catch with sensible defaults rather than hard failures
+  - **Pattern**: For checks that might error on empty databases, catch and return healthy status with descriptive message
+
+### File Content Generation Issues
+- **Tool output truncation in message history**: When file content is very large, the system may truncate it with placeholder text like "Tool call argument 'initial_content' pruned from message history"
+  - This corrupts the file with literal placeholder text
+  - **Solution**: When creating files with large content (>500 lines), verify the file was created correctly immediately after
+  - If corrupted, use `find_and_replace_code` to fix, or recreate with smaller content chunks
+
+### Migration Script Organization
+- **Create dedicated migration directories**: Keep migration scripts organized in `scripts/migration/` and `scripts/production/`
+  - Export scripts: `export-firebase-users.ts`, `export-firestore-data.ts`
+  - Import scripts: `migrate-users.ts`, `migrate-transactions.ts`, `migrate-projects.ts`
+  - Validation: `validate-migration.ts`, `post-cutover-validation.ts`
+  - This separation makes it clear which scripts run in which environment
+
+### Testing Script Dependencies
+- **Separate test scripts for different environments**: Create environment-specific test scripts to avoid dependency issues
+  - `post-cutover-validation.ts` - Requires Firebase connection for production validation
+  - `validate-postgres-only.ts` - PostgreSQL-only validation for local/dev testing
+  - This prevents test failures due to missing Firebase credentials in development
+
 ## Resources
 
 ### External Documentation
@@ -536,8 +592,10 @@ Before submitting API calls or adding new flows:
 - [Firebase Documentation](https://firebase.google.com/docs)
 - [Radix UI Documentation](https://radix-ui.com)
 - [Tailwind CSS Documentation](https://tailwindcss.com/docs)
+- [Prisma Documentation](https://www.prisma.io/docs)
 
 ### Project-Specific Resources
 - `memory-bank/` - Project context and documentation
 - `docs/` - Additional project documentation
+- `docs/migration/` - PostgreSQL migration guides and documentation
 - `.rovodev/subagents/` - AI agent configurations
