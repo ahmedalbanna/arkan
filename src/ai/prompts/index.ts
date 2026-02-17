@@ -3,71 +3,38 @@
 import { ai } from '@/ai/genkit';
 import {
     AiProofreadDocumentInputSchema,
-    AiProofreadDocumentOutputSchema,
     AIResearcherInputSchema,
-    AIResearcherOutputSchema,
-    AnalyzeContextOutputSchema,
     BiasCheckInputSchema,
-    BiasCheckOutputSchema,
     DetectAIInputSchema,
-    DetectAIOutputSchema,
     FactCheckInputSchema,
-    FactCheckOutputSchema,
     FactRetrievalInputSchema,
-    FactRetrievalOutputSchema,
     GenerateAgentConfigInputSchema,
-    GenerateAgentConfigOutputSchema,
     GenerateChapterInputSchema,
-    GenerateChapterOutputSchema,
     GenerateCitationInputSchema,
-    GenerateCitationOutputSchema,
     GeneratePlantUMLInputSchema,
-    GeneratePlantUMLOutputSchema,
     GenerateProjectBlueprintInputSchema,
-    GenerateProjectBlueprintOutputSchema,
     GenerateQuizInputSchema,
-    GenerateQuizOutputSchema,
     GenerateSectionInputSchema,
-    GenerateSectionOutputSchema,
     GenerateTextInputSchema,
-    GenerateTextOutputSchema,
     GenerateTocInputSchema,
-    GenerateTocOutputSchema,
     GenerateUIDescriptionInputSchema,
-    GenerateUIDescriptionOutputSchema,
     GrammarCheckInputSchema,
-    GrammarCheckOutputSchema,
     HumanizeTextInputSchema,
-    HumanizeTextOutputSchema,
     ImageToTextInputSchema,
-    ImageToTextOutputSchema,
     ImproveMarkdownInputSchema,
-    ImproveMarkdownOutputSchema,
     ManipulateTextInputSchema,
-    ManipulateTextOutputSchema,
     ParaphraseInputSchema,
-    ParaphraseOutputSchema,
     PlagiarismCheckInputSchema,
-    PlagiarismCheckOutputSchema,
     QuestionAnsweringInputSchema,
-    QuestionAnsweringOutputSchema,
     RewriteDocumentInputSchema,
-    RewriteDocumentOutputSchema,
     RewriteToMarkdownInputSchema,
-    RewriteToMarkdownOutputSchema,
     SentenceStructureCheckInputSchema,
-    SentenceStructureCheckOutputSchema,
     SolveAssignmentsInputSchema,
-    SolveAssignmentsOutputSchema,
-    SummarizeOutputSchema,
     TopicExplainerInputSchema,
-    TopicExplainerOutputSchema,
     TranslateTextInputSchema,
-    TranslateTextOutputSchema,
-    WriteDocumentInputSchema,
-    WriteDocumentOutputSchema
+    WriteDocumentInputSchema
 } from '@/ai/schemas';
-import { GenerateSessionPlanInputSchema, GenerateSessionPlanOutputSchema, GenerateTheoreticalLectureInputSchema, GenerateTheoreticalLectureOutputSchema } from '@/ai/schemas/lecture-generator';
+import { GenerateSessionPlanInputSchema, GenerateTheoreticalLectureInputSchema } from '@/ai/schemas/lecture-generator';
 import { z } from 'zod';
 
 // Export graduation project prompts
@@ -76,7 +43,7 @@ export * from './graduation-project';
 // Export academic writing prompts
 export * from './academic-writing';
 
-const styleDescriptions: Record<string, string> = {
+const _styleDescriptions: Record<string, string> = {
     standard: "Provide a balanced rewrite that improves clarity while retaining the original meaning.",
     fluent: "Rewrite the text to sound more natural and fluent, as if written by a native speaker.",
     formal: "Rewrite the text using a more formal, academic, and professional tone.",
@@ -84,13 +51,13 @@ const styleDescriptions: Record<string, string> = {
     simplify: "Rewrite the text to be simpler and easier to understand for a general audience.",
 };
 
-const lengthDescriptions: Record<string, string> = {
+const _lengthDescriptions: Record<string, string> = {
     short: "a single, concise paragraph.",
     medium: "a few paragraphs, capturing the main points and key supporting details.",
     long: "a detailed summary, covering all significant topics and arguments.",
 };
 
-const styleControls: Record<string, string> = {
+const _styleControls: Record<string, string> = {
     formality: "Adjust the formality level of the text.",
     complexity: "Set the complexity level of the content.",
     tone: "Specify the tone of the text (e.g., friendly, professional).",

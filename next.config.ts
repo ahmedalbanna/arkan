@@ -4,7 +4,6 @@ import type { NextConfig, SizeLimit } from 'next';
 const nextConfig: NextConfig = {
   reactStrictMode: true, // Enable React strict mode for better development experience
   output: 'standalone',
-  swcMinify: true,
   typescript: {
     ignoreBuildErrors: false,
   },
@@ -59,11 +58,7 @@ const nextConfig: NextConfig = {
     return config;
   },
   experimental: {
-    turbo: {
-    },
     serverActions: { bodySizeLimit: '10mb' as SizeLimit },
-    useCache: true,
-    allowDevelopmentBuild: true,
   }
 };
 

@@ -68,7 +68,7 @@ export async function apiService<TRequest = any, TResponse = any>(
     let errorData;
     try {
       errorData = await response.json();
-    } catch (e) {
+    } catch {
       // If the response is not JSON, use the status text
       errorData = { message: response.statusText || 'An unknown error occurred.' };
     }

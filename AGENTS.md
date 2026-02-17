@@ -509,6 +509,25 @@ Before submitting API calls or adding new flows:
 2. **Mismatched Type Assertions**: When using `as const` for literal types, ensure the value actually matches the expected literal
 3. **Callback Parameter Types**: Don't rely on TypeScript inference for callback parameters from dynamic data structures
 
+### ESLint and Build Configuration Issues
+- **Deprecated Next.js Options**: `swcMinify` and `experimental.turbo` are deprecated in Next.js 15 and should be removed from `next.config.ts`
+- **Development-Only Options**: `experimental.allowDevelopmentBuild` requires `NODE_ENV=development` and is inappropriate for production builds - remove it
+- **Unused Import Fixes**: When fixing ESLint unused import errors, use the following patterns:
+  - Unused imports: Remove entirely or comment them out
+  - Unused parameters: Prefix with underscore (e.g., `_request`, `_user`)
+  - Unused variables: Either remove or prefix with underscore
+  - Unused schema exports: Check both schema files and barrel exports (index.ts files) for orphaned exports
+- **Destructured Variable Handling**: When destructuring and some values are unused, use the underscore prefix pattern:
+  - Example: `const { lineColor: _lineColor, ...used } = styles.footnote;`
+  - This is better than creating intermediate variables you don't use
+- **Build Error Investigation**: When `npm run build` hangs or times out during ESLint checks, the build process may still be running in the background. Allow sufficient timeout (600+ seconds) and monitor `/tmp/build.log` for detailed output
+- **Bulk Error Fixing Strategy**: When facing 80+ ESLint errors across many files:
+  1. First fix configuration issues (deprecated options) to reduce noise
+  2. Use `npm run build 2>&1 | grep "^\./src" | grep "Error:"` to get a sorted list of affected files
+  3. Group fixes by file type (flows, API routes, components, services) for efficiency
+  4. Prioritize files with the most errors to maximize impact per fix
+  5. Use parallel fixes when errors follow the same pattern (e.g., unused parameters)
+
 ## Resources
 
 ### External Documentation

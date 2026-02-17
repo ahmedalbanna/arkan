@@ -6,7 +6,7 @@ import { adminDb } from '@/lib/firebase/server-init';
 import { getUserProfile, deleteUser } from "@/services/userService";
 
 // GET a single user profile.
-export const GET = withAuth(async ({ params, user: requester, token }) => {
+export const GET = withAuth(async ({ params, user: requester, token: _token }) => {
     try {
         const targetUserId = params.id;
 

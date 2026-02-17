@@ -7,12 +7,8 @@
  */
 
 import {
-  GenerateTheoreticalLectureInputSchema,
   type GenerateTheoreticalLectureInput,
-  type GenerateTheoreticalLectureOutput,
-  GenerateSessionPlanInputSchema,
   type GenerateSessionPlanInput,
-  type GenerateSessionPlanOutput,
   CreateLectureUnitInputSchema,
   type CreateLectureUnitInput,
   type CreateLectureUnitOutput,

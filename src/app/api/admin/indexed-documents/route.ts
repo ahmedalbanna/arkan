@@ -11,7 +11,7 @@ import {
   getDocumentStatistics 
 } from '@/services/document-tracking-service';
 
-export async function GET(request: NextRequest) {
+export async function GET(_request: NextRequest) {
   try {
     // Get documents from Firestore tracking database
     const documents = await getAllIndexedDocuments();

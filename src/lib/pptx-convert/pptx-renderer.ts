@@ -89,7 +89,7 @@ export async function transformInlinesToPptxText(
 
 
 /** Renders a paragraph node, handling special cases for images and list-like text. */
-async function renderParagraph(slide: PptxGenJS.Slide, node: Paragraph, y: number, h: number, styles: PptxStyleOptions, isRtl = false, fonts: FontOptions = {}, footnoteIdMap: Map<string, number> = new Map(), x: number = layout.CONTENT_X, w: number = layout.CONTENT_WIDTH) {
+async function renderParagraph(slide: PptxGenJS.Slide, node: Paragraph, y: number, h: number, styles: PptxStyleOptions, isRtl = false, fonts: FontOptions = {}, footnoteIdMap: Map<string, number> = new Map(), _x: number = layout.CONTENT_X, _w: number = layout.CONTENT_WIDTH) {
     const imageNode = node.children.length === 1 && node.children[0].type === 'image' ? node.children[0] : null;
     if (imageNode) {
         try {
@@ -117,12 +117,12 @@ async function renderParagraph(slide: PptxGenJS.Slide, node: Paragraph, y: numbe
     } else {
         const textRuns = await transformInlinesToPptxText(node.children, styles.body, styles, isRtl, fonts, footnoteIdMap);
         if (textRuns.length === 0) return;
-        slide.addText(textRuns, { x, y, w, h, ...styles.body, rtlMode: isRtl, align: isRtl ? 'right' : styles.body.align });
+        slide.addText(textRuns, { x: layout.CONTENT_X, y, w: layout.CONTENT_WIDTH, h, ...styles.body, rtlMode: isRtl, align: isRtl ? 'right' : styles.body.align });
     }
 }
 
 /** Renders a blockquote node. */
-async function renderBlockquote(slide: PptxGenJS.Slide, node: Blockquote, y: number, h: number, styles: PptxStyleOptions, isRtl = false, fonts: FontOptions = {}, footnoteIdMap: Map<string, number> = new Map(), x: number = layout.CONTENT_X, w: number = layout.CONTENT_WIDTH) {
+async function renderBlockquote(slide: PptxGenJS.Slide, node: Blockquote, y: number, h: number, styles: PptxStyleOptions, isRtl = false, fonts: FontOptions = {}, footnoteIdMap: Map<string, number> = new Map(), _x: number = layout.CONTENT_X, _w: number = layout.CONTENT_WIDTH) {
     const blockquoteStyle = { ...styles.body, ...styles.blockquote };
     const textRuns: PptxGenJS.TextProps[] = [];
     for (const [i, p] of node.children.entries()) {
@@ -133,11 +133,11 @@ async function renderBlockquote(slide: PptxGenJS.Slide, node: Blockquote, y: num
             }
         }
     }
-    slide.addText(textRuns, { x, y, w, h, ...blockquoteStyle, rtlMode: isRtl, align: isRtl ? 'right' : blockquoteStyle.align });
+    slide.addText(textRuns, { x: layout.CONTENT_X, y, w: layout.CONTENT_WIDTH, h, ...blockquoteStyle, rtlMode: isRtl, align: isRtl ? 'right' : blockquoteStyle.align });
 }
 
 /** Renders a table node. */
-async function renderTable(slide: PptxGenJS.Slide, node: Table, y: number, h: number, styles: PptxStyleOptions, isRtl = false, fonts: FontOptions = {}, x: number = layout.CONTENT_X, w: number = layout.CONTENT_WIDTH, footnoteIdMap: Map<string, number> = new Map()) {
+async function renderTable(slide: PptxGenJS.Slide, node: Table, y: number, h: number, styles: PptxStyleOptions, isRtl = false, fonts: FontOptions = {}, _x: number = layout.CONTENT_X, _w: number = layout.CONTENT_WIDTH, footnoteIdMap: Map<string, number> = new Map()) {
     const tableRows: PptxGenJS.TableRow[] = [];
     for (const [rowIndex, rowNode] of node.children.entries()) {
         const tableCells: PptxGenJS.TableCell[] = [];
@@ -153,11 +153,11 @@ async function renderTable(slide: PptxGenJS.Slide, node: Table, y: number, h: nu
 }
 
 /** Renders a code block node. */
-async function renderCode(slide: PptxGenJS.Slide, node: Code, y: number, h: number, styles: PptxStyleOptions, isRtl = false, fonts: FontOptions = {}, x: number = layout.CONTENT_X, w: number = layout.CONTENT_WIDTH) {
+async function renderCode(slide: PptxGenJS.Slide, node: Code, y: number, h: number, styles: PptxStyleOptions, isRtl = false, fonts: FontOptions = {}, _x: number = layout.CONTENT_X, _w: number = layout.CONTENT_WIDTH) {
     const codeStyle = { ...styles.code };
     if (fonts.code) codeStyle.fontFace = fonts.code;
     slide.addText(node.value, {
-        x, y, w, h, ...styles.body,
+        x: layout.CONTENT_X, y, w: layout.CONTENT_WIDTH, h, ...styles.body,
         ...codeStyle,
         rtlMode: false, // Code is always LTR
         align: 'left'   // Code is always LTR

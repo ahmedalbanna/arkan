@@ -3,7 +3,7 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
-import { BrainCircuit, FileSpreadsheet, GitGraph, Laptop, Presentation, FileQuestion, BookCheck, PencilLine, FileText, ShieldCheck, Users, Workflow, Bell, Palette } from 'lucide-react';
+import { BrainCircuit, FileSpreadsheet, GitGraph, Laptop, Presentation, FileQuestion, FileText, ShieldCheck, Users, Bell, Palette } from 'lucide-react';
 import { useLocalization } from '@/context/LocalizationContext';
 
 const features = [

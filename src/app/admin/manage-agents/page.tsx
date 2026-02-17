@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useEffect } from 'react';
+// useEffect removed - not used in component
 import AgentPlayground from '@/components/agent/AgentPlayground';
 import { AgentList } from '@/components/sidebar/AgentList';
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@/components/ui/resizable';
@@ -22,7 +22,7 @@ export default function ManageAgentsPage() {
         error,
         fetchAgents,
     } = useAgentManager();
-    const { firebaseUser, isLoading: authIsLoading } = useAuth();
+    const { firebaseUser: _firebaseUser, isLoading: authIsLoading } = useAuth();
 
     function handleFetch() {
         fetchAgents();

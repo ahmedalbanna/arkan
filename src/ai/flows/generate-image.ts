@@ -8,7 +8,6 @@
  */
 
 import { ai } from '@/ai/genkit';
-import { z } from 'zod';
 import { GenerateImageInputSchema, type GenerateImageInput, GenerateImageOutputSchema, type GenerateImageOutput } from '@/ai/schemas';
 
 export async function generateImage(input: GenerateImageInput): Promise<GenerateImageOutput> {

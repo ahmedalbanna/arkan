@@ -12,7 +12,6 @@ import {
   signOut,
   type UserCredential
 } from "firebase/auth";
-import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { apiService } from './apiService';
 import { fetchUserProfileApi } from './userService';
 

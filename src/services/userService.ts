@@ -2,7 +2,6 @@
 'use server';
 import { adminAuth, adminDb } from '@/lib/firebase/server-init';
 import type { UserProfile } from '@/lib/models';
-import { FieldValue } from 'firebase-admin/firestore';
 
 export async function getUserProfile(id: string): Promise<UserProfile | null> {
     if (!id) return null;

@@ -84,7 +84,7 @@ export async function handleDeleteUser(prevState: any, formData: FormData) {
 
     try {
         await deleteUser(validatedFields.data.userId);
-    } catch (error) {
+    } catch {
         console.error('Failed to delete user:', error);
         return { error: 'Failed to delete user.' };
     }

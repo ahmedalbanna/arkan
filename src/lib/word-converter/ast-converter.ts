@@ -35,8 +35,6 @@ export async function convertAstToDocxObjects(ast: Root, footnoteIdMap: Map<stri
   const processListItems = async (listNode: List, level: number): Promise<Paragraph[]> => {
     const paragraphs: Paragraph[] = [];
     for (const listItem of listNode.children) {
-      const hasCheckedProperty = 'checked' in listItem;
-
       for (const itemContent of listItem.children) {
         if (itemContent.type === 'paragraph') {
           const children = await transformInlines(itemContent.children, footnoteIdMap, baseRunOptions, options);

@@ -80,7 +80,7 @@ class ModelHealthMonitor {
 
     try {
       // Try to generate a simple response
-      const response = await this.testGeneration(modelName);
+      await this.testGeneration(modelName);
 
       const responseTime = Date.now() - startTime;
       const result: HealthCheckResult = {
@@ -170,7 +170,7 @@ class ModelHealthMonitor {
       this.serverOnline = response.ok;
       this.lastServerCheck = Date.now();
       return this.serverOnline;
-    } catch (error) {
+    } catch {
       this.serverOnline = false;
       this.lastServerCheck = Date.now();
       return false;

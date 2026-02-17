@@ -1,11 +1,9 @@
 
 'use server';
 
-import { z } from 'zod';
 import { generateReportSection } from '@/ai/flows/generate-report-section';
 import { deductCredit } from '@/services/credit-service';
 import { logGeneration } from '@/services/generation-service'; // Assuming this is server-side
-import type { SectionName } from '@/ai/schemas';
 import { withAuth, handleApiError, createApiResponse } from '@/lib/utils/api-utils';
 import { GenerateSectionInputSchema } from '@/ai/schemas';
 

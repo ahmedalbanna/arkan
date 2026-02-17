@@ -6,14 +6,11 @@ import { useAuth } from '@/context/AuthContext';
 import { StatCard } from '@/components/admin/dashboard/StatCard';
 import { AgentUsageChart } from '@/components/admin/dashboard/AgentUsageChart';
 import { RecentActivity } from '@/components/admin/dashboard/RecentActivity';
-import { AlertCircle, Bot, History, AreaChart, TrendingDown, Gem, MessageSquare, Loader2, UserCog, CreditCard } from 'lucide-react';
-import { Card, CardHeader, CardContent, CardTitle, CardDescription } from '@/components/ui/card';
+import { AlertCircle, Bot, AreaChart, TrendingDown, Gem, UserCog, CreditCard } from 'lucide-react';
+import { Card, CardHeader, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
-import { useRouter } from 'next/navigation';
-import { toast } from '@/hooks';
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import type { UserProfile } from '@/lib/types';
 import { useLocalization } from '@/context/LocalizationContext';
 import Link from 'next/link';
 
@@ -46,10 +43,8 @@ function DashboardSkeleton() {
 
 export default function UserDashboardPage() {
     const { t } = useLocalization();
-    const { userProfile, firebaseUser } = useAuth();
+    const { userProfile } = useAuth();
     const { data: stats, isLoading, isError, error } = useUserStats();
-    const router = useRouter();
-    const [isCreatingChat, setIsCreatingChat] = useState(false);
 
     return (
         <div className="container mx-auto max-w-7xl px-4 py-12">

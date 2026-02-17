@@ -241,7 +241,7 @@ async function processFootnotesForPptx(
         const id = footnoteCounter++;
         footnoteIdMap.set(node.identifier, id);
 
-        const { lineColor, ...footnoteTextStyle } = styles.footnote || { fontSize: 10, color: '6c757d' };
+        const { lineColor: _lineColor, ...footnoteTextStyle } = styles.footnote || { fontSize: 10, color: '6c757d' };
         const baseOptions: PptxGenJS.TextPropsOptions = { ...footnoteTextStyle };
 
         if (isRtl) baseOptions.rtlMode = true;
@@ -421,7 +421,7 @@ function splitRunsByHeight(
             break;
         }
         textForCurrentRun += sentence;
-        sentenceIndex = i + 2;
+        // sentenceIndex tracking not currently used but kept for future reference
     }
 
     // If we couldn't fit any complete sentences, fall back to word-based splitting
