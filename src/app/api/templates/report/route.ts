@@ -1,57 +1,87 @@
-
-// src/app/api/admin/templates/report/route.ts
-import { adminDb } from '@/lib/firebase/server-init';
+// src/app/api/templates/report/route.ts
+import { getReportTemplates, createReportTemplate } from '@/services/templateService';
 import { CreateReportTemplateSchema, type ReportTemplateProperties } from '@/lib/models';
 import { createApiResponse, handleApiError, withAuth } from '@/lib/utils/api-utils';
 import { defaultReportTemplates } from '@/lib/db/seed-data/report-templates';
 
-
-// This is a public endpoint that does not require authentication
-// as all users need to be able to fetch the templates for building reports.
+/**
+ * GET /api/templates/report
+ * This is a public endpoint that does not require authentication
+ * as all users need to be able to fetch the templates for building reports.
+ */
 export async function GET() {
-    try {
-        let collectionRef = adminDb.collection('templates').doc('report').collection('items');
-        let snapshot = await collectionRef.get();
+  try {
+    let templates = await getReportTemplates();
 
-        // Lazy seeding
-        if (snapshot.empty) {
-            let batch = adminDb.batch();
-            defaultReportTemplates.forEach(template => {
-                const docRef = collectionRef.doc(template.id);
-                batch.set(docRef, template);
-            });
-            await batch.commit();
-            snapshot = await collectionRef.get(); // Re-fetch
-        }
+    // Lazy seeding: If no templates exist, populate them from the default config.
+    if (templates.length === 0) {
+      for (const template of defaultReportTemplates) {
+        await createReportTemplate({
+          id: template.id,
+          name: template.name,
+          description: template.description || '',
+          content: template.content,
+          imageUrl: template.imageUrl,
+        });
+      }
 
-        let templates = snapshot.docs.map(doc => doc.data() as ReportTemplateProperties);
-        return createApiResponse(templates, 200);
-    } catch (error) {
-        return handleApiError(error);
+      // Re-fetch after seeding
+      templates = await getReportTemplates();
     }
+
+    const response = templates.map((t) => ({
+      id: t.id,
+      name: t.name,
+      description: t.description,
+      content: t.content,
+      imageUrl: t.imageUrl,
+      createdAt: t.createdAt.toISOString(),
+    }));
+
+    return createApiResponse(response, 200);
+  } catch (error) {
+    return handleApiError(error);
+  }
 }
 
-
-export const POST = withAuth(async ({ request }) => {
+/**
+ * POST /api/templates/report
+ * Admin-only endpoint to create a new report template
+ */
+export const POST = withAuth(
+  async ({ request }) => {
     try {
-        let body = await request.json();
-        const validation = CreateReportTemplateSchema.safeParse(body);
-        if (!validation.success) {
-            return handleApiError(validation.error);
-        }
+      const body = await request.json();
+      const validation = CreateReportTemplateSchema.safeParse(body);
 
-        const { id, ...data } = validation.data;
-        const collectionRef = adminDb.collection('templates').doc('report').collection('items');
+      if (!validation.success) {
+        return handleApiError(validation.error);
+      }
 
-        const docRef = collectionRef.doc(id);
-        const doc = await docRef.get();
-        if (doc.exists) {
-            return handleApiError({ message: 'A report template with this ID already exists.' }, 409);
-        }
+      const { id, name, description, content, imageUrl } = validation.data;
 
-        await docRef.set(data);
-        return createApiResponse({ id, ...data }, 201);
+      const newTemplate = await createReportTemplate({
+        id,
+        name,
+        description,
+        content,
+        imageUrl,
+      });
+
+      return createApiResponse(
+        {
+          id: newTemplate.id,
+          name: newTemplate.name,
+          description: newTemplate.description,
+          content: newTemplate.content,
+          imageUrl: newTemplate.imageUrl,
+          createdAt: newTemplate.createdAt.toISOString(),
+        },
+        201
+      );
     } catch (error) {
-        return handleApiError(error);
+      return handleApiError(error);
     }
-}, { requireAdmin: true });
+  },
+  { requireAdmin: true }
+);

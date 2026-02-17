@@ -1,87 +1,124 @@
 // src/app/api/admin/dashboard-stats/route.ts
 
 import { withAuth, handleApiError, createApiResponse } from '@/lib/utils/api-utils';
-import { adminDb } from '@/lib/firebase/server-init';
+import { prisma } from '@/lib/db/prisma';
 import { getUserProfile } from '@/services/userService';
 
 async function getSummaryCounts() {
-    let [usersSnapshot, generationsSnapshot, pendingTransactionsSnapshot] = await Promise.all([
-        adminDb.collection('users').count().get(),
-        adminDb.collection('agent_generations').count().get(),
-        adminDb.collection('transactions').where('status', '==', 'pending').count().get()
-    ]);
+  const [usersCount, generationsCount, pendingTransactionsCount] = await Promise.all([
+    prisma.user.count(),
+    prisma.generationLog.count(),
+    prisma.transaction.count({
+      where: { status: 'PENDING' },
+    }),
+  ]);
 
-    return {
-        totalUsers: usersSnapshot.data().count,
-        totalGenerations: generationsSnapshot.data().count,
-        pendingPayments: pendingTransactionsSnapshot.data().count,
-    };
+  return {
+    totalUsers: usersCount,
+    totalGenerations: generationsCount,
+    pendingPayments: pendingTransactionsCount,
+  };
 }
 
 async function getAgentUsage() {
-    // Fetch logs from the last 30 days for agent usage stats to improve performance
-    let thirtyDaysAgo = new Date();
-    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+  // Fetch logs from the last 30 days for agent usage stats to improve performance
+  const thirtyDaysAgo = new Date();
+  thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
 
-    let agentGenerations = await adminDb.collection('agent_generations')
-        .where('createdAt', '>=', thirtyDaysAgo.toISOString())
-        .get();
+  const agentGenerations = await prisma.generationLog.findMany({
+    where: {
+      createdAt: {
+        gte: thirtyDaysAgo,
+      },
+    },
+    select: {
+      agentId: true,
+    },
+  });
 
-    let agentUsage: Record<string, number> = {};
-    agentGenerations.forEach(doc => {
-        let agentId = doc.data().agentId;
-        agentUsage[agentId] = (agentUsage[agentId] || 0) + 1;
-    });
+  // Count usage by agent
+  const agentUsage: Record<string, number> = {};
+  agentGenerations.forEach((log) => {
+    const agentId = log.agentId || 'unknown';
+    agentUsage[agentId] = (agentUsage[agentId] || 0) + 1;
+  });
 
-    let agentUsagePromises = Object.entries(agentUsage)
-        .map(async ([agentId, count]) => ({
-            name: await adminDb.collection('agents').doc(agentId).get().then(doc => doc.data()?.name || 'Unknown'),
-            agentId,
-            count,
-        }));
-    return (await Promise.all(agentUsagePromises))
-        .sort((a, b) => b.count - a.count) // Sort after all promises are resolved
-        .slice(0, 10); // Get top 10 most used agents
+  // Fetch agent details
+  const agentUsageData = await Promise.all(
+    Object.entries(agentUsage).map(async ([agentId, count]) => {
+      const agent = await prisma.agent.findUnique({
+        where: { id: agentId },
+        select: { name: true },
+      });
+      return {
+        name: agent?.name || 'Unknown',
+        agentId,
+        count,
+      };
+    })
+  );
 
+  return agentUsageData
+    .sort((a, b) => b.count - a.count)
+    .slice(0, 10); // Get top 10 most used agents
 }
 
 async function getRecentActivity() {
-    let recentGenerationsSnapshot = await adminDb.collection('agent_generations')
-        .orderBy('createdAt', 'desc')
-        .limit(5)
-        .get();
+  const recentGenerations = await prisma.generationLog.findMany({
+    orderBy: { createdAt: 'desc' },
+    take: 5,
+    select: {
+      id: true,
+      userId: true,
+      agentId: true,
+      createdAt: true,
+      status: true,
+      creditsUsed: true,
+    },
+  });
 
-    let activityPromises = recentGenerationsSnapshot.docs.map(async (doc) => {
-        let data = doc.data();
-        let userProfile = await getUserProfile(data.userId);
-        return {
-            id: doc.id,
-            userName: userProfile?.name || 'Unknown User', // Fetch user name
-            ...data
-        };
-    });
+  // Fetch user names for recent activity
+  const activityData = await Promise.all(
+    recentGenerations.map(async (log) => {
+      const userProfile = await getUserProfile(log.userId);
+      return {
+        id: log.id,
+        userName: userProfile?.name || 'Unknown User',
+        userId: log.userId,
+        agentId: log.agentId,
+        createdAt: log.createdAt.toISOString(),
+        status: log.status,
+        creditsUsed: log.creditsUsed,
+      };
+    })
+  );
 
-    return Promise.all(activityPromises);
+  return activityData;
 }
 
-
-export const GET = withAuth(async () => {
+/**
+ * GET /api/admin/dashboard-stats
+ * Admin-only endpoint to fetch dashboard statistics
+ */
+export const GET = withAuth(
+  async () => {
     try {
-        let [summaryCounts, agentUsageChartData, recentActivity] = await Promise.all([
-            getSummaryCounts(),
-            getAgentUsage(),
-            getRecentActivity(),
-        ]);
+      const [summaryCounts, agentUsageChartData, recentActivity] = await Promise.all([
+        getSummaryCounts(),
+        getAgentUsage(),
+        getRecentActivity(),
+      ]);
 
-        let stats = {
-            ...summaryCounts,
-            agentUsageChartData,
-            recentActivity
-        };
+      const stats = {
+        ...summaryCounts,
+        agentUsageChartData,
+        recentActivity,
+      };
 
-        return createApiResponse(stats, 200);
-
+      return createApiResponse(stats, 200);
     } catch (error) {
-        return handleApiError(error);
+      return handleApiError(error);
     }
-}, { requireAdmin: true });
+  },
+  { requireAdmin: true }
+);

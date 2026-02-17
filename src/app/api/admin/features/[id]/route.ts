@@ -1,37 +1,58 @@
 import { z } from 'zod';
-import { adminDb } from '@/lib/firebase/server-init';
+import { prisma } from '@/lib/db/prisma';
 import { handleApiError, withAuth, createApiResponse } from '@/lib/utils/api-utils';
 
 const updateFeatureSchema = z.object({
   isEnabled: z.boolean(),
 });
 
-export const PUT = withAuth(async ({ request, params }) => {
-  try {
-    let id = params.id;
-    if (!id) {
-      return handleApiError({ message: 'Feature ID is required.' }, 400);
+/**
+ * PUT /api/admin/features/[id]
+ * Admin-only endpoint to update a feature's enabled status
+ */
+export const PUT = withAuth(
+  async ({ request, params }) => {
+    try {
+      const { id } = await params;
+      
+      if (!id) {
+        return handleApiError({ message: 'Feature ID is required.' }, 400);
+      }
+
+      // Check if feature exists
+      const feature = await prisma.feature.findUnique({
+        where: { id },
+      });
+
+      if (!feature) {
+        return handleApiError({ message: 'Feature not found.' }, 404);
+      }
+
+      const body = await request.json();
+      const validation = updateFeatureSchema.safeParse(body);
+
+      if (!validation.success) {
+        return handleApiError(validation.error);
+      }
+
+      const updated = await prisma.feature.update({
+        where: { id },
+        data: { isEnabled: validation.data.isEnabled },
+      });
+
+      return createApiResponse(
+        {
+          id: updated.id,
+          key: updated.key,
+          name: updated.name,
+          description: updated.description,
+          isEnabled: updated.isEnabled,
+        },
+        200
+      );
+    } catch (error) {
+      return handleApiError(error);
     }
-
-    let featureRef = adminDb.collection('features').doc(id);
-    let featureDoc = await featureRef.get();
-
-    if (!featureDoc.exists) {
-      return handleApiError({ message: 'Feature not found.' }, 404);
-    }
-
-    let body = await request.json();
-    let validation = updateFeatureSchema.safeParse(body);
-
-    if (!validation.success) {
-      return handleApiError(validation.error);
-    }
-
-    await featureRef.update({ isEnabled: validation.data.isEnabled });
-    let updatedDoc = await featureRef.get();
-
-    return createApiResponse({id: updatedDoc.id, ...updatedDoc.data()}, 200);
-  } catch (error) {
-    return handleApiError(error);
-  }
-}, { requireAdmin: true });
+  },
+  { requireAdmin: true }
+);

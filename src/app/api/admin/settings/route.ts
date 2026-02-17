@@ -1,7 +1,7 @@
 'use server';
 
 import { z } from 'zod';
-import { adminDb } from '@/lib/firebase/server-init';
+import { prisma } from '@/lib/db/prisma';
 import { withAuth, handleApiError, createApiResponse } from '@/lib/utils/api-utils';
 
 const bankAccountSchema = z.object({
@@ -19,45 +19,92 @@ const settingsSchema = z.object({
   bankAccounts: z.array(bankAccountSchema).optional(),
 });
 
-
 async function getSettings() {
-    let settingsRef = adminDb.collection('settings').doc('defaults');
-    let doc = await settingsRef.get();
-    if (!doc.exists) {
-        // If settings don't exist, return an empty structure.
-        // The admin UI should guide the user to seed the database.
-        return {
-            newUserCredits: 10,
-            bankAccounts: []
-        };
+  const settings = await prisma.setting.findMany();
+  
+  if (settings.length === 0) {
+    return {
+      newUserCredits: 10,
+      bankAccounts: [],
+    };
+  }
+
+  const result: any = {};
+  settings.forEach((s) => {
+    if (s.key === 'bankAccounts') {
+      result[s.key] = JSON.parse(s.value);
+    } else if (s.key === 'newUserCredits') {
+      result[s.key] = parseInt(s.value);
+    } else {
+      result[s.key] = s.value;
     }
-    return doc.data();
+  });
+
+  return result;
 }
 
-// GET /api/settings - This endpoint is public to allow fetching bank details
+/**
+ * GET /api/admin/settings
+ * Fetch all system settings
+ */
 export async function GET() {
-    try {
-        let settings = await getSettings();
-        return createApiResponse(settings, 200);
-    } catch (error) {
-        return handleApiError(error);
-    }
+  try {
+    const settings = await getSettings();
+    return createApiResponse(settings, 200);
+  } catch (error) {
+    return handleApiError(error);
+  }
 }
 
-// PUT /api/settings - This endpoint remains admin-only
-export const PUT = withAuth(async ({ request }) => {
+/**
+ * PUT /api/admin/settings
+ * Admin-only endpoint to update system settings
+ */
+export const PUT = withAuth(
+  async ({ request }) => {
     try {
-        let body = await request.json();
-        let validation = settingsSchema.safeParse(body);
-        if (!validation.success) {
-            return handleApiError(validation.error);
-        }
+      const body = await request.json();
+      const validation = settingsSchema.safeParse(body);
 
-        let settingsRef = adminDb.collection('settings').doc('defaults');
-        await settingsRef.set(validation.data, { merge: true });
+      if (!validation.success) {
+        return handleApiError(validation.error);
+      }
 
-        return createApiResponse(validation.data, 200);
+      const { newUserCredits, bankAccounts } = validation.data;
+
+      // Update or create newUserCredits setting
+      await prisma.setting.upsert({
+        where: { key: 'newUserCredits' },
+        update: { value: newUserCredits.toString() },
+        create: {
+          key: 'newUserCredits',
+          value: newUserCredits.toString(),
+          type: 'number',
+          description: 'Credits given to new users',
+          isPublic: false,
+        },
+      });
+
+      // Update or create bankAccounts setting
+      if (bankAccounts) {
+        await prisma.setting.upsert({
+          where: { key: 'bankAccounts' },
+          update: { value: JSON.stringify(bankAccounts) },
+          create: {
+            key: 'bankAccounts',
+            value: JSON.stringify(bankAccounts),
+            type: 'string',
+            description: 'Bank account information for transfers',
+            isPublic: false,
+          },
+        });
+      }
+
+      const updatedSettings = await getSettings();
+      return createApiResponse(updatedSettings, 200);
     } catch (error) {
-        return handleApiError(error);
+      return handleApiError(error);
     }
-}, { requireAdmin: true });
+  },
+  { requireAdmin: true }
+);

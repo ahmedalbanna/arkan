@@ -1,87 +1,101 @@
-
 import { z } from "zod";
 import { revalidatePath } from "next/cache";
 import { withAuth, handleApiError, createApiResponse } from "@/lib/utils/api-utils";
-import { adminDb } from '@/lib/firebase/server-init';
-import { getUserProfile, deleteUser } from "@/services/userService";
+import { getUserProfile, updateUser, deleteUser } from "@/services/userService";
 
-// GET a single user profile.
-export const GET = withAuth(async ({ params, user: requester, token: _token }) => {
-    try {
-        const targetUserId = params.id;
+/**
+ * GET /api/admin/users/[id]
+ * Get a single user profile
+ */
+export const GET = withAuth(async ({ params, user: requester }) => {
+  try {
+    const { id: targetUserId } = await params;
 
-        // Authorization check: either admin or self
-        if (requester.role !== 'admin' && requester.id !== targetUserId) {
-            return handleApiError({ message: "Forbidden" }, 403);
-        }
-
-        const user = await getUserProfile(targetUserId);
-        if (!user) {
-            return handleApiError({ message: "User not found." }, 404);
-        }
-        return createApiResponse(user, 200);
-    } catch (error) {
-        return handleApiError(error);
+    // Authorization check: either admin or self
+    if (requester.role !== 'ADMIN' && requester.role !== 'SUPER_ADMIN' && requester.id !== targetUserId) {
+      return handleApiError({ message: "Forbidden" }, 403);
     }
+
+    const user = await getUserProfile(targetUserId);
+    if (!user) {
+      return handleApiError({ message: "User not found." }, 404);
+    }
+    return createApiResponse(user, 200);
+  } catch (error) {
+    return handleApiError(error);
+  }
 });
 
-const updateUserSchema = z.object({
+const adminUpdateUserSchema = z.object({
   name: z.string().min(1, 'Name is required').optional(),
   email: z.string().email('Invalid email address').optional(),
-  bio: z.string().optional(),
   credits: z.coerce.number().int().min(0).optional(),
-  role: z.enum(['user', 'admin']).optional(),
-  hasCompletedOnboarding: z.boolean().optional(),
+  role: z.enum(['USER', 'ADMIN', 'SUPER_ADMIN']).optional(),
 });
 
-// PUT (update) a user profile
+const userUpdateSchema = z.object({
+  name: z.string().min(1, 'Name is required').optional(),
+  email: z.string().email('Invalid email address').optional(),
+});
+
+/**
+ * PUT /api/admin/users/[id]
+ * Update a user profile
+ */
 export const PUT = withAuth(async ({ request, params, user: requester }) => {
-    try {
-        const userId = params.id;
-        const body = await request.json();
+  try {
+    const { id: userId } = await params;
+    const body = await request.json();
 
-        // An admin can update any field. A regular user can only update their own name/bio.
-        if (requester.role !== 'admin') {
-            if (userId !== requester.id) {
-                return handleApiError({ message: "Forbidden" }, 403);
-            }
-            // If not admin, only allow name and bio updates
-            const { name, bio, hasCompletedOnboarding } = body;
-            const validation = updateUserSchema.safeParse({ name, bio, hasCompletedOnboarding });
-             if (!validation.success) {
-                return handleApiError(validation.error);
-            }
-            const updateData = { ...validation.data, updatedAt: new Date().toISOString() };
-            await adminDb.collection("users").doc(userId).update(updateData);
-        } else {
-             const validation = updateUserSchema.safeParse(body);
-             if (!validation.success) {
-                return handleApiError(validation.error);
-            }
-            const updateData = { ...validation.data, updatedAt: new Date().toISOString() };
-            await adminDb.collection("users").doc(userId).update(updateData);
-        }
+    const isAdmin = requester.role === 'ADMIN' || requester.role === 'SUPER_ADMIN';
 
-        revalidatePath(`/profile/${userId}`);
-        revalidatePath('/admin/manage-users');
-
-        const updatedUser = await getUserProfile(userId);
-        return createApiResponse(updatedUser, 200);
-    } catch (error) {
-        return handleApiError(error);
+    // An admin can update any field. A regular user can only update their own profile.
+    let validation;
+    if (!isAdmin) {
+      if (userId !== requester.id) {
+        return handleApiError({ message: "Forbidden: Users can only update their own profile." }, 403);
+      }
+      validation = userUpdateSchema.safeParse(body);
+    } else {
+      validation = adminUpdateUserSchema.safeParse(body);
     }
+
+    if (!validation.success) {
+      return handleApiError(validation.error);
+    }
+
+    const updatedUser = await updateUser(userId, validation.data);
+
+    revalidatePath(`/profile/${userId}`);
+    revalidatePath('/admin/manage-users');
+
+    return createApiResponse(updatedUser, 200);
+  } catch (error) {
+    return handleApiError(error);
+  }
 });
 
-export const DELETE = withAuth(async ({ params }) => {
+/**
+ * DELETE /api/admin/users/[id]
+ * Admin-only endpoint to delete a user
+ */
+export const DELETE = withAuth(
+  async ({ params }) => {
     try {
-        const targetUserId = params.id;
-        if (!targetUserId) {
-            return handleApiError({ message: "User ID is required" }, 400);
-        }
-        await deleteUser(targetUserId);
-        revalidatePath("/admin/manage-users");
-        return createApiResponse({ message: `User ${targetUserId} deleted successfully`}, 200);
+      const { id: targetUserId } = await params;
+      
+      if (!targetUserId) {
+        return handleApiError({ message: "User ID is required" }, 400);
+      }
+
+      await deleteUser(targetUserId);
+
+      revalidatePath('/admin/manage-users');
+
+      return createApiResponse({ message: "User deleted successfully." }, 200);
     } catch (error) {
-        return handleApiError(error);
+      return handleApiError(error);
     }
-}, { requireAdmin: true });
+  },
+  { requireAdmin: true }
+);

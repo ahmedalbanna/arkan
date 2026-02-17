@@ -1,71 +1,130 @@
 // src/app/api/agents/route.ts
-import { adminDb } from '@/lib/firebase/server-init';
+import { prisma } from '@/lib/db/prisma';
 import { handleApiError, createApiResponse, withAuth } from '@/lib/utils/api-utils';
 import { z } from 'zod';
-// Unused import removed: import type { AgentProperties } from '@/lib/models';
 
 const agentSchema = z.object({
-    id: z.string().min(3).regex(/^[a-z0-9-]+$/, "ID must be lowercase alphanumeric with hyphens"),
-    name: z.string().min(1),
-    description: z.string().optional(),
-    category: z.string().min(1),
-    prompt: z.string().optional(),
-    guidelines: z.array(z.string()).optional(),
-    isEnabled: z.boolean().default(true),
-    author: z.string().default('Custom'),
-    version: z.string().default('1.0'),
+  id: z.string().min(3).regex(/^[a-z0-9-]+$/, 'ID must be lowercase alphanumeric with hyphens'),
+  name: z.string().min(1),
+  description: z.string().optional(),
+  categoryId: z.string().min(1, 'Category ID is required'),
+  prompt: z.string().optional(),
+  guidelines: z.array(z.string()).optional(),
+  isEnabled: z.boolean().default(true),
+  author: z.string().default('Custom'),
+  version: z.string().default('1.0'),
 });
 
-
+/**
+ * GET /api/agents
+ * Fetch agents with optional filtering by category
+ */
 export const GET = withAuth(async ({ request }) => {
-    try {
-        let { searchParams } = new URL(request.url);
-        let category = searchParams.get('category');
-        let enabledOnly = searchParams.get('enabledOnly') !== 'false';
+  try {
+    const { searchParams } = new URL(request.url);
+    const category = searchParams.get('category');
+    const enabledOnly = searchParams.get('enabledOnly') !== 'false';
 
-        let query: FirebaseFirestore.Query = adminDb.collection('agents');
-
-        if (category) {
-            query = query.where('category', '==', category);
-        }
-        if (enabledOnly) {
-            query = query.where('isEnabled', '==', true);
-        }
-
-        let snapshot = await query.orderBy('name').get();
-        let agents = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-
-        return createApiResponse(agents, 200);
-    } catch (error) {
-        return handleApiError(error);
+    const whereClause: any = {};
+    
+    if (category) {
+      whereClause.category = {
+        name: category,
+      };
     }
+    
+    if (enabledOnly) {
+      whereClause.isEnabled = true;
+    }
+
+    const agents = await prisma.agent.findMany({
+      where: whereClause,
+      include: {
+        category: true,
+      },
+      orderBy: { name: 'asc' },
+    });
+
+    const response = agents.map((a) => ({
+      id: a.id,
+      name: a.name,
+      description: a.description,
+      categoryId: a.categoryId,
+      category: a.category?.name,
+      prompt: a.prompt,
+      guidelines: a.guidelines,
+      isEnabled: a.isEnabled,
+      author: a.author,
+      version: a.version,
+      createdAt: a.createdAt.toISOString(),
+    }));
+
+    return createApiResponse(response, 200);
+  } catch (error) {
+    return handleApiError(error);
+  }
 });
 
-
-export const POST = withAuth(async ({ request }) => {
+/**
+ * POST /api/agents
+ * Admin-only endpoint to create a new agent
+ */
+export const POST = withAuth(
+  async ({ request }) => {
     try {
-        let body = await request.json();
-        let validation = agentSchema.safeParse(body);
-        if (!validation.success) {
-            return handleApiError(validation.error);
-        }
+      const body = await request.json();
+      const validation = agentSchema.safeParse(body);
 
-        let { id, ...agentData } = validation.data;
-        let agentRef = adminDb.collection('agents').doc(id);
+      if (!validation.success) {
+        return handleApiError(validation.error);
+      }
 
-        let doc = await agentRef.get();
-        if (doc.exists) {
-            return handleApiError({ message: 'Agent with this ID already exists.' }, 409);
-        }
+      const { id, categoryId, ...agentData } = validation.data;
 
-        await agentRef.set({
-            ...agentData,
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString(),
-        });
+      // Check if agent already exists
+      const existing = await prisma.agent.findUnique({
+        where: { id },
+      });
 
-        return createApiResponse({ id, ...agentData }, 201);
+      if (existing) {
+        return handleApiError({ message: 'Agent with this ID already exists.' }, 409);
+      }
+
+      // Verify category exists
+      const category = await prisma.agentCategory.findUnique({
+        where: { id: categoryId },
+      });
+
+      if (!category) {
+        return handleApiError({ message: 'Category not found' }, 404);
+      }
+
+      const newAgent = await prisma.agent.create({
+        data: {
+          id,
+          categoryId,
+          ...agentData,
+        },
+      });
+
+      return createApiResponse(
+        {
+          id: newAgent.id,
+          name: newAgent.name,
+          description: newAgent.description,
+          categoryId: newAgent.categoryId,
+          prompt: newAgent.prompt,
+          guidelines: newAgent.guidelines,
+          isEnabled: newAgent.isEnabled,
+          author: newAgent.author,
+          version: newAgent.version,
+          createdAt: newAgent.createdAt.toISOString(),
+        },
+        201
+      );
     } catch (error) {
-        return handleApiError(error);
+      return handleApiError(error);
     }
-}, { requireAdmin: true });
+  },
+  { requireAdmin: true }
+);
