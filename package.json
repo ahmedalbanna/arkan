@@ -33,6 +33,9 @@
     "migrate:import-projects": "tsx scripts/migration/migrate-projects.ts",
     "migrate:validate": "tsx scripts/migration/validate-migration.ts",
     "migrate:full": "tsx scripts/migration/run-full-migration.ts",
+    "hasura:apply-metadata": "bash scripts/apply-hasura-metadata.sh",
+    "hasura:console": "hasura console --endpoint http://localhost:8080 --admin-secret ${HASURA_ADMIN_SECRET:-hasura-admin-secret}",
+    "test:graphql": "tsx scripts/test-hasura-graphql.ts",
     "qdrant:start": "docker-compose up -d qdrant",
     "qdrant:stop": "docker-compose stop qdrant",
     "qdrant:logs": "docker-compose logs -f qdrant",
@@ -46,6 +49,7 @@
     "test:indexing": "tsx scripts/test-file-indexing.ts"
   },
   "dependencies": {
+    "@apollo/client": "^4.1.4",
     "@dnd-kit/core": "^6.1.0",
     "@dnd-kit/sortable": "^8.0.0",
     "@genkit-ai/dotprompt": "^0.9.12",
@@ -122,6 +126,8 @@
     "firebase-admin": "13.4.0",
     "genkit": "^1.19.2",
     "genkitx-ollama": "^1.27.0",
+    "graphql": "^16.12.0",
+    "graphql-ws": "^6.0.7",
     "handlebars-loader": "^1.7.3",
     "html-to-docx": "^1.8.0",
     "html2canvas": "^1.4.1",
