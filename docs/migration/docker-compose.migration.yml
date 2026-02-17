@@ -1,0 +1,202 @@
+# Docker Compose for PostgreSQL Migration
+# Usage: docker-compose -f docker-compose.migration.yml up -d
+
+version: "3.8"
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15-alpine
+    container_name: arkan-postgres-migration
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-arkan_dev}
+      POSTGRES_USER: ${POSTGRES_USER:-arkan_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-arkan_password}
+      PGDATA: /var/lib/postgresql/data/pgdata
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./scripts/sql:/docker-entrypoint-initdb.d
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-arkan_user} -d ${POSTGRES_DB:-arkan_dev}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    networks:
+      - arkan-network
+
+  # Hasura GraphQL Engine
+  hasura:
+    image: hasura/graphql-engine:v2.36.0
+    container_name: arkan-hasura-migration
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    ports:
+      - "${HASURA_PORT:-8080}:8080"
+    environment:
+      # Database
+      HASURA_GRAPHQL_DATABASE_URL: postgresql://${POSTGRES_USER:-arkan_user}:${POSTGRES_PASSWORD:-arkan_password}@postgres:5432/${POSTGRES_DB:-arkan_dev}
+      
+      # Console & Dev Mode
+      HASURA_GRAPHQL_ENABLE_CONSOLE: "true"
+      HASURA_GRAPHQL_DEV_MODE: "${HASURA_DEV_MODE:-true}"
+      HASURA_GRAPHQL_CONSOLE_ASSETS_DIR: /srv/console-assets
+      
+      # Admin Secret
+      HASURA_GRAPHQL_ADMIN_SECRET: ${HASURA_ADMIN_SECRET:-hasura-admin-secret-change-me}
+      
+      # JWT Secret (for NextAuth integration)
+      HASURA_GRAPHQL_JWT_SECRET: '{"type":"HS256","key":"${NEXTAUTH_SECRET:-your-nextauth-secret-min-32-characters}"}'
+      
+      # Unauthorized role
+      HASURA_GRAPHQL_UNAUTHORIZED_ROLE: anonymous
+      
+      # Logging
+      HASURA_GRAPHQL_ENABLED_LOG_TYPES: startup, http-log, webhook-log, websocket-log, query-log
+      HASURA_GRAPHQL_LOG_LEVEL: ${HASURA_LOG_LEVEL:-info}
+      
+      # Performance
+      HASURA_GRAPHQL_CONNECTIONS_PER_READ_REPLICA: 5
+      HASURA_GRAPHQL_STRIPES_PER_READ_REPLICA: 1
+      
+      # CORS (for development)
+      HASURA_GRAPHQL_CORS_DOMAIN: ${HASURA_CORS_DOMAIN:-http://localhost:9002,http://localhost:3000}
+      
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/healthz"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    networks:
+      - arkan-network
+
+  # PgBouncer (Connection Pooler - Optional for production)
+  pgbouncer:
+    image: edoburu/pgbouncer:latest
+    container_name: arkan-pgbouncer
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    ports:
+      - "${PGBOUNCER_PORT:-6432}:5432"
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER:-arkan_user}:${POSTGRES_PASSWORD:-arkan_password}@postgres:5432/${POSTGRES_DB:-arkan_dev}
+      POOL_MODE: transaction
+      MAX_CLIENT_CONN: 1000
+      DEFAULT_POOL_SIZE: 25
+      MIN_POOL_SIZE: 5
+      RESERVE_POOL_SIZE: 5
+      RESERVE_POOL_TIMEOUT: 3
+      SERVER_LIFETIME: 3600
+      SERVER_IDLE_TIMEOUT: 600
+    networks:
+      - arkan-network
+    profiles:
+      - production
+
+  # pgAdmin (Database Management UI - Optional)
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: arkan-pgadmin
+    restart: unless-stopped
+    depends_on:
+      - postgres
+    ports:
+      - "${PGADMIN_PORT:-5050}:80"
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL:-admin@arkan.local}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD:-admin}
+      PGADMIN_CONFIG_SERVER_MODE: 'False'
+      PGADMIN_CONFIG_MASTER_PASSWORD_REQUIRED: 'False'
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+    networks:
+      - arkan-network
+    profiles:
+      - tools
+
+  # Redis (for future caching/queue needs)
+  redis:
+    image: redis:7-alpine
+    container_name: arkan-redis
+    restart: unless-stopped
+    ports:
+      - "${REDIS_PORT:-6379}:6379"
+    volumes:
+      - redis_data:/data
+    command: redis-server --appendonly yes --requirepass ${REDIS_PASSWORD:-redis-password}
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - arkan-network
+    profiles:
+      - cache
+
+  # Keep existing services from original docker-compose.yml
+  # Ollama (for local AI models)
+  ollama:
+    image: ollama/ollama:latest
+    container_name: arkan-ollama
+    ports:
+      - "11434:11434"
+    volumes:
+      - ./ollama_models:/root/.ollama
+    environment:
+      - OLLAMA_HOST=0.0.0.0:11434
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:11434/api/tags"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    command: serve
+    networks:
+      - arkan-network
+
+  # Qdrant (Vector Database for RAG)
+  qdrant:
+    image: qdrant/qdrant:latest
+    container_name: arkan-qdrant
+    ports:
+      - "6333:6333"
+      - "6334:6334"
+    volumes:
+      - ./qdrant_storage:/qdrant/storage
+    environment:
+      - QDRANT_ALLOW_RECOVERY_MODE=true
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:6333/healthz"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - arkan-network
+
+volumes:
+  postgres_data:
+    driver: local
+  pgadmin_data:
+    driver: local
+  redis_data:
+    driver: local
+  ollama_models:
+    driver: local
+  qdrant_storage:
+    driver: local
+
+networks:
+  arkan-network:
+    driver: bridge
