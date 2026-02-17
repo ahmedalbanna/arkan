@@ -4,6 +4,28 @@
 
 **Arkan** is a sophisticated AI-powered platform for writing and document generation, built for academics, professionals, and students. It combines cutting-edge AI technology with intuitive user experience to democratize access to professional-grade writing tools.
 
+### System Architecture Overview
+
+The system is organized into 13 core modules, each handling specific responsibilities:
+
+| Module | Location | Purpose |
+|--------|----------|---------|
+| **AI Engine** | `src/ai/` | Genkit flows, schemas, and AI operations (23+ flows) |
+| **Frontend/UI** | `src/app/`, `src/components/` | Next.js pages and React components |
+| **API & Backend** | `src/app/api/` | REST endpoints for all system operations |
+| **State Management** | `src/hooks/`, `src/context/` | Zustand stores and custom React hooks |
+| **Database & Services** | `src/lib/db/`, `src/services/` | Firebase, SQLite, and service layer |
+| **RAG System** | `src/lib/rag/` | Vector store (Qdrant), embeddings, retrieval |
+| **Document Processing** | `src/lib/` | Converters (MD→DOCX/PPTX), exporters, parsers |
+| **Utilities** | `src/lib/utils/`, `src/ai/utils/` | Helper functions, validators, formatters |
+| **Models & Types** | `src/lib/models/`, `src/types/` | TypeScript definitions and data models |
+| **Configuration** | Root & `next.config.ts` | Next.js, Tailwind, Firebase, TypeScript configs |
+| **Internationalization** | `src/locales/` | English and Arabic language support |
+| **Testing** | `jest.config.js`, `__tests__/` | Jest and React Testing Library setup |
+| **Scripts & Tools** | `scripts/` | Qdrant management, migrations, demo data |
+
+**Key Pattern**: Each module maintains single responsibility with clear interfaces between them. The `src/services/api/` layer acts as the primary integration point between frontend and backend.
+
 ### Technology Stack
 - **Frontend**: Next.js 15 with React 18, TypeScript, Tailwind CSS
 - **AI Engine**: Google Genkit with Gemini 2.5 Flash Lite model  

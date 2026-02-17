@@ -7,6 +7,7 @@
 
 import { ai } from '@/ai/genkit';
 import {
+    DiagramTypeSchema,
     GitHistorySchema,
     ProjectMetricsSchema,
     ProjectReportSchema,
@@ -271,7 +272,7 @@ Return a JSON object with:
 
 const GenerateArchitectureDiagramInputSchema = z.object({
     projectPath: z.string().describe('Path to the project'),
-    diagramType: z.enum(['component', 'sequence', 'class', 'deployment', 'flowchart']).default('component').describe('Type of diagram'),
+    diagramType: DiagramTypeSchema.default('component').describe('Type of diagram'),
     includeDetails: z.boolean().default(true).describe('Include detailed annotations'),
     style: z.enum(['simple', 'detailed', 'technical']).default('detailed').describe('Diagram style'),
 });

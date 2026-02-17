@@ -22,27 +22,28 @@ import {
 import {
     generateArchitectureDiagramTool,
 } from '@/ai/tools/reporting-and-metrics';
+import z from 'zod';
 
 // ==================== INPUT/OUTPUT SCHEMAS ====================
 
 const ProjectDocumentationInputSchema = ProjectDataSchema.extend({
-    projectPath: ai.z.string().describe('Path to the project directory'),
-    includeREADME: ai.z.boolean().default(true).describe('Generate README.md'),
-    includeAPIReference: ai.z.boolean().default(true).describe('Generate API documentation'),
-    includeUserGuide: ai.z.boolean().default(true).describe('Generate user guide'),
-    includeArchitecture: ai.z.boolean().default(true).describe('Generate architecture diagrams'),
-    template: ai.z.enum(['minimal', 'standard', 'comprehensive']).default('standard'),
+    projectPath: z.string().describe('Path to the project directory'),
+    includeREADME: z.boolean().default(true).describe('Generate README.md'),
+    includeAPIReference: z.boolean().default(true).describe('Generate API documentation'),
+    includeUserGuide: z.boolean().default(true).describe('Generate user guide'),
+    includeArchitecture: z.boolean().default(true).describe('Generate architecture diagrams'),
+    template: z.enum(['minimal', 'standard', 'comprehensive']).default('standard'),
 });
 
-const ProjectDocumentationOutputSchema = ai.z.object({
+const ProjectDocumentationOutputSchema = z.object({
     readme: ReadmeOutputSchema.optional(),
-    apiDocumentation: ai.z.string().optional(),
-    userGuide: ai.z.string().optional(),
-    architectureDiagram: ai.z.string().optional(),
-    projectStructure: ai.z.string(),
-    dependencies: ai.z.string(),
-    summary: ai.z.string(),
-    fullDocumentationPackage: ai.z.string(),
+    apiDocumentation: z.string().optional(),
+    userGuide: z.string().optional(),
+    architectureDiagram: z.string().optional(),
+    projectStructure: z.string(),
+    dependencies: z.string(),
+    summary: z.string(),
+    fullDocumentationPackage: z.string(),
 });
 
 // ==================== MAIN FLOW ====================

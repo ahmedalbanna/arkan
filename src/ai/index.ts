@@ -9,8 +9,6 @@ export * as schemas from './schemas';
 export * from './genkit';
 export * from './dev';
 export * from './model-mapping';
-export * from './model-selector';
 export * from './model-performance-monitor';
 export * from './model-request-queue';
 export * from './model-health-check';
-export * from './model-utils';

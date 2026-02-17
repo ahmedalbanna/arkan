@@ -142,7 +142,8 @@ export const DiagramTypeSchema = z.enum([
     'state',
     'gantt',
     'architecture',
-    'component'
+    'component',
+    'deployment'
 ]);
 export type DiagramType = z.infer<typeof DiagramTypeSchema>;
 
