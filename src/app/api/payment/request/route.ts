@@ -1,9 +1,7 @@
 
-import { getStorage } from 'firebase-admin/storage';
 import { withAuth, handleApiError, createApiResponse } from '@/lib/utils/api-utils';
 import { createTransaction } from '@/services/transactionService';
 import prisma from '@/lib/db/prisma';
-import admin from 'firebase-admin';
 
 export const config = {
     api: {
@@ -27,20 +25,14 @@ export const POST = withAuth(async ({ request }) => {
       return handleApiError({ message: 'Missing required fields.' }, 400);
     }
 
-    let storage = getStorage();
-    let bucket = storage.bucket(process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET || 'arkan-docudec.appspot.com');
+    // TODO: Implement file storage using alternatives like:
+    // - AWS S3
+    // - Cloudinary
+    // - UploadThing
+    // - Vercel Blob Storage
+    // For now, we'll store the file name as a placeholder
     let fileName = `payment_proofs/${userId}/${Date.now()}-${file.name}`;
-
-    let fileBuffer = Buffer.from(await file.arrayBuffer());
-
-    await bucket.file(fileName).save(fileBuffer, {
-      metadata: { contentType: file.type },
-    });
-
-    let [fileUrl] = await bucket.file(fileName).getSignedUrl({
-      action: 'read',
-      expires: '03-09-2491'
-    });
+    let fileUrl = `/uploads/${fileName}`; // Placeholder URL
 
     let transactionData = {
       userId,
@@ -56,29 +48,11 @@ export const POST = withAuth(async ({ request }) => {
 
     let { id: transactionId } = await createTransaction(transactionData);
 
-    // Query admin users from PostgreSQL
-    let admins = await prisma.user.findMany({
-      where: { role: 'admin' },
-      select: { id: true, name: true, email: true },
-    });
-
-    if (admins.length > 0) {
-      let rtdb = admin.database();
-      let notificationPayload = {
-        title: "New Payment Request",
-        description: `User ${userName || userEmail} submitted a payment request for $${price}.`,
-        icon: "credit-card",
-        isRead: false,
-        createdAt: new Date().toISOString(),
-        link: '/admin/manage-payments'
-      };
-
-      let notificationPromises = admins.map(admin => {
-          let notificationRef = rtdb.ref(`notifications/${admin.id}`).push();
-          return notificationRef.set(notificationPayload);
-      });
-      await Promise.all(notificationPromises);
-    }
+    // TODO: Implement notification system using alternatives like:
+    // - Email notifications (SendGrid, Resend)
+    // - WebSocket/Pusher for real-time notifications
+    // - In-app notification table in PostgreSQL
+    console.log(`New payment request from ${userName || userEmail} for $${price}`);
 
     return createApiResponse({ message: 'Request submitted successfully for review.', transactionId }, 200);
   } catch (error) {

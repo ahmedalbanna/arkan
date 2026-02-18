@@ -22,7 +22,6 @@ type PasswordFormValues = z.infer<typeof passwordSchema>;
 
 export function ChangePasswordForm() {
   const { data: session } = useSession();
-  const { firebaseUser } = useAuth();
   const { toast } = useToast();
 
   const form = useForm<PasswordFormValues>({
@@ -65,8 +64,8 @@ export function ChangePasswordForm() {
     changePasswordMutation.mutate(data);
   };
   
-  // Only show password change form if user has a password-based account
-  if (!firebaseUser) {
+  // Only show password change form if user is authenticated
+  if (!session?.user) {
     return null;
   }
 

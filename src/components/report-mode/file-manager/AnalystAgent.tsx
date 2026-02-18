@@ -76,7 +76,7 @@ export default function AnalystAgent() {
     const { t } = useLocalization();
     const { project, updateProject } = useBuilderStore();
     const externalContext = project?.externalContext || [];
-    const { firebaseUser, refetchUser } = useAuth();
+    const { userProfile, refetchUser } = useAuth();
     const { resolvedTheme } = useTheme();
     const [markdownResult, setMarkdownResult] = useState<string | null>(null);
 
@@ -107,7 +107,7 @@ export default function AnalystAgent() {
             toast({ title: t('builder.files.toasts.contextRequired'), description: t('builder.files.toasts.contextRequiredDesc'), variant: 'destructive' });
             return;
         }
-        if (!firebaseUser) return;
+        if (!userProfile) return;
         setMarkdownResult(null); // Clear previous markdown result
         const token = session?.user?.id;
         analysisMutation.mutate({ prompt: data.prompt, contextFiles: [...externalContext], token });

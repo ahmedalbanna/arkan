@@ -2,9 +2,7 @@
 // src/services/user-service.ts
 'use client';
 
-import { app } from '@/lib/firebase/client-init';
 import type { UserProfile } from '@/lib/models/user';
-import { doc, getFirestore, onSnapshot } from "firebase/firestore";
 import { apiService } from './apiService';
 
 /**
@@ -35,25 +33,13 @@ export async function fetchUsersApi(limit: number, lastVisibleId: string | undef
 }
 
 /**
- * Subscribes to real-time updates for a user's profile from Firestore.
- * This is a client-side function that uses the Firebase JS SDK.
+ * Subscribes to real-time updates for a user's profile.
+ * Note: This function is deprecated. Use React Query's polling or WebSocket alternatives.
+ * @deprecated Use React Query with refetchInterval for real-time updates
  */
-export function subscribeToUserProfile(userId: string, callback: (user: UserProfile | null) => void) {
-  const db = getFirestore(app);
-  const userDocRef = doc(db, "users", userId);
-
-  const unsubscribe = onSnapshot(userDocRef, (doc) => {
-    if (doc.exists()) {
-      callback({ id: doc.id, ...doc.data() } as UserProfile);
-    } else {
-      callback(null);
-    }
-  }, (error) => {
-    console.error("Error listening to user profile:", error);
-    callback(null);
-  });
-
-  return unsubscribe;
+export function subscribeToUserProfile(_userId: string, _callback: (user: UserProfile | null) => void) {
+  console.warn('subscribeToUserProfile is deprecated. Use React Query polling instead.');
+  return () => {}; // Return no-op unsubscribe function
 }
 
 /**

@@ -1,65 +1,41 @@
 
 'use client';
 
-import { auth } from '@/lib/firebase/client-init';
-import type { LoginCredentials, SignupCredentials, UserProfile } from '@/lib/types';
-import {
-  GoogleAuthProvider,
-  getAdditionalUserInfo,
-  sendPasswordResetEmail,
-  signInWithEmailAndPassword,
-  signInWithPopup,
-  signOut,
-  type UserCredential
-} from "firebase/auth";
+import type { SignupCredentials, UserProfile } from '@/lib/types';
 import { apiService } from './apiService';
 import { fetchUserProfileApi } from './userService';
 
 // Re-export for convenience
 export { fetchUserProfileApi };
 
+/**
+ * Note: Firebase Auth has been removed. All authentication is now handled via NextAuth.
+ * These functions are deprecated and kept for backwards compatibility.
+ */
 
-// --- Authentication Functions ---
-
-export async function loginWithEmail(credentials: LoginCredentials): Promise<UserCredential> {
-  try {
-    return await signInWithEmailAndPassword(
-      auth,
-      credentials.email,
-      credentials.password
-    );
-  } catch (error: any) {
-    if (
-      error.code === "auth/invalid-credential" ||
-      error.code === "auth/user-not-found" ||
-      error.code === "auth/wrong-password" ||
-      error.code === "auth/invalid-email"
-    ) {
-      throw new Error("Invalid email or password.");
-    }
-    throw new Error(error.message || "Login failed. Please try again.");
-  }
+/**
+ * @deprecated Use NextAuth signIn() instead
+ */
+export async function loginWithEmail(_credentials: { email: string; password: string }) {
+  throw new Error('Firebase Auth removed. Use NextAuth signIn() instead.');
 }
 
-export async function loginWithGoogle(): Promise<{user: UserCredential['user'], isNewUser: boolean}> {
-  const provider = new GoogleAuthProvider();
-  try {
-    const result = await signInWithPopup(auth, provider);
-    const info = getAdditionalUserInfo(result);
-    return { user: result.user, isNewUser: !!info?.isNewUser };
-  } catch (error: any) {
-    throw new Error(error.message || "Google Sign-In failed.");
-  }
+/**
+ * @deprecated Use NextAuth signIn('google') instead
+ */
+export async function loginWithGoogle() {
+  throw new Error('Firebase Auth removed. Use NextAuth signIn("google") instead.');
 }
 
+/**
+ * @deprecated Use NextAuth signOut() instead
+ */
 export async function serviceLogoutUser() {
-  await signOut(auth);
-  return apiService({ endpoint: '/api/auth/logout', method: 'POST' });
+  throw new Error('Firebase Auth removed. Use NextAuth signOut() instead.');
 }
 
 /**
  * Signs up a new user via the dedicated API endpoint.
- * This now handles both auth creation and profile creation in one go.
  */
 export async function serviceSignupUser(credentials: SignupCredentials) {
     return apiService({
@@ -69,9 +45,11 @@ export async function serviceSignupUser(credentials: SignupCredentials) {
     });
 }
 
-
-export async function forgotPasswordService(email: string) {
-  return sendPasswordResetEmail(auth, email);
+/**
+ * @deprecated Use NextAuth password reset flow instead
+ */
+export async function forgotPasswordService(_email: string) {
+  throw new Error('Firebase Auth removed. Implement NextAuth password reset flow.');
 }
 
 export async function sendPasswordResetEmailApi(userId: string, token: string) {
@@ -83,8 +61,7 @@ export async function sendPasswordResetEmailApi(userId: string, token: string) {
 }
 
 /**
- * Creates or updates a user profile document in Firestore.
- * This is now the single source of truth for creating profiles.
+ * Creates or updates a user profile via API.
  */
 export async function createOrUpdateUserProfileApi(userId: string, data: Partial<UserProfile>, token: string): Promise<UserProfile> {
     return apiService({

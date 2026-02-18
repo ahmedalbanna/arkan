@@ -1,37 +1,9 @@
 /**
  * Vector Store Implementation for RAG
  * 
- * This module provides a simple in-memory vector store with persistence to Firestore.
- * For production, consider using dedicated vector databases like Pinecone or Qdrant.
+ * This module provides a simple in-memory vector store.
+ * For production, use Qdrant (see qdrant-adapter.ts)
  */
-
-import { Timestamp, getFirestore, type Firestore } from 'firebase-admin/firestore';
-import { initializeApp, getApps } from 'firebase-admin/app';
-import { doc, collection, setDoc, getDocs, query, where } from 'firebase/firestore';
-
-// Note: These functions are not available in firebase-admin/firestore
-// They would need to be implemented using firebase-admin API
-// For now, we'll skip Firestore persistence
-
-
-// Initialize Firebase Admin if not already initialized
-let db: Firestore | null = null;
-
-function getDb(): Firestore {
-  if (!db) {
-    try {
-      if (getApps().length === 0) {
-        initializeApp();
-      }
-      db = getFirestore();
-    } catch (error) {
-      console.error('Failed to initialize Firestore:', error);
-      // Return a placeholder for development
-      throw new Error('Firestore not available');
-    }
-  }
-  return db;
-}
 
 export interface DocumentChunk {
   id: string;
@@ -87,20 +59,8 @@ export class VectorStore {
   async addChunk(chunk: DocumentChunk): Promise<void> {
     this.chunks.set(chunk.id, chunk);
 
-    // Persist to Firestore
-    try {
-      const firestore = getDb();
-      const docRef = doc(firestore, this.collectionName, chunk.id);
-      await setDoc(docRef, {
-        content: chunk.content,
-        embedding: chunk.embedding || [],
-        metadata: chunk.metadata,
-        createdAt: Timestamp.now(),
-      });
-    } catch (error) {
-      console.error('Error persisting chunk to Firestore:', error);
-      // Don't throw - allow in-memory storage to continue
-    }
+    // Note: For persistence, use Qdrant adapter instead
+    // In-memory storage only
   }
 
   /**
@@ -150,30 +110,13 @@ export class VectorStore {
   }
 
   /**
-   * Load chunks from Firestore for a specific project
+   * Load chunks for a specific project (in-memory only)
+   * For persistent storage, use Qdrant adapter
    */
-  async loadProjectChunks(projectId: string): Promise<void> {
-    try {
-      const firestore = getDb();
-      const q = query(
-        collection(firestore, this.collectionName),
-        where('metadata.projectId', '==', projectId)
-      );
-
-      const snapshot = await getDocs(q);
-      snapshot.forEach((doc: any) => {
-        const data = doc.data();
-        const chunk: DocumentChunk = {
-          id: doc.id,
-          content: data.content,
-          embedding: data.embedding,
-          metadata: data.metadata,
-        };
-        this.chunks.set(chunk.id, chunk);
-      });
-    } catch (error) {
-      console.error('Error loading chunks from Firestore:', error);
-    }
+  async loadProjectChunks(_projectId: string): Promise<void> {
+    // In-memory store doesn't persist data
+    // Use Qdrant adapter for production persistence
+    console.warn('loadProjectChunks: In-memory store does not persist data. Use Qdrant adapter.');
   }
 
   /**

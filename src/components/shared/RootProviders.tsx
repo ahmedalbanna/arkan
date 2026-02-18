@@ -5,7 +5,6 @@ import QueryProvider from './QueryProvider';
 import { ThemeProvider } from './ThemeProvider';
 import { NextAuthProvider } from '@/context/NextAuthContext';
 import { LocalizationProvider } from '@/context/LocalizationContext';
-import FirebaseMessagingProvider from '@/components/firebase/FirebaseMessagingProvider';
 import LanguageDirectionManager from './LanguageDirectionManager';
 import { Toaster } from '@/components/ui/toaster';
 
@@ -26,14 +25,12 @@ export function RootProviders({ children, fontClassName }: RootProvidersProps) {
         <SessionProvider>
           <LocalizationProvider>
             <NextAuthProvider>
-              <FirebaseMessagingProvider>
-                <LanguageDirectionManager>
-                  <div className={fontClassName}>
-                    {children}
-                    <Toaster />
-                  </div>
-                </LanguageDirectionManager>
-              </FirebaseMessagingProvider>
+              <LanguageDirectionManager>
+                <div className={fontClassName}>
+                  {children}
+                  <Toaster />
+                </div>
+              </LanguageDirectionManager>
             </NextAuthProvider>
           </LocalizationProvider>
         </SessionProvider>

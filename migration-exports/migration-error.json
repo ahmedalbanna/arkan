@@ -1,0 +1,11 @@
+{
+  "failedAt": "2026-02-18T19:08:17.112Z",
+  "error": "Credential implementation provided to initializeApp() via the \"credential\" property failed to fetch a valid Google OAuth2 access token with the following error: \"A Not Found error was returned while attempting to retrieve an accesstoken for the Compute Engine built-in service account. This may be because the Compute Engine instance does not have any permission scopes specified: Could not refresh access token: Request failed with status code 404\".",
+  "log": [
+    {
+      "step": "Export Users",
+      "status": "failed",
+      "error": "Credential implementation provided to initializeApp() via the \"credential\" property failed to fetch a valid Google OAuth2 access token with the following error: \"A Not Found error was returned while attempting to retrieve an accesstoken for the Compute Engine built-in service account. This may be because the Compute Engine instance does not have any permission scopes specified: Could not refresh access token: Request failed with status code 404\"."
+    }
+  ]
+}

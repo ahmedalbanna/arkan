@@ -38,7 +38,7 @@ const adminLinks = [
 
 export function MobileNav({ navLinks }: { navLinks: NavLink[] }) {
   const { t, locale } = useLocalization();
-  const { firebaseUser, userProfile } = useAuth();
+  const { userProfile } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
   const pathname = usePathname();
 
@@ -48,7 +48,7 @@ export function MobileNav({ navLinks }: { navLinks: NavLink[] }) {
 
   function renderLinks(links: NavLink[], isMobile = false) {
     return links
-      .filter(link => link.auth === 'any' || (link.auth && firebaseUser))
+      .filter(link => link.auth === 'any' || (link.auth && userProfile))
       .map((link) => (
         <Button
           key={link.href}

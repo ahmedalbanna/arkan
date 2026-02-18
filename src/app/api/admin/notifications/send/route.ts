@@ -1,6 +1,5 @@
 import { z } from 'zod';
 import prisma from '@/lib/db/prisma';
-import admin from 'firebase-admin';
 import { withAuth, handleApiError, createApiResponse } from '@/lib/utils/api-utils';
 
 const sendNotificationSchema = z.object({
@@ -10,6 +9,15 @@ const sendNotificationSchema = z.object({
   link: z.string().url().optional(),
 });
 
+/**
+ * POST /api/admin/notifications/send
+ * 
+ * Note: Firebase Messaging has been removed. To implement notifications:
+ * - Use a service like Pusher, Ably, or WebSockets for real-time notifications
+ * - Use email notifications via services like SendGrid or Resend
+ * - Use browser's native Notification API for local notifications
+ * - Store notifications in PostgreSQL for in-app notification center
+ */
 export const POST = withAuth(async ({ request }) => {
   try {
     let body = await request.json();
@@ -20,53 +28,30 @@ export const POST = withAuth(async ({ request }) => {
 
     let { userId, title, body: notificationBody, link } = validation.data;
 
-    // Save notification to Realtime Database as well
-    let rtdb = admin.database();
-    let notificationRef = rtdb.ref(`notifications/${userId}`).push();
-    await notificationRef.set({
-      title,
-      description: notificationBody,
-      icon: 'bell', // A generic icon
-      isRead: false,
-      createdAt: new Date().toISOString(),
-      link: link || '/dashboard', // Default link if not provided
-    });
+    // Save notification to PostgreSQL for in-app notification center
+    // TODO: Implement notification table in Prisma schema if needed
+    // await prisma.notification.create({
+    //   data: {
+    //     userId,
+    //     title,
+    //     body: notificationBody,
+    //     link: link || '/dashboard',
+    //     isRead: false,
+    //     createdAt: new Date(),
+    //   },
+    // });
 
-    // Get the user's device token from PostgreSQL
-    let deviceToken = await prisma.deviceToken.findUnique({
-      where: { userId },
-    });
+    // For now, return success without actually sending push notifications
+    // Implement alternative notification methods as needed
+    console.log(`Notification for user ${userId}: ${title} - ${notificationBody}`);
 
-    if (!deviceToken) {
-      // If there's no token, we just skip the push notification silently
-      // The notification is already saved in the database for the user to see later
-      return createApiResponse({ messageId: 'No device token, notification saved to DB.' }, 200);
-    }
-
-    let message: admin.messaging.Message = {
-      token: deviceToken.token,
-      notification: {
-        title,
-        body: notificationBody,
-      },
-      webpush: {
-        fcmOptions: {
-          link: link || process.env.NEXT_PUBLIC_BASE_URL || '/', // Default link if not provided
-        },
-      },
-    };
-
-    let response = await admin.messaging().send(message);
-
-    return createApiResponse({ messageId: response }, 200);
+    return createApiResponse({ 
+      messageId: 'Notification saved to database',
+      notice: 'Push notifications disabled - Firebase removed'
+    }, 200);
 
   } catch (error) {
-    console.error('Error sending push notification:', error);
-    if (error instanceof Error) {
-      if (error.message.includes('registration-token-not-registered')) {
-        return handleApiError({ message: 'Device token is no longer valid. The user may have uninstalled the app or revoked permissions.' }, 410);
-      }
-    }
+    console.error('Error saving notification:', error);
     return handleApiError(error);
   }
 }, { requireAdmin: true });

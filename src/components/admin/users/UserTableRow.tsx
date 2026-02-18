@@ -24,12 +24,12 @@ interface UserTableRowProps {
 export function UserTableRow({ user }: UserTableRowProps) {
     const { t } = useLocalization();
     const queryClient = useQueryClient();
-    const { firebaseUser, userProfile: _adminProfile } = useAuth();
+    const { userProfile: adminProfile } = useAuth();
     const sendPasswordResetMutation = useSendPasswordReset();
 
     async function prefetchUser(userId: string) {
-        if (!firebaseUser) return;
-        const token = firebaseUser.uid;
+        if (!adminProfile) return;
+        const token = adminProfile.id;
         await queryClient.prefetchQuery({
             queryKey: userKeys.profile(userId),
             queryFn: () => fetchUserProfileApi(userId, token),

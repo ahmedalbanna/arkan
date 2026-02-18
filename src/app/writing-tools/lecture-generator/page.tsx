@@ -38,7 +38,7 @@ export default function LectureGeneratorPage() {
     });
     const [subTopicsStr, setSubTopicsStr] = useState('');
     const { toast } = useToast(); // This was likely corrected in a previous step
-    const { firebaseUser: user } = useAuth();
+    const { userProfile: user } = useAuth();
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         const { name, value } = e.target;

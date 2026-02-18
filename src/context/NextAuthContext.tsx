@@ -9,7 +9,6 @@ import { createContext, ReactNode, useCallback, useContext, useEffect } from 're
 import { useBuilderStore } from '@/hooks';
 
 interface AuthContextType {
-  firebaseUser: { uid: string; email: string | null } | null;
   userProfile: User | null;
   isLoading: boolean;
   refetchUser: () => void;
@@ -22,34 +21,48 @@ export const NextAuthProvider = ({ children }: { children: ReactNode }) => {
   const queryClient = useQueryClient();
   const { setUserProfile } = useBuilderStore();
 
-  // Map NextAuth session to Firebase-like user object for compatibility
-  const firebaseUser = session?.user ? {
-    uid: session.user.id,
-    email: session.user.email,
-  } : null;
+  const userId = session?.user?.id;
 
   // Use React Query to get the user profile
   const { data: userProfile, isLoading: isProfileLoading } = useQuery<User | null>({
-    queryKey: userKeys.profile(firebaseUser?.uid ?? ''),
+    queryKey: userKeys.profile(userId ?? ''),
     queryFn: async () => {
-      if (!firebaseUser || !session) return null;
+      if (!userId || !session) return null;
       
-      // Use NextAuth session token instead of Firebase token
-      const token = session.user.id; // Or use JWT token if needed
-      const userProfileData = await fetchUserProfileApi(firebaseUser.uid, token);
-      const userInstance = userProfileData ? new User(userProfileData) : null;
-      setUserProfile(userInstance);
-      return userInstance;
+      // Use NextAuth session user ID as token
+      const token = session.user.id;
+      const userProfileData = await fetchUserProfileApi(userId, token);
+      
+      // Map API response fields to User model fields
+      if (userProfileData) {
+        const mappedData = {
+          id: userProfileData.id,
+          name: userProfileData.name || '',
+          email: userProfileData.email || '',
+          
+          // Map Prisma role enum (USER/ADMIN/SUPER_ADMIN) to User model role type (user/admin)
+          role: (userProfileData.role === 'admin' || userProfileData.role === 'user' ? 'admin' : 'user') as 'admin' | 'user',
+          credits: userProfileData.credits || 0,
+          createdAt: userProfileData.createdAt?.toString() || new Date().toISOString(),
+          updatedAt: userProfileData.updatedAt?.toString() || new Date().toISOString(),
+          hasCompletedOnboarding: true, // Default for existing users
+        };
+        const userInstance = new User(mappedData);
+        setUserProfile(userInstance);
+        return userInstance;
+      }
+      
+      return null;
     },
-    enabled: !!firebaseUser && !!session,
+    enabled: !!userId && !!session,
     staleTime: Infinity,
   });
 
   const refetchUser = useCallback(() => {
-    if (firebaseUser?.uid) {
-      queryClient.invalidateQueries({ queryKey: userKeys.profile(firebaseUser.uid) });
+    if (userId) {
+      queryClient.invalidateQueries({ queryKey: userKeys.profile(userId) });
     }
-  }, [firebaseUser, queryClient]);
+  }, [userId, queryClient]);
 
   // Update builder store when user profile changes
   useEffect(() => {
@@ -64,11 +77,10 @@ export const NextAuthProvider = ({ children }: { children: ReactNode }) => {
     }
   }, [session, queryClient, setUserProfile]);
 
-  const isLoading = status === 'loading' || (!!firebaseUser && isProfileLoading);
+  const isLoading = status === 'loading' || (!!userId && isProfileLoading);
 
   return (
     <AuthContext.Provider value={{
-      firebaseUser,
       userProfile: userProfile ?? null,
       isLoading,
       refetchUser
