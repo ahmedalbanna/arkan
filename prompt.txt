@@ -1,33 +1,239 @@
-When i login with admin@arkan.dev and admin123
-
- ○ Compiling /api/auth/session ...
+ ○ Compiling / ...
+ ✓ Compiled / in 1237ms
+[NextAuthContext] Session status: loading
+[NextAuthContext Query] Query result: {
+  hasData: false,
+  isLoading: false,
+  queryKey: [ 'users', 'detail', 'pending' ]
+}
+[NextAuthContext] Providing auth context: {
+  isLoading: true,
+  hasUserProfile: false,
+  userId: undefined,
+  sessionStatus: 'loading'
+}
+ GET / 200 in 2172ms
 [next-auth][warn][DEBUG_ENABLED] 
 https://next-auth.js.org/warnings#debug_enabled
- GET /api/auth/session 200 in 6144ms
- ✓ Compiled /api/auth/session in 24s
- GET /login 200 in 22612ms
- GET /api/auth/session 200 in 333ms
- ⚠ Cross origin request detected from 9002-01kegbftgsxwkfgqv12wpvwprn.cloudspaces.litng.ai to /_next/* resource. In a future major version of Next.js, you will need to explicitly configure "allowedDevOrigins" in next.config to allow this.
-Read more: https://nextjs.org/docs/app/api-reference/config/next-config-js/allowedDevOrigins
- ○ Compiling /api/auth/[...nextauth] ...
- ✓ Compiled /api/auth/[...nextauth] in 525ms
- GET /api/auth/providers 200 in 2017ms
- GET /api/auth/csrf 200 in 502ms
+[NextAuth JWT] jwt() called {
+  hasUser: false,
+  tokenHasUserId: true,
+  userId: 'cmlseqqdx00009t186flyd6oq'
+}
+[NextAuth JWT] Adding Hasura claims with role: ADMIN
+[NextAuth JWT] jwt() returning token: {
+  userId: 'cmlseqqdx00009t186flyd6oq',
+  email: 'admin@arkan.dev',
+  role: 'ADMIN',
+  credits: 10000
+}
+[NextAuth Session] session() called with token: {
+  userId: 'cmlseqqdx00009t186flyd6oq',
+  email: 'admin@arkan.dev',
+  role: 'ADMIN',
+  credits: 10000
+}
+[NextAuth Session] Session user object populated: {
+  id: 'cmlseqqdx00009t186flyd6oq',
+  email: 'admin@arkan.dev',
+  name: 'Admin User',
+  role: 'ADMIN',
+  credits: 10000
+}
+[NextAuth Session] Hasura token added: {
+  'x-hasura-allowed-roles': [ 'ADMIN', 'anonymous' ],
+  'x-hasura-default-role': 'ADMIN',
+  'x-hasura-user-id': 'cmlseqqdx00009t186flyd6oq',
+  'x-hasura-role': 'ADMIN'
+}
+[NextAuth Session] session() returning: {
+  userExists: true,
+  userId: 'cmlseqqdx00009t186flyd6oq',
+  hasuraTokenExists: true
+}
+{
+  user: {
+    name: 'Admin User',
+    email: 'admin@arkan.dev',
+    image: null,
+    id: 'cmlseqqdx00009t186flyd6oq',
+    role: 'ADMIN',
+    credits: 10000
+  },
+  hasuraToken: {
+    'x-hasura-allowed-roles': [ 'ADMIN', 'anonymous' ],
+    'x-hasura-default-role': 'ADMIN',
+    'x-hasura-user-id': 'cmlseqqdx00009t186flyd6oq',
+    'x-hasura-role': 'ADMIN'
+  }
+}
+ GET /api/auth/session 200 in 491ms
+ GET /_next/src/file.ts 404 in 462ms
+ GET /_next/src/file-selector.ts 404 in 1278ms
+ GET /_next/src/helpers/applyUnfilter.ts 404 in 1300ms
+ GET /_next/src/helpers/unfilter.ts 404 in 1273ms
+ GET /_next/src/helpers/decodeInterlaceAdam7.ts 404 in 1246ms
+ GET /_next/src/helpers/signature.ts 404 in 1270ms
+ GET /_next/src/helpers/text.ts 404 in 1174ms
+ GET /_next/src/helpers/crc.ts 404 in 1212ms
+ GET /_next/src/index.ts 404 in 1152ms
+ GET /_next/src/helpers/decodeInterlaceNull.ts 404 in 1241ms
+[NextAuth JWT] jwt() called {
+  hasUser: false,
+  tokenHasUserId: true,
+  userId: 'cmlseqqdx00009t186flyd6oq'
+}
+[NextAuth JWT] Adding Hasura claims with role: ADMIN
+[NextAuth JWT] jwt() returning token: {
+  userId: 'cmlseqqdx00009t186flyd6oq',
+  email: 'admin@arkan.dev',
+  role: 'ADMIN',
+  credits: 10000
+}
+[NextAuth Session] session() called with token: {
+  userId: 'cmlseqqdx00009t186flyd6oq',
+  email: 'admin@arkan.dev',
+  role: 'ADMIN',
+  credits: 10000
+}
+[NextAuth Session] Session user object populated: {
+  id: 'cmlseqqdx00009t186flyd6oq',
+  email: 'admin@arkan.dev',
+  name: 'Admin User',
+  role: 'ADMIN',
+  credits: 10000
+}
+[NextAuth Session] Hasura token added: {
+  'x-hasura-allowed-roles': [ 'ADMIN', 'anonymous' ],
+  'x-hasura-default-role': 'ADMIN',
+  'x-hasura-user-id': 'cmlseqqdx00009t186flyd6oq',
+  'x-hasura-role': 'ADMIN'
+}
+[NextAuth Session] session() returning: {
+  userExists: true,
+  userId: 'cmlseqqdx00009t186flyd6oq',
+  hasuraTokenExists: true
+}
+{
+  user: {
+    name: 'Admin User',
+    email: 'admin@arkan.dev',
+    image: null,
+    id: 'cmlseqqdx00009t186flyd6oq',
+    role: 'ADMIN',
+    credits: 10000
+  },
+  hasuraToken: {
+    'x-hasura-allowed-roles': [ 'ADMIN', 'anonymous' ],
+    'x-hasura-default-role': 'ADMIN',
+    'x-hasura-user-id': 'cmlseqqdx00009t186flyd6oq',
+    'x-hasura-role': 'ADMIN'
+  }
+}
+ GET /api/auth/session 200 in 445ms
+ GET /login 200 in 280ms
+ ✓ Compiled /api/auth/[...nextauth] in 383ms
+ GET /api/auth/providers 200 in 1752ms
+ GET /api/auth/csrf 200 in 655ms
+[NextAuth] authorize() called with email: admin@arkan.dev
+[NextAuth] Searching for user with email: admin@arkan.dev
 prisma:query SELECT "public"."users"."id", "public"."users"."name", "public"."users"."email", "public"."users"."email_verified", "public"."users"."image", "public"."users"."role"::text, "public"."users"."password_hash", "public"."users"."full_name", "public"."users"."phone", "public"."users"."phone_verified", "public"."users"."credits", "public"."users"."total_spent", "public"."users"."created_at", "public"."users"."updated_at", "public"."users"."last_login_at" FROM "public"."users" WHERE ("public"."users"."email" = $1 AND 1=1) LIMIT $2 OFFSET $3
+[NextAuth] User found: {
+  id: 'cmlseqqdx00009t186flyd6oq',
+  email: 'admin@arkan.dev',
+  name: 'Admin User',
+  role: 'ADMIN',
+  credits: 10000,
+  hasPasswordHash: true
+}
+[NextAuth] Verifying password...
+[NextAuth] Password verified successfully
+[NextAuth] authorize() returning user: {
+  id: 'cmlseqqdx00009t186flyd6oq',
+  email: 'admin@arkan.dev',
+  name: 'Admin User',
+  image: null
+}
+[NextAuth SignIn] signIn() called for user: cmlseqqdx00009t186flyd6oq
+[NextAuth SignIn] Updating lastLoginAt for user: cmlseqqdx00009t186flyd6oq
 prisma:query UPDATE "public"."users" SET "last_login_at" = $1, "updated_at" = $2 WHERE ("public"."users"."id" = $3 AND 1=1) RETURNING "public"."users"."id", "public"."users"."name", "public"."users"."email", "public"."users"."email_verified", "public"."users"."image", "public"."users"."role"::text, "public"."users"."password_hash", "public"."users"."full_name", "public"."users"."phone", "public"."users"."phone_verified", "public"."users"."credits", "public"."users"."total_spent", "public"."users"."created_at", "public"."users"."updated_at", "public"."users"."last_login_at"
+[NextAuth SignIn] lastLoginAt updated successfully
+[NextAuth SignIn] signIn() returning true
+[NextAuth JWT] jwt() called {
+  hasUser: true,
+  tokenHasUserId: false,
+  userId: 'cmlseqqdx00009t186flyd6oq'
+}
+[NextAuth JWT] Initial sign in - user object: {
+  id: 'cmlseqqdx00009t186flyd6oq',
+  email: 'admin@arkan.dev',
+  name: 'Admin User'
+}
+[NextAuth JWT] Fetching full user data for ID: cmlseqqdx00009t186flyd6oq
 prisma:query SELECT "public"."users"."id", "public"."users"."role"::text, "public"."users"."credits" FROM "public"."users" WHERE ("public"."users"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
- POST /api/auth/callback/credentials 200 in 749ms
- GET /api/auth/session 200 in 444ms
+[NextAuth JWT] Full user data fetched: { role: 'ADMIN', credits: 10000 }
+[NextAuth JWT] Token updated with role and credits: { role: 'ADMIN', credits: 10000 }
+[NextAuth JWT] Adding Hasura claims with role: ADMIN
+[NextAuth JWT] jwt() returning token: {
+  userId: 'cmlseqqdx00009t186flyd6oq',
+  email: 'admin@arkan.dev',
+  role: 'ADMIN',
+  credits: 10000
+}
+ POST /api/auth/callback/credentials 200 in 598ms
+[NextAuth JWT] jwt() called {
+  hasUser: false,
+  tokenHasUserId: true,
+  userId: 'cmlseqqdx00009t186flyd6oq'
+}
+[NextAuth JWT] Adding Hasura claims with role: ADMIN
+[NextAuth JWT] jwt() returning token: {
+  userId: 'cmlseqqdx00009t186flyd6oq',
+  email: 'admin@arkan.dev',
+  role: 'ADMIN',
+  credits: 10000
+}
+[NextAuth Session] session() called with token: {
+  userId: 'cmlseqqdx00009t186flyd6oq',
+  email: 'admin@arkan.dev',
+  role: 'ADMIN',
+  credits: 10000
+}
+[NextAuth Session] Session user object populated: {
+  id: 'cmlseqqdx00009t186flyd6oq',
+  email: 'admin@arkan.dev',
+  name: 'Admin User',
+  role: 'ADMIN',
+  credits: 10000
+}
+[NextAuth Session] Hasura token added: {
+  'x-hasura-allowed-roles': [ 'ADMIN', 'anonymous' ],
+  'x-hasura-default-role': 'ADMIN',
+  'x-hasura-user-id': 'cmlseqqdx00009t186flyd6oq',
+  'x-hasura-role': 'ADMIN'
+}
+[NextAuth Session] session() returning: {
+  userExists: true,
+  userId: 'cmlseqqdx00009t186flyd6oq',
+  hasuraTokenExists: true
+}
+{
+  user: {
+    name: 'Admin User',
+    email: 'admin@arkan.dev',
+    image: null,
+    id: 'cmlseqqdx00009t186flyd6oq',
+    role: 'ADMIN',
+    credits: 10000
+  },
+  hasuraToken: {
+    'x-hasura-allowed-roles': [ 'ADMIN', 'anonymous' ],
+    'x-hasura-default-role': 'ADMIN',
+    'x-hasura-user-id': 'cmlseqqdx00009t186flyd6oq',
+    'x-hasura-role': 'ADMIN'
+  }
+}
+ GET /api/auth/session 200 in 385ms
  ○ Compiling /builder ...
- ✓ Compiled /builder in 11.1s
- GET /builder 200 in 11382ms
-
-Query Details
-[
-  "users",
-  "detail",
-  ""
-]
-fresh
-
-why User Query Details is empty?
+ ✓ Compiled /builder in 11.2s
+ GET /builder 200 in 11476ms

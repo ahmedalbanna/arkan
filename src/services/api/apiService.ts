@@ -43,6 +43,14 @@ export async function apiService<TRequest = any, TResponse = any>(
     authToken = session.user.id || '';
   }
 
+  console.log(`[apiService] Preparing request:`, {
+    method,
+    endpoint,
+    hasAuthToken: !!authToken,
+    hasData: !!data,
+    isFormData
+  });
+
   const config: RequestInit = {
     method,
     headers: { ...headers },
@@ -53,24 +61,37 @@ export async function apiService<TRequest = any, TResponse = any>(
       ...config.headers,
       'Authorization': `Bearer ${authToken}`,
     };
+    console.log(`[apiService] Authorization header set for token:`, authToken.substring(0, 10) + '...');
   }
 
   if (data) {
     if (isFormData) {
       // Don't set Content-Type for FormData, browser does it with boundary
       config.body = data as unknown as FormData;
+      console.log(`[apiService] FormData body set`);
     } else {
       (config.headers as Record<string, string>)['Content-Type'] = 'application/json';
       config.body = JSON.stringify(data);
+      console.log(`[apiService] JSON body set:`, data);
     }
   }
 
+  console.log(`[apiService] Fetching from endpoint:`, endpoint);
   const response = await fetch(endpoint, config);
 
+  console.log(`[apiService] Response received:`, {
+    endpoint,
+    status: response.status,
+    statusText: response.statusText,
+    ok: response.ok
+  });
+
   if (!response.ok) {
+    console.error(`[apiService] Error response (${response.status}):`, response.statusText);
     let errorData;
     try {
       errorData = await response.json();
+      console.error(`[apiService] Error data:`, errorData);
     } catch {
       // If the response is not JSON, use the status text
       errorData = { message: response.statusText || 'An unknown error occurred.' };
@@ -80,9 +101,14 @@ export async function apiService<TRequest = any, TResponse = any>(
 
   // Handle cases where the response might be empty (e.g., DELETE 204 No Content)
   const contentType = response.headers.get('content-type');
+  console.log(`[apiService] ${method} ${endpoint} - contentType:`, contentType);
+  
   if (contentType && contentType.includes('application/json')) {
-    return response.json();
+    const responseData = await response.json();
+    console.log(`[apiService] Response data parsed:`, responseData);
+    return responseData;
   }
   // Return an empty object or a success indicator for non-JSON responses
+  console.warn(`[apiService] No JSON content-type. Returning empty object.`);
   return {} as TResponse;
 }

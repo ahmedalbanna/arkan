@@ -785,3 +785,64 @@ Before submitting API calls or adding new flows:
 - `docs/` - Additional project documentation
 - `docs/migration/` - PostgreSQL migration guides and documentation
 - `.rovodev/subagents/` - AI agent configurations
+
+## Debugging & Logging Best Practices
+
+### Console Logging for Data Flow Tracking
+- **Prefix Convention**: Use consistent prefixes like `[ModuleName]` to filter logs easily (e.g., `[NextAuth]`, `[apiService]`)
+- **Strategic Placement**: Log at component boundaries where data transforms:
+  - Authentication callbacks (authorize, jwt, session, signIn)
+  - API service layer (request prep, fetch, response parsing)
+  - React Query execution and state updates
+  - Server-side middleware (authentication, authorization)
+- **Log Content Pattern**: Include both the action and result state
+  - ✅ Good: `console.log('[NextAuth] User found:', { id, email, role, credits })`
+  - ❌ Bad: `console.log('user found')` (no context about what was found)
+- **Debugging Documentation**: When adding console logs, create corresponding documentation that shows:
+  1. Expected log output at each step
+  2. Success and error indicators
+  3. What each log tells you about system state
+  4. Quick reference guide for common issues
+
+### Authentication Flow Debugging Patterns
+- **19-Step Tracing**: Complete authentication flows (login → profile loading) typically have 15-20 distinct steps:
+  - Each step should log entry and exit conditions
+  - Data transformations should be logged at boundaries
+  - Authorization decisions should log reasoning
+  - This enables quick identification of failure points
+- **Data Type Visibility**: Create documentation showing data type transformations at each boundary
+  - Include what data enters and leaves each function
+  - Note type conversions (e.g., Prisma enum → model type)
+  - Helps identify schema mismatches early
+- **Execution Path Verification**: Log conditions that determine execution flow
+  - Boolean flags (enabled, hasData, hasSession)
+  - Optional chaining results (userId?.exists)
+  - This makes it obvious when code paths are skipped
+
+### Common Logging Mistakes to Avoid
+- **Over-logging in production**: Console logs have performance impact
+  - Solution: Wrap development logs in environment checks or use conditional logging
+  - Consider: `if (process.env.DEBUG) console.log(...)`
+- **Missing context in logs**: Logs without sufficient detail are hard to debug
+  - Always include identifiers (IDs, emails) and relevant state
+  - Include timestamps if order matters
+- **Inconsistent log prefixes**: Makes filtering and tracking difficult
+  - Establish conventions early and document them
+  - Use hierarchical prefixes for related functionality
+
+### Documentation for Debugging
+- **Quick Reference Cards**: Create 1-page guides with:
+  - Expected logs in sequential order
+  - What to check at each step
+  - Common issues and their indicators
+  - Error reference with fixes
+- **Detailed Step-by-Step Guides**: For complex flows, document:
+  - What happens at each step
+  - Data structures at that point
+  - Potential failure modes
+  - Where to look in code
+- **Architecture Diagrams**: Visual flow charts showing:
+  - Data flow direction
+  - Transformation boundaries
+  - Authorization checkpoints
+  - Error paths

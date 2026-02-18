@@ -13,6 +13,7 @@ export async function GET() {
       return NextResponse.json({ session: null }, { status: 200 });
     }
 
+    console.log(session);
     return NextResponse.json({ session }, { status: 200 });
   } catch (error) {
     console.error('Session fetch error:', error);

@@ -46,8 +46,29 @@ export function subscribeToUserProfile(_userId: string, _callback: (user: UserPr
  * Fetches the profile for a single user from the API.
  */
 export async function fetchUserProfileApi(userId: string, token: string): Promise<UserProfile | null> {
-  if (!userId) return null;
-  return apiService({ endpoint: `/api/users/${userId}`, token });
+  console.log('[userService] fetchUserProfileApi called with:', {
+    userId,
+    tokenLength: token?.length,
+    tokenPreview: token?.substring(0, 10) + '...'
+  });
+
+  if (!userId) {
+    console.warn('[userService] fetchUserProfileApi: userId is empty, returning null');
+    return null;
+  }
+
+  console.log('[userService] Calling apiService for user profile');
+  const result = await apiService({ endpoint: `/api/users/${userId}`, token });
+  
+  console.log('[userService] fetchUserProfileApi result:', {
+    hasResult: !!result,
+    resultKeys: result ? Object.keys(result) : null,
+    userId: result?.id,
+    email: result?.email,
+    role: result?.role
+  });
+  
+  return result;
 }
 
 /**

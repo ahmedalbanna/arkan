@@ -29,15 +29,34 @@ type ApiHandler = (context: AuthContext) => Promise<NextResponse | Response>;
 export const withAuth = (handler: ApiHandler, options: ApiHandlerOptions = {}) => {
   return async (request: NextRequest, { params }: { params: Promise<{ [key: string]: string }> }) => {
     try {
+      console.log('[withAuth] API request received:', {
+        method: request.method,
+        url: request.url,
+        requireAdmin: options.requireAdmin
+      });
+
       const resolvedParams = await params;
+      console.log('[withAuth] Resolved params:', resolvedParams);
       
       // Get session from NextAuth
+      console.log('[withAuth] Getting session from NextAuth...');
       const session = await getSession();
+      
+      console.log('[withAuth] Session retrieved:', {
+        hasSession: !!session,
+        hasUserId: !!session?.user?.id,
+        userId: session?.user?.id,
+        email: session?.user?.email,
+        role: session?.user?.role
+      });
+
       if (!session?.user?.id) {
+        console.error('[withAuth] Unauthorized: No session found');
         return handleApiError({ message: 'Unauthorized: No session found' }, 401);
       }
 
       // Fetch full user profile from database
+      console.log('[withAuth] Fetching full user profile from database for userId:', session.user.id);
       const user = await prisma.user.findUnique({
         where: { id: session.user.id },
         select: {
@@ -50,16 +69,31 @@ export const withAuth = (handler: ApiHandler, options: ApiHandlerOptions = {}) =
         },
       });
 
+      console.log('[withAuth] User profile retrieved:', {
+        hasUser: !!user,
+        userId: user?.id,
+        email: user?.email,
+        role: user?.role,
+        credits: user?.credits
+      });
+
       if (!user) {
+        console.error('[withAuth] Forbidden: User profile not found in database');
         return handleApiError({ message: 'Forbidden: User profile not found' }, 403);
       }
 
       if (options.requireAdmin && user.role !== 'ADMIN' && user.role !== 'SUPER_ADMIN') {
+        console.error('[withAuth] Forbidden: Admin access required, user role is', user.role);
         return handleApiError({ message: 'Forbidden: Admin access required' }, 403);
       }
 
-      return handler({ request, user, token: session.user.id, params: resolvedParams });
+      console.log('[withAuth] Authorization passed, calling handler');
+      const response = await handler({ request, user, token: session.user.id, params: resolvedParams });
+      
+      console.log('[withAuth] Handler returned response with status:', response.status);
+      return response;
     } catch (error: any) {
+      console.error('[withAuth] Exception caught in withAuth:', error);
       return handleApiError(error);
     }
   };
