@@ -7,7 +7,8 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useWritingTool, useToast } from '@/hooks';
 import { useDropzone } from 'react-dropzone';
-import { useAuth } from '@/context/AuthContext';
+import { useSession } from "next-auth/react";
+import { useAuth } from '@/context/NextAuthContext';
 import { processFileApi } from '@/services';
 import type { BiasCheckOutput } from '@/ai/schemas';
 
@@ -19,7 +20,7 @@ type BiasCheckFormValues = z.infer<typeof biasCheckSchema>;
 
 export function useBiasCheckerLogic() {
   const [isUploading, setIsUploading] = useState(false);
-  const { firebaseUser, refetchUser } = useAuth();
+  const { data: session } = useSession(); const { refetchUser } = useAuth();
   const { toast } = useToast();
 
   const mutation = useWritingTool('/api/writing-tools/bias-checker', {
@@ -37,7 +38,7 @@ export function useBiasCheckerLogic() {
     const file = acceptedFiles[0];
     if (!file) return;
 
-    if (!firebaseUser) {
+    if (!session?.user?.id) {
       toast({ title: 'Authentication Error', description: 'You must be logged in to process files.', variant: "destructive" });
       return;
     }
@@ -47,7 +48,7 @@ export function useBiasCheckerLogic() {
     formData.append('file', file);
 
     try {
-      const token = await firebaseUser.getIdToken();
+      const token = session.user.id;
       const result = await processFileApi(formData, token);
       form.setValue('text', result.markdown, { shouldValidate: true });
       toast({ title: 'File Processed', description: `Text extracted from ${file.name}.` });
@@ -57,7 +58,7 @@ export function useBiasCheckerLogic() {
     } finally {
       setIsUploading(false);
     }
-  }, [firebaseUser, form, refetchUser, toast]);
+  }, [session?.user?.id, form, refetchUser, toast]);
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,

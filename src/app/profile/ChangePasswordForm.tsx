@@ -4,9 +4,9 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useMutation } from '@tanstack/react-query';
-import { updatePassword, EmailAuthProvider, reauthenticateWithCredential } from 'firebase/auth';
-import { useAuth } from '@/context/AuthContext';
+import { useSession } from "next-auth/react";
 import { useToast } from '@/hooks';
+import { useAuth } from '@/context/NextAuthContext';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
@@ -21,6 +21,7 @@ const passwordSchema = z.object({
 type PasswordFormValues = z.infer<typeof passwordSchema>;
 
 export function ChangePasswordForm() {
+  const { data: session } = useSession();
   const { firebaseUser } = useAuth();
   const { toast } = useToast();
 
@@ -31,24 +32,31 @@ export function ChangePasswordForm() {
 
   const changePasswordMutation = useMutation({
     mutationFn: async (data: PasswordFormValues) => {
-      if (!firebaseUser || !firebaseUser.email) {
+      if (!session?.user?.id) {
         throw new Error('User not properly authenticated.');
       }
-      const credential = EmailAuthProvider.credential(firebaseUser.email, data.currentPassword);
-      await reauthenticateWithCredential(firebaseUser, credential);
-      await updatePassword(firebaseUser, data.newPassword);
+      const response = await fetch('/api/auth/change-password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          currentPassword: data.currentPassword,
+          newPassword: data.newPassword,
+        }),
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Failed to change password');
+      }
+
+      return response.json();
     },
     onSuccess: () => {
       toast({ title: 'Success', description: 'Your password has been updated.' });
       form.reset();
     },
     onError: (error: any) => {
-      let description = 'An unexpected error occurred.';
-      if (error.code === 'auth/wrong-password' || error.code === 'auth/invalid-credential') {
-        description = 'The current password you entered is incorrect.';
-      } else if (error.code) {
-        description = error.message;
-      }
+      const description = error.message || 'An unexpected error occurred.';
       toast({ title: 'Error', description, variant: 'destructive' });
     },
   });
@@ -57,7 +65,8 @@ export function ChangePasswordForm() {
     changePasswordMutation.mutate(data);
   };
   
-  if (firebaseUser?.providerData.some(p => p.providerId !== 'password')) {
+  // Only show password change form if user has a password-based account
+  if (!firebaseUser) {
     return null;
   }
 

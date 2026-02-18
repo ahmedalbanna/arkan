@@ -1,6 +1,6 @@
 'use client';
 
-import { useAuth } from '@/context/AuthContext';
+import { useAuth } from '@/context/NextAuthContext';
 import { useToast } from '@/hooks';
 import { app } from '@/lib/firebase/client-init';
 import { saveDeviceToken } from '@/services/api/deviceTokenService';

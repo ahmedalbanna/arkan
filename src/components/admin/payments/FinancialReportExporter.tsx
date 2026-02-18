@@ -10,7 +10,7 @@ import { format } from 'date-fns';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { cn } from '@/lib/utils/cn';
-import { useAuth } from '@/context/AuthContext';
+import { useAuth } from '@/context/NextAuthContext';
 import { fetchTransactionsForReport } from '@/services';
 import { useToast } from '@/hooks';
 import { useLocalization } from '@/context/LocalizationContext';
@@ -45,7 +45,7 @@ function formatTransactionsToMarkdown(transactions: TransactionProperties[], dat
 export function FinancialReportExporter() {
     const [dateRange, setDateRange] = useState<DateRange | undefined>();
     const [isLoading, setIsLoading] = useState(false);
-    const { firebaseUser } = useAuth();
+    const { data: session } = useSession();
     const { toast } = useToast();
     const { t } = useLocalization();
 
@@ -61,7 +61,7 @@ export function FinancialReportExporter() {
 
         setIsLoading(true);
         try {
-            const token = await firebaseUser.getIdToken();
+            const token = session?.user?.id;
             const transactions = await fetchTransactionsForReport({
                 startDate: dateRange.from.toISOString(),
                 endDate: dateRange.to.toISOString(),

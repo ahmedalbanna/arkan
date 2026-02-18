@@ -2,7 +2,7 @@
 'use client';
 
 import { useUserStats } from '@/hooks';
-import { useAuth } from '@/context/AuthContext';
+import { useSession } from "next-auth/react";
 import { StatCard } from '@/components/admin/dashboard/StatCard';
 import { AgentUsageChart } from '@/components/admin/dashboard/AgentUsageChart';
 import { RecentActivity } from '@/components/admin/dashboard/RecentActivity';
@@ -12,6 +12,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { _useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { useLocalization } from '@/context/LocalizationContext';
+import { useAuth } from '@/context/NextAuthContext';
 import Link from 'next/link';
 
 

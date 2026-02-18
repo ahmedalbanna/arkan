@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Pencil, KeyRound } from "lucide-react";
 import Link from 'next/link';
 import { useQueryClient } from "@tanstack/react-query";
-import { useAuth } from "@/context/AuthContext";
+import { useAuth } from "@/context/NextAuthContext";
 import { userKeys } from "@/lib/query-keys";
 import { fetchUserProfileApi } from "@/services/api/userService";
 
@@ -29,7 +29,7 @@ export function UserTableRow({ user }: UserTableRowProps) {
 
     async function prefetchUser(userId: string) {
         if (!firebaseUser) return;
-        const token = await firebaseUser.getIdToken();
+        const token = firebaseUser.uid;
         await queryClient.prefetchQuery({
             queryKey: userKeys.profile(userId),
             queryFn: () => fetchUserProfileApi(userId, token),

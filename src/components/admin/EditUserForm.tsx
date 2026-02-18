@@ -28,7 +28,7 @@ import { useUpdateUser } from '@/hooks';
 import { UserProfile } from '@/lib/models';
 import { Loader2, Save, Send } from 'lucide-react';
 import { useEffect, useState } from 'react';
-import { useAuth } from '@/context/AuthContext';
+import { useAuth } from '@/context/NextAuthContext';
 import {
   Select,
   SelectContent,

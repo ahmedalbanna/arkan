@@ -10,7 +10,7 @@ import type { DiffPart } from '@/lib/utils/diff';
 import { computeDiff } from '@/lib/utils/diff';
 import { useLocalization } from '@/context/LocalizationContext';
 import { useMutation } from '@tanstack/react-query';
-import { useAuth } from '@/context/AuthContext';
+import { useSession } from "next-auth/react";
 import { writingToolApi } from '@/services/api/writingToolsService';
 
 const formSchema = z.object({
@@ -27,7 +27,7 @@ type FormValues = z.infer<typeof formSchema>;
 
 export function useTextStylistLogic() {
   const { t } = useLocalization();
-  const { firebaseUser } = useAuth();
+  const { data: session } = useSession();
   const [originalText, setOriginalText] = useState('');
   const [processedText, setProcessedText] = useState<any>(null); // Can be string or object
   const [diff, setDiff] = useState<DiffPart[] | null>(null);
@@ -64,8 +64,8 @@ export function useTextStylistLogic() {
   
   const rewriteMutation = useMutation({
     mutationFn: async (variables: any) => {
-      if (!firebaseUser) throw new Error('User not authenticated');
-      const token = await firebaseUser.getIdToken();
+      if (!session?.user?.id) throw new Error('User not authenticated');
+      const token = session.user.id;
       return writingToolApi<any, any>('/api/writing-tools/rewrite-text', {
         data: { flow: 'rewrite-text', text: variables.text, style: variables.style },
         token
@@ -77,8 +77,8 @@ export function useTextStylistLogic() {
 
   const summarizeMutation = useMutation({
     mutationFn: async (variables: any) => {
-      if (!firebaseUser) throw new Error('User not authenticated');
-      const token = await firebaseUser.getIdToken();
+      if (!session?.user?.id) throw new Error('User not authenticated');
+      const token = session.user.id;
       return writingToolApi<any, any>('/api/writing-tools/summarize-text-with-ratio', {
         data: { flow: 'summarize-with-ratio', text: variables.text, ratio: variables.ratio },
         token
@@ -90,8 +90,8 @@ export function useTextStylistLogic() {
 
   const styleEditorMutation = useMutation({
     mutationFn: async (variables: any) => {
-      if (!firebaseUser) throw new Error('User not authenticated');
-      const token = await firebaseUser.getIdToken();
+      if (!session?.user?.id) throw new Error('User not authenticated');
+      const token = session.user.id;
       return writingToolApi<any, any>('/api/writing-tools/style-editor', {
         data: { flow: 'style-editor', text: variables.text, targetAudience: variables.targetAudience, tone: variables.tone },
         token
@@ -103,8 +103,8 @@ export function useTextStylistLogic() {
 
   const readabilityMutation = useMutation({
     mutationFn: async (variables: any) => {
-      if (!firebaseUser) throw new Error('User not authenticated');
-      const token = await firebaseUser.getIdToken();
+      if (!session?.user?.id) throw new Error('User not authenticated');
+      const token = session.user.id;
       return writingToolApi<any, any>('/api/writing-tools/readability-enhancer', {
         data: { flow: 'readability-enhancer', text: variables.text, targetLevel: variables.targetLevel },
         token
@@ -116,8 +116,8 @@ export function useTextStylistLogic() {
 
   const concisenessMutation = useMutation({
     mutationFn: async (variables: any) => {
-      if (!firebaseUser) throw new Error('User not authenticated');
-      const token = await firebaseUser.getIdToken();
+      if (!session?.user?.id) throw new Error('User not authenticated');
+      const token = session.user.id;
       return writingToolApi<any, any>('/api/writing-tools/conciseness-checker', {
         data: { flow: 'conciseness-checker', text: variables.text, targetReduction: variables.targetReduction },
         token
@@ -129,8 +129,8 @@ export function useTextStylistLogic() {
 
   const clarityMutation = useMutation({
     mutationFn: async (variables: any) => {
-      if (!firebaseUser) throw new Error('User not authenticated');
-      const token = await firebaseUser.getIdToken();
+      if (!session?.user?.id) throw new Error('User not authenticated');
+      const token = session.user.id;
       return writingToolApi<any, any>('/api/writing-tools/clarity-advisor', {
         data: { flow: 'clarity-advisor', text: variables.text, focusAreas: variables.focusAreas },
         token

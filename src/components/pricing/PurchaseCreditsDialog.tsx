@@ -10,7 +10,7 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog';
 import { useState } from 'react';
-import { useAuth } from '@/context/AuthContext';
+import { useAuth } from '@/context/NextAuthContext';
 import { useLocalization } from '@/context/LocalizationContext';
 import { Slider } from '@/components/ui/slider';
 import { Button } from '@/components/ui/button';
@@ -70,7 +70,7 @@ type FileFormValues = z.infer<typeof fileSchema>;
 
 export function PurchaseCreditsDialog({ trigger }: { trigger: React.ReactNode }) {
   const { t } = useLocalization();
-  const { firebaseUser } = useAuth();
+  const { data: session } = useSession();
   const [isOpen, setIsOpen] = useState(false);
   const [step, setStep] = useState(1);
   const [credits, setCredits] = useState(100);
@@ -104,17 +104,17 @@ export function PurchaseCreditsDialog({ trigger }: { trigger: React.ReactNode })
   }
 
   async function onSubmit(data: FileFormValues) {
-    if (!firebaseUser) return;
-    const token = await firebaseUser.getIdToken();
+    if (!session?.user?.id) return;
+    const token = session?.user?.id;
     const formData = new FormData();
     formData.append('file', data.file[0]);
-    formData.append('userId', firebaseUser.uid);
+    formData.append('userId', session?.user?.id || '');
     formData.append('planId', `custom-${credits}`);
     formData.append('planName', `${credits} Credits`);
     formData.append('credits', credits.toString());
     formData.append('price', price.toFixed(2));
-    formData.append('userName', firebaseUser.displayName || 'N/A');
-    formData.append('userEmail', firebaseUser.email || 'N/A');
+    formData.append('userName', session?.user?.name || 'N/A');
+    formData.append('userEmail', session?.user?.email || 'N/A');
 
     // @ts-expect-error - FormData object literal property mismatch
     mutation.mutate({ formData: formData as any, token });
@@ -192,7 +192,7 @@ export function PurchaseCreditsDialog({ trigger }: { trigger: React.ReactNode })
                         </AccordionItem>
                       ))}
                     </Accordion>
-                    <p className="text-sm pt-4"><strong>{t('submitPayment.referenceLabel')}:</strong> {t('submitPayment.yourUserIdLabel')} ({firebaseUser?.uid || t('submitPayment.pleaseLogin')})</p>
+                    <p className="text-sm pt-4"><strong>{t('submitPayment.referenceLabel')}:</strong> {t('submitPayment.yourUserIdLabel')} ({session?.user?.id || t('submitPayment.pleaseLogin')})</p>
                   </CardContent>
                 </Card>
               )}

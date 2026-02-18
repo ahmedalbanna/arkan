@@ -7,7 +7,7 @@ import { Editor } from '@tiptap/react';
 import { useToast } from '@/hooks/util/use-toast';
 import { useLocalization } from '@/context/LocalizationContext';
 import { useMutation } from '@tanstack/react-query';
-import { useAuth } from '@/context/AuthContext';
+import { useAuth } from '@/context/NextAuthContext';
 import { useBuilderStore } from '../core/useBuilderStore';
 import { generateReportSectionApi } from '@/services/api/reportService';
 import type { SectionName } from '@/ai/schemas';
@@ -25,7 +25,7 @@ interface AiActionsProps {
 export function useAiActions({ editor: initialEditor }: AiActionsProps = {}) {
   const { t } = useLocalization();
   const { toast } = useToast();
-  const { firebaseUser, refetchUser } = useAuth();
+  const { data: session } = useSession(); const { refetchUser } = useAuth();
   const { updateProject } = useBuilderStore();
   const { activeEditor } = useEditorStore();
   
@@ -63,8 +63,8 @@ export function useAiActions({ editor: initialEditor }: AiActionsProps = {}) {
 
   const aiActionMutation = useMutation({
     mutationFn: async (variables: { textToManipulate: string; command: string; }) => {
-        if (!firebaseUser) throw new Error('User not authenticated');
-        const token = await firebaseUser.getIdToken();
+        if (!session?.user?.id) throw new Error('User not authenticated');
+        const token = session?.user?.id;
         return writingToolApi<any, any>('/api/writing-tools/manipulate-text', {
           data: { flow: 'manipulate-text', textToManipulate: variables.textToManipulate, command: variables.command },
           token
@@ -76,8 +76,8 @@ export function useAiActions({ editor: initialEditor }: AiActionsProps = {}) {
 
   const translateMutation = useMutation({
       mutationFn: async (variables: { text: string; targetLang: string; }) => {
-          if (!firebaseUser) throw new Error('User not authenticated');
-          const token = await firebaseUser.getIdToken();
+          if (!session?.user?.id) throw new Error('User not authenticated');
+          const token = session?.user?.id;
           return writingToolApi<any, any>('/api/writing-tools/translate-text', {
             data: { flow: 'translate-text', text: variables.text, targetLang: variables.targetLang },
             token
@@ -131,12 +131,12 @@ export function useAiActions({ editor: initialEditor }: AiActionsProps = {}) {
     mutationKey: ['generateReportSection'],
     mutationFn: async (sectionId: string) => {
         const currentProject = useBuilderStore.getState().project;
-        if (!currentProject || !firebaseUser) throw new Error("Project or user not found.");
+        if (!currentProject || !session?.user?.id) throw new Error("Project or user not found.");
         
         const section = currentProject.getSection(sectionId);
         if (!section) throw new Error("Section not found.");
 
-        const token = await firebaseUser.getIdToken();
+        const token = session?.user?.id;
         const body = {
             flow: 'generate-section',
             sectionToGenerate: section.id as SectionName,
@@ -165,7 +165,7 @@ export function useAiActions({ editor: initialEditor }: AiActionsProps = {}) {
       mutationFn: async (variables: { chapterId: string, sectionIds: string[] }) => {
         const { chapterId, sectionIds } = variables;
         const project = useBuilderStore.getState().project;
-        if (!project || !firebaseUser) throw new Error("User or project not found.");
+        if (!project || !session?.user?.id) throw new Error("User or project not found.");
         
         const chapter = project.getChapter(chapterId);
         if (!chapter) throw new Error("Chapter not found.");
@@ -173,7 +173,7 @@ export function useAiActions({ editor: initialEditor }: AiActionsProps = {}) {
         const sectionsToBuild = chapter.sections.filter(s => sectionIds.includes(s.id));
         if (sectionsToBuild.length === 0) throw new Error('No sections selected in this chapter.');
 
-        const token = await firebaseUser.getIdToken();
+        const token = session?.user?.id;
         const body = {
             flow: 'generate-chapter',
             chapterTitle: chapter.title,
@@ -209,7 +209,7 @@ export function useAiActions({ editor: initialEditor }: AiActionsProps = {}) {
  const generateProjectMutation = useMutation({
     mutationKey: ['generateProjectContent'],
     mutationFn: async ({ selectedSectionIds }: { project: Project; selectedSectionIds: Set<string> }) => {
-      if (!firebaseUser) throw new Error("User not found.");
+      if (!session?.user?.id) throw new Error("User not found.");
       if (selectedSectionIds.size === 0) throw new Error('No sections were selected for generation.');
       
       for (const sectionId of selectedSectionIds) {

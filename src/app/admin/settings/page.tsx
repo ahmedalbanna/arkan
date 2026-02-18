@@ -1,10 +1,9 @@
 
 'use client';
 
-import { useAuth } from '@/context/AuthContext';
+import { useSession } from "next-auth/react";
 import { useToast } from '@/hooks';
 import type { AppSettings } from '@/lib/types';
-import { getAuthenticatedToken } from '@/lib/utils/authUtils';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useFieldArray, useForm } from 'react-hook-form';
@@ -66,7 +65,7 @@ async function updateSettings(variables: { data: AppSettings, token: string }): 
 // --- Main Settings Page Component ---
 export default function AdminSettingsPage() {
     const { t } = useLocalization();
-    const { firebaseUser } = useAuth();
+    const { data: session } = useSession();
     const { toast } = useToast();
     const queryClient = useQueryClient();
 
@@ -106,8 +105,8 @@ export default function AdminSettingsPage() {
     });
 
     const onSubmit = async (data: SettingsFormValues) => {
-        const token = await getAuthenticatedToken(firebaseUser);
-        mutation.mutate({ data, token });
+        if (!session?.user?.id) throw new Error("Admin not authenticated.");
+        mutation.mutate({ data, token: session.user.id });
     };
 
     const addNewAccount = () => {

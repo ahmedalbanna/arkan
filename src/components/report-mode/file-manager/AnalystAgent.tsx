@@ -13,7 +13,7 @@ import {
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Textarea } from '@/components/ui/textarea';
-import { useAuth } from '@/context/AuthContext';
+import { useAuth } from '@/context/NextAuthContext';
 import { useLocalization } from '@/context/LocalizationContext';
 import { toast, useBuilderStore } from '@/hooks';
 import { markdownComponents } from '@/lib/utils/markdown-styles';
@@ -109,7 +109,7 @@ export default function AnalystAgent() {
         }
         if (!firebaseUser) return;
         setMarkdownResult(null); // Clear previous markdown result
-        const token = await firebaseUser.getIdToken();
+        const token = session?.user?.id;
         analysisMutation.mutate({ prompt: data.prompt, contextFiles: [...externalContext], token });
     }
 

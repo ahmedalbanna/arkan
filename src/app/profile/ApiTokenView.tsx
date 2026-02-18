@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { useAuth } from '@/context/AuthContext';
+import { useSession } from "next-auth/react";
 import { useToast } from '@/hooks';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -11,15 +11,18 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 
 
 export function ApiTokenView() {
-  const { firebaseUser } = useAuth();
+  const { data: session } = useSession();
   const [token, setToken] = useState<string | null>(null);
   const [isCopied, setIsCopied] = useState(false);
   const { toast } = useToast();
 
   const handleShowToken = async () => {
-    if (firebaseUser) {
-      const idToken = await firebaseUser.getIdToken(true); // Force refresh
-      setToken(idToken);
+    if (session?.user?.id) {
+      // For API token, we use the session user ID as the token
+      setToken(session.user.id);
+      toast({ title: 'Token Retrieved!' });
+    } else {
+      toast({ title: 'Error', description: 'Not authenticated', variant: 'destructive' });
     }
   };
 

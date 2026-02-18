@@ -8,9 +8,10 @@ import { z } from 'zod';
 import { useWritingTool, useToast } from '@/hooks';
 import { ParaphraseModeSchema } from '@/ai/schemas';
 import { useDropzone } from 'react-dropzone';
-import { useAuth } from '@/context/AuthContext';
+import { useSession } from "next-auth/react";
 import { processFileApi } from '@/services';
 import { useLocalization } from '@/context/LocalizationContext';
+import { useAuth } from '@/context/NextAuthContext';
 
 const paraphraserSchema = z.object({
   text: z.string().min(10, 'Please enter at least 10 characters to paraphrase.'),
@@ -23,7 +24,7 @@ export function useParaphraserLogic() {
   const { t } = useLocalization();
   const [isCopied, setIsCopied] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
-  const { firebaseUser, refetchUser } = useAuth();
+  const { data: session } = useSession(); const { refetchUser } = useAuth();
   const { toast } = useToast();
 
   const paraphraseMutation = useWritingTool('/api/writing-tools/paraphrase');
@@ -37,7 +38,7 @@ export function useParaphraserLogic() {
     const file = acceptedFiles[0];
     if (!file) return;
 
-    if (!firebaseUser) {
+    if (!session?.user?.id) {
       toast({ title: t('writingTools.paraphraser.toastAuthError'), description: t('writingTools.paraphraser.toastAuthErrorDesc'), variant: "destructive" });
       return;
     }
@@ -47,7 +48,7 @@ export function useParaphraserLogic() {
     formData.append('file', file);
 
     try {
-      const token = await firebaseUser.getIdToken();
+      const token = session.user.id;
       const result = await processFileApi(formData, token);
       form.setValue('text', result.markdown, { shouldValidate: true });
       toast({ title: t('writingTools.paraphraser.toastFileProcessed'), description: t('writingTools.paraphraser.toastFileProcessedDesc', { fileName: file.name }) });
@@ -57,7 +58,7 @@ export function useParaphraserLogic() {
     } finally {
       setIsUploading(false);
     }
-  }, [firebaseUser, form, refetchUser, toast, t]);
+  }, [session?.user?.id, form, refetchUser, toast, t]);
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,

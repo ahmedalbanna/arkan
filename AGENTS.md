@@ -687,6 +687,57 @@ Before submitting API calls or adding new flows:
   });
   ```
 
+## Firebase to NextAuth Migration Patterns
+
+### Large-Scale Authentication Migration Strategy
+- **Approach**: Use dual-provider pattern (Phase 1) → Safe migrations (Phase 2-3) → Cleanup (Phase 4)
+  - Phase 1: Update infrastructure (token generation, API service layer)
+  - Phase 2: Migrate data hooks (use consistent patterns across 20+ files)
+  - Phase 3: Migrate pages and complex components
+  - Phase 4: Remove legacy code and verify
+- **Why Dual Provider Works**: Keep legacy AuthContext alongside NextAuthContext during transition, both exposing `useAuth()` hook for backwards compatibility
+- **Critical Files to Update First**:
+  - `src/lib/utils/authUtils.ts` - Token generation (blocks everything)
+  - `src/services/api/apiService.ts` - API layer (used by 50+ files)
+  - `src/components/shared/RootProviders.tsx` - Provider stack
+- **Pattern for Migration**: 
+  ```typescript
+  // OLD (Firebase)
+  const { firebaseUser } = useAuth();
+  const token = await getAuthenticatedToken(firebaseUser);
+  
+  // NEW (NextAuth)
+  const { data: session } = useSession();
+  const token = session.user.id; // No async needed
+  ```
+
+### Bulk Migration Best Practices
+- **Sed Command Dangers**: Regex replacements can corrupt code (e.g., `if (navigator.onLine if (navigator.onLine && firebaseUser)if...`)
+  - ✅ Better: Use simple, single-pattern sed commands
+  - ✅ Better: Verify each file after batch changes
+  - ❌ Avoid: Complex nested sed patterns on same line
+- **Verification Strategy**:
+  ```bash
+  # After batch migration, check for corrupted patterns
+  grep -r "if (navigator.onLine if\|firebaseUser)if" src/
+  grep -r "getIdToken()" src/ | grep -v "userCredential.user"
+  ```
+- **Error Pattern Recognition**: Build errors with "Parsing ecmascript source code failed" often indicate sed corruption - check for duplicated keywords/conditions
+- **Progressive Verification**: Fix errors as they appear in build output rather than trying to catch all at once
+
+### NextAuth Session Token Handling
+- **Key Difference**: NextAuth provides token via session, no async `getIdToken()` call needed
+  - Firebase: `const token = await firebaseUser.getIdToken()`
+  - NextAuth: `const token = session.user.id` or `session.user.accessToken`
+- **Session Field Verification**: Must verify actual token field name in NextAuth config's jwt callback before migrating
+- **Compatibility Layer**: Map NextAuth session to Firebase-like object for backwards compatibility:
+  ```typescript
+  const firebaseUser = session?.user ? {
+    uid: session.user.id,
+    email: session.user.email,
+  } : null;
+  ```
+
 ## Environment Configuration Anti-Patterns
 
 ### Critical: Prevent Duplicate Environment Variables

@@ -4,7 +4,7 @@
 import { create } from 'zustand';
 import type { AgentProperties } from '@/lib/models';
 import { fetchAgentsApi, createAgentApi, updateAgentApi, deleteAgentApi } from '@/services/api/agentService';
-import { useAuth } from '@/context/AuthContext';
+import { useAuth } from '@/context/NextAuthContext';
 import { useEffect } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from './util/use-toast';
@@ -48,7 +48,7 @@ const useAgentUIState = create<AgentState>((set) => ({
 }));
 
 export function useAgentManager() {
-  const { firebaseUser } = useAuth();
+  const { data: session } = useSession();
   const queryClient = useQueryClient();
   const {
     selectedAgentId,
@@ -59,8 +59,8 @@ export function useAgentManager() {
   const { data, isLoading, error, refetch } = useQuery({
     queryKey: agentKeys.all,
     queryFn: async () => {
-      if (!firebaseUser) throw new Error("Not authenticated");
-      const token = await firebaseUser.getIdToken();
+      if (!session?.user?.id) throw new Error("Not authenticated");
+      const token = session.user.id;
       const fetchedAgents = await fetchAgentsApi(token);
       saveToCache(AGENTS_CACHE_KEY, fetchedAgents);
       return fetchedAgents;
@@ -70,7 +70,7 @@ export function useAgentManager() {
         const cachedAgents = getFromCache<AgentProperties[]>(AGENTS_CACHE_KEY);
         return cachedAgents;
     },
-    enabled: !!firebaseUser,
+    enabled: !!session?.user?.id,
     staleTime: 1000 * 60 * 5, // Data is stale after 5 minutes
   });
 
@@ -86,8 +86,8 @@ export function useAgentManager() {
 
   const createMutation = useMutation({
     mutationFn: async (data: Omit<AgentProperties, 'id'>) => {
-        if (!firebaseUser) throw new Error("Not authenticated");
-        const token = await firebaseUser.getIdToken();
+        if (!session?.user?.id) throw new Error("Not authenticated");
+        const token = session.user.id;
         // The API now expects the `id` in the body
         return createAgentApi(data as any, token);
     },
@@ -99,8 +99,8 @@ export function useAgentManager() {
 
   const updateMutation = useMutation({
     mutationFn: async ({ id, data }: { id: string, data: Partial<AgentProperties> }) => {
-      if (!firebaseUser) throw new Error("Not authenticated");
-      const token = await firebaseUser.getIdToken();
+      if (!session?.user?.id) throw new Error("Not authenticated");
+      const token = session.user.id;
       return updateAgentApi(id, data, token);
     },
     onSuccess: () => {
@@ -110,8 +110,8 @@ export function useAgentManager() {
 
   const deleteMutation = useMutation({
     mutationFn: async (id: string) => {
-      if (!firebaseUser) throw new Error("Not authenticated");
-      const token = await firebaseUser.getIdToken();
+      if (!session?.user?.id) throw new Error("Not authenticated");
+      const token = session.user.id;
       return deleteAgentApi(id, token);
     },
     onSuccess: (_, id) => {

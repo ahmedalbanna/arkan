@@ -2,8 +2,7 @@
 'use client';
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { useAuth } from '@/context/AuthContext';
-import { getAuthenticatedToken } from '@/lib/utils/authUtils';
+import { useSession } from 'next-auth/react';
 import { toast } from '@/hooks/util/use-toast';
 import {
     fetchReportTemplatesApi,
@@ -75,11 +74,11 @@ export function useApplyReportTemplate(onSuccessCallback?: () => void) {
 
 export function useCreateReportTemplate() {
     const queryClient = useQueryClient();
-    const { firebaseUser } = useAuth();
+    const { data: session } = useSession();
     return useMutation({
         mutationFn: async (data: CreateReportTemplateData) => {
-            const token = await getAuthenticatedToken(firebaseUser);
-            return createReportTemplateApi(data, token);
+            if (!session?.user?.id) throw new Error("User not authenticated");
+            return createReportTemplateApi(data, session.user.id);
         },
         onSuccess: () => queryClient.invalidateQueries({ queryKey: ['report-templates'] }),
         onError: (error: any) => toast({ title: 'Creation Failed', description: error.message, variant: 'destructive' }),
@@ -88,11 +87,11 @@ export function useCreateReportTemplate() {
 
 export function useUpdateReportTemplate() {
     const queryClient = useQueryClient();
-    const { firebaseUser } = useAuth();
+    const { data: session } = useSession();
     return useMutation({
         mutationFn: async ({ templateId, data }: { templateId: string; data: UpdateReportTemplateData }) => {
-            const token = await getAuthenticatedToken(firebaseUser);
-            return updateReportTemplateApi(templateId, data, token);
+            if (!session?.user?.id) throw new Error("User not authenticated");
+            return updateReportTemplateApi(templateId, data, session.user.id);
         },
         onSuccess: () => {
             toast({ title: 'Template Updated', description: 'Report template has been saved.' });
@@ -104,11 +103,11 @@ export function useUpdateReportTemplate() {
 
 export function useDeleteReportTemplate() {
     const queryClient = useQueryClient();
-    const { firebaseUser } = useAuth();
+    const { data: session } = useSession();
     return useMutation({
         mutationFn: async (templateId: string) => {
-            const token = await getAuthenticatedToken(firebaseUser);
-            return deleteReportTemplateApi(templateId, token);
+            if (!session?.user?.id) throw new Error("User not authenticated");
+            return deleteReportTemplateApi(templateId, session.user.id);
         },
         onSuccess: () => {
             toast({ title: 'Template Deleted' });
@@ -133,11 +132,11 @@ export function usePresentationTemplates() {
 
 export function useCreatePresentationTemplate() {
     const queryClient = useQueryClient();
-    const { firebaseUser } = useAuth();
+    const { data: session } = useSession();
     return useMutation({
         mutationFn: async (data: CreatePresentationTemplateData) => {
-            const token = await getAuthenticatedToken(firebaseUser);
-            return createPresentationTemplateApi(data, token);
+            if (!session?.user?.id) throw new Error("User not authenticated");
+            return createPresentationTemplateApi(data, session.user.id);
         },
         onSuccess: () => queryClient.invalidateQueries({ queryKey: ['presentation-templates'] }),
         onError: (error: any) => toast({ title: 'Creation Failed', description: error.message, variant: 'destructive' }),
@@ -146,11 +145,11 @@ export function useCreatePresentationTemplate() {
 
 export function useUpdatePresentationTemplate() {
     const queryClient = useQueryClient();
-    const { firebaseUser } = useAuth();
+    const { data: session } = useSession();
     return useMutation({
         mutationFn: async ({ templateId, data }: { templateId: string; data: UpdatePresentationTemplateData }) => {
-            const token = await getAuthenticatedToken(firebaseUser);
-            return updatePresentationTemplateApi(templateId, data, token);
+            if (!session?.user?.id) throw new Error("User not authenticated");
+            return updatePresentationTemplateApi(templateId, data, session.user.id);
         },
         onSuccess: () => {
             toast({ title: 'Template Updated', description: 'Presentation template has been saved.' });
@@ -162,11 +161,11 @@ export function useUpdatePresentationTemplate() {
 
 export function useDeletePresentationTemplate() {
     const queryClient = useQueryClient();
-    const { firebaseUser } = useAuth();
+    const { data: session } = useSession();
     return useMutation({
         mutationFn: async (templateId: string) => {
-            const token = await getAuthenticatedToken(firebaseUser);
-            return deletePresentationTemplateApi(templateId, token);
+            if (!session?.user?.id) throw new Error("User not authenticated");
+            return deletePresentationTemplateApi(templateId, session.user.id);
         },
         onSuccess: () => {
             toast({ title: 'Template Deleted' });

@@ -4,13 +4,13 @@
 import { useInfiniteQuery } from '@tanstack/react-query';
 import { userKeys } from '@/lib/query-keys';
 import { fetchUsersApi } from '@/services/api/userService';
-import { useAuth } from '@/context/AuthContext';
+import { useAuth } from '@/context/NextAuthContext';
 import { User } from '@/lib/models/user';
 
 const USERS_PER_PAGE = 10;
 
 export function useUserManagementConsole() {
-  const { firebaseUser, isLoading: authLoading } = useAuth();
+  const { data: session, status: sessionStatus } = useSession();
 
   const {
     data,
@@ -24,8 +24,8 @@ export function useUserManagementConsole() {
   } = useInfiniteQuery({
     queryKey: userKeys.lists(),
     queryFn: async ({ pageParam }) => {
-      if (!firebaseUser) throw new Error("User not authenticated");
-      const token = await firebaseUser.getIdToken();
+      if (!session?.user?.id) throw new Error("User not authenticated");
+      const token = session.user.id;
       const result = await fetchUsersApi(USERS_PER_PAGE, pageParam, token);
       // Instantiate User objects
       return {
@@ -35,7 +35,7 @@ export function useUserManagementConsole() {
     },
     initialPageParam: undefined as string | undefined,
     getNextPageParam: (lastPage) => lastPage.hasNextPage ? lastPage.lastVisibleId : undefined,
-    enabled: !authLoading && !!firebaseUser,
+    enabled: sessionStatus === "authenticated",
     staleTime: 1000 * 60 * 5, // 5 minutes
   });
 

@@ -7,10 +7,11 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useWritingTool } from './use-writing-tool';
 import { useToast } from '@/hooks/util/use-toast';
-import { useAuth } from '@/context/AuthContext';
+import { useSession } from "next-auth/react";
 import { processFileApi } from '@/services/api/documentProcessingService';
 import { useDropzone } from 'react-dropzone';
 import { useLocalization } from '@/context/LocalizationContext';
+import { useAuth } from '@/context/NextAuthContext';
 
 const detectorSchema = z.object({
   text: z.string().min(50, 'Please enter at least 50 characters for an accurate analysis.'),
@@ -21,7 +22,7 @@ type DetectorFormValues = z.infer<typeof detectorSchema>;
 export function useAIDetectorLogic() {
   const { t } = useLocalization();
   const [isUploading, setIsUploading] = useState(false);
-  const { firebaseUser, refetchUser } = useAuth();
+  const { data: session } = useSession(); const { refetchUser } = useAuth();
   const { toast } = useToast();
 
   const mutation = useWritingTool('/api/writing-tools/ai-detector');
@@ -35,7 +36,7 @@ export function useAIDetectorLogic() {
     const file = acceptedFiles[0];
     if (!file) return;
 
-    if (!firebaseUser) {
+    if (!session?.user?.id) {
       toast({ title: t('writingTools.aiDetector.toastAuthError'), variant: "destructive" });
       return;
     }
@@ -45,7 +46,7 @@ export function useAIDetectorLogic() {
     formData.append('file', file);
 
     try {
-      const token = await firebaseUser.getIdToken();
+      const token = session.user.id;
       const result = await processFileApi(formData, token);
       form.setValue('text', result.markdown, { shouldValidate: true });
       toast({ title: t('writingTools.aiDetector.toastFileProcessed'), description: t('writingTools.aiDetector.toastFileExtracted', { fileName: file.name }) });
@@ -55,7 +56,7 @@ export function useAIDetectorLogic() {
     } finally {
       setIsUploading(false);
     }
-  }, [firebaseUser, form, refetchUser, toast, t]);
+  }, [session?.user?.id, form, refetchUser, toast, t]);
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,

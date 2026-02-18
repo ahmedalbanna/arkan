@@ -19,8 +19,9 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
-import { useAuth } from '@/context/AuthContext';
+import { useSession } from 'next-auth/react';
 import { useLocalization } from '@/context/LocalizationContext';
+import { useAuth } from '@/context/NextAuthContext';
 import { cn } from '@/lib/utils/cn';
 import { ThemeToggle } from '@/components/shared/ThemeToggle';
 import { useLogout } from '@/hooks';
@@ -112,17 +113,18 @@ function NavContent({ isMobile = false, closeSheet }: { isMobile?: boolean, clos
 
 function AdminLayoutContent({ children }: { children: ReactNode }) {
     const { t } = useLocalization();
-    const { userProfile, isLoading: isAuthLoading, firebaseUser } = useAuth();
+    const { data: session, status } = useSession();
+    const { userProfile } = useAuth();
     const logoutMutation = useLogout();
     const [isSheetOpen, setIsSheetOpen] = useState(false);
 
     useEffect(() => {
-        if (!isAuthLoading && userProfile?.role !== 'admin') {
+        if (status !== 'loading' && userProfile?.role !== 'admin') {
             notFound();
         }
-    }, [isAuthLoading, userProfile]);
+    }, [status, userProfile]);
 
-    if (isAuthLoading || !userProfile || userProfile.role !== 'admin') {
+    if (status === 'loading' || !userProfile || userProfile.role !== 'admin') {
         return <AdminLayoutSkeleton />;
     }
 
@@ -171,7 +173,7 @@ function AdminLayoutContent({ children }: { children: ReactNode }) {
                         <DropdownMenuContent align="end">
                             <DropdownMenuLabel>{userProfile.name}</DropdownMenuLabel>
                             <DropdownMenuSeparator />
-                            <DropdownMenuItem asChild><Link href={`/profile/${firebaseUser?.uid}`}>Profile</Link></DropdownMenuItem>
+                            <DropdownMenuItem asChild><Link href={`/profile/${session?.user?.id}`}>Profile</Link></DropdownMenuItem>
                             <DropdownMenuItem asChild><Link href="/builder">Go to Builder</Link></DropdownMenuItem>
                             <DropdownMenuSeparator />
                             <DropdownMenuItem onClick={() => logoutMutation.mutate()}>Logout</DropdownMenuItem>

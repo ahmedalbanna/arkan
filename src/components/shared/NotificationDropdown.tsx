@@ -49,6 +49,7 @@ export function NotificationDropdown() {
   const clearAllMutation = useClearNotifications();
 
   const unreadCount = notifications?.filter(n => !n.isRead).length ?? 0;
+  const hasNotifications = notifications && notifications.length > 0;
 
   function handleNotificationClick(notification: Notification) {
     if (!notification.isRead) {
@@ -70,46 +71,93 @@ export function NotificationDropdown() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size="icon" className="relative">
-          <Bell className="h-5 w-5" />
+        <Button 
+          variant="ghost" 
+          size="icon" 
+          className="relative transition-colors hover:bg-accent"
+          aria-label="Notifications"
+        >
+          <Bell className={`h-5 w-5 ${unreadCount > 0 ? 'animate-pulse text-primary' : ''}`} />
           {unreadCount > 0 && (
-            <Badge variant="destructive" className="absolute -top-1 -right-1 h-4 w-4 justify-center p-0">{unreadCount}</Badge>
+            <Badge 
+              variant="destructive" 
+              className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-xs font-bold shadow-lg"
+            >
+              {unreadCount > 9 ? '9+' : unreadCount}
+            </Badge>
           )}
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-80">
-        <DropdownMenuLabel className="flex justify-between items-center">
-          <span>{t('header.notifications')}</span>
-          {notifications && notifications.length > 0 && (
-            <Button variant="ghost" size="sm" onClick={handleClearAll} disabled={clearAllMutation.isPending}>
-              <Trash2 className="mr-1 h-3 w-3" />
-              {t('header.clearAll')}
-            </Button>
-          )}
-        </DropdownMenuLabel>
-        <DropdownMenuSeparator />
-        <ScrollArea className="h-auto max-h-80">
-          {notifications && notifications.length > 0 ? (
-            notifications.map(notification => (
-              <DropdownMenuItem key={notification.id} className="items-start" onSelect={(e) => { e.preventDefault(); handleNotificationClick(notification); }}>
-                <div className="flex items-start gap-3">
-                  <div className="relative">
-                    <NotificationIcon icon={notification.icon} />
-                    {!notification.isRead && (
-                      <span className="absolute top-0 right-0 block h-2 w-2 rounded-full bg-blue-500" />
-                    )}
-                  </div>
-                  <div>
-                    <p className="font-semibold">{notification.title}</p>
-                    <p className="text-xs text-muted-foreground">{notification.description}</p>
-                    <p className="text-xs text-muted-foreground/80 mt-1">{formatDistanceToNow(new Date(notification.createdAt), { addSuffix: true })}</p>
+      <DropdownMenuContent align="end" className="w-96">
+        {/* Header */}
+        <div className="flex justify-between items-center px-4 py-3">
+          <h2 className="font-semibold text-sm">{t('header.notifications')}</h2>
+          <div className="flex items-center gap-2">
+            {unreadCount > 0 && (
+              <Badge variant="secondary" className="text-xs">
+                {unreadCount} {unreadCount === 1 ? 'new' : 'new'}
+              </Badge>
+            )}
+            {hasNotifications && (
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                onClick={handleClearAll} 
+                disabled={clearAllMutation.isPending}
+                className="h-7 text-xs"
+              >
+                <Trash2 className="mr-1 h-3 w-3" />
+                Clear
+              </Button>
+            )}
+          </div>
+        </div>
+
+        <DropdownMenuSeparator className="my-0" />
+
+        {/* Notifications List */}
+        <ScrollArea className="h-auto max-h-96">
+          {hasNotifications ? (
+            <div className="divide-y">
+              {notifications.map(notification => (
+                <div
+                  key={notification.id}
+                  onClick={() => handleNotificationClick(notification)}
+                  className={`p-3 cursor-pointer transition-colors hover:bg-accent group ${
+                    !notification.isRead ? 'bg-primary/5' : ''
+                  }`}
+                >
+                  <div className="flex items-start gap-3">
+                    <div className="relative mt-1">
+                      <NotificationIcon icon={notification.icon} />
+                      {!notification.isRead && (
+                        <span className="absolute top-0 right-0 block h-2 w-2 rounded-full bg-blue-500 animate-pulse" />
+                      )}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-start justify-between gap-2">
+                        <p className="font-semibold text-sm leading-tight">{notification.title}</p>
+                        {!notification.isRead && (
+                          <div className="h-2 w-2 rounded-full bg-blue-500 flex-shrink-0 mt-1" />
+                        )}
+                      </div>
+                      <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
+                        {notification.description}
+                      </p>
+                      <p className="text-xs text-muted-foreground/70 mt-1.5">
+                        {formatDistanceToNow(new Date(notification.createdAt), { addSuffix: true })}
+                      </p>
+                    </div>
                   </div>
                 </div>
-              </DropdownMenuItem>
-            ))
+              ))}
+            </div>
           ) : (
-            <div className="p-4 text-center text-sm text-muted-foreground">
-              {t('header.noNotifications')}
+            <div className="flex flex-col items-center justify-center py-12 text-center">
+              <Bell className="h-8 w-8 text-muted-foreground/40 mb-2" />
+              <p className="text-sm text-muted-foreground">
+                {t('header.noNotifications')}
+              </p>
             </div>
           )}
         </ScrollArea>

@@ -2,8 +2,7 @@
 'use client';
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { useAuth } from '@/context/AuthContext';
-import { getAuthenticatedToken } from '@/lib/utils/authUtils';
+import { useSession } from 'next-auth/react';
 import { toast } from '@/hooks/util/use-toast';
 import {
     fetchPptxTemplatesApi,
@@ -26,11 +25,11 @@ export function usePptxStyles() {
 
 export function useUpdatePptxTemplate() {
     const queryClient = useQueryClient();
-    const { firebaseUser } = useAuth();
+    const { data: session } = useSession();
     return useMutation({
         mutationFn: async ({ key, styles }: { key: string, styles: Record<string, unknown> }) => {
-            const token = await getAuthenticatedToken(firebaseUser);
-            return updatePptxTemplateApi(key, { styles }, token);
+            if (!session?.user?.id) throw new Error("User not authenticated");
+            return updatePptxTemplateApi(key, { styles }, session.user.id);
         },
         onSuccess: (data, { key }) => {
             toast({ title: "Template Saved", description: `Style changes for "${key}" have been saved.` });
@@ -42,11 +41,11 @@ export function useUpdatePptxTemplate() {
 
 export function useDeletePptxTemplate() {
     const queryClient = useQueryClient();
-    const { firebaseUser } = useAuth();
+    const { data: session } = useSession();
     return useMutation({
         mutationFn: async (key: string) => {
-            const token = await getAuthenticatedToken(firebaseUser);
-            return deletePptxTemplateApi(key, token);
+            if (!session?.user?.id) throw new Error("User not authenticated");
+            return deletePptxTemplateApi(key, session.user.id);
         },
         onSuccess: (data, key) => {
             toast({ title: 'Template Deleted', description: `Template "${key}" has been deleted.` });
@@ -58,11 +57,11 @@ export function useDeletePptxTemplate() {
 
 export function useCreatePptxTemplate() {
     const queryClient = useQueryClient();
-    const { firebaseUser } = useAuth();
+    const { data: session } = useSession();
     return useMutation({
-        mutationFn: async (data: { id: string; name: string; description: string }) => {
-            const token = await getAuthenticatedToken(firebaseUser);
-            return createPptxTemplateApi(data, token);
+        mutationFn: async (data: { id: string, name: string, description: string }) => {
+            if (!session?.user?.id) throw new Error("User not authenticated");
+            return createPptxTemplateApi(data, session.user.id);
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['pptx-styles'] });
@@ -72,11 +71,11 @@ export function useCreatePptxTemplate() {
 
 export function useRefreshPptxTemplateImage() {
     const queryClient = useQueryClient();
-    const { firebaseUser } = useAuth();
+    const { data: session } = useSession();
     return useMutation({
         mutationFn: async (variables: { templateId: string, prompt: string }) => {
-            const token = await getAuthenticatedToken(firebaseUser);
-            return refreshTemplateImage({ ...variables, templateType: 'pptx' }, token);
+            if (!session?.user?.id) throw new Error("User not authenticated");
+            return refreshTemplateImage({ ...variables, templateType: 'pptx' }, session.user.id);
         },
         onSuccess: () => {
             toast({ title: 'Image Refreshing', description: 'The new template preview is being generated.' });

@@ -4,17 +4,17 @@
 import { useQuery } from '@tanstack/react-query';
 import { adminKeys } from '@/lib/query-keys';
 import { fetchDashboardStats } from '@/services/api/adminService';
-import { useAuth } from '@/context/AuthContext';
+import { useAuth } from '@/context/NextAuthContext';
 
 export function useAdminDashboard() {
-    const { firebaseUser } = useAuth();
+    const { data: session } = useSession();
     return useQuery({
         queryKey: adminKeys.dashboardStats(),
         queryFn: async () => {
-            if (!firebaseUser) throw new Error("User not authenticated");
-            const token = await firebaseUser.getIdToken();
+            if (!session?.user?.id) throw new Error("User not authenticated");
+            const token = session.user.id;
             return fetchDashboardStats(token);
         },
-        enabled: !!firebaseUser,
+        enabled: !!session?.user?.id,
     });
 }

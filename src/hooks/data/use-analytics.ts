@@ -4,17 +4,17 @@
 import { useQuery } from '@tanstack/react-query';
 import { analyticsKeys } from '@/lib/query-keys';
 import { fetchUserStats } from '@/services/api/analyticsService';
-import { useAuth } from '@/context/AuthContext';
+import { useSession } from "next-auth/react";
 
 export function useUserStats() {
-    const { firebaseUser } = useAuth();
+    const { data: session } = useSession();
     return useQuery({
-        queryKey: analyticsKeys.userStats(firebaseUser?.uid ?? ''),
+        queryKey: analyticsKeys.userStats(session?.user?.id ?? ''),
         queryFn: async () => {
-            if (!firebaseUser) throw new Error("User not authenticated");
-            const token = await firebaseUser.getIdToken();
+            if (!session?.user?.id) throw new Error("User not authenticated");
+            const token = session.user.id;
             return fetchUserStats(token);
         },
-        enabled: !!firebaseUser,
+        enabled: !!session?.user?.id,
     });
 }

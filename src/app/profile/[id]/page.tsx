@@ -8,10 +8,11 @@ import { Badge } from '@/components/ui/badge';
 import { Mail, Gem, Calendar, Pencil } from 'lucide-react';
 import { format } from 'date-fns';
 import { useLocalization } from '@/context/LocalizationContext';
+import { useAuth } from '@/context/NextAuthContext';
 import { useUserProfile } from '@/hooks';
 import { Skeleton } from '@/components/ui/skeleton';
 import { use, _Suspense, _lazy } from 'react';
-import { useAuth } from '@/context/AuthContext';
+import { useSession } from "next-auth/react";
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 

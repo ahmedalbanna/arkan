@@ -2,8 +2,7 @@
 'use client';
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { useAuth } from '@/context/AuthContext';
-import { getAuthenticatedToken } from '@/lib/utils/authUtils';
+import { useSession } from 'next-auth/react';
 import { toast } from '@/hooks/util/use-toast';
 import {
     fetchDocxTemplatesApi,
@@ -25,11 +24,11 @@ export function useDocxStyles() {
 
 export function useUpdateDocxTemplate() {
     const queryClient = useQueryClient();
-    const { firebaseUser } = useAuth();
+    const { data: session } = useSession();
     return useMutation({
         mutationFn: async ({ key, styles }: { key: string, styles: Record<string, unknown> }) => {
-            const token = await getAuthenticatedToken(firebaseUser);
-            return updateDocxTemplateApi(key, { styles }, token);
+            if (!session?.user?.id) throw new Error("User not authenticated");
+            return updateDocxTemplateApi(key, { styles }, session.user.id);
         },
         onSuccess: (data, { key }) => {
             toast({ title: "Template Saved", description: `Style changes for "${key}" have been saved.` });
@@ -41,11 +40,11 @@ export function useUpdateDocxTemplate() {
 
 export function useDeleteDocxTemplate() {
     const queryClient = useQueryClient();
-    const { firebaseUser } = useAuth();
+    const { data: session } = useSession();
     return useMutation({
         mutationFn: async (key: string) => {
-            const token = await getAuthenticatedToken(firebaseUser);
-            return deleteDocxTemplateApi(key, token);
+            if (!session?.user?.id) throw new Error("User not authenticated");
+            return deleteDocxTemplateApi(key, session.user.id);
         },
         onSuccess: (data, key) => {
             toast({ title: 'Template Deleted', description: `Template "${key}" has been deleted.` });
@@ -57,11 +56,11 @@ export function useDeleteDocxTemplate() {
 
 export function useCreateDocxTemplate() {
     const queryClient = useQueryClient();
-    const { firebaseUser } = useAuth();
+    const { data: session } = useSession();
     return useMutation({
         mutationFn: async (data: { id: string, name: string, description: string }) => {
-            const token = await getAuthenticatedToken(firebaseUser);
-            return createDocxTemplateApi(data, token);
+            if (!session?.user?.id) throw new Error("User not authenticated");
+            return createDocxTemplateApi(data, session.user.id);
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['docx-styles'] });
@@ -71,11 +70,11 @@ export function useCreateDocxTemplate() {
 
 export function useRefreshDocxTemplateImage() {
     const queryClient = useQueryClient();
-    const { firebaseUser } = useAuth();
+    const { data: session } = useSession();
     return useMutation({
         mutationFn: async (variables: { templateId: string, prompt: string }) => {
-            const token = await getAuthenticatedToken(firebaseUser);
-            return refreshTemplateImage({ ...variables, templateType: 'docx' }, token);
+            if (!session?.user?.id) throw new Error("User not authenticated");
+            return refreshTemplateImage({ ...variables, templateType: 'docx' }, session.user.id);
         },
         onSuccess: () => {
             toast({ title: 'Image Refreshing', description: 'The new template preview is being generated.' });

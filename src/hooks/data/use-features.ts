@@ -5,7 +5,7 @@ import { useQuery } from '@tanstack/react-query';
 import { fetchFeaturesApi, updateFeatureApi } from '@/services/api/featureService';
 import type { Feature } from '@/lib/types';
 import { toast } from '@/hooks/util/use-toast';
-import { useAuth } from '@/context/AuthContext';
+import { useSession } from "next-auth/react";
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { featureKeys } from '@/lib/query-keys';
 import type { UpdateFeatureVariables } from '@/lib/types';
@@ -23,12 +23,12 @@ export function useFeatures() {
 
 export function useUpdateFeature() {
     const queryClient = useQueryClient();
-    const { firebaseUser } = useAuth();
+    const { data: session } = useSession();
 
     return useMutation({
         mutationFn: async (variables: UpdateFeatureVariables) => {
-            if (!firebaseUser) throw new Error("User not authenticated");
-            const token = await firebaseUser.getIdToken();
+            if (!session?.user?.id) throw new Error("User not authenticated");
+            const token = session.user.id;
             return updateFeatureApi(variables, token);
         },
         // Optimistic update

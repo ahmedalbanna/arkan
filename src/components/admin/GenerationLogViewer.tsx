@@ -10,7 +10,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
-import { useAuth } from '@/context/AuthContext';
+import { useSession } from 'next-auth/react';
+import { useAuth } from '@/context/NextAuthContext';
 import { formatDistanceToNow } from 'date-fns';
 import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
@@ -98,7 +99,7 @@ export default function GenerationLogViewer() {
     const debouncedUserId = useDebounce(userIdFilter, 500);
     const { t } = useLocalization();
 
-    const { firebaseUser, isLoading: authLoading } = useAuth();
+    const { data: session, status: sessionStatus } = useSession();
 
     const {
       data,
@@ -111,13 +112,13 @@ export default function GenerationLogViewer() {
     } = useInfiniteQuery({
         queryKey: generationLogKeys.list({ agentId: debouncedAgentId, userId: debouncedUserId }),
         queryFn: async ({ pageParam }) => {
-            if (!firebaseUser) throw new Error("User not authenticated");
-            const token = await firebaseUser.getIdToken();
+            if (!session?.user?.id) throw new Error("User not authenticated");
+            const token = session.user.id;
             return fetchGenerationLogs({ token, limit: LOGS_PER_PAGE, agentId: debouncedAgentId, userId: debouncedUserId, lastVisibleId: pageParam });
         },
         initialPageParam: undefined as string | undefined,
         getNextPageParam: (lastPage) => lastPage.hasNextPage ? lastPage.lastVisibleId : undefined,
-        enabled: !!firebaseUser,
+        enabled: !!session?.user?.id,
         staleTime: 1000 * 60, // 1 minute
     });
 

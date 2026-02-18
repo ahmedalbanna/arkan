@@ -1,12 +1,13 @@
 
 'use client';
 
-import { useAuth } from '@/context/AuthContext';
+import { useSession } from 'next-auth/react';
 import { notFound } from 'next/navigation';
 import { Card, CardContent, CardHeader, CardTitle as _CardTitle, CardDescription as _CardDescription } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useLocalization } from '@/context/LocalizationContext';
+import { useAuth } from '@/context/NextAuthContext';
 import { UpdateProfileForm } from './UpdateProfileForm';
 import { ChangePasswordForm } from './ChangePasswordForm';
 import { ApiTokenView } from './ApiTokenView';
@@ -38,9 +39,10 @@ function ProfileSkeleton() {
 
 export default function ProfilePage() {
     const { t: _t } = useLocalization();
-    const { userProfile, firebaseUser, isLoading } = useAuth();
+    const { data: session, status } = useSession();
+    const { userProfile } = useAuth();
 
-    if (isLoading) {
+    if (status === 'loading') {
         return (
             <div className="container mx-auto max-w-2xl px-4 py-12">
                 <ProfileSkeleton />
@@ -48,7 +50,7 @@ export default function ProfilePage() {
         );
     }
 
-    if (!userProfile || !firebaseUser) {
+    if (!userProfile || !session?.user) {
         notFound();
     }
 

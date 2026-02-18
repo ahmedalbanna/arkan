@@ -7,32 +7,31 @@ import { sectionKeys } from '@/lib/query-keys';
 import { fetchSections as fetchSectionsApi, createSection as createSectionApi, updateSection as updateSectionApi, deleteSection as deleteSectionApi } from '@/services/api/sectionService';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from '@/hooks/util/use-toast';
-import { useAuth } from '@/context/AuthContext';
-import { getAuthenticatedToken } from '@/lib/utils/authUtils';
+import { useSession } from 'next-auth/react';
 import { Section, type SectionProperties } from '@/lib/models';
 
 export function useSections() {
-  const { firebaseUser } = useAuth();
+  const { data: session } = useSession();
   return useQuery({
     queryKey: sectionKeys.lists(),
     queryFn: async () => {
-      if (!firebaseUser) throw new Error("User not authenticated");
-      const token = await firebaseUser.getIdToken();
+      if (!session?.user?.id) throw new Error("User not authenticated");
+      const token = session.user.id;
       const sectionsData = await fetchSectionsApi(token);
       // Instantiate Section objects
       return sectionsData.map(s => new Section(s));
     },
-    enabled: !!firebaseUser,
+    enabled: !!session?.user?.id,
   });
 }
 
 export function useCreateSection() {
     const queryClient = useQueryClient();
-    const { firebaseUser } = useAuth();
+    const { data: session } = useSession();
     return useMutation({
         mutationFn: async (data: Omit<SectionProperties, 'id'> & { id: string }) => {
-            const token = await getAuthenticatedToken(firebaseUser);
-            return createSectionApi(data, token);
+            if (!session?.user?.id) throw new Error("User not authenticated");
+            return createSectionApi(data, session.user.id);
         },
         onSuccess: () => {
             toast({ title: 'Section Created', description: 'The new section has been successfully added.' });
@@ -46,11 +45,11 @@ export function useCreateSection() {
 
 export function useUpdateSection() {
     const queryClient = useQueryClient();
-    const { firebaseUser } = useAuth();
+    const { data: session } = useSession();
     return useMutation({
         mutationFn: async ({ sectionId, data }: { sectionId: string, data: Partial<SectionProperties>}) => {
-            const token = await getAuthenticatedToken(firebaseUser);
-            return updateSectionApi(sectionId, data, token);
+            if (!session?.user?.id) throw new Error("User not authenticated");
+            return updateSectionApi(sectionId, data, session.user.id);
         },
         onSuccess: (data) => {
             toast({ title: 'Section Updated', description: `Section "${data.title}" has been updated.` });
@@ -68,11 +67,11 @@ export function useUpdateSection() {
 
 export function useDeleteSection() {
     const queryClient = useQueryClient();
-    const { firebaseUser } = useAuth();
+    const { data: session } = useSession();
     return useMutation({
         mutationFn: async (sectionId: string) => {
-            const token = await getAuthenticatedToken(firebaseUser);
-            return deleteSectionApi(sectionId, token);
+            if (!session?.user?.id) throw new Error("User not authenticated");
+            return deleteSectionApi(sectionId, session.user.id);
         },
         onSuccess: () => {
             toast({ title: 'Section Deleted', description: 'The section has been removed.' });

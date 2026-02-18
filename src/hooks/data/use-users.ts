@@ -2,6 +2,7 @@
 'use client';
 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useSession } from 'next-auth/react';
 import {
   createUserService,
   deleteUserApi,
@@ -12,9 +13,7 @@ import {
 import { User, type UserProfile } from '@/lib/models';
 import { userKeys } from '@/lib/query-keys';
 import { handleErrorUtility } from '@/lib/utils/errorUtils';
-import { useAuth } from '@/context/AuthContext';
 import { toast } from '@/hooks';
-import { getAuthenticatedToken } from '@/lib/utils/authUtils';
 
 
 // ============================================================================
@@ -27,18 +26,17 @@ import { getAuthenticatedToken } from '@/lib/utils/authUtils';
  * @param userId - The ID of the user to fetch.
  */
 export function useUserProfile(userId: string) {
-  const { firebaseUser } = useAuth();
+  const { data: session } = useSession();
 
   return useQuery({
     queryKey: userKeys.profile(userId),
     queryFn: async () => {
-      if (!firebaseUser) return null;
-      const token = await getAuthenticatedToken(firebaseUser);
-      const userProfile = await fetchUserProfileApi(userId, token);
+      if (!session?.user?.id) return null;
+      const userProfile = await fetchUserProfileApi(userId, session.user.id);
       // Instantiate the User class to include methods
       return userProfile ? new User(userProfile) : null;
     },
-    enabled: !!firebaseUser && !!userId,
+    enabled: !!session?.user?.id && !!userId,
   });
 }
 
@@ -53,11 +51,11 @@ export function useUserProfile(userId: string) {
  */
 export function useCreateUser(options?: { onSuccess?: (data: unknown) => void }) {
   const queryClient = useQueryClient();
-  const { firebaseUser } = useAuth();
+  const { data: session } = useSession();
   return useMutation({
     mutationFn: async (data: Record<string, unknown>) => {
-      const token = await getAuthenticatedToken(firebaseUser);
-      return createUserService(data, token);
+      if (!session?.user?.id) throw new Error("User not authenticated");
+      return createUserService(data, session.user.id);
     },
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: userKeys.lists() });
@@ -73,11 +71,11 @@ export function useCreateUser(options?: { onSuccess?: (data: unknown) => void })
  */
 export function useUpdateUser() {
   const queryClient = useQueryClient();
-  const { firebaseUser } = useAuth();
+  const { data: session } = useSession();
   return useMutation({
     mutationFn: async (variables: { userId: string; data: Partial<UserProfile> }) => {
-      const token = await getAuthenticatedToken(firebaseUser);
-      return updateUserApi(variables.userId, variables.data, token);
+      if (!session?.user?.id) throw new Error("User not authenticated");
+      return updateUserApi(variables.userId, variables.data, session.user.id);
     },
     onSuccess: (data) => {
       toast({ title: 'Success', description: 'User profile has been successfully updated.' });
@@ -95,11 +93,11 @@ export function useUpdateUser() {
  */
 export function useDeleteUser() {
   const queryClient = useQueryClient();
-  const { firebaseUser } = useAuth();
+  const { data: session } = useSession();
   return useMutation({
     mutationFn: async (userId: string) => {
-      const token = await getAuthenticatedToken(firebaseUser);
-      return deleteUserApi(userId, token);
+      if (!session?.user?.id) throw new Error("User not authenticated");
+      return deleteUserApi(userId, session.user.id);
     },
     onSuccess: (data, userId) => {
       toast({ title: "User Deleted", description: `User with ID ${userId} has been removed.` });
@@ -114,7 +112,7 @@ export function useDeleteUser() {
  * Requires admin privileges.
  */
 export function useSendNotification() {
-  const { firebaseUser } = useAuth();
+  const { data: session } = useSession();
   return useMutation({
     mutationFn: async (variables: {
       userId: string;
@@ -122,8 +120,8 @@ export function useSendNotification() {
       body: string;
       link?: string;
     }) => {
-      const token = await getAuthenticatedToken(firebaseUser);
-      return sendNotificationApi(variables, token);
+      if (!session?.user?.id) throw new Error("User not authenticated");
+      return sendNotificationApi(variables, session.user.id);
     },
     onSuccess: () => {
       toast({ title: 'Notification Sent', description: 'The user has been notified of the changes.' });

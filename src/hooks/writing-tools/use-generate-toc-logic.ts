@@ -9,7 +9,7 @@ import { GenerateTocOutputSchema } from '@/ai/schemas';
 import type { TocSection } from '@/lib/models';
 import { useMutation } from '@tanstack/react-query';
 import { useMemo } from 'react';
-import { useAuth } from '@/context/AuthContext';
+import { useSession } from "next-auth/react";
 import { writingToolApi } from '@/services/api/writingToolsService';
 
 // Updated schema to include the optional additional instructions
@@ -28,12 +28,12 @@ const formatTocToMarkdown = (toc: TocSection[]): string => {
 
 export function useGenerateTocLogic() {
   const { toast } = useToast();
-  const { firebaseUser } = useAuth();
+  const { data: session } = useSession();
 
   const mutation = useMutation({
     mutationFn: async (data: FormValues): Promise<z.infer<typeof GenerateTocOutputSchema>> => {
-      if (!firebaseUser) throw new Error('User not authenticated');
-      const token = await firebaseUser.getIdToken();
+      if (!session?.user?.id) throw new Error('User not authenticated');
+      const token = session.user.id;
       
       return writingToolApi<any, z.infer<typeof GenerateTocOutputSchema>>(
         '/api/writing-tools/generate-toc',

@@ -2,20 +2,20 @@
 'use client';
 
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { useAuth } from '@/context/AuthContext';
+import { useSession } from "next-auth/react";
 import { submitPaymentProof } from '@/services/api/transactionService';
 import { useToast } from '@/hooks';
 import { transactionKeys } from '@/lib/query-keys';
 
 export function useSubmitPaymentProof() {
-    const { firebaseUser } = useAuth();
+    const { data: session } = useSession();
     const queryClient = useQueryClient();
     const { toast } = useToast();
 
     return useMutation({
         mutationFn: async (formData: FormData) => {
-            if (!firebaseUser) throw new Error("User not authenticated");
-            const token = await firebaseUser.getIdToken();
+            if (!session?.user?.id) throw new Error("User not authenticated");
+            const token = session.user.id;
             return submitPaymentProof({ formData, token });
         },
         onSuccess: () => {

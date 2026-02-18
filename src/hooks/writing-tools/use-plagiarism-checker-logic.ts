@@ -7,10 +7,11 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useWritingTool, useToast } from '@/hooks';
 import { useDropzone } from 'react-dropzone';
-import { useAuth } from '@/context/AuthContext';
+import { useSession } from "next-auth/react";
 import { processFileApi } from '@/services';
 import type { PlagiarismCheckOutput } from '@/ai/schemas';
 import { useLocalization } from '@/context/LocalizationContext';
+import { useAuth } from '@/context/NextAuthContext';
 
 const plagiarismSchema = z.object({
   text: z.string().min(50, 'Please enter at least 50 characters for an accurate analysis.'),
@@ -21,7 +22,7 @@ type PlagiarismFormValues = z.infer<typeof plagiarismSchema>;
 export function usePlagiarismCheckerLogic() {
   const { t } = useLocalization();
   const [isUploading, setIsUploading] = useState(false);
-  const { firebaseUser, refetchUser } = useAuth();
+  const { data: session } = useSession(); const { refetchUser } = useAuth();
   const { toast } = useToast();
 
   const mutation = useWritingTool('/api/writing-tools/plagiarism-checker', {
@@ -39,7 +40,7 @@ export function usePlagiarismCheckerLogic() {
     const file = acceptedFiles[0];
     if (!file) return;
 
-    if (!firebaseUser) {
+    if (!session?.user?.id) {
       toast({ title: t('writingTools.aiDetector.toastAuthError'), variant: "destructive" });
       return;
     }
@@ -49,7 +50,7 @@ export function usePlagiarismCheckerLogic() {
     formData.append('file', file);
 
     try {
-      const token = await firebaseUser.getIdToken();
+      const token = session.user.id;
       const result = await processFileApi(formData, token);
       form.setValue('text', result.markdown, { shouldValidate: true });
       toast({ title: t('writingTools.aiDetector.toastFileProcessed'), description: t('writingTools.aiDetector.toastFileExtracted', { fileName: file.name }) });
@@ -59,7 +60,7 @@ export function usePlagiarismCheckerLogic() {
     } finally {
       setIsUploading(false);
     }
-  }, [firebaseUser, form, refetchUser, toast, t]);
+  }, [session?.user?.id, form, refetchUser, toast, t]);
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,

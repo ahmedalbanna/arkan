@@ -1,14 +1,15 @@
 
 'use client';
 
-import { useAuth } from '@/context/AuthContext';
+import { useSession } from 'next-auth/react';
+import { useAuth } from '@/context/NextAuthContext';
 import { useBuilderStore, useInitializeBuilderStore } from '@/hooks';
 import { userKeys } from '@/lib/query-keys';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useCallback, useEffect, useState } from 'react';
 
 export function useBuilderPageLogic() {
-  const { userProfile, firebaseUser, refetchUser } = useAuth();
+  const { data: session } = useSession(); const { userProfile, refetchUser } = useAuth();
   const { project, updateProject, isStoreInitialized } = useBuilderStore();
   const [showOnboarding, setShowOnboarding] = useState(false);
   const queryClient = useQueryClient();
@@ -25,9 +26,9 @@ export function useBuilderPageLogic() {
 
   const onboardingMutation = useMutation({
     mutationFn: async () => {
-      if (!firebaseUser) throw new Error('User not authenticated');
-      const token = await firebaseUser.getIdToken();
-      const response = await fetch(`/api/users/${firebaseUser.uid}`, {
+      if (!session?.user?.id) throw new Error('User not authenticated');
+      const token = session.user.id;
+      const response = await fetch(`/api/users/${session.user.id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
         body: JSON.stringify({ hasCompletedOnboarding: true })
@@ -37,8 +38,8 @@ export function useBuilderPageLogic() {
     },
     onSuccess: () => {
       // Refetch user data to get the updated onboarding status
-      if (firebaseUser?.uid) {
-        queryClient.invalidateQueries({ queryKey: userKeys.profile(firebaseUser.uid) });
+      if (session?.user?.id) {
+        queryClient.invalidateQueries({ queryKey: userKeys.profile(session?.user?.id || "") });
       }
       refetchUser();
     },

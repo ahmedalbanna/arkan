@@ -9,7 +9,7 @@ import { Send, Loader2, ServerCrash } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { type ApiEndpoint } from '@/config/api-docs';
 import dynamic from 'next/dynamic';
-import { useAuth } from '@/context/AuthContext';
+import { useAuth } from '@/context/NextAuthContext';
 import { useToast } from '@/hooks';
 
 const ReactJson = dynamic(() => import('@microlink/react-json-view'), { ssr: false });
@@ -19,7 +19,7 @@ interface ApiTesterProps {
 }
 
 export function ApiTester({ endpoint }: ApiTesterProps) {
-  const { firebaseUser } = useAuth();
+  const { data: session } = useSession();
   const { toast } = useToast();
   const { resolvedTheme } = useTheme();
   const [body, setBody] = useState(
@@ -37,7 +37,7 @@ export function ApiTester({ endpoint }: ApiTesterProps) {
     try {
       let token: string | undefined;
       if (endpoint.auth !== 'public' && firebaseUser) {
-        token = await firebaseUser.getIdToken();
+        token = session?.user?.id;
       } else if (endpoint.auth !== 'public') {
         throw new Error('Authentication required for this endpoint.');
       }

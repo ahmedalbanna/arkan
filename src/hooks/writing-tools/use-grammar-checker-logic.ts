@@ -8,9 +8,10 @@ import { z } from 'zod';
 import { useWritingTool, useToast } from '@/hooks';
 import type { GrammarCheckOutput } from '@/ai/schemas';
 import { useDropzone } from 'react-dropzone';
-import { useAuth } from '@/context/AuthContext';
+import { useSession } from "next-auth/react";
 import { processFileApi } from '@/services';
 import { useLocalization } from '@/context/LocalizationContext';
+import { useAuth } from '@/context/NextAuthContext';
 
 const grammarCheckSchema = z.object({
   text: z.string().min(10, 'Please enter at least 10 characters to check.'),
@@ -22,7 +23,7 @@ export function useGrammarCheckerLogic() {
   const { t } = useLocalization();
   const [isUploading, setIsUploading] = useState(false);
   const [isCopied, setIsCopied] = useState(false);
-  const { firebaseUser, refetchUser } = useAuth();
+  const { data: session } = useSession(); const { refetchUser } = useAuth();
   const { toast } = useToast();
 
   const mutation = useWritingTool('/api/writing-tools/grammar-checker');
@@ -36,7 +37,7 @@ export function useGrammarCheckerLogic() {
     const file = acceptedFiles[0];
     if (!file) return;
 
-    if (!firebaseUser) {
+    if (!session?.user?.id) {
       toast({ title: t('writingTools.grammarChecker.authErrorTitle'), variant: "destructive" });
       return;
     }
@@ -46,7 +47,7 @@ export function useGrammarCheckerLogic() {
     formData.append('file', file);
 
     try {
-      const token = await firebaseUser.getIdToken();
+      const token = session.user.id;
       const result = await processFileApi(formData, token);
       form.setValue('text', result.markdown, { shouldValidate: true });
       toast({ title: t('writingTools.grammarChecker.fileProcessed'), description: `Text extracted from ${file.name}.` });
@@ -56,7 +57,7 @@ export function useGrammarCheckerLogic() {
     } finally {
       setIsUploading(false);
     }
-  }, [firebaseUser, form, refetchUser, toast, t]);
+  }, [session?.user?.id, form, refetchUser, toast, t]);
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,

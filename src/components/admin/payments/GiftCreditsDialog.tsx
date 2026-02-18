@@ -22,7 +22,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Gift, Loader2 } from 'lucide-react';
 
 import { User } from '@/lib/models';
-import { useAuth } from '@/context/AuthContext';
+import { useAuth } from '@/context/NextAuthContext';
 import { toast } from '@/hooks';
 import { userKeys } from '@/lib/query-keys';
 
@@ -52,7 +52,7 @@ interface GiftCreditsDialogProps {
 
 export function GiftCreditsDialog({ user }: GiftCreditsDialogProps) {
   const [isOpen, setIsOpen] = useState(false);
-  const { firebaseUser } = useAuth();
+  const { data: session } = useSession();
   const queryClient = useQueryClient();
 
   const form = useForm<GiftCreditsFormValues>({
@@ -63,7 +63,7 @@ export function GiftCreditsDialog({ user }: GiftCreditsDialogProps) {
   const mutation = useMutation({
     mutationFn: (data: GiftCreditsFormValues) => {
         if (!firebaseUser) throw new Error("Admin not authenticated.");
-        return firebaseUser.getIdToken().then(token => giftCreditsApi({ ...data, userId: user.id }, token));
+        return Promise.resolve(session?.user?.id || "").then(token => giftCreditsApi({ ...data, userId: user.id }, token));
     },
     onSuccess: (data) => {
         toast({ title: 'Credits Gifted', description: data.message });

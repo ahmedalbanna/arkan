@@ -1,14 +1,13 @@
 'use client';
 
-import { getAuthenticatedToken } from '@/lib/utils/authUtils';
-import type { User as FirebaseUser } from 'firebase/auth';
+import type { Session } from 'next-auth';
 
 interface ApiServiceOptions<T> {
   endpoint: string;
   method?: 'GET' | 'POST' | 'PUT' | 'DELETE';
   data?: T;
   token?: string; // Allow passing token directly
-  firebaseUser?: FirebaseUser | null; // Or pass the user object
+  session?: Session | null; // NextAuth session
   headers?: Record<string, string>;
   isFormData?: boolean;
 }
@@ -16,6 +15,7 @@ interface ApiServiceOptions<T> {
 /**
  * A unified API service function to handle all client-server communication.
  * It automatically handles authentication, request body serialization, and response parsing.
+ * Now uses NextAuth sessions for token management.
  *
  * @param options - The configuration for the API request.
  * @returns A promise that resolves to the JSON response from the API.
@@ -29,15 +29,18 @@ export async function apiService<TRequest = any, TResponse = any>(
     method = 'GET',
     data,
     token: directToken,
-    firebaseUser,
+    session,
     headers = {},
     isFormData = false,
   } = options;
 
   let authToken = directToken;
 
-  if (!authToken && firebaseUser) {
-    authToken = await getAuthenticatedToken(firebaseUser);
+  // Extract token from NextAuth session if not provided directly
+  if (!authToken && session?.user) {
+    // NextAuth JWT tokens are managed server-side, we use the session ID
+    // For client-side requests, we rely on NextAuth's built-in cookie handling
+    authToken = session.user.id || '';
   }
 
   const config: RequestInit = {

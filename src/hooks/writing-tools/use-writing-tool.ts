@@ -1,7 +1,8 @@
 
 'use client';
 
-import { useAuth } from '@/context/AuthContext';
+import { useSession } from 'next-auth/react';
+import { useAuth } from '@/context/NextAuthContext';
 import { toast } from '@/hooks';
 import { apiService } from '@/services/api/apiService'; // Use the new apiService
 import { useMutation, type UseMutationOptions } from '@tanstack/react-query';
@@ -18,7 +19,8 @@ export function useWritingTool<TData = unknown, TVariables = unknown>(
   endpoint: string,
   options?: Omit<UseMutationOptions<TData, Error, TVariables>, 'mutationFn'>
 ) {
-  const { firebaseUser, refetchUser } = useAuth();
+  const { data: session } = useSession();
+  const { refetchUser } = useAuth();
   const toolName = endpoint.split('/').pop() || '';
 
   return useMutation<TData, Error, TVariables>({
@@ -28,7 +30,7 @@ export function useWritingTool<TData = unknown, TVariables = unknown>(
         endpoint, // The full endpoint is passed in now
         method: 'POST',
         data: { ...data, flow: toolName }, // Still useful to send flow name for logging
-        firebaseUser,
+        session,
       });
     },
     onSuccess: (data, variables, context) => {

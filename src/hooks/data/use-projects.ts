@@ -7,20 +7,20 @@ import { Project } from '@/lib/models';
 import { projectKeys } from '@/lib/query-keys';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useBuilderStore } from '../core/useBuilderStore';
-import { useAuth } from '@/context/AuthContext';
-import { getAuthenticatedToken } from '@/lib/utils/authUtils';
+import { useAuth } from '@/context/NextAuthContext';
+import { useSession } from "next-auth/react";
 import { fetchProjectsApi, saveProjectApi, deleteProjectApi } from '@/services/api/projectService';
 import { localProjectService } from '@/services/local-project-service';
 
 export function useProjects() {
-    const { firebaseUser } = useAuth();
+    const { data: session } = useSession();
     const { data, ...rest } = useQuery<Project[]>({
         queryKey: projectKeys.lists(),
         queryFn: async () => {
-            if (!firebaseUser) return [];
+            if (!session?.user?.id) return [];
             // Then, fetch from server and merge
             try {
-                const token = await getAuthenticatedToken(firebaseUser);
+                const token = session.user.id;
                 const serverProjects = await fetchProjectsApi(token);
                 
                 const mergedProjects = serverProjects.map(p => new Project(p));
@@ -37,7 +37,7 @@ export function useProjects() {
                 return localProjects.map(p => new Project(p));
             }
         },
-        enabled: !!firebaseUser,
+        enabled: !!session?.user?.id,
     });
 
     return { projects: data, ...rest };
@@ -46,15 +46,15 @@ export function useProjects() {
 export function useSaveProject() {
     const queryClient = useQueryClient();
     const { setHasUnsavedChanges } = useBuilderStore();
-    const { firebaseUser } = useAuth();
+    const { data: session } = useSession();
 
     const saveProjectMutation = useMutation({
         mutationFn: async (projectData: ProjectProperties) => {
-            if (!navigator.onLine || !firebaseUser) {
+            if (!navigator.onLine || !session?.user?.id) {
                 toast({ title: 'Offline', description: 'You are offline. Please connect to the internet to save the project.', variant: 'destructive' });
                 throw new Error("User is offline.");
             }
-            const token = await getAuthenticatedToken(firebaseUser);
+            const token = session.user.id;
             return saveProjectApi(projectData, token);
         },
         onSuccess: (savedProject) => {
@@ -76,15 +76,15 @@ export function useSaveProject() {
 
 export function useDeleteProject() {
     const queryClient = useQueryClient();
-    const { firebaseUser } = useAuth();
+    const { data: session } = useSession();
 
     return useMutation({
         mutationFn: async (projectId: string) => {
             // Delete from local and server simultaneously
             const localDelete = localProjectService.deleteProject(projectId);
             let serverDelete: Promise<unknown> | null = null;
-            if (navigator.onLine && firebaseUser) {
-                const token = await getAuthenticatedToken(firebaseUser);
+            if (navigator.onLine && session?.user?.id) {
+                const token = session.user.id;
                 serverDelete = deleteProjectApi(projectId, token);
             }
             await Promise.all([localDelete, serverDelete]);

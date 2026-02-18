@@ -6,10 +6,11 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useWritingTool, useToast } from '@/hooks';
-import { useAuth } from '@/context/AuthContext';
+import { useSession } from "next-auth/react";
 import { processFileApi } from '@/services';
 import { useDropzone } from 'react-dropzone';
 import { useLocalization } from '@/context/LocalizationContext';
+import { useAuth } from '@/context/NextAuthContext';
 
 const summarizerSchema = z.object({
   text: z.string().min(20, 'Please enter at least 20 characters to summarize.'),
@@ -22,7 +23,7 @@ export function useSummarizerLogic() {
   const { t } = useLocalization();
   const [summarizedText, setSummarizedText] = useState('');
   const [isCopied, setIsCopied] = useState(false);
-  const { firebaseUser, refetchUser } = useAuth();
+  const { data: session } = useSession(); const { refetchUser } = useAuth();
   const [isUploading, setIsUploading] = useState(false);
   const { toast } = useToast();
 
@@ -45,7 +46,7 @@ export function useSummarizerLogic() {
     const file = acceptedFiles[0];
     if (!file) return;
 
-    if (!firebaseUser) {
+    if (!session?.user?.id) {
       toast({ title: "Authentication Error", description: "You must be logged in to process files.", variant: "destructive" });
       return;
     }
@@ -55,7 +56,7 @@ export function useSummarizerLogic() {
     formData.append('file', file);
 
     try {
-      const token = await firebaseUser.getIdToken();
+      const token = session.user.id;
       const result = await processFileApi(formData, token);
       form.setValue('text', result.markdown, { shouldValidate: true });
       toast({ title: t('writingTools.summarizer.processingFile'), description: `Text extracted from ${file.name}.` });
@@ -65,7 +66,7 @@ export function useSummarizerLogic() {
     } finally {
       setIsUploading(false);
     }
-  }, [firebaseUser, form, refetchUser, toast, t]);
+  }, [session?.user?.id, form, refetchUser, toast, t]);
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,

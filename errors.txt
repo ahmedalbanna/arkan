@@ -1,35 +1,19 @@
 ## Error Type
-Build Error
+Runtime ReferenceError
 
 ## Error Message
-Export useClearAllNotifications doesn't exist in target module
+useAuth is not defined
 
-## Build Output
-./src/components/shared/NotificationDropdown.tsx:14:1
-Export useClearAllNotifications doesn't exist in target module
-  12 | import { useRouter } from 'next/navigation';
-  13 | import { useLocalization } from '@/context/LocalizationContext';
-> 14 | import { useClearAllNotifications, useMarkNotificationsAsRead, useNotifications } from '@/hooks';
-     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  15 | import { Button } from '@/components/ui/button';
-  16 | import { Badge } from '@/components/ui/badge';
-  17 | import {
 
-The export useClearAllNotifications was not found in module [project]/src/hooks/index.ts [app-client] (ecmascript).
-Did you mean to import useClearNotifications?
-All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+    at AdminLayoutContent (src/app/admin/layout.tsx:116:29)
 
-Import traces:
-  Client Component Browser:
-    ./src/components/shared/NotificationDropdown.tsx [Client Component Browser]
-    ./src/components/shared/Header.tsx [Client Component Browser]
-    ./src/components/shared/Header.tsx [Server Component]
-    ./src/app/layout.tsx [Server Component]
-
-  Client Component SSR:
-    ./src/components/shared/NotificationDropdown.tsx [Client Component SSR]
-    ./src/components/shared/Header.tsx [Client Component SSR]
-    ./src/components/shared/Header.tsx [Server Component]
-    ./src/app/layout.tsx [Server Component]
+## Code Frame
+  114 |     const { t } = useLocalization();
+  115 |     const { data: session, status } = useSession();
+> 116 |     const { userProfile } = useAuth();
+      |                             ^
+  117 |     const logoutMutation = useLogout();
+  118 |     const [isSheetOpen, setIsSheetOpen] = useState(false);
+  119 |
 
 Next.js version: 15.5.9 (Turbopack)
