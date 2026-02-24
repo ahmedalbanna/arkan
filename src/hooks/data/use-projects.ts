@@ -9,8 +9,9 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useBuilderStore } from '../core/useBuilderStore';
 import { useAuth } from '@/context/AuthContext';
 import { getAuthenticatedToken } from '@/lib/utils/authUtils';
-import { fetchProjectsApi, saveProjectApi, deleteProjectApi } from '@/services/api/projectService';
 import { localProjectService } from '@/services/local-project-service';
+import { container } from '@/infrastructure/di/container';
+import { ProjectApiClient } from '@/modules/projects/adapters/api-client/ProjectApiClient';
 
 export function useProjects() {
     const { firebaseUser } = useAuth();
@@ -21,7 +22,8 @@ export function useProjects() {
             // Then, fetch from server and merge
             try {
                 const token = await getAuthenticatedToken(firebaseUser);
-                const serverProjects = await fetchProjectsApi(token);
+                const client = container.resolve(ProjectApiClient);
+                const serverProjects = await client.fetchProjects(token);
                 
                 const mergedProjects = serverProjects.map(p => new Project(p));
 
@@ -55,7 +57,8 @@ export function useSaveProject() {
                 throw new Error("User is offline.");
             }
             const token = await getAuthenticatedToken(firebaseUser);
-            return saveProjectApi(projectData, token);
+            const client = container.resolve(ProjectApiClient);
+            return client.saveProject(projectData, token);
         },
         onSuccess: (savedProject) => {
             setHasUnsavedChanges(false);
@@ -85,7 +88,8 @@ export function useDeleteProject() {
             let serverDelete: Promise<any> | null = null;
             if (navigator.onLine && firebaseUser) {
                 const token = await getAuthenticatedToken(firebaseUser);
-                serverDelete = deleteProjectApi(projectId, token);
+                const client = container.resolve(ProjectApiClient);
+                serverDelete = client.deleteProject(projectId, token);
             }
             await Promise.all([localDelete, serverDelete]);
             return projectId;

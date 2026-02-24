@@ -2,20 +2,14 @@
 'use client';
 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import {
-  createUserService,
-  deleteUserApi,
-  fetchUserProfileApi,
-  updateUserApi,
-  sendNotificationApi,
-  adminUpdateUserApi,
-} from '@/services/api/userService';
 import { User, type UserProfile } from '@/lib/models';
 import { userKeys } from '@/lib/query-keys';
 import { handleErrorUtility } from '@/lib/utils/errorUtils';
 import { useAuth } from '@/context/AuthContext';
 import { toast } from '@/hooks';
 import { getAuthenticatedToken } from '@/lib/utils/authUtils';
+import { container } from '@/infrastructure/di/container';
+import { UserApiClient } from '@/modules/users/adapters/api-client/UserApiClient';
 
 
 // ============================================================================
@@ -35,7 +29,8 @@ export function useUserProfile(userId: string) {
     queryFn: async () => {
       if (!firebaseUser) return null;
       const token = await getAuthenticatedToken(firebaseUser);
-      const userProfile = await fetchUserProfileApi(userId, token);
+      const client = container.resolve(UserApiClient);
+      const userProfile = await client.fetchUserById(userId, token);
       // Instantiate the User class to include methods
       return userProfile ? new User(userProfile) : null;
     },
@@ -58,7 +53,8 @@ export function useCreateUser(options?: { onSuccess?: (data: any) => void }) {
   return useMutation({
     mutationFn: async (data: any) => {
       const token = await getAuthenticatedToken(firebaseUser);
-      return createUserService(data, token);
+      const client = container.resolve(UserApiClient);
+      return client.createUser(data, token);
     },
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: userKeys.lists() });
@@ -78,7 +74,8 @@ export function useUpdateUser() {
   return useMutation({
     mutationFn: async (variables: { userId: string; data: Partial<UserProfile> }) => {
       const token = await getAuthenticatedToken(firebaseUser);
-      return updateUserApi(variables.userId, variables.data, token);
+      const client = container.resolve(UserApiClient);
+      return client.updateUser(variables.userId, variables.data, token);
     },
     onSuccess: (data) => {
       toast({ title: 'Success', description: 'User profile has been successfully updated.' });
@@ -99,7 +96,8 @@ export function useAdminUpdateUser() {
   return useMutation({
     mutationFn: async (variables: { userId: string; data: Partial<UserProfile> }) => {
       const token = await getAuthenticatedToken(firebaseUser);
-      return adminUpdateUserApi(variables.userId, variables.data, token);
+      const client = container.resolve(UserApiClient);
+      return client.adminUpdateUser(variables.userId, variables.data, token);
     },
     onSuccess: (data) => {
       toast({ title: 'Success', description: 'User profile has been successfully updated.' });
@@ -121,7 +119,8 @@ export function useDeleteUser() {
   return useMutation({
     mutationFn: async (userId: string) => {
       const token = await getAuthenticatedToken(firebaseUser);
-      return deleteUserApi(userId, token);
+      const client = container.resolve(UserApiClient);
+      return client.deleteUser(userId, token);
     },
     onSuccess: (data, userId) => {
       toast({ title: "User Deleted", description: `User with ID ${userId} has been removed.` });
@@ -145,7 +144,8 @@ export function useSendNotification() {
       link?: string;
     }) => {
       const token = await getAuthenticatedToken(firebaseUser);
-      return sendNotificationApi(variables, token);
+      const client = container.resolve(UserApiClient);
+      return client.sendNotification(variables, token);
     },
     onSuccess: () => {
       toast({ title: 'Notification Sent', description: 'The user has been notified of the changes.' });

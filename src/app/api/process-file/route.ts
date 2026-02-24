@@ -1,10 +1,11 @@
+
 'use server';
 
 import { imageToText } from '@/ai/flows/image-to-text';
 import { rewriteDocumentToMarkdown } from '@/ai/flows/rewrite-document-to-markdown';
 import { createApiResponse, handleApiError, withAuth } from '@/lib/utils/api-utils';
-import { deductCredit } from '@/services/credit-service';
-import { logGeneration } from '@/services/generation-service';
+import { container } from '@/infrastructure/di/container';
+import { AiController } from '@/modules/ai/adapters/controllers/AiController';
 
 const SUPPORTED_MIME_TYPES = [
     'application/pdf',
@@ -17,8 +18,8 @@ const SUPPORTED_MIME_TYPES = [
 
 export const POST = withAuth(async ({ request, user }) => {
     try {
-        let formData = await request.formData();
-        let file = formData.get('file') as File;
+        const formData = await request.formData();
+        const file = formData.get('file') as File;
 
         if (!file) {
             return handleApiError({ message: 'No file uploaded.' }, 400);
@@ -28,45 +29,32 @@ export const POST = withAuth(async ({ request, user }) => {
             return handleApiError({ message: `Invalid file type. Supported types are: ${SUPPORTED_MIME_TYPES.join(', ')}` }, 400);
         }
 
-        // Standard credit deduction for processing
-        await deductCredit(user.id, 1);
+        const fileArrayBuffer = await file.arrayBuffer();
+        const base64 = Buffer.from(fileArrayBuffer).toString('base64');
+        const dataUri = `data:${file.type};base64,${base64}`;
 
-        let fileArrayBuffer = await file.arrayBuffer();
-        let base64 = Buffer.from(fileArrayBuffer).toString('base64');
-        let dataUri = `data:${file.type};base64,${base64}`;
-
-        let result: { markdown: string } | { text: string };
-        let agentId: string;
-        let markdownContent: string;
-
-        if (file.type === 'application/pdf') {
-            agentId = 'pdf-to-markdown';
-            result = await rewriteDocumentToMarkdown({
-                pdfDataUri: dataUri
-            });
-            markdownContent = 'markdown' in result ? result.markdown : '';
-        } else if (file.type.startsWith('image/')) {
-            agentId = 'image-to-text';
-            result = await imageToText({
-                imageDataUri: dataUri
-            });
-            markdownContent = 'text' in result ? result.text : '';
-        } else {
-            // For plain text or markdown, we just decode it.
-            agentId = 'text-file-to-markdown';
-            markdownContent = Buffer.from(await file.arrayBuffer()).toString('utf-8');
-            result = { markdown: markdownContent };
-        }
-
-        await logGeneration({
-            agentId,
+        const controller = container.resolve(AiController);
+        
+        const result = await controller.runTool({
             userId: user.id,
-            input: { fileName: file.name, fileType: file.type }, // Don't log the full data URI
-            output: { markdownLength: markdownContent.length },
+            toolName: file.type === 'application/pdf' ? 'pdf-to-markdown' : (file.type.startsWith('image/') ? 'image-to-text' : 'text-file-to-markdown'),
+            input: { fileName: file.name, fileType: file.type },
+            flow: async () => {
+                if (file.type === 'application/pdf') {
+                    const res = await rewriteDocumentToMarkdown({ pdfDataUri: dataUri });
+                    return { markdown: 'markdown' in res ? res.markdown : '' };
+                } else if (file.type.startsWith('image/')) {
+                    const res = await imageToText({ imageDataUri: dataUri });
+                    return { markdown: 'text' in res ? res.text : '' };
+                } else {
+                    const content = Buffer.from(fileArrayBuffer).toString('utf-8');
+                    return { markdown: content };
+                }
+            },
             creditCost: 1
         });
 
-        return createApiResponse({ markdown: markdownContent }, 200);
+        return createApiResponse(result, 200);
 
     } catch (error) {
         return handleApiError(error);

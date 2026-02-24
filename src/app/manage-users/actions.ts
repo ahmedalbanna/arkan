@@ -4,20 +4,21 @@
 import { z } from 'zod';
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
-import { updateUser, deleteUser, getUserProfile } from '@/services/userService';
+import { container } from '@/infrastructure/di/container';
+import { UserController } from '@/modules/users/adapters/controllers/UserController';
 import { cookies } from 'next/headers';
 import { adminAuth } from '@/lib/firebase/server-init';
 
 // Helper function to verify the requester is an admin
 async function verifyAdmin() {
-
   const sessionCookie = (await cookies()).get('__session')?.value;
   if (!sessionCookie) {
     return { authorized: false, message: 'Unauthorized' };
   }
   try {
     const decodedToken = await adminAuth.verifySessionCookie(sessionCookie, true);
-    const userProfile = await getUserProfile(decodedToken.uid);
+    const controller = container.resolve(UserController);
+    const userProfile = await controller.getUser(decodedToken.uid);
     if (userProfile?.role !== 'admin') {
       return { authorized: false, message: 'Forbidden' };
     }
@@ -54,7 +55,9 @@ export async function handleUpdateUser(prevState: any, formData: FormData) {
   const { userId, ...updateData } = validatedFields.data;
 
   try {
-    await updateUser(userId, updateData);
+    const controller = container.resolve(UserController);
+    await controller.updateUser(userId, updateData);
+    
     revalidatePath('/admin/manage-users');
     revalidatePath(`/admin/manage-users/${userId}/edit`);
     return { success: true, message: 'User updated successfully.' };
@@ -83,7 +86,8 @@ export async function handleDeleteUser(prevState: any, formData: FormData) {
     }
 
     try {
-        await deleteUser(validatedFields.data.userId);
+        const controller = container.resolve(UserController);
+        await controller.deleteUser(validatedFields.data.userId);
     } catch (error) {
         console.error('Failed to delete user:', error);
         return { error: 'Failed to delete user.' };

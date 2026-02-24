@@ -1,5 +1,6 @@
 
-import { getUserProfile } from '@/services/userService';
+import { container } from '@/infrastructure/di/container';
+import { UserController } from '@/modules/users/adapters/controllers/UserController';
 import { CustomFirebaseError, handleFirebaseError } from '@/lib/firebase/error';
 import { adminAuth } from '@/lib/firebase/server-init';
 import { NextResponse, type NextRequest } from 'next/server';
@@ -40,7 +41,9 @@ export const withAuth = (handler: ApiHandler, options: ApiHandlerOptions = {}) =
         return handleApiError({ message: 'Unauthorized: Invalid token' }, 401);
       }
 
-      const user = await getUserProfile(decodedToken.uid);
+      const controller = container.resolve(UserController);
+      const user = await controller.getUser(decodedToken.uid);
+      
       if (!user) {
         return handleApiError({ message: 'Forbidden: User profile not found' }, 403);
       }

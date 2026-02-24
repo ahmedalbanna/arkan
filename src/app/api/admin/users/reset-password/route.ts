@@ -1,22 +1,18 @@
+
 'use server';
 
 import { z } from 'zod';
-import { resetUserPassword } from '@/services/userService';
-import { generateRandomPassword } from '@/lib/utils/randomPassword'; // Assuming a utility for password generation
+import { generateRandomPassword } from '@/lib/utils/randomPassword';
 import { createApiResponse, handleApiError, withAuth } from '@/lib/utils/api-utils';
-import { NextRequest } from 'next/server';
+import { container } from '@/infrastructure/di/container';
+import { UserController } from '@/modules/users/adapters/controllers/UserController';
 
 const resetPasswordSchema = z.object({
-  id: z.string().uuid(),
+  id: z.string().min(1),
 });
 
-
-export const POST = withAuth(async ({ user, request }: { user: any, request: NextRequest }) => {
+export const POST = withAuth(async ({ request }) => {
   try {
-    // Note: The user ID from the URL parameter is not used here,
-    // as the schema only validates the ID in the request body.
-    // You might want to adjust the schema or logic if you need to
-    // ensure the body ID matches the URL ID.
     const body = await request.json();
     const validation = resetPasswordSchema.safeParse(body);
     if (!validation.success) {
@@ -24,8 +20,11 @@ export const POST = withAuth(async ({ user, request }: { user: any, request: Nex
     }
 
     const { id } = validation.data;
-    const newPassword = generateRandomPassword(8); // Generate a new random password
- await resetUserPassword(id, newPassword); // Pass the generated password
+    const newPassword = generateRandomPassword(8);
+    
+    const controller = container.resolve(UserController);
+    await controller.resetPassword(id, newPassword);
+    
     return createApiResponse({ message: 'User password reset successfully.' }, 200);
   } catch (error) {
     return handleApiError(error);

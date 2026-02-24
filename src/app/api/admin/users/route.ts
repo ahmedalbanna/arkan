@@ -1,7 +1,8 @@
 
 import { z } from 'zod';
 import { withAuth, handleApiError, createApiResponse } from '@/lib/utils/api-utils';
-import { getPaginatedUsers, createUser } from '@/services/userService';
+import { container } from '@/infrastructure/di/container';
+import { UserController } from '@/modules/users/adapters/controllers/UserController';
 
 const userListQuerySchema = z.object({
   limit: z.coerce.number().int().min(1).max(50).default(10),
@@ -18,7 +19,9 @@ export const GET = withAuth(async ({ request }) => {
     }
 
     const { limit, lastVisibleId } = queryValidation.data;
-    const results = await getPaginatedUsers({ limit, lastVisibleId });
+    const controller = container.resolve(UserController);
+    const results = await controller.getPaginatedUsers({ limit, lastVisibleId });
+    
     return createApiResponse(results, 200);
   } catch (error) {
     return handleApiError(error);
@@ -41,7 +44,10 @@ export const POST = withAuth(async ({ request }) => {
     if (!validation.success) {
       return handleApiError(validation.error);
     }
-    const newUser = await createUser(validation.data);
+    
+    const controller = container.resolve(UserController);
+    const newUser = await controller.createUser(validation.data);
+    
     return createApiResponse(newUser, 201);
   } catch (error) {
     return handleApiError(error);

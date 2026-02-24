@@ -2,8 +2,6 @@
 'use server';
 
 import { createApiResponse, handleApiError, withAuth } from '@/lib/utils/api-utils';
-import { deductCredit } from '@/services/credit-service';
-import { logGeneration } from '@/services/generation-service';
 
 // Import all flows and schemas
 import { aiResearcher } from '@/ai/flows/ai-researcher';
@@ -73,6 +71,9 @@ const toolConfig = {
 
 type ToolName = keyof typeof toolConfig;
 
+import { container } from '@/infrastructure/di/container';
+import { AiController } from '@/modules/ai/adapters/controllers/AiController';
+
 export const POST = withAuth(async ({ request, user, params }) => {
   const toolName = (await params).tool as ToolName;
 
@@ -90,16 +91,13 @@ export const POST = withAuth(async ({ request, user, params }) => {
       return handleApiError(validation.error);
     }
 
-    const result = await flow(validation.data as any);
-
-    await deductCredit(user.id, creditCost);
-
-    await logGeneration({
-      agentId: toolName,
-      userId: user.id,
-      input: validation.data,
-      output: result,
-      creditCost: creditCost,
+    const controller = container.resolve(AiController);
+    const result = await controller.runTool({
+        userId: user.id,
+        toolName,
+        input: validation.data,
+        flow,
+        creditCost
     });
 
     return createApiResponse(result, 200);
