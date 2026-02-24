@@ -1,7 +1,9 @@
 
 import { inject, injectable } from "tsyringe";
-import { IUserRepository, IUserRepositoryToken } from "../../domain/repositories/IUserRepository";
-import { INotificationService, INotificationServiceToken } from "../../domain/services/INotificationService";
+import type { IUserRepository } from "../../domain/repositories/IUserRepository";
+import { IUserRepositoryToken } from "../../domain/repositories/IUserRepository";
+import type { INotificationService } from "../../domain/services/INotificationService";
+import { INotificationServiceToken } from "../../domain/services/INotificationService";
 
 @injectable()
 export class GiftCreditsUseCase {

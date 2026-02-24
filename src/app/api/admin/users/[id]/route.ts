@@ -1,9 +1,8 @@
-// src/app/api/admin/users/[id]/route.ts
+
 import { z } from 'zod';
-import { revalidatePath } from 'next/cache';
 import { withAuth, handleApiError, createApiResponse } from '@/lib/utils/api-utils';
-import { adminAuth, adminDb } from '@/lib/firebase/server-init';
-import { getUserProfile, deleteUser } from "@/services/userService";
+import { container } from '@/infrastructure/di/container';
+import { UserController } from '@/modules/users/adapters/controllers/UserController';
 
 const adminUpdateUserSchema = z.object({
   name: z.string().min(1, 'Name is required').optional(),
@@ -17,8 +16,9 @@ const adminUpdateUserSchema = z.object({
 // GET logic to fetch a single user, admin only
 export const GET = withAuth(async ({ params }) => {
     try {
-        const userId = params.id;
-        const user = await getUserProfile(userId);
+        const { id } = await params;
+        const controller = container.resolve(UserController);
+        const user = await controller.getUser(id);
         if (!user) {
             return handleApiError({ message: "User not found." }, 404);
         }
@@ -31,8 +31,8 @@ export const GET = withAuth(async ({ params }) => {
 // PUT to update a user profile (Admin only)
 export const PUT = withAuth(async ({ request, params }) => {
   try {
-    const userId = params.id;
-    if (!userId) {
+    const { id } = await params;
+    if (!id) {
       return handleApiError({ message: 'User ID is required' }, 400);
     }
     
@@ -42,22 +42,9 @@ export const PUT = withAuth(async ({ request, params }) => {
       return handleApiError(validation.error);
     }
     
-    const updateData: Record<string, any> = { ...validation.data, updatedAt: new Date().toISOString() };
-    
-    // Update email in Firebase Auth if it's being changed
-    if (validation.data.email) {
-      const existingUser = await adminAuth.getUser(userId);
-      if (existingUser.email !== validation.data.email) {
-        await adminAuth.updateUser(userId, { email: validation.data.email });
-      }
-    }
+    const controller = container.resolve(UserController);
+    const updatedUser = await controller.updateUser(id, validation.data);
 
-    await adminDb.collection("users").doc(userId).update(updateData);
-
-    revalidatePath('/admin/manage-users');
-    revalidatePath(`/admin/manage-users/${userId}/edit`);
-
-    const updatedUser = await getUserProfile(userId);
     return createApiResponse(updatedUser, 200);
   } catch (error: any) {
     if (error.code === 'auth/email-already-exists') {
@@ -70,13 +57,13 @@ export const PUT = withAuth(async ({ request, params }) => {
 // DELETE a user (Admin only)
 export const DELETE = withAuth(async ({ params }) => {
   try {
-    const userId = params.id;
-    if (!userId) {
+    const { id } = await params;
+    if (!id) {
       return handleApiError({ message: "User ID is required" }, 400);
     }
-    await deleteUser(userId);
-    revalidatePath("/admin/manage-users");
-    return createApiResponse({ message: `User ${userId} deleted successfully`}, 200);
+    const controller = container.resolve(UserController);
+    await controller.deleteUser(id);
+    return createApiResponse({ message: `User ${id} deleted successfully`}, 200);
   } catch (error) {
     return handleApiError(error);
   }

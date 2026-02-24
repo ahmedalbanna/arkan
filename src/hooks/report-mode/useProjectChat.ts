@@ -23,7 +23,7 @@ export function useProjectChat() {
             const token = await firebaseUser.getIdToken();
             const projectContext = project.fullMarkdownContent;
 
-            return apiService<{ response: string }>({
+            return apiService<any, { response: string }>({
                 endpoint: '/api/chat/project-consultant',
                 method: 'POST',
                 token,

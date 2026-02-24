@@ -57,7 +57,7 @@ export function useAgentManager() {
   } = useAgentUIState();
 
   const { data, isLoading, error, refetch } = useQuery({
-    queryKey: agentKeys.all,
+    queryKey: agentKeys.all(),
     queryFn: async () => {
       if (!firebaseUser) throw new Error("Not authenticated");
       const token = await firebaseUser.getIdToken();
@@ -92,7 +92,7 @@ export function useAgentManager() {
         return createAgentApi(data as any, token);
     },
     onSuccess: (newAgent) => {
-        queryClient.invalidateQueries({ queryKey: agentKeys.all });
+        queryClient.invalidateQueries({ queryKey: agentKeys.all() });
         selectAgent(newAgent.id);
     }
   });
@@ -104,7 +104,7 @@ export function useAgentManager() {
       return updateAgentApi(id, data, token);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: agentKeys.all });
+      queryClient.invalidateQueries({ queryKey: agentKeys.all() });
     }
   });
 
@@ -115,7 +115,7 @@ export function useAgentManager() {
       return deleteAgentApi(id, token);
     },
     onSuccess: (_, id) => {
-      queryClient.invalidateQueries({ queryKey: agentKeys.all });
+      queryClient.invalidateQueries({ queryKey: agentKeys.all() });
       if (selectedAgentId === id) {
         selectAgent(null);
       }

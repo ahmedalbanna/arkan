@@ -13,7 +13,7 @@ const SectionSchema = z.object({
 });
 
 // GET all sections
-export const GET = withAuth(async ({ user }) => {
+export const GET = withAuth(async () => {
   try {
     let snapshot = await adminDb.collection('sections').orderBy('title').get();
     let sections = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));

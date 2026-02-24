@@ -263,6 +263,17 @@ export class Project {
     return this.with({ content: this.content.filter(c => c.id !== id) });
   }
 
+  public moveContentItem(activeId: string, overId: string): Project {
+    const oldIndex = this.content.findIndex(item => item.id === activeId);
+    const newIndex = this.content.findIndex(item => item.id === overId);
+    
+    if (oldIndex !== -1 && newIndex !== -1) {
+      const newContent = arrayMove([...this.content], oldIndex, newIndex);
+      return this.with({ content: newContent });
+    }
+    return this;
+  }
+
   public updateSection(id: string, updater: (s: Section) => Section): Project {
     let sectionFound = false;
     const newContent = this.content.map(item => {

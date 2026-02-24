@@ -1,6 +1,7 @@
 
 import { inject, injectable } from "tsyringe";
-import { IProjectRepository, IProjectRepositoryToken } from "../../domain/repositories/IProjectRepository";
+import type { IProjectRepository } from "../../domain/repositories/IProjectRepository";
+import { IProjectRepositoryToken } from "../../domain/repositories/IProjectRepository";
 
 @injectable()
 export class DeleteProjectUseCase {

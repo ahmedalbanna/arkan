@@ -10,8 +10,9 @@ import {
   forgotPasswordService,
   sendPasswordResetEmailApi,
   createOrUpdateUserProfileApi,
-  fetchUserProfileApi, // Import the fetch service
 } from '@/services/api/authService';
+import { container } from '@/infrastructure/di/container';
+import { UserApiClient } from '@/modules/users/adapters/api-client/UserApiClient';
 import type { LoginCredentials, SignupCredentials, UserProfile } from '@/lib/types';
 import { useToast } from '@/hooks/util/use-toast';
 import { handleErrorUtility } from '@/lib/utils/errorUtils';
@@ -32,7 +33,7 @@ export function useLogin() {
   return useMutation({
     mutationFn: (credentials: LoginCredentials) => loginWithEmail(credentials),
     onSuccess: (user) => {
-      queryClient.invalidateQueries({ queryKey: userKeys.all }); // Refetch user data
+      queryClient.invalidateQueries({ queryKey: userKeys.all() }); // Refetch user data
       router.push('/builder');
       toast({ title: "Welcome back!" });
     },
@@ -42,14 +43,12 @@ export function useLogin() {
 
 // Helper to create profile on first sign-in
 async function handleFirstSignIn(user: FirebaseUser) {
-    // Check if a profile already exists by trying to fetch it.
-    // We expect this to fail for a new user.
     const token = await user.getIdToken();
     try {
-        const existingProfile = await fetchUserProfileApi(user.uid, token);
+        const client = container.resolve(UserApiClient);
+        const existingProfile = await client.fetchUserProfile(user.uid, token);
 
         if (!existingProfile) {
-            // Profile doesn't exist, so create it.
             const profileData: Partial<UserProfile> = {
                 id: user.uid,
                 name: user.displayName || `User ${user.uid.slice(0,6)}`,
@@ -58,7 +57,6 @@ async function handleFirstSignIn(user: FirebaseUser) {
             await createOrUpdateUserProfileApi(user.uid, profileData, token);
         }
     } catch (error) {
-        // Handle cases where the initial fetch fails for reasons other than 404
         console.error("Error during first sign-in profile check:", error);
     }
 }
@@ -76,7 +74,7 @@ export function useGoogleSignIn() {
             if (isNewUser) {
                 await handleFirstSignIn(userCredential.user);
             }
-            queryClient.invalidateQueries({ queryKey: userKeys.all });
+            queryClient.invalidateQueries({ queryKey: userKeys.all() });
             router.push('/builder');
             toast({ title: `Welcome, ${userCredential.user.displayName}!` });
         },
@@ -117,7 +115,7 @@ export function usePhoneSignIn() {
             if (info?.isNewUser) {
                 await handleFirstSignIn(userCredential.user);
             }
-            queryClient.invalidateQueries({ queryKey: userKeys.all });
+            queryClient.invalidateQueries({ queryKey: userKeys.all() });
             router.push('/builder');
             toast({ title: `Welcome!` });
         } catch (err: any) {

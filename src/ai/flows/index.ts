@@ -34,7 +34,7 @@ export * from './rewrite-to-markdown';
 export * from './summarize-document';
 export * from './summarize-text';
 export * from './text-stylist';
-export * from './text-to-speech';
+// export * from './text-to-speech'; // Missing file
 export * from './topic-explainer';
 export * from './translate-text';
 export * from './write-document';

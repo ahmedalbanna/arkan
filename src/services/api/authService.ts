@@ -16,10 +16,6 @@ import {
 } from "firebase/auth";
 import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { apiService } from './apiService';
-import { fetchUserProfileApi } from './userService';
-
-// Re-export for convenience
-export { fetchUserProfileApi };
 
 
 // --- Authentication Functions ---

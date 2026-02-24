@@ -3,69 +3,36 @@
 import { ai } from '@/ai/genkit';
 import {
     AiProofreadDocumentInputSchema,
-    AiProofreadDocumentOutputSchema,
     AIResearcherInputSchema,
-    AIResearcherOutputSchema,
-    AnalyzeContextOutputSchema,
     BiasCheckInputSchema,
-    BiasCheckOutputSchema,
     DetectAIInputSchema,
-    DetectAIOutputSchema,
     FactCheckInputSchema,
-    FactCheckOutputSchema,
     FactRetrievalInputSchema,
-    FactRetrievalOutputSchema,
     GenerateAgentConfigInputSchema,
-    GenerateAgentConfigOutputSchema,
     GenerateChapterInputSchema,
-    GenerateChapterOutputSchema,
     GenerateCitationInputSchema,
-    GenerateCitationOutputSchema,
     GeneratePlantUMLInputSchema,
-    GeneratePlantUMLOutputSchema,
     GenerateProjectBlueprintInputSchema,
-    GenerateProjectBlueprintOutputSchema,
     GenerateQuizInputSchema,
-    GenerateQuizOutputSchema,
     GenerateSectionInputSchema,
-    GenerateSectionOutputSchema,
     GenerateTextInputSchema,
-    GenerateTextOutputSchema,
     GenerateTocInputSchema,
-    GenerateTocOutputSchema,
     GenerateUIDescriptionInputSchema,
-    GenerateUIDescriptionOutputSchema,
     GrammarCheckInputSchema,
-    GrammarCheckOutputSchema,
     HumanizeTextInputSchema,
-    HumanizeTextOutputSchema,
     ImageToTextInputSchema,
-    ImageToTextOutputSchema,
     ImproveMarkdownInputSchema,
-    ImproveMarkdownOutputSchema,
     ManipulateTextInputSchema,
-    ManipulateTextOutputSchema,
     ParaphraseInputSchema,
-    ParaphraseOutputSchema,
     PlagiarismCheckInputSchema,
-    PlagiarismCheckOutputSchema,
     QuestionAnsweringInputSchema,
-    QuestionAnsweringOutputSchema,
     RewriteDocumentInputSchema,
-    RewriteDocumentOutputSchema,
     RewriteToMarkdownInputSchema,
-    RewriteToMarkdownOutputSchema,
     SentenceStructureCheckInputSchema,
-    SentenceStructureCheckOutputSchema,
     SolveAssignmentsInputSchema,
-    SolveAssignmentsOutputSchema,
-    SummarizeOutputSchema,
     TopicExplainerInputSchema,
-    TopicExplainerOutputSchema,
     TranslateTextInputSchema,
-    TranslateTextOutputSchema,
-    WriteDocumentInputSchema,
-    WriteDocumentOutputSchema
+    WriteDocumentInputSchema
 } from '@/ai/schemas';
 import { GenerateSessionPlanInputSchema, GenerateSessionPlanOutputSchema, GenerateTheoreticalLectureInputSchema, GenerateTheoreticalLectureOutputSchema } from '@/ai/schemas/lecture-generator';
 import { z } from 'zod';
@@ -76,31 +43,31 @@ export * from './graduation-project';
 // Export academic writing prompts
 export * from './academic-writing';
 
-const styleDescriptions: Record<string, string> = {
-    standard: "Provide a balanced rewrite that improves clarity while retaining the original meaning.",
-    fluent: "Rewrite the text to sound more natural and fluent, as if written by a native speaker.",
-    formal: "Rewrite the text using a more formal, academic, and professional tone.",
-    creative: "Rewrite the text in a more creative and engaging style, using vivid language.",
-    simplify: "Rewrite the text to be simpler and easier to understand for a general audience.",
-};
+// const styleDescriptions: Record<string, string> = {
+//     standard: "Provide a balanced rewrite that improves clarity while retaining the original meaning.",
+//     fluent: "Rewrite the text to sound more natural and fluent, as if written by a native speaker.",
+//     formal: "Rewrite the text using a more formal, academic, and professional tone.",
+//     creative: "Rewrite the text in a more creative and engaging style, using vivid language.",
+//     simplify: "Rewrite the text to be simpler and easier to understand for a general audience.",
+// };
 
-const lengthDescriptions: Record<string, string> = {
-    short: "a single, concise paragraph.",
-    medium: "a few paragraphs, capturing the main points and key supporting details.",
-    long: "a detailed summary, covering all significant topics and arguments.",
-};
+// const lengthDescriptions: Record<string, string> = {
+//     short: "a single, concise paragraph.",
+//     medium: "a few paragraphs, capturing the main points and key supporting details.",
+//     long: "a detailed summary, covering all significant topics and arguments.",
+// };
 
-const styleControls: Record<string, string> = {
-    formality: "Adjust the formality level of the text.",
-    complexity: "Set the complexity level of the content.",
-    tone: "Specify the tone of the text (e.g., friendly, professional).",
-    language: "Choose the language for the output.",
-    outputStyle: "Define the output style, including formatting options like headings, paragraphs, lists, tables, and more.",
-    diagramType: "Specify the type of diagram to generate (e.g., use case, class, sequence).",
-    citationStyle: "Choose the citation style for references (e.g., APA, MLA).",
-    programmingLanguage: "Specify the programming language for code examples.",
-    tableCaption: "Provide a caption for tables in the output.",
-};
+// const styleControls: Record<string, string> = {
+//     formality: "Adjust the formality level of the text.",
+//     complexity: "Set the complexity level of the content.",
+//     tone: "Specify the tone of the text (e.g., friendly, professional).",
+//     language: "Choose the language for the output.",
+//     outputStyle: "Define the output style, including formatting options like headings, paragraphs, lists, tables, and more.",
+//     diagramType: "Specify the type of diagram to generate (e.g., use case, class, sequence).",
+//     citationStyle: "Choose the citation style for references (e.g., APA, MLA).",
+//     programmingLanguage: "Specify the programming language for code examples.",
+//     tableCaption: "Provide a caption for tables in the output.",
+// };
 
 export const prompts = {
     proofread: ai.definePrompt({

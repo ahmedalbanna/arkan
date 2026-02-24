@@ -2,7 +2,7 @@
 'use server';
 
 import { adminDb } from '@/lib/firebase/server-init';
-import { FieldValue } from 'firebase-admin/firestore';
+// import { FieldValue } from 'firebase-admin/firestore';
 import type { TransactionProperties } from '@/lib/models';
 
 export async function createTransaction(data: Omit<TransactionProperties, 'createdAt' | 'id'>) {

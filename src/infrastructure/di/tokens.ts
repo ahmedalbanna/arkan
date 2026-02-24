@@ -1,0 +1,3 @@
+
+export const FIRESTORE_TOKEN = Symbol("FIRESTORE_TOKEN");
+export const FIREBASE_AUTH_TOKEN = Symbol("FIREBASE_AUTH_TOKEN");

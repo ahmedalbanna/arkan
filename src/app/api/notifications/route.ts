@@ -39,7 +39,7 @@ export async function GET(request: Request) {
 
         return NextResponse.json(notifications, { status: 200 });
 
-    } catch (_error) {
+    } catch (error) {
         console.error('Error fetching notifications (Firestore):', error);
         return NextResponse.json({ message: 'An unexpected error occurred.' }, { status: 500 });
     }

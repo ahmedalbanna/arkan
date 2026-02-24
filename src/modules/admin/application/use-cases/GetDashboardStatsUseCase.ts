@@ -1,6 +1,7 @@
 
 import { inject, injectable } from "tsyringe";
-import { IAdminStatsRepository, IAdminStatsRepositoryToken, DashboardStats } from "../../domain/repositories/IAdminStatsRepository";
+import type { IAdminStatsRepository, DashboardStats } from "../../domain/repositories/IAdminStatsRepository";
+import { IAdminStatsRepositoryToken } from "../../domain/repositories/IAdminStatsRepository";
 
 @injectable()
 export class GetDashboardStatsUseCase {

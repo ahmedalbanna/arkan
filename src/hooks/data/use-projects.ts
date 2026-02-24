@@ -16,7 +16,7 @@ import { ProjectApiClient } from '@/modules/projects/adapters/api-client/Project
 export function useProjects() {
     const { firebaseUser } = useAuth();
     const { data, ...rest } = useQuery<Project[]>({
-        queryKey: projectKeys.lists(),
+        queryKey: projectKeys.lists(firebaseUser?.uid || 'anonymous'),
         queryFn: async () => {
             if (!firebaseUser) return [];
             // Then, fetch from server and merge
@@ -62,7 +62,7 @@ export function useSaveProject() {
         },
         onSuccess: (savedProject) => {
             setHasUnsavedChanges(false);
-            queryClient.invalidateQueries({ queryKey: projectKeys.lists() });
+            queryClient.invalidateQueries({ queryKey: projectKeys.lists(firebaseUser?.uid || 'anonymous') });
             toast({ title: 'Project Saved', description: `"${savedProject.name}" has been saved to the cloud.` });
         },
         onError: (error: any) => {
@@ -96,7 +96,7 @@ export function useDeleteProject() {
         },
         onSuccess: (projectId) => {
             toast({ title: 'Project Deleted', description: 'The project has been successfully deleted.' });
-            queryClient.invalidateQueries({ queryKey: projectKeys.lists() });
+            queryClient.invalidateQueries({ queryKey: projectKeys.lists(firebaseUser?.uid || 'anonymous') });
             // Also remove from the specific detail query if it exists
             queryClient.removeQueries({ queryKey: projectKeys.detail(projectId) });
         },

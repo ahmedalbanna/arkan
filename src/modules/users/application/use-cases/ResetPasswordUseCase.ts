@@ -1,6 +1,7 @@
 
 import { inject, injectable } from "tsyringe";
-import { IAuthRepository, IAuthRepositoryToken } from "../../domain/repositories/IAuthRepository";
+import type { IAuthRepository } from "../../domain/repositories/IAuthRepository";
+import { IAuthRepositoryToken } from "../../domain/repositories/IAuthRepository";
 
 @injectable()
 export class ResetPasswordUseCase {

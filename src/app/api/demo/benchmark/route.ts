@@ -6,7 +6,7 @@
 import { NextRequest } from 'next/server';
 import { retrieveContext } from '@/lib/rag/retrieval';
 
-export async function POST(request: NextRequest) {
+export async function POST(_request: NextRequest) {
   const encoder = new TextEncoder();
 
   const stream = new ReadableStream({

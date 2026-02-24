@@ -9,7 +9,7 @@
  */
 
 import { OLLAMA_MODELS, MODEL_BY_TASK } from './genkit';
-import { FLOW_MODEL_MAPPING, getModelForFlow } from './model-mapping';
+import { getModelForFlow } from './model-mapping';
 
 /**
  * Task complexity levels

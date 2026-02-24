@@ -22,7 +22,7 @@ export const POST = withAuth(async ({ request, user }) => {
       return handleApiError(validation.error);
     }
 
-    const { projectId, ...agentInput } = validation.data;
+    const { projectId: _, ...agentInput } = validation.data;
     const creditCost = 1;
 
     // Use the controller to run the tool, which handles credit deduction and logging

@@ -1,7 +1,9 @@
 
 import { inject, injectable } from "tsyringe";
-import { IAiService, IAiServiceToken } from "../../domain/services/IAiService";
-import { IGenerationLogRepository, IGenerationLogRepositoryToken } from "../../domain/repositories/IGenerationLogRepository";
+import type { IAiService } from "../../domain/services/IAiService";
+import { IAiServiceToken } from "../../domain/services/IAiService";
+import type { IGenerationLogRepository } from "../../domain/repositories/IGenerationLogRepository";
+import { IGenerationLogRepositoryToken } from "../../domain/repositories/IGenerationLogRepository";
 import { DeductCreditsUseCase } from "@/modules/users/application/use-cases/DeductCreditsUseCase";
 
 export interface RunAiToolInput<TInput> {

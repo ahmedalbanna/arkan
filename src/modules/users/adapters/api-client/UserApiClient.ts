@@ -1,10 +1,15 @@
 
 import { apiService } from "@/services/api/apiService";
 import { UserProfile } from "../../domain/entities/User";
+import type { Firestore } from "firebase/firestore";
 
 export class UserApiClient {
     async fetchUserById(id: string, token: string): Promise<UserProfile> {
         return apiService({ endpoint: `/api/users/${id}`, token });
+    }
+
+    async fetchUserProfile(id: string, token: string): Promise<UserProfile> {
+        return this.fetchUserById(id, token);
     }
 
     async updateUser(id: string, data: Partial<UserProfile>, token: string): Promise<UserProfile> {
@@ -60,5 +65,30 @@ export class UserApiClient {
             data: variables,
             token
         });
+    }
+
+    subscribeToUserProfile(userId: string, firestore: Firestore, callback: (user: UserProfile | null) => void) {
+        // Pass firestore instance from outside to avoid mixed library versions
+        if (typeof window === 'undefined' || !firestore) {
+            return () => {}; 
+        }
+
+        // We can use standard imports for types only
+        const { doc, onSnapshot } = require("firebase/firestore");
+
+        const userDocRef = doc(firestore, "users", userId);
+
+        const unsubscribe = onSnapshot(userDocRef, (snapshot: any) => {
+            if (snapshot.exists()) {
+                callback({ id: snapshot.id, ...snapshot.data() } as UserProfile);
+            } else {
+                callback(null);
+            }
+        }, (error: any) => {
+            console.error("Error listening to user profile:", error);
+            callback(null);
+        });
+
+        return unsubscribe;
     }
 }

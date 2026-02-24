@@ -1,7 +1,9 @@
 
 import { inject, injectable } from "tsyringe";
-import { IUserRepository, IUserRepositoryToken } from "../../domain/repositories/IUserRepository";
-import { IAuthRepository, IAuthRepositoryToken } from "../../domain/repositories/IAuthRepository";
+import type { IUserRepository } from "../../domain/repositories/IUserRepository";
+import { IUserRepositoryToken } from "../../domain/repositories/IUserRepository";
+import type { IAuthRepository } from "../../domain/repositories/IAuthRepository";
+import { IAuthRepositoryToken } from "../../domain/repositories/IAuthRepository";
 import { UserProfile } from "../../domain/entities/User";
 
 @injectable()

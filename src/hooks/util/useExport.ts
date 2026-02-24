@@ -153,7 +153,7 @@ export function useExport() {
 
             const result = await convertMarkdownToPptx(finalMarkdown, project.name, conversionOptions);
             // Ensure result is a Blob
-            const blob = result instanceof Blob ? result : new Blob([result], { 
+            const blob = result instanceof Blob ? result : new Blob([result as any], { 
                 type: 'application/vnd.openxmlformats-officedocument.presentationml.presentation' 
             });
             saveAs(blob, `${project.name.replace(/\s+/g, '_')}_presentation.pptx`);

@@ -1,7 +1,9 @@
 
 import { inject, injectable } from "tsyringe";
-import { IGenerationLogRepository, IGenerationLogRepositoryToken } from "@/modules/ai/domain/repositories/IGenerationLogRepository";
-import { IAgentRepository, IAgentRepositoryToken } from "@/modules/ai/domain/repositories/IAgentRepository";
+import type { IGenerationLogRepository } from "@/modules/ai/domain/repositories/IGenerationLogRepository";
+import { IGenerationLogRepositoryToken } from "@/modules/ai/domain/repositories/IGenerationLogRepository";
+import type { IAgentRepository } from "@/modules/ai/domain/repositories/IAgentRepository";
+import { IAgentRepositoryToken } from "@/modules/ai/domain/repositories/IAgentRepository";
 
 export interface UserStats {
     totalGenerations: number;

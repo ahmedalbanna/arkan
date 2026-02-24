@@ -1,6 +1,7 @@
 
 import { inject, injectable } from "tsyringe";
-import { IUserRepository, IUserRepositoryToken } from "../../domain/repositories/IUserRepository";
+import type { IUserRepository } from "../../domain/repositories/IUserRepository";
+import { IUserRepositoryToken } from "../../domain/repositories/IUserRepository";
 import { UserProfile } from "../../domain/entities/User";
 
 @injectable()
