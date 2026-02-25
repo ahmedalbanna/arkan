@@ -1,8 +1,8 @@
 
 'use client';
 
-import { DocxTemplateProperties } from '@/lib/models/docxTemplate';
-import { CustomStyles } from '@/lib/word-converter/types';
+import { DocxTemplateProperties } from '@/modules/templates/domain/entities/DocxTemplate';
+import { CustomStyles } from '@/modules/ai-content/infrastructure/exporters/word-converter/types';
 import type { IStylesOptions } from 'docx';
 import { AlignmentType, ShadingType } from 'docx';
 

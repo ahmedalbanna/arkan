@@ -9,10 +9,10 @@
  * 5. Verify system health
  */
 
-import { indexDocument } from '@/lib/rag/indexer';
-import { retrieveContext } from '@/lib/rag/retrieval';
-import { getVectorStore } from '@/lib/rag/vector-store';
-import { getCacheManager } from '@/lib/rag/cache';
+import { indexDocument } from '@/modules/rag/infrastructure/indexer';
+import { retrieveContext } from '@/modules/rag/infrastructure/retrieval';
+import { getVectorStore } from '@/modules/rag/infrastructure/vector-store';
+import { getCacheManager } from '@/modules/rag/infrastructure/cache';
 
 const testDocuments = [
   {
@@ -166,10 +166,10 @@ async function testIndexing() {
           success: true,
         });
       } else {
-        console.log(`   ✗ Failed: ${result.error}\n`);
+        console.log(`   ✗ Failed: ${result.errors?.join(', ') || 'Unknown error'}\n`);
         indexResults.push({
           title: doc.title,
-          error: result.error,
+          error: result.errors?.join(', ') || 'Unknown error',
           success: false,
         });
       }

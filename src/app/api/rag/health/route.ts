@@ -8,8 +8,8 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { getVectorStore } from '@/lib/rag/vector-store';
-import { RAGConfig, validateRAGConfig } from '@/lib/rag/config';
+import { getVectorStore } from '@/modules/rag/infrastructure/vector-store';
+import { RAGConfig, validateRAGConfig } from '@/modules/rag/infrastructure/config';
 
 export async function GET(_request: NextRequest) {
   try {

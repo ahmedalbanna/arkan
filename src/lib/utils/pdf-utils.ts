@@ -1,5 +1,5 @@
 import type { PptxConversionOptions } from '@/lib/markdown-to-pptx-converter';
-import { templates } from '@/lib/pptx-styles';
+import { templates } from '@/modules/templates/infrastructure/PptxStyles';
 import type { Root as MdastRoot } from 'mdast';
 import rehypeSanitize from 'rehype-sanitize';
 import rehypeStringify from 'rehype-stringify';
@@ -8,7 +8,7 @@ import remarkParse from 'remark-parse';
 import remarkRehype from 'remark-rehype';
 import { unified } from 'unified';
 
-import { exportComponentAsPDF } from '../pdf-exporter';
+import { exportComponentAsPDF } from '@/modules/ai-content/infrastructure/exporters/PdfExporter';
 import { splitAstIntoSlides } from '../pptx-convert/ast-utils';
 import { DEFAULT_CODE_FONT, DEFAULT_FONT } from '../pptx-convert/constants';
 import { processPlantUml } from './processPlantUml';

@@ -1,5 +1,5 @@
 
-import { Section, type SectionProperties } from './section';
+import { Section, type SectionProperties } from './Section';
 import { v4 as uuidv4 } from 'uuid';
 
 export interface ChapterProperties {

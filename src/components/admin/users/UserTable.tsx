@@ -10,7 +10,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { useLocalization } from "@/context/LocalizationContext";
-import type { User } from "@/lib/models/user";
+import type { User } from "@/modules/users/domain/entities/User";
 import { UserTableRow } from "./UserTableRow";
 
 interface UserTableProps {

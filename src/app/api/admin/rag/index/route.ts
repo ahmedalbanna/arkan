@@ -9,7 +9,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { indexDocument } from '@/lib/rag/indexer';
+import { indexDocument } from '@/modules/rag/infrastructure/indexer';
 
 // File processing utilities
 async function extractTextFromFile(file: File): Promise<string> {

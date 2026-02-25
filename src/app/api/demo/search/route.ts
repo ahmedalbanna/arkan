@@ -4,7 +4,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { retrieveContext } from '@/lib/rag/retrieval';
+import { retrieveContext } from '@/modules/rag/infrastructure/retrieval';
 
 export async function POST(request: NextRequest) {
   try {
@@ -23,7 +23,7 @@ export async function POST(request: NextRequest) {
     // Check if it will be a cache hit (for demo purposes)
     let cacheHit = false;
     if (useCache) {
-      const { getCacheManager } = await import('@/lib/rag/cache');
+      const { getCacheManager } = await import('@/modules/rag/infrastructure/cache');
       const cache = getCacheManager().getSearchCache();
       cacheHit = cache.getResults(query, { topK, minScore }) !== null;
     }

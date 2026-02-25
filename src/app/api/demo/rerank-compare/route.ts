@@ -4,10 +4,10 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { generateEmbedding } from '@/lib/rag/embeddings';
-import { getVectorStore } from '@/lib/rag/vector-store';
-import { getReranker } from '@/lib/rag/reranker';
-import type { RerankStrategy } from '@/lib/rag/reranker';
+import { generateEmbedding } from '@/modules/rag/infrastructure/embeddings';
+import { getVectorStore } from '@/modules/rag/infrastructure/vector-store';
+import { getReranker } from '@/modules/rag/infrastructure/reranker';
+import type { RerankStrategy } from '@/modules/rag/infrastructure/reranker';
 
 export async function POST(request: NextRequest) {
   try {

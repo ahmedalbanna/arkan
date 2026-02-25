@@ -1,4 +1,6 @@
-import { Chapter, Project, Section } from './models';
+import type { Chapter } from '@/modules/ai-content/domain/entities/Chapter';
+import type { Project } from '@/modules/projects/domain/entities/Project';
+import type { Section } from '@/modules/ai-content/domain/entities/Section';
 
 /**
  * A dedicated class for building complex AI prompts from the project structure.

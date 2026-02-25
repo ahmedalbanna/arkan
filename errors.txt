@@ -2,27 +2,36 @@
 Build Error
 
 ## Error Message
-Export INotificationService doesn't exist in target module
+Module not found: Can't resolve '@/lib/docx-styles'
 
 ## Build Output
-./src/modules/billing/application/use-cases/SubmitPaymentRequestUseCase.ts:8:1
-Export INotificationService doesn't exist in target module
-   6 | import { IFileStorageServiceToken } from "../../domain/services/IFileStorageService";
-   7 | import { IUserRepository, IUserRepositoryToken } from "@/modules/users/domain/repositories/IUserRepository";
->  8 | import { INotificationService, INotificationServiceToken } from "@/modules/users/domain/services/INotificationService";
-     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-   9 | import { TransactionProperties } from "../../domain/entities/Transaction";
-  10 |
-  11 | @injectable()
+./src/components/report-mode/session/ExportDialog.tsx:19:1
+Module not found: Can't resolve '@/lib/docx-styles'
+  17 | import { Label } from '@/components/ui/label';
+  18 | import { useBuilderStore, useExport } from '@/hooks';
+> 19 | import { templates as docxTemplates, type DocxTemplateKey } from '@/lib/docx-styles';
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  20 | import { templates as pptxTemplates, type PptxTemplateKey } from '@/lib/pptx-styles';
+  21 | import { Download, FileText, Loader2, Presentation } from 'lucide-react';
+  22 | import { useState, useMemo } from 'react';
 
-The export INotificationService was not found in module [project]/src/modules/users/domain/services/INotificationService.ts [app-route] (ecmascript).
-Did you mean to import INotificationServiceToken?
-All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+Import map: aliased to relative './src/lib/docx-styles' inside of [project]/
 
-Import trace:
-  App Route:
-    ./src/modules/billing/application/use-cases/SubmitPaymentRequestUseCase.ts
-    ./src/modules/billing/adapters/controllers/BillingController.ts
-    ./src/app/api/admin/transactions/route.ts
+Import traces:
+  Client Component Browser:
+    ./src/components/report-mode/session/ExportDialog.tsx [Client Component Browser]
+    ./src/components/report-mode/session/SessionActions.tsx [Client Component Browser]
+    ./src/components/report-mode/ReportModeGenerator.tsx [Client Component Browser]
+    ./src/app/builder/page.tsx [Client Component Browser]
+    ./src/app/builder/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/components/report-mode/session/ExportDialog.tsx [Client Component SSR]
+    ./src/components/report-mode/session/SessionActions.tsx [Client Component SSR]
+    ./src/components/report-mode/ReportModeGenerator.tsx [Client Component SSR]
+    ./src/app/builder/page.tsx [Client Component SSR]
+    ./src/app/builder/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
 
 Next.js version: 15.5.9 (Turbopack)

@@ -5,8 +5,8 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { retrieveContext } from '@/lib/rag/retrieval';
-import { getCacheManager } from '@/lib/rag/cache';
+import { retrieveContext } from '@/modules/rag/infrastructure/retrieval';
+import { getCacheManager } from '@/modules/rag/infrastructure/cache';
 
 export async function POST(request: NextRequest) {
   try {

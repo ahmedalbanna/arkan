@@ -8,8 +8,8 @@ import { Button } from '@/components/ui/button';
 import { TemplateCard } from './TemplateCard';
 import { useState } from 'react';
 import { TemplateFormDialog } from './TemplateFormDialog';
-import { PptxTemplate } from '@/lib/models/pptxTemplate';
-import { DocxTemplate } from '@/lib/models/docxTemplate';
+import { PptxTemplate } from '@/modules/templates/domain/entities/PptxTemplate';
+import { DocxTemplate } from '@/modules/templates/domain/entities/DocxTemplate';
 import { ReportTemplate } from '@/lib/models';
 
 type TemplateType = 'docx' | 'pptx' | 'report';

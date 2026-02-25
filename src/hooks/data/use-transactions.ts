@@ -5,7 +5,7 @@ import { useAuth } from '@/context/AuthContext';
 import { transactionKeys } from '@/lib/query-keys';
 import { getTransactions, verifyPayment, submitPaymentProof } from '@/services/api/transactionService';
 import { toast, useToast } from '@/hooks/util/use-toast';
-import { Transaction, type TransactionProperties } from '@/lib/models/transaction';
+import { Transaction, type TransactionProperties } from '@/modules/billing/domain/entities/Transaction';
 import { VerifyPaymentVariables } from '@/lib/types';
 import { useQuery } from '@tanstack/react-query';
 

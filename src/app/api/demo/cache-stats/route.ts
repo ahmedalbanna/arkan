@@ -4,7 +4,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { getCacheManager } from '@/lib/rag/cache';
+import { getCacheManager } from '@/modules/rag/infrastructure/cache';
 
 export async function GET(_request: NextRequest) {
   try {

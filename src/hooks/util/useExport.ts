@@ -3,11 +3,11 @@
 import { useState } from 'react';
 import { saveAs } from 'file-saver';
 import { toast } from './use-toast';
-import type { Project, ProjectContent } from '@/lib/models';
-import { Chapter } from '@/lib/models';
-import { templates as docxTemplates, type DocxTemplateKey } from '@/lib/docx-styles';
-import { templates as pptxTemplates, type PptxTemplateKey } from '@/lib/pptx-styles';
-import { ConversionOptions } from '@/lib/word-converter/types';
+import type { Project, ProjectContent } from '@/modules/projects/domain/entities/Project';
+import { Chapter } from '@/modules/ai-content/domain/entities/Chapter';
+import { templates as docxTemplates, type DocxTemplateKey } from '@/modules/ai-content/infrastructure/exporters/DocxStyles';
+import { templates as pptxTemplates, type PptxTemplateKey } from '@/modules/templates/infrastructure/PptxStyles';
+import { ConversionOptions } from '@/modules/ai-content/infrastructure/exporters/word-converter/types';
 import { PptxConversionOptions, convertMarkdownToPptx } from '@/lib/markdown-to-pptx-converter';
 
 interface DocxExportParams {

@@ -1,4 +1,4 @@
-import { templates } from '@/lib/pptx-styles'; // Keep for default styles
+import { templates } from '@/modules/templates/infrastructure/PptxStyles'; // Keep for default styles
 import type { PptxStyleOptions } from '@/lib/types';
 import { type ListItem, type Root as MdastRoot } from 'mdast';
 import PptxGenJS from 'pptxgenjs';
@@ -8,7 +8,7 @@ import remarkGfm from 'remark-gfm'; // Import remarkGfm
 import remarkParse from 'remark-parse';
 import remarkRehype from 'remark-rehype';
 import { unified } from 'unified';
-import { exportComponentAsPDF } from './pdf-exporter';
+import { exportComponentAsPDF } from '@/modules/ai-content/infrastructure/exporters/PdfExporter';
 import { getNodeText, splitAstIntoSlides } from './pptx-convert/ast-utils';
 import { DEFAULT_CODE_FONT, DEFAULT_FONT, layout } from './pptx-convert/constants';
 import { createSlidesWithContent, type FontOptions } from './pptx-convert/slide-layout-engine';

@@ -5,7 +5,7 @@
  * for showcasing RAG capabilities
  */
 
-import { indexDocument } from '@/lib/rag/indexer';
+import { indexDocument } from '@/modules/rag/infrastructure/indexer';
 
 const demoDocuments = [
   {
@@ -443,10 +443,10 @@ async function loadDemoData() {
           success: true,
         });
       } else {
-        console.log(`   ❌ Failed: ${result.error}\n`);
+        console.log(`   ❌ Failed: ${result.errors?.join(', ') || 'Unknown error'}\n`);
         results.push({
           title: doc.title,
-          error: result.error,
+          error: result.errors?.join(', ') || 'Unknown error',
           success: false,
         });
       }

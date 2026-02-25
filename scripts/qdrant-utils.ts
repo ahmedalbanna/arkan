@@ -4,8 +4,8 @@
  * Helper scripts for managing Qdrant vector database
  */
 
-import { QdrantVectorStore } from '@/lib/rag/qdrant-adapter';
-import { RAGConfig } from '@/lib/rag/config';
+import { QdrantVectorStore } from '@/modules/rag/infrastructure/qdrant-adapter';
+import { RAGConfig } from '@/modules/rag/infrastructure/config';
 
 /**
  * Initialize Qdrant collection

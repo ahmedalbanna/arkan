@@ -16,6 +16,7 @@ import { ITransactionRepositoryToken } from "@/modules/billing/domain/repositori
 import { IFileStorageServiceToken } from "@/modules/billing/domain/services/IFileStorageService";
 import { IRagRepositoryToken } from "@/modules/rag/domain/repositories/IRagRepository";
 import { ITemplateRepositoryToken } from "@/modules/templates/domain/repositories/ITemplateRepository";
+import { ISectionRepositoryToken } from "@/modules/ai-content/domain/repositories/ISectionRepository";
 
 // Client-side implementations (Safe to import anywhere)
 import { ProjectApiClient } from "@/modules/projects/adapters/api-client/ProjectApiClient";
@@ -47,6 +48,7 @@ if (typeof window === 'undefined') {
   const { FirebaseFileStorageService } = require("@/modules/billing/infrastructure/services/FirebaseFileStorageService");
   const { DefaultRagRepository } = require("@/modules/rag/infrastructure/repositories/DefaultRagRepository");
   const { FirebaseTemplateRepository } = require("@/modules/templates/infrastructure/repositories/FirebaseTemplateRepository");
+  const { FirebaseSectionRepository } = require("@/modules/ai-content/infrastructure/repositories/FirebaseSectionRepository");
 
   container.register(IProjectRepositoryToken, {
     useClass: FirebaseProjectRepository
@@ -98,6 +100,10 @@ if (typeof window === 'undefined') {
 
   container.register(ITemplateRepositoryToken, {
     useClass: FirebaseTemplateRepository
+  }, { lifecycle: Lifecycle.Singleton });
+
+  container.register(ISectionRepositoryToken, {
+    useClass: FirebaseSectionRepository
   }, { lifecycle: Lifecycle.Singleton });
 }
 

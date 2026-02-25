@@ -4,7 +4,7 @@
 import { useInfiniteQuery } from '@tanstack/react-query';
 import { userKeys } from '@/lib/query-keys';
 import { useAuth } from '@/context/AuthContext';
-import { User } from '@/lib/models/user';
+import { User } from '@/modules/users/domain/entities/User';
 import { container } from '@/infrastructure/di/container';
 import { UserApiClient } from '@/modules/users/adapters/api-client/UserApiClient';
 

@@ -5,7 +5,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { getVectorStore } from '@/lib/rag/vector-store';
+import { getVectorStore } from '@/modules/rag/infrastructure/vector-store';
 import { 
   getAllIndexedDocuments, 
   getDocumentStatistics 

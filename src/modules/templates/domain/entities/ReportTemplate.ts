@@ -1,6 +1,6 @@
 import { z } from 'zod';
-import { SectionPropertiesSchema } from './section';
-import { Template, type BaseTemplateProperties } from './template';
+import { SectionPropertiesSchema } from '@/modules/ai-content/domain/entities/Section';
+import { Template, type BaseTemplateProperties } from './Template';
 
 export const ReportTemplateChapterSchema = z.object({
   title: z.string(),
@@ -29,6 +29,8 @@ export const CreateReportTemplateSchema = ReportTemplatePropertiesSchema.omit({ 
 
 export const UpdateReportTemplateSchema = ReportTemplatePropertiesSchema.omit({ id: true }).partial();
 
+export type CreateReportTemplateData = z.infer<typeof CreateReportTemplateSchema>;
+export type UpdateReportTemplateData = z.infer<typeof UpdateReportTemplateSchema>;
 
 // Corresponds to ReportGenerationTemplateSchema from the Zod schemas
 export interface ReportTemplateProperties extends BaseTemplateProperties {

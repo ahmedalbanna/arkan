@@ -4,7 +4,7 @@
  */
 
 import { NextRequest } from 'next/server';
-import { retrieveContext } from '@/lib/rag/retrieval';
+import { retrieveContext } from '@/modules/rag/infrastructure/retrieval';
 
 export async function POST(_request: NextRequest) {
   const encoder = new TextEncoder();
@@ -39,7 +39,7 @@ export async function POST(_request: NextRequest) {
             
             // Check cache hit
             if (scenario.useCache) {
-              const { getCacheManager } = await import('@/lib/rag/cache');
+              const { getCacheManager } = await import('@/modules/rag/infrastructure/cache');
               const cache = getCacheManager().getSearchCache();
               if (cache.getResults(query, {}) !== null) {
                 cacheHits++;

@@ -3,7 +3,9 @@ import remarkParse from 'remark-parse';
 import remarkGfm from 'remark-gfm';
 import remarkStringify from 'remark-stringify';
 import { type Root as MdastRoot, type RootContent } from 'mdast';
-import { Chapter, Section, type ProjectContent } from '@/lib/models';
+import { Chapter } from '@/modules/ai-content/domain/entities/Chapter';
+import { Section } from '@/modules/ai-content/domain/entities/Section';
+import type { ProjectContent } from '@/modules/projects/domain/entities/Project';
 import { getNodeText } from '@/lib/pptx-convert/ast-utils';
 
 /**

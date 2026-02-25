@@ -8,7 +8,7 @@ import { useLocalization } from '@/context/LocalizationContext';
 import { Button } from '@/components/ui/button';
 import { useTransactions } from '@/hooks';
 import type { TransactionStatus } from '@/services';
-import { Transaction } from '@/lib/models/transaction';
+import { Transaction } from '@/modules/billing/domain/entities/Transaction';
 
 
 function ConsoleSkeleton() {

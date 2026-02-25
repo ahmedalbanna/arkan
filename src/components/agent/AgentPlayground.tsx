@@ -12,7 +12,7 @@ import { Button } from '@/components/ui/button';
 import { Form, FormControl, FormField, FormItem } from '@/components/ui/form';
 import { Textarea } from '@/components/ui/textarea';
 import { useAgentManager } from '@/hooks/use-agent-store';
-import type { AgentProperties } from '@/lib/models/agent';
+import type { AgentProperties } from '@/modules/ai/domain/entities/Agent';
 import { useMutation } from '@tanstack/react-query';
 import { toast } from '../ui/use-toast';
 import { ResponseDisplay } from './ResponseDisplay';

@@ -6,8 +6,9 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Button } from '@/components/ui/button';
 import { Copy, Check } from 'lucide-react';
 import { useBuilderStore } from '@/hooks';
-import { PromptBuilder } from '@/lib/prompt-builder';
+
 import type { Section } from '@/lib/models';
+import { PromptBuilder } from '@/modules/ai-content/domain/services/PromptBuilder';
 
 interface FullPromptPreviewDialogProps {
   isOpen: boolean;

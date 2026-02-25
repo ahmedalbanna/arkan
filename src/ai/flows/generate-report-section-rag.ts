@@ -10,7 +10,7 @@
 
 import { ai } from '@/ai/genkit';
 import { GenerateSectionInputSchema, GenerateSectionOutputSchema, type GenerateSectionInput, type GenerateSectionOutput } from '@/ai/schemas';
-import { retrieveContext } from '@/lib/rag/retrieval';
+import { retrieveContext } from '@/modules/rag/infrastructure/retrieval';
 import { validateJsonOutput, getJsonPromptInstructions, RECOMMENDED_TEMPERATURES } from '@/ai/utils/json-output-validator';
 
 export interface GenerateSectionWithRAGInput extends GenerateSectionInput {

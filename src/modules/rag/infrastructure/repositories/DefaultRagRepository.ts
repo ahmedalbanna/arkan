@@ -2,9 +2,9 @@
 import "reflect-metadata";
 import { injectable } from "tsyringe";
 import { IRagRepository, RagIndexingOptions, RagRetrievalOptions, RagIndexingResult, RagRetrievalResult } from "../../domain/repositories/IRagRepository";
-import { indexDocument } from "@/lib/rag/indexer";
-import { retrieveContext } from "@/lib/rag/retrieval";
-import { getVectorStore } from "@/lib/rag/vector-store";
+import { indexDocument } from "@/modules/rag/infrastructure/indexer";
+import { retrieveContext } from "@/modules/rag/infrastructure/retrieval";
+import { getVectorStore } from "@/modules/rag/infrastructure/vector-store";
 
 @injectable()
 export class DefaultRagRepository implements IRagRepository {

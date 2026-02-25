@@ -12,9 +12,9 @@
  */
 
 import { adminDb } from '@/lib/firebase/server-init';
-import { QdrantVectorStore } from '@/lib/rag/qdrant-adapter';
-import { RAGConfig } from '@/lib/rag/config';
-import type { DocumentChunk } from '@/lib/rag/vector-store-interface';
+import { QdrantVectorStore } from '@/modules/rag/infrastructure/qdrant-adapter';
+import { RAGConfig } from '@/modules/rag/infrastructure/config';
+import type { DocumentChunk } from '@/modules/rag/infrastructure/vector-store-interface';
 
 interface MigrationStats {
   totalDocuments: number;
@@ -260,4 +260,5 @@ if (require.main === module) {
   main().catch(console.error);
 }
 
-export { migrateToQdrant, MigrationStats };
+export { migrateToQdrant };
+export type { MigrationStats };

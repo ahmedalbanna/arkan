@@ -1,4 +1,7 @@
-import { Project, ReportTemplateProperties, Section, SectionProperties, Chapter, ProjectProperties } from '@/lib/models';
+import { Project, type ProjectProperties } from '@/modules/projects/domain/entities/Project';
+import type { ReportTemplateProperties } from '@/modules/templates/domain/entities/ReportTemplate';
+import { Section, type SectionProperties } from '@/modules/ai-content/domain/entities/Section';
+import { Chapter } from '@/modules/ai-content/domain/entities/Chapter';
 
 /**
  * Applies a report template to a project, creating the necessary chapters and sections.

@@ -10,7 +10,7 @@ import { useVerifyPayment } from "@/hooks";
 import { useState } from "react";
 import { Textarea } from "@/components/ui/textarea";
 import { useLocalization } from "@/context/LocalizationContext";
-import { Transaction } from "@/lib/models/transaction";
+import { Transaction } from "@/modules/billing/domain/entities/Transaction";
 
 interface TransactionCardProps {
     transaction: Transaction;

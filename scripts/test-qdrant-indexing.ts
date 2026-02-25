@@ -8,8 +8,9 @@
  *   npx tsx scripts/test-qdrant-indexing.ts
  */
 
-import { indexDocument, retrieveContext } from '@/lib/rag';
-import { getVectorStore } from '@/lib/rag/vector-store';
+import { indexDocument } from '@/modules/rag/infrastructure/indexer';
+import { retrieveContext } from '@/modules/rag/infrastructure/retrieval';
+import { getVectorStore } from '@/modules/rag/infrastructure/vector-store';
 
 // Test documents with diverse content
 const testDocuments = [
@@ -270,10 +271,10 @@ async function main() {
     console.log('   ✅ TEST COMPLETED SUCCESSFULLY');
     console.log('═══════════════════════════════════════════════════════\n');
 
-    const successCount = indexResults.filter(r => !r.error).length;
+    const successCount = indexResults.filter(r => r.success).length;
     console.log(`📊 Summary:`);
     console.log(`   Documents indexed: ${successCount}/${testDocuments.length}`);
-    console.log(`   Total chunks: ${indexResults.reduce((sum, r) => sum + (r.chunksCreated || 0), 0)}`);
+    console.log(`   Total chunks: ${indexResults.reduce((sum, r) => sum + (r.chunks || 0), 0)}`);
     console.log('\n💡 Next steps:');
     console.log('   1. View in Qdrant UI: http://localhost:3100');
     console.log('   2. Check health: curl http://localhost:9002/api/rag/health');

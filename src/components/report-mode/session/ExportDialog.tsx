@@ -24,7 +24,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '.
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Chapter, Section, type ProjectContent } from '@/lib/models';
+import { Chapter } from '@/modules/ai-content/domain/entities/Chapter';
+import { ProjectContent } from '@/modules/projects/domain/entities/Project';
+import { Section } from '@/modules/ai-content/domain/entities/Section';
+
 
 export function ExportDialog() {
   const { project } = useBuilderStore();

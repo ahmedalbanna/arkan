@@ -10,10 +10,12 @@ import {
   SectionContextSchema,
   SectionType,
   SectionTypeSchema,
-} from './control-types';
+} from './ControlTypes';
 import { z } from 'zod';
-import type { Project } from './project';
-import { PromptBuilder } from '../prompt-builder';
+import type { ProjectProperties as Project } from '@/modules/projects/domain/entities/Project';
+import { PromptBuilder } from '../services/PromptBuilder';
+
+export type SectionStatus = 'pending' | 'generating' | 'completed' | 'failed' | 'idle';
 
 export const SectionPropertiesSchema = z.object({
   id: z.string().optional(),

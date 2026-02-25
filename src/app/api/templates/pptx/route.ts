@@ -3,7 +3,7 @@ import { createApiResponse, handleApiError, withAuth } from '@/lib/utils/api-uti
 import { z } from 'zod';
 import { container } from '@/infrastructure/di/container';
 import { TemplateController } from '@/modules/templates/adapters/controllers/TemplateController';
-import { templates as defaultTemplates } from '@/lib/pptx-styles';
+import { templates as defaultTemplates } from '@/modules/templates/infrastructure/PptxStyles';
 
 export async function GET() {
     try {

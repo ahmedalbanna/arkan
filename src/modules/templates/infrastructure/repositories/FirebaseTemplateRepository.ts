@@ -3,8 +3,8 @@ import "reflect-metadata";
 import { injectable } from "tsyringe";
 import { adminDb } from "@/lib/firebase/server-init";
 import { ITemplateRepository, Template } from "../../domain/repositories/ITemplateRepository";
-import { templates as defaultDocxTemplates } from '@/lib/docx-styles';
-import { templates as defaultPptxTemplates } from '@/lib/pptx-styles';
+import { templates as defaultDocxTemplates } from '@/modules/ai-content/infrastructure/exporters/DocxStyles';
+import { templates as defaultPptxTemplates } from '@/modules/templates/infrastructure/PptxStyles';
 
 @injectable()
 export class FirebaseTemplateRepository implements ITemplateRepository {

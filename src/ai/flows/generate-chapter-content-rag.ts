@@ -10,7 +10,7 @@
 
 import { ai } from '@/ai/genkit';
 import { GenerateChapterInputSchema, GenerateChapterOutputSchema, type GenerateChapterInput, type GenerateChapterOutput } from '@/ai/schemas';
-import { retrieveContext } from '@/lib/rag/retrieval';
+import { retrieveContext } from '@/modules/rag/infrastructure/retrieval';
 
 export interface GenerateChapterWithRAGInput extends GenerateChapterInput {
   projectId?: string;

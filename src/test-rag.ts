@@ -1,4 +1,4 @@
-import { generateEmbedding } from '@/lib/rag/embeddings';
+import { generateEmbedding } from '@/modules/rag/infrastructure/embeddings';
 
 async function testRAG() {
   try {

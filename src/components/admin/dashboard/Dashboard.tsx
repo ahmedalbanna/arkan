@@ -9,7 +9,7 @@ import { RecentActivity } from './RecentActivity';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useLocalization } from '@/context/LocalizationContext';
 import { Card, CardHeader, CardContent } from '@/components/ui/card';
-import type { UserProfile } from '@/lib/models/user';
+import type { UserProfile } from '@/modules/users/domain/entities/User';
 
 
 function DashboardSkeleton() {

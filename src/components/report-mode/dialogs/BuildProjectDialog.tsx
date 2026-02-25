@@ -14,7 +14,7 @@ import {
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useBuilderStore } from '@/hooks';
 import type { Chapter, Section, Project } from '@/lib/models';
-import { PromptBuilder } from '@/lib/prompt-builder';
+
 import { AlertTriangle, Building, Code, Eye, Link as LinkIcon, Loader2, StickyNote } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { MarkdownViewer } from '../../shared/MarkdownViewer';
@@ -22,6 +22,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '..
 import { Badge } from '../../ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '../../ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../ui/tabs';
+import { PromptBuilder } from '@/modules/ai-content/domain/services/PromptBuilder';
 
 
 interface BuildProjectDialogProps {

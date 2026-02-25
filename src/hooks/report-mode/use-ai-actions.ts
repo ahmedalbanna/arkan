@@ -11,7 +11,7 @@ import { useAuth } from '@/context/AuthContext';
 import { useBuilderStore } from '../core/useBuilderStore';
 import { generateReportSectionApi } from '@/services/api/reportService';
 import type { SectionName } from '@/ai/schemas';
-import { PromptBuilder } from '@/lib/prompt-builder';
+import { PromptBuilder } from '@/modules/ai-content/domain/services/PromptBuilder';
 import { writingToolApi } from '@/services/api/writingToolsService';
 import { Chapter, type Project, type Section } from '@/lib/models';
 import { parseMarkdownToContent } from '@/lib/project/markdown-parser';

@@ -6,8 +6,8 @@
 
 import { NextResponse } from 'next/server';
 import { getDocumentStatistics } from '@/services/document-tracking-service';
-import { getVectorStore } from '@/lib/rag/vector-store';
-import { getCacheManager } from '@/lib/rag/cache';
+import { getVectorStore } from '@/modules/rag/infrastructure/vector-store';
+import { getCacheManager } from '@/modules/rag/infrastructure/cache';
 
 export async function GET() {
   try {

@@ -1,6 +1,6 @@
 
 import { v4 as uuidv4 } from 'uuid';
-import { ExternalContextType } from './control-types';
+import { ExternalContextType } from './ControlTypes';
 
 export interface ExternalContextProperties {
     id?: string;
