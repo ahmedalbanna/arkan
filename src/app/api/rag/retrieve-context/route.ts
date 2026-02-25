@@ -1,14 +1,8 @@
-/**
- * API Route: Retrieve RAG Context
- * 
- * POST /api/rag/retrieve-context
- * 
- * Retrieves relevant context from the vector store for a given query.
- */
 
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
-import RAGService from '@/services/rag-service';
+import { container } from '@/infrastructure/di/container';
+import { RagController } from '@/modules/rag/adapters/controllers/RagController';
 
 const RetrieveContextSchema = z.object({
   query: z.string().min(1, 'Query is required'),
@@ -20,40 +14,27 @@ const RetrieveContextSchema = z.object({
 
 export async function POST(request: NextRequest) {
   try {
-    // Parse request body
     const body = await request.json();
-    
-    // Validate input
     const validation = RetrieveContextSchema.safeParse(body);
     if (!validation.success) {
-      return NextResponse.json(
-        { error: 'Invalid input', details: validation.error.errors },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Invalid input', details: validation.error.errors }, { status: 400 });
     }
 
-    const { query, userId, projectId, topK, minScore } = validation.data;
-
-    // Retrieve context
-    const result = await RAGService.getRelevantContext(
-      query,
-      projectId || userId, // Use projectId if available, otherwise userId
-      userId,
-      { topK, minScore }
-    );
+    const { query, ...options } = validation.data;
+    const controller = container.resolve(RagController);
+    const result = await controller.retrieveContext(query, options);
 
     return NextResponse.json({
       success: true,
       context: result.context,
       sources: result.sources,
-      sourcesCount: result.sources.length,
     });
 
   } catch (error) {
     console.error('Error in retrieve-context API:', error);
-    return NextResponse.json(
-      { error: 'Internal server error', message: error instanceof Error ? error.message : 'Unknown error' },
-      { status: 500 }
-    );
+    return NextResponse.json({ 
+        error: 'Internal server error', 
+        message: error instanceof Error ? error.message : 'Unknown error' 
+    }, { status: 500 });
   }
 }

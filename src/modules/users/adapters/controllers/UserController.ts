@@ -1,6 +1,6 @@
-import "reflect-metadata";
 
-import { injectable, inject } from "tsyringe";
+import "reflect-metadata";
+import { injectable } from "tsyringe";
 import { GetUserProfileUseCase } from "../../application/use-cases/GetUserProfileUseCase";
 import { UpdateUserProfileUseCase } from "../../application/use-cases/UpdateUserProfileUseCase";
 import { GetPaginatedUsersUseCase } from "../../application/use-cases/GetPaginatedUsersUseCase";
@@ -9,19 +9,21 @@ import { ResetPasswordUseCase } from "../../application/use-cases/ResetPasswordU
 import { GiftCreditsUseCase } from "../../application/use-cases/GiftCreditsUseCase";
 import { DeleteUserUseCase } from "../../application/use-cases/DeleteUserUseCase";
 import { GetUserStatsUseCase } from "../../application/use-cases/GetUserStatsUseCase";
+import { UploadProfilePictureUseCase } from "../../application/use-cases/UploadProfilePictureUseCase";
 import { revalidatePath } from "next/cache";
 
 @injectable()
 export class UserController {
     constructor(
-        @inject(GetUserProfileUseCase) private getUserProfileUseCase: GetUserProfileUseCase,
-        @inject(UpdateUserProfileUseCase) private updateUserProfileUseCase: UpdateUserProfileUseCase,
-        @inject(GetPaginatedUsersUseCase) private getPaginatedUsersUseCase: GetPaginatedUsersUseCase,
-        @inject(CreateUserUseCase) private createUserUseCase: CreateUserUseCase,
-        @inject(ResetPasswordUseCase) private resetPasswordUseCase: ResetPasswordUseCase,
-        @inject(GiftCreditsUseCase) private giftCreditsUseCase: GiftCreditsUseCase,
-        @inject(DeleteUserUseCase) private deleteUserUseCase: DeleteUserUseCase,
-        @inject(GetUserStatsUseCase) private getUserStatsUseCase: GetUserStatsUseCase
+        private getUserProfileUseCase: GetUserProfileUseCase,
+        private updateUserProfileUseCase: UpdateUserProfileUseCase,
+        private getPaginatedUsersUseCase: GetPaginatedUsersUseCase,
+        private createUserUseCase: CreateUserUseCase,
+        private resetPasswordUseCase: ResetPasswordUseCase,
+        private giftCreditsUseCase: GiftCreditsUseCase,
+        private deleteUserUseCase: DeleteUserUseCase,
+        private getUserStatsUseCase: GetUserStatsUseCase,
+        private uploadProfilePictureUseCase: UploadProfilePictureUseCase
     ) {}
 
     async getUser(userId: string) {
@@ -59,5 +61,11 @@ export class UserController {
 
     async getUserStats(userId: string) {
         return this.getUserStatsUseCase.execute(userId);
+    }
+
+    async uploadProfilePicture(userId: string, file: Buffer, fileName: string, contentType: string) {
+        const url = await this.uploadProfilePictureUseCase.execute(userId, file, fileName, contentType);
+        revalidatePath(`/profile/${userId}`);
+        return url;
     }
 }

@@ -3,7 +3,7 @@ import "reflect-metadata";
 import { injectable } from "tsyringe";
 import { adminDb, adminRealtimeDb } from "@/lib/firebase/server-init";
 import admin from 'firebase-admin';
-import { INotificationService, NotificationPayload } from "../../domain/services/INotificationService";
+import type { INotificationService, NotificationPayload } from "../../domain/services/INotificationService";
 
 @injectable()
 export class FirebaseNotificationService implements INotificationService {

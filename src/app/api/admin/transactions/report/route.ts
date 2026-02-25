@@ -1,7 +1,8 @@
 
 import { z } from 'zod';
 import { handleApiError, withAuth, createApiResponse } from '@/lib/utils/api-utils';
-import { getTransactionsByDateRange } from '@/services/transactionService';
+import { container } from '@/infrastructure/di/container';
+import { BillingController } from '@/modules/billing/adapters/controllers/BillingController';
 
 const getReportSchema = z.object({
   startDate: z.string().datetime(),
@@ -18,7 +19,8 @@ export const GET = withAuth(async ({ request }) => {
     }
 
     const { startDate, endDate } = queryValidation.data;
-    const transactions = await getTransactionsByDateRange(startDate, endDate);
+    const controller = container.resolve(BillingController);
+    const transactions = await controller.getTransactions({ startDate, endDate });
     return createApiResponse(transactions, 200);
   } catch (error) {
     return handleApiError(error);

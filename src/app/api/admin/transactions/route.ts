@@ -1,28 +1,29 @@
 
-// src/app/api/admin/transactions/route.ts
 import { z } from 'zod';
 import { withAuth, handleApiError, createApiResponse } from '@/lib/utils/api-utils';
-import { getTransactionsByStatus } from '@/services/transactionService';
+import { container } from '@/infrastructure/di/container';
+import { BillingController } from '@/modules/billing/adapters/controllers/BillingController';
 
 const getTransactionsSchema = z.object({
-  status: z.enum(['pending', 'verified', 'rejected']),
+  status: z.enum(['pending', 'verified', 'rejected']).optional(),
   limit: z.coerce.number().int().min(1).max(50).default(6),
   lastVisibleId: z.string().optional(),
 });
 
 export const GET = withAuth(async ({ request }) => {
   try {
-    let { searchParams } = new URL(request.url);
-    let queryValidation = getTransactionsSchema.safeParse(Object.fromEntries(searchParams));
+    const { searchParams } = new URL(request.url);
+    const queryValidation = getTransactionsSchema.safeParse(Object.fromEntries(searchParams));
 
     if (!queryValidation.success) {
       return handleApiError(queryValidation.error);
     }
 
-    let { limit, lastVisibleId, status } = queryValidation.data;
+    const { limit, lastVisibleId, status } = queryValidation.data;
 
-    let { transactions, hasNextPage, lastVisibleId: newLastVisibleId } = await getTransactionsByStatus({ status, limit, lastVisibleId });
-    return createApiResponse({ transactions, hasNextPage, lastVisibleId: newLastVisibleId }, 200);
+    const controller = container.resolve(BillingController);
+    const result = await controller.getTransactions({ status, limit, lastVisibleId });
+    return createApiResponse(result, 200);
 
   } catch (error) {
     return handleApiError(error);

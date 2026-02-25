@@ -1,7 +1,8 @@
-// src/app/api/agents/[id]/route.ts
-import { adminDb } from '@/lib/firebase/server-init';
+
 import { handleApiError, createApiResponse, withAuth } from '@/lib/utils/api-utils';
 import { z } from 'zod';
+import { container } from '@/infrastructure/di/container';
+import { AiController } from '@/modules/ai/adapters/controllers/AiController';
 
 const agentUpdateSchema = z.object({
     name: z.string().min(1).optional(),
@@ -16,14 +17,14 @@ const agentUpdateSchema = z.object({
 
 export const GET = withAuth(async ({ params }) => {
     try {
-        let { id } = params;
-        let agentRef = adminDb.collection('agents').doc(id);
-        let doc = await agentRef.get();
+        const { id } = await params;
+        const controller = container.resolve(AiController);
+        const agent = await controller.getAgentById(id);
 
-        if (!doc.exists) {
+        if (!agent) {
             return handleApiError({ message: 'Agent not found' }, 404);
         }
-        return createApiResponse({ id: doc.id, ...doc.data() }, 200);
+        return createApiResponse(agent, 200);
     } catch (error) {
         return handleApiError(error);
     }
@@ -31,22 +32,18 @@ export const GET = withAuth(async ({ params }) => {
 
 export const PUT = withAuth(async ({ request, params }) => {
     try {
-        let { id } = params;
-        let body = await request.json();
-        let validation = agentUpdateSchema.safeParse(body);
+        const { id } = await params;
+        const body = await request.json();
+        const validation = agentUpdateSchema.safeParse(body);
 
         if (!validation.success) {
             return handleApiError(validation.error);
         }
 
-        let agentRef = adminDb.collection('agents').doc(id);
-        await agentRef.update({
-            ...validation.data,
-            updatedAt: new Date().toISOString(),
-        });
-
-        let updatedDoc = await agentRef.get();
-        return createApiResponse({ id: updatedDoc.id, ...updatedDoc.data() }, 200);
+        const controller = container.resolve(AiController);
+        const updatedAgent = await controller.saveAgent(id, validation.data);
+        
+        return createApiResponse(updatedAgent, 200);
     } catch (error) {
         return handleApiError(error);
     }
@@ -54,8 +51,10 @@ export const PUT = withAuth(async ({ request, params }) => {
 
 export const DELETE = withAuth(async ({ params }) => {
     try {
-        let { id } = params;
-        await adminDb.collection('agents').doc(id).delete();
+        const { id } = await params;
+        const controller = container.resolve(AiController);
+        await controller.deleteAgent(id);
+        
         return createApiResponse({ message: 'Agent deleted successfully' }, 200);
     } catch (error) {
         return handleApiError(error);

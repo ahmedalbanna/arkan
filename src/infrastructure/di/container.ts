@@ -11,6 +11,11 @@ import { IGenerationLogRepositoryToken } from "@/modules/ai/domain/repositories/
 import { IAgentRepositoryToken } from "@/modules/ai/domain/repositories/IAgentRepository";
 import { IAiServiceToken } from "@/modules/ai/domain/services/IAiService";
 import { IAdminStatsRepositoryToken } from "@/modules/admin/domain/repositories/IAdminStatsRepository";
+import { IFeatureRepositoryToken } from "@/modules/admin/domain/repositories/IFeatureRepository";
+import { ITransactionRepositoryToken } from "@/modules/billing/domain/repositories/ITransactionRepository";
+import { IFileStorageServiceToken } from "@/modules/billing/domain/services/IFileStorageService";
+import { IRagRepositoryToken } from "@/modules/rag/domain/repositories/IRagRepository";
+import { ITemplateRepositoryToken } from "@/modules/templates/domain/repositories/ITemplateRepository";
 
 // Client-side implementations (Safe to import anywhere)
 import { ProjectApiClient } from "@/modules/projects/adapters/api-client/ProjectApiClient";
@@ -37,6 +42,11 @@ if (typeof window === 'undefined') {
   const { FirebaseAgentRepository } = require("@/modules/ai/infrastructure/repositories/FirebaseAgentRepository");
   const { GenkitAiService } = require("@/modules/ai/infrastructure/services/GenkitAiService");
   const { FirebaseAdminStatsRepository } = require("@/modules/admin/infrastructure/repositories/FirebaseAdminStatsRepository");
+  const { FirebaseFeatureRepository } = require("@/modules/admin/infrastructure/repositories/FirebaseFeatureRepository");
+  const { FirebaseTransactionRepository } = require("@/modules/billing/infrastructure/repositories/FirebaseTransactionRepository");
+  const { FirebaseFileStorageService } = require("@/modules/billing/infrastructure/services/FirebaseFileStorageService");
+  const { DefaultRagRepository } = require("@/modules/rag/infrastructure/repositories/DefaultRagRepository");
+  const { FirebaseTemplateRepository } = require("@/modules/templates/infrastructure/repositories/FirebaseTemplateRepository");
 
   container.register(IProjectRepositoryToken, {
     useClass: FirebaseProjectRepository
@@ -68,6 +78,26 @@ if (typeof window === 'undefined') {
 
   container.register(IAdminStatsRepositoryToken, {
     useClass: FirebaseAdminStatsRepository
+  }, { lifecycle: Lifecycle.Singleton });
+
+  container.register(IFeatureRepositoryToken, {
+    useClass: FirebaseFeatureRepository
+  }, { lifecycle: Lifecycle.Singleton });
+
+  container.register(ITransactionRepositoryToken, {
+    useClass: FirebaseTransactionRepository
+  }, { lifecycle: Lifecycle.Singleton });
+
+  container.register(IFileStorageServiceToken, {
+    useClass: FirebaseFileStorageService
+  }, { lifecycle: Lifecycle.Singleton });
+
+  container.register(IRagRepositoryToken, {
+    useClass: DefaultRagRepository
+  }, { lifecycle: Lifecycle.Singleton });
+
+  container.register(ITemplateRepositoryToken, {
+    useClass: FirebaseTemplateRepository
   }, { lifecycle: Lifecycle.Singleton });
 }
 

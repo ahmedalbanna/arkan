@@ -1,16 +1,17 @@
-import { getStorage } from 'firebase-admin/storage';
-import { adminDb } from '@/lib/firebase/server-init';
+
 import { withAuth, handleApiError, createApiResponse } from '@/lib/utils/api-utils';
+import { container } from '@/infrastructure/di/container';
+import { UserController } from '@/modules/users/adapters/controllers/UserController';
 
 export const POST = withAuth(async ({ request, params, user }) => {
-    const { id: targetUserId } = params;
-
-    // Check if the user is an admin or is updating their own profile
-    if (user.role !== 'admin' && user.id !== targetUserId) {
-        return handleApiError({ message: 'Forbidden' }, 403);
-    }
-
     try {
+        const { id: targetUserId } = await params;
+
+        // Check if the user is an admin or is updating their own profile
+        if (user.role !== 'admin' && user.id !== targetUserId) {
+            return handleApiError({ message: 'Forbidden' }, 403);
+        }
+
         const formData = await request.formData();
         const file = formData.get('file') as File | null;
 
@@ -23,28 +24,10 @@ export const POST = withAuth(async ({ request, params, user }) => {
             return handleApiError({ message: 'Invalid file type. Only JPG, PNG, and WebP are allowed.' }, 400);
         }
 
-        const storage = getStorage();
-        const bucketName = process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET;
-        if (!bucketName) {
-            throw new Error("Firebase Storage bucket name not configured.");
-        }
-        const bucket = storage.bucket(bucketName);
-        const fileName = `profile_pictures/${targetUserId}/${Date.now()}-${file.name}`;
-
         const fileBuffer = Buffer.from(await file.arrayBuffer());
 
-        const fileUpload = bucket.file(fileName);
-        await fileUpload.save(fileBuffer, {
-            metadata: { contentType: file.type },
-        });
-
-        await fileUpload.makePublic();
-        const publicUrl = fileUpload.publicUrl();
-
-        await adminDb.collection('users').doc(targetUserId).update({
-            profilePictureUrl: publicUrl,
-            updatedAt: new Date().toISOString(),
-        });
+        const controller = container.resolve(UserController);
+        const publicUrl = await controller.uploadProfilePicture(targetUserId, fileBuffer, file.name, file.type);
 
         return createApiResponse({ profilePictureUrl: publicUrl }, 200);
 

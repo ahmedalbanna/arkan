@@ -106,4 +106,9 @@ export class FirebaseUserRepository implements IUserRepository {
 
         return { users, hasNextPage, lastVisibleId: newLastVisibleId };
     }
+
+    async getAdmins(): Promise<UserProfile[]> {
+        const snapshot = await this.collection.where('role', '==', 'admin').get();
+        return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as UserProfile));
+    }
 }

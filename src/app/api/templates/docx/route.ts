@@ -1,32 +1,18 @@
-// src/app/api/templates/docx/route.ts
-import { adminDb } from '@/lib/firebase/server-init';
-import { templates as defaultTemplates, type DocxTemplateKey  } from '@/lib/docx-styles';
+
 import { createApiResponse, handleApiError, withAuth } from '@/lib/utils/api-utils';
 import { z } from 'zod';
-import { createGenerativeTemplate } from '@/services/templateService';
+import { container } from '@/infrastructure/di/container';
+import { TemplateController } from '@/modules/templates/adapters/controllers/TemplateController';
+import { templates as defaultTemplates } from '@/lib/docx-styles';
 
-// This endpoint is public and does not require authentication
-// as all users need to be able to fetch the templates for exporting.
 export async function GET() {
     try {
-        let stylesCollection = adminDb.collection('templates').doc('docx').collection('styles');
-        let snapshot = await stylesCollection.get();
+        const controller = container.resolve(TemplateController);
+        const templatesList = await controller.getTemplates('docx');
 
-        // Lazy seeding: If no templates exist, populate them from the default config.
-        if (snapshot.empty) {
-            let batch = adminDb.batch();
-            (Object.keys(defaultTemplates) as DocxTemplateKey []).forEach(key => {
-                let template = defaultTemplates[key];
-                let docRef = stylesCollection.doc(key);
-                batch.set(docRef, { ...template, id: key, createdAt: new Date().toISOString() });
-            });
-            await batch.commit();
-            snapshot = await stylesCollection.get(); // Re-fetch after seeding
-        }
-
-        let templates: { [key: string]: any } = {};
-        snapshot.docs.forEach((doc) => {
-            templates[doc.id] = doc.data();
+        const templates: { [key: string]: any } = {};
+        templatesList.forEach((t) => {
+            templates[t.id] = t;
         });
 
         return createApiResponse(templates, 200);
@@ -35,33 +21,37 @@ export async function GET() {
     }
 }
 
-
 const createDocxTemplateSchema = z.object({
-  id: z.string().min(3, "ID must be at least 3 characters").regex(/^[a-z0-9-]+$/, "ID can only contain lowercase letters, numbers, and hyphens."),
-  name: z.string().min(1, "Name is required"),
-  description: z.string().min(1, "Description is required"),
+  id: z.string().min(3).regex(/^[a-z0-9-]+$/),
+  name: z.string().min(1),
+  description: z.string().min(1),
 });
 
 export const POST = withAuth(async ({ request }) => {
     try {
-        let body = await request.json();
-        let validation = createDocxTemplateSchema.safeParse(body);
+        const body = await request.json();
+        const validation = createDocxTemplateSchema.safeParse(body);
         if(!validation.success) {
             return handleApiError(validation.error);
         }
 
-        let { id, name, description } = validation.data;
+        const { id, name, description } = validation.data;
+        const controller = container.resolve(TemplateController);
 
-        // Create a new template based on the 'modern' default
-        let newTemplateData = {
+        // Check if exists
+        const existing = await controller.getTemplateById('docx', id);
+        if (existing) {
+            return handleApiError({ message: 'Template already exists.' }, 409);
+        }
+
+        const newTemplate = await controller.saveTemplate('docx', {
+            id,
             name,
             description,
             styles: defaultTemplates.modern.styles,
             imageUrl: 'https://placehold.co/400x565.png',
             dataAiHint: 'document modern',
-        };
-
-        let newTemplate = await createGenerativeTemplate('docx', id, newTemplateData);
+        });
 
         return createApiResponse(newTemplate, 201);
     } catch (error) {

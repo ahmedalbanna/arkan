@@ -1,6 +1,8 @@
+
 import { z } from 'zod';
-import { adminDb } from '@/lib/firebase/server-init';
 import { withAuth, handleApiError, createApiResponse } from '@/lib/utils/api-utils';
+import { container } from '@/infrastructure/di/container';
+import { TemplateController } from '@/modules/templates/adapters/controllers/TemplateController';
 
 const updatePptxTemplateSchema = z.object({
   styles: z.object({}).passthrough(),
@@ -8,29 +10,25 @@ const updatePptxTemplateSchema = z.object({
 
 export const PUT = withAuth(async ({ request, params }) => {
     try {
-        let key = params.key;
+        const { key } = await params;
         if (!key) {
             return handleApiError({ message: 'Template key is required.' }, 400);
         }
 
-        let templateRef = adminDb.collection('templates').doc('pptx').collection('styles').doc(key);
-        let templateDoc = await templateRef.get();
-
-        if (!templateDoc.exists) {
-            return handleApiError({ message: 'PPTX template not found.' }, 404);
-        }
-
-        let body = await request.json();
-        let validation = updatePptxTemplateSchema.safeParse(body);
+        const body = await request.json();
+        const validation = updatePptxTemplateSchema.safeParse(body);
 
         if (!validation.success) {
             return handleApiError(validation.error);
         }
 
-        await templateRef.update({ styles: validation.data.styles, updatedAt: new Date().toISOString() });
-        let updatedDoc = await templateRef.get();
+        const controller = container.resolve(TemplateController);
+        const updatedTemplate = await controller.saveTemplate('pptx', {
+            id: key,
+            ...validation.data
+        });
 
-        return createApiResponse(updatedDoc.data(), 200);
+        return createApiResponse(updatedTemplate, 200);
 
     } catch (error) {
         return handleApiError(error);
@@ -39,7 +37,7 @@ export const PUT = withAuth(async ({ request, params }) => {
 
 export const DELETE = withAuth(async ({ params }) => {
     try {
-        let key = params.key;
+        const { key } = await params;
         if (!key) {
             return handleApiError({ message: 'Template key is required.' }, 400);
         }
@@ -48,14 +46,8 @@ export const DELETE = withAuth(async ({ params }) => {
             return handleApiError({ message: 'Default templates cannot be deleted.' }, 403);
         }
 
-        let templateRef = adminDb.collection('templates').doc('pptx').collection('styles').doc(key);
-        let templateDoc = await templateRef.get();
-
-        if (!templateDoc.exists) {
-            return handleApiError({ message: 'PPTX template not found.' }, 404);
-        }
-
-        await templateRef.delete();
+        const controller = container.resolve(TemplateController);
+        await controller.deleteTemplate('pptx', key);
 
         return createApiResponse({ message: `Template "${key}" deleted successfully.` }, 200);
 

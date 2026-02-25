@@ -9,6 +9,7 @@ export interface IUserRepository {
     deductCredits(id: string, amount: number): Promise<number>;
     addCredits(id: string, amount: number): Promise<void>;
     getPaginated(options: { limit: number, lastVisibleId?: string }): Promise<{ users: UserProfile[], hasNextPage: boolean, lastVisibleId: string | null }>;
+    getAdmins(): Promise<UserProfile[]>;
 }
 
 export const IUserRepositoryToken = Symbol("IUserRepository");

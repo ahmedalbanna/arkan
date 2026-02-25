@@ -1,23 +1,12 @@
-/**
- * RAG Statistics API Endpoint
- * 
- * Returns detailed statistics about the RAG system
- */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { getVectorStore } from '@/lib/rag/vector-store';
+import { container } from '@/infrastructure/di/container';
+import { RagController } from '@/modules/rag/adapters/controllers/RagController';
 
 export async function GET(_request: NextRequest) {
   try {
-    const vectorStore = getVectorStore();
-
-    // Get total chunks
-    let totalChunks = 0;
-    if (typeof vectorStore.size === 'function') {
-      totalChunks = await vectorStore.size();
-    } else {
-      totalChunks = vectorStore.size();
-    }
+    const controller = container.resolve(RagController);
+    const { totalChunks } = await controller.getStats();
 
     // Mock project data for now (in production, track this separately)
     const projects = [
@@ -43,12 +32,8 @@ export async function GET(_request: NextRequest) {
 
   } catch (error) {
     console.error('Error fetching RAG stats:', error);
-    
-    return NextResponse.json(
-      {
-        error: error instanceof Error ? error.message : 'Failed to fetch statistics',
-      },
-      { status: 500 }
-    );
+    return NextResponse.json({ 
+        error: error instanceof Error ? error.message : 'Failed to fetch statistics' 
+    }, { status: 500 });
   }
 }
