@@ -1,20 +1,120 @@
-## Error Type
-Runtime FirebaseError
-
-## Error Message
-Expected first argument to collection() to be a CollectionReference, a DocumentReference or FirebaseFirestore
-
-
-    at AppProviders (src/components/shared/AppProviders.tsx:31:15)
-    at RootLayout (src/app/layout.tsx:137:9)
-
-## Code Frame
-  29 |         <LocalizationProvider>
-  30 |             <FirebaseProvider firebaseApp={firebaseApp} firestore={firestore} auth={auth}>
-> 31 |               <AuthProvider>
-     |               ^
-  32 |                 <FirebaseMessagingProvider>
-  33 |                   {children}
-  34 |                 </FirebaseMessagingProvider>
-
-Next.js version: 15.5.9 (Turbopack)
+ GET /builder 200 in 1719ms
+ GET /favicon.ico?favicon.7ed73651.ico 200 in 310ms
+ POST /api/auth/session 200 in 573ms
+API Route Error: Error: Cannot inject the dependency "getUserProfileUseCase" at position #0 of "UserController" constructor. Reason:
+    Cannot inject the dependency "userRepository" at position #0 of "GetUserProfileUseCase" constructor. Reason:
+        TypeInfo not known for "undefined"
+    at <unknown> (src/lib/utils/api-utils.ts:44:36)
+  42 |       }
+  43 |
+> 44 |       const controller = container.resolve(UserController);
+     |                                    ^
+  45 |       const user = await controller.getUser(decodedToken.uid);
+  46 |       
+  47 |       if (!user) {
+ GET /api/projects 500 in 725ms
+API Route Error: Error: Cannot inject the dependency "getUserProfileUseCase" at position #0 of "UserController" constructor. Reason:
+    Cannot inject the dependency "userRepository" at position #0 of "GetUserProfileUseCase" constructor. Reason:
+        TypeInfo not known for "undefined"
+    at <unknown> (src/lib/utils/api-utils.ts:44:36)
+  42 |       }
+  43 |
+> 44 |       const controller = container.resolve(UserController);
+     |                                    ^
+  45 |       const user = await controller.getUser(decodedToken.uid);
+  46 |       
+  47 |       if (!user) {
+ GET /api/users/nR5tqFUzwhdm4ybpBObt25pJ6TI2 500 in 795ms
+Registering server-side dependencies...
+Firebase Admin SDK initialized using environment variables.
+API Route Error: Error: Cannot inject the dependency "getUserProfileUseCase" at position #0 of "UserController" constructor. Reason:
+    Cannot inject the dependency "userRepository" at position #0 of "GetUserProfileUseCase" constructor. Reason:
+        TypeInfo not known for "undefined"
+    at <unknown> (src/lib/utils/api-utils.ts:44:36)
+  42 |       }
+  43 |
+> 44 |       const controller = container.resolve(UserController);
+     |                                    ^
+  45 |       const user = await controller.getUser(decodedToken.uid);
+  46 |       
+  47 |       if (!user) {
+ GET /api/projects 500 in 513ms
+API Route Error: Error: Cannot inject the dependency "getUserProfileUseCase" at position #0 of "UserController" constructor. Reason:
+    Cannot inject the dependency "userRepository" at position #0 of "GetUserProfileUseCase" constructor. Reason:
+        TypeInfo not known for "undefined"
+    at <unknown> (src/lib/utils/api-utils.ts:44:36)
+  42 |       }
+  43 |
+> 44 |       const controller = container.resolve(UserController);
+     |                                    ^
+  45 |       const user = await controller.getUser(decodedToken.uid);
+  46 |       
+  47 |       if (!user) {
+ GET /api/users/nR5tqFUzwhdm4ybpBObt25pJ6TI2 500 in 693ms
+Registering server-side dependencies...
+Firebase Admin SDK initialized using environment variables.
+API Route Error: Error: Cannot inject the dependency "getUserProfileUseCase" at position #0 of "UserController" constructor. Reason:
+    Cannot inject the dependency "userRepository" at position #0 of "GetUserProfileUseCase" constructor. Reason:
+        TypeInfo not known for "undefined"
+    at <unknown> (src/lib/utils/api-utils.ts:44:36)
+  42 |       }
+  43 |
+> 44 |       const controller = container.resolve(UserController);
+     |                                    ^
+  45 |       const user = await controller.getUser(decodedToken.uid);
+  46 |       
+  47 |       if (!user) {
+ GET /api/users/nR5tqFUzwhdm4ybpBObt25pJ6TI2 500 in 544ms
+Registering server-side dependencies...
+Firebase Admin SDK initialized using environment variables.
+API Route Error: Error: Cannot inject the dependency "getUserProfileUseCase" at position #0 of "UserController" constructor. Reason:
+    Cannot inject the dependency "userRepository" at position #0 of "GetUserProfileUseCase" constructor. Reason:
+        TypeInfo not known for "undefined"
+    at <unknown> (src/lib/utils/api-utils.ts:44:36)
+  42 |       }
+  43 |
+> 44 |       const controller = container.resolve(UserController);
+     |                                    ^
+  45 |       const user = await controller.getUser(decodedToken.uid);
+  46 |       
+  47 |       if (!user) {
+ GET /api/users/nR5tqFUzwhdm4ybpBObt25pJ6TI2 500 in 554ms
+Registering server-side dependencies...
+Firebase Admin SDK initialized using environment variables.
+ GET /api/admin/settings 200 in 1948ms
+API Route Error: Error: Cannot inject the dependency "getUserProfileUseCase" at position #0 of "UserController" constructor. Reason:
+    Cannot inject the dependency "userRepository" at position #0 of "GetUserProfileUseCase" constructor. Reason:
+        TypeInfo not known for "undefined"
+    at <unknown> (src/lib/utils/api-utils.ts:44:36)
+  42 |       }
+  43 |
+> 44 |       const controller = container.resolve(UserController);
+     |                                    ^
+  45 |       const user = await controller.getUser(decodedToken.uid);
+  46 |       
+  47 |       if (!user) {
+ GET /api/projects 500 in 489ms
+API Route Error: Error: Cannot inject the dependency "getUserProfileUseCase" at position #0 of "UserController" constructor. Reason:
+    Cannot inject the dependency "userRepository" at position #0 of "GetUserProfileUseCase" constructor. Reason:
+        TypeInfo not known for "undefined"
+    at <unknown> (src/lib/utils/api-utils.ts:44:36)
+  42 |       }
+  43 |
+> 44 |       const controller = container.resolve(UserController);
+     |                                    ^
+  45 |       const user = await controller.getUser(decodedToken.uid);
+  46 |       
+  47 |       if (!user) {
+ GET /api/projects 500 in 495ms
+API Route Error: Error: Cannot inject the dependency "getUserProfileUseCase" at position #0 of "UserController" constructor. Reason:
+    Cannot inject the dependency "userRepository" at position #0 of "GetUserProfileUseCase" constructor. Reason:
+        TypeInfo not known for "undefined"
+    at <unknown> (src/lib/utils/api-utils.ts:44:36)
+  42 |       }
+  43 |
+> 44 |       const controller = container.resolve(UserController);
+     |                                    ^
+  45 |       const user = await controller.getUser(decodedToken.uid);
+  46 |       
+  47 |       if (!user) {
+ GET /api/projects 500 in 419ms

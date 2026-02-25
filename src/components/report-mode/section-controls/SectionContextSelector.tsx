@@ -37,9 +37,9 @@ export function SectionContextSelector({ sectionId }: SectionContextSelectorProp
   
   // Get all sections except current one for copying context from
   const otherSections = useMemo(() => {
-    return reportSections.filter(s => s.id !== sectionId && (
-      Object.keys(s.context?.sections || {}).length > 0 || 
-      Object.keys(s.context?.externalContext || {}).length > 0
+    return (reportSections as any[]).filter(s => s.id !== sectionId && (
+      Object.keys((s as any).context?.sections || {}).length > 0 || 
+      Object.keys((s as any).context?.externalContext || {}).length > 0
     ));
   }, [reportSections, sectionId]);
   
@@ -97,8 +97,8 @@ export function SectionContextSelector({ sectionId }: SectionContextSelectorProp
                 </SelectTrigger>
                 <SelectContent>
                   {otherSections.map(section => {
-                    const contextCount = Object.keys(section.context?.sections || {}).length + 
-                                       Object.keys(section.context?.externalContext || {}).length;
+                    const contextCount = Object.keys((section as any).context?.sections || {}).length + 
+                                       Object.keys((section as any).context?.externalContext || {}).length;
                     return (
                       <SelectItem key={section.id} value={section.id} className="text-xs">
                         {section.title} ({contextCount} link{contextCount > 1 ? 's' : ''})

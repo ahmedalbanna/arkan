@@ -64,8 +64,8 @@ export class VectorStore {
 
     // Persist to Firestore
     try {
-      const docRef = doc(db, this.collectionName, chunk.id);
-      await setDoc(docRef, {
+      const docRef = doc(db as any, this.collectionName, chunk.id);
+      await (setDoc as any)(docRef, {
         content: chunk.content,
         embedding: chunk.embedding || [],
         metadata: chunk.metadata,
@@ -129,7 +129,7 @@ export class VectorStore {
   async loadProjectChunks(projectId: string): Promise<void> {
     try {
       const q = query(
-        collection(db, this.collectionName),
+        collection(db as any, this.collectionName),
         where('metadata.projectId', '==', projectId)
       );
 

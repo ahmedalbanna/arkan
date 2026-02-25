@@ -1,7 +1,7 @@
 
 import { apiService } from "@/services/api/apiService";
 import { UserProfile } from "../../domain/entities/User";
-import type { Firestore } from "firebase/firestore";
+import { doc, onSnapshot, type Firestore } from "firebase/firestore";
 
 export class UserApiClient {
     async fetchUserById(id: string, token: string): Promise<UserProfile> {
@@ -72,9 +72,6 @@ export class UserApiClient {
         if (typeof window === 'undefined' || !firestore) {
             return () => {}; 
         }
-
-        // We can use standard imports for types only
-        const { doc, onSnapshot } = require("firebase/firestore");
 
         const userDocRef = doc(firestore, "users", userId);
 

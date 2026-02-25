@@ -41,10 +41,10 @@ export const POST = withAuth(async ({ request, user }) => {
             input: { fileName: file.name, fileType: file.type },
             flow: async () => {
                 if (file.type === 'application/pdf') {
-                    const res = await rewriteDocumentToMarkdown({ pdfDataUri: dataUri });
+                    const res = await rewriteDocumentToMarkdown({ flow: 'rewrite-document-to-markdown', pdfDataUri: dataUri });
                     return { markdown: 'markdown' in res ? res.markdown : '' };
                 } else if (file.type.startsWith('image/')) {
-                    const res = await imageToText({ imageDataUri: dataUri });
+                    const res = await imageToText({ flow: 'image-to-text', imageDataUri: dataUri });
                     return { markdown: 'text' in res ? res.text : '' };
                 } else {
                     const content = Buffer.from(fileArrayBuffer).toString('utf-8');

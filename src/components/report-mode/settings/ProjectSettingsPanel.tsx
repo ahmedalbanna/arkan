@@ -140,9 +140,9 @@ export default function ProjectSettingsPanel() {
   const handleBlur = () => {
     const data = form.getValues();
     updateProject(p => {
-      const updatePayload: Partial<ProjectProperties> = { ...data };
+      const updatePayload: Partial<ProjectProperties> = { ...(data as any) };
       if (data.teamMembers) {
-        updatePayload.teamMembers = data.teamMembers.split(',').map(name => name.trim()).filter(Boolean);
+        updatePayload.teamMembers = (data.teamMembers as unknown as string).split(',').map((name: string) => name.trim()).filter(Boolean);
       } else {
         updatePayload.teamMembers = [];
       }

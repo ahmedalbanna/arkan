@@ -21,10 +21,10 @@ export const POST = withAuth(async ({ request, user }) => {
     }
 
     const controller = container.resolve(AiController);
-    const result = await controller.runTool({
+    const result = await controller.runTool<typeof validation.data & { flow: 'generate-image' }, Awaited<ReturnType<typeof generateImage>>>({
         userId: user.id,
         toolName: 'generate-image',
-        input: validation.data,
+        input: { ...validation.data, flow: 'generate-image' as const },
         flow: generateImage,
         creditCost: 5
     });

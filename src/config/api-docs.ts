@@ -558,7 +558,7 @@ export const apiDocsConfig: ApiSection[] = [
             description: 'Export project content or raw markdown to a DOCX file.',
             auth: 'user',
             requestBody: { project: {}, selectedContent: [] },
-            responseBody: '(binary file data)'
+            responseBody: {} as Record<string, any>
         },
         {
             method: 'POST',
@@ -566,7 +566,7 @@ export const apiDocsConfig: ApiSection[] = [
             description: 'Export project content or raw markdown to a PPTX file.',
             auth: 'user',
             requestBody: { markdown: '# Slide 1', fileName: 'presentation' },
-            responseBody: '(binary file data)'
+            responseBody: {} as Record<string, any>
         },
         {
             method: 'POST',
@@ -581,8 +581,8 @@ export const apiDocsConfig: ApiSection[] = [
             path: '/api/image-to-svg',
             description: 'Convert a raster image (PNG, JPG) to a vector SVG.',
             auth: 'user',
-            requestBody: { file: '(binary file data)', mode: 'line' },
-            responseBody: '<svg>...</svg>'
+            requestBody: { file: '(binary file data)', mode: 'line' } as Record<string, any>,
+            responseBody: {} as Record<string, any>
         },
     ]
   }

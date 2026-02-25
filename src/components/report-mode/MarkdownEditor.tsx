@@ -38,16 +38,18 @@ const MarkdownEditorComponent = ({ content, onChange, editorClassName }: Markdow
       attributes: {
         class: cn('prose dark:prose-invert max-w-none focus:outline-none font-serif text-base prose-p:text-base prose-headings:font-headline prose-a:text-primary hover:prose-a:text-primary/80 prose-table:w-full prose-table:table-fixed prose-tr:border-b prose-th:text-left prose-th:p-2 prose-td:p-2', editorClassName),
       },
-      handlePaste: async (view, event, slice): Promise<boolean> => {
+      handlePaste: (view, event, slice): boolean => {
         const text = event.clipboardData?.getData('text/plain');
         const html = event.clipboardData?.getData('text/html');
 
         if (html) {
-            return await handleHtmlPaste(editor!, html);
+            void handleHtmlPaste(editor!, html);
+            return true;
         }
 
         if (text) {
-          return await handlePlainPaste(editor!, text);
+          void handlePlainPaste(editor!, text);
+          return true;
         }
         
         return false;
@@ -78,7 +80,7 @@ const MarkdownEditorComponent = ({ content, onChange, editorClassName }: Markdow
       {editor && (
         <BubbleMenu
           editor={editor}
-          tippyOptions={{ duration: 100, placement: 'top', onClose: () => false }}
+          tippyOptions={{ duration: 100, placement: 'top' }}
           pluginKey={bubbleMenuId}
           shouldShow={({ editor }) => !editor.state.selection.empty}
         >

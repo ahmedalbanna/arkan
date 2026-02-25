@@ -144,9 +144,10 @@ export async function POST(request: NextRequest) {
     });
 
     if (!result.success) {
-      console.error(`   ✗ Indexing failed: ${result.error}`);
+      const errMsg = result.errors?.join(', ') || 'Indexing failed';
+      console.error(`   ✗ Indexing failed: ${errMsg}`);
       return NextResponse.json(
-        { success: false, error: result.error || 'Indexing failed' },
+        { success: false, error: errMsg },
         { status: 500 }
       );
     }

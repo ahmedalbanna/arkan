@@ -53,9 +53,9 @@ export async function POST(req: NextRequest) {
 
     } else {
         // Handle direct markdown export
-        const { markdown, fileName: fn, options } = validation.data;
-        docxBuffer = await convertMarkdownToWord(markdown, fn, options);
-        fileName = `${fn}.docx`;
+        const directData = validation.data as { markdown: string; fileName: string; options: ConversionOptions };
+        docxBuffer = await convertMarkdownToWord(directData.markdown, directData.fileName, directData.options);
+        fileName = `${directData.fileName}.docx`;
     }
 
     if (!docxBuffer) {

@@ -92,11 +92,11 @@ export const POST = withAuth(async ({ request, user, params }) => {
     }
 
     const controller = container.resolve(AiController);
-    const result = await controller.runTool({
+    const result = await controller.runTool<any, any>({
         userId: user.id,
         toolName,
-        input: validation.data,
-        flow,
+        input: validation.data as any,
+        flow: flow as any,
         creditCost
     });
 

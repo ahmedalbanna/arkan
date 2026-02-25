@@ -167,7 +167,7 @@ export const academicPaperQualityCheckerFlow = ai.defineFlow(
 
         // Argument Score
         if (results.argumentAnalysis) {
-            const strengthMap = { strong: 90, moderate: 70, weak: 50 };
+            const strengthMap: Record<string, number> = { strong: 90, moderate: 70, weak: 50 };
             scores.argument = strengthMap[results.argumentAnalysis.overallStrength] || 60;
         }
 

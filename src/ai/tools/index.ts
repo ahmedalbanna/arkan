@@ -65,18 +65,16 @@ export {
 } from './prompt-architect';
 
 // Export Google search tools
-export {
-    googleSearchTool,
-    googleSearchTools, searchImages,
-    searchMaps, searchNews, searchShopping, searchWeb
-} from './google-search';
+// export { googleSearchTool, googleSearchTools, searchImages, searchMaps, searchNews, searchShopping, searchWeb } from './google-search'; // module not yet created
+// Placeholder for googleSearchTool until google-search module is created
+const googleSearchTool: Record<string, unknown> = {};
 
 // Aggregate all tools for easy registration
 import { citationsAndReferencesTools } from './citations-and-references';
 import { comprehensiveAnalysisTools } from './comprehensive-analysis';
 import { documentStructureTools } from './document-structure';
 import { documentationGenerationTools } from './documentation-generation';
-import { googleSearchTools } from './google-search';
+// import { googleSearchTools } from './google-search'; // module not yet created
 import { grammarAndStyleTools } from './grammar-and-style';
 import { projectAnalysisTools } from './project-analysis';
 import { promptArchitectTools } from './prompt-architect';
@@ -120,8 +118,8 @@ export const projectDocumentationTools = {
  * Search and research tools
  */
 export const searchAndResearchTools = {
-    // Google Search (1 tool)
-    ...googleSearchTools,
+    // Google Search tools (module not yet created)
+    // ...googleSearchTools,
 };
 
 /**

@@ -1,4 +1,6 @@
-// // src/app/api/templates/refresh-image/route.ts
+// Route disabled - pending refactor to new architecture
+// eslint-disable-next-line @typescript-eslint/no-empty-function
+export {};
 // import { generateImage } from '@/ai/flows/generate-image';
 // import { adminDb } from '@/lib/firebase/server-init';
 // import { createApiResponse, handleApiError, withAuth } from '@/lib/utils/api-utils';

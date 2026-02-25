@@ -146,7 +146,7 @@ export const projectDocumentationGenerator = ai.defineFlow(
 
             const archDiagram = await generateArchitectureDiagramTool({
                 projectPath,
-                diagramType: input.diagramType || 'component',
+                diagramType: (input.diagramType || 'component') as "class" | "flowchart" | "sequence" | "component" | "deployment",
                 includeDetails: true,
                 style: 'detailed',
             });

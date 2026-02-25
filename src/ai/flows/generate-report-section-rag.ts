@@ -68,6 +68,7 @@ ${ragContext ? 'IMPORTANT: You have access to RAG-retrieved context which contai
     system: systemPrompt,
     prompt: `
 ${getJsonPromptInstructions(`{
+  "sectionName": "Name of the section being generated",
   "content": "Complete section content in markdown format"
 }`)}
 
@@ -143,6 +144,7 @@ Now, generate the section content based on all the context provided above. Synth
       fallbackFn: (rawOutput) => {
         if (typeof rawOutput === 'string') {
           return {
+            sectionName: input.sectionToGenerate,
             content: rawOutput,
           };
         }

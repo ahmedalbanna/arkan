@@ -43,6 +43,9 @@ export const academicLiteratureReviewFlow = ai.defineFlow(
         outputSchema: AcademicLiteratureReviewOutputSchema,
     },
     async (input) => {
+        const { topic, keywords, citationStyle, focusAreas, minLength, includeGaps } = input;
+        void topic; void keywords; void focusAreas; void minLength; void includeGaps; // used in prompts below
+
         // ========================================================================
         // STEP 1: Generate Initial Draft
         // ========================================================================

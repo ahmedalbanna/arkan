@@ -34,7 +34,7 @@ import { Checkbox } from '../ui/checkbox';
 import { useDebounce } from '@/hooks';
 
 const generateSchema = z.object({
-  flow: z.string(),
+  flow: z.literal('generate-agent-config').default('generate-agent-config'),
   prompt: z.string().min(10, 'Please describe the agent you want to create in more detail.'),
   includeJsonOutput: z.boolean().default(false),
 });

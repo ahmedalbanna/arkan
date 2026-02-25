@@ -139,7 +139,7 @@ export default function AdminSettingsPage() {
 
     const onSubmit = async (data: SettingsFormValues) => {
         const token = await getAuthenticatedToken(firebaseUser);
-        mutation.mutate({ data, token });
+        mutation.mutate({ data: data as AppSettings, token });
     };
 
     const addNewMethod = () => {

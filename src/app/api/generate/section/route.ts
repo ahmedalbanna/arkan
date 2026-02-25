@@ -44,7 +44,8 @@ export const POST = withAuth(async ({ request, user }) => {
         creditCost
     });
 
-    const content = result?.content;
+    const sectionResult = result as { content?: string } | null;
+    const content = sectionResult?.content;
     if (!content) {
       throw new Error('AI generation returned empty content.');
     }

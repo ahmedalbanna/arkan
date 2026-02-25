@@ -33,8 +33,8 @@ You have been provided with the full context of their current project. Your role
 
 Always be helpful, encouraging, and provide actionable advice. Keep your responses concise and to the point. Format your responses using simple markdown.`;
     
-    const llmResponse = await ai.generate({
-      model: 'ollama/phi3:mini-4k', // Phi-3 is good for conversational chat
+    const llmResponse = await (ai.generate as any)({
+      model: 'ollama/phi4-mini:latest', // Updated model
       system: systemPrompt,
       prompt: `
 **Project Context:**
