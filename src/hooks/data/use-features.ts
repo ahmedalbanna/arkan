@@ -9,13 +9,19 @@ import { useAuth } from '@/context/AuthContext';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { featureKeys } from '@/lib/query-keys';
 import { Feature } from '@/modules/admin/domain/entities/Feature';
-
+import { fetchFeaturesApi, updateFeatureApi, type UpdateFeatureVariables } from '@/modules/admin/adapters/api-client/FeatureApiClient';
 
 
 export function useFeatures() {
+    const { firebaseUser } = useAuth();
     const { data: features, isPending: isLoading, isError, isFetched: isLoaded } = useQuery<Feature[]>({
         queryKey: featureKeys.lists(),
-        queryFn: fetchFeaturesApi,
+        queryFn: async () => {
+            if (!firebaseUser) throw new Error('User not authenticated');
+            const token = await firebaseUser.getIdToken();
+            return fetchFeaturesApi(token);
+        },
+        enabled: !!firebaseUser,
         staleTime: 1000 * 60 * 5, // 5 minutes
     });
 

@@ -2,6 +2,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import type { Notification } from '@/modules/users/domain/entities/Notification';
 import { useAuth } from '@/context/AuthContext';
 import { getDatabase } from 'firebase/database';
 import { initializeFirebase } from '@/firebase';

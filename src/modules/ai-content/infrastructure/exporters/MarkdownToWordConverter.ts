@@ -22,7 +22,9 @@ import remarkParse from 'remark-parse';
 import { unified } from 'unified';
 
 
-import { Project, Chapter, ProjectContent } from './models';
+import { Chapter } from '@/modules/ai-content/domain/entities/Chapter';
+import type { ProjectContent } from '@/modules/projects/domain/entities/Project';
+import { Project } from '@/modules/projects/domain/entities/Project';
 import { convertAstToDocxObjects } from '@/modules/ai-content/infrastructure/exporters/word-converter/ast-converter';
 import { ConversionOptions, DocxObject } from '@/modules/ai-content/infrastructure/exporters/word-converter/types';
 import { processFootnotes } from '@/modules/ai-content/infrastructure/exporters/word-converter/node-handlers';

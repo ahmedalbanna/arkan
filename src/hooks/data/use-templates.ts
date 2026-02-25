@@ -23,6 +23,7 @@ import { useSections } from './use-sections';
 import { applyReportTemplate as applyReportTemplateUtil } from '@/lib/project/template';
 import { CreateReportTemplateData, ReportTemplateProperties, UpdateReportTemplateData } from '@/modules/templates/domain/entities/ReportTemplate';
 import { PptxTemplateProperties } from '@/modules/templates/domain/entities/PptxTemplate';
+import type { BaseTemplateProperties } from '@/modules/templates/domain/entities/Template';
 
 
 // ============================================================================
@@ -30,9 +31,14 @@ import { PptxTemplateProperties } from '@/modules/templates/domain/entities/Pptx
 // ============================================================================
 
 export function useReportTemplates() {
+    const { firebaseUser } = useAuth();
     return useQuery<ReportTemplateProperties[]>({
         queryKey: ['report-templates'],
-        queryFn: fetchReportTemplatesApi,
+        queryFn: async () => {
+            const token = await getAuthenticatedToken(firebaseUser);
+            return fetchReportTemplatesApi(token);
+        },
+        enabled: !!firebaseUser,
         staleTime: 1000 * 60 * 60, // 1 hour
     });
 }
@@ -119,10 +125,14 @@ export function useDeleteReportTemplate() {
 // ============================================================================
 
 export function usePresentationTemplates() {
+    const { firebaseUser } = useAuth();
     return useQuery<PptxTemplateProperties[]>({
         queryKey: ['presentation-templates'],
-        
-        queryFn: fetchPresentationTemplatesApi,
+        queryFn: async () => {
+            const token = await getAuthenticatedToken(firebaseUser);
+            return fetchPresentationTemplatesApi(token);
+        },
+        enabled: !!firebaseUser,
     });
 }
 
@@ -131,9 +141,9 @@ export function useCreatePresentationTemplate() {
     const queryClient = useQueryClient();
     const { firebaseUser } = useAuth();
     return useMutation({
-        mutationFn: async (data: CreatePresentationTemplateData) => {
+        mutationFn: async (data: BaseTemplateProperties) => {
             const token = await getAuthenticatedToken(firebaseUser);
-            return createPresentationTemplateApi(data, token);
+            return createPresentationTemplateApi({ ...data }, token);
         },
         onSuccess: () => queryClient.invalidateQueries({ queryKey: ['presentation-templates'] }),
         onError: (error: any) => toast({ title: 'Creation Failed', description: error.message, variant: 'destructive' }),
@@ -144,9 +154,9 @@ export function useUpdatePresentationTemplate() {
     const queryClient = useQueryClient();
     const { firebaseUser } = useAuth();
     return useMutation({
-        mutationFn: async ({ templateId, data }: { templateId: string; data: UpdatePresentationTemplateData }) => {
+        mutationFn: async ({ templateId, data }: { templateId: string; data: Partial<BaseTemplateProperties> }) => {
             const token = await getAuthenticatedToken(firebaseUser);
-            return updatePresentationTemplateApi(templateId, data, token);
+            return updatePresentationTemplateApi(templateId, { ...data }, token);
         },
         onSuccess: () => {
             toast({ title: 'Template Updated', description: 'Presentation template has been saved.' });

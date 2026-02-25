@@ -12,6 +12,14 @@ import { useQuery } from '@tanstack/react-query';
 
 export type TransactionStatus = 'pending' | 'verified' | 'rejected';
 
+export interface VerifyPaymentVariables {
+    transactionId: string;
+    userId: string;
+    creditsToGrant: number;
+    status: TransactionStatus;
+    adminNotes?: string;
+}
+
 
 
 const TRANSACTIONS_PER_PAGE = 6;

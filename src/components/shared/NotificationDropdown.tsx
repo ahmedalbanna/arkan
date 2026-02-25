@@ -24,7 +24,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import type { Notification } from '@/lib/types';
+import type { Notification } from '@/modules/users/domain/entities/Notification';
 import { formatDistanceToNow } from 'date-fns';
 
 function NotificationIcon({ icon }: { icon: Notification['icon'] }) {

@@ -16,11 +16,11 @@ export function useGuidelineEditor(itemKey: string) {
     // This prevents race conditions and simplifies the data flow.
 
     const setPrompt = (prompt: string) => {
-        updateProject(p => p.updateSection(itemKey, s => s.with({ prompt })));
+        updateProject(currentProject => currentProject.updateSection(itemKey, section => section.withProps({ prompt })));
     };
 
     const setGuidelines = (guidelines: string[]) => {
-        updateProject(p => p.updateSection(itemKey, s => s.with({ guidelines })));
+        updateProject(currentProject => currentProject.updateSection(itemKey, section => section.withProps({ guidelines })));
     };
 
     return {

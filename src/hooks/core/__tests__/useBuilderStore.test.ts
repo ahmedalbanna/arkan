@@ -90,7 +90,7 @@ describe('useBuilderStore', () => {
     });
 
     act(() => {
-      result.current.updateProject(p => p.updateSection('sec1', s => s.with({ content: 'Updated content' })));
+      result.current.updateProject(project => project.updateSection('sec1', section => section.withProps({ content: 'Updated content' })));
     });
 
     expect(result.current.project?.getSection('sec1')?.content).toBe('Updated content');
@@ -198,9 +198,9 @@ describe('useBuilderStore', () => {
     expect(chapter).not.toBeInstanceOf(Chapter);
 
     const section = chapter.sections[0];
-    expect(section).not.toBeInstanceOf(Section);
-    expect(section.content).toBe('Hello World');
-    expect(section.controls?.formality).toBe(75);
+    expect(section).toBeInstanceOf(Section);
+    expect(section?.content).toBe('Hello World');
+    expect(section?.controls?.formality).toBe(75);
   });
 
   describe('useBuilderStore Integration', () => {
@@ -218,9 +218,9 @@ describe('useBuilderStore', () => {
       const firstSectionId = (result.current.project!.content[0] as Chapter).sections[0].id;
 
       act(() => {
-        result.current.updateProject(p => 
-          p.updateChapter((p.content[0] as Chapter).id, c => 
-            c.updateSection(firstSectionId, s => s.with({ title: "UPDATED TITLE" }))
+        result.current.updateProject(project => 
+          project.updateChapter((project.content[0] as Chapter).id, chapter => 
+            chapter.updateSection(firstSectionId, section => section.withProps({ title: "UPDATED TITLE" }))
           )
         );
       });

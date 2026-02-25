@@ -45,6 +45,7 @@ export function useChapterActions(chapter: Chapter | null, onOpenChange?: (open:
       const defaultContext: SectionContext = { sections: {}, externalContext: {} };
       // Default all sections within this chapter to be selected
       chapter.sections.forEach(section => {
+        defaultContext.sections = defaultContext.sections || {};
         defaultContext.sections[section.id] = 'context';
       });
       setContext(defaultContext);

@@ -56,7 +56,7 @@ export function SectionGenerationControls({
     };
     
     const onOutputStyleChange = (style: keyof GenerationControlState['outputStyle'], checked: boolean) => {
-        updateProject(p => p.updateSection(section.id, s => s.withProps({ controls: { ...s.controls, outputStyle: { ...s.controls.outputStyle, [style]: checked } } })));
+        updateProject(project => project.updateSection(section.id, currentSection => currentSection.withProps({ controls: { ...currentSection.controls, outputStyle: { ...currentSection.controls.outputStyle, [style]: checked } } })));
     };
     
     const handleToneChange = (value: string) => {
@@ -113,10 +113,10 @@ export function SectionGenerationControls({
              <div className="space-y-2">
                 <Label>Output Format</Label>
                 <div className="flex items-center flex-wrap gap-4">
-                    {Object.keys(controls.outputStyle).map(key => (
-                         <div key={key} className="flex items-center gap-2">
-                            <Checkbox id={`output-${key}-${section.id}`} checked={controls.outputStyle[key as keyof typeof controls.outputStyle]} onCheckedChange={(checked) => onOutputStyleChange(key as keyof typeof controls.outputStyle, !!checked)} />
-                            <Label htmlFor={`output-${key}-${section.id}`} className="capitalize">{key.replace(/([A-Z])/g, ' $1')}</Label>
+                    {(Object.keys(controls.outputStyle) as Array<keyof GenerationControlState['outputStyle']>).map(key => (
+                         <div key={String(key)} className="flex items-center gap-2">
+                            <Checkbox id={`output-${String(key)}-${section.id}`} checked={controls.outputStyle[key]} onCheckedChange={(checked) => onOutputStyleChange(key, !!checked)} />
+                            <Label htmlFor={`output-${String(key)}-${section.id}`} className="capitalize">{String(key).replace(/([A-Z])/g, ' $1')}</Label>
                         </div>
                     ))}
                 </div>

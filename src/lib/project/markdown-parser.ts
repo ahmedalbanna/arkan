@@ -31,7 +31,7 @@ export function parseMarkdownToContent(markdown: string, existingContent: Projec
             return item as T;
         }
         if (item instanceof Chapter) {
-            const foundInSection = item.sections.find(s => s.title === title && !usedIds.has(s.id));
+            const foundInSection = item.sections.find(section => section.title === title && !usedIds.has(section.id));
             if (foundInSection && constructor === Section) {
                 return foundInSection as T;
             }
@@ -43,14 +43,14 @@ export function parseMarkdownToContent(markdown: string, existingContent: Projec
   const flushSection = () => {
     if (currentSection) {
       const sectionMarkdown = isToc ? (currentSection.content || '') : unified().use(remarkGfm).use(remarkStringify).stringify({ type: 'root', children: accumulatedContent }).trim();
-      
-      currentSection = currentSection.with({ content: sectionMarkdown });
+
+      const updatedSection = currentSection.withProps({ content: sectionMarkdown });
 
       if (currentChapter) {
         // addSection is immutable and returns a new Chapter instance
-        currentChapter = currentChapter.addSection(currentSection);
+        currentChapter = currentChapter.addSection(updatedSection);
       } else {
-        newContent.push(currentSection);
+        newContent.push(updatedSection);
       }
     }
     accumulatedContent = [];

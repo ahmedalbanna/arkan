@@ -17,11 +17,9 @@ export const defaultPaymentMethods: PaymentMethod[] = [
         icon: 'wallet',
         isActive: true,
         wallet: {
-            provider: 'cac-bank',
-            accountNumber: '770123456',
-            accountName: 'Arkan Platform',
-            phoneNumber: '+967-777-123-456',
-            notes: 'متاح على مدار الساعة'
+            name: 'Arkan Platform',
+            id: 'cac-bank',
+            number: '770123456'
         },
         processingTime: 'فوري',
         instructions: 'قم بتحويل المبلغ المطلوب إلى رقم المحفظة وأرسل إيصال الدفع'
@@ -34,11 +32,9 @@ export const defaultPaymentMethods: PaymentMethod[] = [
         icon: 'smartphone',
         isActive: true,
         wallet: {
-            provider: 'mobi-cash',
-            accountNumber: '712345678',
-            accountName: 'Arkan Platform',
-            phoneNumber: '+967-712-345-678',
-            notes: 'خدمة سريعة ومضمونة'
+            name: 'Arkan Platform',
+            id: 'mobi-cash',
+            number: '712345678'
         },
         processingTime: 'فوري',
         instructions: 'استخدم تطبيق موبي كاش للتحويل إلى رقم الحساب المذكور'
@@ -51,11 +47,9 @@ export const defaultPaymentMethods: PaymentMethod[] = [
         icon: 'smartphone',
         isActive: true,
         wallet: {
-            provider: 'yemen-mobile',
-            accountNumber: '730123456',
-            accountName: 'Arkan Platform',
-            phoneNumber: '+967-730-123-456',
-            notes: 'محفظة يمن موبايل الرسمية'
+            name: 'Arkan Platform',
+            id: 'yemen-mobile',
+            number: '730123456'
         },
         processingTime: 'فوري',
         instructions: 'احفظ رقم المحفظة وقم بالتحويل من خلال *133#'
@@ -68,11 +62,9 @@ export const defaultPaymentMethods: PaymentMethod[] = [
         icon: 'smartphone',
         isActive: true,
         wallet: {
-            provider: 'mtn-mobile-money',
-            accountNumber: '782345678',
-            accountName: 'Arkan Platform',
-            phoneNumber: '+967-782-345-678',
-            notes: 'خدمة MTN للمدفوعات الإلكترونية'
+            name: 'Arkan Platform',
+            id: 'mtn-mobile-money',
+            number: '782345678'
         },
         processingTime: 'فوري',
         instructions: 'استخدم رمز *141# للتحويل إلى رقم المحفظة'
@@ -85,11 +77,9 @@ export const defaultPaymentMethods: PaymentMethod[] = [
         icon: 'smartphone',
         isActive: true,
         wallet: {
-            provider: 'you-telecom',
-            accountNumber: '790123456',
-            accountName: 'Arkan Platform',
-            phoneNumber: '+967-790-123-456',
-            notes: 'محفظة يو الإلكترونية'
+            name: 'Arkan Platform',
+            id: 'you-telecom',
+            number: '790123456'
         },
         processingTime: 'فوري',
         instructions: 'قم بالتحويل من خلال تطبيق يو أو استخدم *155#'
@@ -106,13 +96,11 @@ export const defaultPaymentMethods: PaymentMethod[] = [
         accountHolder: 'Arkan Platform Services',
         currencies: {
             YER: {
-                accountNumber: '1001234567890',
                 iban: 'YE01AJIB0001234567890123456',
             },
             USD: {
-                accountNumber: '2001234567890',
                 iban: 'YE02AJIB0002234567890123456',
-                swiftCode: 'AJIBYHSA'
+                swift: 'AJIBYHSA'
             }
         },
         processingTime: '1-2 يوم عمل',
@@ -128,13 +116,11 @@ export const defaultPaymentMethods: PaymentMethod[] = [
         accountHolder: 'Arkan Platform Services',
         currencies: {
             YER: {
-                accountNumber: '3001234567890',
                 iban: 'YE03TDMN0003234567890123456',
             },
             USD: {
-                accountNumber: '4001234567890',
                 iban: 'YE04TDMN0004234567890123456',
-                swiftCode: 'TDMNYHSA'
+                swift: 'TDMNYHSA'
             }
         },
         processingTime: '1-2 يوم عمل',
@@ -150,18 +136,15 @@ export const defaultPaymentMethods: PaymentMethod[] = [
         accountHolder: 'Arkan Platform Services',
         currencies: {
             YER: {
-                accountNumber: '5001234567890',
                 iban: 'YE05CACB0005234567890123456',
             },
             USD: {
-                accountNumber: '6001234567890',
                 iban: 'YE06CACB0006234567890123456',
-                swiftCode: 'CACBYHSA'
+                swift: 'CACBYHSA'
             },
             SAR: {
-                accountNumber: '7001234567890',
                 iban: 'YE07CACB0007234567890123456',
-                swiftCode: 'CACBYHSA'
+                swift: 'CACBYHSA'
             }
         },
         processingTime: '1-2 يوم عمل',
@@ -178,11 +161,9 @@ export const defaultPaymentMethods: PaymentMethod[] = [
         isActive: true,
         accountHolder: 'Arkan Platform',
         wallet: {
-            provider: 'other',
-            accountNumber: 'ARKAN-2024',
-            accountName: 'Arkan Platform',
-            phoneNumber: '+967-777-888-999',
-            notes: 'متاح في جميع مكاتب الصرافة المعتمدة'
+            name: 'Arkan Platform',
+            id: 'other',
+            number: 'ARKAN-2024'
         },
         processingTime: 'فوري - 24 ساعة',
         instructions: 'قم بإرسال الحوالة باسم "Arkan Platform" مع رقم المستخدم الخاص بك كمرجع'
@@ -200,9 +181,7 @@ export const defaultPaymentMethods: PaymentMethod[] = [
         currencies: {
             USD: {
                 iban: 'YE08INTL0008234567890123456',
-                swiftCode: 'INTLYHSA',
-                bankAddress: 'Sana\'a, Yemen - Main Branch',
-                accountNumber: '8001234567890'
+                swift: 'INTLYHSA'
             }
         },
         processingTime: '2-5 أيام عمل',

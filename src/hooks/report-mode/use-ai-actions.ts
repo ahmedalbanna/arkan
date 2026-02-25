@@ -13,7 +13,7 @@ import { generateReportSectionApi } from '@/modules/ai-content/adapters/api-clie
 import type { SectionName } from '@/ai/schemas';
 import { PromptBuilder } from '@/modules/ai-content/domain/services/PromptBuilder';
 import { writingToolApi } from '@/modules/ai/adapters/api-client/WritingToolsApiClient';
-import { Chapter, type Project, type Section } from '@/lib/types';
+import { Chapter, type Project, type Section, type ExternalContextType } from '@/lib/types';
 import { parseMarkdownToContent } from '@/lib/project/markdown-parser';
 import { useEditorStore } from '../core/use-editor-store';
 import { projectKeys } from '@/lib/query-keys';
@@ -122,6 +122,25 @@ export function useAiActions({ editor: initialEditor }: AiActionsProps = {}) {
     }
   };
 
+    const mapSectionContextToRecord = (currentSection: Section, project: Project) => {
+    const context = currentSection.context?.sections || {};
+    return Object.entries(context).reduce<Record<string, string>>((acc, [sectionId]) => {
+        const target = project.getSection(sectionId);
+        if (target?.content) {
+            acc[target.title] = target.content;
+        }
+        return acc;
+    }, {});
+  };
+
+  const mapExternalContextToArray = (currentSection: Section, project: Project) => {
+    const context = currentSection.context?.externalContext || {};
+    return Object.entries(context).map(([externalId, usage]) => {
+        const external = project.externalContext.find(item => item.id === externalId);
+        return external ? { id: external.id, content: external.content, type: usage } : null;
+    }).filter((item): item is { id: string; content: string; type: ExternalContextType } => Boolean(item));
+  };
+
   const generateSectionMutation = useMutation({
     mutationKey: ['generateReportSection'],
     mutationFn: async (sectionId: string) => {
@@ -137,8 +156,8 @@ export function useAiActions({ editor: initialEditor }: AiActionsProps = {}) {
             flow: 'generate-section',
             sectionToGenerate: section.id as SectionName,
             prompt: section.buildActionPrompt(),
-            otherSections: section.getContextAsRecord(currentProject),
-            externalContext: section.getExternalContextAsArray(currentProject),
+            otherSections: mapSectionContextToRecord(section, currentProject),
+            externalContext: mapExternalContextToArray(section, currentProject),
             guidelines: section.guidelines,
             instructionText: PromptBuilder.buildSectionPrompt(section, currentProject),
         };
@@ -147,8 +166,10 @@ export function useAiActions({ editor: initialEditor }: AiActionsProps = {}) {
         return generateReportSectionApi(body, token);
     },
     onSuccess: (data, sectionId) => {
-        updateProject(p => p.updateSection(sectionId, s => s.with({ content: data.content })));
-        queryClient.invalidateQueries({ queryKey: projectKeys.detail(project?.id || '') });
+        updateProject(currentProject => currentProject.updateSection(sectionId, section => section.withProps({ content: data.content })));
+        if (project?.id) {
+            queryClient.invalidateQueries({ queryKey: projectKeys.detail(project.id) });
+        }
         refetchUser();
         toast({ title: 'Generation In Progress', description: 'The AI is generating your content. It will appear automatically when ready.' });
     },

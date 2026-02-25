@@ -17,23 +17,23 @@ export function useGuidelineEditor(itemKey: string) {
     // This prevents race conditions and simplifies the data flow.
 
     const setPrompt = (prompt: string) => {
-        updateProject(p => p.updateSection(itemKey, s => s.with({ prompt })));
+        updateProject(currentProject => currentProject.updateSection(itemKey, section => section.withProps({ prompt })));
     };
 
     const setRules = (rules: string[]) => {
-        updateProject(p => p.updateSection(itemKey, s => s.with({ rules })));
+        updateProject(currentProject => currentProject.updateSection(itemKey, section => section.withProps({ rules })));
     };
 
     const setGuidelines = (guidelines: string[]) => {
-        updateProject(p => p.updateSection(itemKey, s => s.with({ guidelines })));
+        updateProject(currentProject => currentProject.updateSection(itemKey, section => section.withProps({ guidelines })));
     };
 
     const setConstraints = (constraints: string[]) => {
-        updateProject(p => p.updateSection(itemKey, s => s.with({ constraints })));
+        updateProject(currentProject => currentProject.updateSection(itemKey, section => section.withProps({ constraints })));
     };
 
     const setBehaviors = (behaviors: Behavior[]) => {
-        updateProject(p => p.updateSection(itemKey, s => s.with({ behaviors })));
+        updateProject(currentProject => currentProject.updateSection(itemKey, section => section.withProps({ behaviors: behaviors.map(behavior => JSON.stringify(behavior)) })));
     };
 
     return {

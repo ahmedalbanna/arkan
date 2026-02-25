@@ -19,16 +19,16 @@ export function useContextSelector(itemKey: string) {
     const reportSections = useMemo(() => {
         if (!project?.sections) return [];
         return project.sections
-            .filter(s => s.id !== itemKey)
-            .map(s => ({ id: s.id, title: s.title }));
+            .filter(section => section.id !== itemKey)
+            .map(section => ({ id: section.id, title: section.title }));
     }, [project?.sections, itemKey]);
     
     const sectionsContent = useMemo(() => {
         if (!project?.sections) return {};
-        return project.sections.reduce((acc, section) => {
-            acc[section.id] = section.content || '';
+        return project.sections.reduce<Record<string, string>>((acc, currentSection) => {
+            acc[currentSection.id] = currentSection.content || '';
             return acc;
-        }, {} as Record<string, string>);
+        }, {});
     }, [project?.sections]);
 
 
@@ -38,18 +38,19 @@ export function useContextSelector(itemKey: string) {
         subKey: string,
         value: ExternalContextType | false
     ) => {
-        updateProject(p => p.updateSection(sectionId, (sec) => {
-            const newContext = { ...sec.context };
+        updateProject(currentProject => currentProject.updateSection(sectionId, (sec) => {
+            const existingContext = sec.context || { sections: {}, externalContext: {} };
+            const newContext = { ...existingContext };
             const newDict = { ...(newContext[type] || {}) };
-            
+
             if (value === false) {
                 delete newDict[subKey];
             } else {
                 newDict[subKey] = value;
             }
-            
+
             newContext[type] = newDict;
-            return sec.with({ context: newContext });
+            return sec.withProps({ context: newContext });
         }));
     }, [updateProject]);
 

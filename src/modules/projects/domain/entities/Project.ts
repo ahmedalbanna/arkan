@@ -282,12 +282,12 @@ export class Project {
       }
       if (item instanceof Chapter) {
         const originalSections = item.sections;
-        const updatedSections = item.sections.map(s => {
-          if (s.id === id) {
+        const updatedSections = item.sections.map(currentSection => {
+          if (currentSection.id === id) {
             sectionFound = true;
-            return updater(s);
+            return updater(currentSection);
           }
-          return s;
+          return currentSection;
         });
         if (originalSections !== updatedSections) {
           return item.with({ sections: updatedSections });
@@ -300,7 +300,7 @@ export class Project {
   }
 
   public updateSectionContent(sectionId: string, newMarkdown: string): Project {
-    return this.updateSection(sectionId, s => s.with({ content: newMarkdown }));
+    return this.updateSection(sectionId, updatedSection => updatedSection.withProps({ content: newMarkdown }));
   }
 
   public addExternalContext(ctx: Omit<ExternalContextProperties, 'id'>): Project {
