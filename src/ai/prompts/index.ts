@@ -34,7 +34,7 @@ import {
     TranslateTextInputSchema,
     WriteDocumentInputSchema
 } from '@/ai/schemas';
-import { GenerateSessionPlanInputSchema, GenerateSessionPlanOutputSchema, GenerateTheoreticalLectureInputSchema, GenerateTheoreticalLectureOutputSchema } from '@/ai/schemas/lecture-generator';
+import { GenerateSessionPlanInputSchema, GenerateTheoreticalLectureInputSchema } from '@/ai/schemas/lecture-generator';
 import { z } from 'zod';
 
 // Export graduation project prompts

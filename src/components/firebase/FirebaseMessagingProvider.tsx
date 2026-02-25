@@ -5,7 +5,7 @@ import { useToast } from '@/hooks';
 import { initializeFirebase } from '@/firebase';
 
 const { firebaseApp: app } = initializeFirebase();
-import { saveDeviceToken } from '@/services/api/deviceTokenService';
+import { saveDeviceToken } from '@/modules/users/adapters/api-client/DeviceTokenApiClient';
 import { getMessaging, getToken, onMessage } from 'firebase/messaging';
 import { useEffect, useState } from 'react';
 

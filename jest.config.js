@@ -8,7 +8,7 @@ module.exports = {
     '^@/ai/(.*)$': '<rootDir>/src/ai/$1',
     '^@/components/(.*)$': '<rootDir>/src/components/$1',
     '^@/hooks/(.*)$': '<rootDir>/src/hooks/$1',
-    '^@/services/(.*)$': '<rootDir>/src/services/$1',
+    '^@/services/(.*)$': '<rootDir>/src/modules/$1',
   },
   // A list of paths to modules that run some code to configure or set up the testing framework before each test.
   setupFilesAfterEnv: ['<rootDir>/jest.setup.js'],

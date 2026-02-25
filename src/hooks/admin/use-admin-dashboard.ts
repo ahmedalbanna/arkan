@@ -3,7 +3,7 @@
 
 import { useQuery } from '@tanstack/react-query';
 import { adminKeys } from '@/lib/query-keys';
-import { fetchDashboardStats } from '@/services/api/adminService';
+import { fetchDashboardStats } from '@/modules/admin/adapters/api-client/AdminApiClient';
 import { useAuth } from '@/context/AuthContext';
 
 export function useAdminDashboard() {

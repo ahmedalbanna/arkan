@@ -43,7 +43,8 @@ function TemplateCard({ template, onSelect, isLoading }: { template: ReportTempl
 
 export function ReportTemplateDialog({ isOpen, onOpenChange }: ReportTemplateDialogProps) {
   const { t } = useLocalization();
-  const { data: templates, isLoading, isError, error } = useReportTemplates();
+  const { data, isLoading, isError, error } = useReportTemplates();
+  const templates = Array.isArray(data) ? data : [];
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedTemplateId, setSelectedTemplateId] = useState<string | null>(null);
 

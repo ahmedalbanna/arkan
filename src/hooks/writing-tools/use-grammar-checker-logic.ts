@@ -9,7 +9,7 @@ import { useWritingTool, useToast } from '@/hooks';
 import type { GrammarCheckOutput } from '@/ai/schemas';
 import { useDropzone } from 'react-dropzone';
 import { useAuth } from '@/context/AuthContext';
-import { processFileApi } from '@/services';
+import { processFileApi } from '@/modules/ai-content/adapters/api-client/DocumentProcessingApiClient';
 import { useLocalization } from '@/context/LocalizationContext';
 
 const grammarCheckSchema = z.object({

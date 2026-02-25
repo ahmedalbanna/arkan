@@ -7,7 +7,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { useLocalization } from '@/context/LocalizationContext';
 import { Button } from '@/components/ui/button';
 import { useTransactions } from '@/hooks';
-import type { TransactionStatus } from '@/services';
+import type { TransactionStatus } from '@/modules/billing/adapters/api-client/TransactionApiClient';
 import { Transaction } from '@/modules/billing/domain/entities/Transaction';
 
 

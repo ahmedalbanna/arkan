@@ -3,7 +3,7 @@
 
 import type { TransactionProperties } from '@/lib/types';
 
-import { apiService } from './apiService';
+import { apiService } from '@/infrastructure/api/ApiService';
 import { VerifyPaymentVariables } from '@/hooks/data/use-transactions';
 
 export type TransactionStatus = 'pending' | 'verified' | 'rejected';

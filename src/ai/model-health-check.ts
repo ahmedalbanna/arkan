@@ -170,7 +170,7 @@ class ModelHealthMonitor {
       this.serverOnline = response.ok;
       this.lastServerCheck = Date.now();
       return this.serverOnline;
-    } catch (_error) {
+    } catch { 
       this.serverOnline = false;
       this.lastServerCheck = Date.now();
       return false;

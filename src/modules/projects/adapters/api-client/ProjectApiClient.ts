@@ -1,5 +1,5 @@
 
-import { apiService } from "@/services/api/apiService";
+import { apiService } from "@/infrastructure/api/ApiService";
 import { ProjectProperties } from "../../domain/entities/Project";
 
 export class ProjectApiClient {

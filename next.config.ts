@@ -5,7 +5,6 @@ import withPWA from "@ducanh2912/next-pwa";
 const pwaConfig = withPWA({
   dest: 'public',
   register: true,
-  skipWaiting: true,
   disable: process.env.NODE_ENV === 'development',
 });
 
@@ -87,7 +86,6 @@ const nextConfig: NextConfig = {
   experimental: {
     serverActions: { bodySizeLimit: '10mb' as SizeLimit },
     useCache: true,
-    instrumentationHook: true,
   }
 };
 

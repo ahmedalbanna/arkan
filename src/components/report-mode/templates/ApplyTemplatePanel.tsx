@@ -9,10 +9,11 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { useLocalization } from '@/context/LocalizationContext';
-import type { ReportTemplateProperties } from '@/lib/types';
+
 import { MarkdownViewer } from '@/components/shared/MarkdownViewer';
 import { Label } from '@/components/ui/label';
 import { useBuilderStore } from '@/hooks';
+import { ReportTemplateProperties } from '@/modules/templates/domain/entities/ReportTemplate';
 
 function TemplateCard({ template, onSelect }: { template: ReportTemplateProperties; onSelect: () => void }) {
   return (

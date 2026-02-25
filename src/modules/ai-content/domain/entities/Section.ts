@@ -1,229 +1,139 @@
-
-import { v4 as uuidv4 } from 'uuid';
-import {
-  Behavior,
-  BehaviorSchema,
-  defaultControls,
-  GenerationControlState,
-  GenerationControlStateSchema,
-  SectionContext,
-  SectionContextSchema,
-  SectionType,
-  SectionTypeSchema,
-} from './ControlTypes';
 import { z } from 'zod';
-import type { ProjectProperties as Project } from '@/modules/projects/domain/entities/Project';
-import { PromptBuilder } from '../services/PromptBuilder';
+import { v4 as uuidv4 } from 'uuid';
 
-export type SectionStatus = 'pending' | 'generating' | 'completed' | 'failed' | 'idle';
+export const SectionStatusSchema = z.enum(['pending', 'in_progress', 'completed', 'failed']);
+export type SectionStatus = z.infer<typeof SectionStatusSchema>;
+
+export const SectionTypeSchema = z.enum(['report', 'diagram', 'presentation', 'code', 'math']);
+export type SectionType = z.infer<typeof SectionTypeSchema>;
+
+export const SectionContextSchema = z.object({
+  sections: z.record(z.string(), z.string()).optional(),
+  externalContext: z.record(z.string(), z.string()).optional(),
+});
+export type SectionContext = z.infer<typeof SectionContextSchema>;
+
+export const SectionControlsSchema = z.record(z.string(), z.any());
+export type SectionControls = z.infer<typeof SectionControlsSchema>;
 
 export const SectionPropertiesSchema = z.object({
   id: z.string().optional(),
   title: z.string(),
-  type: SectionTypeSchema,
+  type: SectionTypeSchema.optional(),
   content: z.string().optional(),
+  status: SectionStatusSchema.optional(),
+  progress: z.number().optional(),
+  aiOutput: z.any().optional(),
+  lastUpdated: z.string().optional(),
+  with: z.array(z.string()).optional(),
+  controls: SectionControlsSchema.optional(),
   prompt: z.string().optional(),
   rules: z.array(z.string()).optional(),
   guidelines: z.array(z.string()).optional(),
   constraints: z.array(z.string()).optional(),
-  behaviors: z.array(BehaviorSchema).optional(),
-  controls: GenerationControlStateSchema.partial().optional(),
-  context: SectionContextSchema.partial().optional(),
-  metadata: z.record(z.any()).optional(),
+  behaviors: z.array(z.string()).optional(),
+  context: SectionContextSchema.optional(),
 });
 
-
-export interface SectionProperties {
-  id?: string;
-  title: string;
-  type: SectionType;
-  content?: string;
-  prompt?: string;
-  rules?: string[];
-  guidelines?: string[];
-  constraints?: string[];
-  behaviors?: Behavior[];
-  controls?: Partial<GenerationControlState>;
-  context?: Partial<SectionContext>;
-  metadata?: Record<string, any>;
-}
+export interface SectionProperties extends z.infer<typeof SectionPropertiesSchema> {}
 
 export class Section {
   public readonly id: string;
   public readonly title: string;
   public readonly type: SectionType;
-  public readonly content: string;
-  public readonly prompt: string;
-  public readonly rules: readonly string[];
-  public readonly guidelines: readonly string[];
-  public readonly constraints: readonly string[];
-  public readonly behaviors: readonly Behavior[];
-  public readonly controls: GenerationControlState;
-  public readonly context: SectionContext;
-  public readonly metadata: Readonly<Record<string, any>>;
+  public content: string;
+  public status: SectionStatus;
+  public progress: number;
+  public aiOutput: any;
+  public lastUpdated: string;
+  public with: string[];
+  public controls: SectionControls;
+  public prompt: string;
+  public rules: string[];
+  public guidelines: string[];
+  public constraints: string[];
+  public behaviors: string[];
+  public context?: SectionContext;
 
   constructor(props: SectionProperties) {
     this.id = props.id || uuidv4();
     this.title = props.title;
-    this.type = props.type;
-    this.content = props.content ?? '';
-    this.prompt = props.prompt ?? '';
-    this.rules = props.rules ?? [];
-    this.guidelines = props.guidelines ?? [];
-    this.constraints = props.constraints ?? [];
-    this.behaviors = props.behaviors ?? [];
-    this.metadata = props.metadata ?? {};
-
-    this.controls = {
-      ...defaultControls,
-      ...props.controls,
-      outputStyle: {
-        ...defaultControls.outputStyle,
-        ...(props.controls?.outputStyle || {}),
-      },
-    };
-
-    this.context = {
-      sections: props.context?.sections ?? {},
-      externalContext: props.context?.externalContext ?? {},
-    };
+    this.type = props.type || 'report';
+    this.content = props.content || '';
+    this.status = props.status || 'pending';
+    this.progress = props.progress || 0;
+    this.aiOutput = props.aiOutput || null;
+    this.lastUpdated = props.lastUpdated || new Date().toISOString();
+    this.with = props.with || [];
+    this.controls = props.controls || {};
+    this.prompt = props.prompt || '';
+    this.rules = props.rules || [];
+    this.guidelines = props.guidelines || [];
+    this.constraints = props.constraints || [];
+    this.behaviors = props.behaviors || [];
+    this.context = props.context;
   }
 
-  public with(props: Partial<SectionProperties>): Section {
-    return new Section({ ...this.toStateObject(), ...props });
+  public withProps(props: Partial<SectionProperties>): Section {
+    return new Section({
+      id: this.id,
+      title: props.title ?? this.title,
+      type: props.type ?? this.type,
+      content: props.content ?? this.content,
+      status: props.status ?? this.status,
+      progress: props.progress ?? this.progress,
+      aiOutput: props.aiOutput ?? this.aiOutput,
+      lastUpdated: props.lastUpdated ?? this.lastUpdated,
+      with: props.with ?? this.with,
+      controls: props.controls ?? this.controls,
+      prompt: props.prompt ?? this.prompt,
+      rules: props.rules ?? this.rules,
+      guidelines: props.guidelines ?? this.guidelines,
+      constraints: props.constraints ?? this.constraints,
+      behaviors: props.behaviors ?? this.behaviors,
+      context: props.context ?? this.context,
+    });
   }
 
   public buildSystemPrompt(): string {
-    const personas = this.behaviors.filter(b => b.type === 'persona').map(b => b.name);
-    const behaviorInstructions = this.behaviors.filter(b => b.type === 'behavior').map(b => b.name);
-
-    let systemPrompt = 'You are an advanced AI assistant tailored for academic and technical writing.';
-
-    if (personas.length > 0) {
-      systemPrompt += `\n\n**ROLE / PERSONA:**\nAdopt the persona of: ${personas.join(', ')}. Write with the authority, vocabulary, and perspective of this role.`;
-    }
-
-    if (this.controls.tone) {
-      systemPrompt += `\nMaintain a **${this.controls.tone}** tone throughout.`;
-    }
-
-    const allRules = [
-      ...this.rules,
-      ...behaviorInstructions,
-      this.controls.language !== 'default' ? `Output must be in ${this.controls.language}.` : null,
-    ].filter(Boolean) as string[];
-
-    if (allRules.length > 0) {
-      systemPrompt += `\n\n**MANDATORY RULES:**\n${allRules.map(r => `- ${r}`).join('\n')}`;
-    }
-
-    if (this.guidelines.length > 0) {
-        systemPrompt += `\n\n**GUIDELINES (Follow these recommendations):**\n${this.guidelines.map(g => `- ${g}`).join('\n')}`;
-    }
-
-    if (this.constraints.length > 0) {
-      systemPrompt += `\n\n**CONSTRAINTS (DO NOT DO):**\n${this.constraints.map(c => `- ${c}`).join('\n')}`;
-    }
-
-    // Output Format Specifics
-    if (this.type === 'diagram') {
-      systemPrompt += `\n\nOutput ONLY valid PlantUML code inside \`\`\`plantuml blocks. Do not add conversational text.`;
-    } else if (this.type === 'code') {
-      systemPrompt += `\n\nFocus on producing high-quality, documented code snippets.`;
-    }
-
-    return systemPrompt;
+    const parts: string[] = [];
+    if (this.rules.length) parts.push(`Rules:\n${this.rules.map(r => `- ${r}`).join('\n')}`);
+    if (this.guidelines.length) parts.push(`Guidelines:\n${this.guidelines.map(g => `- ${g}`).join('\n')}`);
+    if (this.constraints.length) parts.push(`Constraints:\n${this.constraints.map(c => `- ${c}`).join('\n')}`);
+    if (this.behaviors.length) parts.push(`Behaviors:\n${this.behaviors.map(b => `- ${b}`).join('\n')}`);
+    return parts.join('\n\n');
   }
 
   public buildActionPrompt(): string {
-    const formalityMap: { [key: number]: string } = { 0: 'very informal and casual', 33: 'balanced and neutral', 67: 'formal and professional', 100: 'very formal and academic' };
-    const complexityMap: { [key: number]: string } = { 0: 'very simple and easy to understand', 33: 'clear and straightforward', 67: 'detailed and technical', 100: 'highly complex and expert-level' };
-
-    let instructions: string[] = [];
-    const formality = this.controls.formality > 67 ? formalityMap[100] : this.controls.formality > 33 ? formalityMap[67] : this.controls.formality > 0 ? formalityMap[33] : formalityMap[0];
-    instructions.push(`The formality should be ${formality}.`);
-
-    const complexity = this.controls.complexity > 67 ? complexityMap[100] : this.controls.complexity > 33 ? complexityMap[67] : this.controls.complexity > 0 ? complexityMap[33] : complexityMap[0];
-    instructions.push(`The complexity should be ${complexity}.`);
-
-    if (this.controls.tone) instructions.push(`The tone should be ${this.controls.tone}.`);
-    if (this.controls.wordCount) instructions.push(`Aim for a word count of approximately ${this.controls.wordCount} words.`);
-
-    if (this.controls.outputStyle.diagram && this.controls.diagramType) {
-        instructions.push(`The output must include a PlantUML diagram of type '${this.controls.diagramType}'.`);
-    }
-    if (this.controls.outputStyle.code && this.controls.programmingLanguage) {
-        instructions.push(`The code blocks should be in ${this.controls.programmingLanguage}.`);
-    }
-    if (this.controls.outputStyle.table && this.controls.tableCaption) {
-        instructions.push(`If a table is generated, it must have the caption: "${this.controls.tableCaption}".`);
-    }
-    if (this.controls.outputStyle.heading && this.controls.includedHeadings && this.controls.includedHeadings.length > 0) {
-        instructions.push(`The heading should cover the following topics: ${this.controls.includedHeadings.join(', ')}.`);
-    }
-
-    if (this.controls.language && this.controls.language !== 'default') {
-        instructions.push(`The output language must be ${this.controls.language}.`);
-    }
-    
-    if (this.controls.outputStyle.includeCitations && this.controls.citationStyle) {
-        instructions.push(`Use ${this.controls.citationStyle} citation style.`);
-    }
-
-    const enabledStyles = Object.entries(this.controls.outputStyle).filter(([key, value]) => value && key !== 'includeCitations').map(([key]) => key);
-    if (enabledStyles.length > 0) instructions.push(`The output should primarily include the following elements: ${enabledStyles.join(', ')}.`);
-    
-    const additionalInstructions = `\n\n**Additional Instructions:**\n${instructions.join(' ')}`;
-
-    return `${this.prompt}${additionalInstructions}`;
-  }
-
-  public getContextAsRecord(project: Project): Record<string, string> {
-      if (!this.context?.sections) return {};
-      const contextRecord: Record<string, string> = {};
-      for (const sectionId of Object.keys(this.context.sections)) {
-          const section = project.getSection(sectionId);
-          if (section?.content) {
-              contextRecord[section.title] = section.content;
-          }
-      }
-      return contextRecord;
-  }
-
-  public getExternalContextAsArray(project: Project): { fileName: string; content: string; type: string }[] {
-      if (!this.context?.externalContext) return [];
-      const externalContextArray = [];
-      for (const fileId of Object.keys(this.context.externalContext)) {
-          const file = project.externalContext?.find(f => f.id === fileId);
-          if (file) {
-              externalContextArray.push({
-                  fileName: file.fileName,
-                  content: file.content,
-                  type: this.context.externalContext[fileId]!,
-              });
-          }
-      }
-      return externalContextArray;
+    const controlLines = Object.entries(this.controls || {})
+      .map(([key, value]) => `- ${key}: ${JSON.stringify(value)}`)
+      .join('\n');
+    const promptLines = [this.prompt, controlLines].filter(Boolean).join('\n');
+    return promptLines || `Generate content for section: ${this.title}`;
   }
 
   public toStateObject(): SectionProperties {
+    return this.toProperties();
+  }
+
+  public toProperties(): SectionProperties {
     return {
       id: this.id,
       title: this.title,
       type: this.type,
       content: this.content,
-      prompt: this.prompt,
-      rules: [...this.rules],
-      guidelines: [...this.guidelines],
-      constraints: [...this.constraints],
-      behaviors: [...this.behaviors],
+      status: this.status,
+      progress: this.progress,
+      aiOutput: this.aiOutput,
+      lastUpdated: this.lastUpdated,
+      with: this.with,
       controls: this.controls,
+      prompt: this.prompt,
+      rules: this.rules,
+      guidelines: this.guidelines,
+      constraints: this.constraints,
+      behaviors: this.behaviors,
       context: this.context,
-      metadata: this.metadata,
     };
-  }
-
-  public toJSON(): SectionProperties {
-    return this.toStateObject();
   }
 }

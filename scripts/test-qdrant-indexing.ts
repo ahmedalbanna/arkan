@@ -112,10 +112,19 @@ const testDocuments = [
 /**
  * Index all test documents
  */
-async function indexTestDocuments() {
+type IndexTestResult = {
+  projectId: string;
+  userId: string;
+  sourceFile: string;
+  type: 'report' | 'reference' | 'context' | 'user_upload';
+  chunksCreated?: number;
+  error?: string;
+};
+
+async function indexTestDocuments(): Promise<IndexTestResult[]> {
   console.log('📚 Starting document indexing...\n');
 
-  const results = [];
+  const results: IndexTestResult[] = [];
 
   for (let i = 0; i < testDocuments.length; i++) {
     const doc = testDocuments[i];
@@ -138,8 +147,9 @@ async function indexTestDocuments() {
         console.log(`   ✅ Indexed successfully: ${result.chunksCreated} chunks created\n`);
         results.push({ ...doc.metadata, chunksCreated: result.chunksCreated });
       } else {
-        console.log(`   ❌ Failed: ${result.error}\n`);
-        results.push({ ...doc.metadata, error: result.error });
+        const errorMessage = result.errors?.[0] ?? 'Unknown error';
+        console.log(`   ❌ Failed: ${errorMessage}\n`);
+        results.push({ ...doc.metadata, error: errorMessage });
       }
     } catch (error) {
       console.error(`   ❌ Error: ${error instanceof Error ? error.message : 'Unknown error'}\n`);
@@ -271,10 +281,11 @@ async function main() {
     console.log('   ✅ TEST COMPLETED SUCCESSFULLY');
     console.log('═══════════════════════════════════════════════════════\n');
 
-    const successCount = indexResults.filter(r => r.success).length;
+    const successCount = indexResults.filter(result => !result.error).length;
+    const totalChunks = indexResults.reduce((sum, result) => sum + (result.chunksCreated ?? 0), 0);
     console.log(`📊 Summary:`);
     console.log(`   Documents indexed: ${successCount}/${testDocuments.length}`);
-    console.log(`   Total chunks: ${indexResults.reduce((sum, r) => sum + (r.chunks || 0), 0)}`);
+    console.log(`   Total chunks: ${totalChunks}`);
     console.log('\n💡 Next steps:');
     console.log('   1. View in Qdrant UI: http://localhost:3100');
     console.log('   2. Check health: curl http://localhost:9002/api/rag/health');

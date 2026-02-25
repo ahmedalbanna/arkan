@@ -5,7 +5,7 @@ import { useState } from 'react';
 import { useMutation } from '@tanstack/react-query';
 import { useAuth } from '@/context/AuthContext';
 import { useBuilderStore } from '../core/useBuilderStore';
-import { apiService } from '@/services';
+import { apiService } from '@/infrastructure/api/ApiService';
 
 interface Message {
     role: 'user' | 'model';

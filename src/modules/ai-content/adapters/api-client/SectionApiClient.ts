@@ -2,7 +2,7 @@
 'use client';
 
 import { SectionProperties } from "@/lib/types";
-import { apiService } from "./apiService";
+import { apiService } from "@/infrastructure/api/ApiService";
 
 export async function fetchSections(token: string): Promise<SectionProperties[]> {
   return apiService({ endpoint: '/api/admin/sections', token });

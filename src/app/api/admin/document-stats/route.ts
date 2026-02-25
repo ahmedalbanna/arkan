@@ -5,7 +5,7 @@
  */
 
 import { NextResponse } from 'next/server';
-import { getDocumentStatistics } from '@/services/document-tracking-service';
+import { getDocumentStatistics } from '@/modules/rag/infrastructure/document-tracking-service';
 import { getVectorStore } from '@/modules/rag/infrastructure/vector-store';
 import { getCacheManager } from '@/modules/rag/infrastructure/cache';
 

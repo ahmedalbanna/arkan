@@ -1,6 +1,6 @@
 
 'use client';
-import { apiService } from './apiService';
+import { apiService } from '@/infrastructure/api/ApiService';
 
 /**
  * Calls the API to process an uploaded file (PDF, Image, Text, etc.) and extract its content.

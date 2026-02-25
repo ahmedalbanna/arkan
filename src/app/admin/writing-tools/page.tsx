@@ -3,32 +3,7 @@
 
 import { AIToolCard } from '@/components/writing-tools/AIToolCard';
 import { useLocalization } from '@/context/LocalizationContext';
-import {
-  BookCheck,
-  BookOpenText,
-  Brain,
-  BrainCircuit,
-  Building2,
-  CheckCircle,
-  CopyCheck,
-  EyeOff,
-  FileEdit,
-  FileQuestion,
-  Fingerprint,
-  GitGraph,
-  Languages,
-  LayoutTemplate,
-  Lightbulb,
-  PencilRuler,
-  PenSquare,
-  Quote,
-  Repeat,
-  Scale,
-  Search,
-  SpellCheck,
-  UserCheck,
-  Workflow
-} from 'lucide-react';
+import { PenSquare } from 'lucide-react';
 
 export default function WritingToolsPage() {
   const { t } = useLocalization();

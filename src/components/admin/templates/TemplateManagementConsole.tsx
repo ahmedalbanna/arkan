@@ -40,11 +40,12 @@ const PptxTemplateManager = ({ onEdit }: { onEdit: (template: TemplateData) => v
 };
 
 const ReportTemplateManager = ({ onEdit }: { onEdit: (template: TemplateData) => void }) => {
-    const { data: templates, isLoading } = useReportTemplates();
+    const { data, isLoading } = useReportTemplates();
     if(isLoading) return <Loader2 className="animate-spin" />;
+    const templates = Array.isArray(data) ? data : [];
     return (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {templates?.map(template => (
+            {templates.map(template => (
                 <TemplateCard key={template.id} template={new ReportTemplate(template)} onEdit={() => onEdit(new ReportTemplate(template))} templateType="report" />
             ))}
         </div>

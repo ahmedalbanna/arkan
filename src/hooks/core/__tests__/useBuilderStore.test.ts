@@ -1,7 +1,12 @@
 
 import { renderHook, act } from '@testing-library/react';
 import { useBuilderStore } from '../useBuilderStore';
-import { Project, Chapter, Section, defaultControls, type ProjectProperties } from '@/lib/types';
+import { ProjectProperties } from '@/modules/projects/domain/entities/ProjectProperties';
+import { Chapter } from '@/modules/ai-content/domain/entities/Chapter';
+import { Section } from '@/modules/ai-content/domain/entities/Section';
+import { Project } from '@/modules/projects/domain/entities/Project';
+import { defaultControls } from '@/modules/ai-content/domain/entities/ControlTypes';
+
 
 const createSoftwareDesignTemplate = (): ProjectProperties => ({
     id: 'sdd-template',

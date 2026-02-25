@@ -52,11 +52,11 @@ export function SectionGenerationControls({
     }
 
     const handleControlChange = <K extends keyof GenerationControlState>(field: K, value: GenerationControlState[K]) => {
-        updateProject(p => p.updateSection(section.id, s => s.with({ controls: { ...s.controls, [field]: value } })));
+        updateProject(p => p.updateSection(section.id, s => s.withProps({ controls: { ...s.controls, [field]: value } })));
     };
     
     const onOutputStyleChange = (style: keyof GenerationControlState['outputStyle'], checked: boolean) => {
-        updateProject(p => p.updateSection(section.id, s => s.with({ controls: { ...s.controls, outputStyle: { ...s.controls.outputStyle, [style]: checked } } })));
+        updateProject(p => p.updateSection(section.id, s => s.withProps({ controls: { ...s.controls, outputStyle: { ...s.controls.outputStyle, [style]: checked } } })));
     };
     
     const handleToneChange = (value: string) => {

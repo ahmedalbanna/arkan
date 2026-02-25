@@ -14,7 +14,7 @@ import {
     createPresentationTemplateApi,
     updatePresentationTemplateApi,
     deletePresentationTemplateApi,
-} from '@/services/api/templateService';
+} from '@/modules/templates/adapters/api-client/TemplateApiClient';
 
 
 import { useBuilderStore } from '../core/useBuilderStore';

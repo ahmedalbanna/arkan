@@ -11,7 +11,7 @@ import {
     deletePptxTemplateApi,
     createPptxTemplateApi,
     refreshTemplateImage,
-} from '@/services/api/templateService';
+} from '@/modules/templates/adapters/api-client/TemplateApiClient';
 import type { PptxTemplateProperties } from '@/lib/types';
 
 

@@ -3,7 +3,7 @@
 
 import { useAuth } from '@/context/AuthContext';
 import { toast } from '@/hooks';
-import { apiService } from '@/services/api/apiService'; // Use the new apiService
+import { apiService } from '@/infrastructure/api/ApiService'; // Use the new apiService
 import { useMutation, type UseMutationOptions } from '@tanstack/react-query';
 
 /**

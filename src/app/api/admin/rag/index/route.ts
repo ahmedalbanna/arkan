@@ -157,7 +157,7 @@ export async function POST(request: NextRequest) {
 
     // Step 4: Record in document tracking database
     try {
-      const { recordIndexedDocument } = await import('@/services/document-tracking-service');
+      const { recordIndexedDocument } = await import('@/modules/rag/infrastructure/document-tracking-service');
       await recordIndexedDocument({
         projectId: projectId.trim(),
         userId: userId ? userId.trim() : undefined,
@@ -195,7 +195,7 @@ export async function POST(request: NextRequest) {
         const userId = formData.get('userId') as string | null;
         
         if (file && projectId) {
-          const { recordFailedIndexing } = await import('@/services/document-tracking-service');
+          const { recordFailedIndexing } = await import('@/modules/rag/infrastructure/document-tracking-service');
           await recordFailedIndexing({
             projectId: projectId.trim(),
             userId: userId ? userId.trim() : undefined,

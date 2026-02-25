@@ -1,9 +1,6 @@
 /**
  * Migration Script: Transfer vectors from Firestore to Qdrant
  */
-import { adminDb } from '../src/infrastructure/firebase/server-init';
-import { QdrantVectorStore } from '../src/modules/rag/infrastructure/qdrant-adapter';
-import type { RAGConfig } from '../src/modules/rag/infrastructure/config';
 import type { DocumentChunk } from '../src/modules/rag/infrastructure/vector-store';
 
 async function migrate() {

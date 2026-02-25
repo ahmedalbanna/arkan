@@ -9,7 +9,7 @@ import { getVectorStore } from '@/modules/rag/infrastructure/vector-store';
 import { 
   getAllIndexedDocuments, 
   getDocumentStatistics 
-} from '@/services/document-tracking-service';
+} from '@/modules/rag/infrastructure/document-tracking-service';
 
 export async function GET(_request: NextRequest) {
   try {
@@ -72,7 +72,7 @@ export async function DELETE(request: NextRequest) {
     }
 
     // 2. Mark documents as deleted in tracking database
-    const { markDocumentDeleted } = await import('@/services/document-tracking-service');
+    const { markDocumentDeleted } = await import('@/modules/rag/infrastructure/document-tracking-service');
     await markDocumentDeleted(projectId);
     console.log(`   ✓ Marked documents as deleted in tracking database`);
 

@@ -44,12 +44,12 @@ export const professionalDocumentWriterFlow = ai.defineFlow(
             topic,
             purpose,
             targetAudience,
-            keyPoints,
+            keyPoints: _keyPoints,
             tone,
             length,
             includeExecutiveSummary,
             includeRecommendations,
-            additionalContext
+            additionalContext: _additionalContext
         } = input;
 
         // ========================================================================

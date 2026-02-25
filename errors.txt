@@ -2,35 +2,47 @@
 Build Error
 
 ## Error Message
-Module not found: Can't resolve '@/lib/docx-styles'
+Module not found: Can't resolve '@/services'
 
 ## Build Output
-./src/components/report-mode/session/ExportDialog.tsx:19:1
-Module not found: Can't resolve '@/lib/docx-styles'
-  17 | import { Label } from '@/components/ui/label';
-  18 | import { useBuilderStore, useExport } from '@/hooks';
-> 19 | import { templates as docxTemplates, type DocxTemplateKey } from '@/lib/docx-styles';
-     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  20 | import { templates as pptxTemplates, type PptxTemplateKey } from '@/lib/pptx-styles';
-  21 | import { Download, FileText, Loader2, Presentation } from 'lucide-react';
-  22 | import { useState, useMemo } from 'react';
+./src/hooks/data/use-docx-templates.ts:8:1
+Module not found: Can't resolve '@/services'
+   6 | import { getAuthenticatedToken } from '@/lib/utils/authUtils';
+   7 | import { toast } from '@/hooks/util/use-toast';
+>  8 | import {
+     | ^^^^^^^^
+>  9 |     fetchDocxTemplatesApi,
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 10 |     updateDocxTemplateApi,
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 11 |     deleteDocxTemplateApi,
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 12 |     createDocxTemplateApi,
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 13 |     refreshTemplateImage,
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 14 | } from '@/services';
+     | ^^^^^^^^^^^^^^^^^^^^^
+  15 | import type { DocxTemplateProperties } from '@/lib/types';
+  16 |
+  17 | export function useDocxStyles() {
 
-Import map: aliased to relative './src/lib/docx-styles' inside of [project]/
+Import map: aliased to relative './src/services' inside of [project]/
 
 Import traces:
   Client Component Browser:
-    ./src/components/report-mode/session/ExportDialog.tsx [Client Component Browser]
-    ./src/components/report-mode/session/SessionActions.tsx [Client Component Browser]
-    ./src/components/report-mode/ReportModeGenerator.tsx [Client Component Browser]
-    ./src/app/builder/page.tsx [Client Component Browser]
-    ./src/app/builder/page.tsx [Server Component]
+    ./src/hooks/data/use-docx-templates.ts [Client Component Browser]
+    ./src/hooks/index.ts [Client Component Browser]
+    ./src/components/ui/toaster.tsx [Client Component Browser]
+    ./src/components/ui/toaster.tsx [Server Component]
+    ./src/app/layout.tsx [Server Component]
 
   Client Component SSR:
-    ./src/components/report-mode/session/ExportDialog.tsx [Client Component SSR]
-    ./src/components/report-mode/session/SessionActions.tsx [Client Component SSR]
-    ./src/components/report-mode/ReportModeGenerator.tsx [Client Component SSR]
-    ./src/app/builder/page.tsx [Client Component SSR]
-    ./src/app/builder/page.tsx [Server Component]
+    ./src/hooks/data/use-docx-templates.ts [Client Component SSR]
+    ./src/hooks/index.ts [Client Component SSR]
+    ./src/components/ui/toaster.tsx [Client Component SSR]
+    ./src/components/ui/toaster.tsx [Server Component]
+    ./src/app/layout.tsx [Server Component]
 
 https://nextjs.org/docs/messages/module-not-found
 

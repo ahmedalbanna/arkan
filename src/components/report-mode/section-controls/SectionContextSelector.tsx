@@ -50,7 +50,7 @@ export function SectionContextSelector({ sectionId }: SectionContextSelectorProp
     if (!sourceSection) return;
     
     // Copy the context from source section to current section
-    updateProject(p => p.updateSection(sectionId, s => s.with({
+    updateProject(p => p.updateSection(sectionId, s => s.withProps({
       context: {
         sections: { ...sourceSection.context?.sections },
         externalContext: { ...sourceSection.context?.externalContext }

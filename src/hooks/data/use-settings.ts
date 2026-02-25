@@ -2,7 +2,7 @@
 'use client';
 
 import { useQuery } from '@tanstack/react-query';
-import { fetchPublicSettings } from '@/services/api/settingsService';
+import { fetchPublicSettings } from '@/modules/admin/adapters/api-client/SettingsApiClient';
 import type { PublicSettings } from '@/lib/types';
 
 export function usePublicSettings() {

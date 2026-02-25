@@ -1,5 +1,5 @@
 
-import { apiService } from "@/services/api/apiService";
+import { apiService } from "@/infrastructure/api/ApiService";
 import { UserProfile } from "../../domain/entities/User";
 import { doc, onSnapshot, type Firestore } from "firebase/firestore";
 

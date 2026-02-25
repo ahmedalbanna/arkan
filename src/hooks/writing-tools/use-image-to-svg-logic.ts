@@ -1,7 +1,7 @@
 
 'use client';
 
-import { convertImageToSvgApi } from '@/services/api/imageConversionService';
+import { convertImageToSvgApi } from '@/modules/ai/adapters/api-client/ImageConversionApiClient';
 import { useToast } from '@/hooks/util/use-toast';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation } from '@tanstack/react-query';

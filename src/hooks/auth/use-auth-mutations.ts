@@ -10,7 +10,7 @@ import {
   forgotPasswordService,
   sendPasswordResetEmailApi,
   createOrUpdateUserProfileApi,
-} from '@/services/api/authService';
+} from '@/modules/users/adapters/api-client/AuthApiClient';
 import { container } from '@/infrastructure/di/container';
 import { UserApiClient } from '@/modules/users/adapters/api-client/UserApiClient';
 

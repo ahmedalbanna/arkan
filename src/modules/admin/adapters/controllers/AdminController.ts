@@ -5,6 +5,7 @@ import { GetFeaturesUseCase } from "../../application/use-cases/GetFeaturesUseCa
 import { UpdateFeatureUseCase } from "../../application/use-cases/UpdateFeatureUseCase";
 import { GetSettingsUseCase } from "../../application/use-cases/GetSettingsUseCase";
 import { UpdateSettingsUseCase } from "../../application/use-cases/UpdateSettingsUseCase";
+import { GetGenerationLogsUseCase } from "../../application/use-cases/GetGenerationLogsUseCase";
 
 @injectable()
 export class AdminController {
@@ -13,7 +14,8 @@ export class AdminController {
         private getFeaturesUseCase: GetFeaturesUseCase,
         private updateFeatureUseCase: UpdateFeatureUseCase,
         private getSettingsUseCase: GetSettingsUseCase,
-        private updateSettingsUseCase: UpdateSettingsUseCase
+        private updateSettingsUseCase: UpdateSettingsUseCase,
+        private getGenerationLogsUseCase: GetGenerationLogsUseCase
     ) {}
 
     async getDashboardStats() {
@@ -34,5 +36,9 @@ export class AdminController {
 
     async updateSettings(data: any) {
         return this.updateSettingsUseCase.execute(data);
+    }
+
+    async getGenerationLogs(options: { limit: number; agentId?: string; userId?: string; lastVisibleId?: string }) {
+        return this.getGenerationLogsUseCase.execute(options);
     }
 }

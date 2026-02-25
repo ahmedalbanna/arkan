@@ -2,13 +2,14 @@
 'use client';
 
 import { useQuery } from '@tanstack/react-query';
-import { fetchFeaturesApi, updateFeatureApi } from '@/services/api/featureService';
-import type { Feature } from '@/lib/types';
+
+
 import { toast } from '@/hooks/util/use-toast';
 import { useAuth } from '@/context/AuthContext';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { featureKeys } from '@/lib/query-keys';
-import type { UpdateFeatureVariables } from '@/lib/types';
+import { Feature } from '@/modules/admin/domain/entities/Feature';
+
 
 
 export function useFeatures() {

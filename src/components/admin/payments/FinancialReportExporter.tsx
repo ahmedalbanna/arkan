@@ -11,7 +11,7 @@ import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { cn } from '@/lib/utils/cn';
 import { useAuth } from '@/context/AuthContext';
-import { fetchTransactionsForReport } from '@/services';
+import { fetchTransactionsForReport } from '@/modules/billing/adapters/api-client/TransactionApiClient';
 import { useToast } from '@/hooks';
 import { useLocalization } from '@/context/LocalizationContext';
 import { convertMarkdownToPdf } from '@/lib/utils/pdf-utils';

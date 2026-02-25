@@ -15,7 +15,7 @@ import {
   type UserCredential
 } from "firebase/auth";
 import { createUserWithEmailAndPassword } from 'firebase/auth';
-import { apiService } from './apiService';
+import { apiService } from '@/infrastructure/api/ApiService';
 import { LoginCredentials } from '@/lib/utils/authUtils';
 import { SignupCredentials } from '@/components/auth/SignupForm';
 import { UserProfile } from '@/modules/users/domain/entities/User';

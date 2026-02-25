@@ -7,7 +7,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useWritingTool, useToast } from '@/hooks';
 import { useAuth } from '@/context/AuthContext';
-import { processFileApi } from '@/services';
+import { processFileApi } from '@/modules/ai-content/adapters/api-client/DocumentProcessingApiClient';
 import { useDropzone } from 'react-dropzone';
 import { useLocalization } from '@/context/LocalizationContext';
 

@@ -66,8 +66,6 @@ export {
 
 // Export Google search tools
 // export { googleSearchTool, googleSearchTools, searchImages, searchMaps, searchNews, searchShopping, searchWeb } from './google-search'; // module not yet created
-// Placeholder for googleSearchTool until google-search module is created
-const googleSearchTool: Record<string, unknown> = {};
 
 // Aggregate all tools for easy registration
 import { citationsAndReferencesTools } from './citations-and-references';

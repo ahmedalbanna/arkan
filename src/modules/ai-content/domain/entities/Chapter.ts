@@ -1,4 +1,3 @@
-
 import { Section, type SectionProperties } from './Section';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -11,7 +10,7 @@ export interface ChapterProperties {
 export class Chapter {
   public readonly id: string;
   public readonly title: string;
-  public readonly sections: readonly Section[];
+  public readonly sections: Section[];
 
   constructor(props: ChapterProperties) {
     this.id = props.id || uuidv4();
@@ -61,7 +60,7 @@ export class Chapter {
     };
   }
 
-  public toJSON(): any {
+  public toJSON(): ChapterProperties {
     return this.toStateObject();
   }
 }

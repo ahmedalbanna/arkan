@@ -246,7 +246,7 @@ export function PurchaseCreditsDialog({ trigger }: { trigger: React.ReactNode })
     if (!firebaseUser) return;
     
     const formData = new FormData();
-    formData.append('file', data.file[0]);
+    formData.append('file', data.file);
     formData.append('userId', firebaseUser.uid);
     formData.append('credits', credits.toString());
     formData.append('price', price.toFixed(2));

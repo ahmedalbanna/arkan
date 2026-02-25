@@ -9,7 +9,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useBuilderStore } from '../core/useBuilderStore';
 import { useAuth } from '@/context/AuthContext';
 import { getAuthenticatedToken } from '@/lib/utils/authUtils';
-import { localProjectService } from '@/services/local-project-service';
+import { localProjectService } from '@/modules/projects/adapters/local-storage/LocalProjectService';
 import { container } from '@/infrastructure/di/container';
 import { ProjectApiClient } from '@/modules/projects/adapters/api-client/ProjectApiClient';
 

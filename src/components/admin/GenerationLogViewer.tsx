@@ -3,8 +3,8 @@
 
 import { useInfiniteQuery } from '@tanstack/react-query';
 import { generationLogKeys } from '@/lib/query-keys';
-import { fetchGenerationLogs } from '@/services';
-import type { GenerationLog } from '@/services';
+import { fetchGenerationLogs } from '@/modules/ai/adapters/api-client/GenerationLogApiClient';
+import type { GenerationLog } from '@/modules/ai/adapters/api-client/GenerationLogApiClient';
 import { AlertCircle, Eye, Loader2, Search } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';

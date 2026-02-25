@@ -3,7 +3,7 @@
 import { useInfiniteQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '@/context/AuthContext';
 import { transactionKeys } from '@/lib/query-keys';
-import { getTransactions, verifyPayment, submitPaymentProof } from '@/services/api/transactionService';
+import { getTransactions, verifyPayment, submitPaymentProof } from '@/modules/billing/adapters/api-client/TransactionApiClient';
 import { toast, useToast } from '@/hooks/util/use-toast';
 import { Transaction, type TransactionProperties } from '@/modules/billing/domain/entities/Transaction';
 
@@ -67,7 +67,7 @@ export function useUserTransactions() {
         queryFn: async () => {
             if (!firebaseUser) throw new Error("User not authenticated");
             const token = await firebaseUser.getIdToken();
-            const { fetchUserTransactions } = await import('@/services/api/transactionService');
+            const { fetchUserTransactions } = await import('@/modules/billing/adapters/api-client/TransactionApiClient');
             const results = await fetchUserTransactions(token);
             // Instantiate Transaction objects
             return results.map((t: TransactionProperties) => new Transaction(t));

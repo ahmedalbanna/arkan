@@ -2,7 +2,7 @@
 'use client';
 
 import type { CitationStyle, DiagramTypeSchema, ParaphraseMode, SummarizeLength } from "@/ai/schemas";
-import { apiService } from "./apiService";
+import { apiService } from "@/infrastructure/api/ApiService";
 import { z } from "zod";
 
 // Base types for form data
