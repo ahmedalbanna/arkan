@@ -1,4 +1,5 @@
 
+import "reflect-metadata";
 import { injectable } from "tsyringe";
 import { adminDb } from "@/lib/firebase/server-init";
 import { IGenerationLogRepository, GenerationLog } from "../../domain/repositories/IGenerationLogRepository";

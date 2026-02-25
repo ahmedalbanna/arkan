@@ -1,11 +1,12 @@
+import "reflect-metadata";
 
-import { injectable } from "tsyringe";
+import { injectable, inject } from "tsyringe";
 import { RunAiToolUseCase, RunAiToolInput } from "../../application/use-cases/RunAiToolUseCase";
 
 @injectable()
 export class AiController {
     constructor(
-        private runAiToolUseCase: RunAiToolUseCase
+        @inject(RunAiToolUseCase) private runAiToolUseCase: RunAiToolUseCase
     ) {}
 
     async runTool<TInput, TOutput>(params: RunAiToolInput<TInput>): Promise<TOutput> {

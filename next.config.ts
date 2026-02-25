@@ -12,6 +12,7 @@ const pwaConfig = withPWA({
 const nextConfig: NextConfig = {
   reactStrictMode: true, // Enable React strict mode for better development experience
   output: 'standalone',
+  transpilePackages: ['tsyringe'],
   typescript: {
     ignoreBuildErrors: false,
   },
@@ -86,6 +87,7 @@ const nextConfig: NextConfig = {
   experimental: {
     serverActions: { bodySizeLimit: '10mb' as SizeLimit },
     useCache: true,
+    instrumentationHook: true,
   }
 };
 

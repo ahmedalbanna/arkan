@@ -1,3 +1,4 @@
+import "reflect-metadata";
 
 import { inject, injectable } from "tsyringe";
 import type { IUserRepository } from "../../domain/repositories/IUserRepository";

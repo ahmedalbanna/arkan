@@ -1,3 +1,4 @@
+import "reflect-metadata";
 
 import { inject, injectable } from "tsyringe";
 import type { IAiService } from "../../domain/services/IAiService";
@@ -21,7 +22,7 @@ export class RunAiToolUseCase {
         private aiService: IAiService,
         @inject(IGenerationLogRepositoryToken)
         private generationLogRepository: IGenerationLogRepository,
-        private deductCreditsUseCase: DeductCreditsUseCase
+        @inject(DeductCreditsUseCase) private deductCreditsUseCase: DeductCreditsUseCase
     ) {}
 
     async execute<TInput, TOutput>(params: RunAiToolInput<TInput>): Promise<TOutput> {

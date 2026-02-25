@@ -1,3 +1,4 @@
+import "reflect-metadata";
 
 import { inject, injectable } from "tsyringe";
 import type { IGenerationLogRepository } from "@/modules/ai/domain/repositories/IGenerationLogRepository";

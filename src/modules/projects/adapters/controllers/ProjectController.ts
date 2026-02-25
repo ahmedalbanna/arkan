@@ -1,5 +1,6 @@
+import "reflect-metadata";
 
-import { injectable } from "tsyringe";
+import { injectable, inject } from "tsyringe";
 import { GetProjectsUseCase } from "../../application/use-cases/GetProjectsUseCase";
 import { SaveProjectUseCase } from "../../application/use-cases/SaveProjectUseCase";
 import { GetProjectByIdUseCase } from "../../application/use-cases/GetProjectByIdUseCase";
@@ -8,10 +9,10 @@ import { DeleteProjectUseCase } from "../../application/use-cases/DeleteProjectU
 @injectable()
 export class ProjectController {
     constructor(
-        private getProjectsUseCase: GetProjectsUseCase,
-        private saveProjectUseCase: SaveProjectUseCase,
-        private getProjectByIdUseCase: GetProjectByIdUseCase,
-        private deleteProjectUseCase: DeleteProjectUseCase
+        @inject(GetProjectsUseCase) private getProjectsUseCase: GetProjectsUseCase,
+        @inject(SaveProjectUseCase) private saveProjectUseCase: SaveProjectUseCase,
+        @inject(GetProjectByIdUseCase) private getProjectByIdUseCase: GetProjectByIdUseCase,
+        @inject(DeleteProjectUseCase) private deleteProjectUseCase: DeleteProjectUseCase
     ) {}
 
     async getProjects(userId: string) {

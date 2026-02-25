@@ -1,4 +1,5 @@
 
+import "reflect-metadata";
 import { injectable } from "tsyringe";
 import { IAiService } from "../../domain/services/IAiService";
 import { ai } from "@/ai/genkit";

@@ -1,4 +1,5 @@
 
+import "reflect-metadata";
 import { injectable } from "tsyringe";
 import { adminAuth } from "@/lib/firebase/server-init";
 import { IAuthRepository } from "../../domain/repositories/IAuthRepository";

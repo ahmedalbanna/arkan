@@ -1,13 +1,14 @@
+import "reflect-metadata";
 
-import { injectable } from "tsyringe";
+import { injectable, inject } from "tsyringe";
 import { GetDashboardStatsUseCase } from "../../application/use-cases/GetDashboardStatsUseCase";
 import { GetGenerationLogsUseCase } from "../../application/use-cases/GetGenerationLogsUseCase";
 
 @injectable()
 export class AdminController {
     constructor(
-        private getDashboardStatsUseCase: GetDashboardStatsUseCase,
-        private getGenerationLogsUseCase: GetGenerationLogsUseCase
+        @inject(GetDashboardStatsUseCase) private getDashboardStatsUseCase: GetDashboardStatsUseCase,
+        @inject(GetGenerationLogsUseCase) private getGenerationLogsUseCase: GetGenerationLogsUseCase
     ) {}
 
     async getDashboardStats() {

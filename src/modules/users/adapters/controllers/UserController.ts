@@ -1,5 +1,6 @@
+import "reflect-metadata";
 
-import { injectable } from "tsyringe";
+import { injectable, inject } from "tsyringe";
 import { GetUserProfileUseCase } from "../../application/use-cases/GetUserProfileUseCase";
 import { UpdateUserProfileUseCase } from "../../application/use-cases/UpdateUserProfileUseCase";
 import { GetPaginatedUsersUseCase } from "../../application/use-cases/GetPaginatedUsersUseCase";
@@ -13,14 +14,14 @@ import { revalidatePath } from "next/cache";
 @injectable()
 export class UserController {
     constructor(
-        private getUserProfileUseCase: GetUserProfileUseCase,
-        private updateUserProfileUseCase: UpdateUserProfileUseCase,
-        private getPaginatedUsersUseCase: GetPaginatedUsersUseCase,
-        private createUserUseCase: CreateUserUseCase,
-        private resetPasswordUseCase: ResetPasswordUseCase,
-        private giftCreditsUseCase: GiftCreditsUseCase,
-        private deleteUserUseCase: DeleteUserUseCase,
-        private getUserStatsUseCase: GetUserStatsUseCase
+        @inject(GetUserProfileUseCase) private getUserProfileUseCase: GetUserProfileUseCase,
+        @inject(UpdateUserProfileUseCase) private updateUserProfileUseCase: UpdateUserProfileUseCase,
+        @inject(GetPaginatedUsersUseCase) private getPaginatedUsersUseCase: GetPaginatedUsersUseCase,
+        @inject(CreateUserUseCase) private createUserUseCase: CreateUserUseCase,
+        @inject(ResetPasswordUseCase) private resetPasswordUseCase: ResetPasswordUseCase,
+        @inject(GiftCreditsUseCase) private giftCreditsUseCase: GiftCreditsUseCase,
+        @inject(DeleteUserUseCase) private deleteUserUseCase: DeleteUserUseCase,
+        @inject(GetUserStatsUseCase) private getUserStatsUseCase: GetUserStatsUseCase
     ) {}
 
     async getUser(userId: string) {
