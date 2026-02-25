@@ -1,6 +1,6 @@
 
 import { defaultSections } from '@/lib/db/seed-data/sections';
-import { adminDb } from '@/lib/firebase/server-init';
+import { adminDb } from '@/infrastructure/firebase/server-init';
 
 async function seed() {
   const batch = adminDb.batch();

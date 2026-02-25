@@ -8,7 +8,7 @@ import { useWritingTool, useToast } from '@/hooks';
 import { useState, useMemo, useEffect, useCallback } from 'react';
 import { DiffPart, computeDiff } from '@/lib/utils/diff';
 import { useBuilderStore } from '../core/useBuilderStore';
-import { Chapter, SectionContext } from '@/lib/models';
+import { Chapter, SectionContext } from '@/lib/types';
 
 type ManipulationType = 'rewrite' | 'summarize' | 'style-editor' | 'readability-enhancer' | 'conciseness-checker' | 'clarity-advisor';
 

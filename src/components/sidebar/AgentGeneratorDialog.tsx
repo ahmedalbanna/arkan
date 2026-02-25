@@ -27,7 +27,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks';
 import { useAgentManager } from '@/hooks/use-agent-store';
-import type { AgentProperties } from '@/lib/models';
+import type { AgentProperties } from '@/lib/types';
 import { useMutation } from '@tanstack/react-query';
 import { useState } from 'react';
 import { Checkbox } from '../ui/checkbox';

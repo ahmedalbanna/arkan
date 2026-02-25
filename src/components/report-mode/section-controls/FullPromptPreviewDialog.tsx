@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Copy, Check } from 'lucide-react';
 import { useBuilderStore } from '@/hooks';
 
-import type { Section } from '@/lib/models';
+import type { Section } from '@/lib/types';
 import { PromptBuilder } from '@/modules/ai-content/domain/services/PromptBuilder';
 
 interface FullPromptPreviewDialogProps {

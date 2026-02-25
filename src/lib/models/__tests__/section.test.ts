@@ -1,6 +1,6 @@
 
-import { Section, defaultControls } from '@/lib/models';
-import { Project } from '@/lib/models';
+import { Section, defaultControls } from '@/lib/types';
+import { Project } from '@/lib/types';
 
 describe('Section Model', () => {
   it('should initialize with required properties and defaults', () => {

@@ -1,7 +1,7 @@
 // src/app/api/notifications/mark-as-read/route.ts
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
-import { adminAuth } from '@/lib/firebase/server-init';
+import { adminAuth } from '@/infrastructure/firebase/server-init';
 import { getDatabase } from 'firebase-admin/database';
 
 const markAsReadSchema = z.object({

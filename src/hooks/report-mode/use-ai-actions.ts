@@ -13,7 +13,7 @@ import { generateReportSectionApi } from '@/services/api/reportService';
 import type { SectionName } from '@/ai/schemas';
 import { PromptBuilder } from '@/modules/ai-content/domain/services/PromptBuilder';
 import { writingToolApi } from '@/services/api/writingToolsService';
-import { Chapter, type Project, type Section } from '@/lib/models';
+import { Chapter, type Project, type Section } from '@/lib/types';
 import { parseMarkdownToContent } from '@/lib/project/markdown-parser';
 import { useEditorStore } from '../core/use-editor-store';
 import { projectKeys } from '@/lib/query-keys';

@@ -1,6 +1,6 @@
 'use client';
 
-import { Chapter, Project, Section, TocSection, type ProjectProperties, User } from '@/lib/models';
+import { Chapter, Project, Section, TocSection, type ProjectProperties, User } from '@/lib/types';
 import { localProjectService } from '@/services/local-project-service';
 import { useEffect } from 'react';
 import { create } from 'zustand';

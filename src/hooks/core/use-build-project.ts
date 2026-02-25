@@ -2,7 +2,7 @@
 'use client';
 
 import { useBuilderStore } from '@/hooks/core/useBuilderStore';
-import type { Project, Section } from '@/lib/models';
+import type { Project, Section } from '@/lib/types';
 
 export function useBuildProject() {
     const { project } = useBuilderStore();

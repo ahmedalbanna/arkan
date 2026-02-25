@@ -1,5 +1,5 @@
 // src/app/api/agent-categories/route.ts
-import { adminDb } from '@/lib/firebase/server-init';
+import { adminDb } from '@/infrastructure/firebase/server-init';
 import { handleApiError, createApiResponse, withAuth } from '@/lib/utils/api-utils';
 
 export const GET = withAuth(async () => {

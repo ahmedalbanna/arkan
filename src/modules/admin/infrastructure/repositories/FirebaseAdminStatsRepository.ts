@@ -1,7 +1,7 @@
 import "reflect-metadata";
 
 import { injectable } from "tsyringe";
-import { adminDb } from "@/lib/firebase/server-init";
+import { adminDb } from "@/infrastructure/firebase/server-init";
 import { IAdminStatsRepository, DashboardStats } from "../../domain/repositories/IAdminStatsRepository";
 
 @injectable()

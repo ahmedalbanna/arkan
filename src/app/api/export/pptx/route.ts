@@ -3,7 +3,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
-import type { ProjectProperties } from '@/lib/models';
+import type { ProjectProperties } from '@/lib/types';
 import { convertMarkdownToPptx } from '@/lib/markdown-to-pptx-converter';
 import type { PptxConversionOptions } from '@/lib/markdown-to-pptx-converter';
 

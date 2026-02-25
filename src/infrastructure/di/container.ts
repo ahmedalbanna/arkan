@@ -21,6 +21,7 @@ import { ISectionRepositoryToken } from "@/modules/ai-content/domain/repositorie
 // Client-side implementations (Safe to import anywhere)
 import { ProjectApiClient } from "@/modules/projects/adapters/api-client/ProjectApiClient";
 import { UserApiClient } from "@/modules/users/adapters/api-client/UserApiClient";
+import { TemplateApiClient } from "@/modules/templates/adapters/api-client/TemplateApiClient";
 
 // Register Client API Clients (always)
 container.register(ProjectApiClient, {
@@ -29,6 +30,10 @@ container.register(ProjectApiClient, {
 
 container.register(UserApiClient, {
   useClass: UserApiClient
+}, { lifecycle: Lifecycle.Singleton });
+
+container.register(TemplateApiClient, {
+  useClass: TemplateApiClient
 }, { lifecycle: Lifecycle.Singleton });
 
 // Server-side registration (Conditional)

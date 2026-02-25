@@ -1,8 +1,8 @@
 
 import { container } from '@/infrastructure/di/container';
 import { UserController } from '@/modules/users/adapters/controllers/UserController';
-import { CustomFirebaseError, handleFirebaseError } from '@/lib/firebase/error';
-import { adminAuth } from '@/lib/firebase/server-init';
+import { CustomFirebaseError, handleFirebaseError } from '@/infrastructure/firebase/error';
+import { adminAuth } from '@/infrastructure/firebase/server-init';
 import { NextResponse, type NextRequest } from 'next/server';
 import { ZodError } from 'zod';
 

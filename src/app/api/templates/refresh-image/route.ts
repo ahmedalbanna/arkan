@@ -2,7 +2,7 @@
 // eslint-disable-next-line @typescript-eslint/no-empty-function
 export {};
 // import { generateImage } from '@/ai/flows/generate-image';
-// import { adminDb } from '@/lib/firebase/server-init';
+// import { adminDb } from '@/infrastructure/firebase/server-init';
 // import { createApiResponse, handleApiError, withAuth } from '@/lib/utils/api-utils';
 // import { logGeneration } from '@/services/generation-service';
 // import { getStorage } from 'firebase-admin/storage';

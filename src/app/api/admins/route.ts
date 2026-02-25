@@ -1,5 +1,5 @@
 import { createApiResponse, handleApiError } from '@/lib/utils/api-utils';
-import { adminDb } from '@/lib/firebase/server-init';
+import { adminDb } from '@/infrastructure/firebase/server-init';
 
 // Public endpoint to fetch admins for support chat initiation
 export async function GET() {

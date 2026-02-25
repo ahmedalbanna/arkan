@@ -1,6 +1,6 @@
 
 'use client';
-import type { AgentProperties } from '@/lib/models';
+import type { AgentProperties } from '@/lib/types';
 import { apiService } from './apiService';
 
 export async function fetchAgentsApi(token: string, category?: string): Promise<AgentProperties[]> {

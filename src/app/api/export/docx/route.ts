@@ -3,7 +3,7 @@
 'use server';
 
 import { convertMarkdownToWord } from '@/lib/markdown-to-word-converter';
-import type { ProjectProperties } from '@/lib/models';
+import type { ProjectProperties } from '@/lib/types';
 import type { ConversionOptions } from '@/modules/ai-content/infrastructure/exporters/word-converter/types';
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';

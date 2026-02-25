@@ -1,7 +1,7 @@
 
 'use client';
 
-import type { TransactionProperties } from '@/lib/models';
+import type { TransactionProperties } from '@/lib/types';
 
 import { apiService } from './apiService';
 import { VerifyPaymentVariables } from '@/hooks/data/use-transactions';

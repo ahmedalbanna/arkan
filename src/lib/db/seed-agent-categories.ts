@@ -1,6 +1,6 @@
 
 // src/lib/db/seed-agent-categories.ts
-import { adminDb } from '@/lib/firebase/server-init';
+import { adminDb } from '@/infrastructure/firebase/server-init';
 import { defaultAgentCategories } from './seed-data/agents';
 
 async function seed() {

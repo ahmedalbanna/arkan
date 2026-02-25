@@ -1,5 +1,5 @@
 
-import { adminDb } from '@/lib/firebase/server-init';
+import { adminDb } from '@/infrastructure/firebase/server-init';
 import { createApiResponse, handleApiError } from '@/lib/utils/api-utils';
 
 async function getSettings() {

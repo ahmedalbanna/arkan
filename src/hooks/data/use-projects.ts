@@ -2,8 +2,8 @@
 'use client';
 
 import { toast } from '@/hooks/util/use-toast';
-import type { ProjectProperties } from '@/lib/models';
-import { Project } from '@/lib/models';
+import type { ProjectProperties } from '@/lib/types';
+import { Project } from '@/lib/types';
 import { projectKeys } from '@/lib/query-keys';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useBuilderStore } from '../core/useBuilderStore';

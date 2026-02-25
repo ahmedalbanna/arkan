@@ -1,8 +1,8 @@
 // src/app/api/admin/templates/report/[id]/route.ts
 
 import { createApiResponse, handleApiError, withAuth } from '@/lib/utils/api-utils';
-import { adminDb } from '@/lib/firebase/server-init';
-import { UpdateReportTemplateSchema } from '@/lib/models';
+import { adminDb } from '@/infrastructure/firebase/server-init';
+import { UpdateReportTemplateSchema } from '@/lib/types';
 
 // GET a single report template
 export const GET = withAuth(async ({ params }) => {

@@ -12,7 +12,7 @@ import { userKeys } from "@/lib/query-keys";
 import { container } from "@/infrastructure/di/container";
 import { UserApiClient } from "@/modules/users/adapters/api-client/UserApiClient";
 import { useLocalization } from "@/context/LocalizationContext";
-import { User } from '@/lib/models';
+import { User } from '@/lib/types';
 import { GiftCreditsDialog } from "../payments/GiftCreditsDialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { useSendPasswordReset } from "@/hooks";

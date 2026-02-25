@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { useUpdateUser } from '@/hooks';
-import { UserProfile } from '@/lib/models';
+import { UserProfile } from '@/lib/types';
 import { Loader2, Save } from 'lucide-react';
 import { useEffect } from 'react';
 

@@ -1,5 +1,5 @@
 
-import type { AgentProperties } from '@/lib/models';
+import type { AgentProperties } from '@/lib/types';
 
 export const defaultAgentCategories = [
     { id: 'content-creation', name: 'Content Creation', icon: 'PenSquare' },

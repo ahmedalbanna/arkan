@@ -10,7 +10,7 @@ import {
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { useChapterActions } from '@/hooks/report-mode/use-chapter-actions';
-import { Chapter } from '@/lib/models';
+import { Chapter } from '@/lib/types';
 import { Loader2, Wand2, PlusCircle, Link as LinkIcon, Edit } from 'lucide-react';
 import { ScrollArea } from '../../ui/scroll-area';
 import { Label } from '../../ui/label';

@@ -3,7 +3,7 @@
 
 import { useLocalization } from '@/context/LocalizationContext';
 import { useDeleteProject, useProjects } from '@/hooks';
-import { Project } from '@/lib/models';
+import { Project } from '@/lib/types';
 import { useRouter } from 'next/navigation';
 import { useToast } from '../util/use-toast';
 import { useBuilderStore } from './useBuilderStore';

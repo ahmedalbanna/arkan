@@ -12,7 +12,7 @@ import {
     createPptxTemplateApi,
     refreshTemplateImage,
 } from '@/services/api/templateService';
-import type { PptxTemplateProperties } from '@/lib/models';
+import type { PptxTemplateProperties } from '@/lib/types';
 
 
 export function usePptxStyles() {

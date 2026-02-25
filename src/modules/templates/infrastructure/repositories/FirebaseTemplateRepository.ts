@@ -1,7 +1,7 @@
 
 import "reflect-metadata";
 import { injectable } from "tsyringe";
-import { adminDb } from "@/lib/firebase/server-init";
+import { adminDb } from "@/infrastructure/firebase/server-init";
 import { ITemplateRepository, Template } from "../../domain/repositories/ITemplateRepository";
 import { templates as defaultDocxTemplates } from '@/modules/ai-content/infrastructure/exporters/DocxStyles';
 import { templates as defaultPptxTemplates } from '@/modules/templates/infrastructure/PptxStyles';

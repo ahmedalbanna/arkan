@@ -2,7 +2,7 @@
 'use client';
 
 import { create } from 'zustand';
-import type { AgentProperties } from '@/lib/models';
+import type { AgentProperties } from '@/lib/types';
 import { fetchAgentsApi, createAgentApi, updateAgentApi, deleteAgentApi } from '@/services/api/agentService';
 import { useAuth } from '@/context/AuthContext';
 import { useEffect, useState } from 'react';

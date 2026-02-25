@@ -1,6 +1,6 @@
 // C:\Users\ahmed\source\repos\arkan\src\app\api\admin\sections\[id]\route.ts
 import { withAuth, handleApiError, createApiResponse } from '@/lib/utils/api-utils';
-import { adminDb } from '@/lib/firebase/server-init';
+import { adminDb } from '@/infrastructure/firebase/server-init';
 import { z } from 'zod';
 
 const SectionUpdateSchema = z.object({

@@ -4,9 +4,9 @@
 import { Document, Packer, Paragraph, Table } from 'docx';
 import { saveAs } from 'file-saver';
 
-import type { Section } from '@/lib/models';
-import { templates } from './docx-styles';
-import { createDocxContent } from './markdown-to-word-converter';
+import type { Section } from '@/lib/types';
+import { templates } from './DocxStyles';
+import { createDocxContent } from './MarkdownToWordConverter';
 
 
 const defaultStyles = templates.modern.styles;

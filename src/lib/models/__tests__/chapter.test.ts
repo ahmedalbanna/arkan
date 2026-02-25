@@ -1,5 +1,5 @@
 
-import { Chapter, Section } from '@/lib/models';
+import { Chapter, Section } from '@/lib/types';
 
 describe('Chapter Model', () => {
   it('should initialize with a title and empty sections', () => {

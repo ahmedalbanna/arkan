@@ -1,4 +1,4 @@
-import { Project, type ProjectProperties } from '@/lib/models';
+import { Project, type ProjectProperties } from '@/lib/types';
 
 /**
  * Creates a Project instance from a file.

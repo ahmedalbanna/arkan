@@ -8,7 +8,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useContextSelector } from '@/hooks';
-import type { ExternalContextType } from '@/lib/models';
+import type { ExternalContextType } from '@/lib/types';
 import { FileText, Folder, Copy } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { Button } from '@/components/ui/button';

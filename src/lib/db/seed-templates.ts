@@ -2,7 +2,7 @@
 
 // src/lib/db/seed-templates.ts
 
-import { adminDb } from '@/lib/firebase/server-init';
+import { adminDb } from '@/infrastructure/firebase/server-init';
 import { PptxTemplateKey, templates as defaultPptxTemplates } from '@/modules/templates/infrastructure/PptxStyles';
 import { DocxTemplateKey, templates as defaultDocxTemplates } from '@/modules/ai-content/infrastructure/exporters/DocxStyles';
 

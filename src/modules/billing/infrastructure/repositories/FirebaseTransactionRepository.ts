@@ -1,6 +1,6 @@
 
 import { injectable } from "tsyringe";
-import { adminDb } from "@/lib/firebase/server-init";
+import { adminDb } from "@/infrastructure/firebase/server-init";
 import { ITransactionRepository } from "../../domain/repositories/ITransactionRepository";
 import { TransactionProperties } from "../../domain/entities/Transaction";
 

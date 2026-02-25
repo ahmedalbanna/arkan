@@ -18,7 +18,7 @@ import { ScrollArea } from '../../ui/scroll-area';
 import { Input } from '../../ui/input';
 import { Search } from 'lucide-react';
 import { useLocalization } from '@/context/LocalizationContext';
-import type { ReportTemplateProperties } from '@/lib/models';
+import type { ReportTemplateProperties } from '@/lib/types';
 
 interface ReportTemplateDialogProps {
   isOpen: boolean;

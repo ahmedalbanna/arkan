@@ -5,7 +5,7 @@
  * For production, consider using dedicated vector databases like Pinecone or Qdrant.
  */
 
-import { adminDb as db } from '@/lib/firebase/server-init';
+import { adminDb as db } from '@/infrastructure/firebase/server-init';
 import { collection, doc, setDoc, getDocs, query, where, Timestamp } from 'firebase/firestore';
 
 export interface DocumentChunk {

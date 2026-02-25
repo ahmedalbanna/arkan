@@ -15,7 +15,7 @@ import { fetchTransactionsForReport } from '@/services';
 import { useToast } from '@/hooks';
 import { useLocalization } from '@/context/LocalizationContext';
 import { convertMarkdownToPdf } from '@/lib/utils/pdf-utils';
-import type { TransactionProperties } from '@/lib/models';
+import type { TransactionProperties } from '@/lib/types';
 
 function formatTransactionsToMarkdown(transactions: TransactionProperties[], dateRange: DateRange): string {
     let markdown = `# Financial Report\n\n`;

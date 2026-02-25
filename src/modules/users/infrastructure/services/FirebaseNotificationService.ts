@@ -1,7 +1,7 @@
 import "reflect-metadata";
 
 import { injectable } from "tsyringe";
-import { adminDb, adminRealtimeDb } from "@/lib/firebase/server-init";
+import { adminDb, adminRealtimeDb } from "@/infrastructure/firebase/server-init";
 import admin from 'firebase-admin';
 import type { INotificationService, NotificationPayload } from "../../domain/services/INotificationService";
 

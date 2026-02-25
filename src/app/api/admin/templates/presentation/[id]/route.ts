@@ -1,7 +1,7 @@
 // src/app/api/admin/templates/presentation/[id]/route.ts
 
 import { createApiResponse, handleApiError, withAuth } from '@/lib/utils/api-utils';
-import { adminDb } from '@/lib/firebase/server-init';
+import { adminDb } from '@/infrastructure/firebase/server-init';
 import { PresentationGenerationTemplateSchema, UpdatePresentationTemplateSchema } from '@/ai/schemas';
 
 // GET a single presentation template

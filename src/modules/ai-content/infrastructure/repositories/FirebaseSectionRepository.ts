@@ -1,6 +1,6 @@
 
 import { injectable } from "tsyringe";
-import { adminDb } from "@/lib/firebase/server-init";
+import { adminDb } from "@/infrastructure/firebase/server-init";
 import { ISectionRepository, SectionDefinition } from "../../domain/repositories/ISectionRepository";
 
 @injectable()

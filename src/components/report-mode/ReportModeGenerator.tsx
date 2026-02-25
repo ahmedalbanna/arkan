@@ -17,8 +17,8 @@ import { Slider } from '../ui/slider';
 import { Label } from '../ui/label';
 import { Badge } from '../ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
-import { ToneSchema } from '@/lib/models';
-import type { Language, Tone } from '@/lib/models';
+import { ToneSchema } from '@/lib/types';
+import type { Language, Tone } from '@/lib/types';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/tooltip';
 import { ProjectChat } from './chat/ProjectChat';
 

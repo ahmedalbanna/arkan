@@ -7,7 +7,7 @@ import { redirect } from 'next/navigation';
 import { container } from '@/infrastructure/di/container';
 import { UserController } from '@/modules/users/adapters/controllers/UserController';
 import { cookies } from 'next/headers';
-import { adminAuth } from '@/lib/firebase/server-init';
+import { adminAuth } from '@/infrastructure/firebase/server-init';
 
 // Helper function to verify the requester is an admin
 async function verifyAdmin() {

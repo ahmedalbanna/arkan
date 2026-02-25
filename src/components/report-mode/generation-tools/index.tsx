@@ -30,7 +30,7 @@ import { useMemo } from "react";
 import { Checkbox } from "../../ui/checkbox";
 import { Label } from "../../ui/label";
 import { BuildProjectDialog } from "../dialogs/BuildProjectDialog";
-import { Chapter, Section } from '@/lib/models';
+import { Chapter, Section } from '@/lib/types';
 import { ScrollArea } from "../../ui/scroll-area";
 import { SectionAccordionItem } from "./SectionAccordionItem";
 import { SortableChapterItem } from "./SortableChapterItem";

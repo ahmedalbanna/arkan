@@ -8,7 +8,7 @@ import { Slider } from '@/components/ui/slider';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
 import { Checkbox } from '../../ui/checkbox';
-import type { Tone, Language, GenerationControlState, Section } from '@/lib/models';
+import type { Tone, Language, GenerationControlState, Section } from '@/lib/types';
 import { Card, CardContent, CardDescription, CardHeader } from '../../ui/card';
 import { Info, Eye } from 'lucide-react';
 import { DiagramType, DiagramTypeSchema, ToneSchema } from '@/ai/schemas';

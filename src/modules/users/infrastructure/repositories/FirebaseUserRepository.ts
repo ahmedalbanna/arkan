@@ -1,7 +1,7 @@
 
 import "reflect-metadata";
 import { injectable } from "tsyringe";
-import { adminDb } from "@/lib/firebase/server-init";
+import { adminDb } from "@/infrastructure/firebase/server-init";
 import { IUserRepository } from "../../domain/repositories/IUserRepository";
 import { UserProfile } from "../../domain/entities/User";
 import { FieldValue } from 'firebase-admin/firestore';

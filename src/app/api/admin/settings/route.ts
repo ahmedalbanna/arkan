@@ -1,7 +1,7 @@
 'use server';
 
 import { z } from 'zod';
-import { adminDb } from '@/lib/firebase/server-init';
+import { adminDb } from '@/infrastructure/firebase/server-init';
 import { withAuth, handleApiError, createApiResponse } from '@/lib/utils/api-utils';
 import { defaultPaymentMethods } from '@/lib/db/seed-data/payment-methods';
 

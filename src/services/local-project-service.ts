@@ -1,7 +1,7 @@
 
 'use client';
 
-import type { ProjectProperties } from '@/lib/models';
+import type { ProjectProperties } from '@/lib/types';
 import { openDB, type IDBPDatabase } from 'idb';
 
 const DB_NAME = 'ArkanProjectsDB';

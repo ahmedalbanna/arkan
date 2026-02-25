@@ -2,7 +2,7 @@
 'use client';
 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { User, type UserProfile } from '@/lib/models';
+import { User, type UserProfile } from '@/lib/types';
 import { userKeys } from '@/lib/query-keys';
 import { handleErrorUtility } from '@/lib/utils/errorUtils';
 import { useAuth } from '@/context/AuthContext';

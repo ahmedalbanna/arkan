@@ -5,7 +5,7 @@ import { defaultPaymentMethods } from '@/lib/db/seed-data/payment-methods';
 import { defaultFeatures } from '@/lib/db/seed-data/features';
 import { defaultSections } from '@/lib/db/seed-data/sections';
 
-import { adminDb } from '@/lib/firebase/server-init';
+import { adminDb } from '@/infrastructure/firebase/server-init';
 import { PptxTemplateKey, templates as defaultPptxTemplates } from '@/modules/templates/infrastructure/PptxStyles';
 import { defaultAgents, defaultAgentCategories } from './seed-data/agents';
 import { defaultReportTemplates } from './seed-data/report-templates';

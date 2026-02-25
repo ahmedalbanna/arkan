@@ -8,7 +8,7 @@
  * - Support deletion tracking
  */
 
-import { adminDb } from '@/lib/firebase/server-init';
+import { adminDb } from '@/infrastructure/firebase/server-init';
 import { Timestamp } from 'firebase-admin/firestore';
 
 export interface IndexedDocumentRecord {

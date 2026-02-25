@@ -17,7 +17,7 @@ import { SectionContextSelector } from '../section-controls/SectionContextSelect
 import { SectionGenerationControls } from '../section-controls/SectionGenerationControls';
 import { GuidelineEditor } from '../section-controls/SectionGuidelineEditor';
 import { useAiActions } from '@/hooks/report-mode/use-ai-actions';
-import { Section, type Project } from '@/lib/models';
+import { Section, type Project } from '@/lib/types';
 
 
 interface SectionAccordionItemProps {

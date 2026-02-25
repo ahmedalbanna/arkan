@@ -17,7 +17,7 @@ import Image from 'next/image';
 import { Label } from '../../ui/label';
 import { CustomSelect } from '../../ui/CustomSelect';
 import { useImageUpload } from '@/hooks/core/useImageUpload';
-import { LanguageSchema, BehaviorSchema, type Behavior, type ProjectProperties, CitationStyleSchema, Tone } from '@/lib/models';
+import { LanguageSchema, BehaviorSchema, type Behavior, type ProjectProperties, CitationStyleSchema, Tone } from '@/lib/types';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../../ui/select';
 import { Slider } from '../../ui/slider';
 import { Badge } from '../../ui/badge';

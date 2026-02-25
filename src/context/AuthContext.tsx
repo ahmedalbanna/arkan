@@ -1,7 +1,7 @@
 'use client';
 
 import { userKeys } from '@/lib/query-keys';
-import { User } from '@/lib/models';
+import { User } from '@/lib/types';
 import { getAuthenticatedToken } from '@/lib/utils/authUtils';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { container } from '@/infrastructure/di/container';

@@ -22,7 +22,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Gift, Loader2 } from 'lucide-react';
 
-import { User } from '@/lib/models';
+import { User } from '@/lib/types';
 import { useAuth } from '@/context/AuthContext';
 import { toast } from '@/hooks';
 import { userKeys } from '@/lib/query-keys';

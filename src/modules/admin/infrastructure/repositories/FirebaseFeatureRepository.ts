@@ -1,6 +1,6 @@
 
 import { injectable } from "tsyringe";
-import { adminDb } from "@/lib/firebase/server-init";
+import { adminDb } from "@/infrastructure/firebase/server-init";
 import { IFeatureRepository } from "../../domain/repositories/IFeatureRepository";
 import { Feature } from "../../domain/entities/Feature";
 import { defaultFeatures } from '@/lib/db/seed-data/features';

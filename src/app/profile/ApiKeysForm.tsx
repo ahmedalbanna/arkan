@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { useUpdateUser } from '@/hooks';
-import { UserProfile } from '@/lib/models';
+import { UserProfile } from '@/lib/types';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Loader2, Save, Eye, EyeOff } from 'lucide-react';
 import { useEffect, useState } from 'react';

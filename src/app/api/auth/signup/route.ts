@@ -2,9 +2,9 @@
 'use server';
 
 import { createApiResponse, handleApiError } from '@/lib/utils/api-utils';
-import { adminAuth, adminDb } from '@/lib/firebase/server-init';
+import { adminAuth, adminDb } from '@/infrastructure/firebase/server-init';
 import { z } from 'zod';
-import type { UserProfile } from '@/lib/models';
+import type { UserProfile } from '@/lib/types';
 
 const signupSchema = z.object({
     email: z.string().email("Invalid email address"),

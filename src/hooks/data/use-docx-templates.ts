@@ -12,7 +12,7 @@ import {
     createDocxTemplateApi,
     refreshTemplateImage,
 } from '@/services';
-import type { DocxTemplateProperties } from '@/lib/models';
+import type { DocxTemplateProperties } from '@/lib/types';
 
 export function useDocxStyles() {
     const { data: templates, ...rest } = useQuery<Record<string, DocxTemplateProperties>>({

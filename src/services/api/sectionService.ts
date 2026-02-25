@@ -1,7 +1,7 @@
 
 'use client';
 
-import { SectionProperties } from "@/lib/models";
+import { SectionProperties } from "@/lib/types";
 import { apiService } from "./apiService";
 
 export async function fetchSections(token: string): Promise<SectionProperties[]> {

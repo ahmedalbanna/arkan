@@ -1,7 +1,7 @@
 
 'use client';
 
-import { Project, type ProjectProperties } from '@/lib/models';
+import { Project, type ProjectProperties } from '@/lib/types';
 import { Landmark, UploadCloud, Frame, Loader2, Book, Building, Brush, BookCopy } from 'lucide-react';
 import Image from 'next/image';
 import React, { useRef, useState } from 'react';

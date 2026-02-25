@@ -1,8 +1,8 @@
 import { z } from 'zod';
-import { adminDb } from '@/lib/firebase/server-init';
+import { adminDb } from '@/infrastructure/firebase/server-init';
 import admin from 'firebase-admin';
 import { withAuth, handleApiError, createApiResponse } from '@/lib/utils/api-utils';
-import { CustomFirebaseError } from '@/lib/firebase/error';
+import { CustomFirebaseError } from '@/infrastructure/firebase/error';
 
 const sendNotificationSchema = z.object({
   userId: z.string().min(1, 'User ID is required.'),
