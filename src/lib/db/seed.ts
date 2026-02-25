@@ -4,11 +4,12 @@ import { defaultBankAccounts } from '@/lib/db/seed-data/bank-accounts';
 import { defaultPaymentMethods } from '@/lib/db/seed-data/payment-methods';
 import { defaultFeatures } from '@/lib/db/seed-data/features';
 import { defaultSections } from '@/lib/db/seed-data/sections';
-import { templates as defaultDocxTemplates, type DocxTemplateKey } from '@/lib/docx-styles';
+
 import { adminDb } from '@/lib/firebase/server-init';
-import { templates as defaultPptxTemplates, type PptxTemplateKey } from '@/lib/pptx-styles';
+import { PptxTemplateKey, templates as defaultPptxTemplates } from '@/modules/templates/infrastructure/PptxStyles';
 import { defaultAgents, defaultAgentCategories } from './seed-data/agents';
 import { defaultReportTemplates } from './seed-data/report-templates';
+import { DocxTemplateKey, templates as defaultDocxTemplates } from '@/modules/ai-content/infrastructure/exporters/DocxStyles';
 
 async function seed() {
     console.log("Starting Firestore seeding process...");

@@ -4,7 +4,7 @@
 import { initializeFirebase } from '@/firebase';
 
 const { auth } = initializeFirebase();
-import type { LoginCredentials, SignupCredentials, UserProfile } from '@/lib/types';
+
 import {
   GoogleAuthProvider,
   getAdditionalUserInfo,
@@ -16,6 +16,9 @@ import {
 } from "firebase/auth";
 import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { apiService } from './apiService';
+import { LoginCredentials } from '@/lib/utils/authUtils';
+import { SignupCredentials } from '@/components/auth/SignupForm';
+import { UserProfile } from '@/modules/users/domain/entities/User';
 
 
 // --- Authentication Functions ---

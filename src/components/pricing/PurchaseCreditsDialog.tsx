@@ -16,7 +16,7 @@ import { Slider } from '@/components/ui/slider';
 import { Button } from '@/components/ui/button';
 import { Gem, ShoppingCart, ArrowLeft, Banknote, AlertCircle, Copy, Check, UploadCloud, Loader2, PartyPopper, Wallet, Building, Globe, Smartphone, CreditCard } from 'lucide-react';
 import { useSubmitPaymentProof, usePublicSettings } from '@/hooks';
-import type { BankAccount, PaymentMethod } from '@/lib/types';
+
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '../ui/accordion';
 import { Skeleton } from '../ui/skeleton';
@@ -25,7 +25,7 @@ import { Input } from '../ui/input';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
-import { fileSchema } from '@/lib/types';
+import { fileSchema, PaymentMethod } from '@/lib/types';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 

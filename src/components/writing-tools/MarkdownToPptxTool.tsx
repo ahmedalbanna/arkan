@@ -16,7 +16,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/util/use-toast';
 import { convertMarkdownToPdf, convertMarkdownToPptx } from '@/lib/markdown-to-pptx-converter';
-import { templates } from '@/lib/pptx-styles';
+import { templates as pptxTemplates } from '@/modules/templates/infrastructure/PptxStyles';
 import type { PptxStyleOptions } from '@/lib/types';
 
 const markdownToPptxSchema = z.object({
@@ -168,7 +168,7 @@ This slide demonstrates how a very long paragraph will gracefully break across m
       isRtl: false,
       includeToc: false,
       useCustomTheme: false,
-      customThemeJson: JSON.stringify(templates.modern.styles, null, 2),
+      customThemeJson: JSON.stringify(pptxTemplates.modern.styles, null, 2),
     },
   });
 
@@ -192,7 +192,7 @@ This slide demonstrates how a very long paragraph will gracefully break across m
           return;
         }
       } else {
-        themeStyles = templates[data.template].styles;
+        themeStyles = pptxTemplates[data.template].styles;
       }
 
       await convertMarkdownToPptx(data.markdown, data.fileName, {
@@ -247,7 +247,7 @@ This slide demonstrates how a very long paragraph will gracefully break across m
           return;
         }
       } else {
-        themeStyles = templates[data.template].styles;
+        themeStyles = pptxTemplates[data.template].styles;
       }
 
       await convertMarkdownToPdf(data.markdown, data.fileName, { styles: themeStyles, title: data.fileName, isRtl: data.isRtl });
@@ -308,9 +308,9 @@ This slide demonstrates how a very long paragraph will gracefully break across m
                   <SelectValue placeholder="Select a template" />
                 </SelectTrigger>
                 <SelectContent>
-                  {Object.keys(templates).map((key) => (
+                  {Object.keys(pptxTemplates).map((key) => (
                     <SelectItem value={key} key={key}>
-                      {templates[key as keyof typeof templates].name}
+                      {pptxTemplates[key as keyof typeof pptxTemplates].name}
                     </SelectItem>
                   ))}
                 </SelectContent>

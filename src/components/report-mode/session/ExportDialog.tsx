@@ -16,8 +16,8 @@ import {
 } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import { useBuilderStore, useExport } from '@/hooks';
-import { templates as docxTemplates, type DocxTemplateKey } from '@/lib/docx-styles';
-import { templates as pptxTemplates, type PptxTemplateKey } from '@/lib/pptx-styles';
+
+
 import { Download, FileText, Loader2, Presentation } from 'lucide-react';
 import { useState, useMemo } from 'react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../../ui/select';
@@ -27,6 +27,8 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Chapter } from '@/modules/ai-content/domain/entities/Chapter';
 import { ProjectContent } from '@/modules/projects/domain/entities/Project';
 import { Section } from '@/modules/ai-content/domain/entities/Section';
+import { DocxTemplateKey, templates as docxTemplates } from '@/modules/ai-content/infrastructure/exporters/DocxStyles';
+import { PptxTemplateKey, templates as pptxTemplates } from '@/modules/templates/infrastructure/PptxStyles';
 
 
 export function ExportDialog() {

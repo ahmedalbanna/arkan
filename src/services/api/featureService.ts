@@ -1,7 +1,8 @@
 
 'use client';
 
-import type { Feature, UpdateFeatureVariables } from '@/lib/types';
+
+import { Feature } from '@/modules/admin/domain/entities/Feature';
 import { apiService } from './apiService';
 
 /**

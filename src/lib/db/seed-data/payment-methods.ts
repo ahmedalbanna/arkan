@@ -1,4 +1,5 @@
-import type { PaymentMethod } from '@/lib/types';
+import { PaymentMethod } from "@/modules/billing/domain/entities/PaymentMethod";
+
 
 /**
  * Default payment methods for Yemen including:

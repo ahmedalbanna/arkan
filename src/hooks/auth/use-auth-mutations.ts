@@ -13,7 +13,7 @@ import {
 } from '@/services/api/authService';
 import { container } from '@/infrastructure/di/container';
 import { UserApiClient } from '@/modules/users/adapters/api-client/UserApiClient';
-import type { LoginCredentials, SignupCredentials, UserProfile } from '@/lib/types';
+
 import { useToast } from '@/hooks/util/use-toast';
 import { handleErrorUtility } from '@/lib/utils/errorUtils';
 import { useAuth } from '@/context/AuthContext';
@@ -23,6 +23,9 @@ import { initializeFirebase } from '@/firebase';
 
 const { firebaseApp: app } = initializeFirebase();
 import { useState } from 'react';
+import { LoginCredentials } from '@/lib/utils/authUtils';
+import { UserProfile } from '@/modules/users/domain/entities/User';
+import { SignupCredentials } from '@/components/auth/SignupForm';
 
 
 export function useLogin() {

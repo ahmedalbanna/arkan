@@ -2,8 +2,9 @@
 'use client';
 
 import type { TransactionProperties } from '@/lib/models';
-import type { VerifyPaymentVariables } from '@/lib/types';
+
 import { apiService } from './apiService';
+import { VerifyPaymentVariables } from '@/hooks/data/use-transactions';
 
 export type TransactionStatus = 'pending' | 'verified' | 'rejected';
 interface FetchTransactionsParams {

@@ -15,19 +15,14 @@ import {
     updatePresentationTemplateApi,
     deletePresentationTemplateApi,
 } from '@/services/api/templateService';
-import {
-    type ReportTemplateProperties,
-    type PptxTemplateProperties,
-    type CreateReportTemplateData,
-    type UpdateReportTemplateData,
-    type CreatePresentationTemplateData,
-    type UpdatePresentationTemplateData,
-} from '@/lib/types';
+
 
 import { useBuilderStore } from '../core/useBuilderStore';
 import { useState } from 'react';
 import { useSections } from './use-sections';
 import { applyReportTemplate as applyReportTemplateUtil } from '@/lib/project/template';
+import { CreateReportTemplateData, ReportTemplateProperties, UpdateReportTemplateData } from '@/modules/templates/domain/entities/ReportTemplate';
+import { PptxTemplateProperties } from '@/modules/templates/domain/entities/PptxTemplate';
 
 
 // ============================================================================
@@ -126,7 +121,7 @@ export function useDeleteReportTemplate() {
 export function usePresentationTemplates() {
     return useQuery<PptxTemplateProperties[]>({
         queryKey: ['presentation-templates'],
-        // @ts-expect-error - fetchPresentationTemplatesApi return type mismatch
+        
         queryFn: fetchPresentationTemplatesApi,
     });
 }

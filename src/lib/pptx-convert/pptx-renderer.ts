@@ -8,11 +8,12 @@ import type {
 } from 'mdast';
 import PptxGenJS from 'pptxgenjs';
 
-import type { PptxStyleOptions } from '@/lib/types';
+
 import { arrayBufferToBase64 } from '@/lib/utils/arrayBufferToBase64';
 import { getProxiedImageBuffer } from '../utils/ProxiedImage';
 import { DEFAULT_CODE_FONT, layout } from './constants';
 import type { FontOptions } from './slide-layout-engine';
+import { PptxStyleOptions } from '@/ai/schemas';
 
 /**
  * Transforms inline markdown content (strong, emphasis, links, etc.) into an array of PptxGenJS TextProps runs.

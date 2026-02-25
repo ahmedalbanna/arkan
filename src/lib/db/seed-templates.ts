@@ -1,9 +1,10 @@
 
 
 // src/lib/db/seed-templates.ts
-import { templates as defaultDocxTemplates, type DocxTemplateKey } from '@/lib/docx-styles';
+
 import { adminDb } from '@/lib/firebase/server-init';
-import { templates as defaultPptxTemplates, type PptxTemplateKey } from '@/lib/pptx-styles';
+import { PptxTemplateKey, templates as defaultPptxTemplates } from '@/modules/templates/infrastructure/PptxStyles';
+import { DocxTemplateKey, templates as defaultDocxTemplates } from '@/modules/ai-content/infrastructure/exporters/DocxStyles';
 
 async function seed() {
     console.log("Starting template seeding process...");

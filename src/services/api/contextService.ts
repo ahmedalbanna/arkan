@@ -2,7 +2,8 @@
 'use client';
 
 import type { AnalyzeContextOutput } from '@/ai/schemas';
-import type { ExternalContext } from '@/lib/types';
+import { ExternalContext } from '@/modules/ai-content/domain/entities/ExternalContext';
+
 
 
 interface AnalyzeContextVariables {

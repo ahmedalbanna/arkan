@@ -13,8 +13,9 @@ import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { handleErrorUtility } from '@/lib/utils/errorUtils';
+import { LoginCredentials } from '@/lib/utils/authUtils';
 
-import { LoginCredentials } from '@/lib/types';
+
 
 const formSchema = z.object({
   email: z.string().email({ message: 'Please enter a valid email address.' }),

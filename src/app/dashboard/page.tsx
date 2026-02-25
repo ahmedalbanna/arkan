@@ -10,10 +10,10 @@ import { AlertCircle, Bot, History, AreaChart, TrendingDown, Gem, MessageSquare,
 import { Card, CardHeader, CardContent, CardTitle, CardDescription } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useRouter } from 'next/navigation';
-import { toast } from '@/hooks';
+
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import type { UserProfile } from '@/lib/types';
+
 import { useLocalization } from '@/context/LocalizationContext';
 import Link from 'next/link';
 

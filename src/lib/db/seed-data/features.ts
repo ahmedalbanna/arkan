@@ -1,4 +1,5 @@
-import { Feature } from "../../types";
+import { Feature } from "@/modules/admin/domain/entities/Feature";
+
 
 export const defaultFeatures: Feature[] = [
     { id: 'report', name: 'Report Generator', description: 'Allows users to generate report sections.', isEnabled: true },

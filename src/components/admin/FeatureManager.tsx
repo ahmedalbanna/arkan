@@ -8,7 +8,8 @@ import { Label } from '@/components/ui/label';
 import { AlertCircle } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useLocalization } from '@/context/LocalizationContext';
-import { Feature } from '@/lib/types';
+import { Feature } from '@/modules/admin/domain/entities/Feature';
+
 
 function FeatureSkeleton() {
   return (

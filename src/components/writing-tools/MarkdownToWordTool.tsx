@@ -14,8 +14,9 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/util/use-toast';
-import { templates, type DocxTemplateKey } from '@/lib/docx-styles';
+
 import dynamic from 'next/dynamic';
+import { DocxTemplateKey, templates } from '@/modules/ai-content/infrastructure/exporters/DocxStyles';
 
 const FileWord = dynamic<ComponentPropsWithoutRef<typeof Loader2>>(() => import('lucide-react').then((mod) => mod.FileText), { ssr: false });
 

@@ -1,5 +1,5 @@
 import { templates } from '@/modules/templates/infrastructure/PptxStyles'; // Keep for default styles
-import type { PptxStyleOptions } from '@/lib/types';
+
 import { type ListItem, type Root as MdastRoot } from 'mdast';
 import PptxGenJS from 'pptxgenjs';
 import rehypeSanitize from 'rehype-sanitize';
@@ -14,6 +14,7 @@ import { DEFAULT_CODE_FONT, DEFAULT_FONT, layout } from './pptx-convert/constant
 import { createSlidesWithContent, type FontOptions } from './pptx-convert/slide-layout-engine';
 import { processPlantUml } from './utils/processPlantUml';
 import { convertMarkdownToPdf } from './utils/pdf-utils'; // Import the moved function
+import { PptxStyleOptions } from '@/ai/schemas';
 
 export interface PptxConversionOptions {
     styles?: PptxStyleOptions;

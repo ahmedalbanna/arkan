@@ -6,12 +6,13 @@ import { transactionKeys } from '@/lib/query-keys';
 import { getTransactions, verifyPayment, submitPaymentProof } from '@/services/api/transactionService';
 import { toast, useToast } from '@/hooks/util/use-toast';
 import { Transaction, type TransactionProperties } from '@/modules/billing/domain/entities/Transaction';
-import { VerifyPaymentVariables } from '@/lib/types';
+
 import { useQuery } from '@tanstack/react-query';
+
 
 export type TransactionStatus = 'pending' | 'verified' | 'rejected';
 
-export { type VerifyPaymentVariables };
+
 
 const TRANSACTIONS_PER_PAGE = 6;
 

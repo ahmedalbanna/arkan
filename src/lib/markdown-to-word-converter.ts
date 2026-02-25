@@ -20,11 +20,13 @@ import { Root } from 'mdast';
 import remarkGfm from 'remark-gfm';
 import remarkParse from 'remark-parse';
 import { unified } from 'unified';
-import { convertAstToDocxObjects } from './word-converter/ast-converter';
-import { buildDocumentSections, prepareHeadersAndFooters } from './word-converter/document-builder';
-import { processFootnotes } from './word-converter/node-handlers';
-import { ConversionOptions, DocxObject } from './word-converter/types';
+
+
 import { Project, Chapter, ProjectContent } from './models';
+import { convertAstToDocxObjects } from '@/modules/ai-content/infrastructure/exporters/word-converter/ast-converter';
+import { ConversionOptions, DocxObject } from '@/modules/ai-content/infrastructure/exporters/word-converter/types';
+import { processFootnotes } from '@/modules/ai-content/infrastructure/exporters/word-converter/node-handlers';
+import { buildDocumentSections, prepareHeadersAndFooters } from '@/modules/ai-content/infrastructure/exporters/word-converter/document-builder';
 
 /**
  * Parses markdown, processes it, and creates an array of docx objects and footnotes.
