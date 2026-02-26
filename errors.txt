@@ -1,49 +1,13 @@
-## Error Type
-Build Error
-
-## Error Message
-Module not found: Can't resolve '@/services'
-
-## Build Output
-./src/hooks/data/use-docx-templates.ts:8:1
-Module not found: Can't resolve '@/services'
-   6 | import { getAuthenticatedToken } from '@/lib/utils/authUtils';
-   7 | import { toast } from '@/hooks/util/use-toast';
->  8 | import {
-     | ^^^^^^^^
->  9 |     fetchDocxTemplatesApi,
-     | ^^^^^^^^^^^^^^^^^^^^^^^^^^
-> 10 |     updateDocxTemplateApi,
-     | ^^^^^^^^^^^^^^^^^^^^^^^^^^
-> 11 |     deleteDocxTemplateApi,
-     | ^^^^^^^^^^^^^^^^^^^^^^^^^^
-> 12 |     createDocxTemplateApi,
-     | ^^^^^^^^^^^^^^^^^^^^^^^^^^
-> 13 |     refreshTemplateImage,
-     | ^^^^^^^^^^^^^^^^^^^^^^^^^^
-> 14 | } from '@/services';
-     | ^^^^^^^^^^^^^^^^^^^^^
-  15 | import type { DocxTemplateProperties } from '@/lib/types';
-  16 |
-  17 | export function useDocxStyles() {
-
-Import map: aliased to relative './src/services' inside of [project]/
-
-Import traces:
-  Client Component Browser:
-    ./src/hooks/data/use-docx-templates.ts [Client Component Browser]
-    ./src/hooks/index.ts [Client Component Browser]
-    ./src/components/ui/toaster.tsx [Client Component Browser]
-    ./src/components/ui/toaster.tsx [Server Component]
-    ./src/app/layout.tsx [Server Component]
-
-  Client Component SSR:
-    ./src/hooks/data/use-docx-templates.ts [Client Component SSR]
-    ./src/hooks/index.ts [Client Component SSR]
-    ./src/components/ui/toaster.tsx [Client Component SSR]
-    ./src/components/ui/toaster.tsx [Server Component]
-    ./src/app/layout.tsx [Server Component]
-
-https://nextjs.org/docs/messages/module-not-found
-
-Next.js version: 15.5.9 (Turbopack)
+ ○ Compiling /admin/manage-templates ...
+ ✓ Compiled /admin/manage-templates in 3.5s
+ GET /admin/manage-templates 200 in 3711ms
+ ○ Compiling /api/templates/docx ...
+ ✓ Compiled /api/templates/docx in 1626ms
+ GET /api/templates/docx 200 in 2430ms
+ ○ Compiling /api/templates/pptx ...
+ ✓ Compiled /api/templates/pptx in 720ms
+ GET /api/templates/pptx 200 in 1381ms
+ ○ Compiling /api/templates/report ...
+ ✓ Compiled /api/templates/report in 1787ms
+ GET /api/templates/report 200 in 3409ms
+ PUT /api/templates/report 405 in 399ms

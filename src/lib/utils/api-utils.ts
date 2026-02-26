@@ -36,14 +36,52 @@ export const withAuth = (handler: ApiHandler, options: ApiHandlerOptions = {}) =
       }
       const token = authorization.substring(7);
       
-      const authRepo = container.resolve<any>(IAuthRepositoryToken);
+      const authModule = require("@/modules/users/infrastructure/repositories/FirebaseAuthRepository");
+      const userModule = require("@/modules/users/infrastructure/repositories/FirebaseUserRepository");
+      const FirebaseAuthRepository = authModule.FirebaseAuthRepository || authModule.default;
+      const FirebaseUserRepository = userModule.FirebaseUserRepository || userModule.default;
+
+      let authRepo: any;
+      try {
+        if (!container.isRegistered(IAuthRepositoryToken)) {
+          container.register(IAuthRepositoryToken, { useClass: FirebaseAuthRepository });
+        }
+        authRepo = container.resolve<any>(IAuthRepositoryToken);
+      } catch (error) {
+        const { adminAuth } = require("@/infrastructure/firebase/server-init");
+        authRepo = {
+          verifyToken: async (tokenValue: string) => {
+            const decodedToken = await adminAuth.verifyIdToken(tokenValue, true);
+            return { uid: decodedToken.uid, email: decodedToken.email };
+          },
+        };
+      }
+
       const decodedUser = await authRepo.verifyToken(token);
 
       if (!decodedUser || !decodedUser.uid) {
         return handleApiError({ message: 'Unauthorized: Invalid token' }, 401);
       }
 
-      const userRepo = container.resolve<any>(IUserRepositoryToken);
+      let userRepo: any;
+      try {
+        if (!container.isRegistered(IUserRepositoryToken)) {
+          container.register(IUserRepositoryToken, { useClass: FirebaseUserRepository });
+        }
+        userRepo = container.resolve<any>(IUserRepositoryToken);
+      } catch (error) {
+        const { adminDb } = require("@/infrastructure/firebase/server-init");
+        userRepo = {
+          getById: async (id: string) => {
+            if (!id) return null;
+            const userDoc = await adminDb.collection("users").doc(id).get();
+            if (!userDoc.exists) return null;
+            const data = userDoc.data();
+            return { id: userDoc.id, ...data };
+          },
+        };
+      }
+
       const user = await userRepo.getById(decodedUser.uid);
       
       if (!user) {

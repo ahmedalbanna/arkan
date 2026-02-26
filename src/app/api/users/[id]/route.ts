@@ -1,9 +1,51 @@
 
 import { withAuth, handleApiError, createApiResponse } from "@/lib/utils/api-utils";
 import { container } from "@/infrastructure/di/container";
-import { UserController } from "@/modules/users/adapters/controllers/UserController";
 import { adminUpdateUserSchema, userUpdateSchema } from "@/lib/schemas/api-schemas";
 import { checkUserAccessPermission, checkUserUpdatePermission } from "@/lib/utils/authorization";
+import { IUserRepositoryToken } from "@/modules/users/domain/repositories/IUserRepository";
+import { IAuthRepositoryToken } from "@/modules/users/domain/repositories/IAuthRepository";
+import { GetUserProfileUseCase } from "@/modules/users/application/use-cases/GetUserProfileUseCase";
+import { UpdateUserProfileUseCase } from "@/modules/users/application/use-cases/UpdateUserProfileUseCase";
+
+const ensureUserRepositoriesRegistered = () => {
+    const { adminDb, adminAuth } = require("@/infrastructure/firebase/server-init");
+
+    const userRepo = {
+        getById: async (id: string) => {
+            const doc = await adminDb.collection("users").doc(id).get();
+            if (!doc.exists) return null;
+            return { id: doc.id, ...doc.data() };
+        },
+        update: async (id: string, data: any) => {
+            await adminDb.collection("users").doc(id).set(data, { merge: true });
+            const doc = await adminDb.collection("users").doc(id).get();
+            return { id: doc.id, ...doc.data() };
+        },
+        save: async (user: any) => {
+            await adminDb.collection("users").doc(user.id).set(user, { merge: true });
+            return user;
+        },
+        delete: async (id: string) => adminDb.collection("users").doc(id).delete(),
+        deductCredits: async () => 0,
+        addCredits: async () => {},
+        getPaginated: async () => ({ users: [], hasNextPage: false, lastVisibleId: null }),
+        getAdmins: async () => [],
+    };
+
+    const authRepo = {
+        create: async () => ({ uid: "", email: "" }),
+        updateEmail: async () => {},
+        updatePassword: async () => {},
+        deleteUser: async () => {},
+        verifyToken: async (tokenValue: string) => {
+            const decodedToken = await adminAuth.verifyIdToken(tokenValue, true);
+            return { uid: decodedToken.uid, email: decodedToken.email };
+        },
+    };
+
+    return { userRepo, authRepo };
+};
 
 // GET a single user profile.
 export const GET = withAuth(async ({ params, user: requester }) => {
@@ -14,8 +56,9 @@ export const GET = withAuth(async ({ params, user: requester }) => {
         const authError = checkUserAccessPermission(requester, targetUserId);
         if (authError) return authError;
 
-        const controller = container.resolve(UserController);
-        const user = await controller.getUser(targetUserId);
+        const { userRepo } = ensureUserRepositoriesRegistered();
+        const useCase = new GetUserProfileUseCase(userRepo);
+        const user = await useCase.execute(targetUserId);
         
         if (!user) {
             return handleApiError({ message: "User not found." }, 404);
@@ -44,8 +87,9 @@ export const PUT = withAuth(async ({ request, params, user: requester }) => {
             return handleApiError(validation.error);
         }
 
-        const controller = container.resolve(UserController);
-        const updatedUser = await controller.updateUser(userId, validation.data, requester.email);
+        const { userRepo, authRepo } = ensureUserRepositoriesRegistered();
+        const useCase = new UpdateUserProfileUseCase(userRepo, authRepo);
+        const updatedUser = await useCase.execute(userId, validation.data, requester.email);
         
         return createApiResponse(updatedUser, 200);
     } catch (error: any) {

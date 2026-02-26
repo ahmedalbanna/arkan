@@ -1,8 +1,9 @@
 
 import { z } from 'zod';
 import { withAuth, handleApiError, createApiResponse } from '@/lib/utils/api-utils';
-import { container } from '@/infrastructure/di/container';
-import { UserController } from '@/modules/users/adapters/controllers/UserController';
+import { GetUserProfileUseCase } from '@/modules/users/application/use-cases/GetUserProfileUseCase';
+import { UpdateUserProfileUseCase } from '@/modules/users/application/use-cases/UpdateUserProfileUseCase';
+import { DeleteUserUseCase } from '@/modules/users/application/use-cases/DeleteUserUseCase';
 
 const adminUpdateUserSchema = z.object({
   name: z.string().min(1, 'Name is required').optional(),
@@ -13,12 +14,53 @@ const adminUpdateUserSchema = z.object({
   hasCompletedOnboarding: z.boolean().optional(),
 });
 
+const ensureUserRepositoriesRegistered = () => {
+  const { adminDb, adminAuth } = require("@/infrastructure/firebase/server-init");
+
+  const userRepo = {
+    getById: async (id: string) => {
+      const doc = await adminDb.collection("users").doc(id).get();
+      if (!doc.exists) return null;
+      return { id: doc.id, ...doc.data() };
+    },
+    save: async (user: any) => {
+      const userId = user?.id || adminDb.collection("users").doc().id;
+      await adminDb.collection("users").doc(userId).set({ ...user, id: userId }, { merge: true });
+      return { ...user, id: userId };
+    },
+    update: async (id: string, data: any) => {
+      await adminDb.collection("users").doc(id).set(data, { merge: true });
+      const doc = await adminDb.collection("users").doc(id).get();
+      return { id: doc.id, ...doc.data() };
+    },
+    delete: async (id: string) => adminDb.collection("users").doc(id).delete(),
+    deductCredits: async () => 0,
+    addCredits: async () => {},
+    getPaginated: async () => ({ users: [], hasNextPage: false, lastVisibleId: null }),
+    getAdmins: async () => [],
+  };
+
+  const authRepo = {
+    create: async () => ({ uid: "", email: "" }),
+    updateEmail: async () => {},
+    updatePassword: async () => {},
+    deleteUser: async (id: string) => adminAuth.deleteUser(id),
+    verifyToken: async (tokenValue: string) => {
+      const decodedToken = await adminAuth.verifyIdToken(tokenValue, true);
+      return { uid: decodedToken.uid, email: decodedToken.email };
+    },
+  };
+
+  return { userRepo, authRepo };
+};
+
 // GET logic to fetch a single user, admin only
 export const GET = withAuth(async ({ params }) => {
     try {
         const { id } = await params;
-        const controller = container.resolve(UserController);
-        const user = await controller.getUser(id);
+        const { userRepo } = ensureUserRepositoriesRegistered();
+        const useCase = new GetUserProfileUseCase(userRepo);
+        const user = await useCase.execute(id);
         if (!user) {
             return handleApiError({ message: "User not found." }, 404);
         }
@@ -42,8 +84,9 @@ export const PUT = withAuth(async ({ request, params }) => {
       return handleApiError(validation.error);
     }
     
-    const controller = container.resolve(UserController);
-    const updatedUser = await controller.updateUser(id, validation.data);
+    const { userRepo, authRepo } = ensureUserRepositoriesRegistered();
+    const useCase = new UpdateUserProfileUseCase(userRepo, authRepo);
+    const updatedUser = await useCase.execute(id, validation.data);
 
     return createApiResponse(updatedUser, 200);
   } catch (error: any) {
@@ -61,8 +104,9 @@ export const DELETE = withAuth(async ({ params }) => {
     if (!id) {
       return handleApiError({ message: "User ID is required" }, 400);
     }
-    const controller = container.resolve(UserController);
-    await controller.deleteUser(id);
+    const { userRepo, authRepo } = ensureUserRepositoriesRegistered();
+    const useCase = new DeleteUserUseCase(userRepo, authRepo);
+    await useCase.execute(id);
     return createApiResponse({ message: `User ${id} deleted successfully`}, 200);
   } catch (error) {
     return handleApiError(error);

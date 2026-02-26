@@ -3,7 +3,12 @@ import { Chapter, type ChapterProperties } from '@/modules/ai-content/domain/ent
 import { Section, type SectionProperties } from '@/modules/ai-content/domain/entities/Section';
 import { ExternalContext, type ExternalContextProperties } from '@/modules/ai-content/domain/entities/ExternalContext';
 import type { ReportTemplateProperties } from '@/modules/templates/domain/entities/ReportTemplate';
-import { arrayMove } from '@dnd-kit/sortable';
+const arrayMove = <T>(array: T[], from: number, to: number): T[] => {
+  const newArray = [...array];
+  const [moved] = newArray.splice(from, 1);
+  newArray.splice(to, 0, moved);
+  return newArray;
+};
 import { Language, Behavior, Tone } from '@/modules/ai-content/domain/entities/ControlTypes';
 import { parseMarkdownToContent } from '@/lib/project/markdown-parser'; 
 import { applyReportTemplate } from '@/lib/project/template';

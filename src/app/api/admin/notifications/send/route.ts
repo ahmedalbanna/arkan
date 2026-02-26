@@ -8,7 +8,7 @@ const sendNotificationSchema = z.object({
   userId: z.string().min(1, 'User ID is required.'),
   title: z.string().min(1, 'Title is required.'),
   body: z.string().min(1, 'Body is required.'),
-  link: z.string().url().optional(),
+  link: z.string().url().or(z.string().startsWith('/')).optional(),
 });
 
 export const POST = withAuth(async ({ request }) => {

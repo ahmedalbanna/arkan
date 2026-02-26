@@ -6,6 +6,9 @@ import { UpdateFeatureUseCase } from "../../application/use-cases/UpdateFeatureU
 import { GetSettingsUseCase } from "../../application/use-cases/GetSettingsUseCase";
 import { UpdateSettingsUseCase } from "../../application/use-cases/UpdateSettingsUseCase";
 import { GetGenerationLogsUseCase } from "../../application/use-cases/GetGenerationLogsUseCase";
+import { container } from "@/infrastructure/di/container";
+import { IGenerationLogRepositoryToken } from "@/modules/ai/domain/repositories/IGenerationLogRepository";
+import { IUserRepositoryToken } from "@/modules/users/domain/repositories/IUserRepository";
 
 @injectable()
 export class AdminController {
@@ -14,8 +17,7 @@ export class AdminController {
         private getFeaturesUseCase: GetFeaturesUseCase,
         private updateFeatureUseCase: UpdateFeatureUseCase,
         private getSettingsUseCase: GetSettingsUseCase,
-        private updateSettingsUseCase: UpdateSettingsUseCase,
-        private getGenerationLogsUseCase: GetGenerationLogsUseCase
+        private updateSettingsUseCase: UpdateSettingsUseCase
     ) {}
 
     async getDashboardStats() {
@@ -39,6 +41,15 @@ export class AdminController {
     }
 
     async getGenerationLogs(options: { limit: number; agentId?: string; userId?: string; lastVisibleId?: string }) {
-        return this.getGenerationLogsUseCase.execute(options);
+        if (!container.isRegistered(IGenerationLogRepositoryToken)) {
+            const { FirebaseGenerationLogRepository } = require("@/modules/ai/infrastructure/repositories/FirebaseGenerationLogRepository");
+            container.register(IGenerationLogRepositoryToken, { useClass: FirebaseGenerationLogRepository });
+        }
+        if (!container.isRegistered(IUserRepositoryToken)) {
+            const { FirebaseUserRepository } = require("@/modules/users/infrastructure/repositories/FirebaseUserRepository");
+            container.register(IUserRepositoryToken, { useClass: FirebaseUserRepository });
+        }
+        const useCase = container.resolve(GetGenerationLogsUseCase);
+        return useCase.execute(options);
     }
 }

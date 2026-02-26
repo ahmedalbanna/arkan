@@ -17,6 +17,7 @@ import { IFileStorageServiceToken } from "@/modules/billing/domain/services/IFil
 import { IRagRepositoryToken } from "@/modules/rag/domain/repositories/IRagRepository";
 import { ITemplateRepositoryToken } from "@/modules/templates/domain/repositories/ITemplateRepository";
 import { ISectionRepositoryToken } from "@/modules/ai-content/domain/repositories/ISectionRepository";
+import { ISettingsRepositoryToken } from "@/modules/admin/domain/repositories/ISettingsRepository";
 
 // Client-side implementations (Safe to import anywhere)
 import { ProjectApiClient } from "@/modules/projects/adapters/api-client/ProjectApiClient";
@@ -81,6 +82,7 @@ if (typeof window === 'undefined') {
   const { GenkitAiService } = require("@/modules/ai/infrastructure/services/GenkitAiService");
   const { FirebaseAdminStatsRepository } = require("@/modules/admin/infrastructure/repositories/FirebaseAdminStatsRepository");
   const { FirebaseFeatureRepository } = require("@/modules/admin/infrastructure/repositories/FirebaseFeatureRepository");
+  const { FirebaseSettingsRepository } = require("@/modules/admin/infrastructure/repositories/FirebaseSettingsRepository");
   const { FirebaseTransactionRepository } = require("@/modules/billing/infrastructure/repositories/FirebaseTransactionRepository");
   const { FirebaseFileStorageService } = require("@/modules/billing/infrastructure/services/FirebaseFileStorageService");
   const { DefaultRagRepository } = require("@/modules/rag/infrastructure/repositories/DefaultRagRepository");
@@ -121,6 +123,10 @@ if (typeof window === 'undefined') {
 
   container.register(IFeatureRepositoryToken, {
     useClass: FirebaseFeatureRepository
+  }, { lifecycle: Lifecycle.Singleton });
+
+  container.register(ISettingsRepositoryToken, {
+    useClass: FirebaseSettingsRepository
   }, { lifecycle: Lifecycle.Singleton });
 
   container.register(ITransactionRepositoryToken, {
