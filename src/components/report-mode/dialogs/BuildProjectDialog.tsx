@@ -23,6 +23,7 @@ import { Badge } from '../../ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '../../ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../ui/tabs';
 import { PromptBuilder } from '@/modules/ai-content/domain/services/PromptBuilder';
+import { container } from '@/infrastructure/di/container';
 import { getContextNames } from '@/lib/utils/project-utils';
 
 
@@ -48,7 +49,7 @@ export function BuildProjectDialog({
   const finalProjectPrompt = useMemo(() => {
     if (!project || chaptersToBuild.length === 0) return '';
     const allSelectedSections = new Set(chaptersToBuild.flatMap(c => c.sections.map(s => s.id)));
-    return PromptBuilder.buildProjectPrompt(project, allSelectedSections);
+    return container.resolve(PromptBuilder).buildProjectPrompt(project, allSelectedSections);
   }, [project, chaptersToBuild]);
   
 

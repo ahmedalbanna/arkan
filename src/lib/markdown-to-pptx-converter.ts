@@ -8,7 +8,8 @@ import remarkGfm from 'remark-gfm'; // Import remarkGfm
 import remarkParse from 'remark-parse';
 import remarkRehype from 'remark-rehype';
 import { unified } from 'unified';
-import { exportComponentAsPDF } from '@/modules/ai-content/infrastructure/exporters/PdfExporter';
+import { PdfExportService } from '@/modules/ai-content/infrastructure/exporters/PdfExportService';
+import { container } from '@/infrastructure/di/container';
 import { getNodeText, splitAstIntoSlides } from './pptx-convert/ast-utils';
 import { DEFAULT_CODE_FONT, DEFAULT_FONT, layout } from './pptx-convert/constants';
 import { createSlidesWithContent, type FontOptions } from './pptx-convert/slide-layout-engine';

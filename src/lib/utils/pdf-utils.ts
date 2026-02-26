@@ -8,7 +8,8 @@ import remarkParse from 'remark-parse';
 import remarkRehype from 'remark-rehype';
 import { unified } from 'unified';
 
-import { exportComponentAsPDF } from '@/modules/ai-content/infrastructure/exporters/PdfExporter';
+import { PdfExportService } from '@/modules/ai-content/infrastructure/exporters/PdfExportService';
+import { container } from '@/infrastructure/di/container';
 import { splitAstIntoSlides } from '../pptx-convert/ast-utils';
 import { DEFAULT_CODE_FONT, DEFAULT_FONT } from '../pptx-convert/constants';
 import { processPlantUml } from './processPlantUml';
@@ -88,7 +89,7 @@ export async function convertMarkdownToPdf(
     contentDiv.innerHTML = slidesHtml;
     container.appendChild(contentDiv);
 
-    await exportComponentAsPDF(container, `${fileName}.pdf`);
+    await container.resolve(PdfExportService).exportFromElement(container, `${fileName}.pdf`);
 
     document.body.removeChild(container);
 }

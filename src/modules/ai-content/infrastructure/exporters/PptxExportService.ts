@@ -1,0 +1,51 @@
+
+import "reflect-metadata";
+import { injectable } from "tsyringe";
+import { 
+    IExportService, 
+    ExportOptions 
+} from "@/modules/ai-content/domain/services/IExportService";
+import { Project, ProjectContent } from "@/modules/projects/domain/entities/Project";
+import { convertMarkdownToPptx } from "@/lib/markdown-to-pptx-converter";
+import { Chapter } from "@/modules/ai-content/domain/entities/Chapter";
+
+@injectable()
+export class PptxExportService implements IExportService {
+    async export(project: Project, content: ProjectContent, options: ExportOptions): Promise<Blob | Buffer> {
+        const markdown = this.generateMarkdownFromContent(content);
+        
+        // Extract footnotes from full project content
+        const fullMarkdown = project.fullMarkdownContent || '';
+        const footnoteRegex = /^\[\^.+?\]:.+$/gm;
+        const footnoteDefinitions = fullMarkdown.match(footnoteRegex);
+
+        let finalMarkdown = markdown;
+        if (footnoteDefinitions) {
+            finalMarkdown += '\n\n' + footnoteDefinitions.join('\n');
+        }
+
+        const result = await convertMarkdownToPptx(finalMarkdown, project.name, {
+            styles: options.styles,
+            isRtl: options.isRtl,
+            includeToc: options.includeToc,
+        });
+
+        return result instanceof Blob ? result : new Blob([result as any], { 
+            type: 'application/vnd.openxmlformats-officedocument.presentationml.presentation' 
+        });
+    }
+
+    private generateMarkdownFromContent(content: ProjectContent): string {
+        return content.map(item => {
+            if (item instanceof Chapter) {
+                const chapterContent = `# ${item.title}`;
+                const sectionsContent = item.sections.map(section => 
+                    `## ${section.title}\n\n${section.content || ''}`
+                ).join('\n\n');
+                return `${chapterContent}\n\n${sectionsContent}`;
+            } else {
+                return `# ${item.title}\n\n${item.content || ''}`;
+            }
+        }).join('\n\n<!-- slide-break -->\n\n');
+    }
+}

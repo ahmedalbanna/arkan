@@ -8,7 +8,8 @@ import { Chapter } from '@/modules/ai-content/domain/entities/Chapter';
 import { templates as docxTemplates, type DocxTemplateKey } from '@/modules/ai-content/infrastructure/exporters/DocxStyles';
 import { templates as pptxTemplates, type PptxTemplateKey } from '@/modules/templates/infrastructure/PptxStyles';
 import { ConversionOptions } from '@/modules/ai-content/infrastructure/exporters/word-converter/types';
-import { PptxConversionOptions, convertMarkdownToPptx } from '@/lib/markdown-to-pptx-converter';
+import { container } from '@/infrastructure/di/container';
+import { IDocxExportServiceToken, IPptxExportServiceToken } from '@/modules/ai-content/domain/services/IExportService';
 
 interface DocxExportParams {
     project: Project;
@@ -109,21 +110,6 @@ export function useExport() {
      * @param params - An object containing the project, export options, and selected content.
      */
     const exportPresentationPptx = async ({ project, options, selectedContent }: PptxExportParams) => {
-        // Helper function to generate markdown from content
-        const generateMarkdownFromContent = (content: ProjectContent) => {
-            return content.map(item => {
-                if (item instanceof Chapter) {
-                    const chapterContent = `# ${item.title}`;
-                    const sectionsContent = item.sections.map(section => 
-                        `## ${section.title}\n\n${section.content || ''}`
-                    ).join('\n\n');
-                    return `${chapterContent}\n\n${sectionsContent}`;
-                } else {
-                    return `# ${item.title}\n\n${item.content || ''}`;
-                }
-            }).join('\n\n<!-- slide-break -->\n\n');
-        };
-
         if (selectedContent.length === 0) {
             toast({ title: 'Export Canceled', description: 'No content selected to export.', variant: 'destructive' });
             return;
@@ -132,27 +118,14 @@ export function useExport() {
         setIsExporting(true);
         try {
             const templateStyles = pptxTemplates[options.template] || pptxTemplates.modern;
-
-            const conversionOptions: PptxConversionOptions = {
+            const client = container.resolve(IPptxExportServiceToken);
+            
+            const result = await client.export(project, selectedContent, {
                 styles: templateStyles.styles,
                 isRtl: options.isRtl,
                 includeToc: options.includeToc,
-            };
+            });
 
-            const markdownToExport = generateMarkdownFromContent(selectedContent);
-
-            // Extract footnotes from full project content
-            const fullMarkdown = project.fullMarkdownContent;
-            const footnoteRegex = /^\[\^.+?\]:.+$/gm;
-            const footnoteDefinitions = fullMarkdown.match(footnoteRegex);
-
-            let finalMarkdown = markdownToExport;
-            if (footnoteDefinitions) {
-                finalMarkdown += '\n\n' + footnoteDefinitions.join('\n');
-            }
-
-            const result = await convertMarkdownToPptx(finalMarkdown, project.name, conversionOptions);
-            // Ensure result is a Blob
             const blob = result instanceof Blob ? result : new Blob([result as any], { 
                 type: 'application/vnd.openxmlformats-officedocument.presentationml.presentation' 
             });

@@ -160,7 +160,7 @@ export function useAiActions({ editor: initialEditor }: AiActionsProps = {}) {
             otherSections: mapSectionContextToRecord(section, currentProject),
             externalContext: mapExternalContextToArray(section, currentProject),
             guidelines: section.guidelines,
-            instructionText: PromptBuilder.buildSectionPrompt(section, currentProject),
+            instructionText: container.resolve(PromptBuilder).buildSectionPrompt(section, currentProject),
         };
         // The API now handles saving and the client updates via real-time listeners.
         // We don't need to process the response content here anymore.
@@ -200,7 +200,7 @@ export function useAiActions({ editor: initialEditor }: AiActionsProps = {}) {
               title: s.title, 
               prompt: s.buildActionPrompt(), 
               guidelines: s.guidelines,
-              instructionText: PromptBuilder.buildSectionPrompt(s, project), 
+              instructionText: container.resolve(PromptBuilder).buildSectionPrompt(s, project), 
               context: '' // Context is handled at a higher level if needed, but here we scope it per section
             }))
         };

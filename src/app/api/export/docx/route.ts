@@ -4,7 +4,8 @@
 
 
 import type { ProjectProperties } from '@/lib/types';
-import { convertMarkdownToWord } from '@/modules/ai-content/infrastructure/exporters/MarkdownToWordConverter';
+import { container } from '@/infrastructure/di/container';
+import { IDocxExportServiceToken } from '@/modules/ai-content/domain/services/IExportService';
 import type { ConversionOptions } from '@/modules/ai-content/infrastructure/exporters/word-converter/types';
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
@@ -36,26 +37,23 @@ export async function POST(req: NextRequest) {
     let docxBuffer: Buffer | Blob;
     let fileName: string;
 
+    const exporter = container.resolve<any>(IDocxExportServiceToken);
+
     if ('project' in validation.data) {
         // Handle project-based export
-        // Note: We pass the plain data objects instead of instantiating classes
-        // because Project/Chapter/Section are client components
         const { project: projectData, selectedContent: selectedContentData, options } = validation.data;
         
-        // Pass data directly to converter - it will handle the conversion
-        docxBuffer = await convertMarkdownToWord(
+        docxBuffer = await exporter.export(
           projectData as any, 
-          { 
-            ...options, 
-            selectedContent: selectedContentData as any 
-          }
+          selectedContentData as any,
+          options
         );
         fileName = `${(projectData as ProjectProperties).name?.replace(/\s+/g, '_') || 'document'}.docx`;
 
     } else {
         // Handle direct markdown export
         const directData = validation.data as { markdown: string; fileName: string; options: ConversionOptions };
-        docxBuffer = await convertMarkdownToWord(directData.markdown, directData.fileName, directData.options);
+        docxBuffer = await exporter.exportFromMarkdown(directData.markdown, directData.fileName, directData.options);
         fileName = `${directData.fileName}.docx`;
     }
 

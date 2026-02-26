@@ -9,6 +9,7 @@ import { useBuilderStore } from '@/hooks';
 
 import type { Section } from '@/lib/types';
 import { PromptBuilder } from '@/modules/ai-content/domain/services/PromptBuilder';
+import { container } from '@/infrastructure/di/container';
 
 interface FullPromptPreviewDialogProps {
   isOpen: boolean;
@@ -22,7 +23,7 @@ export function FullPromptPreviewDialog({ isOpen, onOpenChange, section }: FullP
 
   if (!project) return null;
 
-  const fullPrompt = PromptBuilder.buildSectionPrompt(section, project);
+  const fullPrompt = container.resolve(PromptBuilder).buildSectionPrompt(section, project);
 
   const handleCopy = async () => {
     await navigator.clipboard.writeText(fullPrompt);

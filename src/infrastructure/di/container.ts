@@ -18,6 +18,7 @@ import { IRagRepositoryToken } from "@/modules/rag/domain/repositories/IRagRepos
 import { ITemplateRepositoryToken } from "@/modules/templates/domain/repositories/ITemplateRepository";
 import { ISectionRepositoryToken } from "@/modules/ai-content/domain/repositories/ISectionRepository";
 import { ISettingsRepositoryToken } from "@/modules/admin/domain/repositories/ISettingsRepository";
+import { IDocxExportServiceToken, IPptxExportServiceToken } from "@/modules/ai-content/domain/services/IExportService";
 
 // Client-side implementations (Safe to import anywhere)
 import { ProjectApiClient } from "@/modules/projects/adapters/api-client/ProjectApiClient";
@@ -43,8 +44,10 @@ import { AuthApiClient } from "@/modules/users/adapters/api-client/AuthApiClient
 import { DeviceTokenApiClient } from "@/modules/users/adapters/api-client/DeviceTokenApiClient";
 import { CreditService } from "@/modules/billing/application/services/CreditService";
 import { LocalProjectService } from "@/modules/projects/adapters/local-storage/LocalProjectService";
+import { PromptBuilder } from "@/modules/ai-content/domain/services/PromptBuilder";
 
 // Register Client API Clients (always)
+container.register(PromptBuilder, { useClass: PromptBuilder }, { lifecycle: Lifecycle.Singleton });
 container.register(WritingToolRegistry, { useClass: WritingToolRegistry }, { lifecycle: Lifecycle.Singleton });
 container.register(CreditService, { useClass: CreditService }, { lifecycle: Lifecycle.Singleton });
 container.register(LocalProjectService, { useClass: LocalProjectService }, { lifecycle: Lifecycle.Singleton });
@@ -57,6 +60,15 @@ container.register(AnalyticsApiClient, { useClass: AnalyticsApiClient }, { lifec
 container.register(FeatureApiClient, { useClass: FeatureApiClient }, { lifecycle: Lifecycle.Singleton });
 container.register(SettingsApiClient, { useClass: SettingsApiClient }, { lifecycle: Lifecycle.Singleton });
 container.register(SectionApiClient, { useClass: SectionApiClient }, { lifecycle: Lifecycle.Singleton });
+
+// Register Exporters (Lazy load implementations if they have complex deps)
+const { DocxExportService } = require("@/modules/ai-content/infrastructure/exporters/DocxExportService");
+const { PptxExportService } = require("@/modules/ai-content/infrastructure/exporters/PptxExportService");
+const { PdfExportService } = require("@/modules/ai-content/infrastructure/exporters/PdfExportService");
+
+container.register(IDocxExportServiceToken, { useClass: DocxExportService }, { lifecycle: Lifecycle.Singleton });
+container.register(IPptxExportServiceToken, { useClass: PptxExportService }, { lifecycle: Lifecycle.Singleton });
+container.register(PdfExportService, { useClass: PdfExportService }, { lifecycle: Lifecycle.Singleton });
 container.register(DocumentProcessingApiClient, { useClass: DocumentProcessingApiClient }, { lifecycle: Lifecycle.Singleton });
 container.register(ReportApiClient, { useClass: ReportApiClient }, { lifecycle: Lifecycle.Singleton });
 container.register(AgentApiClient, { useClass: AgentApiClient }, { lifecycle: Lifecycle.Singleton });
