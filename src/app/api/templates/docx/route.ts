@@ -1,9 +1,9 @@
 
 import { createApiResponse, handleApiError, withAuth } from '@/lib/utils/api-utils';
-import { z } from 'zod';
 import { container } from '@/infrastructure/di/container';
 import { TemplateController } from '@/modules/templates/adapters/controllers/TemplateController';
 import { templates as defaultTemplates } from '@/modules/ai-content/infrastructure/exporters/DocxStyles';
+import { createDocxTemplateSchema } from '@/lib/schemas/api-schemas';
 
 export async function GET() {
     try {
@@ -20,12 +20,6 @@ export async function GET() {
         return handleApiError(error);
     }
 }
-
-const createDocxTemplateSchema = z.object({
-  id: z.string().min(3).regex(/^[a-z0-9-]+$/),
-  name: z.string().min(1),
-  description: z.string().min(1),
-});
 
 export const POST = withAuth(async ({ request }) => {
     try {

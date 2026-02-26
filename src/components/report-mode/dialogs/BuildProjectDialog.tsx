@@ -23,6 +23,7 @@ import { Badge } from '../../ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '../../ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../ui/tabs';
 import { PromptBuilder } from '@/modules/ai-content/domain/services/PromptBuilder';
+import { getContextNames } from '@/lib/utils/project-utils';
 
 
 interface BuildProjectDialogProps {
@@ -32,17 +33,6 @@ interface BuildProjectDialogProps {
   onGenerateProject: () => void;
   isLoading: boolean;
 }
-
-function getContextNames(project: Project, section: Section): string[] {
-    if (!section) return [];
-    const context = section.context;
-    if (!context) return [];
-
-    const sectionNames = Object.keys(context.sections || {}).map(id => project.getSection(id)?.title || 'Untitled Section');
-    const fileNames = Object.keys(context.externalContext || {}).map(id => project.externalContext.find(f => f.id === id)?.fileName || 'Untitled File');
-
-    return [...sectionNames, ...fileNames];
-};
 
 
 export function BuildProjectDialog({

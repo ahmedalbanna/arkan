@@ -3,6 +3,8 @@
 import { userKeys } from '@/lib/query-keys';
 import { User } from '@/lib/types';
 import { getAuthenticatedToken } from '@/lib/utils/authUtils';
+import { manageSession } from '@/lib/utils/session-management';
+import { hasGuestCookie, clearGuestCookie } from '@/lib/utils/cookie-management';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { container } from '@/infrastructure/di/container';
 import { UserApiClient } from '@/modules/users/adapters/api-client/UserApiClient';
@@ -20,24 +22,6 @@ interface AuthContextType {
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
-
-// Handles setting/clearing the session cookie.
-async function manageSession(user: FirebaseUser | null) {
-  if (user) {
-    const idToken = await user.getIdToken(true);
-    // Set session cookie
-    await fetch('/api/auth/session', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ idToken }),
-    });
-  } else {
-    // This API route is designed to clear both session and guest cookies
-    await fetch('/api/auth/logout', {
-      method: 'POST',
-    });
-  }
-}
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const auth = useFirebaseAuth(); // Consume auth from FirebaseProvider
@@ -88,14 +72,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       setFirebaseUser(user);
-      await manageSession(user);
+      await manageSession(user as any);
 
-      const guestCookieExists = typeof window !== 'undefined' && document.cookie.includes('__guest=true');
+      const guestCookieExists = hasGuestCookie();
 
       if (user) {
         setIsGuest(false);
         if (guestCookieExists) {
-            document.cookie = '__guest=; Max-Age=-99999999; path=/;';
+            clearGuestCookie();
         }
         await queryClient.invalidateQueries({ queryKey: userKeys.profile(user.uid) });
       } else {

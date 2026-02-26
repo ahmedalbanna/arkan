@@ -1,18 +1,18 @@
 
-import { z } from "zod";
 import { withAuth, handleApiError, createApiResponse } from "@/lib/utils/api-utils";
 import { container } from "@/infrastructure/di/container";
 import { UserController } from "@/modules/users/adapters/controllers/UserController";
+import { adminUpdateUserSchema, userUpdateSchema } from "@/lib/schemas/api-schemas";
+import { checkUserAccessPermission, checkUserUpdatePermission } from "@/lib/utils/authorization";
 
 // GET a single user profile.
 export const GET = withAuth(async ({ params, user: requester }) => {
     try {
         const { id: targetUserId } = await params;
 
-        // Authorization check: either admin or self
-        if (requester.role !== 'admin' && requester.id !== targetUserId) {
-            return handleApiError({ message: "Forbidden" }, 403);
-        }
+        // Check authorization
+        const authError = checkUserAccessPermission(requester, targetUserId);
+        if (authError) return authError;
 
         const controller = container.resolve(UserController);
         const user = await controller.getUser(targetUserId);
@@ -26,42 +26,19 @@ export const GET = withAuth(async ({ params, user: requester }) => {
     }
 });
 
-
-const adminUpdateUserSchema = z.object({
-    name: z.string().min(1, 'Name is required').optional(),
-    email: z.string().email('Invalid email address').optional(),
-    bio: z.string().optional(),
-    credits: z.coerce.number().int().min(0).optional(),
-    role: z.enum(['user', 'admin']).optional(),
-    hasCompletedOnboarding: z.boolean().optional(),
-    apiKeys: z.record(z.string()).optional(),
-});
-
-const userUpdateSchema = z.object({
-    name: z.string().min(1, 'Name is required').optional(),
-    email: z.string().email('Invalid email address').optional(),
-    bio: z.string().optional(),
-    hasCompletedOnboarding: z.boolean().optional(),
-    apiKeys: z.record(z.string()).optional(),
-});
-
-
 // PUT (update) a user profile
 export const PUT = withAuth(async ({ request, params, user: requester }) => {
     try {
         const { id: userId } = await params;
         const body = await request.json();
-        let validation;
 
-        // An admin can update any field. A regular user can only update their own profile.
-        if (requester.role !== 'admin') {
-            if (userId !== requester.id) {
-                return handleApiError({ message: "Forbidden: Users can only update their own profile." }, 403);
-            }
-            validation = userUpdateSchema.safeParse(body);
-        } else {
-            validation = adminUpdateUserSchema.safeParse(body);
-        }
+        // Check authorization
+        const authError = checkUserUpdatePermission(requester, userId);
+        if (authError) return authError;
+
+        // Select schema based on role
+        const schema = requester.role === 'admin' ? adminUpdateUserSchema : userUpdateSchema;
+        const validation = schema.safeParse(body);
 
         if (!validation.success) {
             return handleApiError(validation.error);

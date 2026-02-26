@@ -5,29 +5,19 @@
  * Main component for uploading and indexing documents
  */
 
-import React, { useState } from 'react';
+import React from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { FileUploadZone } from './FileUploadZone';
 import { IndexingProgress } from './IndexingProgress';
 import { IndexedDocumentsList } from './IndexedDocumentsList';
 import { IndexingSettings } from './IndexingSettings';
+import { useDocumentIndexing } from '@/hooks/admin/useDocumentIndexing';
+import type { IndexingOptions } from '@/hooks/admin/useDocumentIndexing';
 
-export interface IndexingOptions {
-  projectId: string;
-  userId?: string;
-  chunkSize: number;
-  overlap: number;
-  type: 'report' | 'reference' | 'context' | 'user_upload';
-}
+export type { IndexingOptions };
 
 export function DocumentIndexerInterface() {
-  const [activeTab, setActiveTab] = useState('upload');
-  const [indexingOptions, setIndexingOptions] = useState<IndexingOptions>({
-    projectId: '',
-    chunkSize: 400,
-    overlap: 50,
-    type: 'context',
-  });
+  const { activeTab, setActiveTab, indexingOptions, setIndexingOptions } = useDocumentIndexing();
 
   return (
     <div className="space-y-6">

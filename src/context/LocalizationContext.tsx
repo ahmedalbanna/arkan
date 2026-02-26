@@ -2,6 +2,7 @@
 
 import ar from '@/locales/ar.json';
 import en from '@/locales/en.json';
+import { translate } from '@/lib/utils/translation';
 import { createContext, ReactNode, useContext, useEffect, useState } from 'react';
 
 type Locale = 'en' | 'ar';
@@ -32,28 +33,7 @@ export const LocalizationProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const t = (key: string, variables?: Record<string, any>): string => {
-    const keys = key.split('.');
-
-    const findTranslation = (localeToTry: Locale): string | undefined => {
-      let result: any = translations[localeToTry];
-      for (const k of keys) {
-        result = result?.[k];
-        if (result === undefined) return undefined;
-      }
-      return typeof result === 'string' ? result : undefined;
-    };
-
-    // Attempt to find translation, then fallback, finally default to key
-    let translated: string = findTranslation(locale) || findTranslation('en') || key;
-
-    // Interpolate variables if provided
-    if (variables) {
-      Object.keys(variables).forEach((varName) => {
-        translated = translated.replace(`{${varName}}`, variables[varName]);
-      });
-    }
-
-    return translated;
+    return translate(key, locale, translations, variables);
   };
 
   return (

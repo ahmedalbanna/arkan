@@ -10,13 +10,12 @@ import {
 } from "@/components/ui/tooltip";
 import { useLocalization } from '@/context/LocalizationContext';
 import { useBuilderStore } from '@/hooks';
+import { useProjectFileOperations } from '@/hooks/core/useProjectFileOperations';
 import { useSaveProject } from '@/hooks/data/use-projects';
 import { Download, Loader2, PlusCircle, Save, Upload } from 'lucide-react';
-import { useRouter } from 'next/navigation';
 import { useRef } from 'react';
 import { BrowseProjectsDialog } from './BrowseProjectsDialog';
-import { ExportDialog } from './ExportDialog';
-import { downloadProjectAsFile } from '@/lib/project/io'; 
+import { ExportDialog } from './ExportDialog'; 
 
 interface SessionActionsProps {
     isSaving: boolean;
@@ -24,9 +23,9 @@ interface SessionActionsProps {
 
 export function SessionActions({ isSaving }: SessionActionsProps) {
     const { t } = useLocalization();
-    const router = useRouter();
-    const { project, hasUnsavedChanges, newSession, loadProjectFromFile } = useBuilderStore();
+    const { project, hasUnsavedChanges, newSession } = useBuilderStore();
     const { saveProjectMutation } = useSaveProject();
+    const { handleUploadProject, handleDownloadProject } = useProjectFileOperations();
 
     const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -37,8 +36,11 @@ export function SessionActions({ isSaving }: SessionActionsProps) {
     const onFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (file) {
-            await loadProjectFromFile(file);
-            router.push('/builder');
+            try {
+                await handleUploadProject(file);
+            } catch (error) {
+                // Error already handled in the hook
+            }
         }
         if (e.target) e.target.value = '';
     };
@@ -50,7 +52,7 @@ export function SessionActions({ isSaving }: SessionActionsProps) {
     
     const handleDownload = () => {
         if (project) {
-            downloadProjectAsFile(project); 
+            handleDownloadProject(project); 
         }
     };
 

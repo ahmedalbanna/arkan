@@ -36,7 +36,7 @@ export class RunAiToolUseCase {
         const { flow, creditCost } = config;
 
         // 1. Run the AI Flow
-        const result = await this.aiService.runFlow(flow, input);
+        const result = await this.aiService.runFlow(flow, input, toolName);
 
         // 2. Deduct credits
         await this.deductCreditsUseCase.execute(userId, creditCost);
