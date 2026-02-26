@@ -2,25 +2,24 @@
 
 'use client';
 
+import "reflect-metadata";
+import { injectable } from "tsyringe";
+import { apiService } from "@/infrastructure/api/ApiService";
 
-/**
- * Calls the API to generate a single report section.
- * @param body The request body containing the generation context.
- * @param token The user's authentication token.
- * @returns A promise that resolves to the generated section data.
- */
-export async function generateReportSectionApi(body: any, token: string): Promise<any> {
-    const response = await fetch('/api/generate/section', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify(body),
-    });
-    if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || 'Failed to generate report section');
+@injectable()
+export class ReportApiClient {
+    /**
+     * Calls the API to generate a single report section.
+     * @param body The request body containing the generation context.
+     * @param token The user's authentication token.
+     * @returns A promise that resolves to the generated section data.
+     */
+    async generateReportSectionApi(body: any, token: string): Promise<any> {
+        return apiService({
+            endpoint: '/api/generate/section',
+            method: 'POST',
+            data: body,
+            token
+        });
     }
-    return await response.json();
 }

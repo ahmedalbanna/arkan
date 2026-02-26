@@ -1,8 +1,8 @@
 
 import { container } from '@/infrastructure/di/container';
-import { UserController } from '@/modules/users/adapters/controllers/UserController';
+import { IUserRepositoryToken } from '@/modules/users/domain/repositories/IUserRepository';
+import { IAuthRepositoryToken } from '@/modules/users/domain/repositories/IAuthRepository';
 import { CustomFirebaseError, handleFirebaseError } from '@/infrastructure/firebase/error';
-import { adminAuth } from '@/infrastructure/firebase/server-init';
 import { NextResponse, type NextRequest } from 'next/server';
 import { ZodError } from 'zod';
 
@@ -35,14 +35,16 @@ export const withAuth = (handler: ApiHandler, options: ApiHandlerOptions = {}) =
         return handleApiError({ message: 'Unauthorized: Missing token' }, 401);
       }
       const token = authorization.substring(7);
-      const decodedToken = await adminAuth.verifyIdToken(token, true);
+      
+      const authRepo = container.resolve<any>(IAuthRepositoryToken);
+      const decodedUser = await authRepo.verifyToken(token);
 
-      if (!decodedToken || !decodedToken.uid) {
+      if (!decodedUser || !decodedUser.uid) {
         return handleApiError({ message: 'Unauthorized: Invalid token' }, 401);
       }
 
-      const controller = container.resolve(UserController);
-      const user = await controller.getUser(decodedToken.uid);
+      const userRepo = container.resolve<any>(IUserRepositoryToken);
+      const user = await userRepo.getById(decodedUser.uid);
       
       if (!user) {
         return handleApiError({ message: 'Forbidden: User profile not found' }, 403);

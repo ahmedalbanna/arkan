@@ -73,3 +73,15 @@ export const sectionKeys = {
 export const agentKeys = {
   all: () => ['agents'] as const,
 };
+
+export const templateKeys = {
+  all: () => ['templates'] as const,
+  docx: () => [...templateKeys.all(), 'docx'] as const,
+  pptx: () => [...templateKeys.all(), 'pptx'] as const,
+  report: () => [...templateKeys.all(), 'report'] as const,
+};
+
+export const writingToolKeys = {
+  all: () => ['writing-tools'] as const,
+  tool: (name: string) => [...writingToolKeys.all(), name] as const,
+};

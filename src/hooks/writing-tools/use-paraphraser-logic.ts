@@ -9,7 +9,8 @@ import { useWritingTool, useToast } from '@/hooks';
 import { ParaphraseModeSchema } from '@/ai/schemas';
 import { useDropzone } from 'react-dropzone';
 import { useAuth } from '@/context/AuthContext';
-import { processFileApi } from '@/modules/ai-content/adapters/api-client/DocumentProcessingApiClient';
+import { DocumentProcessingApiClient } from '@/modules/ai-content/adapters/api-client/DocumentProcessingApiClient';
+import { container } from '@/infrastructure/di/container';
 import { useLocalization } from '@/context/LocalizationContext';
 
 const paraphraserSchema = z.object({
@@ -48,7 +49,8 @@ export function useParaphraserLogic() {
 
     try {
       const token = await firebaseUser.getIdToken();
-      const result = await processFileApi(formData, token);
+      const client = container.resolve(DocumentProcessingApiClient);
+      const result = await client.processFileApi(formData, token);
       form.setValue('text', result.markdown, { shouldValidate: true });
       toast({ title: t('writingTools.paraphraser.toastFileProcessed'), description: t('writingTools.paraphraser.toastFileProcessedDesc', { fileName: file.name }) });
       refetchUser();

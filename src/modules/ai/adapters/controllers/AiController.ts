@@ -6,6 +6,7 @@ import { GetAgentsUseCase } from "../../application/use-cases/GetAgentsUseCase";
 import { GetAgentByIdUseCase } from "../../application/use-cases/GetAgentByIdUseCase";
 import { SaveAgentUseCase } from "../../application/use-cases/SaveAgentUseCase";
 import { DeleteAgentUseCase } from "../../application/use-cases/DeleteAgentUseCase";
+import { WritingToolRegistry } from "../../application/services/WritingToolRegistry";
 
 @injectable()
 export class AiController {
@@ -14,10 +15,15 @@ export class AiController {
         private getAgentsUseCase: GetAgentsUseCase,
         private getAgentByIdUseCase: GetAgentByIdUseCase,
         private saveAgentUseCase: SaveAgentUseCase,
-        private deleteAgentUseCase: DeleteAgentUseCase
+        private deleteAgentUseCase: DeleteAgentUseCase,
+        private writingToolRegistry: WritingToolRegistry
     ) {}
 
-    async runTool<TInput, TOutput>(params: RunAiToolInput<TInput>): Promise<TOutput> {
+    getToolConfig(name: string) {
+        return this.writingToolRegistry.getTool(name);
+    }
+
+    async runTool<TInput, TOutput>(params: { userId: string, toolName: string, input: TInput }): Promise<TOutput> {
         return this.runAiToolUseCase.execute<TInput, TOutput>(params);
     }
 

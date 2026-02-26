@@ -2,15 +2,7 @@
 
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
-import {
-  loginWithEmail,
-  loginWithGoogle,
-  serviceLogoutUser,
-  serviceSignupUser,
-  forgotPasswordService,
-  sendPasswordResetEmailApi,
-  createOrUpdateUserProfileApi,
-} from '@/modules/users/adapters/api-client/AuthApiClient';
+import { AuthApiClient } from '@/modules/users/adapters/api-client/AuthApiClient';
 import { container } from '@/infrastructure/di/container';
 import { UserApiClient } from '@/modules/users/adapters/api-client/UserApiClient';
 
@@ -34,7 +26,7 @@ export function useLogin() {
   const { toast } = useToast();
 
   return useMutation({
-    mutationFn: (credentials: LoginCredentials) => loginWithEmail(credentials),
+    mutationFn: (credentials: LoginCredentials) => container.resolve(AuthApiClient).loginWithEmail(credentials),
     onSuccess: (user) => {
       queryClient.invalidateQueries({ queryKey: userKeys.all() }); // Refetch user data
       router.push('/builder');
@@ -57,7 +49,7 @@ async function handleFirstSignIn(user: FirebaseUser) {
                 name: user.displayName || `User ${user.uid.slice(0,6)}`,
                 email: user.email || '',
             };
-            await createOrUpdateUserProfileApi(user.uid, profileData, token);
+            await container.resolve(AuthApiClient).createOrUpdateUserProfileApi(user.uid, profileData, token);
         }
     } catch (error) {
         console.error("Error during first sign-in profile check:", error);
@@ -71,7 +63,7 @@ export function useGoogleSignIn() {
     const { toast } = useToast();
 
     return useMutation({
-        mutationFn: loginWithGoogle,
+        mutationFn: () => container.resolve(AuthApiClient).loginWithGoogle(),
         onSuccess: async (userCredential) => {
             const isNewUser = userCredential.isNewUser;
             if (isNewUser) {
@@ -137,7 +129,7 @@ export function useLogout() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: serviceLogoutUser,
+    mutationFn: () => container.resolve(AuthApiClient).serviceLogoutUser(),
     onSuccess: () => {
       queryClient.clear(); // Clear all user data from cache
       router.push('/login');
@@ -152,7 +144,8 @@ export function useSignup(options?: { onSuccess?: (data: any) => void }) {
 
     return useMutation({
         mutationFn: async (credentials: SignupCredentials) => {
-            const userCredential = await serviceSignupUser(credentials);
+            const client = container.resolve(AuthApiClient);
+            const userCredential = await client.serviceSignupUser(credentials);
             const token = await userCredential.user.getIdToken();
             const profileData: Partial<UserProfile> = {
                 id: userCredential.user.uid,
@@ -160,7 +153,7 @@ export function useSignup(options?: { onSuccess?: (data: any) => void }) {
                 email: credentials.email,
             };
             // After creating the auth user, create the profile in Firestore
-            await createOrUpdateUserProfileApi(userCredential.user.uid, profileData, token);
+            await client.createOrUpdateUserProfileApi(userCredential.user.uid, profileData, token);
             return userCredential;
         },
         onSuccess: (data) => {
@@ -182,7 +175,7 @@ export function useForgotPassword() {
     const { toast } = useToast();
     const router = useRouter();
     return useMutation({
-        mutationFn: (email: string) => forgotPasswordService(email),
+        mutationFn: (email: string) => container.resolve(AuthApiClient).forgotPasswordService(email),
         onSuccess: () => {
             toast({
                 title: "Password Reset Email Sent",
@@ -202,7 +195,7 @@ export function useForgotPasswordLoggedIn() {
       if (!firebaseUser?.email) {
         throw new Error("No authenticated user email found.");
       }
-      return forgotPasswordService(firebaseUser.email);
+      return container.resolve(AuthApiClient).forgotPasswordService(firebaseUser.email);
     },
     onSuccess: () => {
       toast({
@@ -222,7 +215,7 @@ export function useSendPasswordReset() {
     mutationFn: async (userId: string) => {
       if (!firebaseUser) throw new Error("Admin not authenticated.");
       const token = await firebaseUser.getIdToken();
-      return sendPasswordResetEmailApi(userId, token);
+      return container.resolve(AuthApiClient).sendPasswordResetEmailApi(userId, token);
     },
     onSuccess: (data) => {
       toast({

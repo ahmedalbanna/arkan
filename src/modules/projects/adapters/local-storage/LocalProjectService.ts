@@ -1,6 +1,8 @@
 
 'use client';
 
+import "reflect-metadata";
+import { injectable } from "tsyringe";
 import type { ProjectProperties } from '@/lib/types';
 import { openDB, type IDBPDatabase } from 'idb';
 
@@ -16,7 +18,8 @@ interface MyDB {
   };
 }
 
-class LocalProjectService {
+@injectable()
+export class LocalProjectService {
   private dbPromise: Promise<IDBPDatabase<MyDB>> | null = null;
 
   private getDB(): Promise<IDBPDatabase<MyDB>> {
@@ -68,6 +71,3 @@ class LocalProjectService {
     await db.delete(STORE_NAME, id);
   }
 }
-
-// Export a singleton instance of the service
-export const localProjectService = new LocalProjectService();

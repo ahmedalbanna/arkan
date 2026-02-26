@@ -21,14 +21,52 @@ import { ISectionRepositoryToken } from "@/modules/ai-content/domain/repositorie
 // Client-side implementations (Safe to import anywhere)
 import { ProjectApiClient } from "@/modules/projects/adapters/api-client/ProjectApiClient";
 import { UserApiClient } from "@/modules/users/adapters/api-client/UserApiClient";
-// Register Client API Clients (always)
-container.register(ProjectApiClient, {
-  useClass: ProjectApiClient
-}, { lifecycle: Lifecycle.Singleton });
+import { TemplateApiClient } from "@/modules/templates/adapters/api-client/TemplateApiClient";
+import { AdminApiClient } from "@/modules/admin/adapters/api-client/AdminApiClient";
+import { AnalyticsApiClient } from "@/modules/admin/adapters/api-client/AnalyticsApiClient";
+import { FeatureApiClient } from "@/modules/admin/adapters/api-client/FeatureApiClient";
+import { SettingsApiClient } from "@/modules/admin/adapters/api-client/SettingsApiClient";
+import { SectionApiClient } from "@/modules/ai-content/adapters/api-client/SectionApiClient";
+import { DocumentProcessingApiClient } from "@/modules/ai-content/adapters/api-client/DocumentProcessingApiClient";
+import { ReportApiClient } from "@/modules/ai-content/adapters/api-client/ReportApiClient";
+import { WritingToolRegistry } from "@/modules/ai/application/services/WritingToolRegistry";
+import { WritingToolsApiClient } from "@/modules/ai/adapters/api-client/WritingToolsApiClient";
+import { AgentApiClient } from "@/modules/ai/adapters/api-client/AgentApiClient";
+import { DiagramApiClient } from "@/modules/ai/adapters/api-client/DiagramApiClient";
+import { EvaluationApiClient } from "@/modules/ai/adapters/api-client/EvaluationApiClient";
+import { GenerationLogApiClient } from "@/modules/ai/adapters/api-client/GenerationLogApiClient";
+import { ImageConversionApiClient } from "@/modules/ai/adapters/api-client/ImageConversionApiClient";
+import { TransactionApiClient } from "@/modules/billing/adapters/api-client/TransactionApiClient";
+import { RagApiClient } from "@/modules/rag/adapters/api-client/RagApiClient";
+import { AuthApiClient } from "@/modules/users/adapters/api-client/AuthApiClient";
+import { DeviceTokenApiClient } from "@/modules/users/adapters/api-client/DeviceTokenApiClient";
+import { CreditService } from "@/modules/billing/application/services/CreditService";
+import { LocalProjectService } from "@/modules/projects/adapters/local-storage/LocalProjectService";
 
-container.register(UserApiClient, {
-  useClass: UserApiClient
-}, { lifecycle: Lifecycle.Singleton });
+// Register Client API Clients (always)
+container.register(WritingToolRegistry, { useClass: WritingToolRegistry }, { lifecycle: Lifecycle.Singleton });
+container.register(CreditService, { useClass: CreditService }, { lifecycle: Lifecycle.Singleton });
+container.register(LocalProjectService, { useClass: LocalProjectService }, { lifecycle: Lifecycle.Singleton });
+container.register(WritingToolsApiClient, { useClass: WritingToolsApiClient }, { lifecycle: Lifecycle.Singleton });
+container.register(ProjectApiClient, { useClass: ProjectApiClient }, { lifecycle: Lifecycle.Singleton });
+container.register(UserApiClient, { useClass: UserApiClient }, { lifecycle: Lifecycle.Singleton });
+container.register(TemplateApiClient, { useClass: TemplateApiClient }, { lifecycle: Lifecycle.Singleton });
+container.register(AdminApiClient, { useClass: AdminApiClient }, { lifecycle: Lifecycle.Singleton });
+container.register(AnalyticsApiClient, { useClass: AnalyticsApiClient }, { lifecycle: Lifecycle.Singleton });
+container.register(FeatureApiClient, { useClass: FeatureApiClient }, { lifecycle: Lifecycle.Singleton });
+container.register(SettingsApiClient, { useClass: SettingsApiClient }, { lifecycle: Lifecycle.Singleton });
+container.register(SectionApiClient, { useClass: SectionApiClient }, { lifecycle: Lifecycle.Singleton });
+container.register(DocumentProcessingApiClient, { useClass: DocumentProcessingApiClient }, { lifecycle: Lifecycle.Singleton });
+container.register(ReportApiClient, { useClass: ReportApiClient }, { lifecycle: Lifecycle.Singleton });
+container.register(AgentApiClient, { useClass: AgentApiClient }, { lifecycle: Lifecycle.Singleton });
+container.register(DiagramApiClient, { useClass: DiagramApiClient }, { lifecycle: Lifecycle.Singleton });
+container.register(EvaluationApiClient, { useClass: EvaluationApiClient }, { lifecycle: Lifecycle.Singleton });
+container.register(GenerationLogApiClient, { useClass: GenerationLogApiClient }, { lifecycle: Lifecycle.Singleton });
+container.register(ImageConversionApiClient, { useClass: ImageConversionApiClient }, { lifecycle: Lifecycle.Singleton });
+container.register(TransactionApiClient, { useClass: TransactionApiClient }, { lifecycle: Lifecycle.Singleton });
+container.register(RagApiClient, { useClass: RagApiClient }, { lifecycle: Lifecycle.Singleton });
+container.register(AuthApiClient, { useClass: AuthApiClient }, { lifecycle: Lifecycle.Singleton });
+container.register(DeviceTokenApiClient, { useClass: DeviceTokenApiClient }, { lifecycle: Lifecycle.Singleton });
 
 // Server-side registration (Conditional)
 if (typeof window === 'undefined') {

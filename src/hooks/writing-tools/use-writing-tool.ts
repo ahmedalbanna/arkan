@@ -3,7 +3,9 @@
 
 import { useAuth } from '@/context/AuthContext';
 import { toast } from '@/hooks';
-import { apiService } from '@/infrastructure/api/ApiService'; // Use the new apiService
+import { WritingToolsApiClient } from '@/modules/ai/adapters/api-client/WritingToolsApiClient';
+import { container } from '@/infrastructure/di/container';
+import { getAuthenticatedToken } from '@/lib/utils/authUtils';
 import { useMutation, type UseMutationOptions } from '@tanstack/react-query';
 
 /**
@@ -19,17 +21,12 @@ export function useWritingTool<TData = unknown, TVariables = any>(
   options?: Omit<UseMutationOptions<TData, Error, TVariables>, 'mutationFn'>
 ) {
   const { firebaseUser, refetchUser } = useAuth();
-  const toolName = endpoint.split('/').pop() || '';
 
   return useMutation<TData, Error, TVariables>({
     mutationFn: async (data: TVariables) => {
-      // Use apiService which handles auth and errors
-      return apiService({
-        endpoint, // The full endpoint is passed in now
-        method: 'POST',
-        data: { ...data, flow: toolName }, // Still useful to send flow name for logging
-        firebaseUser,
-      });
+      const token = await getAuthenticatedToken(firebaseUser);
+      const client = container.resolve(WritingToolsApiClient);
+      return client.writingToolApi<TVariables, TData>(endpoint, { data, token });
     },
     onSuccess: (data, variables, context) => {
       // Refetch user profile to update credit count in the UI

@@ -3,7 +3,8 @@
 
 import { create } from 'zustand';
 import type { AgentProperties } from '@/lib/types';
-import { fetchAgentsApi, createAgentApi, updateAgentApi, deleteAgentApi } from '@/modules/ai/adapters/api-client/AgentApiClient';
+import { AgentApiClient } from '@/modules/ai/adapters/api-client/AgentApiClient';
+import { container } from '@/infrastructure/di/container';
 import { useAuth } from '@/context/AuthContext';
 import { useEffect, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
@@ -61,7 +62,8 @@ export function useAgentManager() {
     queryFn: async () => {
       if (!firebaseUser) throw new Error("Not authenticated");
       const token = await firebaseUser.getIdToken();
-      const fetchedAgents = await fetchAgentsApi(token);
+      const client = container.resolve(AgentApiClient);
+      const fetchedAgents = await client.fetchAgentsApi(token);
       saveToCache(AGENTS_CACHE_KEY, fetchedAgents);
       return fetchedAgents;
     },
@@ -88,8 +90,9 @@ export function useAgentManager() {
     mutationFn: async (data: Omit<AgentProperties, 'id'>) => {
         if (!firebaseUser) throw new Error("Not authenticated");
         const token = await firebaseUser.getIdToken();
+        const client = container.resolve(AgentApiClient);
         // The API now expects the `id` in the body
-        return createAgentApi(data as any, token);
+        return client.createAgentApi(data as any, token);
     },
     onSuccess: (newAgent) => {
         queryClient.invalidateQueries({ queryKey: agentKeys.all() });
@@ -101,7 +104,8 @@ export function useAgentManager() {
     mutationFn: async ({ id, data }: { id: string, data: Partial<AgentProperties> }) => {
       if (!firebaseUser) throw new Error("Not authenticated");
       const token = await firebaseUser.getIdToken();
-      return updateAgentApi(id, data, token);
+      const client = container.resolve(AgentApiClient);
+      return client.updateAgentApi(id, data, token);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: agentKeys.all() });
@@ -112,7 +116,8 @@ export function useAgentManager() {
     mutationFn: async (id: string) => {
       if (!firebaseUser) throw new Error("Not authenticated");
       const token = await firebaseUser.getIdToken();
-      return deleteAgentApi(id, token);
+      const client = container.resolve(AgentApiClient);
+      return client.deleteAgentApi(id, token);
     },
     onSuccess: (_, id) => {
       queryClient.invalidateQueries({ queryKey: agentKeys.all() });

@@ -98,22 +98,28 @@ export interface GenerateProjectBlueprintVariables {
 }
 
 
-/**
- * A generic API handler for all writing tools.
- * It now uses the centralized apiService.
- * @param endpoint The specific API endpoint for the tool (e.g., '/api/writing-tools/summarize').
- * @param variables An object containing the request body and the auth token.
- * @returns A promise that resolves to the API response.
- */
-export async function writingToolApi<TRequest, TResponse>(
-    endpoint: string,
-    variables: { data: TRequest; token: string }
-): Promise<TResponse> {
-    const { token, data } = variables;
-    return apiService({
-      endpoint,
-      method: 'POST',
-      data,
-      token
-    });
+import "reflect-metadata";
+import { injectable } from "tsyringe";
+
+@injectable()
+export class WritingToolsApiClient {
+    /**
+     * A generic API handler for all writing tools.
+     * It now uses the centralized apiService.
+     * @param endpoint The specific API endpoint for the tool (e.g., '/api/writing-tools/summarize').
+     * @param variables An object containing the request body and the auth token.
+     * @returns A promise that resolves to the API response.
+     */
+    async writingToolApi<TRequest, TResponse>(
+        endpoint: string,
+        variables: { data: TRequest; token: string }
+    ): Promise<TResponse> {
+        const { token, data } = variables;
+        return apiService({
+            endpoint,
+            method: 'POST',
+            data,
+            token
+        });
+    }
 }

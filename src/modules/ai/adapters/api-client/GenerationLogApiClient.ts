@@ -1,6 +1,10 @@
 
 'use client';
 
+import "reflect-metadata";
+import { injectable } from "tsyringe";
+import { apiService } from "@/infrastructure/api/ApiService";
+
 export interface GenerationLog {
     id: string;
     agentId: string;
@@ -19,30 +23,26 @@ interface FetchLogsParams {
     lastVisibleId?: string;
 }
 
-export async function fetchGenerationLogs(params: FetchLogsParams): Promise<{ logs: GenerationLog[], hasNextPage: boolean, lastVisibleId: string | null }> {
-    const { token, limit, agentId, userId, lastVisibleId } = params;
+@injectable()
+export class GenerationLogApiClient {
+    async fetchGenerationLogs(params: FetchLogsParams): Promise<{ logs: GenerationLog[], hasNextPage: boolean, lastVisibleId: string | null }> {
+        const { token, limit, agentId, userId, lastVisibleId } = params;
 
-    if (!token) {
-        throw new Error("Authentication token is required.");
-    }
-
-    const queryParams = new URLSearchParams({
-        limit: limit.toString(),
-    });
-
-    if (agentId) queryParams.append('agentId', agentId);
-    if (userId) queryParams.append('userId', userId);
-    if (lastVisibleId) queryParams.append('lastVisibleId', lastVisibleId);
-
-    const response = await fetch(`/api/admin/logs?${queryParams.toString()}`, {
-        headers: {
-            'Authorization': `Bearer ${token}`
+        if (!token) {
+            throw new Error("Authentication token is required.");
         }
-    });
 
-    if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || 'Failed to fetch generation logs');
+        const queryParams = new URLSearchParams({
+            limit: limit.toString(),
+        });
+
+        if (agentId) queryParams.append('agentId', agentId);
+        if (userId) queryParams.append('userId', userId);
+        if (lastVisibleId) queryParams.append('lastVisibleId', lastVisibleId);
+
+        return apiService({
+            endpoint: `/api/admin/logs?${queryParams.toString()}`,
+            token
+        });
     }
-    return await response.json();
 }

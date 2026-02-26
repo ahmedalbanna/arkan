@@ -1,6 +1,10 @@
 
 'use client';
 
+import "reflect-metadata";
+import { injectable } from "tsyringe";
+import { apiService } from "@/infrastructure/api/ApiService";
+
 export interface UserDashboardStats {
     totalGenerations: number;
     creditsUsed: number;
@@ -15,15 +19,9 @@ export interface UserDashboardStats {
     }[];
 }
 
-export async function fetchUserStats(token: string): Promise<UserDashboardStats> {
-    const response = await fetch('/api/stats', {
-        headers: {
-            'Authorization': `Bearer ${token}`
-        }
-    });
-    if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || 'Failed to fetch user analytics');
+@injectable()
+export class AnalyticsApiClient {
+    async fetchUserStats(token: string): Promise<UserDashboardStats> {
+        return apiService({ endpoint: '/api/stats', token });
     }
-    return await response.json();
 }

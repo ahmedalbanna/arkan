@@ -11,7 +11,8 @@ import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { cn } from '@/lib/utils/cn';
 import { useAuth } from '@/context/AuthContext';
-import { fetchTransactionsForReport } from '@/modules/billing/adapters/api-client/TransactionApiClient';
+import { TransactionApiClient } from '@/modules/billing/adapters/api-client/TransactionApiClient';
+import { container } from '@/infrastructure/di/container';
 import { useToast } from '@/hooks';
 import { useLocalization } from '@/context/LocalizationContext';
 import { convertMarkdownToPdf } from '@/lib/utils/pdf-utils';
@@ -62,7 +63,8 @@ export function FinancialReportExporter() {
         setIsLoading(true);
         try {
             const token = await firebaseUser.getIdToken();
-            const transactions = await fetchTransactionsForReport({
+            const client = container.resolve(TransactionApiClient);
+            const transactions = await client.fetchTransactionsForReport({
                 startDate: dateRange.from.toISOString(),
                 endDate: dateRange.to.toISOString(),
                 token,

@@ -3,7 +3,8 @@
 import { useInfiniteQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '@/context/AuthContext';
 import { transactionKeys } from '@/lib/query-keys';
-import { getTransactions, verifyPayment, submitPaymentProof } from '@/modules/billing/adapters/api-client/TransactionApiClient';
+import { TransactionApiClient } from '@/modules/billing/adapters/api-client/TransactionApiClient';
+import { container } from '@/infrastructure/di/container';
 import { toast, useToast } from '@/hooks/util/use-toast';
 import { Transaction, type TransactionProperties } from '@/modules/billing/domain/entities/Transaction';
 
@@ -32,7 +33,8 @@ export function useTransactions(status: TransactionStatus) {
         queryFn: async ({ pageParam }) => {
             if (!firebaseUser) throw new Error("User not authenticated");
             const token = await firebaseUser.getIdToken();
-            const results = await getTransactions({ token, status, limit: TRANSACTIONS_PER_PAGE, lastVisibleId: pageParam });
+            const client = container.resolve(TransactionApiClient);
+            const results = await client.getTransactions({ token, status, limit: TRANSACTIONS_PER_PAGE, lastVisibleId: pageParam });
             // Instantiate Transaction objects
             return {
                 ...results,
@@ -54,7 +56,8 @@ export function useVerifyPayment() {
         mutationFn: async (variables: VerifyPaymentVariables) => {
             if (!firebaseUser) throw new Error("User not authenticated");
             const token = await firebaseUser.getIdToken();
-            return verifyPayment(variables, token);
+            const client = container.resolve(TransactionApiClient);
+            return client.verifyPayment(variables, token);
         },
         onSuccess: (data, variables) => {
             toast({ title: 'Success', description: `Transaction has been ${variables.status}.` });
@@ -75,8 +78,8 @@ export function useUserTransactions() {
         queryFn: async () => {
             if (!firebaseUser) throw new Error("User not authenticated");
             const token = await firebaseUser.getIdToken();
-            const { fetchUserTransactions } = await import('@/modules/billing/adapters/api-client/TransactionApiClient');
-            const results = await fetchUserTransactions(token);
+            const client = container.resolve(TransactionApiClient);
+            const results = await client.fetchUserTransactions(token);
             // Instantiate Transaction objects
             return results.map((t: TransactionProperties) => new Transaction(t));
         },
@@ -93,7 +96,8 @@ export function useSubmitPaymentProof(options?: { onSuccess?: () => void }) {
         mutationFn: async (formData: FormData) => {
             if (!firebaseUser) throw new Error("User not authenticated");
             const token = await firebaseUser.getIdToken();
-            return submitPaymentProof({ formData, token });
+            const client = container.resolve(TransactionApiClient);
+            return client.submitPaymentProof({ formData, token });
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: transactionKeys.lists() });

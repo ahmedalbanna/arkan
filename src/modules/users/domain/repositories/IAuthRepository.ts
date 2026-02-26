@@ -4,6 +4,7 @@ export interface IAuthRepository {
     updateEmail(userId: string, email: string): Promise<void>;
     updatePassword(userId: string, password: string): Promise<void>;
     deleteUser(userId: string): Promise<void>;
+    verifyToken(token: string): Promise<{ uid: string, email?: string }>;
 }
 
 export const IAuthRepositoryToken = Symbol("IAuthRepository");

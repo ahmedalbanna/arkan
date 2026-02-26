@@ -1,12 +1,17 @@
 
 'use client';
 
-export async function saveDeviceToken(userId: string, token: string): Promise<void> {
-  await fetch('/api/fcm', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({ userId, token }),
-  });
+import "reflect-metadata";
+import { injectable } from "tsyringe";
+import { apiService } from "@/infrastructure/api/ApiService";
+
+@injectable()
+export class DeviceTokenApiClient {
+  async saveDeviceToken(userId: string, token: string): Promise<void> {
+    return apiService({
+        endpoint: '/api/fcm',
+        method: 'POST',
+        data: { userId, token }
+    });
+  }
 }

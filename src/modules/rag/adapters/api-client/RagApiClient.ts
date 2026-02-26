@@ -1,10 +1,11 @@
 
 'use client';
 
+import "reflect-metadata";
+import { injectable } from "tsyringe";
+import { apiService } from "@/infrastructure/api/ApiService";
 import type { AnalyzeContextOutput } from '@/ai/schemas';
 import { ExternalContext } from '@/modules/ai-content/domain/entities/ExternalContext';
-
-
 
 interface AnalyzeContextVariables {
   prompt: string;
@@ -12,16 +13,15 @@ interface AnalyzeContextVariables {
   token: string;
 }
 
-export async function analyzeContextApi(variables: AnalyzeContextVariables): Promise<AnalyzeContextOutput> {
-  const { prompt, contextFiles, token } = variables;
-  const response = await fetch('/api/actions/analyze-context', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-    body: JSON.stringify({ prompt, contextFiles }),
-  });
-  if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.message || 'Analysis failed.');
+@injectable()
+export class RagApiClient {
+  async analyzeContextApi(variables: AnalyzeContextVariables): Promise<AnalyzeContextOutput> {
+    const { prompt, contextFiles, token } = variables;
+    return apiService({
+        endpoint: '/api/actions/analyze-context',
+        method: 'POST',
+        data: { prompt, contextFiles },
+        token
+    });
   }
-  return response.json();
 }

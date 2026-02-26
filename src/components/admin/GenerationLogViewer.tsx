@@ -3,7 +3,8 @@
 
 import { useInfiniteQuery } from '@tanstack/react-query';
 import { generationLogKeys } from '@/lib/query-keys';
-import { fetchGenerationLogs } from '@/modules/ai/adapters/api-client/GenerationLogApiClient';
+import { GenerationLogApiClient } from '@/modules/ai/adapters/api-client/GenerationLogApiClient';
+import { container } from '@/infrastructure/di/container';
 import type { GenerationLog } from '@/modules/ai/adapters/api-client/GenerationLogApiClient';
 import { AlertCircle, Eye, Loader2, Search } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -113,7 +114,8 @@ export default function GenerationLogViewer() {
         queryFn: async ({ pageParam }) => {
             if (!firebaseUser) throw new Error("User not authenticated");
             const token = await firebaseUser.getIdToken();
-            return fetchGenerationLogs({ token, limit: LOGS_PER_PAGE, agentId: debouncedAgentId, userId: debouncedUserId, lastVisibleId: pageParam });
+            const client = container.resolve(GenerationLogApiClient);
+            return client.fetchGenerationLogs({ token, limit: LOGS_PER_PAGE, agentId: debouncedAgentId, userId: debouncedUserId, lastVisibleId: pageParam });
         },
         initialPageParam: undefined as string | undefined,
         getNextPageParam: (lastPage) => lastPage.hasNextPage ? lastPage.lastVisibleId : undefined,

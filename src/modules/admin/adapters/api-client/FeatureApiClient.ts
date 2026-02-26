@@ -1,5 +1,7 @@
 'use client';
 
+import "reflect-metadata";
+import { injectable } from "tsyringe";
 import { apiService } from '@/infrastructure/api/ApiService';
 import type { Feature } from '@/modules/admin/domain/entities/Feature';
 
@@ -10,19 +12,22 @@ export interface UpdateFeatureVariables {
   };
 }
 
-export async function fetchFeaturesApi(token: string) {
-  return apiService<undefined, Feature[]>({
-    endpoint: '/api/admin/features',
-    token,
-  });
-}
+@injectable()
+export class FeatureApiClient {
+  async fetchFeaturesApi(token: string) {
+    return apiService<undefined, Feature[]>({
+      endpoint: '/api/admin/features',
+      token,
+    });
+  }
 
-export async function updateFeatureApi(variables: UpdateFeatureVariables, token: string) {
-  const { featureId, payload } = variables;
-  return apiService({
-    endpoint: `/api/admin/features/${featureId}`,
-    method: 'PUT',
-    data: payload,
-    token,
-  });
+  async updateFeatureApi(variables: UpdateFeatureVariables, token: string) {
+    const { featureId, payload } = variables;
+    return apiService({
+      endpoint: `/api/admin/features/${featureId}`,
+      method: 'PUT',
+      data: payload,
+      token,
+    });
+  }
 }

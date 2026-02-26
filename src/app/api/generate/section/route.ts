@@ -30,18 +30,8 @@ export const POST = withAuth(async ({ request, user }) => {
     
     const result = await controller.runTool({
         userId: user.id,
-        toolName: agentInput.sectionToGenerate,
+        toolName: 'generate-section',
         input: agentInput,
-        flow: async (input) => {
-            const model = selectModel({ flowName: 'generate-report-section' });
-            return executeWithQueue(
-                generateRequestId(),
-                model,
-                'generate-report-section',
-                () => generateReportSection(input)
-            );
-        },
-        creditCost
     });
 
     const sectionResult = result as { content?: string } | null;

@@ -25,8 +25,6 @@ export const POST = withAuth(async ({ request, user }) => {
         userId: user.id,
         toolName: 'generate-image',
         input: { ...validation.data, flow: 'generate-image' as const },
-        flow: generateImage,
-        creditCost: 5
     });
 
     return createApiResponse(result, 200);

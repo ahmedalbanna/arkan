@@ -9,7 +9,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useBuilderStore } from '../core/useBuilderStore';
 import { useAuth } from '@/context/AuthContext';
 import { getAuthenticatedToken } from '@/lib/utils/authUtils';
-import { localProjectService } from '@/modules/projects/adapters/local-storage/LocalProjectService';
+import { LocalProjectService } from '@/modules/projects/adapters/local-storage/LocalProjectService';
 import { container } from '@/infrastructure/di/container';
 import { ProjectApiClient } from '@/modules/projects/adapters/api-client/ProjectApiClient';
 
@@ -23,20 +23,22 @@ export function useProjects() {
             try {
                 const token = await getAuthenticatedToken(firebaseUser);
                 const client = container.resolve(ProjectApiClient);
+                const localService = container.resolve(LocalProjectService);
                 const serverProjects = await client.fetchProjects(token);
                 
                 const mergedProjects = serverProjects.map(p => new Project(p));
 
                 // Sync local db with server source of truth
-                mergedProjects.forEach(p => localProjectService.saveProject(p.toStateObject()));
+                mergedProjects.forEach(p => localService.saveProject(p.toStateObject()));
 
                 return mergedProjects;
 
             } catch (e) {
                 console.warn("Could not sync with server, using local projects.", e);
                  // First, get local projects for optimistic UI
-                const localProjects = await localProjectService.getAllProjects();
-                return localProjects.map(p => new Project(p));
+                const localService = container.resolve(LocalProjectService);
+                const localProjects = await localService.getAllProjects();
+                return localProjects.map((p: ProjectProperties) => new Project(p));
             }
         },
         enabled: !!firebaseUser,
@@ -84,7 +86,8 @@ export function useDeleteProject() {
     return useMutation({
         mutationFn: async (projectId: string) => {
             // Delete from local and server simultaneously
-            const localDelete = localProjectService.deleteProject(projectId);
+            const localService = container.resolve(LocalProjectService);
+            const localDelete = localService.deleteProject(projectId);
             let serverDelete: Promise<any> | null = null;
             if (navigator.onLine && firebaseUser) {
                 const token = await getAuthenticatedToken(firebaseUser);

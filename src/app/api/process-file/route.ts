@@ -35,23 +35,22 @@ export const POST = withAuth(async ({ request, user }) => {
 
         const controller = container.resolve(AiController);
         
+        const toolName = file.type === 'application/pdf' ? 'pdf-to-markdown' : (file.type.startsWith('image/') ? 'image-to-text' : 'text-file-to-markdown');
+        let input: any;
+
+        if (file.type === 'application/pdf') {
+            input = { flow: 'rewrite-document-to-markdown', pdfDataUri: dataUri };
+        } else if (file.type.startsWith('image/')) {
+            input = { flow: 'image-to-text', imageDataUri: dataUri };
+        } else {
+            const content = Buffer.from(fileArrayBuffer).toString('utf-8');
+            input = { content };
+        }
+
         const result = await controller.runTool({
             userId: user.id,
-            toolName: file.type === 'application/pdf' ? 'pdf-to-markdown' : (file.type.startsWith('image/') ? 'image-to-text' : 'text-file-to-markdown'),
-            input: { fileName: file.name, fileType: file.type },
-            flow: async () => {
-                if (file.type === 'application/pdf') {
-                    const res = await rewriteDocumentToMarkdown({ flow: 'rewrite-document-to-markdown', pdfDataUri: dataUri });
-                    return { markdown: 'markdown' in res ? res.markdown : '' };
-                } else if (file.type.startsWith('image/')) {
-                    const res = await imageToText({ flow: 'image-to-text', imageDataUri: dataUri });
-                    return { markdown: 'text' in res ? res.text : '' };
-                } else {
-                    const content = Buffer.from(fileArrayBuffer).toString('utf-8');
-                    return { markdown: content };
-                }
-            },
-            creditCost: 1
+            toolName,
+            input,
         });
 
         return createApiResponse(result, 200);

@@ -1,6 +1,10 @@
 
 'use client';
 
+import "reflect-metadata";
+import { injectable } from "tsyringe";
+import { apiService } from "@/infrastructure/api/ApiService";
+
 export interface DashboardStats {
     totalUsers: number;
     totalGenerations: number;
@@ -17,15 +21,9 @@ export interface DashboardStats {
     }[];
 }
 
-export async function fetchDashboardStats(token: string): Promise<DashboardStats> {
-    const response = await fetch('/api/admin/dashboard-stats', {
-        headers: {
-            'Authorization': `Bearer ${token}`
-        }
-    });
-    if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || 'Failed to fetch dashboard stats');
+@injectable()
+export class AdminApiClient {
+    async fetchDashboardStats(token: string): Promise<DashboardStats> {
+        return apiService({ endpoint: '/api/admin/dashboard-stats', token });
     }
-    return await response.json();
 }

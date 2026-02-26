@@ -3,7 +3,8 @@
 
 import { useQuery } from '@tanstack/react-query';
 import { adminKeys } from '@/lib/query-keys';
-import { fetchDashboardStats } from '@/modules/admin/adapters/api-client/AdminApiClient';
+import { AdminApiClient } from '@/modules/admin/adapters/api-client/AdminApiClient';
+import { container } from '@/infrastructure/di/container';
 import { useAuth } from '@/context/AuthContext';
 
 export function useAdminDashboard() {
@@ -13,7 +14,8 @@ export function useAdminDashboard() {
         queryFn: async () => {
             if (!firebaseUser) throw new Error("User not authenticated");
             const token = await firebaseUser.getIdToken();
-            return fetchDashboardStats(token);
+            const client = container.resolve(AdminApiClient);
+            return client.fetchDashboardStats(token);
         },
         enabled: !!firebaseUser,
     });

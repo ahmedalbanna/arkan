@@ -6,13 +6,12 @@ import { IAiServiceToken } from "../../domain/services/IAiService";
 import type { IGenerationLogRepository } from "../../domain/repositories/IGenerationLogRepository";
 import { IGenerationLogRepositoryToken } from "../../domain/repositories/IGenerationLogRepository";
 import { DeductCreditsUseCase } from "@/modules/users/application/use-cases/DeductCreditsUseCase";
+import { WritingToolRegistry } from "../services/WritingToolRegistry";
 
 export interface RunAiToolInput<TInput> {
     userId: string;
     toolName: string;
     input: TInput;
-    flow: (input: TInput) => Promise<any>;
-    creditCost: number;
 }
 
 @injectable()
@@ -22,11 +21,19 @@ export class RunAiToolUseCase {
         private aiService: IAiService,
         @inject(IGenerationLogRepositoryToken)
         private generationLogRepository: IGenerationLogRepository,
-        @inject(DeductCreditsUseCase) private deductCreditsUseCase: DeductCreditsUseCase
+        @inject(DeductCreditsUseCase) private deductCreditsUseCase: DeductCreditsUseCase,
+        private writingToolRegistry: WritingToolRegistry
     ) {}
 
     async execute<TInput, TOutput>(params: RunAiToolInput<TInput>): Promise<TOutput> {
-        const { userId, toolName, input, flow, creditCost } = params;
+        const { userId, toolName, input } = params;
+
+        const config = this.writingToolRegistry.getTool(toolName);
+        if (!config) {
+            throw new Error(`Tool ${toolName} not found in registry.`);
+        }
+
+        const { flow, creditCost } = config;
 
         // 1. Run the AI Flow
         const result = await this.aiService.runFlow(flow, input);

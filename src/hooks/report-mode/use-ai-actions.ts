@@ -9,10 +9,11 @@ import { marked } from 'marked';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '@/context/AuthContext';
 import { useBuilderStore } from '../core/useBuilderStore';
-import { generateReportSectionApi } from '@/modules/ai-content/adapters/api-client/ReportApiClient';
+import { ReportApiClient } from '@/modules/ai-content/adapters/api-client/ReportApiClient';
+import { container } from '@/infrastructure/di/container';
 import type { SectionName } from '@/ai/schemas';
 import { PromptBuilder } from '@/modules/ai-content/domain/services/PromptBuilder';
-import { writingToolApi } from '@/modules/ai/adapters/api-client/WritingToolsApiClient';
+import { WritingToolsApiClient } from '@/modules/ai/adapters/api-client/WritingToolsApiClient';
 import { Chapter, type Project, type Section, type ExternalContextType } from '@/lib/types';
 import { parseMarkdownToContent } from '@/lib/project/markdown-parser';
 import { useEditorStore } from '../core/use-editor-store';
@@ -163,7 +164,8 @@ export function useAiActions({ editor: initialEditor }: AiActionsProps = {}) {
         };
         // The API now handles saving and the client updates via real-time listeners.
         // We don't need to process the response content here anymore.
-        return generateReportSectionApi(body, token);
+        const client = container.resolve(ReportApiClient);
+        return client.generateReportSectionApi(body, token);
     },
     onSuccess: (data, sectionId) => {
         updateProject(currentProject => currentProject.updateSection(sectionId, section => section.withProps({ content: data.content })));
@@ -203,7 +205,8 @@ export function useAiActions({ editor: initialEditor }: AiActionsProps = {}) {
             }))
         };
 
-        const result = await writingToolApi<any, { markdownContent: string }>(`/api/writing-tools/generate-chapter`, { data: body, token });
+        const client = container.resolve(WritingToolsApiClient);
+        const result = await client.writingToolApi<any, { markdownContent: string }>(`/api/writing-tools/generate-chapter`, { data: body, token });
         return { chapterId, content: result.markdownContent };
     },
     onSuccess: (data) => {

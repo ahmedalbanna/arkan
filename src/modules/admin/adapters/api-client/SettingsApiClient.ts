@@ -1,9 +1,15 @@
 
 'use client';
+
+import "reflect-metadata";
+import { injectable } from "tsyringe";
 import type { PublicSettings } from '@/lib/types';
 import { apiService } from '@/infrastructure/api/ApiService';
 
-// This function now fetches public settings, no token needed.
-export async function fetchPublicSettings(): Promise<PublicSettings> {
-    return apiService({ endpoint: '/api/admin/settings' });
+@injectable()
+export class SettingsApiClient {
+    // This function now fetches public settings, no token needed.
+    async fetchPublicSettings(): Promise<PublicSettings> {
+        return apiService({ endpoint: '/api/admin/settings' });
+    }
 }

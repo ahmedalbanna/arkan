@@ -8,7 +8,8 @@ import { z } from 'zod';
 import { useWritingTool } from './use-writing-tool';
 import { useToast } from '@/hooks/util/use-toast';
 import { useAuth } from '@/context/AuthContext';
-import { processFileApi } from '@/modules/ai-content/adapters/api-client/DocumentProcessingApiClient';
+import { DocumentProcessingApiClient } from '@/modules/ai-content/adapters/api-client/DocumentProcessingApiClient';
+import { container } from '@/infrastructure/di/container';
 import { useDropzone } from 'react-dropzone';
 import { useLocalization } from '@/context/LocalizationContext';
 
@@ -46,7 +47,8 @@ export function useAIDetectorLogic() {
 
     try {
       const token = await firebaseUser.getIdToken();
-      const result = await processFileApi(formData, token);
+      const client = container.resolve(DocumentProcessingApiClient);
+      const result = await client.processFileApi(formData, token);
       form.setValue('text', result.markdown, { shouldValidate: true });
       toast({ title: t('writingTools.aiDetector.toastFileProcessed'), description: t('writingTools.aiDetector.toastFileExtracted', { fileName: file.name }) });
       refetchUser();

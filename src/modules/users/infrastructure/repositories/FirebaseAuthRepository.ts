@@ -26,4 +26,9 @@ export class FirebaseAuthRepository implements IAuthRepository {
     async deleteUser(userId: string): Promise<void> {
         await adminAuth.deleteUser(userId);
     }
+
+    async verifyToken(token: string): Promise<{ uid: string, email?: string }> {
+        const decodedToken = await adminAuth.verifyIdToken(token, true);
+        return { uid: decodedToken.uid, email: decodedToken.email };
+    }
 }

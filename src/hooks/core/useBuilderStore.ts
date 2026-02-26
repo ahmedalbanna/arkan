@@ -1,7 +1,8 @@
 'use client';
 
 import { Chapter, Project, Section, TocSection, type ProjectProperties, User } from '@/lib/types';
-import { localProjectService } from '@/modules/projects/adapters/local-storage/LocalProjectService';
+import { LocalProjectService } from '@/modules/projects/adapters/local-storage/LocalProjectService';
+import { container } from '@/infrastructure/di/container';
 import { useEffect } from 'react';
 import { create } from 'zustand';
 import { toast } from '../util/use-toast';
@@ -44,8 +45,9 @@ const useBuilderStore = create<BuilderState>((set, get) => ({
         const load = async () => {
             const lastProjectId = localStorage.getItem('lastActiveProjectId');
             let projectToLoad: ProjectProperties | undefined;
+            const service = container.resolve(LocalProjectService);
             if (lastProjectId) {
-                projectToLoad = await localProjectService.getProject(lastProjectId);
+                projectToLoad = await service.getProject(lastProjectId);
             }
             
             if (projectToLoad) {
@@ -71,7 +73,8 @@ const useBuilderStore = create<BuilderState>((set, get) => ({
             const result = updater(newProject);
             const finalProject = result instanceof Project ? result : newProject;
             
-            localProjectService.saveProject(finalProject.toStateObject()); 
+            const service = container.resolve(LocalProjectService);
+            service.saveProject(finalProject.toStateObject()); 
             localStorage.setItem('lastActiveProjectId', finalProject.id);
 
             return { 
@@ -89,7 +92,8 @@ const useBuilderStore = create<BuilderState>((set, get) => ({
     loadProject: (projectData) => {
         const newProject = projectData instanceof Project ? projectData : new Project(projectData);
         localStorage.setItem('lastActiveProjectId', newProject.id);
-        localProjectService.saveProject(newProject.toStateObject());
+        const service = container.resolve(LocalProjectService);
+        service.saveProject(newProject.toStateObject());
         set({ project: newProject, hasUnsavedChanges: false, version: 0, selectedFileId: null });
     },
 

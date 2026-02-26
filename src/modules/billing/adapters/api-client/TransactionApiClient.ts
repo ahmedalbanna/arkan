@@ -1,8 +1,8 @@
 
 'use client';
 
-
-
+import "reflect-metadata";
+import { injectable } from "tsyringe";
 import { apiService } from '@/infrastructure/api/ApiService';
 import type { VerifyPaymentVariables } from '@/hooks/data/use-transactions';
 import { TransactionProperties } from '../../domain/entities/Transaction';
@@ -15,64 +15,61 @@ interface FetchTransactionsParams {
   lastVisibleId?: string;
 }
 
-export async function getTransactions(params: FetchTransactionsParams): Promise<{ transactions: TransactionProperties[], hasNextPage: boolean, lastVisibleId?: string | null }> {
-  const { token, status, limit, lastVisibleId } = params;
+@injectable()
+export class TransactionApiClient {
+  async getTransactions(params: FetchTransactionsParams): Promise<{ transactions: TransactionProperties[], hasNextPage: boolean, lastVisibleId?: string | null }> {
+    const { token, status, limit, lastVisibleId } = params;
 
-  const queryParams = new URLSearchParams({
-    status,
-    limit: limit.toString(),
-  });
+    const queryParams = new URLSearchParams({
+      status,
+      limit: limit.toString(),
+    });
 
-  if (lastVisibleId) queryParams.append('lastVisibleId', lastVisibleId);
+    if (lastVisibleId) queryParams.append('lastVisibleId', lastVisibleId);
 
-  return apiService({
-    endpoint: `/api/admin/transactions?${queryParams.toString()}`,
-    token
-  });
-}
-
-
-export async function verifyPayment(variables: VerifyPaymentVariables, token: string) {
-  return apiService({
-    endpoint: '/api/admin/payments/verify',
-    method: 'POST',
-    data: variables,
-    token
-  });
-}
-
-interface FetchReportParams {
-  token: string;
-  startDate: string;
-  endDate: string;
-}
-
-export async function fetchTransactionsForReport(params: FetchReportParams): Promise<TransactionProperties[]> {
-  const { token, startDate, endDate } = params;
-  const queryParams = new URLSearchParams({ startDate, endDate });
-  return apiService({
-    endpoint: `/api/admin/transactions/report?${queryParams.toString()}`,
-    token
-  });
-}
+    return apiService({
+      endpoint: `/api/admin/transactions?${queryParams.toString()}`,
+      token
+    });
+  }
 
 
-/**
- * Fetches the payment history for the currently authenticated user.
- */
-export async function fetchUserTransactions(token: string): Promise<TransactionProperties[]> {
-  return apiService({ endpoint: '/api/transactions', token });
-}
+  async verifyPayment(variables: VerifyPaymentVariables, token: string) {
+    return apiService({
+      endpoint: '/api/admin/payments/verify',
+      method: 'POST',
+      data: variables,
+      token
+    });
+  }
 
-/**
- * Submits the payment proof form data to the backend API.
- */
-export async function submitPaymentProof({ formData, token }: { formData: FormData, token: string }) {
-  return apiService({
-    endpoint: '/api/payment/request',
-    method: 'POST',
-    data: formData,
-    token,
-    isFormData: true
-  });
+  async fetchTransactionsForReport(params: { token: string; startDate: string; endDate: string; }): Promise<TransactionProperties[]> {
+    const { token, startDate, endDate } = params;
+    const queryParams = new URLSearchParams({ startDate, endDate });
+    return apiService({
+      endpoint: `/api/admin/transactions/report?${queryParams.toString()}`,
+      token
+    });
+  }
+
+
+  /**
+   * Fetches the payment history for the currently authenticated user.
+   */
+  async fetchUserTransactions(token: string): Promise<TransactionProperties[]> {
+    return apiService({ endpoint: '/api/transactions', token });
+  }
+
+  /**
+   * Submits the payment proof form data to the backend API.
+   */
+  async submitPaymentProof({ formData, token }: { formData: FormData, token: string }) {
+    return apiService({
+      endpoint: '/api/payment/request',
+      method: 'POST',
+      data: formData,
+      token,
+      isFormData: true
+    });
+  }
 }
