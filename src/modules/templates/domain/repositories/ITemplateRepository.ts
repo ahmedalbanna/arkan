@@ -6,15 +6,18 @@ export interface Template {
     imageUrl?: string;
     dataAiHint?: string;
     styles?: any;
+    isDefault?: boolean;
     createdAt?: string;
     updatedAt?: string;
 }
 
+export type TemplateType = 'docx' | 'pptx' | 'report';
+
 export interface ITemplateRepository {
-    getAll(type: 'docx' | 'pptx'): Promise<Template[]>;
-    getById(type: 'docx' | 'pptx', id: string): Promise<Template | null>;
-    save(type: 'docx' | 'pptx', data: Template): Promise<Template>;
-    delete(type: 'docx' | 'pptx', id: string): Promise<void>;
+    getAll(type: TemplateType): Promise<Template[]>;
+    getById(type: TemplateType, id: string): Promise<Template | null>;
+    save(type: TemplateType, data: Template): Promise<Template>;
+    delete(type: TemplateType, id: string): Promise<void>;
 }
 
 export const ITemplateRepositoryToken = Symbol("ITemplateRepository");

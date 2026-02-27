@@ -1,4 +1,3 @@
-import "reflect-metadata";
 
 import { injectable } from "tsyringe";
 import { adminDb } from "@/infrastructure/firebase/server-init";

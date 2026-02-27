@@ -1,10 +1,9 @@
-import "reflect-metadata";
 
 import { inject, injectable } from "tsyringe";
-import type { IGenerationLogRepository } from "@/modules/ai/domain/repositories/IGenerationLogRepository";
-import { IGenerationLogRepositoryToken } from "@/modules/ai/domain/repositories/IGenerationLogRepository";
-import type { IUserRepository } from "@/modules/users/domain/repositories/IUserRepository";
-import { IUserRepositoryToken } from "@/modules/users/domain/repositories/IUserRepository";
+import type { IGenerationLogRepository } from "../../../ai/domain/repositories/IGenerationLogRepository";
+import { IGenerationLogRepositoryToken } from "../../../ai/domain/repositories/IGenerationLogRepository";
+import type { IUserRepository } from "../../../users/domain/repositories/IUserRepository";
+import { IUserRepositoryToken } from "../../../users/domain/repositories/IUserRepository";
 
 @injectable()
 export class GetGenerationLogsUseCase {

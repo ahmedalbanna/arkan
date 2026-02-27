@@ -1,8 +1,8 @@
-import "reflect-metadata";
 
 import { injectable } from "tsyringe";
 import { adminDb } from "@/infrastructure/firebase/server-init";
-import { IAgentRepository, Agent } from "../../domain/repositories/IAgentRepository";
+import { IAgentRepository } from "../../domain/repositories/IAgentRepository";
+import { Agent, AgentProperties } from "../../domain/entities/Agent";
 
 @injectable()
 export class FirebaseAgentRepository implements IAgentRepository {
@@ -11,7 +11,7 @@ export class FirebaseAgentRepository implements IAgentRepository {
     async getById(id: string): Promise<Agent | null> {
         const doc = await this.collection.doc(id).get();
         if (!doc.exists) return null;
-        return { id: doc.id, ...doc.data() } as Agent;
+        return new Agent({ id: doc.id, ...doc.data() } as AgentProperties);
     }
 
     async getAll(filters?: { category?: string, enabledOnly?: boolean }): Promise<Agent[]> {
@@ -25,7 +25,7 @@ export class FirebaseAgentRepository implements IAgentRepository {
         }
 
         const snapshot = await query.orderBy('name').get();
-        return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Agent));
+        return snapshot.docs.map(doc => new Agent({ id: doc.id, ...doc.data() } as AgentProperties));
     }
 
     async save(id: string, data: any): Promise<Agent> {
@@ -42,10 +42,15 @@ export class FirebaseAgentRepository implements IAgentRepository {
         }
         
         await agentRef.set(dataToSave, { merge: true });
-        return { id, ...dataToSave } as Agent;
+        return new Agent({ id, ...dataToSave } as AgentProperties);
     }
 
     async delete(id: string): Promise<void> {
         await this.collection.doc(id).delete();
+    }
+
+    async getCategories(): Promise<any[]> {
+        const snapshot = await adminDb.collection('agent_categories').orderBy('name').get();
+        return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
     }
 }

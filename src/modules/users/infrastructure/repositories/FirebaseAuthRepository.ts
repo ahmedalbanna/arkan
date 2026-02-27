@@ -1,5 +1,4 @@
 
-import "reflect-metadata";
 import { injectable } from "tsyringe";
 import { adminAuth } from "@/infrastructure/firebase/server-init";
 import { IAuthRepository } from "../../domain/repositories/IAuthRepository";
@@ -30,5 +29,9 @@ export class FirebaseAuthRepository implements IAuthRepository {
     async verifyToken(token: string): Promise<{ uid: string, email?: string }> {
         const decodedToken = await adminAuth.verifyIdToken(token, true);
         return { uid: decodedToken.uid, email: decodedToken.email };
+    }
+
+    async createSessionCookie(idToken: string, options: { expiresIn: number }): Promise<string> {
+        return adminAuth.createSessionCookie(idToken, options);
     }
 }

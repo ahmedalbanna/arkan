@@ -98,7 +98,6 @@ export interface GenerateProjectBlueprintVariables {
 }
 
 
-import "reflect-metadata";
 import { injectable } from "tsyringe";
 
 @injectable()

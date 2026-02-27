@@ -2,9 +2,9 @@
 'use server';
 
 import { createApiResponse, handleApiError } from '@/lib/utils/api-utils';
-import { adminAuth, adminDb } from '@/infrastructure/firebase/server-init';
+import { container } from '@/infrastructure/di/container';
+import { UserController } from '@/modules/users/adapters/controllers/UserController';
 import { z } from 'zod';
-import type { UserProfile } from '@/lib/types';
 
 const signupSchema = z.object({
     email: z.string().email("Invalid email address"),
@@ -14,7 +14,6 @@ const signupSchema = z.object({
 
 /**
  * API endpoint for creating a new user in Firebase Authentication and Firestore.
- * This is now an atomic operation.
  */
 export async function POST(req: Request) {
     try {
@@ -24,32 +23,13 @@ export async function POST(req: Request) {
             return handleApiError(validation.error);
         }
         
-        const { email, password, name } = validation.data;
-        const settings = (await adminDb.collection('settings').doc('defaults').get()).data();
-        const defaultCredits = settings?.newUserCredits ?? 10;
-
-
-        // 1. Create the Firebase Auth user
-        const userRecord = await adminAuth.createUser({
-            email,
-            password,
-            displayName: name
+        const controller = container.resolve(UserController);
+        const newUser = await controller.createUser({
+            ...validation.data,
+            role: 'user' // Default role for signup
         });
-        
-        // 2. Create the corresponding Firestore profile
-        const userProfile: Omit<UserProfile, 'id'> = {
-            name,
-            email,
-            role: 'user',
-            credits: defaultCredits,
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString(),
-            hasCompletedOnboarding: false,
-        };
 
-        await adminDb.collection('users').doc(userRecord.uid).set(userProfile);
-
-        return createApiResponse({ user: { uid: userRecord.uid, email: userRecord.email } }, 201);
+        return createApiResponse({ user: { uid: newUser.id, email: newUser.email } }, 201);
 
     } catch (error: any) {
         if (error.code === 'auth/email-already-exists') {

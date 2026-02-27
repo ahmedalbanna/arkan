@@ -1,4 +1,3 @@
-import "reflect-metadata";
 
 import { inject, injectable } from "tsyringe";
 import type { IUserRepository } from "../../domain/repositories/IUserRepository";
@@ -16,7 +15,7 @@ export class CreateUserUseCase {
         private authRepository: IAuthRepository
     ) {}
 
-    async execute(data: { email: string, password?: string, name: string, role: string, credits: number }): Promise<{ user: { uid: string, email?: string } }> {
+    async execute(data: { email: string, password?: string, name: string, role: string, credits?: number }): Promise<UserProfile> {
         const authUser = await this.authRepository.create({
             email: data.email,
             password: data.password,
@@ -27,7 +26,7 @@ export class CreateUserUseCase {
             id: authUser.uid,
             name: data.name,
             email: data.email,
-            credits: data.credits,
+            credits: data.credits ?? 10,
             role: data.role as any,
             createdAt: new Date().toISOString(),
             updatedAt: new Date().toISOString(),
@@ -39,6 +38,6 @@ export class CreateUserUseCase {
 
         await this.userRepository.save(newUserProfile);
 
-        return { user: { uid: authUser.uid, email: authUser.email } };
+        return newUserProfile;
     }
 }

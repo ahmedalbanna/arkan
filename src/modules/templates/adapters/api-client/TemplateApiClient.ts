@@ -1,4 +1,3 @@
-import "reflect-metadata";
 import { injectable } from "tsyringe";
 import { apiService } from '@/infrastructure/api/ApiService';
 import type { DocxTemplateProperties } from '@/modules/templates/domain/entities/DocxTemplate';

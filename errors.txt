@@ -1,13 +1,14 @@
- ○ Compiling /admin/manage-templates ...
- ✓ Compiled /admin/manage-templates in 3.5s
- GET /admin/manage-templates 200 in 3711ms
- ○ Compiling /api/templates/docx ...
- ✓ Compiled /api/templates/docx in 1626ms
- GET /api/templates/docx 200 in 2430ms
- ○ Compiling /api/templates/pptx ...
- ✓ Compiled /api/templates/pptx in 720ms
- GET /api/templates/pptx 200 in 1381ms
- ○ Compiling /api/templates/report ...
- ✓ Compiled /api/templates/report in 1787ms
- GET /api/templates/report 200 in 3409ms
- PUT /api/templates/report 405 in 399ms
+ GET /api/admin/users?limit=10 500 in 853ms
+API Route Error: Error: Cannot inject the dependency "userRepository" at position #0 of "GetPaginatedUsersUseCase" constructor. Reason:
+    TypeInfo not known for "undefined"
+    at UserController.getPaginatedUsers (src/modules/users/adapters/controllers/UserController.ts:57:46)
+    at GET.requireAdmin (src/app/api/admin/users/route.ts:23:38)
+    at <unknown> (src/lib/utils/api-utils.ts:96:14)
+  55 |
+  56 |     async getPaginatedUsers(options: { limit: number, lastVisibleId?: string }) {
+> 57 |         return this.getPaginatedUsersUseCase.execute(options);
+     |                                              ^
+  58 |     }
+  59 |
+  60 |     async createUser(data: any) {
+ GET /api/admin/users?limit=10 500 in 809ms

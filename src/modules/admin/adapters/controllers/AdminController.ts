@@ -1,23 +1,26 @@
-import "reflect-metadata";
-import { injectable } from "tsyringe";
+import { delay, inject, injectable } from "tsyringe";
 import { GetDashboardStatsUseCase } from "../../application/use-cases/GetDashboardStatsUseCase";
 import { GetFeaturesUseCase } from "../../application/use-cases/GetFeaturesUseCase";
 import { UpdateFeatureUseCase } from "../../application/use-cases/UpdateFeatureUseCase";
 import { GetSettingsUseCase } from "../../application/use-cases/GetSettingsUseCase";
 import { UpdateSettingsUseCase } from "../../application/use-cases/UpdateSettingsUseCase";
 import { GetGenerationLogsUseCase } from "../../application/use-cases/GetGenerationLogsUseCase";
-import { container } from "@/infrastructure/di/container";
-import { IGenerationLogRepositoryToken } from "@/modules/ai/domain/repositories/IGenerationLogRepository";
-import { IUserRepositoryToken } from "@/modules/users/domain/repositories/IUserRepository";
 
 @injectable()
 export class AdminController {
     constructor(
+        @inject(delay(() => GetDashboardStatsUseCase))
         private getDashboardStatsUseCase: GetDashboardStatsUseCase,
+        @inject(delay(() => GetFeaturesUseCase))
         private getFeaturesUseCase: GetFeaturesUseCase,
+        @inject(delay(() => UpdateFeatureUseCase))
         private updateFeatureUseCase: UpdateFeatureUseCase,
+        @inject(delay(() => GetSettingsUseCase))
         private getSettingsUseCase: GetSettingsUseCase,
-        private updateSettingsUseCase: UpdateSettingsUseCase
+        @inject(delay(() => UpdateSettingsUseCase))
+        private updateSettingsUseCase: UpdateSettingsUseCase,
+        @inject(delay(() => GetGenerationLogsUseCase))
+        private getGenerationLogsUseCase: GetGenerationLogsUseCase
     ) {}
 
     async getDashboardStats() {
@@ -41,15 +44,6 @@ export class AdminController {
     }
 
     async getGenerationLogs(options: { limit: number; agentId?: string; userId?: string; lastVisibleId?: string }) {
-        if (!container.isRegistered(IGenerationLogRepositoryToken)) {
-            const { FirebaseGenerationLogRepository } = require("@/modules/ai/infrastructure/repositories/FirebaseGenerationLogRepository");
-            container.register(IGenerationLogRepositoryToken, { useClass: FirebaseGenerationLogRepository });
-        }
-        if (!container.isRegistered(IUserRepositoryToken)) {
-            const { FirebaseUserRepository } = require("@/modules/users/infrastructure/repositories/FirebaseUserRepository");
-            container.register(IUserRepositoryToken, { useClass: FirebaseUserRepository });
-        }
-        const useCase = container.resolve(GetGenerationLogsUseCase);
-        return useCase.execute(options);
+        return this.getGenerationLogsUseCase.execute(options);
     }
 }

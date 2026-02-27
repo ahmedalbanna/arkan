@@ -1,5 +1,4 @@
 
-import "reflect-metadata";
 import { inject, injectable } from "tsyringe";
 import type { IRagRepository, RagRetrievalOptions, RagRetrievalResult } from "../../domain/repositories/IRagRepository";
 import { IRagRepositoryToken } from "../../domain/repositories/IRagRepository";

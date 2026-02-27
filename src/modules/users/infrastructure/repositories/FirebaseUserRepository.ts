@@ -1,31 +1,30 @@
 
-import "reflect-metadata";
 import { injectable } from "tsyringe";
 import { adminDb } from "@/infrastructure/firebase/server-init";
 import { IUserRepository } from "../../domain/repositories/IUserRepository";
-import { UserProfile } from "../../domain/entities/User";
+import { User, UserProfile } from "../../domain/entities/User";
 import { FieldValue } from 'firebase-admin/firestore';
 
 @injectable()
 export class FirebaseUserRepository implements IUserRepository {
     private readonly collection = adminDb.collection("users");
 
-    async getById(id: string): Promise<UserProfile | null> {
+    async getById(id: string): Promise<User | null> {
         if (!id) return null;
         const userDoc = await this.collection.doc(id).get();
         if (!userDoc.exists) {
             return null;
         }
         const data = userDoc.data();
-        return { id: userDoc.id, ...data } as UserProfile;
+        return new User({ id: userDoc.id, ...data } as UserProfile);
     }
 
-    async save(user: UserProfile): Promise<UserProfile> {
+    async save(user: UserProfile): Promise<User> {
         await this.collection.doc(user.id).set(user);
-        return user;
+        return new User(user);
     }
 
-    async update(id: string, data: Partial<UserProfile>): Promise<UserProfile> {
+    async update(id: string, data: Partial<UserProfile>): Promise<User> {
         const updatePayload = {
             ...data,
             updatedAt: new Date().toISOString(),
@@ -100,15 +99,15 @@ export class FirebaseUserRepository implements IUserRepository {
         }
 
         const snapshot = await query.get();
-        const users = snapshot.docs.slice(0, limit).map(doc => ({ id: doc.id, ...doc.data() })) as UserProfile[];
+        const users = snapshot.docs.slice(0, limit).map(doc => new User({ id: doc.id, ...doc.data() } as UserProfile));
         const hasNextPage = snapshot.docs.length > limit;
         const newLastVisibleId = hasNextPage ? snapshot.docs[snapshot.docs.length - 2].id : null;
 
         return { users, hasNextPage, lastVisibleId: newLastVisibleId };
     }
 
-    async getAdmins(): Promise<UserProfile[]> {
+    async getAdmins(): Promise<User[]> {
         const snapshot = await this.collection.where('role', '==', 'admin').get();
-        return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as UserProfile));
+        return snapshot.docs.map(doc => new User({ id: doc.id, ...doc.data() } as UserProfile));
     }
 }

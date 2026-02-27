@@ -1,7 +1,6 @@
 
 'use client';
 
-import "reflect-metadata";
 import { injectable } from "tsyringe";
 import { initializeFirebase } from '@/firebase';
 import {

@@ -1,5 +1,4 @@
 
-import "reflect-metadata";
 import { injectable } from "tsyringe";
 import { IRagRepository, RagIndexingOptions, RagRetrievalOptions, RagIndexingResult, RagRetrievalResult } from "../../domain/repositories/IRagRepository";
 import { indexDocument } from "@/modules/rag/infrastructure/indexer";

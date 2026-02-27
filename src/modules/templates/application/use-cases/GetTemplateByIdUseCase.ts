@@ -1,6 +1,5 @@
-import "reflect-metadata";
 import { inject, injectable } from "tsyringe";
-import type { ITemplateRepository, Template } from "../../domain/repositories/ITemplateRepository";
+import type { ITemplateRepository, Template, TemplateType } from "../../domain/repositories/ITemplateRepository";
 import { ITemplateRepositoryToken } from "../../domain/repositories/ITemplateRepository";
 
 @injectable()
@@ -10,7 +9,7 @@ export class GetTemplateByIdUseCase {
         private templateRepository: ITemplateRepository
     ) {}
 
-    async execute(type: 'docx' | 'pptx', id: string): Promise<Template | null> {
+    async execute(type: TemplateType, id: string): Promise<Template | null> {
         return this.templateRepository.getById(type, id);
     }
 }

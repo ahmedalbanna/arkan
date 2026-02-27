@@ -1,47 +1,31 @@
 // src/app/api/notifications/mark-as-read/route.ts
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
-import { adminAuth } from '@/infrastructure/firebase/server-init';
-import { getDatabase } from 'firebase-admin/database';
+import { container } from '@/infrastructure/di/container';
+import { UserController } from '@/modules/users/adapters/controllers/UserController';
+import { withAuth, handleApiError, createApiResponse } from '@/lib/utils/api-utils';
 
 const markAsReadSchema = z.object({
   notificationIds: z.array(z.string()).min(1),
 });
 
-export async function POST(request: Request) {
-
-    let authorization = request.headers.get('Authorization');
-    if (!authorization?.startsWith('Bearer ')) {
-        return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
-    }
-
-    let token = authorization.substring(7);
+export const POST = withAuth(async ({ request, user }) => {
     try {
-        let decodedToken = await adminAuth.verifyIdToken(token, true);
-        let userId = decodedToken.uid;
-
-        let body = await request.json();
-        let validation = markAsReadSchema.safeParse(body);
+        const body = await request.json();
+        const validation = markAsReadSchema.safeParse(body);
 
         if (!validation.success) {
-            return NextResponse.json({ errors: validation.error.flatten().fieldErrors }, { status: 400 });
+            return handleApiError(validation.error);
         }
 
-        let { notificationIds } = validation.data;
+        const { notificationIds } = validation.data;
+        const controller = container.resolve(UserController);
+        
+        await controller.markNotificationsAsRead(user.uid, notificationIds);
 
-        // Use the Admin SDK to interact with the Realtime Database
-        let db = getDatabase();
-        let updates: { [key: string]: any } = {};
-        notificationIds.forEach(id => {
-            updates[`/notifications/${userId}/${id}/isRead`] = true;
-        });
-
-        await db.ref().update(updates);
-
-        return NextResponse.json({ message: 'Notifications marked as read.' }, { status: 200 });
+        return createApiResponse({ message: 'Notifications marked as read.' }, 200);
 
     } catch (error) {
-        console.error('Error marking notifications as read:', error);
-        return NextResponse.json({ message: 'An unexpected error occurred.' }, { status: 500 });
+        return handleApiError(error);
     }
-}
+});

@@ -1,17 +1,22 @@
 import { createApiResponse, handleApiError } from '@/lib/utils/api-utils';
-import { adminDb } from '@/infrastructure/firebase/server-init';
+import { container } from '@/infrastructure/di/container';
+import { UserController } from '@/modules/users/adapters/controllers/UserController';
 
 // Public endpoint to fetch admins for support chat initiation
 export async function GET() {
     try {
-        let adminsSnapshot = await adminDb.collection('users').where('role', '==', 'admin').get();
-        let admins = adminsSnapshot.docs.map(doc => ({
-            id: doc.id,
-            name: doc.data().name,
-            email: doc.data().email,
-            profilePictureUrl: doc.data().profilePictureUrl,
+        const controller = container.resolve(UserController);
+        const admins = await controller.getAdmins();
+        
+        // Return only necessary public info
+        const publicAdmins = admins.map(admin => ({
+            id: admin.id,
+            name: admin.name,
+            email: admin.email,
+            profilePictureUrl: admin.profilePictureUrl,
         }));
-        return createApiResponse(admins, 200);
+        
+        return createApiResponse(publicAdmins, 200);
     } catch (error) {
         return handleApiError(error);
     }

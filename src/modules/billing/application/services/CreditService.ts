@@ -1,13 +1,14 @@
 
-import "reflect-metadata";
-import { injectable, inject } from "tsyringe";
+import { delay, inject, injectable } from "tsyringe";
 import { DeductCreditsUseCase } from "@/modules/users/application/use-cases/DeductCreditsUseCase";
 import { AddCreditsUseCase } from "@/modules/users/application/use-cases/AddCreditsUseCase";
 
 @injectable()
 export class CreditService {
     constructor(
+        @inject(delay(() => DeductCreditsUseCase))
         private deductCreditsUseCase: DeductCreditsUseCase,
+        @inject(delay(() => AddCreditsUseCase))
         private addCreditsUseCase: AddCreditsUseCase
     ) {}
 

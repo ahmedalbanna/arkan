@@ -1,23 +1,22 @@
 
-import "reflect-metadata";
 import { injectable } from "tsyringe";
 import { adminDb } from "@/infrastructure/firebase/server-init";
 import { IProjectRepository } from "../../domain/repositories/IProjectRepository";
-import { ProjectProperties } from "../../domain/entities/Project";
+import { Project, ProjectProperties } from "../../domain/entities/Project";
 
 @injectable()
 export class FirebaseProjectRepository implements IProjectRepository {
   private readonly collection = adminDb.collection("projects");
 
-  async getById(id: string): Promise<ProjectProperties | null> {
+  async getById(id: string): Promise<Project | null> {
     const doc = await this.collection.doc(id).get();
     if (!doc.exists) {
       return null;
     }
-    return doc.data() as ProjectProperties;
+    return new Project(doc.data() as ProjectProperties);
   }
 
-  async getByUserId(userId: string): Promise<ProjectProperties[]> {
+  async getByUserId(userId: string): Promise<Project[]> {
     const snapshot = await this.collection
       .where("meta.author", "==", userId)
       .orderBy("meta.updated", "desc")
@@ -27,13 +26,13 @@ export class FirebaseProjectRepository implements IProjectRepository {
       return [];
     }
 
-    return snapshot.docs.map((doc) => doc.data() as ProjectProperties);
+    return snapshot.docs.map((doc) => new Project(doc.data() as ProjectProperties));
   }
 
-  async save(project: ProjectProperties): Promise<ProjectProperties> {
+  async save(project: ProjectProperties): Promise<Project> {
     const docRef = project.id ? this.collection.doc(project.id) : this.collection.doc();
     
-    const dataToSave = {
+    const dataToSave: ProjectProperties = {
       ...project,
       id: docRef.id,
       meta: {
@@ -43,7 +42,7 @@ export class FirebaseProjectRepository implements IProjectRepository {
     };
 
     await docRef.set(dataToSave, { merge: true });
-    return dataToSave;
+    return new Project(dataToSave);
   }
 
   async delete(id: string): Promise<void> {

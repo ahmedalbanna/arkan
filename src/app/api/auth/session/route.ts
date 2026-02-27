@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
-import { adminAuth } from '@/infrastructure/firebase/server-init';
 import { handleApiError } from '@/lib/utils/api-utils';
+import { container } from '@/infrastructure/di/container';
+import { UserController } from '@/modules/users/adapters/controllers/UserController';
 
 export async function POST(request: Request) {
   try {
@@ -10,8 +11,9 @@ export async function POST(request: Request) {
       return handleApiError({ message: 'ID token is required.' }, 400);
     }
 
+    const controller = container.resolve(UserController);
     let expiresIn = 60 * 60 * 24 * 5 * 1000; // 5 days
-    let sessionCookie = await adminAuth.createSessionCookie(idToken, { expiresIn });
+    let sessionCookie = await controller.createSession(idToken, expiresIn);
 
     let options = {
       name: '__session',

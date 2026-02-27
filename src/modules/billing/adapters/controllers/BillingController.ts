@@ -1,6 +1,5 @@
 
-import "reflect-metadata";
-import { injectable } from "tsyringe";
+import { delay, inject, injectable } from "tsyringe";
 import { GetTransactionsUseCase } from "../../application/use-cases/GetTransactionsUseCase";
 import { CreateTransactionUseCase } from "../../application/use-cases/CreateTransactionUseCase";
 import { VerifyPaymentUseCase } from "../../application/use-cases/VerifyPaymentUseCase";
@@ -9,9 +8,13 @@ import { SubmitPaymentRequestUseCase } from "../../application/use-cases/SubmitP
 @injectable()
 export class BillingController {
     constructor(
+        @inject(delay(() => GetTransactionsUseCase))
         private getTransactionsUseCase: GetTransactionsUseCase,
+        @inject(delay(() => CreateTransactionUseCase))
         private createTransactionUseCase: CreateTransactionUseCase,
+        @inject(delay(() => VerifyPaymentUseCase))
         private verifyPaymentUseCase: VerifyPaymentUseCase,
+        @inject(delay(() => SubmitPaymentRequestUseCase))
         private submitPaymentRequestUseCase: SubmitPaymentRequestUseCase
     ) {}
 

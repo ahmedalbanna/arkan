@@ -1,6 +1,5 @@
-import "reflect-metadata";
 import { inject, injectable } from "tsyringe";
-import type { ITemplateRepository } from "../../domain/repositories/ITemplateRepository";
+import type { ITemplateRepository, TemplateType } from "../../domain/repositories/ITemplateRepository";
 import { ITemplateRepositoryToken } from "../../domain/repositories/ITemplateRepository";
 
 @injectable()
@@ -10,7 +9,7 @@ export class DeleteTemplateUseCase {
         private templateRepository: ITemplateRepository
     ) {}
 
-    async execute(type: 'docx' | 'pptx', id: string): Promise<void> {
+    async execute(type: TemplateType, id: string): Promise<void> {
         return this.templateRepository.delete(type, id);
     }
 }

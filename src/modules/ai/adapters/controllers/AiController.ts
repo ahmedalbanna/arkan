@@ -1,21 +1,29 @@
 
-import "reflect-metadata";
-import { injectable } from "tsyringe";
+import { delay, inject, injectable } from "tsyringe";
 import { RunAiToolUseCase, RunAiToolInput } from "../../application/use-cases/RunAiToolUseCase";
 import { GetAgentsUseCase } from "../../application/use-cases/GetAgentsUseCase";
 import { GetAgentByIdUseCase } from "../../application/use-cases/GetAgentByIdUseCase";
 import { SaveAgentUseCase } from "../../application/use-cases/SaveAgentUseCase";
 import { DeleteAgentUseCase } from "../../application/use-cases/DeleteAgentUseCase";
+import { GetAgentCategoriesUseCase } from "../../application/use-cases/GetAgentCategoriesUseCase";
 import { WritingToolRegistry } from "../../application/services/WritingToolRegistry";
 
 @injectable()
 export class AiController {
     constructor(
+        @inject(delay(() => RunAiToolUseCase))
         private runAiToolUseCase: RunAiToolUseCase,
+        @inject(delay(() => GetAgentsUseCase))
         private getAgentsUseCase: GetAgentsUseCase,
+        @inject(delay(() => GetAgentByIdUseCase))
         private getAgentByIdUseCase: GetAgentByIdUseCase,
+        @inject(delay(() => SaveAgentUseCase))
         private saveAgentUseCase: SaveAgentUseCase,
+        @inject(delay(() => DeleteAgentUseCase))
         private deleteAgentUseCase: DeleteAgentUseCase,
+        @inject(delay(() => GetAgentCategoriesUseCase))
+        private getAgentCategoriesUseCase: GetAgentCategoriesUseCase,
+        @inject(delay(() => WritingToolRegistry))
         private writingToolRegistry: WritingToolRegistry
     ) {}
 
@@ -41,5 +49,9 @@ export class AiController {
 
     async deleteAgent(id: string) {
         return this.deleteAgentUseCase.execute(id);
+    }
+
+    async getAgentCategories() {
+        return this.getAgentCategoriesUseCase.execute();
     }
 }

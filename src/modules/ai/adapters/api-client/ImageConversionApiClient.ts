@@ -1,6 +1,5 @@
 'use client';
 
-import "reflect-metadata";
 import { injectable } from "tsyringe";
 
 const API_ENDPOINT = '/api/svg-conversion';

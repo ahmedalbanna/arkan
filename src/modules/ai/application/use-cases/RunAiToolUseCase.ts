@@ -1,4 +1,3 @@
-import "reflect-metadata";
 
 import { inject, injectable } from "tsyringe";
 import type { IAiService } from "../../domain/services/IAiService";

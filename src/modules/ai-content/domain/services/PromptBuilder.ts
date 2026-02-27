@@ -1,4 +1,3 @@
-import "reflect-metadata";
 import { injectable } from "tsyringe";
 import type { Chapter } from '@/modules/ai-content/domain/entities/Chapter';
 import type { Project } from '@/modules/projects/domain/entities/Project';

@@ -1,23 +1,21 @@
 // src/app/api/admin/templates/report/[id]/route.ts
 
 import { createApiResponse, handleApiError, withAuth } from '@/lib/utils/api-utils';
-import { adminDb } from '@/infrastructure/firebase/server-init';
 import { UpdateReportTemplateSchema } from '@/lib/types';
+import { container } from '@/infrastructure/di/container';
+import { TemplateController } from '@/modules/templates/adapters/controllers/TemplateController';
 
 // GET a single report template
 export const GET = withAuth(async ({ params }) => {
     try {
-        let { id } = params;
-        if (!id) {
-            return handleApiError({ message: 'Template ID is required.' }, 400);
-        }
-        let docRef = adminDb.collection('templates').doc('report').collection('items').doc(id);
-        let doc = await docRef.get();
+        const { id } = await params;
+        const controller = container.resolve(TemplateController);
+        const template = await controller.getTemplateById('report', id);
 
-        if (!doc.exists) {
+        if (!template) {
             return handleApiError({ message: 'Report template not found.' }, 404);
         }
-        return createApiResponse({ id: doc.id, ...doc.data() }, 200);
+        return createApiResponse(template, 200);
     } catch (error) {
         return handleApiError(error);
     }
@@ -26,24 +24,23 @@ export const GET = withAuth(async ({ params }) => {
 // PUT to update a report template
 export const PUT = withAuth(async ({ request, params }) => {
     try {
-        let { id } = params;
-        if (!id) {
-            return handleApiError({ message: 'Template ID is required.' }, 400);
-        }
-
-        let body = await request.json();
-        // The body now contains the full content structure
-        let validation = UpdateReportTemplateSchema.safeParse(body);
+        const { id } = await params;
+        const body = await request.json();
+        
+        const validation = UpdateReportTemplateSchema.safeParse({ ...body, id });
         if (!validation.success) {
             return handleApiError(validation.error);
         }
 
-        let docRef = adminDb.collection('templates').doc('report').collection('items').doc(id);
-        await docRef.update(validation.data);
+        const controller = container.resolve(TemplateController);
+        const existing = await controller.getTemplateById('report', id);
 
-        let updatedDoc = await docRef.get();
-        return createApiResponse({ id: updatedDoc.id, ...updatedDoc.data() }, 200);
+        if (!existing) {
+            return handleApiError({ message: 'Template not found.' }, 404);
+        }
 
+        const updated = await controller.saveTemplate('report', validation.data as any);
+        return createApiResponse(updated, 200);
     } catch (error) {
         return handleApiError(error);
     }
@@ -52,23 +49,18 @@ export const PUT = withAuth(async ({ request, params }) => {
 // DELETE a report template
 export const DELETE = withAuth(async ({ params }) => {
     try {
-        let { id } = params;
-        if (!id) {
-            return handleApiError({ message: 'Template ID is required.' }, 400);
-        }
+        const { id } = await params;
+        const controller = container.resolve(TemplateController);
         
-        // Prevent deletion of default templates
-        const defaultIds = defaultReportTemplates.filter(t => t.isDefault).map(t => t.id);
-        if (defaultIds.includes(id)) {
+        // Check if it's a default template
+        const template = await controller.getTemplateById('report', id);
+        if (template?.isDefault) {
             return handleApiError({ message: 'Default templates cannot be deleted.' }, 403);
         }
         
-        await adminDb.collection('templates').doc('report').collection('items').doc(id).delete();
+        await controller.deleteTemplate('report', id);
         return createApiResponse({ message: 'Template deleted successfully.' }, 200);
     } catch (error) {
         return handleApiError(error);
     }
 }, { requireAdmin: true });
-
-// Add this import at the top
-import { defaultReportTemplates } from '@/lib/db/seed-data/report-templates';

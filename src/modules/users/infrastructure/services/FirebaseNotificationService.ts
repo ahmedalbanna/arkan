@@ -1,4 +1,3 @@
-import "reflect-metadata";
 
 import { injectable } from "tsyringe";
 import { adminDb, adminRealtimeDb } from "@/infrastructure/firebase/server-init";
@@ -39,5 +38,28 @@ export class FirebaseNotificationService implements INotificationService {
                 console.warn(`Failed to send push notification to user ${userId}`, pushError);
             }
         }
+    }
+
+    async saveDeviceToken(userId: string, token: string): Promise<void> {
+        await adminDb.collection('deviceTokens').doc(userId).set({
+            token,
+            updatedAt: new Date().toISOString(),
+        }, { merge: true });
+    }
+
+    async markAsRead(userId: string, notificationIds: string[]): Promise<void> {
+        const updates: { [key: string]: any } = {};
+        notificationIds.forEach(id => {
+            updates[`/notifications/${userId}/${id}/isRead`] = true;
+        });
+        await adminRealtimeDb.ref().update(updates);
+    }
+
+    async clear(userId: string, notificationIds: string[]): Promise<void> {
+        const updates: { [key: string]: null } = {};
+        notificationIds.forEach(id => {
+            updates[`/notifications/${userId}/${id}`] = null;
+        });
+        await adminRealtimeDb.ref().update(updates);
     }
 }

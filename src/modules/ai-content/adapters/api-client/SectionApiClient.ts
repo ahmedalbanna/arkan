@@ -1,7 +1,6 @@
 
 'use client';
 
-import "reflect-metadata";
 import { injectable } from "tsyringe";
 import { SectionProperties } from "@/lib/types";
 import { apiService } from "@/infrastructure/api/ApiService";

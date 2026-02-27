@@ -1,40 +1,51 @@
 
-import "reflect-metadata";
 import { injectable } from "tsyringe";
 import { adminDb } from "@/infrastructure/firebase/server-init";
-import { ITemplateRepository, Template } from "../../domain/repositories/ITemplateRepository";
+import { ITemplateRepository, Template, TemplateType } from "../../domain/repositories/ITemplateRepository";
 import { templates as defaultDocxTemplates } from '@/modules/ai-content/infrastructure/exporters/DocxStyles';
 import { templates as defaultPptxTemplates } from '@/modules/templates/infrastructure/PptxStyles';
+import { defaultReportTemplates } from '@/lib/db/seed-data/report-templates';
 
 @injectable()
 export class FirebaseTemplateRepository implements ITemplateRepository {
-    async getAll(type: 'docx' | 'pptx'): Promise<Template[]> {
-        const stylesCollection = adminDb.collection('templates').doc(type).collection('styles');
-        let snapshot = await stylesCollection.get();
+    private getCollection(type: TemplateType) {
+        return adminDb.collection('templates').doc(type).collection('items');
+    }
+
+    async getAll(type: TemplateType): Promise<Template[]> {
+        const collection = this.getCollection(type);
+        let snapshot = await collection.get();
 
         if (snapshot.empty) {
-            const defaultTemplates = type === 'docx' ? defaultDocxTemplates : defaultPptxTemplates;
             const batch = adminDb.batch();
-            Object.keys(defaultTemplates).forEach(key => {
-                const template = (defaultTemplates as any)[key];
-                const docRef = stylesCollection.doc(key);
-                batch.set(docRef, { ...template, id: key, createdAt: new Date().toISOString() });
-            });
+            if (type === 'report') {
+                defaultReportTemplates.forEach(template => {
+                    const docRef = collection.doc(template.id);
+                    batch.set(docRef, template);
+                });
+            } else {
+                const defaultTemplates = type === 'docx' ? defaultDocxTemplates : defaultPptxTemplates;
+                Object.keys(defaultTemplates).forEach(key => {
+                    const template = (defaultTemplates as any)[key];
+                    const docRef = collection.doc(key);
+                    batch.set(docRef, { ...template, id: key, createdAt: new Date().toISOString() });
+                });
+            }
             await batch.commit();
-            snapshot = await stylesCollection.get();
+            snapshot = await collection.get();
         }
 
         return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Template));
     }
 
-    async getById(type: 'docx' | 'pptx', id: string): Promise<Template | null> {
-        const doc = await adminDb.collection('templates').doc(type).collection('styles').doc(id).get();
+    async getById(type: TemplateType, id: string): Promise<Template | null> {
+        const doc = await this.getCollection(type).doc(id).get();
         if (!doc.exists) return null;
         return { id: doc.id, ...doc.data() } as Template;
     }
 
-    async save(type: 'docx' | 'pptx', data: Template): Promise<Template> {
-        const docRef = adminDb.collection('templates').doc(type).collection('styles').doc(data.id);
+    async save(type: TemplateType, data: Template): Promise<Template> {
+        const docRef = this.getCollection(type).doc(data.id);
         const dataToSave = {
             ...data,
             updatedAt: new Date().toISOString()
@@ -49,7 +60,7 @@ export class FirebaseTemplateRepository implements ITemplateRepository {
         return { ...dataToSave, id: data.id } as Template;
     }
 
-    async delete(type: 'docx' | 'pptx', id: string): Promise<void> {
-        await adminDb.collection('templates').doc(type).collection('styles').doc(id).delete();
+    async delete(type: TemplateType, id: string): Promise<void> {
+        await this.getCollection(type).doc(id).delete();
     }
 }

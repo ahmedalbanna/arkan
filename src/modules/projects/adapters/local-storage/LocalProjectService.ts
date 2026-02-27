@@ -1,7 +1,6 @@
 
 'use client';
 
-import "reflect-metadata";
 import { injectable } from "tsyringe";
 import type { ProjectProperties } from '@/lib/types';
 import { openDB, type IDBPDatabase } from 'idb';
