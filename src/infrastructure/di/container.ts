@@ -15,6 +15,7 @@ import { IFeatureRepositoryToken } from "@/modules/admin/domain/repositories/IFe
 import { ITransactionRepositoryToken } from "@/modules/billing/domain/repositories/ITransactionRepository";
 import { IFileStorageServiceToken } from "@/modules/billing/domain/services/IFileStorageService";
 import { IRagRepositoryToken } from "@/modules/rag/domain/repositories/IRagRepository";
+import { IIndexedDocumentRepositoryToken } from "@/modules/rag/domain/repositories/IIndexedDocumentRepository";
 import { ITemplateRepositoryToken } from "@/modules/templates/domain/repositories/ITemplateRepository";
 import { ISectionRepositoryToken } from "@/modules/ai-content/domain/repositories/ISectionRepository";
 import { ISettingsRepositoryToken } from "@/modules/admin/domain/repositories/ISettingsRepository";
@@ -98,6 +99,7 @@ if (typeof window === 'undefined') {
   const { FirebaseTransactionRepository } = require("@/modules/billing/infrastructure/repositories/FirebaseTransactionRepository");
   const { FirebaseFileStorageService } = require("@/modules/billing/infrastructure/services/FirebaseFileStorageService");
   const { DefaultRagRepository } = require("@/modules/rag/infrastructure/repositories/DefaultRagRepository");
+  const { FirebaseIndexedDocumentRepository } = require("@/modules/rag/infrastructure/repositories/FirebaseIndexedDocumentRepository");
   const { FirebaseTemplateRepository } = require("@/modules/templates/infrastructure/repositories/FirebaseTemplateRepository");
   const { FirebaseSectionRepository } = require("@/modules/ai-content/infrastructure/repositories/FirebaseSectionRepository");
 
@@ -151,6 +153,10 @@ if (typeof window === 'undefined') {
 
   container.register(IRagRepositoryToken, {
     useClass: DefaultRagRepository
+  }, { lifecycle: Lifecycle.Singleton });
+
+  container.register(IIndexedDocumentRepositoryToken, {
+    useClass: FirebaseIndexedDocumentRepository
   }, { lifecycle: Lifecycle.Singleton });
 
   container.register(ITemplateRepositoryToken, {

@@ -5,34 +5,18 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { getVectorStore } from '@/modules/rag/infrastructure/vector-store';
-import { 
-  getAllIndexedDocuments, 
-  getDocumentStatistics 
-} from '@/modules/rag/infrastructure/document-tracking-service';
+import { container } from '@/infrastructure/di/container';
+import { RagController } from '@/modules/rag/adapters/controllers/RagController';
 
 export async function GET(_request: NextRequest) {
   try {
-    // Get documents from Firestore tracking database
-    const documents = await getAllIndexedDocuments();
-    
-    // Get statistics
-    const stats = await getDocumentStatistics();
-    
-    // Also get Qdrant stats if available
-    const vectorStore = getVectorStore();
-    let qdrantStats: any = {};
-    if (typeof vectorStore.getStats === 'function') {
-      qdrantStats = await vectorStore.getStats();
-    }
+    const controller = container.resolve(RagController);
+    const documents = await controller.getIndexedDocuments();
+    const stats = await controller.getStats();
 
     return NextResponse.json({
       documents,
-      totalChunks: stats.totalChunks,
-      totalDocuments: stats.totalDocuments,
-      projectCount: stats.projectCount,
-      recentUploads: stats.recentUploads,
-      qdrantTotalChunks: qdrantStats.totalChunks || 0,
+      ...stats,
       timestamp: new Date().toISOString(),
     });
 
@@ -62,19 +46,8 @@ export async function DELETE(request: NextRequest) {
       );
     }
 
-    console.log(`🗑️  Deleting project: ${projectId}`);
-
-    // 1. Delete from Qdrant vector store
-    const vectorStore = getVectorStore();
-    if (typeof vectorStore.deleteProjectChunks === 'function') {
-      await vectorStore.deleteProjectChunks(projectId);
-      console.log(`   ✓ Deleted vectors from Qdrant`);
-    }
-
-    // 2. Mark documents as deleted in tracking database
-    const { markDocumentDeleted } = await import('@/modules/rag/infrastructure/document-tracking-service');
-    await markDocumentDeleted(projectId);
-    console.log(`   ✓ Marked documents as deleted in tracking database`);
+    const controller = container.resolve(RagController);
+    await controller.deleteIndexedDocument({ projectId });
 
     return NextResponse.json({
       success: true,

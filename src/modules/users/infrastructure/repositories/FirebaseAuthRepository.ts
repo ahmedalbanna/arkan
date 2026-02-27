@@ -34,4 +34,9 @@ export class FirebaseAuthRepository implements IAuthRepository {
     async createSessionCookie(idToken: string, options: { expiresIn: number }): Promise<string> {
         return adminAuth.createSessionCookie(idToken, options);
     }
+
+    async verifySessionCookie(sessionCookie: string, checkRevoked: boolean = true): Promise<{ uid: string, email?: string }> {
+        const decodedToken = await adminAuth.verifySessionCookie(sessionCookie, checkRevoked);
+        return { uid: decodedToken.uid, email: decodedToken.email };
+    }
 }

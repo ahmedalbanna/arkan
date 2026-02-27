@@ -1,23 +1,21 @@
 // src/app/api/admin/templates/presentation/[id]/route.ts
 
 import { createApiResponse, handleApiError, withAuth } from '@/lib/utils/api-utils';
-import { adminDb } from '@/infrastructure/firebase/server-init';
+import { container } from '@/infrastructure/di/container';
+import { TemplateController } from '@/modules/templates/adapters/controllers/TemplateController';
 import { UpdatePresentationTemplateSchema } from '@/ai/schemas';
 
 // GET a single presentation template
 export const GET = withAuth(async ({ params }) => {
     try {
-        let { id } = params;
-        if (!id) {
-            return handleApiError({ message: 'Template ID is required.' }, 400);
-        }
-        let docRef = adminDb.collection('templates').doc('presentation').collection('items').doc(id);
-        let doc = await docRef.get();
+        const { id } = await params;
+        const controller = container.resolve(TemplateController);
+        const template = await controller.getTemplateById('presentation', id);
 
-        if (!doc.exists) {
+        if (!template) {
             return handleApiError({ message: 'Presentation template not found.' }, 404);
         }
-        return createApiResponse({ id: doc.id, ...doc.data() }, 200);
+        return createApiResponse(template, 200);
     } catch (error) {
         return handleApiError(error);
     }
@@ -27,23 +25,23 @@ export const GET = withAuth(async ({ params }) => {
 // PUT to update a presentation template
 export const PUT = withAuth(async ({ request, params }) => {
     try {
-        let { id } = params;
-        if (!id) {
-            return handleApiError({ message: 'Template ID is required.' }, 400);
-        }
-
-        let body = await request.json();
-        let validation = UpdatePresentationTemplateSchema.safeParse(body);
+        const { id } = await params;
+        const body = await request.json();
+        
+        const validation = UpdatePresentationTemplateSchema.safeParse({ ...body, id });
         if (!validation.success) {
             return handleApiError(validation.error);
         }
 
-        let docRef = adminDb.collection('templates').doc('presentation').collection('items').doc(id);
-        await docRef.update(validation.data);
+        const controller = container.resolve(TemplateController);
+        const existing = await controller.getTemplateById('presentation', id);
 
-        let updatedDoc = await docRef.get();
-        return createApiResponse({ id: updatedDoc.id, ...updatedDoc.data() }, 200);
+        if (!existing) {
+            return handleApiError({ message: 'Template not found.' }, 404);
+        }
 
+        const updated = await controller.saveTemplate('presentation', validation.data as any);
+        return createApiResponse(updated, 200);
     } catch (error) {
         return handleApiError(error);
     }
@@ -53,11 +51,9 @@ export const PUT = withAuth(async ({ request, params }) => {
 // DELETE a presentation template
 export const DELETE = withAuth(async ({ params }) => {
     try {
-        let { id } = params;
-        if (!id) {
-            return handleApiError({ message: 'Template ID is required.' }, 400);
-        }
-        await adminDb.collection('templates').doc('presentation').collection('items').doc(id).delete();
+        const { id } = await params;
+        const controller = container.resolve(TemplateController);
+        await controller.deleteTemplate('presentation', id);
         return createApiResponse({ message: 'Template deleted successfully.' }, 200);
     } catch (error) {
         return handleApiError(error);

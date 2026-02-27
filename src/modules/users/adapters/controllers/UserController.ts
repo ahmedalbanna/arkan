@@ -14,6 +14,9 @@ import { SaveDeviceTokenUseCase } from "../../application/use-cases/SaveDeviceTo
 import { MarkNotificationsAsReadUseCase } from "../../application/use-cases/MarkNotificationsAsReadUseCase";
 import { ClearNotificationsUseCase } from "../../application/use-cases/ClearNotificationsUseCase";
 import { CreateSessionUseCase } from "../../application/use-cases/CreateSessionUseCase";
+import { GetNotificationsUseCase } from "../../application/use-cases/GetNotificationsUseCase";
+import { SendNotificationUseCase } from "../../application/use-cases/SendNotificationUseCase";
+import { VerifySessionUseCase } from "../../application/use-cases/VerifySessionUseCase";
 import { revalidatePath } from "next/cache";
 
 @injectable()
@@ -46,7 +49,13 @@ export class UserController {
         @inject(delay(() => ClearNotificationsUseCase))
         private clearNotificationsUseCase: ClearNotificationsUseCase,
         @inject(delay(() => CreateSessionUseCase))
-        private createSessionUseCase: CreateSessionUseCase
+        private createSessionUseCase: CreateSessionUseCase,
+        @inject(delay(() => GetNotificationsUseCase))
+        private getNotificationsUseCase: GetNotificationsUseCase,
+        @inject(delay(() => SendNotificationUseCase))
+        private sendNotificationUseCase: SendNotificationUseCase,
+        @inject(delay(() => VerifySessionUseCase))
+        private verifySessionUseCase: VerifySessionUseCase
     ) {}
 
     async getUser(userId: string) {
@@ -110,5 +119,17 @@ export class UserController {
 
     async createSession(idToken: string, expiresIn: number) {
         return this.createSessionUseCase.execute(idToken, expiresIn);
+    }
+
+    async getNotifications(userId: string, limit?: number) {
+        return this.getNotificationsUseCase.execute(userId, limit);
+    }
+
+    async sendNotification(userId: string, payload: any) {
+        return this.sendNotificationUseCase.execute(userId, payload);
+    }
+
+    async verifySession(sessionCookie: string, checkRevoked?: boolean) {
+        return this.verifySessionUseCase.execute(sessionCookie, checkRevoked);
     }
 }

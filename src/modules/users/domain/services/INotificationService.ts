@@ -11,6 +11,7 @@ export interface INotificationService {
     saveDeviceToken(userId: string, token: string): Promise<void>;
     markAsRead(userId: string, notificationIds: string[]): Promise<void>;
     clear(userId: string, notificationIds: string[]): Promise<void>;
+    getNotifications(userId: string, limit?: number): Promise<any[]>;
 }
 
 export const INotificationServiceToken = Symbol("INotificationService");

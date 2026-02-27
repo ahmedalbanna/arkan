@@ -1,9 +1,9 @@
 'use server';
 
 import { z } from 'zod';
-import { adminDb } from '@/infrastructure/firebase/server-init';
 import { withAuth, handleApiError, createApiResponse } from '@/lib/utils/api-utils';
-import { defaultPaymentMethods } from '@/lib/db/seed-data/payment-methods';
+import { container } from '@/infrastructure/di/container';
+import { AdminController } from '@/modules/admin/adapters/controllers/AdminController';
 
 const bankTransferDetailsSchema = z.object({
   iban: z.string().optional(),
@@ -44,24 +44,11 @@ const settingsSchema = z.object({
 });
 
 
-async function getSettings() {
-    let settingsRef = adminDb.collection('settings').doc('defaults');
-    let doc = await settingsRef.get();
-    if (!doc.exists || !doc.data()?.paymentMethods) {
-        const defaultSettings = {
-            newUserCredits: 10,
-            paymentMethods: defaultPaymentMethods,
-        };
-        await settingsRef.set(defaultSettings, { merge: true });
-        return defaultSettings;
-    }
-    return doc.data();
-}
-
 // GET /api/settings - This endpoint is public to allow fetching bank details
 export async function GET() {
     try {
-        const settings = await getSettings();
+        const controller = container.resolve(AdminController);
+        const settings = await controller.getSettings();
         return createApiResponse(settings, 200);
     } catch (error) {
         return handleApiError(error);
@@ -77,10 +64,10 @@ export const PUT = withAuth(async ({ request }) => {
             return handleApiError(validation.error);
         }
 
-        const settingsRef = adminDb.collection('settings').doc('defaults');
-        await settingsRef.set(validation.data, { merge: true });
+        const controller = container.resolve(AdminController);
+        const updated = await controller.updateSettings(validation.data);
 
-        return createApiResponse(validation.data, 200);
+        return createApiResponse(updated, 200);
     } catch (error) {
         return handleApiError(error);
     }

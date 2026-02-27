@@ -23,6 +23,8 @@ export class FirebaseTemplateRepository implements ITemplateRepository {
                     const docRef = collection.doc(template.id);
                     batch.set(docRef, template);
                 });
+            } else if (type === 'presentation') {
+                // Presentation templates don't have hardcoded defaults yet, but we could add them
             } else {
                 const defaultTemplates = type === 'docx' ? defaultDocxTemplates : defaultPptxTemplates;
                 Object.keys(defaultTemplates).forEach(key => {
@@ -31,8 +33,10 @@ export class FirebaseTemplateRepository implements ITemplateRepository {
                     batch.set(docRef, { ...template, id: key, createdAt: new Date().toISOString() });
                 });
             }
-            await batch.commit();
-            snapshot = await collection.get();
+            if (!snapshot.empty || type === 'report' || type === 'docx' || type === 'pptx') {
+                await batch.commit();
+                snapshot = await collection.get();
+            }
         }
 
         return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Template));

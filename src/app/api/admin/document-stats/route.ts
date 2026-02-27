@@ -5,48 +5,16 @@
  */
 
 import { NextResponse } from 'next/server';
-import { getDocumentStatistics } from '@/modules/rag/infrastructure/document-tracking-service';
-import { getVectorStore } from '@/modules/rag/infrastructure/vector-store';
-import { getCacheManager } from '@/modules/rag/infrastructure/cache';
+import { container } from '@/infrastructure/di/container';
+import { RagController } from '@/modules/rag/adapters/controllers/RagController';
 
 export async function GET() {
   try {
-    // Get document tracking stats
-    const docStats = await getDocumentStatistics();
-    
-    // Get Qdrant stats
-    const vectorStore = getVectorStore();
-    let qdrantStats: any = {};
-    if (typeof vectorStore.getStats === 'function') {
-      qdrantStats = await vectorStore.getStats();
-    }
-
-    // Get cache stats
-    const cacheManager = getCacheManager();
-    const cacheStats = cacheManager.getAllStats();
+    const controller = container.resolve(RagController);
+    const stats = await controller.getStats();
 
     return NextResponse.json({
-      documents: {
-        total: docStats.totalDocuments,
-        chunks: docStats.totalChunks,
-        projects: docStats.projectCount,
-        recent: docStats.recentUploads,
-      },
-      qdrant: {
-        totalChunks: qdrantStats.totalChunks || 0,
-        vectorDimension: qdrantStats.vectorDimension || 768,
-        indexedFields: qdrantStats.indexedFields || [],
-      },
-      cache: {
-        embeddings: {
-          size: cacheStats.embeddings.size,
-          hitRate: cacheStats.embeddings.hitRate,
-        },
-        searches: {
-          size: cacheStats.searches.size,
-          hitRate: cacheStats.searches.hitRate,
-        },
-      },
+      ...stats,
       timestamp: new Date().toISOString(),
     });
 

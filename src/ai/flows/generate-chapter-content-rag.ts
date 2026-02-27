@@ -10,7 +10,8 @@
 
 import { ai } from '@/ai/genkit';
 import { GenerateChapterInputSchema, GenerateChapterOutputSchema, type GenerateChapterInput, type GenerateChapterOutput } from '@/ai/schemas';
-import { retrieveContext } from '@/modules/rag/infrastructure/retrieval';
+import { container } from '@/infrastructure/di/container';
+import { IAiServiceToken } from '@/modules/ai/domain/services/IAiService';
 
 export interface GenerateChapterWithRAGInput extends GenerateChapterInput {
   projectId?: string;
@@ -34,7 +35,8 @@ export async function generateChapterContentWithRAG(input: GenerateChapterWithRA
       const sectionTitles = input.sectionInstructions?.map(s => s.title).join(', ') || '';
       const query = `${input.chapterTitle}\nSections: ${sectionTitles}`;
       
-      const retrieval = await retrieveContext(query, {
+      const aiService = container.resolve<any>(IAiServiceToken);
+      const retrieval = await aiService.retrieveContext(query, {
         projectId: input.projectId,
         userId: input.userId,
         topK: input.ragTopK || 8, // More context for chapters

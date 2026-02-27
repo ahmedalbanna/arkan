@@ -62,4 +62,18 @@ export class FirebaseNotificationService implements INotificationService {
         });
         await adminRealtimeDb.ref().update(updates);
     }
+
+    async getNotifications(userId: string, limit: number = 10): Promise<any[]> {
+        const snapshot = await adminRealtimeDb.ref(`notifications/${userId}`)
+            .orderByChild('createdAt')
+            .limitToLast(limit)
+            .once('value');
+        
+        const notifications: any[] = [];
+        snapshot.forEach(child => {
+            notifications.push({ id: child.key, ...child.val() });
+        });
+        
+        return notifications.reverse();
+    }
 }

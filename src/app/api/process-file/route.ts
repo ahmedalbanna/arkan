@@ -1,8 +1,6 @@
 
 'use server';
 
-import { imageToText } from '@/ai/flows/image-to-text';
-import { rewriteDocumentToMarkdown } from '@/ai/flows/rewrite-document-to-markdown';
 import { createApiResponse, handleApiError, withAuth } from '@/lib/utils/api-utils';
 import { container } from '@/infrastructure/di/container';
 import { AiController } from '@/modules/ai/adapters/controllers/AiController';

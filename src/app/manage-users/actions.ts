@@ -7,7 +7,6 @@ import { redirect } from 'next/navigation';
 import { container } from '@/infrastructure/di/container';
 import { UserController } from '@/modules/users/adapters/controllers/UserController';
 import { cookies } from 'next/headers';
-import { adminAuth } from '@/infrastructure/firebase/server-init';
 
 // Helper function to verify the requester is an admin
 async function verifyAdmin() {
@@ -16,8 +15,8 @@ async function verifyAdmin() {
     return { authorized: false, message: 'Unauthorized' };
   }
   try {
-    const decodedToken = await adminAuth.verifySessionCookie(sessionCookie, true);
     const controller = container.resolve(UserController);
+    const decodedToken = await controller.verifySession(sessionCookie, true);
     const userProfile = await controller.getUser(decodedToken.uid);
     if (userProfile?.role !== 'admin') {
       return { authorized: false, message: 'Forbidden' };

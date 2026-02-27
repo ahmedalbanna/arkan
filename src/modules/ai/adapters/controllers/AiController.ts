@@ -6,6 +6,8 @@ import { GetAgentByIdUseCase } from "../../application/use-cases/GetAgentByIdUse
 import { SaveAgentUseCase } from "../../application/use-cases/SaveAgentUseCase";
 import { DeleteAgentUseCase } from "../../application/use-cases/DeleteAgentUseCase";
 import { GetAgentCategoriesUseCase } from "../../application/use-cases/GetAgentCategoriesUseCase";
+import { GenerateChapterWithRAGUseCase } from "../../application/use-cases/GenerateChapterWithRAGUseCase";
+import { GenerateSectionWithRAGUseCase } from "../../application/use-cases/GenerateSectionWithRAGUseCase";
 import { WritingToolRegistry } from "../../application/services/WritingToolRegistry";
 
 @injectable()
@@ -23,6 +25,10 @@ export class AiController {
         private deleteAgentUseCase: DeleteAgentUseCase,
         @inject(delay(() => GetAgentCategoriesUseCase))
         private getAgentCategoriesUseCase: GetAgentCategoriesUseCase,
+        @inject(delay(() => GenerateChapterWithRAGUseCase))
+        private generateChapterWithRAGUseCase: GenerateChapterWithRAGUseCase,
+        @inject(delay(() => GenerateSectionWithRAGUseCase))
+        private generateSectionWithRAGUseCase: GenerateSectionWithRAGUseCase,
         @inject(delay(() => WritingToolRegistry))
         private writingToolRegistry: WritingToolRegistry
     ) {}
@@ -53,5 +59,13 @@ export class AiController {
 
     async getAgentCategories() {
         return this.getAgentCategoriesUseCase.execute();
+    }
+
+    async generateChapterWithRAG(userId: string, input: any) {
+        return this.generateChapterWithRAGUseCase.execute(userId, input);
+    }
+
+    async generateSectionWithRAG(userId: string, input: any) {
+        return this.generateSectionWithRAGUseCase.execute(userId, input);
     }
 }

@@ -10,7 +10,8 @@
 
 import { ai } from '@/ai/genkit';
 import { GenerateSectionInputSchema, GenerateSectionOutputSchema, type GenerateSectionInput, type GenerateSectionOutput } from '@/ai/schemas';
-import { retrieveContext } from '@/modules/rag/infrastructure/retrieval';
+import { container } from '@/infrastructure/di/container';
+import { IAiServiceToken } from '@/modules/ai/domain/services/IAiService';
 import { validateJsonOutput, getJsonPromptInstructions, RECOMMENDED_TEMPERATURES } from '@/ai/utils/json-output-validator';
 
 export interface GenerateSectionWithRAGInput extends GenerateSectionInput {
@@ -31,7 +32,8 @@ export async function generateReportSectionWithRAG(input: GenerateSectionWithRAG
       // Create a query from section name and instructions
       const query = `${input.sectionToGenerate}\n${input.instructionText || ''}`;
       
-      const retrieval = await retrieveContext(query, {
+      const aiService = container.resolve<any>(IAiServiceToken);
+      const retrieval = await aiService.retrieveContext(query, {
         projectId: input.projectId,
         userId: input.userId,
         topK: input.ragTopK || 5,

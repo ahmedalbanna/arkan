@@ -38,4 +38,20 @@ export class GenkitAiService implements IAiService {
             return flow(input);
         }
     }
+
+    async retrieveContext(query: string, options?: any): Promise<{ context: string; sources: any[] }> {
+        // Dynamic import to avoid circular dependencies and client bundle issues
+        const { retrieveContext } = require('@/modules/rag/infrastructure/retrieval');
+        return retrieveContext(query, options);
+    }
+
+    async generateChapterWithRAG(input: any): Promise<any> {
+        const { generateChapterContentWithRAG } = require('@/ai/flows/generate-chapter-content-rag');
+        return generateChapterContentWithRAG(input);
+    }
+
+    async generateSectionWithRAG(input: any): Promise<any> {
+        const { generateReportSectionWithRAG } = require('@/ai/flows/generate-report-section-rag');
+        return generateReportSectionWithRAG(input);
+    }
 }

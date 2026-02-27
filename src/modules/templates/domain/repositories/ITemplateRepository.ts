@@ -11,7 +11,7 @@ export interface Template {
     updatedAt?: string;
 }
 
-export type TemplateType = 'docx' | 'pptx' | 'report';
+export type TemplateType = 'docx' | 'pptx' | 'report' | 'presentation';
 
 export interface ITemplateRepository {
     getAll(type: TemplateType): Promise<Template[]>;
