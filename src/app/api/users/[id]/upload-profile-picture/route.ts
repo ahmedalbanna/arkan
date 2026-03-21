@@ -1,5 +1,5 @@
 
-import { withAuth, handleApiError, createApiResponse } from '@/lib/utils/api-utils';
+import { withAuth, handleApiError, handleResult } from '@/lib/utils/api-utils';
 import { container } from '@/infrastructure/di/container';
 import { UserController } from '@/modules/users/adapters/controllers/UserController';
 
@@ -27,9 +27,9 @@ export const POST = withAuth(async ({ request, params, user }) => {
         const fileBuffer = Buffer.from(await file.arrayBuffer());
 
         const controller = container.resolve(UserController);
-        const publicUrl = await controller.uploadProfilePicture(targetUserId, fileBuffer, file.name, file.type);
+        const result = await controller.uploadProfilePicture(targetUserId, fileBuffer, file.name, file.type);
 
-        return createApiResponse({ profilePictureUrl: publicUrl }, 200);
+        return handleResult(result);
 
     } catch (error) {
         return handleApiError(error);

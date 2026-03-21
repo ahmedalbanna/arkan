@@ -5,6 +5,8 @@ import { IUserRepositoryToken } from "../../domain/repositories/IUserRepository"
 import type { IAuthRepository } from "../../domain/repositories/IAuthRepository";
 import { IAuthRepositoryToken } from "../../domain/repositories/IAuthRepository";
 import { UserProfile } from "../../domain/entities/User";
+import { Result } from "@/lib/utils/result";
+import { UserError } from "../../domain/errors/UserErrors";
 
 @injectable()
 export class CreateUserUseCase {
@@ -15,12 +17,18 @@ export class CreateUserUseCase {
         private authRepository: IAuthRepository
     ) {}
 
-    async execute(data: { email: string, password?: string, name: string, role: string, credits?: number }): Promise<UserProfile> {
-        const authUser = await this.authRepository.create({
+    async execute(data: { email: string, password?: string, name: string, role: string, credits?: number }): Promise<Result<{ user: { uid: string, email?: string } }, UserError>> {
+        const authResult = await this.authRepository.create({
             email: data.email,
             password: data.password,
             name: data.name
         });
+
+        if (authResult.isFailure) {
+            return Result.fail(authResult.error!);
+        }
+
+        const authUser = authResult.getValue();
 
         const newUserProfile: UserProfile = {
             id: authUser.uid,
@@ -36,8 +44,11 @@ export class CreateUserUseCase {
             lastDailyCreditUpdate: new Date(0).toISOString(),
         };
 
-        await this.userRepository.save(newUserProfile);
+        const saveResult = await this.userRepository.save(newUserProfile);
+        if (saveResult.isFailure) {
+            return Result.fail(saveResult.error!);
+        }
 
-        return newUserProfile;
+        return Result.ok({ user: { uid: authUser.uid, email: authUser.email } });
     }
 }

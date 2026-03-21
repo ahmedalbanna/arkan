@@ -13,10 +13,15 @@ export const POST = withAuth(async ({ params }) => {
         }
 
         const controller = container.resolve(UserController);
-        const user = await controller.getUser(userId);
+        const result = await controller.getUser(userId);
         
-        if (!user || !user.email) {
-            return handleApiError({ message: 'User not found or has no email.' }, 404);
+        if (result.isFailure) {
+            return handleApiError(result.error, 404);
+        }
+
+        const user = result.getValue();
+        if (!user.email) {
+            return handleApiError({ message: 'User has no email.' }, 404);
         }
 
         // Placeholder for sending a reset email

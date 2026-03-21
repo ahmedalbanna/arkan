@@ -5,6 +5,8 @@ import { IAuthRepositoryToken } from '@/modules/users/domain/repositories/IAuthR
 import { CustomFirebaseError, handleFirebaseError } from '@/infrastructure/firebase/error';
 import { NextResponse, type NextRequest } from 'next/server';
 import { ZodError } from 'zod';
+import { Result } from './result';
+import { UserError, UserErrorType } from '@/modules/users/domain/errors/UserErrors';
 
 
 interface ApiHandlerOptions {
@@ -35,58 +37,24 @@ export const withAuth = (handler: ApiHandler, options: ApiHandlerOptions = {}) =
         return handleApiError({ message: 'Unauthorized: Missing token' }, 401);
       }
       const token = authorization.substring(7);
-      
-      const authModule = require("@/modules/users/infrastructure/repositories/FirebaseAuthRepository");
-      const userModule = require("@/modules/users/infrastructure/repositories/FirebaseUserRepository");
-      const FirebaseAuthRepository = authModule.FirebaseAuthRepository || authModule.default;
-      const FirebaseUserRepository = userModule.FirebaseUserRepository || userModule.default;
 
-      let authRepo: any;
-      try {
-        if (!container.isRegistered(IAuthRepositoryToken)) {
-          container.register(IAuthRepositoryToken, { useClass: FirebaseAuthRepository });
-        }
-        authRepo = container.resolve<any>(IAuthRepositoryToken);
-      } catch (error) {
-        const { adminAuth } = require("@/infrastructure/firebase/server-init");
-        authRepo = {
-          verifyToken: async (tokenValue: string) => {
-            const decodedToken = await adminAuth.verifyIdToken(tokenValue, true);
-            return { uid: decodedToken.uid, email: decodedToken.email };
-          },
-        };
-      }
+      const authRepo = container.resolve<any>(IAuthRepositoryToken);
+      const authResult = await authRepo.verifyToken(token);
 
-      const decodedUser = await authRepo.verifyToken(token);
-
-      if (!decodedUser || !decodedUser.uid) {
+      if (authResult.isFailure) {
         return handleApiError({ message: 'Unauthorized: Invalid token' }, 401);
       }
 
-      let userRepo: any;
-      try {
-        if (!container.isRegistered(IUserRepositoryToken)) {
-          container.register(IUserRepositoryToken, { useClass: FirebaseUserRepository });
-        }
-        userRepo = container.resolve<any>(IUserRepositoryToken);
-      } catch (error) {
-        const { adminDb } = require("@/infrastructure/firebase/server-init");
-        userRepo = {
-          getById: async (id: string) => {
-            if (!id) return null;
-            const userDoc = await adminDb.collection("users").doc(id).get();
-            if (!userDoc.exists) return null;
-            const data = userDoc.data();
-            return { id: userDoc.id, ...data };
-          },
-        };
-      }
+      const decodedUser = authResult.getValue();
 
-      const user = await userRepo.getById(decodedUser.uid);
-      
-      if (!user) {
+      const userRepo = container.resolve<any>(IUserRepositoryToken);
+      const userResult = await userRepo.getById(decodedUser.uid);
+
+      if (userResult.isFailure) {
         return handleApiError({ message: 'Forbidden: User profile not found' }, 403);
       }
+
+      const user = userResult.getValue();
 
       if (options.requireAdmin && user.role !== 'admin') {
         return handleApiError({ message: 'Forbidden: Admin access required' }, 403);
@@ -148,4 +116,35 @@ export const handleApiError = (error: any, defaultStatus = 500) => {
  */
 export const createApiResponse = (data: any, status: number) => {
   return NextResponse.json(data, { status });
+};
+
+/**
+ * Standardized handler for Result objects in API routes.
+ * @param result - The Result object to handle.
+ * @returns A NextResponse object.
+ */
+export const handleResult = <T>(result: Result<T, UserError>) => {
+  if (result.isSuccess) {
+    return createApiResponse(result.getValue(), 200);
+  }
+
+  const error = result.error!;
+  let status = 500;
+
+  switch (error.type) {
+    case UserErrorType.NOT_FOUND:
+      status = 404;
+      break;
+    case UserErrorType.CONFLICT:
+      status = 409;
+      break;
+    case UserErrorType.UNAUTHORIZED:
+      status = 401;
+      break;
+    case UserErrorType.VALIDATION:
+      status = 400;
+      break;
+  }
+
+  return NextResponse.json({ message: error.message, details: error.details }, { status });
 };

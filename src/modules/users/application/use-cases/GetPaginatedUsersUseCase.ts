@@ -3,6 +3,8 @@ import { inject, injectable } from "tsyringe";
 import type { IUserRepository } from "../../domain/repositories/IUserRepository";
 import { IUserRepositoryToken } from "../../domain/repositories/IUserRepository";
 import { UserProfile } from "../../domain/entities/User";
+import { Result } from "@/lib/utils/result";
+import { UserError } from "../../domain/errors/UserErrors";
 
 @injectable()
 export class GetPaginatedUsersUseCase {
@@ -11,7 +13,7 @@ export class GetPaginatedUsersUseCase {
         private userRepository: IUserRepository
     ) {}
 
-    async execute(options: { limit: number, lastVisibleId?: string }): Promise<{ users: UserProfile[], hasNextPage: boolean, lastVisibleId: string | null }> {
+    async execute(options: { limit: number, lastVisibleId?: string }): Promise<Result<{ users: UserProfile[], hasNextPage: boolean, lastVisibleId: string | null }, UserError>> {
         return this.userRepository.getPaginated(options);
     }
 }

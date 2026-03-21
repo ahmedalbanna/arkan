@@ -3,6 +3,8 @@ import { inject, injectable } from "tsyringe";
 import type { IUserRepository } from "../../domain/repositories/IUserRepository";
 import { IUserRepositoryToken } from "../../domain/repositories/IUserRepository";
 import { UserProfile } from "../../domain/entities/User";
+import { Result } from "@/lib/utils/result";
+import { UserError } from "../../domain/errors/UserErrors";
 
 @injectable()
 export class GetUserProfileUseCase {
@@ -11,7 +13,7 @@ export class GetUserProfileUseCase {
         private userRepository: IUserRepository
     ) {}
 
-    async execute(userId: string): Promise<UserProfile | null> {
+    async execute(userId: string): Promise<Result<UserProfile, UserError>> {
         return this.userRepository.getById(userId);
     }
 }

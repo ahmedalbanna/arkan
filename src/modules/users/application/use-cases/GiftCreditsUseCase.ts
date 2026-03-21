@@ -4,6 +4,8 @@ import type { IUserRepository } from "../../domain/repositories/IUserRepository"
 import { IUserRepositoryToken } from "../../domain/repositories/IUserRepository";
 import type { INotificationService } from "../../domain/services/INotificationService";
 import { INotificationServiceToken } from "../../domain/services/INotificationService";
+import { Result } from "@/lib/utils/result";
+import { UserError } from "../../domain/errors/UserErrors";
 
 @injectable()
 export class GiftCreditsUseCase {
@@ -14,15 +16,16 @@ export class GiftCreditsUseCase {
         private notificationService: INotificationService
     ) {}
 
-    async execute(params: { userId: string, credits: number, message?: string, adminName: string }): Promise<void> {
+    async execute(params: { userId: string, credits: number, message?: string, adminName: string }): Promise<Result<void, UserError>> {
         const { userId, credits, message, adminName } = params;
 
         // 1. Ensure user exists
-        const user = await this.userRepository.getById(userId);
-        if (!user) throw new Error("User not found.");
+        const userResult = await this.userRepository.getById(userId);
+        if (userResult.isFailure) return Result.fail(userResult.error!);
 
         // 2. Add credits
-        await this.userRepository.addCredits(userId, credits);
+        const addResult = await this.userRepository.addCredits(userId, credits);
+        if (addResult.isFailure) return addResult;
 
         // 3. Send notification
         const title = "🎁 You've received a gift!";
@@ -30,11 +33,18 @@ export class GiftCreditsUseCase {
             ? `Admin ${adminName} sent you ${credits} credits with a message: "${message}"` 
             : `An admin has sent you ${credits} credits!`;
 
-        await this.notificationService.send(userId, {
-            title,
-            description,
-            icon: "gem",
-            link: '/profile'
-        });
+        try {
+            await this.notificationService.send(userId, {
+                title,
+                description,
+                icon: "gem",
+                link: '/profile'
+            });
+        } catch (error) {
+            // Log notification error but don't fail the use case if credits were already added
+            console.error("Failed to send notification:", error);
+        }
+
+        return Result.ok();
     }
 }

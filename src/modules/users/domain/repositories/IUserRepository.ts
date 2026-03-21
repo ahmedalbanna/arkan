@@ -1,15 +1,17 @@
 
-import { User, UserProfile } from "../entities/User";
+import { UserProfile } from "../entities/User";
+import { Result } from "@/lib/utils/result";
+import { UserError } from "../errors/UserErrors";
 
 export interface IUserRepository {
-    getById(id: string): Promise<User | null>;
-    save(user: UserProfile): Promise<User>;
-    update(id: string, data: Partial<UserProfile>): Promise<User>;
-    delete(id: string): Promise<void>;
-    deductCredits(id: string, amount: number): Promise<number>;
-    addCredits(id: string, amount: number): Promise<void>;
-    getPaginated(options: { limit: number, lastVisibleId?: string }): Promise<{ users: User[], hasNextPage: boolean, lastVisibleId: string | null }>;
-    getAdmins(): Promise<User[]>;
+    getById(id: string): Promise<Result<UserProfile, UserError>>;
+    save(user: UserProfile): Promise<Result<UserProfile, UserError>>;
+    update(id: string, data: Partial<UserProfile>): Promise<Result<UserProfile, UserError>>;
+    delete(id: string): Promise<Result<void, UserError>>;
+    deductCredits(id: string, amount: number): Promise<Result<number, UserError>>;
+    addCredits(id: string, amount: number): Promise<Result<void, UserError>>;
+    getPaginated(options: { limit: number, lastVisibleId?: string }): Promise<Result<{ users: UserProfile[], hasNextPage: boolean, lastVisibleId: string | null }, UserError>>;
+    getAdmins(): Promise<Result<UserProfile[], UserError>>;
 }
 
 export const IUserRepositoryToken = Symbol("IUserRepository");

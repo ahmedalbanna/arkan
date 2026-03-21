@@ -3,7 +3,7 @@
 
 import { z } from 'zod';
 import { generateRandomPassword } from '@/lib/utils/randomPassword';
-import { createApiResponse, handleApiError, withAuth } from '@/lib/utils/api-utils';
+import { handleResult, handleApiError, withAuth } from '@/lib/utils/api-utils';
 import { container } from '@/infrastructure/di/container';
 import { UserController } from '@/modules/users/adapters/controllers/UserController';
 
@@ -23,9 +23,9 @@ export const POST = withAuth(async ({ request }) => {
     const newPassword = generateRandomPassword(8);
     
     const controller = container.resolve(UserController);
-    await controller.resetPassword(id, newPassword);
+    const result = await controller.resetPassword(id, newPassword);
     
-    return createApiResponse({ message: 'User password reset successfully.' }, 200);
+    return handleResult(result);
   } catch (error) {
     return handleApiError(error);
   }

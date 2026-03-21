@@ -3,6 +3,9 @@ import { inject, injectable } from "tsyringe";
 import type { IUserRepository } from "../../domain/repositories/IUserRepository";
 import { IUserRepositoryToken } from "../../domain/repositories/IUserRepository";
 
+import { Result } from "@/lib/utils/result";
+import { UserError } from "../../domain/errors/UserErrors";
+
 @injectable()
 export class DeductCreditsUseCase {
     constructor(
@@ -10,7 +13,7 @@ export class DeductCreditsUseCase {
         private userRepository: IUserRepository
     ) {}
 
-    async execute(userId: string, amount: number): Promise<number> {
+    async execute(userId: string, amount: number): Promise<Result<number, UserError>> {
         return this.userRepository.deductCredits(userId, amount);
     }
 }

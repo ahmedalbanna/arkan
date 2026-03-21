@@ -1,5 +1,5 @@
 
-import { withAuth, handleApiError, createApiResponse } from "@/lib/utils/api-utils";
+import { withAuth, handleApiError, handleResult } from "@/lib/utils/api-utils";
 import { container } from "@/infrastructure/di/container";
 import { adminUpdateUserSchema, userUpdateSchema } from "@/lib/schemas/api-schemas";
 import { checkUserAccessPermission, checkUserUpdatePermission } from "@/lib/utils/authorization";
@@ -15,12 +15,9 @@ export const GET = withAuth(async ({ params, user: requester }) => {
         if (authError) return authError;
 
         const controller = container.resolve(UserController);
-        const user = await controller.getUser(targetUserId);
+        const result = await controller.getUser(targetUserId);
         
-        if (!user) {
-            return handleApiError({ message: "User not found." }, 404);
-        }
-        return createApiResponse(user, 200);
+        return handleResult(result);
     } catch (error) {
         return handleApiError(error);
     }
@@ -45,13 +42,10 @@ export const PUT = withAuth(async ({ request, params, user: requester }) => {
         }
 
         const controller = container.resolve(UserController);
-        const updatedUser = await controller.updateUser(userId, validation.data, requester.email);
+        const result = await controller.updateUser(userId, validation.data, requester.email);
         
-        return createApiResponse(updatedUser, 200);
+        return handleResult(result);
     } catch (error: any) {
-        if (error.code === 'auth/email-already-exists') {
-            return handleApiError({ message: "This email is already in use by another account." }, 409);
-        }
         return handleApiError(error);
     }
 });

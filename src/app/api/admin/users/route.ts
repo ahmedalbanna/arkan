@@ -1,6 +1,6 @@
 
 import { z } from 'zod';
-import { withAuth, handleApiError, createApiResponse } from '@/lib/utils/api-utils';
+import { withAuth, handleApiError, handleResult } from '@/lib/utils/api-utils';
 import { container } from '@/infrastructure/di/container';
 import { UserController } from '@/modules/users/adapters/controllers/UserController';
 
@@ -20,9 +20,9 @@ export const GET = withAuth(async ({ request }) => {
 
     const { limit, lastVisibleId } = queryValidation.data;
     const controller = container.resolve(UserController);
-    const results = await controller.getPaginatedUsers({ limit, lastVisibleId });
+    const result = await controller.getPaginatedUsers({ limit, lastVisibleId });
     
-    return createApiResponse(results, 200);
+    return handleResult(result);
   } catch (error) {
     return handleApiError(error);
   }
@@ -46,9 +46,9 @@ export const POST = withAuth(async ({ request }) => {
     }
     
     const controller = container.resolve(UserController);
-    const newUser = await controller.createUser(validation.data);
+    const result = await controller.createUser(validation.data);
     
-    return createApiResponse(newUser, 201);
+    return handleResult(result);
   } catch (error) {
     return handleApiError(error);
   }

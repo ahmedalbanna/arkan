@@ -2,7 +2,7 @@
 'use server';
 
 import { z } from 'zod';
-import { withAuth, handleApiError, createApiResponse } from '@/lib/utils/api-utils';
+import { withAuth, handleApiError, handleResult } from '@/lib/utils/api-utils';
 import { container } from '@/infrastructure/di/container';
 import { UserController } from '@/modules/users/adapters/controllers/UserController';
 
@@ -23,14 +23,14 @@ export const POST = withAuth(async ({ request, user: adminUser }) => {
     const { userId, credits, message } = validation.data;
 
     const controller = container.resolve(UserController);
-    await controller.giftCredits({
+    const result = await controller.giftCredits({
         userId,
         credits,
         message,
         adminName: adminUser.name
     });
 
-    return createApiResponse({ message: `Successfully gifted ${credits} credits to the user.` }, 200);
+    return handleResult(result);
 
   } catch (error) {
     return handleApiError(error);

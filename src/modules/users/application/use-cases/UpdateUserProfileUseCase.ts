@@ -5,6 +5,8 @@ import { IUserRepositoryToken } from "../../domain/repositories/IUserRepository"
 import type { IAuthRepository } from "../../domain/repositories/IAuthRepository";
 import { IAuthRepositoryToken } from "../../domain/repositories/IAuthRepository";
 import { UserProfile } from "../../domain/entities/User";
+import { Result } from "@/lib/utils/result";
+import { UserError } from "../../domain/errors/UserErrors";
 
 @injectable()
 export class UpdateUserProfileUseCase {
@@ -15,10 +17,13 @@ export class UpdateUserProfileUseCase {
         private authRepository: IAuthRepository
     ) {}
 
-    async execute(userId: string, data: Partial<UserProfile>, currentEmail?: string): Promise<UserProfile> {
+    async execute(userId: string, data: Partial<UserProfile>, currentEmail?: string): Promise<Result<UserProfile, UserError>> {
         // If email is being updated, update it in Auth as well
         if (data.email && data.email !== currentEmail) {
-            await this.authRepository.updateEmail(userId, data.email);
+            const authResult = await this.authRepository.updateEmail(userId, data.email);
+            if (authResult.isFailure) {
+                return Result.fail(authResult.error!);
+            }
         }
 
         return this.userRepository.update(userId, data);

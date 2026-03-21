@@ -18,7 +18,8 @@ export class GetGenerationLogsUseCase {
         const result = await this.logRepository.getPaginated(options);
         
         const logsWithUserNames = await Promise.all(result.logs.map(async (log) => {
-            const user = await this.userRepository.getById(log.userId);
+            const userResult = await this.userRepository.getById(log.userId);
+            const user = userResult.isSuccess ? userResult.getValue() : null;
             return {
                 ...log,
                 userName: user?.name || 'Unknown User'

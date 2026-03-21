@@ -1,6 +1,6 @@
 
 import { z } from 'zod';
-import { withAuth, handleApiError, createApiResponse } from '@/lib/utils/api-utils';
+import { withAuth, handleApiError, handleResult } from '@/lib/utils/api-utils';
 import { container } from '@/infrastructure/di/container';
 import { UserController } from '@/modules/users/adapters/controllers/UserController';
 
@@ -18,11 +18,8 @@ export const GET = withAuth(async ({ params }) => {
     try {
         const { id } = await params;
         const controller = container.resolve(UserController);
-        const user = await controller.getUser(id);
-        if (!user) {
-            return handleApiError({ message: "User not found." }, 404);
-        }
-        return createApiResponse(user, 200);
+        const result = await controller.getUser(id);
+        return handleResult(result);
     } catch (error) {
         return handleApiError(error);
     }
@@ -43,13 +40,10 @@ export const PUT = withAuth(async ({ request, params }) => {
     }
     
     const controller = container.resolve(UserController);
-    const updatedUser = await controller.updateUser(id, validation.data);
+    const result = await controller.updateUser(id, validation.data);
 
-    return createApiResponse(updatedUser, 200);
+    return handleResult(result);
   } catch (error: any) {
-    if (error.code === 'auth/email-already-exists') {
-        return handleApiError({ message: "This email is already in use by another account." }, 409);
-    }
     return handleApiError(error);
   }
 }, { requireAdmin: true });
@@ -62,8 +56,8 @@ export const DELETE = withAuth(async ({ params }) => {
       return handleApiError({ message: "User ID is required" }, 400);
     }
     const controller = container.resolve(UserController);
-    await controller.deleteUser(id);
-    return createApiResponse({ message: `User ${id} deleted successfully`}, 200);
+    const result = await controller.deleteUser(id);
+    return handleResult(result);
   } catch (error) {
     return handleApiError(error);
   }

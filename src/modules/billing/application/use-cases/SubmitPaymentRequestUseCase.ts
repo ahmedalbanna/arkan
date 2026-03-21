@@ -51,15 +51,18 @@ export class SubmitPaymentRequestUseCase {
         } as any);
 
         // 3. Notify all admins
-        const admins = await this.userRepository.getAdmins();
-        const notificationPayload = {
-            title: "New Payment Request",
-            description: `User ${params.userName || params.userEmail} submitted a payment request for $${params.price}.`,
-            icon: "credit-card",
-            link: '/admin/manage-payments'
-        };
+        const adminsResult = await this.userRepository.getAdmins();
+        if (adminsResult.isSuccess) {
+            const admins = adminsResult.getValue();
+            const notificationPayload = {
+                title: "New Payment Request",
+                description: `User ${params.userName || params.userEmail} submitted a payment request for $${params.price}.`,
+                icon: "credit-card",
+                link: '/admin/manage-payments'
+            };
 
-        await Promise.all(admins.map(admin => this.notificationService.send(admin.id, notificationPayload)));
+            await Promise.all(admins.map(admin => this.notificationService.send(admin.id, notificationPayload)));
+        }
 
         return transaction;
     }

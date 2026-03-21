@@ -17,11 +17,18 @@ export class CreditService {
         if (process.env.DEDUCT_CREDITS === 'false') return;
         if (amount === 0) return; // Don't process if cost is zero
 
-        return this.deductCreditsUseCase.execute(userId, amount);
+        const result = await this.deductCreditsUseCase.execute(userId, amount);
+        if (result.isFailure) {
+            throw new Error(result.error?.message || "Failed to deduct credits");
+        }
+        return result.getValue();
     }
 
     async refundCredit(userId: string, amount: number): Promise<void> {
         if (amount === 0) return;
-        await this.addCreditsUseCase.execute(userId, amount);
+        const result = await this.addCreditsUseCase.execute(userId, amount);
+        if (result.isFailure) {
+            throw new Error(result.error?.message || "Failed to refund credits");
+        }
     }
 }
