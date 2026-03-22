@@ -1,6 +1,6 @@
 // src/app/api/admin/templates/report/[id]/route.ts
 
-import { createApiResponse, handleApiError, withAuth } from '@/lib/utils/api-utils';
+import { handleApiError, withAuth, handleTemplateResult } from '@/lib/utils/api-utils';
 import { UpdateReportTemplateSchema } from '@/lib/types';
 import { container } from '@/infrastructure/di/container';
 import { TemplateController } from '@/modules/templates/adapters/controllers/TemplateController';
@@ -10,12 +10,9 @@ export const GET = withAuth(async ({ params }) => {
     try {
         const { id } = await params;
         const controller = container.resolve(TemplateController);
-        const template = await controller.getTemplateById('report', id);
+        const result = await controller.getTemplateById('report', id);
 
-        if (!template) {
-            return handleApiError({ message: 'Report template not found.' }, 404);
-        }
-        return createApiResponse(template, 200);
+        return handleTemplateResult(result);
     } catch (error) {
         return handleApiError(error);
     }
@@ -33,14 +30,14 @@ export const PUT = withAuth(async ({ request, params }) => {
         }
 
         const controller = container.resolve(TemplateController);
-        const existing = await controller.getTemplateById('report', id);
+        const checkResult = await controller.getTemplateById('report', id);
 
-        if (!existing) {
-            return handleApiError({ message: 'Template not found.' }, 404);
+        if (checkResult.isFailure) {
+            return handleTemplateResult(checkResult);
         }
 
-        const updated = await controller.saveTemplate('report', validation.data as any);
-        return createApiResponse(updated, 200);
+        const result = await controller.saveTemplate('report', validation.data as any);
+        return handleTemplateResult(result);
     } catch (error) {
         return handleApiError(error);
     }
@@ -53,13 +50,13 @@ export const DELETE = withAuth(async ({ params }) => {
         const controller = container.resolve(TemplateController);
         
         // Check if it's a default template
-        const template = await controller.getTemplateById('report', id);
-        if (template?.isDefault) {
+        const checkResult = await controller.getTemplateById('report', id);
+        if (checkResult.isSuccess && checkResult.getValue().isDefault) {
             return handleApiError({ message: 'Default templates cannot be deleted.' }, 403);
         }
         
-        await controller.deleteTemplate('report', id);
-        return createApiResponse({ message: 'Template deleted successfully.' }, 200);
+        const result = await controller.deleteTemplate('report', id);
+        return handleTemplateResult(result);
     } catch (error) {
         return handleApiError(error);
     }

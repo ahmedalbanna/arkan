@@ -4,6 +4,8 @@ import type { IRagRepository } from "../../domain/repositories/IRagRepository";
 import { IRagRepositoryToken } from "../../domain/repositories/IRagRepository";
 import type { IIndexedDocumentRepository } from "../../domain/repositories/IIndexedDocumentRepository";
 import { IIndexedDocumentRepositoryToken } from "../../domain/repositories/IIndexedDocumentRepository";
+import { Result } from "@/lib/utils/result";
+import { RagError } from "../../domain/errors/RagErrors";
 
 @injectable()
 export class GetRagStatsUseCase {
@@ -14,11 +16,17 @@ export class GetRagStatsUseCase {
         private documentRepository: IIndexedDocumentRepository
     ) {}
 
-    async execute(): Promise<any> {
-        const ragStats = await this.ragRepository.getStats();
-        const docStats = await this.documentRepository.getStats();
+    async execute(): Promise<Result<any, RagError>> {
+        const ragStatsResult = await this.ragRepository.getStats();
+        if (ragStatsResult.isFailure) return ragStatsResult as any;
+
+        const docStatsResult = await this.documentRepository.getStats();
+        if (docStatsResult.isFailure) return docStatsResult as any;
+
+        const ragStats = ragStatsResult.getValue();
+        const docStats = docStatsResult.getValue();
         
-        return {
+        return Result.ok({
             totalChunks: ragStats.totalChunks,
             documents: {
                 total: docStats.totalDocuments,
@@ -27,6 +35,6 @@ export class GetRagStatsUseCase {
                 recent: docStats.recentUploads,
             },
             timestamp: new Date().toISOString(),
-        };
+        });
     }
 }

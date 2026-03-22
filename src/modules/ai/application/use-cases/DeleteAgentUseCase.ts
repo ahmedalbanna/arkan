@@ -2,6 +2,8 @@
 import { inject, injectable } from "tsyringe";
 import type { IAgentRepository } from "../../domain/repositories/IAgentRepository";
 import { IAgentRepositoryToken } from "../../domain/repositories/IAgentRepository";
+import { Result } from "@/lib/utils/result";
+import { AiError } from "../../domain/errors/AiErrors";
 
 @injectable()
 export class DeleteAgentUseCase {
@@ -10,7 +12,7 @@ export class DeleteAgentUseCase {
         private agentRepository: IAgentRepository
     ) {}
 
-    async execute(id: string): Promise<void> {
+    async execute(id: string): Promise<Result<void, AiError>> {
         return this.agentRepository.delete(id);
     }
 }

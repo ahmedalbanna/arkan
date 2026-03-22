@@ -1,5 +1,5 @@
 // C:\Users\ahmed\source\repos\arkan\src\app\api\admin\sections\[id]\route.ts
-import { withAuth, handleApiError, createApiResponse } from '@/lib/utils/api-utils';
+import { withAuth, handleApiError, handleAIContentResult } from '@/lib/utils/api-utils';
 import { z } from 'zod';
 import { container } from '@/infrastructure/di/container';
 import { AIContentController } from '@/modules/ai-content/adapters/controllers/AIContentController';
@@ -26,13 +26,13 @@ export const PUT = withAuth(async ({ request, params }) => {
     }
 
     const controller = container.resolve(AIContentController);
-    const existing = await controller.getSectionById(sectionId);
-    if (!existing) {
-        return handleApiError({ message: 'Section not found' }, 404);
+    const checkResult = await controller.getSectionById(sectionId);
+    if (checkResult.isFailure) {
+        return handleAIContentResult(checkResult);
     }
 
-    const updated = await controller.saveSection({ id: sectionId, ...validation.data });
-    return createApiResponse(updated, 200);
+    const result = await controller.saveSection({ id: sectionId, ...validation.data });
+    return handleAIContentResult(result);
   } catch (error) {
     return handleApiError(error);
   }
@@ -47,9 +47,9 @@ export const DELETE = withAuth(async ({ params }) => {
     }
     
     const controller = container.resolve(AIContentController);
-    await controller.deleteSection(sectionId);
+    const result = await controller.deleteSection(sectionId);
     
-    return createApiResponse({ message: 'Section deleted successfully' }, 200);
+    return handleAIContentResult(result);
   } catch (error) {
     return handleApiError(error);
   }

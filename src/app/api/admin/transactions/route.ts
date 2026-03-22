@@ -1,6 +1,6 @@
 
 import { z } from 'zod';
-import { withAuth, handleApiError, createApiResponse } from '@/lib/utils/api-utils';
+import { withAuth, handleApiError, handleBillingResult } from '@/lib/utils/api-utils';
 import { container } from '@/infrastructure/di/container';
 import { BillingController } from '@/modules/billing/adapters/controllers/BillingController';
 
@@ -23,7 +23,7 @@ export const GET = withAuth(async ({ request }) => {
 
     const controller = container.resolve(BillingController);
     const result = await controller.getTransactions({ status, limit, lastVisibleId });
-    return createApiResponse(result, 200);
+    return handleBillingResult(result);
 
   } catch (error) {
     return handleApiError(error);

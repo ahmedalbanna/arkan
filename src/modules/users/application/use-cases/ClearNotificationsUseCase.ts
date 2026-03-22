@@ -2,6 +2,8 @@
 import { inject, injectable } from "tsyringe";
 import type { INotificationService } from "../../domain/services/INotificationService";
 import { INotificationServiceToken } from "../../domain/services/INotificationService";
+import { Result } from "@/lib/utils/result";
+import { UserError } from "../../domain/errors/UserErrors";
 
 @injectable()
 export class ClearNotificationsUseCase {
@@ -10,7 +12,7 @@ export class ClearNotificationsUseCase {
         private notificationService: INotificationService
     ) {}
 
-    async execute(userId: string, notificationIds: string[]): Promise<void> {
+    async execute(userId: string, notificationIds: string[]): Promise<Result<void, UserError>> {
         return this.notificationService.clear(userId, notificationIds);
     }
 }

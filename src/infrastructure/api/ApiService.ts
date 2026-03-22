@@ -4,9 +4,20 @@
 import { getAuthenticatedToken } from '@/lib/utils/authUtils';
 import type { User as FirebaseUser } from 'firebase/auth';
 
+export class ApiError extends Error {
+  constructor(
+    public message: string,
+    public status: number,
+    public details?: any
+  ) {
+    super(message);
+    this.name = 'ApiError';
+  }
+}
+
 interface ApiServiceOptions<T> {
   endpoint: string;
-  method?: 'GET' | 'POST' | 'PUT' | 'DELETE';
+  method?: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
   data?: T;
   token?: string; // Allow passing token directly
   firebaseUser?: FirebaseUser | null; // Or pass the user object
@@ -20,7 +31,7 @@ interface ApiServiceOptions<T> {
  *
  * @param options - The configuration for the API request.
  * @returns A promise that resolves to the JSON response from the API.
- * @throws An error if the request fails or the user is not authenticated when required.
+ * @throws An ApiError if the request fails or the user is not authenticated when required.
  */
 export async function apiService<TRequest = any, TResponse = any>(
   options: ApiServiceOptions<TRequest>
@@ -73,7 +84,7 @@ export async function apiService<TRequest = any, TResponse = any>(
       // If the response is not JSON, use the status text
       errorData = { message: response.statusText || 'An unknown error occurred.' };
     }
-    throw new Error(errorData.message);
+    throw new ApiError(errorData.message || response.statusText, response.status, errorData.details);
   }
 
   // Handle cases where the response might be empty (e.g., DELETE 204 No Content)

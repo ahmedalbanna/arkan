@@ -8,8 +8,8 @@ export interface IAuthRepository {
     updatePassword(userId: string, password: string): Promise<Result<void, UserError>>;
     deleteUser(userId: string): Promise<Result<void, UserError>>;
     verifyToken(token: string): Promise<Result<{ uid: string, email?: string }, UserError>>;
-    createSessionCookie(idToken: string, options: { expiresIn: number }): Promise<string>;
-    verifySessionCookie(sessionCookie: string, checkRevoked?: boolean): Promise<{ uid: string, email?: string }>;
+    createSessionCookie(idToken: string, options: { expiresIn: number }): Promise<Result<string, UserError>>;
+    verifySessionCookie(sessionCookie: string, checkRevoked?: boolean): Promise<Result<{ uid: string, email?: string }, UserError>>;
 }
 
 export const IAuthRepositoryToken = Symbol("IAuthRepository");

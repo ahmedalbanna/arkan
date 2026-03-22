@@ -2,6 +2,8 @@
 import { inject, injectable } from "tsyringe";
 import type { IIndexedDocumentRepository, IndexedDocumentRecord } from "../../domain/repositories/IIndexedDocumentRepository";
 import { IIndexedDocumentRepositoryToken } from "../../domain/repositories/IIndexedDocumentRepository";
+import { Result } from "@/lib/utils/result";
+import { RagError } from "../../domain/errors/RagErrors";
 
 @injectable()
 export class GetIndexedDocumentsUseCase {
@@ -10,7 +12,7 @@ export class GetIndexedDocumentsUseCase {
         private documentRepository: IIndexedDocumentRepository
     ) {}
 
-    async execute(limit?: number): Promise<IndexedDocumentRecord[]> {
+    async execute(limit?: number): Promise<Result<IndexedDocumentRecord[], RagError>> {
         return this.documentRepository.getAll(limit);
     }
 }

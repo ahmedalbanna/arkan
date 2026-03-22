@@ -35,11 +35,14 @@ export interface RagRetrievalResult {
     }>;
 }
 
+import { Result } from "@/lib/utils/result";
+import { RagError } from "../errors/RagErrors";
+
 export interface IRagRepository {
-    indexDocument(content: string, options?: RagIndexingOptions): Promise<RagIndexingResult>;
-    retrieveContext(query: string, options?: RagRetrievalOptions): Promise<RagRetrievalResult>;
-    getStats(): Promise<{ totalChunks: number }>;
-    clear(): Promise<void>;
+    indexDocument(content: string, options?: RagIndexingOptions): Promise<Result<RagIndexingResult, RagError>>;
+    retrieveContext(query: string, options?: RagRetrievalOptions): Promise<Result<RagRetrievalResult, RagError>>;
+    getStats(): Promise<Result<{ totalChunks: number }, RagError>>;
+    clear(): Promise<Result<void, RagError>>;
 }
 
 export const IRagRepositoryToken = Symbol("IRagRepository");

@@ -8,11 +8,14 @@ export interface SectionDefinition {
     model?: string;
 }
 
+import { Result } from "@/lib/utils/result";
+import { AIContentError } from "../errors/AIContentErrors";
+
 export interface ISectionRepository {
-    getAll(): Promise<SectionDefinition[]>;
-    getById(id: string): Promise<SectionDefinition | null>;
-    save(section: SectionDefinition): Promise<SectionDefinition>;
-    delete(id: string): Promise<void>;
+    getAll(): Promise<Result<SectionDefinition[], AIContentError>>;
+    getById(id: string): Promise<Result<SectionDefinition, AIContentError>>;
+    save(section: SectionDefinition): Promise<Result<SectionDefinition, AIContentError>>;
+    delete(id: string): Promise<Result<void, AIContentError>>;
 }
 
 export const ISectionRepositoryToken = Symbol("ISectionRepository");

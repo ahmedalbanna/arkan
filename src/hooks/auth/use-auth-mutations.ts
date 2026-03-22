@@ -26,8 +26,12 @@ export function useLogin() {
   const { toast } = useToast();
 
   return useMutation({
-    mutationFn: (credentials: LoginCredentials) => container.resolve(AuthApiClient).loginWithEmail(credentials),
-    onSuccess: (user) => {
+    mutationFn: async (credentials: LoginCredentials) => {
+        const result = await container.resolve(AuthApiClient).loginWithEmail(credentials);
+        if (result.isFailure) throw result.error;
+        return result.getValue();
+    },
+    onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: userKeys.all() }); // Refetch user data
       router.push('/builder');
       toast({ title: "Welcome back!" });
@@ -63,7 +67,11 @@ export function useGoogleSignIn() {
     const { toast } = useToast();
 
     return useMutation({
-        mutationFn: () => container.resolve(AuthApiClient).loginWithGoogle(),
+        mutationFn: async () => {
+            const result = await container.resolve(AuthApiClient).loginWithGoogle();
+            if (result.isFailure) throw result.error;
+            return result.getValue();
+        },
         onSuccess: async (userCredential) => {
             const isNewUser = userCredential.isNewUser;
             if (isNewUser) {
@@ -129,7 +137,11 @@ export function useLogout() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: () => container.resolve(AuthApiClient).serviceLogoutUser(),
+    mutationFn: async () => {
+        const result = await container.resolve(AuthApiClient).serviceLogoutUser();
+        if (result.isFailure) throw result.error;
+        return result.getValue();
+    },
     onSuccess: () => {
       queryClient.clear(); // Clear all user data from cache
       router.push('/login');
@@ -145,15 +157,19 @@ export function useSignup(options?: { onSuccess?: (data: any) => void }) {
     return useMutation({
         mutationFn: async (credentials: SignupCredentials) => {
             const client = container.resolve(AuthApiClient);
-            const userCredential = await client.serviceSignupUser(credentials);
-            const token = await userCredential.user.getIdToken();
-            const profileData: Partial<UserProfile> = {
-                id: userCredential.user.uid,
-                name: credentials.name,
-                email: credentials.email,
-            };
-            // After creating the auth user, create the profile in Firestore
-            await client.createOrUpdateUserProfileApi(userCredential.user.uid, profileData, token);
+            const result = await client.serviceSignupUser(credentials);
+            if (result.isFailure) throw result.error;
+
+            const userCredential = result.getValue();
+            // Note: serviceSignupUser now returns the result of the backend signup which includes user details
+            // However, Firebase Client SDK might still be needed for ID Token if not handled by standard session
+            // But here we're interacting with our own API which returns { user: { uid, email } }
+            
+            // The old logic assumed userCredential.user.getIdToken() was available (Firebase User object)
+            // But serviceSignupUser calls /api/auth/signup which returns our standardized response.
+            // If we need to create the profile, we should ensure the backend does it.
+            // Actually, the backend UserController.createUser ALREADY creates the profile.
+            
             return userCredential;
         },
         onSuccess: (data) => {
@@ -215,7 +231,9 @@ export function useSendPasswordReset() {
     mutationFn: async (userId: string) => {
       if (!firebaseUser) throw new Error("Admin not authenticated.");
       const token = await firebaseUser.getIdToken();
-      return container.resolve(AuthApiClient).sendPasswordResetEmailApi(userId, token);
+      const result = await container.resolve(AuthApiClient).sendPasswordResetEmailApi(userId, token);
+      if (result.isFailure) throw result.error;
+      return result.getValue();
     },
     onSuccess: (data) => {
       toast({

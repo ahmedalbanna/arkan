@@ -2,7 +2,8 @@
 'use client';
 
 import type { CitationStyle, DiagramTypeSchema, ParaphraseMode, SummarizeLength } from "@/ai/schemas";
-import { apiService } from "@/infrastructure/api/ApiService";
+import { apiService, ApiError } from "@/infrastructure/api/ApiService";
+import { Result } from "@/lib/utils/result";
 import { z } from "zod";
 
 // Base types for form data
@@ -112,13 +113,18 @@ export class WritingToolsApiClient {
     async writingToolApi<TRequest, TResponse>(
         endpoint: string,
         variables: { data: TRequest; token: string }
-    ): Promise<TResponse> {
-        const { token, data } = variables;
-        return apiService({
-            endpoint,
-            method: 'POST',
-            data,
-            token
-        });
+    ): Promise<Result<TResponse, ApiError>> {
+        try {
+            const { token, data } = variables;
+            const result = await apiService<TRequest, TResponse>({
+                endpoint,
+                method: 'POST',
+                data,
+                token
+            });
+            return Result.ok(result);
+        } catch (error: any) {
+            return Result.fail(error);
+        }
     }
 }

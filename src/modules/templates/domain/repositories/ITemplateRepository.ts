@@ -13,11 +13,14 @@ export interface Template {
 
 export type TemplateType = 'docx' | 'pptx' | 'report' | 'presentation';
 
+import { Result } from "@/lib/utils/result";
+import { TemplateError } from "../errors/TemplateErrors";
+
 export interface ITemplateRepository {
-    getAll(type: TemplateType): Promise<Template[]>;
-    getById(type: TemplateType, id: string): Promise<Template | null>;
-    save(type: TemplateType, data: Template): Promise<Template>;
-    delete(type: TemplateType, id: string): Promise<void>;
+    getAll(type: TemplateType): Promise<Result<Template[], TemplateError>>;
+    getById(type: TemplateType, id: string): Promise<Result<Template, TemplateError>>;
+    save(type: TemplateType, data: Template): Promise<Result<Template, TemplateError>>;
+    delete(type: TemplateType, id: string): Promise<Result<void, TemplateError>>;
 }
 
 export const ITemplateRepositoryToken = Symbol("ITemplateRepository");

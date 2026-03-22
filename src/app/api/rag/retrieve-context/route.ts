@@ -12,6 +12,8 @@ const RetrieveContextSchema = z.object({
   minScore: z.number().min(0).max(1).default(0.5),
 });
 
+import { handleRagResult } from '@/lib/utils/api-utils';
+
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
@@ -24,10 +26,16 @@ export async function POST(request: NextRequest) {
     const controller = container.resolve(RagController);
     const result = await controller.retrieveContext(query, options);
 
+    if (result.isFailure) {
+        return handleRagResult(result);
+    }
+
+    const data = result.getValue();
+
     return NextResponse.json({
       success: true,
-      context: result.context,
-      sources: result.sources,
+      context: data.context,
+      sources: data.sources,
     });
 
   } catch (error) {

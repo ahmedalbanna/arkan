@@ -5,6 +5,8 @@ import { IAiServiceToken } from "../../domain/services/IAiService";
 import type { IGenerationLogRepository } from "../../domain/repositories/IGenerationLogRepository";
 import { IGenerationLogRepositoryToken } from "../../domain/repositories/IGenerationLogRepository";
 import { DeductCreditsUseCase } from "@/modules/users/application/use-cases/DeductCreditsUseCase";
+import { Result } from "@/lib/utils/result";
+import { AiError } from "../../domain/errors/AiErrors";
 
 @injectable()
 export class GenerateChapterWithRAGUseCase {
@@ -17,14 +19,22 @@ export class GenerateChapterWithRAGUseCase {
         private deductCreditsUseCase: DeductCreditsUseCase
     ) {}
 
-    async execute(userId: string, input: any): Promise<any> {
+    async execute(userId: string, input: any): Promise<Result<any, AiError>> {
         const creditCost = 2; // Default cost for chapter generation
 
         // 1. Run the AI Flow via Service
-        const result = await this.aiService.generateChapterWithRAG(input);
+        const aiResult = await this.aiService.generateChapterWithRAG(input);
+        if (aiResult.isFailure) {
+            return aiResult;
+        }
+
+        const result = aiResult.getValue();
 
         // 2. Deduct credits
-        await this.deductCreditsUseCase.execute(userId, creditCost);
+        const deductResult = await this.deductCreditsUseCase.execute(userId, creditCost);
+        if (deductResult.isFailure) {
+            return Result.fail(AiError.internal(`Credit deduction failed: ${deductResult.error?.message}`));
+        }
 
         // 3. Log the generation
         await this.generationLogRepository.log({
@@ -35,6 +45,6 @@ export class GenerateChapterWithRAGUseCase {
             creditCost: creditCost
         });
 
-        return result;
+        return Result.ok(result);
     }
 }

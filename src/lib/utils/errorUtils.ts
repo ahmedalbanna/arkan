@@ -2,6 +2,7 @@
 'use client';
 
 import { toast } from "@/hooks";
+import { Telemetry } from "./telemetry";
 
 /**
  * A centralized utility for handling and displaying client-side errors.
@@ -17,7 +18,16 @@ export const handleErrorUtility = (error: any, context?: string) => {
   // Check for a structured error response from our API
   if (error && typeof error === 'object' && error.message) {
     description = error.message;
-    if (error.code) { // Use specific Firebase error codes if available
+    
+    // Support validation details
+    if (error.details && Array.isArray(error.details)) {
+        const details = error.details.map((d: any) => d.message || d).join(', ');
+        description = `${error.message}: ${details}`;
+    } else if (error.details && typeof error.details === 'object') {
+        description = `${error.message} (${JSON.stringify(error.details)})`;
+    }
+
+    if (error.code || error.status) { 
         title = context || 'Request Failed';
     }
   } else if (typeof error === 'string') {
@@ -32,6 +42,9 @@ export const handleErrorUtility = (error: any, context?: string) => {
   } else if (description.toLowerCase().includes('not found')) {
       title = "Not Found"
   }
+
+  // Log to telemetry
+  Telemetry.logFailure('ClientUI', { title, description, originalError: error });
 
   toast({
     title,

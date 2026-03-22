@@ -6,7 +6,13 @@ import { UserController } from '@/modules/users/adapters/controllers/UserControl
 export async function GET() {
     try {
         const controller = container.resolve(UserController);
-        const admins = await controller.getAdmins();
+        const result = await controller.getAdmins();
+        
+        if (result.isFailure) {
+            return handleApiError(result.error);
+        }
+
+        const admins = result.getValue();
         
         // Return only necessary public info
         const publicAdmins = admins.map(admin => ({

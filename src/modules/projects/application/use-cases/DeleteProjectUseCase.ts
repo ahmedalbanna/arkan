@@ -2,6 +2,8 @@
 import { inject, injectable } from "tsyringe";
 import type { IProjectRepository } from "../../domain/repositories/IProjectRepository";
 import { IProjectRepositoryToken } from "../../domain/repositories/IProjectRepository";
+import { Result } from "@/lib/utils/result";
+import { ProjectError } from "../../domain/errors/ProjectErrors";
 
 @injectable()
 export class DeleteProjectUseCase {
@@ -10,7 +12,7 @@ export class DeleteProjectUseCase {
     private projectRepository: IProjectRepository
   ) {}
 
-  async execute(projectId: string): Promise<void> {
+  async execute(projectId: string): Promise<Result<void, ProjectError>> {
     return this.projectRepository.delete(projectId);
   }
 }

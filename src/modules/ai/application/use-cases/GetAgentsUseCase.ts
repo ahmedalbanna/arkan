@@ -1,7 +1,10 @@
 
 import { inject, injectable } from "tsyringe";
-import type { IAgentRepository, Agent } from "../../domain/repositories/IAgentRepository";
+import type { IAgentRepository } from "../../domain/repositories/IAgentRepository";
 import { IAgentRepositoryToken } from "../../domain/repositories/IAgentRepository";
+import { Agent } from "../../domain/entities/Agent";
+import { Result } from "@/lib/utils/result";
+import { AiError } from "../../domain/errors/AiErrors";
 
 @injectable()
 export class GetAgentsUseCase {
@@ -10,7 +13,7 @@ export class GetAgentsUseCase {
         private agentRepository: IAgentRepository
     ) {}
 
-    async execute(filters?: { category?: string, enabledOnly?: boolean }): Promise<Agent[]> {
+    async execute(filters?: { category?: string, enabledOnly?: boolean }): Promise<Result<Agent[], AiError>> {
         return this.agentRepository.getAll(filters);
     }
 }

@@ -1,8 +1,9 @@
 'use client';
 
 import { injectable } from "tsyringe";
-import { apiService } from '@/infrastructure/api/ApiService';
+import { apiService, ApiError } from '@/infrastructure/api/ApiService';
 import type { Feature } from '@/modules/admin/domain/entities/Feature';
+import { Result } from "@/lib/utils/result";
 
 export interface UpdateFeatureVariables {
   featureId: string;
@@ -13,20 +14,30 @@ export interface UpdateFeatureVariables {
 
 @injectable()
 export class FeatureApiClient {
-  async fetchFeaturesApi(token: string) {
-    return apiService<undefined, Feature[]>({
-      endpoint: '/api/admin/features',
-      token,
-    });
+  async fetchFeaturesApi(token: string): Promise<Result<Feature[], ApiError>> {
+    try {
+        const data = await apiService<undefined, Feature[]>({
+            endpoint: '/api/admin/features',
+            token,
+        });
+        return Result.ok(data);
+    } catch (error: any) {
+        return Result.fail(error);
+    }
   }
 
-  async updateFeatureApi(variables: UpdateFeatureVariables, token: string) {
-    const { featureId, payload } = variables;
-    return apiService({
-      endpoint: `/api/admin/features/${featureId}`,
-      method: 'PUT',
-      data: payload,
-      token,
-    });
+  async updateFeatureApi(variables: UpdateFeatureVariables, token: string): Promise<Result<any, ApiError>> {
+    try {
+        const { featureId, payload } = variables;
+        const data = await apiService({
+            endpoint: `/api/admin/features/${featureId}`,
+            method: 'PUT',
+            data: payload,
+            token,
+        });
+        return Result.ok(data);
+    } catch (error: any) {
+        return Result.fail(error);
+    }
   }
 }

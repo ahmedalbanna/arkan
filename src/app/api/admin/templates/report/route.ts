@@ -1,14 +1,14 @@
 // src/app/api/admin/templates/report/route.ts
 import { CreateReportTemplateSchema } from '@/lib/types';
-import { createApiResponse, handleApiError, withAuth } from '@/lib/utils/api-utils';
+import { handleApiError, withAuth, handleTemplateResult } from '@/lib/utils/api-utils';
 import { container } from '@/infrastructure/di/container';
 import { TemplateController } from '@/modules/templates/adapters/controllers/TemplateController';
 
 export const GET = withAuth(async () => {
     try {
         const controller = container.resolve(TemplateController);
-        const templates = await controller.getTemplates('report');
-        return createApiResponse(templates, 200);
+        const result = await controller.getTemplates('report');
+        return handleTemplateResult(result);
     } catch (error) {
         return handleApiError(error);
     }
@@ -23,13 +23,13 @@ export const POST = withAuth(async ({ request }) => {
         }
 
         const controller = container.resolve(TemplateController);
-        const existing = await controller.getTemplateById('report', validation.data.id);
-        if (existing) {
+        const checkResult = await controller.getTemplateById('report', validation.data.id);
+        if (checkResult.isSuccess) {
             return handleApiError({ message: 'A report template with this ID already exists.' }, 409);
         }
 
-        const newTemplate = await controller.saveTemplate('report', validation.data);
-        return createApiResponse(newTemplate, 201);
+        const result = await controller.saveTemplate('report', validation.data as any);
+        return handleTemplateResult(result);
     } catch (error) {
         return handleApiError(error);
     }

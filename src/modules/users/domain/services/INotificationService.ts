@@ -6,12 +6,15 @@ export interface NotificationPayload {
     link?: string;
 }
 
+import { Result } from "@/lib/utils/result";
+import { UserError } from "../errors/UserErrors";
+
 export interface INotificationService {
-    send(userId: string, payload: NotificationPayload): Promise<void>;
-    saveDeviceToken(userId: string, token: string): Promise<void>;
-    markAsRead(userId: string, notificationIds: string[]): Promise<void>;
-    clear(userId: string, notificationIds: string[]): Promise<void>;
-    getNotifications(userId: string, limit?: number): Promise<any[]>;
+    send(userId: string, payload: NotificationPayload): Promise<Result<void, UserError>>;
+    saveDeviceToken(userId: string, token: string): Promise<Result<void, UserError>>;
+    markAsRead(userId: string, notificationIds: string[]): Promise<Result<void, UserError>>;
+    clear(userId: string, notificationIds: string[]): Promise<Result<void, UserError>>;
+    getNotifications(userId: string, limit?: number): Promise<Result<any[], UserError>>;
 }
 
 export const INotificationServiceToken = Symbol("INotificationService");

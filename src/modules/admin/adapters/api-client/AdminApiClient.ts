@@ -2,7 +2,8 @@
 'use client';
 
 import { injectable } from "tsyringe";
-import { apiService } from "@/infrastructure/api/ApiService";
+import { apiService, ApiError } from "@/infrastructure/api/ApiService";
+import { Result } from "@/lib/utils/result";
 
 export interface DashboardStats {
     totalUsers: number;
@@ -22,7 +23,12 @@ export interface DashboardStats {
 
 @injectable()
 export class AdminApiClient {
-    async fetchDashboardStats(token: string): Promise<DashboardStats> {
-        return apiService({ endpoint: '/api/admin/dashboard-stats', token });
+    async fetchDashboardStats(token: string): Promise<Result<DashboardStats, ApiError>> {
+        try {
+            const data = await apiService<any, DashboardStats>({ endpoint: '/api/admin/dashboard-stats', token });
+            return Result.ok(data);
+        } catch (error: any) {
+            return Result.fail(error);
+        }
     }
 }

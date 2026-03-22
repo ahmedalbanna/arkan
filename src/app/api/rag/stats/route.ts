@@ -2,11 +2,19 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { container } from '@/infrastructure/di/container';
 import { RagController } from '@/modules/rag/adapters/controllers/RagController';
+import { handleRagResult } from '@/lib/utils/api-utils';
 
 export async function GET(_request: NextRequest) {
   try {
     const controller = container.resolve(RagController);
-    const { totalChunks } = await controller.getStats();
+    const result = await controller.getStats();
+
+    if (result.isFailure) {
+        return handleRagResult(result);
+    }
+
+    const stats = result.getValue();
+    const totalChunks = stats.totalChunks;
 
     // Mock project data for now (in production, track this separately)
     const projects = [

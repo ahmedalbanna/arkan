@@ -24,8 +24,13 @@ export function useProjects() {
                 const token = await getAuthenticatedToken(firebaseUser);
                 const client = container.resolve(ProjectApiClient);
                 const localService = container.resolve(LocalProjectService);
-                const serverProjects = await client.fetchProjects(token);
+                const result = await client.fetchProjects(token);
                 
+                if (result.isFailure) {
+                    throw result.error;
+                }
+
+                const serverProjects = result.getValue();
                 const mergedProjects = serverProjects.map(p => new Project(p));
 
                 // Sync local db with server source of truth
@@ -60,7 +65,9 @@ export function useSaveProject() {
             }
             const token = await getAuthenticatedToken(firebaseUser);
             const client = container.resolve(ProjectApiClient);
-            return client.saveProject(projectData, token);
+            const result = await client.saveProject(projectData, token);
+            if (result.isFailure) throw result.error;
+            return result.getValue();
         },
         onSuccess: (savedProject) => {
             setHasUnsavedChanges(false);
@@ -88,13 +95,19 @@ export function useDeleteProject() {
             // Delete from local and server simultaneously
             const localService = container.resolve(LocalProjectService);
             const localDelete = localService.deleteProject(projectId);
-            let serverDelete: Promise<any> | null = null;
+            
             if (navigator.onLine && firebaseUser) {
                 const token = await getAuthenticatedToken(firebaseUser);
                 const client = container.resolve(ProjectApiClient);
-                serverDelete = client.deleteProject(projectId, token);
+                const result = await client.deleteProject(projectId, token);
+                if (result.isFailure) {
+                    console.error("Failed to delete from server:", result.error);
+                    // We might want to throw here if we want to block the local delete success
+                    // But for now we allow local delete to proceed for offline-first feel
+                }
             }
-            await Promise.all([localDelete, serverDelete]);
+            
+            await localDelete;
             return projectId;
         },
         onSuccess: (projectId) => {

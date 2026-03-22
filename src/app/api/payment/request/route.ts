@@ -28,7 +28,7 @@ export const POST = withAuth(async ({ request }) => {
     const fileBuffer = Buffer.from(await file.arrayBuffer());
 
     const controller = container.resolve(BillingController);
-    const transaction = await controller.submitPaymentRequest({
+    const result = await controller.submitPaymentRequest({
         file: fileBuffer,
         fileName: file.name,
         contentType: file.type,
@@ -41,6 +41,11 @@ export const POST = withAuth(async ({ request }) => {
         userEmail: userEmail || 'N/A'
     });
 
+    if (result.isFailure) {
+        return handleApiError(result.error);
+    }
+
+    const transaction = result.getValue();
     return createApiResponse({ 
         message: 'Request submitted successfully for review.', 
         transactionId: transaction.id 

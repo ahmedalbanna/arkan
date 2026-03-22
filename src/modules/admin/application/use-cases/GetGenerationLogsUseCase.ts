@@ -4,6 +4,8 @@ import type { IGenerationLogRepository } from "../../../ai/domain/repositories/I
 import { IGenerationLogRepositoryToken } from "../../../ai/domain/repositories/IGenerationLogRepository";
 import type { IUserRepository } from "../../../users/domain/repositories/IUserRepository";
 import { IUserRepositoryToken } from "../../../users/domain/repositories/IUserRepository";
+import { Result } from "@/lib/utils/result";
+import { AiError } from "../../../ai/domain/errors/AiErrors";
 
 @injectable()
 export class GetGenerationLogsUseCase {
@@ -14,10 +16,13 @@ export class GetGenerationLogsUseCase {
         private userRepository: IUserRepository
     ) {}
 
-    async execute(options: { limit: number, agentId?: string, userId?: string, lastVisibleId?: string }) {
-        const result = await this.logRepository.getPaginated(options);
+    async execute(options: { limit: number, agentId?: string, userId?: string, lastVisibleId?: string }): Promise<Result<any, AiError>> {
+        const paginatedResult = await this.logRepository.getPaginated(options);
+        if (paginatedResult.isFailure) return paginatedResult as any;
+
+        const resultData = paginatedResult.getValue();
         
-        const logsWithUserNames = await Promise.all(result.logs.map(async (log) => {
+        const logsWithUserNames = await Promise.all(resultData.logs.map(async (log: any) => {
             const userResult = await this.userRepository.getById(log.userId);
             const user = userResult.isSuccess ? userResult.getValue() : null;
             return {
@@ -26,9 +31,9 @@ export class GetGenerationLogsUseCase {
             };
         }));
 
-        return {
-            ...result,
+        return Result.ok({
+            ...resultData,
             logs: logsWithUserNames
-        };
+        });
     }
 }

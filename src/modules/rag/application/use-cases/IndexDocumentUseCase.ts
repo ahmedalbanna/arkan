@@ -4,6 +4,8 @@ import type { IRagRepository, RagIndexingOptions, RagIndexingResult } from "../.
 import { IRagRepositoryToken } from "../../domain/repositories/IRagRepository";
 import type { IIndexedDocumentRepository } from "../../domain/repositories/IIndexedDocumentRepository";
 import { IIndexedDocumentRepositoryToken } from "../../domain/repositories/IIndexedDocumentRepository";
+import { Result } from "@/lib/utils/result";
+import { RagError } from "../../domain/errors/RagErrors";
 
 @injectable()
 export class IndexDocumentUseCase {
@@ -14,20 +16,35 @@ export class IndexDocumentUseCase {
         private documentRepository: IIndexedDocumentRepository
     ) {}
 
-    async execute(content: string, options: RagIndexingOptions): Promise<RagIndexingResult> {
+    async execute(content: string, options: RagIndexingOptions): Promise<Result<RagIndexingResult, RagError>> {
         const result = await this.ragRepository.indexDocument(content, options);
         
-        // Track the successful indexing
-        await this.documentRepository.record({
-            projectId: options.projectId || 'unknown',
-            userId: options.userId,
-            sourceFile: options.sourceFile || 'unknown',
-            chunksCount: result.chunksCount,
-            fileSize: content.length, // approximation
-            type: options.type as any || 'context',
-            chunkSize: options.chunkSize || 500,
-            overlap: options.overlap || 50,
-        });
+        if (result.isSuccess) {
+            const data = result.getValue();
+            // Track the successful indexing
+            await this.documentRepository.record({
+                projectId: options.projectId || 'unknown',
+                userId: options.userId,
+                sourceFile: options.sourceFile || 'unknown',
+                chunksCount: data.chunksCreated,
+                fileSize: content.length, // approximation
+                type: options.type as any || 'context',
+                chunkSize: options.chunkSize || 500,
+                overlap: options.overlap || 50,
+            });
+        } else {
+            // Log failure to db as well
+            await this.documentRepository.recordFailed({
+                projectId: options.projectId || 'unknown',
+                userId: options.userId,
+                sourceFile: options.sourceFile || 'unknown',
+                fileSize: content.length,
+                type: options.type as any || 'context',
+                errorMessage: result.error?.message || "Unknown indexing error",
+                chunkSize: options.chunkSize || 500,
+                overlap: options.overlap || 50,
+            });
+        }
 
         return result;
     }
@@ -39,8 +56,8 @@ export class IndexDocumentUseCase {
         fileSize: number, 
         type: any, 
         errorMessage: string 
-    }): Promise<void> {
-        await this.documentRepository.recordFailed({
+    }): Promise<Result<string, RagError>> {
+        return this.documentRepository.recordFailed({
             projectId: data.projectId,
             userId: data.userId,
             sourceFile: data.sourceFile,

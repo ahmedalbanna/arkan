@@ -4,6 +4,8 @@ import type { IIndexedDocumentRepository } from "../../domain/repositories/IInde
 import { IIndexedDocumentRepositoryToken } from "../../domain/repositories/IIndexedDocumentRepository";
 import type { IRagRepository } from "../../domain/repositories/IRagRepository";
 import { IRagRepositoryToken } from "../../domain/repositories/IRagRepository";
+import { Result } from "@/lib/utils/result";
+import { RagError } from "../../domain/errors/RagErrors";
 
 @injectable()
 export class DeleteIndexedDocumentUseCase {
@@ -14,13 +16,12 @@ export class DeleteIndexedDocumentUseCase {
         private ragRepository: IRagRepository
     ) {}
 
-    async execute(options: { projectId?: string, sourceFile?: string }): Promise<void> {
+    async execute(options: { projectId?: string, sourceFile?: string }): Promise<Result<void, RagError>> {
         if (options.projectId) {
-            await this.documentRepository.deleteByProjectId(options.projectId);
-            // Also delete from vector store via RAG repository if it supports it
-            // For now, we assume the tracking is enough or handled by RAG repo
+            return this.documentRepository.deleteByProjectId(options.projectId);
         } else if (options.sourceFile) {
-            await this.documentRepository.deleteBySourceFile(options.sourceFile);
+            return this.documentRepository.deleteBySourceFile(options.sourceFile);
         }
+        return Result.ok();
     }
 }

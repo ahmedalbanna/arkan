@@ -9,6 +9,8 @@ import { IUserRepositoryToken } from "@/modules/users/domain/repositories/IUserR
 import type { INotificationService } from "@/modules/users/domain/services/INotificationService";
 import { INotificationServiceToken } from "@/modules/users/domain/services/INotificationService";
 import { TransactionProperties } from "../../domain/entities/Transaction";
+import { Result } from "@/lib/utils/result";
+import { BillingError } from "../../domain/errors/BillingErrors";
 
 @injectable()
 export class SubmitPaymentRequestUseCase {
@@ -34,36 +36,43 @@ export class SubmitPaymentRequestUseCase {
         price: number, 
         userName: string, 
         userEmail: string 
-    }): Promise<TransactionProperties> {
+    }): Promise<Result<TransactionProperties, BillingError>> {
         const { file, fileName, contentType, userId, ...rest } = params;
 
-        // 1. Upload proof file
-        const storagePath = `payment_proofs/${userId}/${Date.now()}-${fileName}`;
-        const fileUrl = await this.fileStorageService.upload(storagePath, file, contentType);
+        try {
+            // 1. Upload proof file
+            const storagePath = `payment_proofs/${userId}/${Date.now()}-${fileName}`;
+            const fileUrl = await this.fileStorageService.upload(storagePath, file, contentType);
 
-        // 2. Create transaction record
-        const transaction = await this.transactionRepository.save({
-            userId,
-            ...rest,
-            status: 'pending',
-            proofUrl: fileUrl,
-            createdAt: new Date().toISOString()
-        } as any);
+            // 2. Create transaction record
+            const result = await this.transactionRepository.save({
+                userId,
+                ...rest,
+                status: 'pending',
+                proofUrl: fileUrl,
+                createdAt: new Date().toISOString()
+            } as any);
 
-        // 3. Notify all admins
-        const adminsResult = await this.userRepository.getAdmins();
-        if (adminsResult.isSuccess) {
-            const admins = adminsResult.getValue();
-            const notificationPayload = {
-                title: "New Payment Request",
-                description: `User ${params.userName || params.userEmail} submitted a payment request for $${params.price}.`,
-                icon: "credit-card",
-                link: '/admin/manage-payments'
-            };
+            if (result.isFailure) return result;
+            const transaction = result.getValue();
 
-            await Promise.all(admins.map(admin => this.notificationService.send(admin.id, notificationPayload)));
+            // 3. Notify all admins
+            const adminsResult = await this.userRepository.getAdmins();
+            if (adminsResult.isSuccess) {
+                const admins = adminsResult.getValue();
+                const notificationPayload = {
+                    title: "New Payment Request",
+                    description: `User ${params.userName || params.userEmail} submitted a payment request for $${params.price}.`,
+                    icon: "credit-card",
+                    link: '/admin/manage-payments'
+                };
+
+                await Promise.all(admins.map(admin => this.notificationService.send(admin.id, notificationPayload)));
+            }
+
+            return Result.ok(transaction);
+        } catch (error: any) {
+            return Result.fail(BillingError.internal(error.message));
         }
-
-        return transaction;
     }
 }

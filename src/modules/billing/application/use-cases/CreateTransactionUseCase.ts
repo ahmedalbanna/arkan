@@ -3,6 +3,8 @@ import { inject, injectable } from "tsyringe";
 import type { ITransactionRepository } from "../../domain/repositories/ITransactionRepository";
 import { ITransactionRepositoryToken } from "../../domain/repositories/ITransactionRepository";
 import { TransactionProperties } from "../../domain/entities/Transaction";
+import { Result } from "@/lib/utils/result";
+import { BillingError } from "../../domain/errors/BillingErrors";
 
 @injectable()
 export class CreateTransactionUseCase {
@@ -11,7 +13,7 @@ export class CreateTransactionUseCase {
         private transactionRepository: ITransactionRepository
     ) {}
 
-    async execute(data: Omit<TransactionProperties, 'id' | 'createdAt'>): Promise<TransactionProperties> {
+    async execute(data: Omit<TransactionProperties, 'id' | 'createdAt'>): Promise<Result<TransactionProperties, BillingError>> {
         return this.transactionRepository.save({
             ...data,
             createdAt: new Date().toISOString()

@@ -1,6 +1,6 @@
 // src/app/api/admin/templates/presentation/[id]/route.ts
 
-import { createApiResponse, handleApiError, withAuth } from '@/lib/utils/api-utils';
+import { handleApiError, withAuth, handleTemplateResult } from '@/lib/utils/api-utils';
 import { container } from '@/infrastructure/di/container';
 import { TemplateController } from '@/modules/templates/adapters/controllers/TemplateController';
 import { UpdatePresentationTemplateSchema } from '@/ai/schemas';
@@ -10,12 +10,9 @@ export const GET = withAuth(async ({ params }) => {
     try {
         const { id } = await params;
         const controller = container.resolve(TemplateController);
-        const template = await controller.getTemplateById('presentation', id);
+        const result = await controller.getTemplateById('presentation', id);
 
-        if (!template) {
-            return handleApiError({ message: 'Presentation template not found.' }, 404);
-        }
-        return createApiResponse(template, 200);
+        return handleTemplateResult(result);
     } catch (error) {
         return handleApiError(error);
     }
@@ -34,14 +31,14 @@ export const PUT = withAuth(async ({ request, params }) => {
         }
 
         const controller = container.resolve(TemplateController);
-        const existing = await controller.getTemplateById('presentation', id);
+        const checkResult = await controller.getTemplateById('presentation', id);
 
-        if (!existing) {
-            return handleApiError({ message: 'Template not found.' }, 404);
+        if (checkResult.isFailure) {
+            return handleTemplateResult(checkResult);
         }
 
-        const updated = await controller.saveTemplate('presentation', validation.data as any);
-        return createApiResponse(updated, 200);
+        const result = await controller.saveTemplate('presentation', validation.data as any);
+        return handleTemplateResult(result);
     } catch (error) {
         return handleApiError(error);
     }
@@ -53,8 +50,8 @@ export const DELETE = withAuth(async ({ params }) => {
     try {
         const { id } = await params;
         const controller = container.resolve(TemplateController);
-        await controller.deleteTemplate('presentation', id);
-        return createApiResponse({ message: 'Template deleted successfully.' }, 200);
+        const result = await controller.deleteTemplate('presentation', id);
+        return handleTemplateResult(result);
     } catch (error) {
         return handleApiError(error);
     }

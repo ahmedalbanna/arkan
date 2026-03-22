@@ -62,12 +62,21 @@ export class FirebaseAuthRepository implements IAuthRepository {
         }
     }
 
-    async createSessionCookie(idToken: string, options: { expiresIn: number }): Promise<string> {
-        return adminAuth.createSessionCookie(idToken, options);
+    async createSessionCookie(idToken: string, options: { expiresIn: number }): Promise<Result<string, UserError>> {
+        try {
+            const cookie = await adminAuth.createSessionCookie(idToken, options);
+            return Result.ok(cookie);
+        } catch (error: any) {
+            return Result.fail(UserError.internal(error.message));
+        }
     }
 
-    async verifySessionCookie(sessionCookie: string, checkRevoked: boolean = true): Promise<{ uid: string, email?: string }> {
-        const decodedToken = await adminAuth.verifySessionCookie(sessionCookie, checkRevoked);
-        return { uid: decodedToken.uid, email: decodedToken.email };
+    async verifySessionCookie(sessionCookie: string, checkRevoked: boolean = true): Promise<Result<{ uid: string, email?: string }, UserError>> {
+        try {
+            const decodedToken = await adminAuth.verifySessionCookie(sessionCookie, checkRevoked);
+            return Result.ok({ uid: decodedToken.uid, email: decodedToken.email });
+        } catch (error: any) {
+            return Result.fail(UserError.unauthorized(error.message));
+        }
     }
 }

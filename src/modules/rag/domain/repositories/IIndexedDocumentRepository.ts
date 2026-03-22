@@ -17,21 +17,24 @@ export interface IndexedDocumentRecord {
   errorMessage?: string;
 }
 
+import { Result } from "@/lib/utils/result";
+import { RagError } from "../errors/RagErrors";
+
 export interface IIndexedDocumentRepository {
-    record(data: Omit<IndexedDocumentRecord, 'id' | 'timestamp' | 'indexedAt' | 'status'>): Promise<string>;
-    recordFailed(data: Omit<IndexedDocumentRecord, 'id' | 'timestamp' | 'indexedAt' | 'status' | 'chunksCount'>): Promise<string>;
-    getAll(limit?: number): Promise<IndexedDocumentRecord[]>;
-    getByProjectId(projectId: string): Promise<IndexedDocumentRecord[]>;
-    getByUserId(userId: string): Promise<IndexedDocumentRecord[]>;
-    deleteByProjectId(projectId: string): Promise<void>;
-    deleteBySourceFile(sourceFile: string): Promise<void>;
-    search(query: string): Promise<IndexedDocumentRecord[]>;
-    getStats(): Promise<{
+    record(data: Omit<IndexedDocumentRecord, 'id' | 'timestamp' | 'indexedAt' | 'status'>): Promise<Result<string, RagError>>;
+    recordFailed(data: Omit<IndexedDocumentRecord, 'id' | 'timestamp' | 'indexedAt' | 'status' | 'chunksCount'>): Promise<Result<string, RagError>>;
+    getAll(limit?: number): Promise<Result<IndexedDocumentRecord[], RagError>>;
+    getByProjectId(projectId: string): Promise<Result<IndexedDocumentRecord[], RagError>>;
+    getByUserId(userId: string): Promise<Result<IndexedDocumentRecord[], RagError>>;
+    deleteByProjectId(projectId: string): Promise<Result<void, RagError>>;
+    deleteBySourceFile(sourceFile: string): Promise<Result<void, RagError>>;
+    search(query: string): Promise<Result<IndexedDocumentRecord[], RagError>>;
+    getStats(): Promise<Result<{
         totalDocuments: number;
         totalChunks: number;
         projectCount: number;
         recentUploads: number;
-    }>;
+    }, RagError>>;
 }
 
 export const IIndexedDocumentRepositoryToken = Symbol("IIndexedDocumentRepository");

@@ -25,11 +25,11 @@ export async function convertMarkdownToPdf(
     const ast = unified().use(remarkParse).use(remarkGfm).parse(processedMarkdown) as MdastRoot;
     const slidesContent = splitAstIntoSlides(ast);
 
-    const container = document.createElement('div');
-    container.style.position = 'absolute';
-    container.style.left = '-9999px';
-    container.style.width = '1024px'; // A fixed width for consistent rendering
-    document.body.appendChild(container);
+    const pdfContainer = document.createElement('div');
+    pdfContainer.style.position = 'absolute';
+    pdfContainer.style.left = '-9999px';
+    pdfContainer.style.width = '1024px'; // A fixed width for consistent rendering
+    document.body.appendChild(pdfContainer);
 
     let slidesHtml = '';
     for (const slideAst of slidesContent) {
@@ -83,13 +83,13 @@ export async function convertMarkdownToPdf(
       .pdf-slide code { font-family: ${styles.code?.fontFace || DEFAULT_CODE_FONT}, monospace; }
       .pdf-slide img { max-width: 80%; max-height: 250px; height: auto; display: block; margin: 1em auto; }
     `;
-    container.appendChild(styleElement);
+    pdfContainer.appendChild(styleElement);
 
     const contentDiv = document.createElement('div');
     contentDiv.innerHTML = slidesHtml;
-    container.appendChild(contentDiv);
+    pdfContainer.appendChild(contentDiv);
 
-    await container.resolve(PdfExportService).exportFromElement(container, `${fileName}.pdf`);
+    await container.resolve(PdfExportService).exportFromElement(pdfContainer, `${fileName}.pdf`);
 
-    document.body.removeChild(container);
+    document.body.removeChild(pdfContainer);
 }

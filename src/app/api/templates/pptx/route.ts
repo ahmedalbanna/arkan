@@ -5,11 +5,18 @@ import { container } from '@/infrastructure/di/container';
 import { TemplateController } from '@/modules/templates/adapters/controllers/TemplateController';
 import { templates as defaultTemplates } from '@/modules/templates/infrastructure/PptxStyles';
 
+import { handleTemplateResult } from '@/lib/utils/api-utils';
+
 export async function GET() {
     try {
         const controller = container.resolve(TemplateController);
-        const templatesList = await controller.getTemplates('pptx');
+        const result = await controller.getTemplates('pptx');
 
+        if (result.isFailure) {
+            return handleTemplateResult(result);
+        }
+
+        const templatesList = result.getValue();
         const templates: { [key: string]: any } = {};
         templatesList.forEach((t) => {
             templates[t.id] = t;
@@ -39,21 +46,21 @@ export const POST = withAuth(async ({ request }) => {
         const controller = container.resolve(TemplateController);
 
         // Check if exists
-        const existing = await controller.getTemplateById('pptx', id);
-        if (existing) {
+        const checkResult = await controller.getTemplateById('pptx', id);
+        if (checkResult.isSuccess) {
             return handleApiError({ message: 'Template already exists.' }, 409);
         }
 
-        const newTemplate = await controller.saveTemplate('pptx', {
+        const result = await controller.saveTemplate('pptx', {
             id,
             name,
             description,
             styles: defaultTemplates.modern.styles,
             imageUrl: 'https://placehold.co/400x225.png',
             dataAiHint: 'presentation modern',
-        });
+        } as any);
 
-        return createApiResponse(newTemplate, 201);
+        return handleTemplateResult(result);
     } catch (error) {
         return handleApiError(error);
     }

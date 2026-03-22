@@ -6,7 +6,13 @@ import { CustomFirebaseError, handleFirebaseError } from '@/infrastructure/fireb
 import { NextResponse, type NextRequest } from 'next/server';
 import { ZodError } from 'zod';
 import { Result } from './result';
+import { Telemetry } from './telemetry';
 import { UserError, UserErrorType } from '@/modules/users/domain/errors/UserErrors';
+import { ProjectError, ProjectErrorType } from '@/modules/projects/domain/errors/ProjectErrors';
+import { BillingError, BillingErrorType } from '@/modules/billing/domain/errors/BillingErrors';
+import { RagError, RagErrorType } from '@/modules/rag/domain/errors/RagErrors';
+import { TemplateError, TemplateErrorType } from '@/modules/templates/domain/errors/TemplateErrors';
+import { AIContentError, AIContentErrorType } from '@/modules/ai-content/domain/errors/AIContentErrors';
 
 
 interface ApiHandlerOptions {
@@ -144,6 +150,238 @@ export const handleResult = <T>(result: Result<T, UserError>) => {
     case UserErrorType.VALIDATION:
       status = 400;
       break;
+  }
+
+  if (status >= 500) {
+    Telemetry.logFailure('GenericResult', error);
+  }
+
+  return NextResponse.json({ message: error.message, details: error.details }, { status });
+};
+
+/**
+ * Standardized handler for Billing Result objects in API routes.
+ * @param result - The Result object to handle.
+ * @returns A NextResponse object.
+ */
+export const handleBillingResult = <T>(result: Result<T, BillingError>) => {
+  if (result.isSuccess) {
+    return createApiResponse(result.getValue(), 200);
+  }
+
+  const error = result.error!;
+  let status = 500;
+
+  switch (error.type) {
+    case BillingErrorType.NOT_FOUND:
+      status = 404;
+      break;
+    case BillingErrorType.CONFLICT:
+      status = 409;
+      break;
+    case BillingErrorType.UNAUTHORIZED:
+      status = 401;
+      break;
+    case BillingErrorType.VALIDATION:
+      status = 400;
+      break;
+    case BillingErrorType.SAVE_ERROR:
+      status = 400;
+      break;
+    case BillingErrorType.UPDATE_ERROR:
+      status = 400;
+      break;
+  }
+
+  if (status >= 500) {
+    Telemetry.logFailure('BillingAPI', error);
+  }
+
+  return NextResponse.json({ message: error.message, details: error.details }, { status });
+};
+
+/**
+ * Standardized handler for Template Result objects in API routes.
+ * @param result - The Result object to handle.
+ * @returns A NextResponse object.
+ */
+export const handleTemplateResult = <T>(result: Result<T, TemplateError>) => {
+  if (result.isSuccess) {
+    return createApiResponse(result.getValue(), 200);
+  }
+
+  const error = result.error!;
+  let status = 500;
+
+  switch (error.type) {
+    case TemplateErrorType.NOT_FOUND:
+      status = 404;
+      break;
+    case TemplateErrorType.SAVE_ERROR:
+      status = 400;
+      break;
+    case TemplateErrorType.DELETE_ERROR:
+      status = 400;
+      break;
+  }
+
+  if (status >= 500) {
+    Telemetry.logFailure('TemplateAPI', error);
+  }
+
+  return NextResponse.json({ message: error.message, details: error.details }, { status });
+};
+
+/**
+ * Standardized handler for AIContent Result objects in API routes.
+ * @param result - The Result object to handle.
+ * @returns A NextResponse object.
+ */
+export const handleAIContentResult = <T>(result: Result<T, AIContentError>) => {
+  if (result.isSuccess) {
+    return createApiResponse(result.getValue(), 200);
+  }
+
+  const error = result.error!;
+  let status = 500;
+
+  switch (error.type) {
+    case AIContentErrorType.NOT_FOUND:
+      status = 404;
+      break;
+    case AIContentErrorType.SAVE_ERROR:
+      status = 400;
+      break;
+    case AIContentErrorType.DELETE_ERROR:
+      status = 400;
+      break;
+    case AIContentErrorType.VALIDATION:
+      status = 400;
+      break;
+  }
+
+  if (status >= 500) {
+    Telemetry.logFailure('AIContentAPI', error);
+  }
+
+  return NextResponse.json({ message: error.message, details: error.details }, { status });
+};
+
+/**
+ * Standardized handler for RAG Result objects in API routes.
+ * @param result - The Result object to handle.
+ * @returns A NextResponse object.
+ */
+export const handleRagResult = <T>(result: Result<T, RagError>) => {
+  if (result.isSuccess) {
+    return createApiResponse(result.getValue(), 200);
+  }
+
+  const error = result.error!;
+  let status = 500;
+
+  switch (error.type) {
+    case RagErrorType.NOT_FOUND:
+      status = 404;
+      break;
+    case RagErrorType.UNAUTHORIZED:
+      status = 401;
+      break;
+    case RagErrorType.INDEXING_FAILED:
+      status = 400;
+      break;
+    case RagErrorType.RETRIEVAL_FAILED:
+      status = 400;
+      break;
+    case RagErrorType.DATABASE_ERROR:
+      status = 500;
+      break;
+    case RagErrorType.VECTOR_STORE_ERROR:
+      status = 500;
+      break;
+  }
+
+  if (status >= 500) {
+    Telemetry.logFailure('RagAPI', error);
+  }
+
+  return NextResponse.json({ message: error.message, details: error.details }, { status });
+};
+
+/**
+ * Standardized handler for Project Result objects in API routes.
+ * @param result - The Result object to handle.
+ * @returns A NextResponse object.
+ */
+export const handleProjectResult = <T>(result: Result<T, ProjectError>) => {
+  if (result.isSuccess) {
+    return createApiResponse(result.getValue(), 200);
+  }
+
+  const error = result.error!;
+  let status = 500;
+
+  switch (error.type) {
+    case ProjectErrorType.NOT_FOUND:
+      status = 404;
+      break;
+    case ProjectErrorType.CONFLICT:
+      status = 409;
+      break;
+    case ProjectErrorType.UNAUTHORIZED:
+      status = 401;
+      break;
+    case ProjectErrorType.VALIDATION:
+      status = 400;
+      break;
+    case ProjectErrorType.SAVE_ERROR:
+      status = 400;
+      break;
+    case ProjectErrorType.DELETE_ERROR:
+      status = 400;
+      break;
+  }
+
+  if (status >= 500) {
+    Telemetry.logFailure('ProjectAPI', error);
+  }
+
+  return NextResponse.json({ message: error.message, details: error.details }, { status });
+};
+
+/**
+ * Standardized handler for User Result objects in API routes.
+ * @param result - The Result object to handle.
+ * @returns A NextResponse object.
+ */
+export const handleUserResult = <T>(result: Result<T, UserError>) => {
+  if (result.isSuccess) {
+    return createApiResponse(result.getValue(), 200);
+  }
+
+  const error = result.error!;
+  let status = 500;
+
+  switch (error.type) {
+    case UserErrorType.NOT_FOUND:
+      status = 404;
+      break;
+    case UserErrorType.CONFLICT:
+      status = 409;
+      break;
+    case UserErrorType.UNAUTHORIZED:
+      status = 401;
+      break;
+    case UserErrorType.VALIDATION:
+      status = 400;
+      break;
+    case UserErrorType.INTERNAL:
+      status = 500;
+      break;
+  }
+
+  if (status >= 500) {
+    Telemetry.logFailure('UserAPI', error);
   }
 
   return NextResponse.json({ message: error.message, details: error.details }, { status });

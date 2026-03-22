@@ -118,7 +118,7 @@ export function useExport() {
         setIsExporting(true);
         try {
             const templateStyles = pptxTemplates[options.template] || pptxTemplates.modern;
-            const client = container.resolve(IPptxExportServiceToken);
+            const client = container.resolve<any>(IPptxExportServiceToken);
             
             const result = await client.export(project, selectedContent, {
                 styles: templateStyles.styles,

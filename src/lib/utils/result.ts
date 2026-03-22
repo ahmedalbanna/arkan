@@ -32,6 +32,8 @@ export class Result<T, E = Error> {
   }
 
   public static fail<T, E>(error: E): Result<T, E> {
+    // Note: We don't log here automatically to avoid noise from handled validation errors.
+    // Use Telemetry.logFailure manually in repositories/controllers for critical errors.
     return new Result<T, E>(false, error);
   }
 

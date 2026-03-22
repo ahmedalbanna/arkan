@@ -3,6 +3,9 @@ import { inject, injectable } from "tsyringe";
 import type { ISectionRepository } from "../../domain/repositories/ISectionRepository";
 import { ISectionRepositoryToken } from "../../domain/repositories/ISectionRepository";
 
+import { Result } from "@/lib/utils/result";
+import { AIContentError } from "../../domain/errors/AIContentErrors";
+
 @injectable()
 export class DeleteSectionUseCase {
     constructor(
@@ -10,7 +13,7 @@ export class DeleteSectionUseCase {
         private sectionRepository: ISectionRepository
     ) {}
 
-    async execute(id: string): Promise<void> {
+    async execute(id: string): Promise<Result<void, AIContentError>> {
         return this.sectionRepository.delete(id);
     }
 }

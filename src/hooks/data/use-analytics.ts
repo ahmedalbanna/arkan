@@ -15,7 +15,9 @@ export function useUserStats() {
             if (!firebaseUser) throw new Error("User not authenticated");
             const token = await firebaseUser.getIdToken();
             const client = container.resolve(AnalyticsApiClient);
-            return client.fetchUserStats(token);
+            const result = await client.fetchUserStats(token);
+            if (result.isFailure) throw result.error;
+            return result.getValue();
         },
         enabled: !!firebaseUser,
     });

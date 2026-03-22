@@ -22,10 +22,14 @@ export const POST = withAuth(async ({ request, user }) => {
     }
 
     const controller = container.resolve(BillingController);
-    await controller.verifyPayment({
+    const result = await controller.verifyPayment({
         ...validation.data,
         adminId: user.id
     });
+
+    if (result.isFailure) {
+        return handleApiError(result.error);
+    }
 
     return createApiResponse({ message: `Transaction ${validation.data.status} successfully.` }, 200);
   } catch (error) {

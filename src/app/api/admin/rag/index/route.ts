@@ -90,13 +90,15 @@ export async function POST(request: NextRequest) {
       overlap,
     });
 
-    if (!result.success) {
-      return NextResponse.json({ success: false, error: 'Indexing failed' }, { status: 500 });
+    if (result.isFailure) {
+      return NextResponse.json({ success: false, error: result.error?.message || 'Indexing failed' }, { status: 500 });
     }
+
+    const data = result.getValue();
 
     return NextResponse.json({
       success: true,
-      chunksCreated: result.chunksCreated,
+      chunksCreated: data.chunksCreated,
       fileName: file.name,
       message: 'Document indexed successfully',
     });
@@ -122,12 +124,6 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ success: false, error: 'Internal server error' }, { status: 500 });
   }
 }
-
-export const config = {
-  api: {
-    bodyParser: false,
-  },
-};
 
 // Configure API route
 export const config = {

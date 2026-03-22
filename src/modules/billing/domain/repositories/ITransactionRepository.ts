@@ -1,14 +1,16 @@
 
 import { TransactionProperties } from "../entities/Transaction";
+import { Result } from "@/lib/utils/result";
+import { BillingError } from "../errors/BillingErrors";
 
 export interface ITransactionRepository {
-    getById(id: string): Promise<TransactionProperties | null>;
-    getAll(): Promise<TransactionProperties[]>;
-    getByUserId(userId: string): Promise<TransactionProperties[]>;
-    save(data: Omit<TransactionProperties, 'id'>): Promise<TransactionProperties>;
-    update(id: string, data: Partial<TransactionProperties>): Promise<TransactionProperties>;
-    getPaginated(options: { status?: string, limit: number, lastVisibleId?: string }): Promise<{ transactions: TransactionProperties[], hasNextPage: boolean, lastVisibleId: string | null }>;
-    getByDateRange(startDate: string, endDate: string): Promise<TransactionProperties[]>;
+    getById(id: string): Promise<Result<TransactionProperties, BillingError>>;
+    getAll(): Promise<Result<TransactionProperties[], BillingError>>;
+    getByUserId(userId: string): Promise<Result<TransactionProperties[], BillingError>>;
+    save(data: Omit<TransactionProperties, 'id'>): Promise<Result<TransactionProperties, BillingError>>;
+    update(id: string, data: Partial<TransactionProperties>): Promise<Result<TransactionProperties, BillingError>>;
+    getPaginated(options: { status?: string, limit: number, lastVisibleId?: string }): Promise<Result<{ transactions: TransactionProperties[], hasNextPage: boolean, lastVisibleId: string | null }, BillingError>>;
+    getByDateRange(startDate: string, endDate: string): Promise<Result<TransactionProperties[], BillingError>>;
 }
 
 export const ITransactionRepositoryToken = Symbol("ITransactionRepository");

@@ -28,7 +28,11 @@ export const POST = withAuth(async ({ request, user, params }) => {
         input: validation.data as any
     });
 
-    return createApiResponse(result, 200);
+    if (result.isFailure) {
+        return handleApiError(result.error);
+    }
+
+    return createApiResponse(result.getValue(), 200);
 
   } catch (error) {
     return handleApiError(error);

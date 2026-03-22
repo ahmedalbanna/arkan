@@ -6,6 +6,8 @@ import type { IGenerationLogRepository } from "../../domain/repositories/IGenera
 import { IGenerationLogRepositoryToken } from "../../domain/repositories/IGenerationLogRepository";
 import { DeductCreditsUseCase } from "@/modules/users/application/use-cases/DeductCreditsUseCase";
 import { WritingToolRegistry } from "../services/WritingToolRegistry";
+import { Result } from "@/lib/utils/result";
+import { AiError } from "../../domain/errors/AiErrors";
 
 export interface RunAiToolInput<TInput> {
     userId: string;
@@ -24,21 +26,32 @@ export class RunAiToolUseCase {
         private writingToolRegistry: WritingToolRegistry
     ) {}
 
-    async execute<TInput, TOutput>(params: RunAiToolInput<TInput>): Promise<TOutput> {
+    async execute<TInput, TOutput>(params: RunAiToolInput<TInput>): Promise<Result<TOutput, AiError>> {
         const { userId, toolName, input } = params;
 
         const config = this.writingToolRegistry.getTool(toolName);
         if (!config) {
-            throw new Error(`Tool ${toolName} not found in registry.`);
+            return Result.fail(AiError.notFound(`Tool ${toolName} not found in registry.`));
         }
 
         const { flow, creditCost } = config;
 
         // 1. Run the AI Flow
-        const result = await this.aiService.runFlow(flow, input, toolName);
+        const aiResult = await this.aiService.runFlow<TInput, TOutput>(flow, input, toolName);
+        if (aiResult.isFailure) {
+            return aiResult;
+        }
+
+        const result = aiResult.getValue();
 
         // 2. Deduct credits
-        await this.deductCreditsUseCase.execute(userId, creditCost);
+        const deductResult = await this.deductCreditsUseCase.execute(userId, creditCost);
+        if (deductResult.isFailure) {
+            // If credit deduction fails, we still return the AI result but maybe log the error?
+            // Actually, in a strict system we should have checked credits first.
+            // For now, we propagate the error if we want to enforce credit rules.
+            return Result.fail(AiError.internal(`Credit deduction failed: ${deductResult.error?.message}`));
+        }
 
         // 3. Log the generation
         await this.generationLogRepository.log({
@@ -49,6 +62,6 @@ export class RunAiToolUseCase {
             creditCost: creditCost
         });
 
-        return result;
+        return Result.ok(result);
     }
 }

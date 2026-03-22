@@ -15,7 +15,9 @@ export function useAdminDashboard() {
             if (!firebaseUser) throw new Error("User not authenticated");
             const token = await firebaseUser.getIdToken();
             const client = container.resolve(AdminApiClient);
-            return client.fetchDashboardStats(token);
+            const result = await client.fetchDashboardStats(token);
+            if (result.isFailure) throw result.error;
+            return result.getValue();
         },
         enabled: !!firebaseUser,
     });

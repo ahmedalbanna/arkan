@@ -1,6 +1,6 @@
 
 import { z } from 'zod';
-import { withAuth, handleApiError, createApiResponse } from '@/lib/utils/api-utils';
+import { withAuth, handleApiError, handleTemplateResult } from '@/lib/utils/api-utils';
 import { container } from '@/infrastructure/di/container';
 import { TemplateController } from '@/modules/templates/adapters/controllers/TemplateController';
 
@@ -23,12 +23,12 @@ export const PUT = withAuth(async ({ request, params }) => {
         }
 
         const controller = container.resolve(TemplateController);
-        const updatedTemplate = await controller.saveTemplate('pptx', {
+        const result = await controller.saveTemplate('pptx', {
             id: key,
             ...validation.data
         });
 
-        return createApiResponse(updatedTemplate, 200);
+        return handleTemplateResult(result);
 
     } catch (error) {
         return handleApiError(error);
@@ -47,9 +47,9 @@ export const DELETE = withAuth(async ({ params }) => {
         }
 
         const controller = container.resolve(TemplateController);
-        await controller.deleteTemplate('pptx', key);
+        const result = await controller.deleteTemplate('pptx', key);
 
-        return createApiResponse({ message: `Template "${key}" deleted successfully.` }, 200);
+        return handleTemplateResult(result);
 
     } catch (error) {
         return handleApiError(error);

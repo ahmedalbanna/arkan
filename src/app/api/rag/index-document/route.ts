@@ -12,6 +12,8 @@ const IndexDocumentSchema = z.object({
   type: z.enum(['user_upload', 'reference']).default('user_upload'),
 });
 
+import { handleRagResult } from '@/lib/utils/api-utils';
+
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
@@ -27,14 +29,16 @@ export async function POST(request: NextRequest) {
         sourceFile: fileName,
     });
 
-    if (!result.success) {
-      return NextResponse.json({ error: 'Failed to index document', details: result.errors }, { status: 500 });
+    if (result.isFailure) {
+        return handleRagResult(result);
     }
+
+    const data = result.getValue();
 
     return NextResponse.json({
       success: true,
       message: 'Document indexed successfully',
-      chunksCreated: result.chunksCreated,
+      chunksCreated: data.chunksCreated,
     });
 
   } catch (error) {

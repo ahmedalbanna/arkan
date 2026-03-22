@@ -20,7 +20,11 @@ export async function POST(request: Request) {
     let { userId, token } = validation.data;
 
     const controller = container.resolve(UserController);
-    await controller.saveDeviceToken(userId, token);
+    const result = await controller.saveDeviceToken(userId, token);
+
+    if (result.isFailure) {
+        return NextResponse.json({ message: result.error?.message || 'Failed to save device token.' }, { status: 500 });
+    }
 
     return NextResponse.json({ message: 'Device token saved successfully.' }, { status: 200 });
 

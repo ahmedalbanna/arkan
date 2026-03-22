@@ -9,6 +9,8 @@ const markAsReadSchema = z.object({
   notificationIds: z.array(z.string()).min(1),
 });
 
+import { handleUserResult } from '@/lib/utils/api-utils';
+
 export const POST = withAuth(async ({ request, user }) => {
     try {
         const body = await request.json();
@@ -21,9 +23,9 @@ export const POST = withAuth(async ({ request, user }) => {
         const { notificationIds } = validation.data;
         const controller = container.resolve(UserController);
         
-        await controller.markNotificationsAsRead(user.uid, notificationIds);
+        const result = await controller.markNotificationsAsRead(user.uid, notificationIds);
 
-        return createApiResponse({ message: 'Notifications marked as read.' }, 200);
+        return handleUserResult(result);
 
     } catch (error) {
         return handleApiError(error);

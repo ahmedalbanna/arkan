@@ -1,5 +1,5 @@
 // jest.setup.js
-import '@testing-library/jest-dom';
+require('@testing-library/jest-dom');
 
 // Mock the canvas context for text measurement functions
 // This prevents errors when running tests in a JSDOM environment

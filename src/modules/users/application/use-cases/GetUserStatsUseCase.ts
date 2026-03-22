@@ -29,7 +29,12 @@ export class GetUserStatsUseCase {
 
     async execute(userId: string): Promise<Result<UserStats, UserError>> {
         try {
-            const logs = await this.generationLogRepository.getByUserId(userId);
+            const logsResult = await this.generationLogRepository.getByUserId(userId);
+            if (logsResult.isFailure) {
+                return Result.fail(UserError.internal(logsResult.error?.message || "Failed to fetch logs"));
+            }
+
+            const logs = logsResult.getValue();
             
             const totalGenerations = logs.length;
             let creditsUsed = 0;
@@ -42,9 +47,9 @@ export class GetUserStatsUseCase {
             });
 
             const agentUsagePromises = Object.entries(agentUsage).map(async ([agentId, count]) => {
-                const agent = await this.agentRepository.getById(agentId);
+                const agentResult = await this.agentRepository.getById(agentId);
                 return {
-                    name: agent?.name || 'Unknown',
+                    name: agentResult.isSuccess ? agentResult.getValue().name : 'Unknown',
                     agentId,
                     count
                 };

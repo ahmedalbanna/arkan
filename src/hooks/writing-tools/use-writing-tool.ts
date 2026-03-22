@@ -26,7 +26,9 @@ export function useWritingTool<TData = unknown, TVariables = any>(
     mutationFn: async (data: TVariables) => {
       const token = await getAuthenticatedToken(firebaseUser);
       const client = container.resolve(WritingToolsApiClient);
-      return client.writingToolApi<TVariables, TData>(endpoint, { data, token });
+      const result = await client.writingToolApi<TVariables, TData>(endpoint, { data, token });
+      if (result.isFailure) throw result.error;
+      return result.getValue();
     },
     onSuccess: (data, variables, context) => {
       // Refetch user profile to update credit count in the UI

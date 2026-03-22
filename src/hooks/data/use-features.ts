@@ -21,7 +21,9 @@ export function useFeatures() {
             if (!firebaseUser) throw new Error('User not authenticated');
             const token = await firebaseUser.getIdToken();
             const client = container.resolve(FeatureApiClient);
-            return client.fetchFeaturesApi(token);
+            const result = await client.fetchFeaturesApi(token);
+            if (result.isFailure) throw result.error;
+            return result.getValue();
         },
         enabled: !!firebaseUser,
         staleTime: 1000 * 60 * 5, // 5 minutes

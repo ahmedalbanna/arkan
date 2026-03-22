@@ -7,11 +7,15 @@ import { TemplateController } from '@/modules/templates/adapters/controllers/Tem
 
 // This is a public endpoint that does not require authentication
 // as all users need to be able to fetch the templates for building reports.
+import { handleTemplateResult } from '@/lib/utils/api-utils';
+
+// This is a public endpoint that does not require authentication
+// as all users need to be able to fetch the templates for building reports.
 export async function GET() {
     try {
         const controller = container.resolve(TemplateController);
-        const templates = await controller.getTemplates('report');
-        return createApiResponse(templates, 200);
+        const result = await controller.getTemplates('report');
+        return handleTemplateResult(result);
     } catch (error) {
         return handleApiError(error);
     }
@@ -26,13 +30,13 @@ export const POST = withAuth(async ({ request }) => {
         }
 
         const controller = container.resolve(TemplateController);
-        const existing = await controller.getTemplateById('report', validation.data.id);
-        if (existing) {
+        const checkResult = await controller.getTemplateById('report', validation.data.id);
+        if (checkResult.isSuccess) {
             return handleApiError({ message: 'A report template with this ID already exists.' }, 409);
         }
 
-        const newTemplate = await controller.saveTemplate('report', validation.data);
-        return createApiResponse(newTemplate, 201);
+        const result = await controller.saveTemplate('report', validation.data as any);
+        return handleTemplateResult(result);
     } catch (error) {
         return handleApiError(error);
     }
@@ -52,13 +56,13 @@ export const PUT = withAuth(async ({ request }) => {
         }
 
         const controller = container.resolve(TemplateController);
-        const existing = await controller.getTemplateById('report', id);
-        if (!existing) {
-            return handleApiError({ message: 'Template not found.' }, 404);
+        const checkResult = await controller.getTemplateById('report', id);
+        if (checkResult.isFailure) {
+            return handleTemplateResult(checkResult);
         }
 
-        const updated = await controller.saveTemplate('report', { id, ...data } as any);
-        return createApiResponse(updated, 200);
+        const result = await controller.saveTemplate('report', { id, ...data } as any);
+        return handleTemplateResult(result);
     } catch (error) {
         return handleApiError(error);
     }

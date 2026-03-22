@@ -1,7 +1,10 @@
 
 import { inject, injectable } from "tsyringe";
-import type { IAgentRepository, Agent } from "../../domain/repositories/IAgentRepository";
+import type { IAgentRepository } from "../../domain/repositories/IAgentRepository";
 import { IAgentRepositoryToken } from "../../domain/repositories/IAgentRepository";
+import { Agent } from "../../domain/entities/Agent";
+import { Result } from "@/lib/utils/result";
+import { AiError } from "../../domain/errors/AiErrors";
 
 @injectable()
 export class GetAgentByIdUseCase {
@@ -10,7 +13,7 @@ export class GetAgentByIdUseCase {
         private agentRepository: IAgentRepository
     ) {}
 
-    async execute(id: string): Promise<Agent | null> {
+    async execute(id: string): Promise<Result<Agent, AiError>> {
         return this.agentRepository.getById(id);
     }
 }

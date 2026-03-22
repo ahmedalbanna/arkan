@@ -207,7 +207,8 @@ export function useAiActions({ editor: initialEditor }: AiActionsProps = {}) {
 
         const client = container.resolve(WritingToolsApiClient);
         const result = await client.writingToolApi<any, { markdownContent: string }>(`/api/writing-tools/generate-chapter`, { data: body, token });
-        return { chapterId, content: result.markdownContent };
+        if (result.isFailure) throw result.error;
+        return { chapterId, content: result.getValue().markdownContent };
     },
     onSuccess: (data) => {
         updateProject(p => {

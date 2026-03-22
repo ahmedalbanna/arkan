@@ -3,6 +3,9 @@ import { inject, injectable } from "tsyringe";
 import type { ISectionRepository, SectionDefinition } from "../../domain/repositories/ISectionRepository";
 import { ISectionRepositoryToken } from "../../domain/repositories/ISectionRepository";
 
+import { Result } from "@/lib/utils/result";
+import { AIContentError } from "../../domain/errors/AIContentErrors";
+
 @injectable()
 export class SaveSectionUseCase {
     constructor(
@@ -10,7 +13,7 @@ export class SaveSectionUseCase {
         private sectionRepository: ISectionRepository
     ) {}
 
-    async execute(section: SectionDefinition) {
+    async execute(section: SectionDefinition): Promise<Result<SectionDefinition, AIContentError>> {
         return this.sectionRepository.save(section);
     }
 }

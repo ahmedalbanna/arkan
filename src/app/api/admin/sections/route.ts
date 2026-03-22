@@ -1,5 +1,5 @@
 
-import { withAuth, handleApiError, createApiResponse } from '@/lib/utils/api-utils';
+import { withAuth, handleApiError, handleAIContentResult } from '@/lib/utils/api-utils';
 import { z } from 'zod';
 import { container } from '@/infrastructure/di/container';
 import { AIContentController } from '@/modules/ai-content/adapters/controllers/AIContentController';
@@ -16,8 +16,8 @@ const SectionSchema = z.object({
 export const GET = withAuth(async () => {
   try {
     const controller = container.resolve(AIContentController);
-    const sections = await controller.getSections();
-    return createApiResponse(sections, 200);
+    const result = await controller.getSections();
+    return handleAIContentResult(result);
   } catch (error) {
     return handleApiError(error);
   }
@@ -32,7 +32,7 @@ export const POST = withAuth(async ({ request }) => {
     }
     const controller = container.resolve(AIContentController);
     const result = await controller.saveSection(validation.data);
-    return createApiResponse(result, 201);
+    return handleAIContentResult(result);
   } catch (error) {
     return handleApiError(error);
   }

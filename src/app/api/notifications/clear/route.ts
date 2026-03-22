@@ -10,6 +10,8 @@ const clearSchema = z.object({
 });
 
 
+import { handleUserResult } from '@/lib/utils/api-utils';
+
 export const POST = withAuth(async ({ request, user }) => {
     try {
         const body = await request.json();
@@ -21,9 +23,9 @@ export const POST = withAuth(async ({ request, user }) => {
         const { notificationIds } = validation.data;
         const controller = container.resolve(UserController);
         
-        await controller.clearNotifications(user.uid, notificationIds);
+        const result = await controller.clearNotifications(user.uid, notificationIds);
 
-        return createApiResponse({ message: 'Notifications cleared.' }, 200);
+        return handleUserResult(result);
 
     } catch (error) {
         return handleApiError(error);

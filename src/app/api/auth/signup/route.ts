@@ -1,7 +1,7 @@
 
 'use server';
 
-import { createApiResponse, handleApiError } from '@/lib/utils/api-utils';
+import { createApiResponse, handleApiError, handleUserResult } from '@/lib/utils/api-utils';
 import { container } from '@/infrastructure/di/container';
 import { UserController } from '@/modules/users/adapters/controllers/UserController';
 import { z } from 'zod';
@@ -24,21 +24,14 @@ export async function POST(req: Request) {
         }
         
         const controller = container.resolve(UserController);
-        const newUser = await controller.createUser({
+        const result = await controller.createUser({
             ...validation.data,
             role: 'user' // Default role for signup
         });
 
-        return createApiResponse({ user: { uid: newUser.id, email: newUser.email } }, 201);
+        return handleUserResult(result);
 
     } catch (error: any) {
-        if (error.code === 'auth/email-already-exists') {
-            return handleApiError({ message: "Email address is already in use by another account." }, 409);
-        } else if (error.code === 'auth/invalid-email') {
-            return handleApiError({ message: "The email address is not valid." }, 400);
-        } else if (error.code === 'auth/weak-password') {
-            return handleApiError({ message: "The password is too weak. It must be at least 6 characters long." }, 400);
-        }
         return handleApiError(error);
     }
 }

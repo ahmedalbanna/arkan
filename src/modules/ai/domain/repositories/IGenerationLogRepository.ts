@@ -8,10 +8,13 @@ export interface GenerationLog {
     timestamp?: string;
 }
 
+import { Result } from "@/lib/utils/result";
+import { AiError } from "../errors/AiErrors";
+
 export interface IGenerationLogRepository {
-    log(entry: GenerationLog): Promise<void>;
-    getByUserId(userId: string): Promise<GenerationLog[]>;
-    getPaginated(options: { limit: number, agentId?: string, userId?: string, lastVisibleId?: string }): Promise<{ logs: any[], hasNextPage: boolean, lastVisibleId: string | null }>;
+    log(entry: GenerationLog): Promise<Result<void, AiError>>;
+    getByUserId(userId: string): Promise<Result<GenerationLog[], AiError>>;
+    getPaginated(options: { limit: number, agentId?: string, userId?: string, lastVisibleId?: string }): Promise<Result<{ logs: any[], hasNextPage: boolean, lastVisibleId: string | null }, AiError>>;
 }
 
 export const IGenerationLogRepositoryToken = Symbol("IGenerationLogRepository");
