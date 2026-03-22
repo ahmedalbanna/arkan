@@ -12,26 +12,26 @@ export class RagError {
   constructor(
     public readonly type: RagErrorType,
     public readonly message: string,
-    public readonly details?: any
+    public readonly details?: unknown
   ) {}
 
   public static notFound(message: string = "Resource not found"): RagError {
     return new RagError(RagErrorType.NOT_FOUND, message);
   }
 
-  public static indexingFailed(message: string = "Document indexing failed", details?: any): RagError {
+  public static indexingFailed(message: string = "Document indexing failed", details?: unknown): RagError {
     return new RagError(RagErrorType.INDEXING_FAILED, message, details);
   }
 
-  public static retrievalFailed(message: string = "Context retrieval failed", details?: any): RagError {
+  public static retrievalFailed(message: string = "Context retrieval failed", details?: unknown): RagError {
     return new RagError(RagErrorType.RETRIEVAL_FAILED, message, details);
   }
 
-  public static databaseError(message: string = "Database operation failed", details?: any): RagError {
+  public static databaseError(message: string = "Database operation failed", details?: unknown): RagError {
     return new RagError(RagErrorType.DATABASE_ERROR, message, details);
   }
 
-  public static vectorStoreError(message: string = "Vector store operation failed", details?: any): RagError {
+  public static vectorStoreError(message: string = "Vector store operation failed", details?: unknown): RagError {
     return new RagError(RagErrorType.VECTOR_STORE_ERROR, message, details);
   }
 

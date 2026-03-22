@@ -1,6 +1,6 @@
 
 import type { IStylesOptions } from 'docx';
-import { CustomStyles } from '@/modules/ai-content/infrastructure/exporters/word-converter/types';
+import type { CustomStyles } from '@/modules/ai-content/domain/types/export-types';
 import { Template, type BaseTemplateProperties } from './Template';
 
 // Corresponds to DocxTemplateSchema

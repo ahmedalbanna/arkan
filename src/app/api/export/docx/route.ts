@@ -6,7 +6,7 @@
 import type { ProjectProperties } from '@/lib/types';
 import { container } from '@/infrastructure/di/container';
 import { IDocxExportServiceToken } from '@/modules/ai-content/domain/services/IExportService';
-import type { ConversionOptions } from '@/modules/ai-content/infrastructure/exporters/word-converter/types';
+import type { ConversionOptions } from '@/modules/ai-content/domain/types/export-types';
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 

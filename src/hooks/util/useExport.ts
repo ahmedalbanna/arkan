@@ -4,12 +4,11 @@ import { useState } from 'react';
 import { saveAs } from 'file-saver';
 import { toast } from './use-toast';
 import type { Project, ProjectContent } from '@/modules/projects/domain/entities/Project';
-import { Chapter } from '@/modules/ai-content/domain/entities/Chapter';
 import { templates as docxTemplates, type DocxTemplateKey } from '@/modules/ai-content/infrastructure/exporters/DocxStyles';
 import { templates as pptxTemplates, type PptxTemplateKey } from '@/modules/templates/infrastructure/PptxStyles';
-import { ConversionOptions } from '@/modules/ai-content/infrastructure/exporters/word-converter/types';
+import type { ConversionOptions } from '@/modules/ai-content/domain/types/export-types';
 import { container } from '@/infrastructure/di/container';
-import { IDocxExportServiceToken, IPptxExportServiceToken } from '@/modules/ai-content/domain/services/IExportService';
+import { IPptxExportServiceToken } from '@/modules/ai-content/domain/services/IExportService';
 
 interface DocxExportParams {
     project: Project;
@@ -79,7 +78,7 @@ export function useExport() {
                             errorMessage += `\n\nDetails: ${errorData.error}`;
                         }
                     }
-                } catch (parseError) {
+                } catch {
                     // If response is not JSON, use status text
                     errorMessage = `Server error: ${response.statusText || response.status}`;
                 }

@@ -17,10 +17,6 @@ import { CreateSessionUseCase } from "../../application/use-cases/CreateSessionU
 import { GetNotificationsUseCase } from "../../application/use-cases/GetNotificationsUseCase";
 import { SendNotificationUseCase } from "../../application/use-cases/SendNotificationUseCase";
 import { VerifySessionUseCase } from "../../application/use-cases/VerifySessionUseCase";
-import { revalidatePath } from "next/cache";
-import { Result } from "@/lib/utils/result";
-import { UserError } from "../../domain/errors/UserErrors";
-
 @injectable()
 export class UserController {
     constructor(
@@ -65,14 +61,7 @@ export class UserController {
     }
 
     async updateUser(userId: string, data: any, currentEmail?: string) {
-        const result = await this.updateUserProfileUseCase.execute(userId, data, currentEmail);
-        
-        if (result.isSuccess) {
-            revalidatePath(`/profile/${userId}`);
-            revalidatePath('/admin/manage-users');
-        }
-        
-        return result;
+        return this.updateUserProfileUseCase.execute(userId, data, currentEmail);
     }
 
     async getPaginatedUsers(options: { limit: number, lastVisibleId?: string }) {
@@ -100,11 +89,7 @@ export class UserController {
     }
 
     async uploadProfilePicture(userId: string, file: Buffer, fileName: string, contentType: string) {
-        const result = await this.uploadProfilePictureUseCase.execute(userId, file, fileName, contentType);
-        if (result.isSuccess) {
-            revalidatePath(`/profile/${userId}`);
-        }
-        return result;
+        return this.uploadProfilePictureUseCase.execute(userId, file, fileName, contentType);
     }
 
     async getAdmins() {

@@ -5,7 +5,7 @@ import {
     ExportOptions 
 } from "@/modules/ai-content/domain/services/IExportService";
 import { Project, ProjectContent } from "@/modules/projects/domain/entities/Project";
-import { convertMarkdownToPptx } from "@/lib/markdown-to-pptx-converter";
+import { convertMarkdownToPptx, type PptxConversionOptions } from "@/lib/markdown-to-pptx-converter";
 import { Chapter } from "@/modules/ai-content/domain/entities/Chapter";
 
 @injectable()
@@ -23,11 +23,13 @@ export class PptxExportService implements IExportService {
             finalMarkdown += '\n\n' + footnoteDefinitions.join('\n');
         }
 
-        const result = await convertMarkdownToPptx(finalMarkdown, project.name, {
-            styles: options.styles,
+        const pptxOptions: PptxConversionOptions = {
+            styles: options.styles as PptxConversionOptions['styles'],
             isRtl: options.isRtl,
             includeToc: options.includeToc,
-        });
+        };
+
+        const result = await convertMarkdownToPptx(finalMarkdown, project.name, pptxOptions);
 
         return result instanceof Blob ? result : new Blob([result as any], { 
             type: 'application/vnd.openxmlformats-officedocument.presentationml.presentation' 

@@ -1,4 +1,5 @@
 
+import { revalidatePath } from 'next/cache';
 import { withAuth, handleApiError, handleProjectResult } from '@/lib/utils/api-utils';
 import { container } from '@/infrastructure/di/container';
 import { ProjectController } from '@/modules/projects/adapters/controllers/ProjectController';
@@ -19,6 +20,11 @@ export const DELETE = withAuth(async ({ params }) => {
     const { id } = await params;
     const controller = container.resolve(ProjectController);
     const result = await controller.deleteProject(id);
+
+    if (result.isSuccess) {
+      revalidatePath('/dashboard');
+    }
+
     return handleProjectResult(result);
   } catch (error) {
     return handleApiError(error);

@@ -1,4 +1,5 @@
 
+import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
 import { withAuth, handleApiError, handleResult } from '@/lib/utils/api-utils';
 import { container } from '@/infrastructure/di/container';
@@ -41,6 +42,11 @@ export const PUT = withAuth(async ({ request, params }) => {
     
     const controller = container.resolve(UserController);
     const result = await controller.updateUser(id, validation.data);
+
+    if (result.isSuccess) {
+      revalidatePath(`/profile/${id}`);
+      revalidatePath('/admin/manage-users');
+    }
 
     return handleResult(result);
   } catch (error: any) {

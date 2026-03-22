@@ -1,4 +1,5 @@
 
+import { revalidatePath } from 'next/cache';
 import { withAuth, handleApiError, handleResult } from '@/lib/utils/api-utils';
 import { container } from '@/infrastructure/di/container';
 import { UserController } from '@/modules/users/adapters/controllers/UserController';
@@ -28,6 +29,10 @@ export const POST = withAuth(async ({ request, params, user }) => {
 
         const controller = container.resolve(UserController);
         const result = await controller.uploadProfilePicture(targetUserId, fileBuffer, file.name, file.type);
+
+        if (result.isSuccess) {
+            revalidatePath(`/profile/${targetUserId}`);
+        }
 
         return handleResult(result);
 

@@ -5,8 +5,8 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { retrieveContext } from '@/modules/rag/infrastructure/retrieval';
-import { getCacheManager } from '@/modules/rag/infrastructure/cache';
+import { container } from '@/infrastructure/di/container';
+import { RagController } from '@/modules/rag/adapters/controllers/RagController';
 
 export async function POST(request: NextRequest) {
   try {
@@ -28,16 +28,17 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Check if will be cache hit (for reporting)
+    const controller = container.resolve(RagController);
+
     let cacheHit = false;
     if (useCache) {
-      const cacheManager = getCacheManager();
-      const cache = cacheManager.getSearchCache();
-      cacheHit = cache.getResults(query, { projectId, topK, minScore }) !== null;
+      const cacheHitResult = await controller.isSearchCacheHit(query, { projectId, topK, minScore });
+      if (cacheHitResult.isSuccess) {
+        cacheHit = cacheHitResult.getValue();
+      }
     }
 
-    // Perform search
-    const result = await retrieveContext(query, {
+    const result = await controller.retrieveContext(query, {
       projectId,
       topK,
       minScore,
@@ -46,15 +47,28 @@ export async function POST(request: NextRequest) {
       rerankStrategy,
     });
 
+    if (result.isFailure) {
+      return NextResponse.json(
+        {
+          error: result.error?.message ?? 'Search failed',
+          sources: [],
+          context: '',
+        },
+        { status: 400 }
+      );
+    }
+
+    const data = result.getValue();
+
     return NextResponse.json({
-      ...result,
+      ...data,
       cacheHit,
       timestamp: new Date().toISOString(),
     });
 
   } catch (error) {
     console.error('RAG test error:', error);
-    
+
     return NextResponse.json(
       {
         error: error instanceof Error ? error.message : 'Search failed',

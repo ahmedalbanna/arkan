@@ -4,10 +4,8 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { generateEmbedding } from '@/modules/rag/infrastructure/embeddings';
-import { getVectorStore } from '@/modules/rag/infrastructure/vector-store';
-import { getReranker } from '@/modules/rag/infrastructure/reranker';
-import type { RerankStrategy } from '@/modules/rag/infrastructure/reranker';
+import { container } from '@/infrastructure/di/container';
+import { RagController } from '@/modules/rag/adapters/controllers/RagController';
 
 export async function POST(request: NextRequest) {
   try {
@@ -21,62 +19,37 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Get initial search results
-    const queryEmbedding = await generateEmbedding(query);
-    const vectorStore = getVectorStore();
-    const initialResults = await vectorStore.search(queryEmbedding, {
-      topK: 10,
-      minScore: 0.3,
-    });
+    const controller = container.resolve(RagController);
+    const result = await controller.compareReranking(query, strategy);
 
-    if (initialResults.length === 0) {
+    if (result.isFailure) {
+      return NextResponse.json(
+        {
+          error: result.error?.message ?? 'Comparison failed',
+          comparisons: [],
+        },
+        { status: 400 }
+      );
+    }
+
+    const data = result.getValue();
+
+    if (data.initialResultCount === 0) {
       return NextResponse.json({
         comparisons: [],
         message: 'No results found for comparison',
       });
     }
 
-    // Determine which strategies to test
-    const strategies: RerankStrategy[] = 
-      strategy === 'all' 
-        ? ['cross-encoder', 'bm25', 'hybrid']
-        : [strategy as RerankStrategy];
-
-    // Run comparison
-    const reranker = getReranker();
-    const comparisons = await Promise.all(
-      strategies.map(async (strat) => {
-        const startTime = Date.now();
-        const reranked = await reranker.rerank(query, initialResults, {
-          strategy: strat,
-          topK: 5,
-        });
-        const time = Date.now() - startTime;
-
-        const avgScore = reranked.reduce((sum, r) => sum + r.score, 0) / reranked.length;
-
-        return {
-          strategy: strat,
-          results: reranked.map(r => ({
-            content: r.chunk.content,
-            score: r.score,
-            sourceFile: r.chunk.metadata.sourceFile,
-          })),
-          avgScore,
-          time,
-        };
-      })
-    );
-
     return NextResponse.json({
-      comparisons,
-      initialResultCount: initialResults.length,
+      comparisons: data.comparisons,
+      initialResultCount: data.initialResultCount,
       timestamp: new Date().toISOString(),
     });
 
   } catch (error) {
     console.error('Re-ranking comparison error:', error);
-    
+
     return NextResponse.json(
       {
         error: error instanceof Error ? error.message : 'Comparison failed',

@@ -4,7 +4,8 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { retrieveContext } from '@/modules/rag/infrastructure/retrieval';
+import { container } from '@/infrastructure/di/container';
+import { RagController } from '@/modules/rag/adapters/controllers/RagController';
 
 export async function POST(request: NextRequest) {
   try {
@@ -18,18 +19,18 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    const controller = container.resolve(RagController);
     const startTime = Date.now();
-    
-    // Check if it will be a cache hit (for demo purposes)
+
     let cacheHit = false;
     if (useCache) {
-      const { getCacheManager } = await import('@/modules/rag/infrastructure/cache');
-      const cache = getCacheManager().getSearchCache();
-      cacheHit = cache.getResults(query, { topK, minScore }) !== null;
+      const cacheHitResult = await controller.isSearchCacheHit(query, { topK, minScore });
+      if (cacheHitResult.isSuccess) {
+        cacheHit = cacheHitResult.getValue();
+      }
     }
 
-    // Perform search
-    const result = await retrieveContext(query, {
+    const result = await controller.retrieveContext(query, {
       topK,
       minScore,
       useCache,
@@ -37,10 +38,22 @@ export async function POST(request: NextRequest) {
       rerankStrategy: 'hybrid',
     });
 
+    if (result.isFailure) {
+      return NextResponse.json(
+        {
+          error: result.error?.message ?? 'Search failed',
+          sources: [],
+          context: '',
+        },
+        { status: 400 }
+      );
+    }
+
+    const data = result.getValue();
     const searchTime = Date.now() - startTime;
 
     return NextResponse.json({
-      ...result,
+      ...data,
       searchTime,
       cacheHit,
       timestamp: new Date().toISOString(),
@@ -48,7 +61,7 @@ export async function POST(request: NextRequest) {
 
   } catch (error) {
     console.error('Demo search error:', error);
-    
+
     return NextResponse.json(
       {
         error: error instanceof Error ? error.message : 'Search failed',

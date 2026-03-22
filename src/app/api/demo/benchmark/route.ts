@@ -4,7 +4,8 @@
  */
 
 import { NextRequest } from 'next/server';
-import { retrieveContext } from '@/modules/rag/infrastructure/retrieval';
+import { container } from '@/infrastructure/di/container';
+import { RagController } from '@/modules/rag/adapters/controllers/RagController';
 
 export async function POST(_request: NextRequest) {
   const encoder = new TextEncoder();
@@ -26,6 +27,7 @@ export async function POST(_request: NextRequest) {
           { name: 'With Cache + Re-ranking', useCache: true, rerank: true },
         ];
 
+        const controllerInstance = container.resolve(RagController);
         const totalSteps = scenarios.length * testQueries.length;
         let currentStep = 0;
 
@@ -37,16 +39,14 @@ export async function POST(_request: NextRequest) {
           for (const query of testQueries) {
             const startTime = Date.now();
             
-            // Check cache hit
             if (scenario.useCache) {
-              const { getCacheManager } = await import('@/modules/rag/infrastructure/cache');
-              const cache = getCacheManager().getSearchCache();
-              if (cache.getResults(query, {}) !== null) {
+              const cacheHitResult = await controllerInstance.isSearchCacheHit(query, {});
+              if (cacheHitResult.isSuccess && cacheHitResult.getValue()) {
                 cacheHits++;
               }
             }
 
-            await retrieveContext(query, {
+            await controllerInstance.retrieveContext(query, {
               topK: 5,
               minScore: 0.5,
               useCache: scenario.useCache,

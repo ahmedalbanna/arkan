@@ -3,7 +3,6 @@ import { GetProjectsUseCase } from "../../application/use-cases/GetProjectsUseCa
 import { SaveProjectUseCase } from "../../application/use-cases/SaveProjectUseCase";
 import { GetProjectByIdUseCase } from "../../application/use-cases/GetProjectByIdUseCase";
 import { DeleteProjectUseCase } from "../../application/use-cases/DeleteProjectUseCase";
-import { revalidatePath } from "next/cache";
 
 @injectable()
 export class ProjectController {
@@ -27,20 +26,10 @@ export class ProjectController {
     }
 
     async saveProject(projectData: any, userId: string) {
-        const result = await this.saveProjectUseCase.execute(projectData, userId);
-        if (result.isSuccess) {
-            const project = result.getValue();
-            revalidatePath(`/builder?id=${project.id}`);
-            revalidatePath('/dashboard');
-        }
-        return result;
+        return this.saveProjectUseCase.execute(projectData, userId);
     }
 
     async deleteProject(projectId: string) {
-        const result = await this.deleteProjectUseCase.execute(projectId);
-        if (result.isSuccess) {
-            revalidatePath('/dashboard');
-        }
-        return result;
+        return this.deleteProjectUseCase.execute(projectId);
     }
 }

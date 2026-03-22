@@ -1,19 +1,19 @@
 // src/lib/word-converter/types.ts
 
-import { IParagraphOptions, IStylesOptions, Paragraph, Table } from 'docx';
+import { IStylesOptions, Paragraph, Table } from 'docx';
+import type {
+  ConversionOptions,
+  CustomStyles,
+  FontOptions,
+  HeaderFooterContent,
+} from '@/modules/ai-content/domain/types/export-types';
 
-// Define font options for different language scripts
-export interface FontOptions {
-  default?: string; // For LTR languages
-  rtl?: string;     // For RTL languages like Arabic
-  code?: string;    // For code blocks and inline code
-}
-
-// New interface for custom, non-standard styles that are applied programmatically
-export interface CustomStyles {
-  codeBlock?: Omit<IParagraphOptions, 'children'>;
-  imageParagraph?: Omit<IParagraphOptions, 'children'>;
-}
+export type {
+  ConversionOptions,
+  CustomStyles,
+  FontOptions,
+  HeaderFooterContent,
+};
 
 // Defines the structure for a document template
 export interface Template {
@@ -34,27 +34,3 @@ export type OrientationDirective = {
 };
 
 export type DocxObject = Paragraph | Table | OrientationDirective;
-
-export interface HeaderFooterContent {
-  default?: (Paragraph | Table)[];
-  first?: (Paragraph | Table)[];
-}
-
-export interface ConversionOptions {
-  styles?: IStylesOptions;
-  customStyles?: CustomStyles; // Added to pass template-specific custom styles
-  paper?: {
-    size?: { width: number; height: number };
-    margins?: { top: number; right: number; bottom: number; left: number };
-    orientation?: 'portrait' | 'landscape';
-  };
-  header?: HeaderFooterContent;
-  footer?: HeaderFooterContent;
-  coverPageMarkdown?: string;
-  watermark?: string;
-  pageNumbers?: boolean;
-  isRtl?: boolean;
-  fonts?: FontOptions;
-  includeToc?: boolean;
-  selectedContent?: any; // Support for filtering project content
-}

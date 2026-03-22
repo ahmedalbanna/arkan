@@ -2,7 +2,7 @@
 import { inject, injectable } from "tsyringe";
 import type { IRagRepository, RagIndexingOptions, RagIndexingResult } from "../../domain/repositories/IRagRepository";
 import { IRagRepositoryToken } from "../../domain/repositories/IRagRepository";
-import type { IIndexedDocumentRepository } from "../../domain/repositories/IIndexedDocumentRepository";
+import type { IIndexedDocumentRepository, IndexedDocumentRecord } from "../../domain/repositories/IIndexedDocumentRepository";
 import { IIndexedDocumentRepositoryToken } from "../../domain/repositories/IIndexedDocumentRepository";
 import { Result } from "@/lib/utils/result";
 import { RagError } from "../../domain/errors/RagErrors";
@@ -28,7 +28,7 @@ export class IndexDocumentUseCase {
                 sourceFile: options.sourceFile || 'unknown',
                 chunksCount: data.chunksCreated,
                 fileSize: content.length, // approximation
-                type: options.type as any || 'context',
+                type: options.type ?? 'context',
                 chunkSize: options.chunkSize || 500,
                 overlap: options.overlap || 50,
             });
@@ -39,7 +39,7 @@ export class IndexDocumentUseCase {
                 userId: options.userId,
                 sourceFile: options.sourceFile || 'unknown',
                 fileSize: content.length,
-                type: options.type as any || 'context',
+                type: options.type ?? 'context',
                 errorMessage: result.error?.message || "Unknown indexing error",
                 chunkSize: options.chunkSize || 500,
                 overlap: options.overlap || 50,
@@ -49,14 +49,7 @@ export class IndexDocumentUseCase {
         return result;
     }
 
-    async recordFailed(data: { 
-        projectId: string, 
-        userId?: string, 
-        sourceFile: string, 
-        fileSize: number, 
-        type: any, 
-        errorMessage: string 
-    }): Promise<Result<string, RagError>> {
+    async recordFailed(data: Pick<IndexedDocumentRecord, 'projectId' | 'userId' | 'sourceFile' | 'fileSize' | 'type' | 'errorMessage'>): Promise<Result<string, RagError>> {
         return this.documentRepository.recordFailed({
             projectId: data.projectId,
             userId: data.userId,

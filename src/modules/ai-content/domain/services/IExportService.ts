@@ -6,8 +6,8 @@ export interface ExportOptions {
     isRtl?: boolean;
     includeToc?: boolean;
     pageNumbers?: boolean;
-    styles?: any;
-    customStyles?: any;
+    styles?: unknown;
+    customStyles?: unknown;
 }
 
 export interface IExportService {

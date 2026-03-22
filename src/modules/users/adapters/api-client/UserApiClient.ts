@@ -1,8 +1,10 @@
 
+import { injectable } from "tsyringe";
 import { apiService } from "@/infrastructure/api/ApiService";
 import { UserProfile } from "../../domain/entities/User";
 import { doc, onSnapshot, type Firestore } from "firebase/firestore";
 
+@injectable()
 export class UserApiClient {
     async fetchUserById(id: string, token: string): Promise<UserProfile> {
         return apiService({ endpoint: `/api/users/${id}`, token });

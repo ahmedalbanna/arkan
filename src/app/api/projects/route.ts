@@ -1,4 +1,5 @@
 
+import { revalidatePath } from 'next/cache';
 import { withAuth, handleApiError, handleProjectResult } from '@/lib/utils/api-utils';
 import { container } from '@/infrastructure/di/container';
 import { ProjectController } from '@/modules/projects/adapters/controllers/ProjectController';
@@ -18,6 +19,13 @@ export const POST = withAuth(async ({ request, user }) => {
     const projectData = await request.json();
     const controller = container.resolve(ProjectController);
     const result = await controller.saveProject(projectData, user.id);
+
+    if (result.isSuccess) {
+      const project = result.getValue();
+      revalidatePath(`/builder?id=${project.id}`);
+      revalidatePath('/dashboard');
+    }
+
     return handleProjectResult(result);
   } catch (error) {
     return handleApiError(error);
