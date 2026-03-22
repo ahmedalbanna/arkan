@@ -138,6 +138,9 @@ Each module in `src/modules/` follows the same four-layer structure:
 - Register all implementations in `src/infrastructure/di/container.ts`
 - Server-only repositories are `require()`-loaded inside the `typeof window === 'undefined'` guard to avoid client bundle contamination
 - Resolve via `container.resolve(ClassName)` — do not `new` services directly
+- In Next.js route handlers, prefer resolving controllers/use cases through the DI container once metadata is set up correctly; avoid falling back to ad-hoc manual wiring unless there is a proven runtime blocker
+- For controller-to-use-case injection in this codebase, prefer `@inject(delay(() => UseCase))` on constructor parameters to avoid `TypeInfo not known for "undefined"` issues from import order / circular initialization in Next.js
+- Keep `reflect-metadata` initialization centralized in `src/instrumentation.ts` and `src/infrastructure/di/container.ts`; do not scatter `import "reflect-metadata"` across use cases/controllers as a workaround
 
 ### AI Flows (Genkit)
 
@@ -301,6 +304,28 @@ FIREBASE_ADMIN_PRIVATE_KEY=
 - Do not use `new` to instantiate services — always resolve via `container.resolve()`
 - All Genkit flow files must declare `'use server'` at the top
 - Server-only DI registrations must be inside the `typeof window === 'undefined'` guard in `container.ts`
+- Keep domain entities, shared types, and any server-reachable modules free of client-only dependencies (for example drag-and-drop or React UI libraries); they can crash API routes at runtime when imported transitively
 - When adding new TanStack Query data fetches, always add a key factory to `src/lib/query-keys.ts`
 - Credits are deducted server-side only — never trust client-side credit values
 - RTL/LTR layout changes must be tested in both Arabic and English
+
+## Notes
+
+- When converting function-based modules (especially `adapters/api-client/*`) to class-based DI services, treat it as a 3-part refactor: update the module, register it in `src/infrastructure/di/container.ts`, then update every consumer/import in hooks, stores, and components. Skipping the consumer sweep leaves the codebase in a mixed pattern.
+- Before doing bulk `find_and_replace_code` changes, inspect the exact file contents with `open_files`/`expand_code_chunks` first. Several files in this project look similar but differ slightly in imports or surrounding code, so guessing exact match strings causes avoidable failed edits.
+- Before refactoring a client/helper, `grep` for real call sites first. Some adapters or imports may be unused, partially migrated, or temporarily stubbed in the UI, so updating presumed consumers without verifying usage wastes time and creates avoidable churn.
+- If a large route/module needs a structural rewrite and targeted replacements keep failing, prefer reading the full file and then replacing the whole file in one controlled edit instead of stacking many brittle partial replacements.
+- Keep heavy export/conversion logic out of hooks and route handlers. Prefer thin hooks/routes that delegate to infrastructure services; wrap existing converter libraries/utilities behind injectable services instead of duplicating conversion logic in UI code.
+- Do not use `any` as the first fix for `tsyringe` / `TypeInfo not known for "undefined"` errors. Fix the root cause instead: centralize metadata setup, use `@inject(delay(() => ...))` for controller constructor params, and verify import paths / initialization order.
+- When sweeping for direct Firebase usage, distinguish active code from commented-out legacy snippets before planning refactors. Commented imports/usages are not architectural violations and should not drive new work.
+- If a service module grows into a data-access concern (for example document tracking in RAG), promote it into an explicit repository interface + infrastructure implementation rather than leaving it as a free-floating helper.
+- When converting frontend API clients or service adapters to return `Result` objects, do the consumer sweep in the same pass: update TanStack Query hooks, mutations, and route callers to unwrap success values and `throw result.error` on failure so existing `onError`/error-boundary flows keep working.
+- Preserve existing public API response shapes during Result-pattern migrations unless you are also updating every caller. Some endpoints (especially auth/session/signup flows) may intentionally return nested payloads that the frontend already depends on, so swapping them to a generic `handle*Result(...)` response can introduce subtle breakage.
+- When adding Jest coverage in this repo, prefer mocking repositories to return `Result.ok(...)` / `Result.fail(...)` directly rather than constructing heavy domain objects unless the entity behavior is what you are testing. Also verify Jest path aliases cover `@/modules/*`, and keep `jest.setup.js` CommonJS-compatible in the current setup.
+- For large architecture migrations, prefer staged compatibility shims before deleting old barrels. A temporary re-export layer (for example in `src/lib/types.ts`) can keep the app compiling while imports are migrated module-by-module.
+- Avoid repo-wide path rewrites or broad shell replacements until you have verified the exact import patterns with targeted searches. Large `sed`/mass-replace passes can silently create widespread breakage, especially across `src/modules/**/adapters/api-client`, scripts, tests, and case-sensitive file names.
+- After moving shared infrastructure such as API clients, Firebase initialization, or RAG utilities, immediately sweep for old import roots and run `npm run typecheck` and `npm run lint` early. These migrations tend to fail from stale imports more than from business-logic bugs.
+- When moving files between folders with naming changes, standardize internal imports in the same pass (for example `./Template` vs `./template`, or moved exporter/helper paths). Case mismatches are easy to miss and show up late as type or lint failures.
+- Keep domain entities free of framework/browser concerns and avoid circular class dependencies between entities. When two entities need to reference each other, prefer a lightweight `*Properties` interface or ID-based reference rather than importing the full class both ways.
+- After overwriting critical files or doing bulk moves, reopen the changed files immediately to verify the actual content on disk. Large automated edits can leave incorrect placeholders, stale imports, or partial content that is not obvious from the write step alone.
+- During cleanup, do not delete old directories (`src/services`, `src/lib/models`, legacy helpers) until consumer imports have been migrated and verified. Deleting them too early makes typecheck/lint output much noisier and obscures the real migration order.
