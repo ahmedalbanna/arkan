@@ -9,7 +9,7 @@ import { useWritingTool } from './use-writing-tool';
 import { useToast } from '@/hooks/util/use-toast';
 import { useAuth } from '@/context/AuthContext';
 import { DocumentProcessingApiClient } from '@/modules/ai-content/adapters/api-client/DocumentProcessingApiClient';
-import { container } from '@/infrastructure/di/container';
+import { runAuthenticatedResultCall } from '../data/authenticated-client-call';
 import { useDropzone } from 'react-dropzone';
 import { useLocalization } from '@/context/LocalizationContext';
 
@@ -46,9 +46,9 @@ export function useAIDetectorLogic() {
     formData.append('file', file);
 
     try {
-      const token = await firebaseUser.getIdToken();
-      const client = container.resolve(DocumentProcessingApiClient);
-      const result = await client.processFileApi(formData, token);
+      const result = await runAuthenticatedResultCall(firebaseUser, DocumentProcessingApiClient, (client, token) =>
+        client.processFileApi(formData, token),
+      );
       form.setValue('text', result.markdown, { shouldValidate: true });
       toast({ title: t('writingTools.aiDetector.toastFileProcessed'), description: t('writingTools.aiDetector.toastFileExtracted', { fileName: file.name }) });
       refetchUser();

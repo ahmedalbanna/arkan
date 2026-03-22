@@ -1,4 +1,5 @@
 // jest.setup.js
+require('reflect-metadata');
 require('@testing-library/jest-dom');
 
 // Mock the canvas context for text measurement functions

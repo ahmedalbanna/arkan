@@ -17,7 +17,7 @@ import { useMutation } from '@tanstack/react-query';
 import { toast } from '../ui/use-toast';
 import { ResponseDisplay } from './ResponseDisplay';
 import { useAuth } from '@/context/AuthContext';
-
+import { getAuthenticatedToken } from '@/lib/utils/authUtils';
 
 interface AgentPlaygroundProps {
   agent: AgentProperties | null;
@@ -43,7 +43,7 @@ function AgentPlayground({ agent }: AgentPlaygroundProps) {
   useEffect(() => {
     form.reset({ userPrompt: '' });
   }, [agent, form]);
-  
+
   const mutation = useMutation({
     // @ts-expect-error - Genkit Action type vs MutationFunction type mismatch
     mutationFn: runAgentFlow,
@@ -63,7 +63,7 @@ function AgentPlayground({ agent }: AgentPlaygroundProps) {
 
   async function onSubmit(values: PlaygroundFormValues) {
     if (!agent || !firebaseUser) return;
-    const token = await firebaseUser.getIdToken();
+    const token = await getAuthenticatedToken(firebaseUser);
     const systemPrompt = `${agent.prompt}\n\n${(agent.guidelines || []).join('\n')}`;
     mutation.mutate({ systemPrompt, userPrompt: values.userPrompt, token });
   }
@@ -114,16 +114,18 @@ function AgentPlayground({ agent }: AgentPlaygroundProps) {
               name="userPrompt"
               render={({ field }) => (
                 <FormItem>
-                  <Textarea
-                    {...field}
-                    placeholder={`Ask ${agent.name} to do something...`}
-                    className="min-h-[80px] w-full resize-none pr-20"
-                    disabled={mutation.isPending || isGuest}
-                  />
+                  <FormControl>
+                    <Textarea
+                      {...field}
+                      placeholder={`Ask ${agent.name} to do something...`}
+                      className="min-h-[80px] w-full resize-none pr-20"
+                      disabled={mutation.isPending || isGuest}
+                    />
+                  </FormControl>
                 </FormItem>
               )}
             />
-             <Button type="submit" size="sm" className="absolute bottom-3 right-3" disabled={mutation.isPending || isGuest}>
+            <Button type="submit" size="sm" className="absolute bottom-3 right-3" disabled={mutation.isPending || isGuest}>
               {mutation.isPending ? (
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
               ) : (

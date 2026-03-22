@@ -1,21 +1,17 @@
 'use client';
 
-/**
- * RAG Health Monitor Component
- * 
- * Displays the health status of the RAG system for admins
- */
+import React, { useCallback, useEffect, useState } from 'react';
+import { AlertCircle, CheckCircle2, RefreshCw, XCircle } from 'lucide-react';
 
-import React, { useEffect, useState } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { RefreshCw, CheckCircle2, XCircle, AlertCircle } from 'lucide-react';
-import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { apiService } from '@/infrastructure/api/ApiService';
 
 interface HealthCheck {
   status: 'ok' | 'error' | 'unknown';
-  details: any;
+  details: unknown;
 }
 
 interface HealthStatus {
@@ -33,70 +29,74 @@ interface HealthStatus {
   };
 }
 
-export function RAGHealthMonitor() {
+const checkLabels: Record<keyof HealthStatus['checks'], string> = {
+  config: 'Configuration',
+  vectorStore: 'Vector Store',
+  ollama: 'Ollama',
+};
+
+const getStatusIcon = (status: string): React.ReactNode => {
+  if (status === 'ok' || status === 'healthy') {
+    return <CheckCircle2 className="h-5 w-5 text-green-500" />;
+  }
+
+  if (status === 'error') {
+    return <XCircle className="h-5 w-5 text-red-500" />;
+  }
+
+  return <AlertCircle className="h-5 w-5 text-yellow-500" />;
+};
+
+const getStatusBadgeVariant = (status: string): 'default' | 'destructive' | 'secondary' | 'outline' => {
+  if (status === 'ok' || status === 'healthy') {
+    return 'default';
+  }
+
+  if (status === 'error') {
+    return 'destructive';
+  }
+
+  if (status === 'degraded') {
+    return 'secondary';
+  }
+
+  return 'outline';
+};
+
+export function RAGHealthMonitor(): React.JSX.Element {
   const [health, setHealth] = useState<HealthStatus | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [autoRefresh, setAutoRefresh] = useState(false);
 
-  const fetchHealth = async () => {
+  const fetchHealth = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
-      
-      const response = await fetch('/api/rag/health');
-      
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-      }
-      
-      const data = await response.json();
+      const data = await apiService<undefined, HealthStatus>({ endpoint: '/api/rag/health' });
       setHealth(data);
-    } catch (err) {
+    } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Failed to fetch health status');
     } finally {
       setLoading(false);
     }
-  };
-
-  useEffect(() => {
-    fetchHealth();
   }, []);
 
   useEffect(() => {
-    if (!autoRefresh) return;
-    
-    const interval = setInterval(fetchHealth, 30000); // Refresh every 30 seconds
-    return () => clearInterval(interval);
-  }, [autoRefresh]);
+    void fetchHealth();
+  }, [fetchHealth]);
 
-  const getStatusIcon = (status: string) => {
-    switch (status) {
-      case 'ok':
-      case 'healthy':
-        return <CheckCircle2 className="h-5 w-5 text-green-500" />;
-      case 'error':
-        return <XCircle className="h-5 w-5 text-red-500" />;
-      default:
-        return <AlertCircle className="h-5 w-5 text-yellow-500" />;
+  useEffect(() => {
+    if (!autoRefresh) {
+      return undefined;
     }
-  };
 
-  const getStatusBadge = (status: string) => {
-    const variants = {
-      ok: 'default' as const,
-      healthy: 'default' as const,
-      error: 'destructive' as const,
-      degraded: 'secondary' as const,
-      unknown: 'outline' as const,
-    };
-    
-    return (
-      <Badge variant={variants[status as keyof typeof variants] || 'outline'}>
-        {status.toUpperCase()}
-      </Badge>
-    );
-  };
+    const interval = window.setInterval(() => {
+      void fetchHealth();
+    }, 30000);
+
+    return () => window.clearInterval(interval);
+  }, [autoRefresh, fetchHealth]);
 
   if (error) {
     return (
@@ -105,7 +105,7 @@ export function RAGHealthMonitor() {
         <AlertDescription>
           Error loading health status: {error}
         </AlertDescription>
-        <Button onClick={fetchHealth} variant="outline" size="sm" className="mt-2">
+        <Button onClick={() => void fetchHealth()} variant="outline" size="sm" className="mt-2 w-fit">
           Retry
         </Button>
       </Alert>
@@ -114,182 +114,109 @@ export function RAGHealthMonitor() {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
         <div>
           <h2 className="text-2xl font-bold">RAG Health Monitor</h2>
           <p className="text-sm text-muted-foreground">
             Monitor the status of your RAG system components
           </p>
         </div>
+
         <div className="flex items-center gap-2">
-          <Button
-            onClick={fetchHealth}
-            disabled={loading}
-            size="sm"
-            variant="outline"
-          >
-            <RefreshCw className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
+          <Button onClick={() => void fetchHealth()} disabled={loading} size="sm" variant="outline">
+            <RefreshCw className={`mr-2 h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
             Refresh
           </Button>
           <Button
-            onClick={() => setAutoRefresh(!autoRefresh)}
+            onClick={() => setAutoRefresh((current) => !current)}
             size="sm"
             variant={autoRefresh ? 'default' : 'outline'}
           >
-            {autoRefresh ? 'Disable' : 'Enable'} Auto-refresh
+            Auto Refresh: {autoRefresh ? 'On' : 'Off'}
           </Button>
         </div>
       </div>
 
-      {health && (
+      {loading && !health ? (
+        <Card>
+          <CardHeader>
+            <CardTitle>System Status</CardTitle>
+            <CardDescription>Loading health status...</CardDescription>
+          </CardHeader>
+          <CardContent className="flex items-center gap-2 text-sm text-muted-foreground">
+            <RefreshCw className="h-4 w-4 animate-spin" />
+            Checking RAG services
+          </CardContent>
+        </Card>
+      ) : null}
+
+      {health ? (
         <>
-          {/* Overall Status */}
-          <Card>
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
+          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+            <Card className="md:col-span-2 xl:col-span-1">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
                   {getStatusIcon(health.status)}
-                  <CardTitle>Overall Status</CardTitle>
-                </div>
-                {getStatusBadge(health.status)}
-              </div>
-              <CardDescription>
-                Last updated: {new Date(health.timestamp).toLocaleString()}
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-3 gap-4 text-sm">
-                <div>
-                  <div className="font-medium text-muted-foreground">Provider</div>
-                  <div className="font-mono">{health.config.provider}</div>
-                </div>
-                <div>
-                  <div className="font-medium text-muted-foreground">Embedding Model</div>
-                  <div className="font-mono">{health.config.embeddingModel}</div>
-                </div>
-                <div>
-                  <div className="font-medium text-muted-foreground">Vector Dimension</div>
-                  <div className="font-mono">{health.config.vectorDimension}</div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+                  System Status
+                </CardTitle>
+                <CardDescription>Overall health of the RAG stack</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-2">
+                <Badge variant={getStatusBadgeVariant(health.status)}>
+                  {health.status.toUpperCase()}
+                </Badge>
+                <p className="text-sm text-muted-foreground">
+                  Last updated: {new Date(health.timestamp).toLocaleString()}
+                </p>
+              </CardContent>
+            </Card>
 
-          {/* Configuration Check */}
-          <Card>
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  {getStatusIcon(health.checks.config.status)}
-                  <CardTitle>Configuration</CardTitle>
+            <Card className="md:col-span-2 xl:col-span-3">
+              <CardHeader>
+                <CardTitle>Configuration</CardTitle>
+                <CardDescription>Active runtime configuration</CardDescription>
+              </CardHeader>
+              <CardContent className="grid gap-4 md:grid-cols-3">
+                <div>
+                  <p className="text-sm font-medium">Provider</p>
+                  <p className="text-sm text-muted-foreground">{health.config.provider}</p>
                 </div>
-                {getStatusBadge(health.checks.config.status)}
-              </div>
-            </CardHeader>
-            <CardContent>
-              {health.checks.config.details.errors?.length > 0 && (
-                <Alert variant="destructive">
-                  <AlertDescription>
-                    <ul className="list-disc list-inside space-y-1">
-                      {health.checks.config.details.errors.map((err: string, idx: number) => (
-                        <li key={idx}>{err}</li>
-                      ))}
-                    </ul>
-                  </AlertDescription>
-                </Alert>
-              )}
-            </CardContent>
-          </Card>
+                <div>
+                  <p className="text-sm font-medium">Embedding Model</p>
+                  <p className="text-sm text-muted-foreground">{health.config.embeddingModel}</p>
+                </div>
+                <div>
+                  <p className="text-sm font-medium">Vector Dimension</p>
+                  <p className="text-sm text-muted-foreground">{health.config.vectorDimension}</p>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
 
-          {/* Vector Store Check */}
-          <Card>
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  {getStatusIcon(health.checks.vectorStore.status)}
-                  <CardTitle>Vector Store</CardTitle>
-                </div>
-                {getStatusBadge(health.checks.vectorStore.status)}
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-2 text-sm">
-                {health.checks.vectorStore.details.type && (
-                  <div>
-                    <span className="font-medium">Type:</span>{' '}
-                    <span className="font-mono">{health.checks.vectorStore.details.type}</span>
-                  </div>
-                )}
-                {health.checks.vectorStore.details.url && (
-                  <div>
-                    <span className="font-medium">URL:</span>{' '}
-                    <span className="font-mono">{health.checks.vectorStore.details.url}</span>
-                  </div>
-                )}
-                {health.checks.vectorStore.details.collection && (
-                  <div>
-                    <span className="font-medium">Collection:</span>{' '}
-                    <span className="font-mono">{health.checks.vectorStore.details.collection}</span>
-                  </div>
-                )}
-                {health.checks.vectorStore.details.totalChunks !== undefined && (
-                  <div>
-                    <span className="font-medium">Total Chunks:</span>{' '}
-                    <span className="font-mono">{health.checks.vectorStore.details.totalChunks.toLocaleString()}</span>
-                  </div>
-                )}
-                {health.checks.vectorStore.details.error && (
-                  <Alert variant="destructive">
-                    <AlertDescription>{health.checks.vectorStore.details.error}</AlertDescription>
-                  </Alert>
-                )}
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Ollama Check */}
-          <Card>
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  {getStatusIcon(health.checks.ollama.status)}
-                  <CardTitle>Ollama Embedding Service</CardTitle>
-                </div>
-                {getStatusBadge(health.checks.ollama.status)}
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-2 text-sm">
-                {health.checks.ollama.details.url && (
-                  <div>
-                    <span className="font-medium">URL:</span>{' '}
-                    <span className="font-mono">{health.checks.ollama.details.url}</span>
-                  </div>
-                )}
-                {health.checks.ollama.details.model && (
-                  <div>
-                    <span className="font-medium">Model:</span>{' '}
-                    <span className="font-mono">{health.checks.ollama.details.model}</span>
-                  </div>
-                )}
-                {health.checks.ollama.details.modelAvailable !== undefined && (
-                  <div>
-                    <span className="font-medium">Model Available:</span>{' '}
-                    <span className="font-mono">
-                      {health.checks.ollama.details.modelAvailable ? 'Yes' : 'No'}
-                    </span>
-                  </div>
-                )}
-                {health.checks.ollama.details.error && (
-                  <Alert variant="destructive">
-                    <AlertDescription>{health.checks.ollama.details.error}</AlertDescription>
-                  </Alert>
-                )}
-              </div>
-            </CardContent>
-          </Card>
+          <div className="grid gap-4 md:grid-cols-3">
+            {Object.entries(health.checks).map(([key, check]) => (
+              <Card key={key}>
+                <CardHeader>
+                  <CardTitle className="flex items-center justify-between gap-2 text-base">
+                    <span>{checkLabels[key as keyof HealthStatus['checks']]}</span>
+                    {getStatusIcon(check.status)}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-2">
+                  <Badge variant={getStatusBadgeVariant(check.status)}>
+                    {check.status.toUpperCase()}
+                  </Badge>
+                  <p className="text-xs text-muted-foreground">
+                    {typeof check.details === 'string'
+                      ? check.details
+                      : 'Component responded successfully.'}
+                  </p>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
         </>
-      )}
+      ) : null}
     </div>
   );
 }

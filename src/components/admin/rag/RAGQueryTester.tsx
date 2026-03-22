@@ -1,20 +1,16 @@
 'use client';
 
-/**
- * RAG Query Tester
- * 
- * Interactive tool for testing RAG queries and viewing results
- */
+import React, { useMemo, useState } from 'react';
+import { Loader2, Search } from 'lucide-react';
 
-import React, { useState } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import { Badge } from '@/components/ui/badge';
-import { Search, Loader2 } from 'lucide-react';
 import { Slider } from '@/components/ui/slider';
+import { apiService } from '@/infrastructure/api/ApiService';
 
 interface SearchResult {
   content: string;
@@ -24,7 +20,11 @@ interface SearchResult {
   chunkIndex: number;
 }
 
-export function RAGQueryTester() {
+interface RetrievalResponse {
+  sources?: SearchResult[];
+}
+
+export function RAGQueryTester(): React.JSX.Element {
   const [query, setQuery] = useState('');
   const [projectId, setProjectId] = useState('');
   const [topK, setTopK] = useState(5);
@@ -33,39 +33,45 @@ export function RAGQueryTester() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [searchTime, setSearchTime] = useState<number | null>(null);
+  const [hasSearched, setHasSearched] = useState(false);
 
-  const handleSearch = async () => {
+  const formattedMinScore = useMemo(() => minScore.toFixed(2), [minScore]);
+
+  const handleSearch = async (): Promise<void> => {
     if (!query.trim()) {
       setError('Please enter a query');
+      setHasSearched(false);
       return;
     }
 
     setLoading(true);
     setError(null);
+    setHasSearched(false);
     const startTime = Date.now();
 
     try {
-      const response = await fetch('/api/rag/retrieve-context', {
+      const data = await apiService<
+        { query: string; projectId?: string; topK: number; minScore: number },
+        RetrievalResponse
+      >({
+        endpoint: '/api/rag/retrieve-context',
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
+        data: {
           query,
           projectId: projectId || undefined,
           topK,
           minScore,
-        }),
+        },
       });
 
-      if (!response.ok) {
-        throw new Error(`Search failed: ${response.statusText}`);
-      }
-
-      const data = await response.json();
-      setResults(data.sources || []);
+      setResults(data.sources ?? []);
       setSearchTime(Date.now() - startTime);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Search failed');
+      setHasSearched(true);
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Failed to retrieve context');
       setResults([]);
+      setSearchTime(null);
+      setHasSearched(true);
     } finally {
       setLoading(false);
     }
@@ -75,12 +81,9 @@ export function RAGQueryTester() {
     <Card>
       <CardHeader>
         <CardTitle>Query Tester</CardTitle>
-        <CardDescription>
-          Test RAG queries and view search results in real-time
-        </CardDescription>
+        <CardDescription>Test RAG queries and view search results in real-time</CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
-        {/* Query Input */}
         <div className="space-y-2">
           <Label htmlFor="query">Search Query</Label>
           <div className="flex gap-2">
@@ -88,127 +91,103 @@ export function RAGQueryTester() {
               id="query"
               placeholder="What is machine learning?"
               value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+              onChange={(event) => setQuery(event.target.value)}
+              onKeyDown={(event) => {
+                if (event.key === 'Enter' && !loading) {
+                  void handleSearch();
+                }
+              }}
               disabled={loading}
             />
-            <Button onClick={handleSearch} disabled={loading || !query.trim()}>
-              {loading ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
-              ) : (
-                <Search className="h-4 w-4" />
-              )}
+            <Button onClick={() => void handleSearch()} disabled={loading}>
+              {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Search className="h-4 w-4" />}
+              <span className="sr-only">Run query</span>
             </Button>
           </div>
         </div>
 
-        {/* Filters */}
-        <div className="grid gap-4 md:grid-cols-3">
+        <div className="grid gap-4 md:grid-cols-2">
           <div className="space-y-2">
-            <Label htmlFor="projectId">Project ID (Optional)</Label>
+            <Label htmlFor="project-id">Project ID (optional)</Label>
             <Input
-              id="projectId"
-              placeholder="filter-by-project"
+              id="project-id"
+              placeholder="project-123"
               value={projectId}
-              onChange={(e) => setProjectId(e.target.value)}
+              onChange={(event) => setProjectId(event.target.value)}
               disabled={loading}
             />
           </div>
 
           <div className="space-y-2">
-            <Label>Top K Results: {topK}</Label>
+            <div className="flex items-center justify-between">
+              <Label htmlFor="top-k">Top results</Label>
+              <Badge variant="outline">{topK}</Badge>
+            </div>
             <Slider
-              value={[topK]}
-              onValueChange={([value]) => setTopK(value)}
+              id="top-k"
               min={1}
-              max={20}
+              max={10}
               step={1}
-              disabled={loading}
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label>Min Score: {minScore.toFixed(2)}</Label>
-            <Slider
-              value={[minScore]}
-              onValueChange={([value]) => setMinScore(value)}
-              min={0}
-              max={1}
-              step={0.05}
+              value={[topK]}
+              onValueChange={(value) => setTopK(value[0] ?? 5)}
               disabled={loading}
             />
           </div>
         </div>
 
-        {/* Error Display */}
-        {error && (
-          <div className="rounded-lg bg-destructive/10 p-4 text-sm text-destructive">
-            {error}
+        <div className="space-y-2">
+          <div className="flex items-center justify-between">
+            <Label htmlFor="min-score">Minimum score</Label>
+            <Badge variant="outline">{formattedMinScore}</Badge>
           </div>
-        )}
+          <Slider
+            id="min-score"
+            min={0}
+            max={1}
+            step={0.05}
+            value={[minScore]}
+            onValueChange={(value) => setMinScore(value[0] ?? 0.5)}
+            disabled={loading}
+          />
+        </div>
 
-        {/* Results */}
-        {results.length > 0 && (
+        {searchTime !== null ? (
+          <Badge variant="secondary">Search completed in {searchTime}ms</Badge>
+        ) : null}
+
+        {error ? (
+          <Alert variant="destructive">
+            <AlertDescription>{error}</AlertDescription>
+          </Alert>
+        ) : null}
+
+        {hasSearched && !loading && results.length === 0 && !error ? (
+          <p className="text-sm text-muted-foreground">No results found for this query.</p>
+        ) : null}
+
+        {results.length > 0 ? (
           <div className="space-y-4">
             <div className="flex items-center justify-between">
-              <h3 className="text-lg font-semibold">
-                Search Results ({results.length})
-              </h3>
-              {searchTime && (
-                <Badge variant="outline">
-                  {searchTime}ms
-                </Badge>
-              )}
+              <h3 className="text-sm font-semibold">Results</h3>
+              <Badge variant="outline">{results.length} matches</Badge>
             </div>
-
-            <div className="space-y-3">
-              {results.map((result, idx) => (
-                <Card key={idx} className="border-l-4 border-l-primary">
-                  <CardContent className="pt-4">
-                    <div className="space-y-2">
-                      <div className="flex items-start justify-between gap-4">
-                        <div className="flex-1">
-                          <div className="flex items-center gap-2 mb-2">
-                            <Badge variant="secondary">
-                              Score: {result.score.toFixed(3)}
-                            </Badge>
-                            {result.sourceFile && (
-                              <Badge variant="outline">
-                                {result.sourceFile}
-                              </Badge>
-                            )}
-                            {result.projectId && (
-                              <Badge variant="outline">
-                                {result.projectId}
-                              </Badge>
-                            )}
-                          </div>
-                          <p className="text-sm text-muted-foreground whitespace-pre-wrap">
-                            {result.content}
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
+            {results.map((result, index) => (
+              <Card key={`${result.projectId ?? 'project'}-${result.chunkIndex}-${index}`}>
+                <CardHeader>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <CardTitle className="text-base">Result #{index + 1}</CardTitle>
+                    <Badge variant="secondary">Score: {result.score.toFixed(3)}</Badge>
+                    {result.sourceFile ? <Badge variant="outline">{result.sourceFile}</Badge> : null}
+                    {result.projectId ? <Badge variant="outline">{result.projectId}</Badge> : null}
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-sm text-muted-foreground">{result.content}</p>
+                </CardContent>
+              </Card>
+            ))}
           </div>
-        )}
-
-        {/* No Results */}
-        {!loading && !error && results.length === 0 && query && (
-          <div className="text-center py-8 text-muted-foreground">
-            No results found. Try adjusting your query or filters.
-          </div>
-        )}
-
-        {/* Empty State */}
-        {!loading && !error && !query && results.length === 0 && (
-          <div className="text-center py-8 text-muted-foreground">
-            Enter a query to test the RAG system
-          </div>
-        )}
+        ) : null}
       </CardContent>
     </Card>
   );

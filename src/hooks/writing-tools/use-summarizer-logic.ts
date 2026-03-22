@@ -8,7 +8,7 @@ import { z } from 'zod';
 import { useWritingTool, useToast } from '@/hooks';
 import { useAuth } from '@/context/AuthContext';
 import { DocumentProcessingApiClient } from '@/modules/ai-content/adapters/api-client/DocumentProcessingApiClient';
-import { container } from '@/infrastructure/di/container';
+import { runAuthenticatedResultCall } from '../data/authenticated-client-call';
 import { useDropzone } from 'react-dropzone';
 import { useLocalization } from '@/context/LocalizationContext';
 
@@ -56,9 +56,9 @@ export function useSummarizerLogic() {
     formData.append('file', file);
 
     try {
-      const token = await firebaseUser.getIdToken();
-      const client = container.resolve(DocumentProcessingApiClient);
-      const result = await client.processFileApi(formData, token);
+      const result = await runAuthenticatedResultCall(firebaseUser, DocumentProcessingApiClient, (client, token) =>
+        client.processFileApi(formData, token),
+      );
       form.setValue('text', result.markdown, { shouldValidate: true });
       toast({ title: t('writingTools.summarizer.processingFile'), description: `Text extracted from ${file.name}.` });
       refetchUser();

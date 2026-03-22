@@ -1,12 +1,11 @@
-
 'use client';
 
 import { useInfiniteQuery } from '@tanstack/react-query';
 import { userKeys } from '@/lib/query-keys';
 import { useAuth } from '@/context/AuthContext';
 import { User } from '@/modules/users/domain/entities/User';
-import { container } from '@/infrastructure/di/container';
 import { UserApiClient } from '@/modules/users/adapters/api-client/UserApiClient';
+import { runAuthenticatedResultCall } from '@/hooks/data/authenticated-client-call';
 
 const USERS_PER_PAGE = 10;
 
@@ -25,23 +24,22 @@ export function useUserManagementConsole() {
   } = useInfiniteQuery({
     queryKey: userKeys.lists(),
     queryFn: async ({ pageParam }) => {
-      if (!firebaseUser) throw new Error("User not authenticated");
-      const token = await firebaseUser.getIdToken();
-      const client = container.resolve(UserApiClient);
-      const result = await client.getPaginatedUsers({ limit: USERS_PER_PAGE, lastVisibleId: pageParam }, token);
-      // Instantiate User objects
+      const result = await runAuthenticatedResultCall(firebaseUser, UserApiClient, (client, token) =>
+        client.getPaginatedUsers({ limit: USERS_PER_PAGE, lastVisibleId: pageParam }, token),
+      );
+
       return {
-          ...result,
-          users: result.users.map((u: any) => new User(u)),
+        ...result,
+        users: result.users.map((user) => new User(user)),
       };
     },
     initialPageParam: undefined as string | undefined,
-    getNextPageParam: (lastPage) => lastPage.hasNextPage ? lastPage.lastVisibleId : undefined,
-    enabled: !authLoading && !!firebaseUser,
-    staleTime: 1000 * 60 * 5, // 5 minutes
+    getNextPageParam: (lastPage) => (lastPage.hasNextPage ? lastPage.lastVisibleId ?? undefined : undefined),
+    enabled: !authLoading && Boolean(firebaseUser),
+    staleTime: 1000 * 60 * 5,
   });
 
-  const allUsers = data?.pages.flatMap(page => page.users) ?? [];
+  const allUsers = data?.pages.flatMap((page) => page.users) ?? [];
 
   return {
     allUsers,

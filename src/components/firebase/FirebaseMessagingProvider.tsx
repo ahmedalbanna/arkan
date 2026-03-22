@@ -6,54 +6,52 @@ import { initializeFirebase } from '@/firebase';
 
 const { firebaseApp: app } = initializeFirebase();
 import { DeviceTokenApiClient } from '@/modules/users/adapters/api-client/DeviceTokenApiClient';
-import { container } from '@/infrastructure/di/container';
 import { getMessaging, getToken, onMessage } from 'firebase/messaging';
 import { useEffect, useState } from 'react';
+import { runAuthenticatedResultCall } from '@/hooks/data/authenticated-client-call';
 
 export default function FirebaseMessagingProvider({ children }: { children: React.ReactNode }) {
-    const { firebaseUser } = useAuth();
-    const { toast } = useToast();
-    const [, setToken] = useState<string | null>(null);
+  const { firebaseUser } = useAuth();
+  const { toast } = useToast();
+  const [, setToken] = useState<string | null>(null);
 
-    useEffect(() => {
-        if (typeof window !== 'undefined' && 'serviceWorker' in navigator) {
-            const messaging = getMessaging(app);
+  useEffect(() => {
+    if (typeof window !== 'undefined' && 'serviceWorker' in navigator) {
+      const messaging = getMessaging(app);
 
-            async function requestPermission() {
-                try {
-                    const permission = await Notification.requestPermission();
-                    if (permission === 'granted' && firebaseUser) {
-                        const currentToken = await getToken(messaging, { vapidKey: process.env.NEXT_PUBLIC_FIREBASE_VAPID_KEY });
-                        if (currentToken) {
-                            setToken(currentToken);
-                            const client = container.resolve(DeviceTokenApiClient);
-                            await client.saveDeviceToken(firebaseUser.uid, currentToken);
-                        } else {
-                            console.log('No registration token available. Request permission to generate one.');
-                        }
-                    } else {
-                        console.log('Unable to get permission to notify.');
-                    }
-                } catch (err) {
-                    console.error('An error occurred while retrieving token. ', err);
-                }
+      async function requestPermission() {
+        try {
+          const permission = await Notification.requestPermission();
+          if (permission === 'granted' && firebaseUser) {
+            const currentToken = await getToken(messaging, { vapidKey: process.env.NEXT_PUBLIC_FIREBASE_VAPID_KEY });
+            if (currentToken) {
+              setToken(currentToken);
+              await runAuthenticatedResultCall(firebaseUser, DeviceTokenApiClient, (client) =>
+                client.saveDeviceToken(firebaseUser.uid, currentToken),
+              );
+            } else {
+              console.log('No registration token available. Request permission to generate one.');
             }
-
-            requestPermission();
-
-            const unsubscribe = onMessage(messaging, (payload) => {
-                console.log('Message received. ', payload);
-                toast({
-                    title: payload.notification?.title,
-                    description: payload.notification?.body,
-                });
-            });
-
-            return () => {
-                unsubscribe();
-            };
+          } else {
+            console.log('Unable to get permission to notify.');
+          }
+        } catch (err) {
+          console.error('An error occurred while retrieving token. ', err);
         }
-    }, [firebaseUser, toast]);
+      }
 
-    return <>{children}</>;
+      requestPermission();
+
+      const unsubscribe = onMessage(messaging, (payload) => {
+        console.log('Message received. ', payload);
+        toast({ title: payload.notification?.title, description: payload.notification?.body });
+      });
+
+      return () => {
+        unsubscribe();
+      };
+    }
+  }, [firebaseUser, toast]);
+
+  return <>{children}</>;
 }

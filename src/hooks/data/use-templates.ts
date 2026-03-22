@@ -1,183 +1,178 @@
-
 'use client';
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '@/context/AuthContext';
-import { getAuthenticatedToken } from '@/lib/utils/authUtils';
 import { toast } from '@/hooks/util/use-toast';
 import { TemplateApiClient } from '@/modules/templates/adapters/api-client/TemplateApiClient';
-import { container } from '@/infrastructure/di/container';
-
-
 import { useBuilderStore } from '../core/useBuilderStore';
 import { useState } from 'react';
-import { useSections } from './use-sections';
 import { applyReportTemplate as applyReportTemplateUtil } from '@/lib/project/template';
-import { CreateReportTemplateData, ReportTemplateProperties, UpdateReportTemplateData } from '@/modules/templates/domain/entities/ReportTemplate';
+import {
+  CreateReportTemplateData,
+  ReportTemplateProperties,
+  UpdateReportTemplateData,
+} from '@/modules/templates/domain/entities/ReportTemplate';
 import { PptxTemplateProperties } from '@/modules/templates/domain/entities/PptxTemplate';
 import type { BaseTemplateProperties } from '@/modules/templates/domain/entities/Template';
-
-
-// ============================================================================
-// REPORT GENERATION TEMPLATES
-// ============================================================================
+import { runAuthenticatedResultCall, unwrapResult } from './authenticated-client-call';
+import { templateKeys } from '@/lib/query-keys';
 
 export function useReportTemplates() {
-    const { firebaseUser } = useAuth();
-    return useQuery<ReportTemplateProperties[]>({
-        queryKey: ['report-templates'],
-        queryFn: async () => {
-            const token = await getAuthenticatedToken(firebaseUser);
-            const client = container.resolve(TemplateApiClient);
-            return client.fetchReportTemplatesApi(token);
-        },
-        enabled: !!firebaseUser,
-        staleTime: 1000 * 60 * 60, // 1 hour
-    });
+  return useQuery<ReportTemplateProperties[]>({
+    queryKey: templateKeys.report(),
+    queryFn: async () => unwrapResult(await new TemplateApiClient().fetchReportTemplatesApi()),
+    staleTime: 1000 * 60 * 60,
+  });
 }
 
 export function useApplyReportTemplate(onSuccessCallback?: () => void) {
-    const { project, updateProject } = useBuilderStore();
-    const { data: allSections } = useSections();
-    const [isApplying, setIsApplying] = useState(false);
+  const { project, updateProject } = useBuilderStore();
+  const [isApplying, setIsApplying] = useState(false);
 
-    const handleSelectTemplate = (template: ReportTemplateProperties) => {
-        if (!project) {
-            toast({ title: 'Error', description: 'Project data not available.', variant: 'destructive' });
-            return;
-        }
+  const handleSelectTemplate = (template: ReportTemplateProperties) => {
+    if (!project) {
+      toast({ title: 'Error', description: 'Project data not available.', variant: 'destructive' });
+      return;
+    }
 
-        setIsApplying(true);
-        try {
-            updateProject(p => applyReportTemplateUtil(p, template));
-            toast({ title: "Template Applied", description: `Project structured with '${template.name}'.` });
-            if (onSuccessCallback) {
-                onSuccessCallback();
-            }
-        } catch (error: any) {
-            toast({ title: 'Failed to Apply Template', description: error.message, variant: 'destructive' });
-        } finally {
-            setIsApplying(false);
-        }
-    };
-    
-    return {
-        handleSelectTemplate,
-        isApplyingTemplate: isApplying,
-    };
+    setIsApplying(true);
+    try {
+      updateProject((currentProject) => applyReportTemplateUtil(currentProject, template));
+      toast({ title: 'Template Applied', description: `Project structured with '${template.name}'.` });
+      onSuccessCallback?.();
+    } catch (error: unknown) {
+      const description = error instanceof Error ? error.message : 'Failed to apply template';
+      toast({ title: 'Failed to Apply Template', description, variant: 'destructive' });
+    } finally {
+      setIsApplying(false);
+    }
+  };
+
+  return {
+    handleSelectTemplate,
+    isApplyingTemplate: isApplying,
+  };
 }
 
-
 export function useCreateReportTemplate() {
-    const queryClient = useQueryClient();
-    const { firebaseUser } = useAuth();
-    return useMutation({
-        mutationFn: async (data: CreateReportTemplateData) => {
-            const token = await getAuthenticatedToken(firebaseUser);
-            const client = container.resolve(TemplateApiClient);
-            return client.createReportTemplateApi(data, token);
-        },
-        onSuccess: () => queryClient.invalidateQueries({ queryKey: ['report-templates'] }),
-        onError: (error: any) => toast({ title: 'Creation Failed', description: error.message, variant: 'destructive' }),
-    });
+  const queryClient = useQueryClient();
+  const { firebaseUser } = useAuth();
+
+  return useMutation({
+    mutationFn: async (data: CreateReportTemplateData) =>
+      runAuthenticatedResultCall(firebaseUser, TemplateApiClient, (client, token) =>
+        client.createReportTemplateApi(data, token),
+      ),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: templateKeys.report() }),
+    onError: (error: unknown) => {
+      const description = error instanceof Error ? error.message : 'Creation failed';
+      toast({ title: 'Creation Failed', description, variant: 'destructive' });
+    },
+  });
 }
 
 export function useUpdateReportTemplate() {
-    const queryClient = useQueryClient();
-    const { firebaseUser } = useAuth();
-    return useMutation({
-        mutationFn: async ({ templateId, data }: { templateId: string; data: UpdateReportTemplateData }) => {
-            const token = await getAuthenticatedToken(firebaseUser);
-            const client = container.resolve(TemplateApiClient);
-            return client.updateReportTemplateApi(templateId, data, token);
-        },
-        onSuccess: () => {
-            toast({ title: 'Template Updated', description: 'Report template has been saved.' });
-            queryClient.invalidateQueries({ queryKey: ['report-templates'] });
-        },
-        onError: (error: any) => toast({ title: 'Update Failed', description: error.message, variant: 'destructive' }),
-    });
+  const queryClient = useQueryClient();
+  const { firebaseUser } = useAuth();
+
+  return useMutation({
+    mutationFn: async ({ templateId, data }: { templateId: string; data: UpdateReportTemplateData }) =>
+      runAuthenticatedResultCall(firebaseUser, TemplateApiClient, (client, token) =>
+        client.updateReportTemplateApi(templateId, data, token),
+      ),
+    onSuccess: () => {
+      toast({ title: 'Template Updated', description: 'Report template has been saved.' });
+      queryClient.invalidateQueries({ queryKey: templateKeys.report() });
+    },
+    onError: (error: unknown) => {
+      const description = error instanceof Error ? error.message : 'Update failed';
+      toast({ title: 'Update Failed', description, variant: 'destructive' });
+    },
+  });
 }
 
 export function useDeleteReportTemplate() {
-    const queryClient = useQueryClient();
-    const { firebaseUser } = useAuth();
-    return useMutation({
-        mutationFn: async (templateId: string) => {
-            const token = await getAuthenticatedToken(firebaseUser);
-            const client = container.resolve(TemplateApiClient);
-            return client.deleteReportTemplateApi(templateId, token);
-        },
-        onSuccess: () => {
-            toast({ title: 'Template Deleted' });
-            queryClient.invalidateQueries({ queryKey: ['report-templates'] });
-        },
-        onError: (error: any) => toast({ title: 'Delete Failed', description: error.message, variant: 'destructive' }),
-    });
-}
+  const queryClient = useQueryClient();
+  const { firebaseUser } = useAuth();
 
-// ============================================================================
-// PRESENTATION GENERATION TEMPLATES
-// ============================================================================
+  return useMutation({
+    mutationFn: async (templateId: string) =>
+      runAuthenticatedResultCall(firebaseUser, TemplateApiClient, (client, token) =>
+        client.deleteReportTemplateApi(templateId, token),
+      ),
+    onSuccess: () => {
+      toast({ title: 'Template Deleted' });
+      queryClient.invalidateQueries({ queryKey: templateKeys.report() });
+    },
+    onError: (error: unknown) => {
+      const description = error instanceof Error ? error.message : 'Delete failed';
+      toast({ title: 'Delete Failed', description, variant: 'destructive' });
+    },
+  });
+}
 
 export function usePresentationTemplates() {
-    const { firebaseUser } = useAuth();
-    return useQuery<PptxTemplateProperties[]>({
-        queryKey: ['presentation-templates'],
-        queryFn: async () => {
-            const token = await getAuthenticatedToken(firebaseUser);
-            const client = container.resolve(TemplateApiClient);
-            return client.fetchPresentationTemplatesApi(token);
-        },
-        enabled: !!firebaseUser,
-    });
+  return useQuery<PptxTemplateProperties[]>({
+    queryKey: templateKeys.presentation(),
+    queryFn: async () => unwrapResult(await new TemplateApiClient().fetchPresentationTemplatesApi()),
+  });
 }
 
-
 export function useCreatePresentationTemplate() {
-    const queryClient = useQueryClient();
-    const { firebaseUser } = useAuth();
-    return useMutation({
-        mutationFn: async (data: BaseTemplateProperties) => {
-            const token = await getAuthenticatedToken(firebaseUser);
-            const client = container.resolve(TemplateApiClient);
-            return client.createPresentationTemplateApi({ ...data }, token);
-        },
-        onSuccess: () => queryClient.invalidateQueries({ queryKey: ['presentation-templates'] }),
-        onError: (error: any) => toast({ title: 'Creation Failed', description: error.message, variant: 'destructive' }),
-    });
+  const queryClient = useQueryClient();
+  const { firebaseUser } = useAuth();
+
+  return useMutation({
+    mutationFn: async (data: BaseTemplateProperties) =>
+      runAuthenticatedResultCall(firebaseUser, TemplateApiClient, (client, token) =>
+        client.createPresentationTemplateApi(data, token),
+      ),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: templateKeys.presentation() }),
+    onError: (error: unknown) => {
+      const description = error instanceof Error ? error.message : 'Creation failed';
+      toast({ title: 'Creation Failed', description, variant: 'destructive' });
+    },
+  });
 }
 
 export function useUpdatePresentationTemplate() {
-    const queryClient = useQueryClient();
-    const { firebaseUser } = useAuth();
-    return useMutation({
-        mutationFn: async ({ templateId, data }: { templateId: string; data: Partial<BaseTemplateProperties> }) => {
-            const token = await getAuthenticatedToken(firebaseUser);
-            const client = container.resolve(TemplateApiClient);
-            return client.updatePresentationTemplateApi(templateId, { ...data }, token);
-        },
-        onSuccess: () => {
-            toast({ title: 'Template Updated', description: 'Presentation template has been saved.' });
-            queryClient.invalidateQueries({ queryKey: ['presentation-templates'] });
-        },
-        onError: (error: any) => toast({ title: 'Update Failed', description: error.message, variant: 'destructive' }),
-    });
+  const queryClient = useQueryClient();
+  const { firebaseUser } = useAuth();
+
+  return useMutation({
+    mutationFn: async ({ templateId, data }: { templateId: string; data: Partial<BaseTemplateProperties> }) =>
+      runAuthenticatedResultCall(firebaseUser, TemplateApiClient, (client, token) =>
+        client.updatePresentationTemplateApi(templateId, data, token),
+      ),
+    onSuccess: () => {
+      toast({ title: 'Template Updated', description: 'Presentation template has been saved.' });
+      queryClient.invalidateQueries({ queryKey: templateKeys.presentation() });
+      queryClient.invalidateQueries({ queryKey: templateKeys.pptx() });
+    },
+    onError: (error: unknown) => {
+      const description = error instanceof Error ? error.message : 'Update failed';
+      toast({ title: 'Update Failed', description, variant: 'destructive' });
+    },
+  });
 }
 
 export function useDeletePresentationTemplate() {
-    const queryClient = useQueryClient();
-    const { firebaseUser } = useAuth();
-    return useMutation({
-        mutationFn: async (templateId: string) => {
-            const token = await getAuthenticatedToken(firebaseUser);
-            const client = container.resolve(TemplateApiClient);
-            return client.deletePresentationTemplateApi(templateId, token);
-        },
-        onSuccess: () => {
-            toast({ title: 'Template Deleted' });
-            queryClient.invalidateQueries({ queryKey: ['presentation-templates'] });
-        },
-        onError: (error: any) => toast({ title: 'Delete Failed', description: error.message, variant: 'destructive' }),
-    });
+  const queryClient = useQueryClient();
+  const { firebaseUser } = useAuth();
+
+  return useMutation({
+    mutationFn: async (templateId: string) =>
+      runAuthenticatedResultCall(firebaseUser, TemplateApiClient, (client, token) =>
+        client.deletePresentationTemplateApi(templateId, token),
+      ),
+    onSuccess: () => {
+      toast({ title: 'Template Deleted' });
+      queryClient.invalidateQueries({ queryKey: templateKeys.presentation() });
+      queryClient.invalidateQueries({ queryKey: templateKeys.pptx() });
+    },
+    onError: (error: unknown) => {
+      const description = error instanceof Error ? error.message : 'Delete failed';
+      toast({ title: 'Delete Failed', description, variant: 'destructive' });
+    },
+  });
 }

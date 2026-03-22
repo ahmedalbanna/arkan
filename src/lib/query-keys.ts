@@ -1,4 +1,3 @@
-
 /**
  * Query Key Factories for React Query
  *
@@ -25,34 +24,39 @@ export const featureKeys = {
   detail: (featureId: string) => [...featureKeys.details(), featureId] as const,
 };
 
+export const settingsKeys = {
+  all: () => ['settings'] as const,
+  public: () => [...settingsKeys.all(), 'public'] as const,
+};
+
 export const transactionKeys = {
   all: () => ['transactions'] as const,
   lists: () => [...transactionKeys.all(), 'list'] as const,
   list: (identifier: 'pending' | 'verified' | 'rejected' | string) => [...transactionKeys.lists(), { identifier }] as const,
-}
+};
 
 export const generationLogKeys = {
   all: () => ['generation-logs'] as const,
   lists: () => [...generationLogKeys.all(), 'list'] as const,
-  list: (filters: { agentId?: string; userId?: string; }) => [...generationLogKeys.lists(), filters] as const,
-}
+  list: (filters: { agentId?: string; userId?: string }) => [...generationLogKeys.lists(), filters] as const,
+};
 
 export const adminKeys = {
   all: () => ['admin'] as const,
   dashboardStats: () => [...adminKeys.all(), 'dashboard-stats'] as const,
-}
+};
 
 export const analyticsKeys = {
   all: () => ['analytics'] as const,
   userStats: (userId: string) => [...analyticsKeys.all(), 'user-stats', userId] as const,
-}
+};
 
 export const projectKeys = {
   all: (userId: string) => ['projects', userId] as const,
   lists: (userId: string) => [...projectKeys.all(userId), 'list'] as const,
   details: (userId: string) => [...projectKeys.all(userId), 'detail'] as const,
-  detail: (projectId: string) => [...projectKeys.details('shared'), projectId] as const, // Use a shared user or specific if known
-}
+  detail: (userId: string, projectId: string) => [...projectKeys.details(userId), projectId] as const,
+};
 
 export const homeworkKeys = {
   all: () => ['homework'] as const,
@@ -79,6 +83,7 @@ export const templateKeys = {
   docx: () => [...templateKeys.all(), 'docx'] as const,
   pptx: () => [...templateKeys.all(), 'pptx'] as const,
   report: () => [...templateKeys.all(), 'report'] as const,
+  presentation: () => [...templateKeys.all(), 'presentation'] as const,
 };
 
 export const writingToolKeys = {

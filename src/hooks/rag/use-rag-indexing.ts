@@ -1,11 +1,14 @@
 /**
  * Hook: useRAGIndexing
- * 
+ *
  * React hook for indexing documents into the RAG system
  */
 
+'use client';
+
 import { useState } from 'react';
 import { useAuth } from '@/context/AuthContext';
+import { apiService } from '@/infrastructure/api/ApiService';
 
 interface IndexingState {
   isIndexing: boolean;
@@ -14,8 +17,12 @@ interface IndexingState {
   chunksCreated: number;
 }
 
+interface IndexDocumentResponse {
+  chunksCreated?: number;
+}
+
 export function useRAGIndexing() {
-  const { firebaseUser: user } = useAuth();
+  const { firebaseUser } = useAuth();
   const [state, setState] = useState<IndexingState>({
     isIndexing: false,
     error: null,
@@ -27,10 +34,10 @@ export function useRAGIndexing() {
     content: string,
     fileName: string,
     projectId?: string,
-    type: 'user_upload' | 'reference' = 'user_upload'
+    type: 'user_upload' | 'reference' = 'user_upload',
   ) => {
-    if (!user) {
-      setState(prev => ({ ...prev, error: 'User not authenticated' }));
+    if (!firebaseUser) {
+      setState((prev) => ({ ...prev, error: 'User not authenticated' }));
       return false;
     }
 
@@ -42,35 +49,32 @@ export function useRAGIndexing() {
     });
 
     try {
-      const response = await fetch('/api/rag/index-document', {
+      const data = await apiService<
+        { content: string; fileName: string; userId: string; projectId?: string; type: 'user_upload' | 'reference' },
+        IndexDocumentResponse
+      >({
+        endpoint: '/api/rag/index-document',
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
+        firebaseUser,
+        data: {
           content,
           fileName,
-          userId: user.uid,
+          userId: firebaseUser.uid,
           projectId,
           type,
-        }),
+        },
       });
 
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || 'Failed to index document');
-      }
-
+      const chunksCreated = data.chunksCreated ?? 0;
       setState({
         isIndexing: false,
         error: null,
         success: true,
-        chunksCreated: data.chunksCreated || 0,
+        chunksCreated,
       });
 
-      return true;
-    } catch (error) {
+      return chunksCreated;
+    } catch (error: unknown) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       setState({
         isIndexing: false,
@@ -83,15 +87,11 @@ export function useRAGIndexing() {
   };
 
   const indexMultipleDocuments = async (
-    documents: Array<{
-      content: string;
-      fileName: string;
-      type?: 'user_upload' | 'reference';
-    }>,
-    projectId?: string
+    documents: Array<{ content: string; fileName: string; type?: 'user_upload' | 'reference' }>,
+    projectId?: string,
   ) => {
-    if (!user) {
-      setState(prev => ({ ...prev, error: 'User not authenticated' }));
+    if (!firebaseUser) {
+      setState((prev) => ({ ...prev, error: 'User not authenticated' }));
       return false;
     }
 
@@ -107,15 +107,10 @@ export function useRAGIndexing() {
       const errors: string[] = [];
 
       for (const doc of documents) {
-        const success = await indexDocument(
-          doc.content,
-          doc.fileName,
-          projectId,
-          doc.type || 'user_upload'
-        );
+        const result = await indexDocument(doc.content, doc.fileName, projectId, doc.type ?? 'user_upload');
 
-        if (success) {
-          totalChunks += state.chunksCreated;
+        if (typeof result === 'number') {
+          totalChunks += result;
         } else {
           errors.push(`Failed to index: ${doc.fileName}`);
         }
@@ -139,7 +134,7 @@ export function useRAGIndexing() {
       });
 
       return true;
-    } catch (error) {
+    } catch (error: unknown) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       setState({
         isIndexing: false,

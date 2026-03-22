@@ -1,24 +1,31 @@
-
-
 'use client';
 
-import { injectable } from "tsyringe";
-import { apiService } from "@/infrastructure/api/ApiService";
+import { injectable } from 'tsyringe';
+import { apiService, ApiError } from '@/infrastructure/api/ApiService';
+import { Result } from '@/lib/utils/result';
+
+export interface GeneratedReportSectionResponse {
+  content: string;
+}
+
+const toApiError = (error: unknown): ApiError => {
+  if (error instanceof ApiError) return error;
+  return new ApiError('Unexpected report API error', 500, error);
+};
 
 @injectable()
 export class ReportApiClient {
-    /**
-     * Calls the API to generate a single report section.
-     * @param body The request body containing the generation context.
-     * @param token The user's authentication token.
-     * @returns A promise that resolves to the generated section data.
-     */
-    async generateReportSectionApi(body: any, token: string): Promise<any> {
-        return apiService({
-            endpoint: '/api/generate/section',
-            method: 'POST',
-            data: body,
-            token
-        });
+  async generateReportSectionApi(body: unknown, token: string): Promise<Result<GeneratedReportSectionResponse, ApiError>> {
+    try {
+      const data = await apiService<unknown, GeneratedReportSectionResponse>({
+        endpoint: '/api/generate/section',
+        method: 'POST',
+        data: body,
+        token,
+      });
+      return Result.ok(data);
+    } catch (error: unknown) {
+      return Result.fail(toApiError(error));
     }
+  }
 }

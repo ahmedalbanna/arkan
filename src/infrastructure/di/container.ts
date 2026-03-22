@@ -35,12 +35,9 @@ import { ReportApiClient } from "@/modules/ai-content/adapters/api-client/Report
 import { WritingToolRegistry } from "@/modules/ai/application/services/WritingToolRegistry";
 import { WritingToolsApiClient } from "@/modules/ai/adapters/api-client/WritingToolsApiClient";
 import { AgentApiClient } from "@/modules/ai/adapters/api-client/AgentApiClient";
-import { DiagramApiClient } from "@/modules/ai/adapters/api-client/DiagramApiClient";
-import { EvaluationApiClient } from "@/modules/ai/adapters/api-client/EvaluationApiClient";
 import { GenerationLogApiClient } from "@/modules/ai/adapters/api-client/GenerationLogApiClient";
 import { ImageConversionApiClient } from "@/modules/ai/adapters/api-client/ImageConversionApiClient";
 import { TransactionApiClient } from "@/modules/billing/adapters/api-client/TransactionApiClient";
-import { RagApiClient } from "@/modules/rag/adapters/api-client/RagApiClient";
 import { AuthApiClient } from "@/modules/users/adapters/api-client/AuthApiClient";
 import { DeviceTokenApiClient } from "@/modules/users/adapters/api-client/DeviceTokenApiClient";
 import { CreditService } from "@/modules/billing/application/services/CreditService";
@@ -73,12 +70,9 @@ container.register(PdfExportService, { useClass: PdfExportService }, { lifecycle
 container.register(DocumentProcessingApiClient, { useClass: DocumentProcessingApiClient }, { lifecycle: Lifecycle.Singleton });
 container.register(ReportApiClient, { useClass: ReportApiClient }, { lifecycle: Lifecycle.Singleton });
 container.register(AgentApiClient, { useClass: AgentApiClient }, { lifecycle: Lifecycle.Singleton });
-container.register(DiagramApiClient, { useClass: DiagramApiClient }, { lifecycle: Lifecycle.Singleton });
-container.register(EvaluationApiClient, { useClass: EvaluationApiClient }, { lifecycle: Lifecycle.Singleton });
 container.register(GenerationLogApiClient, { useClass: GenerationLogApiClient }, { lifecycle: Lifecycle.Singleton });
 container.register(ImageConversionApiClient, { useClass: ImageConversionApiClient }, { lifecycle: Lifecycle.Singleton });
 container.register(TransactionApiClient, { useClass: TransactionApiClient }, { lifecycle: Lifecycle.Singleton });
-container.register(RagApiClient, { useClass: RagApiClient }, { lifecycle: Lifecycle.Singleton });
 container.register(AuthApiClient, { useClass: AuthApiClient }, { lifecycle: Lifecycle.Singleton });
 container.register(DeviceTokenApiClient, { useClass: DeviceTokenApiClient }, { lifecycle: Lifecycle.Singleton });
 

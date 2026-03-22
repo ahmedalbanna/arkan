@@ -10,12 +10,13 @@ module.exports = {
     '^@/hooks/(.*)$': '<rootDir>/src/hooks/$1',
     '^@/modules/(.*)$': '<rootDir>/src/modules/$1',
     '^@/services/(.*)$': '<rootDir>/src/modules/$1',
+    '^@/(.*)$': '<rootDir>/src/$1',
   },
   // A list of paths to modules that run some code to configure or set up the testing framework before each test.
   setupFilesAfterEnv: ['<rootDir>/jest.setup.js'],
   transform: {
-    // Use ts-jest for .ts and .tsx files
-    '^.+\\.(ts|tsx)$': 'ts-jest',
+    // Use ts-jest for TypeScript and transformed ESM JavaScript dependencies
+    '^.+\\.(ts|tsx|js|jsx)$': ['ts-jest', { tsconfig: { jsx: 'react-jsx' }, allowJs: true }],
   },
   // By default, node_modules are not transformed by Jest.
   // We need to transform ESM-only packages from the unified ecosystem.
@@ -24,4 +25,5 @@ module.exports = {
   ],
   // Automatically clear mock calls and instances between every test
   clearMocks: true,
+  modulePathIgnorePatterns: ['<rootDir>/.next/'],
 };

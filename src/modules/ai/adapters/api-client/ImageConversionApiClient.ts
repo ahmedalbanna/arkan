@@ -1,30 +1,31 @@
 'use client';
 
-import { injectable } from "tsyringe";
+import { injectable } from 'tsyringe';
+import { apiService } from '@/infrastructure/api/ApiService';
 
 const API_ENDPOINT = '/api/svg-conversion';
 
 @injectable()
 export class ImageConversionApiClient {
-    async convertImageToSvgApi(formData: FormData): Promise<string> {
-        try {
-            const response = await fetch(API_ENDPOINT, {
-                method: 'POST',
-                body: formData,
-            });
+  async convertImageToSvgApi(formData: FormData): Promise<string> {
+    try {
+      return await apiService<FormData, string>({
+        endpoint: API_ENDPOINT,
+        method: 'POST',
+        data: formData,
+        isFormData: true,
+        responseType: 'text',
+      });
+    } catch (error: unknown) {
+      if (error instanceof TypeError) {
+        throw new Error('Network error. Could not connect to the conversion service. Please check your network connection.');
+      }
 
-            if (!response.ok) {
-                const errorText = await response.text();
-                throw new Error(errorText || 'Failed to convert image on the server.');
-            }
+      if (error instanceof Error) {
+        throw error;
+      }
 
-            return await response.text();
-        } catch (error) {
-            if (error instanceof TypeError) {
-                // This often indicates a network error.
-                throw new Error("Network error. Could not connect to the conversion service. Please check your network connection.");
-            }
-            throw error;
-        }
+      throw new Error('Failed to convert image on the server.');
     }
+  }
 }

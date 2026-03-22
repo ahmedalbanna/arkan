@@ -1,86 +1,94 @@
-
 'use client';
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '@/context/AuthContext';
-import { getAuthenticatedToken } from '@/lib/utils/authUtils';
 import { toast } from '@/hooks/util/use-toast';
 import { TemplateApiClient } from '@/modules/templates/adapters/api-client/TemplateApiClient';
-import { container } from '@/infrastructure/di/container';
+import { templateKeys } from '@/lib/query-keys';
 import type { PptxTemplateProperties } from '@/lib/types';
-
+import { runAuthenticatedResultCall, unwrapResult } from './authenticated-client-call';
 
 export function usePptxStyles() {
-    const { data: templates, ...rest } = useQuery<Record<string, PptxTemplateProperties>>({
-        queryKey: ['pptx-styles'],
-        queryFn: () => container.resolve(TemplateApiClient).fetchPptxTemplatesApi(),
-        staleTime: 1000 * 60 * 60,
-    });
-    return { templates: templates || {}, ...rest };
+  const { data: templates, ...rest } = useQuery<Record<string, PptxTemplateProperties>>({
+    queryKey: templateKeys.pptx(),
+    queryFn: async () => unwrapResult(await new TemplateApiClient().fetchPptxTemplatesApi()),
+    staleTime: 1000 * 60 * 60,
+  });
+
+  return { templates: templates || {}, ...rest };
 }
 
 export function useUpdatePptxTemplate() {
-    const queryClient = useQueryClient();
-    const { firebaseUser } = useAuth();
-    return useMutation({
-        mutationFn: async ({ key, styles }: { key: string, styles: any }) => {
-            const token = await getAuthenticatedToken(firebaseUser);
-            const client = container.resolve(TemplateApiClient);
-            return client.updatePptxTemplateApi(key, { styles }, token);
-        },
-        onSuccess: (data, { key }) => {
-            toast({ title: "Template Saved", description: `Style changes for "${key}" have been saved.` });
-            queryClient.invalidateQueries({ queryKey: ['pptx-styles'] });
-        },
-        onError: (error: any) => toast({ title: "Save Failed", description: error.message, variant: 'destructive' }),
-    });
+  const queryClient = useQueryClient();
+  const { firebaseUser } = useAuth();
+
+  return useMutation({
+    mutationFn: async ({ key, styles }: { key: string; styles: unknown }) =>
+      runAuthenticatedResultCall(firebaseUser, TemplateApiClient, (client, token) =>
+        client.updatePptxTemplateApi(key, { styles } as Partial<PptxTemplateProperties>, token),
+      ),
+    onSuccess: (_data, { key }) => {
+      toast({ title: 'Template Saved', description: `Style changes for "${key}" have been saved.` });
+      queryClient.invalidateQueries({ queryKey: templateKeys.pptx() });
+    },
+    onError: (error: unknown) => {
+      const description = error instanceof Error ? error.message : 'Save failed';
+      toast({ title: 'Save Failed', description, variant: 'destructive' });
+    },
+  });
 }
 
 export function useDeletePptxTemplate() {
-    const queryClient = useQueryClient();
-    const { firebaseUser } = useAuth();
-    return useMutation({
-        mutationFn: async (key: string) => {
-            const token = await getAuthenticatedToken(firebaseUser);
-            const client = container.resolve(TemplateApiClient);
-            return client.deletePptxTemplateApi(key, token);
-        },
-        onSuccess: (data, key) => {
-            toast({ title: 'Template Deleted', description: `Template "${key}" has been deleted.` });
-            queryClient.invalidateQueries({ queryKey: ['pptx-styles'] });
-        },
-        onError: (error: any) => toast({ title: 'Delete Failed', description: error.message, variant: 'destructive' }),
-    });
+  const queryClient = useQueryClient();
+  const { firebaseUser } = useAuth();
+
+  return useMutation({
+    mutationFn: async (key: string) =>
+      runAuthenticatedResultCall(firebaseUser, TemplateApiClient, (client, token) =>
+        client.deletePptxTemplateApi(key, token),
+      ),
+    onSuccess: (_data, key) => {
+      toast({ title: 'Template Deleted', description: `Template "${key}" has been deleted.` });
+      queryClient.invalidateQueries({ queryKey: templateKeys.pptx() });
+    },
+    onError: (error: unknown) => {
+      const description = error instanceof Error ? error.message : 'Delete failed';
+      toast({ title: 'Delete Failed', description, variant: 'destructive' });
+    },
+  });
 }
 
 export function useCreatePptxTemplate() {
-    const queryClient = useQueryClient();
-    const { firebaseUser } = useAuth();
-    return useMutation({
-        mutationFn: async (data: { id: string; name: string; description: string }) => {
-            const token = await getAuthenticatedToken(firebaseUser);
-            const client = container.resolve(TemplateApiClient);
-            return client.createPptxTemplateApi(data, token);
-        },
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ['pptx-styles'] });
-        },
-    });
+  const queryClient = useQueryClient();
+  const { firebaseUser } = useAuth();
+
+  return useMutation({
+    mutationFn: async (data: { id: string; name: string; description: string }) =>
+      runAuthenticatedResultCall(firebaseUser, TemplateApiClient, (client, token) =>
+        client.createPptxTemplateApi(data, token),
+      ),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: templateKeys.pptx() });
+    },
+  });
 }
 
 export function useRefreshPptxTemplateImage() {
-    const queryClient = useQueryClient();
-    const { firebaseUser } = useAuth();
-    return useMutation({
-        mutationFn: async (variables: { templateId: string, prompt: string }) => {
-            const token = await getAuthenticatedToken(firebaseUser);
-            const client = container.resolve(TemplateApiClient);
-            return client.refreshTemplateImage({ ...variables, templateType: 'pptx' }, token);
-        },
-        onSuccess: () => {
-            toast({ title: 'Image Refreshing', description: 'The new template preview is being generated.' });
-            queryClient.invalidateQueries({ queryKey: ['pptx-styles'] });
-        },
-        onError: (error: any) => toast({ title: "Image Refresh Failed", description: error.message, variant: "destructive" })
-    });
+  const queryClient = useQueryClient();
+  const { firebaseUser } = useAuth();
+
+  return useMutation({
+    mutationFn: async (variables: { templateId: string; prompt: string }) =>
+      runAuthenticatedResultCall(firebaseUser, TemplateApiClient, (client, token) =>
+        client.refreshTemplateImage({ ...variables, templateType: 'pptx' }, token),
+      ),
+    onSuccess: () => {
+      toast({ title: 'Image Refreshing', description: 'The new template preview is being generated.' });
+      queryClient.invalidateQueries({ queryKey: templateKeys.pptx() });
+    },
+    onError: (error: unknown) => {
+      const description = error instanceof Error ? error.message : 'Image refresh failed';
+      toast({ title: 'Image Refresh Failed', description, variant: 'destructive' });
+    },
+  });
 }

@@ -23,6 +23,7 @@ interface ApiServiceOptions<T> {
   firebaseUser?: FirebaseUser | null; // Or pass the user object
   headers?: Record<string, string>;
   isFormData?: boolean;
+  responseType?: 'json' | 'blob' | 'text';
 }
 
 /**
@@ -44,6 +45,7 @@ export async function apiService<TRequest = any, TResponse = any>(
     firebaseUser,
     headers = {},
     isFormData = false,
+    responseType = 'json',
   } = options;
 
   let authToken = directToken;
@@ -85,6 +87,14 @@ export async function apiService<TRequest = any, TResponse = any>(
       errorData = { message: response.statusText || 'An unknown error occurred.' };
     }
     throw new ApiError(errorData.message || response.statusText, response.status, errorData.details);
+  }
+
+  if (responseType === 'blob') {
+    return (await response.blob()) as TResponse;
+  }
+
+  if (responseType === 'text') {
+    return (await response.text()) as TResponse;
   }
 
   // Handle cases where the response might be empty (e.g., DELETE 204 No Content)

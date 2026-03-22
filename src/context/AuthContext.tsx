@@ -1,17 +1,17 @@
 'use client';
 
 import { userKeys } from '@/lib/query-keys';
-import { User } from '@/lib/types';
-import { getAuthenticatedToken } from '@/lib/utils/authUtils';
 import { manageSession } from '@/lib/utils/session-management';
 import { hasGuestCookie, clearGuestCookie } from '@/lib/utils/cookie-management';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { container } from '@/infrastructure/di/container';
 import { UserApiClient } from '@/modules/users/adapters/api-client/UserApiClient';
+import { User } from '@/modules/users/domain/entities/User';
 import { User as FirebaseUser, onAuthStateChanged } from 'firebase/auth';
 import { createContext, ReactNode, useCallback, useContext, useEffect, useState } from 'react';
 import { useBuilderStore } from '@/hooks';
-import { useAuth as useFirebaseAuth, useFirestore } from '@/firebase/provider'; // Aliased to avoid naming conflict
+import { useAuth as useFirebaseAuth, useFirestore } from '@/firebase/provider';
+import { runAuthenticatedResultCall } from '@/hooks/data/authenticated-client-call';
 
 interface AuthContextType {
   firebaseUser: FirebaseUser | null;
@@ -24,13 +24,12 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
-  const auth = useFirebaseAuth(); // Consume auth from FirebaseProvider
+  const auth = useFirebaseAuth();
   const [firebaseUser, setFirebaseUser] = useState<FirebaseUser | null>(null);
   const [authIsLoading, setAuthIsLoading] = useState(true);
   const [isGuest, setIsGuest] = useState(false);
   const queryClient = useQueryClient();
-  const { setUserProfile } = useBuilderStore(); // Get setter from builder store
-
+  const { setUserProfile } = useBuilderStore();
   const firestore = useFirestore();
 
   useEffect(() => {
@@ -39,27 +38,32 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       const unsubscribe = client.subscribeToUserProfile(firebaseUser.uid, firestore, (user) => {
         const userInstance = user ? new User(user) : null;
         queryClient.setQueryData(userKeys.profile(firebaseUser.uid), userInstance);
-        setUserProfile(userInstance); // Update builder store
+        setUserProfile(userInstance);
       });
+
       return () => unsubscribe();
-    } else if (!firebaseUser) {
-      setUserProfile(null); // Clear on logout
+    }
+
+    if (!firebaseUser) {
+      setUserProfile(null);
     }
   }, [firebaseUser, queryClient, setUserProfile, firestore]);
 
-  // Use React Query to get the user profile from the cache
   const { data: userProfile, isLoading: isProfileLoading } = useQuery<User | null>({
     queryKey: userKeys.profile(firebaseUser?.uid ?? ''),
     queryFn: async () => {
-      if (!firebaseUser) return null;
-      const token = await getAuthenticatedToken(firebaseUser);
-      const client = container.resolve(UserApiClient);
-      const userProfileData = await client.fetchUserById(firebaseUser.uid, token);
+      if (!firebaseUser) {
+        return null;
+      }
+
+      const userProfileData = await runAuthenticatedResultCall(firebaseUser, UserApiClient, (client, token) =>
+        client.fetchUserById(firebaseUser.uid, token),
+      );
       const userInstance = userProfileData ? new User(userProfileData) : null;
-      setUserProfile(userInstance); // Update builder store on fetch
+      setUserProfile(userInstance);
       return userInstance;
     },
-    enabled: !!firebaseUser,
+    enabled: Boolean(firebaseUser),
     staleTime: Infinity,
   });
 
@@ -72,42 +76,39 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       setFirebaseUser(user);
-      await manageSession(user as any);
+      await manageSession(user as never);
 
       const guestCookieExists = hasGuestCookie();
 
       if (user) {
         setIsGuest(false);
         if (guestCookieExists) {
-            clearGuestCookie();
+          clearGuestCookie();
         }
         await queryClient.invalidateQueries({ queryKey: userKeys.profile(user.uid) });
       } else {
         setIsGuest(guestCookieExists);
         if (!guestCookieExists) {
-            queryClient.clear();
-            setUserProfile(null);
+          queryClient.clear();
+          setUserProfile(null);
         }
       }
+
       setAuthIsLoading(false);
     });
 
     return () => unsubscribe();
-  }, [auth, queryClient, setUserProfile]); // Added auth to dependency array
+  }, [auth, queryClient, setUserProfile]);
 
   const value = {
-      firebaseUser,
-      userProfile: userProfile ?? null,
-      isLoading: authIsLoading || (!!firebaseUser && isProfileLoading),
-      isGuest,
-      refetchUser,
+    firebaseUser,
+    userProfile: userProfile ?? null,
+    isLoading: authIsLoading || (Boolean(firebaseUser) && isProfileLoading),
+    isGuest,
+    refetchUser,
   };
-  
-  return (
-    <AuthContext.Provider value={value}>
-      {children}
-    </AuthContext.Provider>
-  );
+
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
 
 export const useAuth = (): AuthContextType => {

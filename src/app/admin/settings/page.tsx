@@ -19,10 +19,12 @@ import { Textarea } from '@/components/ui/textarea';
 import { useLocalization } from '@/context/LocalizationContext';
 import { useToast } from '@/hooks';
 import { usePublicSettings } from '@/hooks/data/use-settings';
-import { getAuthenticatedToken } from '@/lib/utils/authUtils';
+import { runAuthenticatedResultCall } from '@/hooks/data/authenticated-client-call';
 import { useAuth } from '@/context/AuthContext';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import type { AppSettings } from '@/lib/types';
+import { settingsKeys } from '@/lib/query-keys';
+import { SettingsApiClient } from '@/modules/admin/adapters/api-client/SettingsApiClient';
 
 
 // Schemas for validation
@@ -66,21 +68,15 @@ const settingsSchema = z.object({
 
 type SettingsFormValues = z.infer<typeof settingsSchema>;
 
-// API Service Function
-async function updateSettings(variables: { data: AppSettings, token: string }): Promise<AppSettings> {
-    const response = await fetch('/api/admin/settings', {
-        method: 'PUT',
-        headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${variables.token}`
-        },
-        body: JSON.stringify(variables.data),
-    });
-    if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || 'Failed to update settings');
-    }
-    return response.json();
+async function updateSettings(variables: {
+    data: AppSettings;
+    firebaseUser: NonNullable<ReturnType<typeof useAuth>['firebaseUser']>;
+}): Promise<AppSettings> {
+    return runAuthenticatedResultCall(
+        variables.firebaseUser,
+        SettingsApiClient,
+        (client, token) => client.updateSettings(variables.data, token),
+    );
 }
 
 function getPaymentMethodIcon(type: string) {
@@ -129,7 +125,7 @@ export default function AdminSettingsPage() {
     const mutation = useMutation({
         mutationFn: updateSettings,
         onSuccess: (data) => {
-            queryClient.setQueryData(['publicSettings'], data);
+            queryClient.setQueryData(settingsKeys.public(), data);
             toast({ title: t('adminSettings.successToastTitle'), description: t('adminSettings.successToastDesc') });
         },
         onError: (error: Error) => {
@@ -138,8 +134,11 @@ export default function AdminSettingsPage() {
     });
 
     const onSubmit = async (data: SettingsFormValues) => {
-        const token = await getAuthenticatedToken(firebaseUser);
-        mutation.mutate({ data: data as AppSettings, token });
+        if (!firebaseUser) {
+            toast({ title: t('adminSettings.errorToastTitle'), description: 'Admin not authenticated.', variant: 'destructive' });
+            return;
+        }
+        mutation.mutate({ data: data as AppSettings, firebaseUser });
     };
 
     const addNewMethod = () => {

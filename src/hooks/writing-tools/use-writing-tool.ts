@@ -1,37 +1,23 @@
-
 'use client';
 
 import { useAuth } from '@/context/AuthContext';
 import { toast } from '@/hooks';
 import { WritingToolsApiClient } from '@/modules/ai/adapters/api-client/WritingToolsApiClient';
-import { container } from '@/infrastructure/di/container';
-import { getAuthenticatedToken } from '@/lib/utils/authUtils';
 import { useMutation, type UseMutationOptions } from '@tanstack/react-query';
+import { runAuthenticatedResultCall } from '../data/authenticated-client-call';
 
-/**
- * A generic hook for calling AI writing tools.
- * It handles authentication, loading state, error handling, and credit deduction automatically.
- *
- * @param endpoint The specific API endpoint for the tool (e.g., '/api/writing-tools/summarize').
- * @param options Optional React Query mutation options.
- * @returns A React Query mutation object.
- */
 export function useWritingTool<TData = unknown, TVariables = any>(
   endpoint: string,
-  options?: Omit<UseMutationOptions<TData, Error, TVariables>, 'mutationFn'>
+  options?: Omit<UseMutationOptions<TData, Error, TVariables>, 'mutationFn'>,
 ) {
   const { firebaseUser, refetchUser } = useAuth();
 
   return useMutation<TData, Error, TVariables>({
-    mutationFn: async (data: TVariables) => {
-      const token = await getAuthenticatedToken(firebaseUser);
-      const client = container.resolve(WritingToolsApiClient);
-      const result = await client.writingToolApi<TVariables, TData>(endpoint, { data, token });
-      if (result.isFailure) throw result.error;
-      return result.getValue();
-    },
+    mutationFn: async (data: TVariables) =>
+      runAuthenticatedResultCall(firebaseUser, WritingToolsApiClient, (client, token) =>
+        client.writingToolApi<TVariables, TData>(endpoint, { data, token }),
+      ),
     onSuccess: (data, variables, context) => {
-      // Refetch user profile to update credit count in the UI
       refetchUser();
       if (options?.onSuccess) {
         // @ts-expect-error - Type mismatch with TanStack Query callback signature
@@ -49,7 +35,6 @@ export function useWritingTool<TData = unknown, TVariables = any>(
         options.onError(error, variables, context);
       }
     },
-    // Spread any additional options passed in
     ...options,
   });
 }

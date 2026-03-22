@@ -11,6 +11,7 @@ import { type ApiEndpoint } from '@/config/api-docs';
 import dynamic from 'next/dynamic';
 import { useAuth } from '@/context/AuthContext';
 import { useToast } from '@/hooks';
+import { apiService } from '@/infrastructure/api/ApiService';
 
 const ReactJson = dynamic(() => import('@microlink/react-json-view'), { ssr: false });
 
@@ -22,9 +23,7 @@ export function ApiTester({ endpoint }: ApiTesterProps) {
   const { firebaseUser } = useAuth();
   const { toast } = useToast();
   const { resolvedTheme } = useTheme();
-  const [body, setBody] = useState(
-    endpoint.requestBody ? JSON.stringify(endpoint.requestBody, null, 2) : ''
-  );
+  const [body, setBody] = useState(endpoint.requestBody ? JSON.stringify(endpoint.requestBody, null, 2) : '');
   const [response, setResponse] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -35,39 +34,25 @@ export function ApiTester({ endpoint }: ApiTesterProps) {
     setResponse(null);
 
     try {
-      let token: string | undefined;
-      if (endpoint.auth !== 'public' && firebaseUser) {
-        token = await firebaseUser.getIdToken();
-      } else if (endpoint.auth !== 'public') {
+      if (endpoint.auth !== 'public' && !firebaseUser) {
         throw new Error('Authentication required for this endpoint.');
       }
-      
-      const headers: HeadersInit = {
-        'Content-Type': 'application/json',
-      };
-      if (token) {
-        headers['Authorization'] = `Bearer ${token}`;
-      }
 
-      const res = await fetch(endpoint.path, {
+      const parsedBody = endpoint.method !== 'GET' && body ? JSON.parse(body) : undefined;
+      const data = await apiService<any, any>({
+        endpoint: endpoint.path,
         method: endpoint.method,
-        headers,
-        body: endpoint.method !== 'GET' && body ? body : undefined,
+        firebaseUser: endpoint.auth !== 'public' ? firebaseUser : undefined,
+        data: parsedBody,
       });
 
-      const data = await res.json();
-
-      if (!res.ok) {
-        throw new Error(data.message || 'Request failed');
-      }
-
       setResponse(data);
-
     } catch (err: any) {
-      setError(err.message);
+      const errorMessage = err instanceof Error ? err.message : 'Request failed';
+      setError(errorMessage);
       toast({
         title: 'API Request Failed',
-        description: err.message,
+        description: errorMessage,
         variant: 'destructive',
       });
     } finally {
@@ -81,7 +66,7 @@ export function ApiTester({ endpoint }: ApiTesterProps) {
         <Send className="w-4 h-4" />
         Live API Tester
       </h4>
-      
+
       {endpoint.method !== 'GET' && (
         <div className="space-y-2">
           <Label htmlFor="api-tester-body">Request Body</Label>

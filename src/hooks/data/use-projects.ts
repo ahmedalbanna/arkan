@@ -1,123 +1,122 @@
-
 'use client';
 
 import { toast } from '@/hooks/util/use-toast';
-import type { ProjectProperties } from '@/lib/types';
-import { Project } from '@/lib/types';
 import { projectKeys } from '@/lib/query-keys';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useBuilderStore } from '../core/useBuilderStore';
 import { useAuth } from '@/context/AuthContext';
-import { getAuthenticatedToken } from '@/lib/utils/authUtils';
 import { LocalProjectService } from '@/modules/projects/adapters/local-storage/LocalProjectService';
-import { container } from '@/infrastructure/di/container';
 import { ProjectApiClient } from '@/modules/projects/adapters/api-client/ProjectApiClient';
+import { Project, type ProjectProperties } from '@/modules/projects/domain/entities/Project';
+import { container } from '@/infrastructure/di/container';
+import { runAuthenticatedResultCall } from './authenticated-client-call';
 
 export function useProjects() {
-    const { firebaseUser } = useAuth();
-    const { data, ...rest } = useQuery<Project[]>({
-        queryKey: projectKeys.lists(firebaseUser?.uid || 'anonymous'),
-        queryFn: async () => {
-            if (!firebaseUser) return [];
-            // Then, fetch from server and merge
-            try {
-                const token = await getAuthenticatedToken(firebaseUser);
-                const client = container.resolve(ProjectApiClient);
-                const localService = container.resolve(LocalProjectService);
-                const result = await client.fetchProjects(token);
-                
-                if (result.isFailure) {
-                    throw result.error;
-                }
+  const { firebaseUser } = useAuth();
+  const projectScope = firebaseUser?.uid ?? 'anonymous';
 
-                const serverProjects = result.getValue();
-                const mergedProjects = serverProjects.map(p => new Project(p));
+  const { data, ...rest } = useQuery<Project[]>({
+    queryKey: projectKeys.lists(projectScope),
+    queryFn: async () => {
+      if (!firebaseUser) {
+        return [];
+      }
 
-                // Sync local db with server source of truth
-                mergedProjects.forEach(p => localService.saveProject(p.toStateObject()));
+      try {
+        const serverProjects = await runAuthenticatedResultCall(firebaseUser, ProjectApiClient, (client, token) =>
+          client.fetchProjects(token),
+        );
+        const localService = container.resolve(LocalProjectService);
+        const mergedProjects = serverProjects.map((project) => new Project(project));
 
-                return mergedProjects;
+        mergedProjects.forEach((project) => {
+          localService.saveProject(project.toStateObject());
+        });
 
-            } catch (e) {
-                console.warn("Could not sync with server, using local projects.", e);
-                 // First, get local projects for optimistic UI
-                const localService = container.resolve(LocalProjectService);
-                const localProjects = await localService.getAllProjects();
-                return localProjects.map((p: ProjectProperties) => new Project(p));
-            }
-        },
-        enabled: !!firebaseUser,
-    });
+        return mergedProjects;
+      } catch (error) {
+        console.warn('Could not sync with server, using local projects.', error);
+        const localService = container.resolve(LocalProjectService);
+        const localProjects = await localService.getAllProjects();
+        return localProjects.map((project: ProjectProperties) => new Project(project));
+      }
+    },
+    enabled: Boolean(firebaseUser),
+  });
 
-    return { projects: data, ...rest };
+  return { projects: data, projectScope, ...rest };
 }
 
 export function useSaveProject() {
-    const queryClient = useQueryClient();
-    const { setHasUnsavedChanges } = useBuilderStore();
-    const { firebaseUser } = useAuth();
+  const queryClient = useQueryClient();
+  const { setHasUnsavedChanges } = useBuilderStore();
+  const { firebaseUser } = useAuth();
+  const projectScope = firebaseUser?.uid ?? 'anonymous';
 
-    const saveProjectMutation = useMutation({
-        mutationFn: async (projectData: ProjectProperties) => {
-            if (!navigator.onLine || !firebaseUser) {
-                toast({ title: 'Offline', description: 'You are offline. Please connect to the internet to save the project.', variant: 'destructive' });
-                throw new Error("User is offline.");
-            }
-            const token = await getAuthenticatedToken(firebaseUser);
-            const client = container.resolve(ProjectApiClient);
-            const result = await client.saveProject(projectData, token);
-            if (result.isFailure) throw result.error;
-            return result.getValue();
-        },
-        onSuccess: (savedProject) => {
-            setHasUnsavedChanges(false);
-            queryClient.invalidateQueries({ queryKey: projectKeys.lists(firebaseUser?.uid || 'anonymous') });
-            toast({ title: 'Project Saved', description: `"${savedProject.name}" has been saved to the cloud.` });
-        },
-        onError: (error: any) => {
-            toast({ title: 'Error', description: `Failed to save project: ${error.message}`, variant: 'destructive' });
-        }
-    });
+  const saveProjectMutation = useMutation({
+    mutationFn: async (projectData: ProjectProperties) => {
+      if (!navigator.onLine || !firebaseUser) {
+        toast({
+          title: 'Offline',
+          description: 'You are offline. Please connect to the internet to save the project.',
+          variant: 'destructive',
+        });
+        throw new Error('User is offline.');
+      }
 
-    return {
-        saveProjectMutation,
-        isSaving: saveProjectMutation.isPending,
-    };
+      return runAuthenticatedResultCall(firebaseUser, ProjectApiClient, (client, token) =>
+        client.saveProject(projectData, token),
+      );
+    },
+    onSuccess: (savedProject) => {
+      setHasUnsavedChanges(false);
+      queryClient.invalidateQueries({ queryKey: projectKeys.lists(projectScope) });
+      queryClient.invalidateQueries({ queryKey: projectKeys.detail(projectScope, savedProject.id ?? '') });
+      toast({ title: 'Project Saved', description: `"${savedProject.name}" has been saved to the cloud.` });
+    },
+    onError: (error: unknown) => {
+      const description = error instanceof Error ? error.message : 'Failed to save project.';
+      toast({ title: 'Error', description: `Failed to save project: ${description}`, variant: 'destructive' });
+    },
+  });
+
+  return {
+    saveProjectMutation,
+    isSaving: saveProjectMutation.isPending,
+  };
 }
 
-
 export function useDeleteProject() {
-    const queryClient = useQueryClient();
-    const { firebaseUser } = useAuth();
+  const queryClient = useQueryClient();
+  const { firebaseUser } = useAuth();
+  const projectScope = firebaseUser?.uid ?? 'anonymous';
 
-    return useMutation({
-        mutationFn: async (projectId: string) => {
-            // Delete from local and server simultaneously
-            const localService = container.resolve(LocalProjectService);
-            const localDelete = localService.deleteProject(projectId);
-            
-            if (navigator.onLine && firebaseUser) {
-                const token = await getAuthenticatedToken(firebaseUser);
-                const client = container.resolve(ProjectApiClient);
-                const result = await client.deleteProject(projectId, token);
-                if (result.isFailure) {
-                    console.error("Failed to delete from server:", result.error);
-                    // We might want to throw here if we want to block the local delete success
-                    // But for now we allow local delete to proceed for offline-first feel
-                }
-            }
-            
-            await localDelete;
-            return projectId;
-        },
-        onSuccess: (projectId) => {
-            toast({ title: 'Project Deleted', description: 'The project has been successfully deleted.' });
-            queryClient.invalidateQueries({ queryKey: projectKeys.lists(firebaseUser?.uid || 'anonymous') });
-            // Also remove from the specific detail query if it exists
-            queryClient.removeQueries({ queryKey: projectKeys.detail(projectId) });
-        },
-        onError: (error: any) => {
-            toast({ title: 'Delete Failed', description: error.message, variant: 'destructive' });
-        },
-    });
+  return useMutation({
+    mutationFn: async (projectId: string) => {
+      const localService = container.resolve(LocalProjectService);
+      const localDelete = localService.deleteProject(projectId);
+
+      if (navigator.onLine && firebaseUser) {
+        try {
+          await runAuthenticatedResultCall(firebaseUser, ProjectApiClient, (client, token) =>
+            client.deleteProject(projectId, token),
+          );
+        } catch (error) {
+          console.error('Failed to delete from server:', error);
+        }
+      }
+
+      await localDelete;
+      return projectId;
+    },
+    onSuccess: (projectId) => {
+      toast({ title: 'Project Deleted', description: 'The project has been successfully deleted.' });
+      queryClient.invalidateQueries({ queryKey: projectKeys.lists(projectScope) });
+      queryClient.removeQueries({ queryKey: projectKeys.detail(projectScope, projectId) });
+    },
+    onError: (error: unknown) => {
+      const description = error instanceof Error ? error.message : 'Delete failed.';
+      toast({ title: 'Delete Failed', description, variant: 'destructive' });
+    },
+  });
 }
