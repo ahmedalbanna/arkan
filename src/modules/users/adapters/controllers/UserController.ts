@@ -21,6 +21,7 @@ import { SendPasswordResetUseCase } from "../../application/use-cases/SendPasswo
 import { ChangePasswordUseCase } from "../../application/use-cases/ChangePasswordUseCase";
 import { RegisterFingerprintUseCase } from "../../application/use-cases/RegisterFingerprintUseCase";
 import { GetUserFingerprintsUseCase } from "../../application/use-cases/GetUserFingerprintsUseCase";
+import { RevokeFingerprintUseCase } from "../../application/use-cases/RevokeFingerprintUseCase";
 
 @injectable()
 export class UserController {
@@ -68,7 +69,9 @@ export class UserController {
         @inject(delay(() => RegisterFingerprintUseCase))
         private registerFingerprintUseCase: RegisterFingerprintUseCase,
         @inject(delay(() => GetUserFingerprintsUseCase))
-        private getUserFingerprintsUseCase: GetUserFingerprintsUseCase
+        private getUserFingerprintsUseCase: GetUserFingerprintsUseCase,
+        @inject(delay(() => RevokeFingerprintUseCase))
+        private revokeFingerprintUseCase: RevokeFingerprintUseCase
     ) {}
 
     async getUser(id: string) {
@@ -161,5 +164,9 @@ export class UserController {
 
     async getUserFingerprints(userId: string) {
         return this.getUserFingerprintsUseCase.execute(userId);
+    }
+
+    async revokeFingerprint(userId: string, fingerprintId: string) {
+        return this.revokeFingerprintUseCase.execute(userId, fingerprintId);
     }
 }

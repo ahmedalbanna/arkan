@@ -69,6 +69,18 @@ export class UserApiClient {
     }
   }
 
+  async revokeUserFingerprint(userId: string, fingerprintId: string): Promise<Result<void, ApiError>> {
+    try {
+      await apiService({ 
+        endpoint: `/api/users/${userId}/fingerprints/${fingerprintId}`,
+        method: 'DELETE'
+      });
+      return Result.ok();
+    } catch (error: unknown) {
+      return Result.fail(toApiError(error));
+    }
+  }
+
   async updateUser(id: string, data: Partial<UserProfile>, token: string): Promise<Result<UserProfile, ApiError>> {
     try {
       const response = await apiService<Partial<UserProfile>, UserProfile>({

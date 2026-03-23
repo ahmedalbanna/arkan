@@ -10,7 +10,7 @@ Arkan is a sophisticated AI-powered platform designed for writing and document g
 
 *   **Frontend:** Next.js 15 with React 18, TypeScript, and Tailwind CSS.
 *   **AI Integration:** Google Genkit utilizing the Gemini 2.5 Flash Lite model.
-*   **Backend:** Firebase services including Authentication, Firestore, Storage, and Functions.
+*   **Backend:** SQLite with Drizzle ORM. Firebase is used only for Storage and FCM (Notifications).
 *   **UI Framework:** Radix UI components with custom theming.
 *   **State Management:** Zustand combined with React Query for efficient data management.
 
@@ -64,10 +64,23 @@ const generateTextFlow = ai.defineFlow({
 
 ### Authentication System
 
-*   Utilizes Firebase Authentication with integrated session management.
-*   Features server-side authentication protection implemented via middleware.
-*   Includes automatic user profile creation.
-*   Supports real-time synchronization of user profiles.
+*   Local authentication system using SQLite and secure JWT sessions.
+*   Features server-side protection implemented via HTTP-only cookies and Next.js middleware.
+*   Includes automatic user profile creation and device fingerprinting for security.
+*   Fully self-contained, no external dependency for identity management.
+
+### Database & Setup
+
+To initialize the local database:
+```bash
+npm run db:push   # Create arkan.db and sync schema
+npm run db:seed   # Seed default agents, templates, and settings
+```
+
+Management commands:
+- `npm run db:generate`: Create SQL migration files.
+- `npm run db:push`: Direct schema-to-DB synchronization (dev).
+- `npm run db:seed`: Populate/Reset core data.
 
 ### Internationalization
 
