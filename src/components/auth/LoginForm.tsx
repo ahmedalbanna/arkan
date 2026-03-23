@@ -4,27 +4,29 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
+import { Checkbox } from '@/components/ui/checkbox';
 import { useLogin } from '@/hooks/auth/use-auth-mutations';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { AlertCircle, Loader2 } from 'lucide-react';
+import { generateFingerprint } from '@/lib/utils/security/fingerprint';
 import Link from 'next/link';
 import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
-import { LoginCredentials } from '@/lib/utils/authUtils';
 import { apiService } from '@/infrastructure/api/ApiService';
 import { handleErrorUtility } from '@/lib/utils/errorUtils';
 
 const formSchema = z.object({ 
   email: z.string().email({ message: 'Please enter a valid email address.' }), 
-  password: z.string().min(1, { message: 'Password is required.' }) 
+  password: z.string().min(1, { message: 'Password is required.' }),
+  rememberMe: z.boolean().default(false)
 });
 
 export default function LoginForm() {
   const loginMutation = useLogin();
-  const form = useForm<LoginCredentials>({ 
+  const form = useForm<z.infer<typeof formSchema>>({ 
     resolver: zodResolver(formSchema), 
-    defaultValues: { email: '', password: '' } 
+    defaultValues: { email: '', password: '', rememberMe: false } 
   });
 
   useEffect(() => { 
@@ -34,9 +36,17 @@ export default function LoginForm() {
     } 
   }, [loginMutation.error, form]);
 
-  function onSubmit(values: LoginCredentials) { 
+  async function onSubmit(values: z.infer<typeof formSchema>) { 
     form.clearErrors('root.serverError'); 
-    loginMutation.mutate(values); 
+    
+    // Capture Fingerprint
+    const { hash, data } = await generateFingerprint();
+    
+    loginMutation.mutate({
+        ...values,
+        fingerprint: hash,
+        fingerprintData: data
+    } as any); 
   }
 
   const handleGuestLogin = async () => { 
@@ -91,6 +101,26 @@ export default function LoginForm() {
               <FormMessage />
             </FormItem>
           )} 
+        />
+        <FormField
+          control={form.control}
+          name="rememberMe"
+          render={({ field }) => (
+            <FormItem className="flex flex-row items-center space-x-3 space-y-0 rounded-md py-2">
+              <FormControl>
+                <Checkbox
+                  checked={field.value}
+                  onCheckedChange={field.onChange}
+                  disabled={isPending}
+                />
+              </FormControl>
+              <div className="space-y-1 leading-none">
+                <FormLabel className="text-sm font-normal">
+                  Remember me
+                </FormLabel>
+              </div>
+            </FormItem>
+          )}
         />
         <Button type="submit" className="w-full" disabled={isPending}>
           {loginMutation.isPending && <Loader2 className="me-2 h-4 w-4 animate-spin" />} 

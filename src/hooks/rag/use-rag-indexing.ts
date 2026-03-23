@@ -55,7 +55,6 @@ export function useRAGIndexing() {
       >({
         endpoint: '/api/rag/index-document',
         method: 'POST',
-        firebaseUser,
         data: {
           content,
           fileName,

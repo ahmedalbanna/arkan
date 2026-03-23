@@ -31,6 +31,12 @@ export interface DashboardStats {
             count: number;
         }[];
     };
+    accountSharingReport?: {
+        userId: string;
+        userName: string;
+        deviceCount: number;
+        lastLogin: string;
+    }[];
 }
 
 

@@ -62,7 +62,6 @@ export function useRAGRetrieval() {
       >({
         endpoint: '/api/rag/retrieve-context',
         method: 'POST',
-        firebaseUser,
         data: {
           query,
           userId: firebaseUser.uid,

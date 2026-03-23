@@ -38,7 +38,6 @@ export function GiftCreditsDialog({ user }: GiftCreditsDialogProps) {
       return apiService<GiftCreditsFormValues & { userId: string }, { message: string }>({
         endpoint: '/api/admin/gift-credits',
         method: 'POST',
-        firebaseUser,
         data: { ...data, userId: user.id },
       });
     },

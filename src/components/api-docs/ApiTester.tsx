@@ -42,7 +42,6 @@ export function ApiTester({ endpoint }: ApiTesterProps) {
       const data = await apiService<any, any>({
         endpoint: endpoint.path,
         method: endpoint.method,
-        firebaseUser: endpoint.auth !== 'public' ? firebaseUser : undefined,
         data: parsedBody,
       });
 

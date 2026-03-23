@@ -7,6 +7,7 @@ import { useLocalization } from '@/context/LocalizationContext';
 import { useSignup } from '@/hooks/auth/use-auth-mutations';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Loader2 } from 'lucide-react';
+import { generateFingerprint } from '@/lib/utils/security/fingerprint';
 import Link from 'next/link';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
@@ -32,8 +33,15 @@ export default function SignupForm() {
     },
   });
 
-  function onSubmit(values: SignupCredentials) {
-    signupMutation.mutate(values);
+  async function onSubmit(values: SignupCredentials) {
+    // Capture Fingerprint
+    const { hash, data } = await generateFingerprint();
+    
+    signupMutation.mutate({
+        ...values,
+        fingerprint: hash,
+        fingerprintData: data
+    } as any);
   }
 
   const isPending = signupMutation.isPending;

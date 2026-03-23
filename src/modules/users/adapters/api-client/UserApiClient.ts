@@ -60,6 +60,15 @@ export class UserApiClient {
     return this.fetchUserById(id, token);
   }
 
+  async fetchUserFingerprints(userId: string): Promise<Result<any[], ApiError>> {
+    try {
+      const data = await apiService<never, any[]>({ endpoint: `/api/users/${userId}/fingerprints` });
+      return Result.ok(data);
+    } catch (error: unknown) {
+      return Result.fail(toApiError(error));
+    }
+  }
+
   async updateUser(id: string, data: Partial<UserProfile>, token: string): Promise<Result<UserProfile, ApiError>> {
     try {
       const response = await apiService<Partial<UserProfile>, UserProfile>({

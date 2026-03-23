@@ -1,5 +1,4 @@
-
-import { delay, inject, injectable } from "tsyringe";
+import { inject, injectable, delay } from "tsyringe";
 import { GetUserProfileUseCase } from "../../application/use-cases/GetUserProfileUseCase";
 import { UpdateUserProfileUseCase } from "../../application/use-cases/UpdateUserProfileUseCase";
 import { GetPaginatedUsersUseCase } from "../../application/use-cases/GetPaginatedUsersUseCase";
@@ -18,6 +17,11 @@ import { GetNotificationsUseCase } from "../../application/use-cases/GetNotifica
 import { SendNotificationUseCase } from "../../application/use-cases/SendNotificationUseCase";
 import { VerifySessionUseCase } from "../../application/use-cases/VerifySessionUseCase";
 import { LoginUseCase } from "../../application/use-cases/LoginUseCase";
+import { SendPasswordResetUseCase } from "../../application/use-cases/SendPasswordResetUseCase";
+import { ChangePasswordUseCase } from "../../application/use-cases/ChangePasswordUseCase";
+import { RegisterFingerprintUseCase } from "../../application/use-cases/RegisterFingerprintUseCase";
+import { GetUserFingerprintsUseCase } from "../../application/use-cases/GetUserFingerprintsUseCase";
+
 @injectable()
 export class UserController {
     constructor(
@@ -56,43 +60,55 @@ export class UserController {
         @inject(delay(() => SendNotificationUseCase))
         private sendNotificationUseCase: SendNotificationUseCase,
         @inject(delay(() => VerifySessionUseCase))
-        private verifySessionUseCase: VerifySessionUseCase
+        private verifySessionUseCase: VerifySessionUseCase,
+        @inject(delay(() => SendPasswordResetUseCase))
+        private sendPasswordResetUseCase: SendPasswordResetUseCase,
+        @inject(delay(() => ChangePasswordUseCase))
+        private changePasswordUseCase: ChangePasswordUseCase,
+        @inject(delay(() => RegisterFingerprintUseCase))
+        private registerFingerprintUseCase: RegisterFingerprintUseCase,
+        @inject(delay(() => GetUserFingerprintsUseCase))
+        private getUserFingerprintsUseCase: GetUserFingerprintsUseCase
     ) {}
 
-    async getUser(userId: string) {
-        return this.getUserProfileUseCase.execute(userId);
+    async getUser(id: string) {
+        return this.getUserProfileUseCase.execute(id);
     }
 
-    async updateUser(userId: string, data: any, currentEmail?: string) {
-        return this.updateUserProfileUseCase.execute(userId, data, currentEmail);
-    }
-
-    async getPaginatedUsers(options: { limit: number, lastVisibleId?: string }) {
-        return this.getPaginatedUsersUseCase.execute(options);
+    async login(email: string, password: string) {
+        return this.loginUseCase.execute(email, password);
     }
 
     async createUser(data: any) {
         return this.createUserUseCase.execute(data);
     }
 
-    async resetPassword(userId: string, newPassword: string) {
-        return this.resetPasswordUseCase.execute(userId, newPassword);
+    async updateUser(id: string, data: any, requesterEmail?: string) {
+        return this.updateUserProfileUseCase.execute(id, data, requesterEmail);
+    }
+
+    async getPaginatedUsers(options: any) {
+        return this.getPaginatedUsersUseCase.execute(options);
+    }
+
+    async getPaginated(options: any) {
+        return this.getPaginatedUsersUseCase.execute(options);
     }
 
     async giftCredits(params: { userId: string, credits: number, message?: string, adminName: string }) {
         return this.giftCreditsUseCase.execute(params);
     }
 
-    async deleteUser(userId: string) {
-        return this.deleteUserUseCase.execute(userId);
+    async deleteUser(id: string) {
+        return this.deleteUserUseCase.execute(id);
     }
 
     async getUserStats(userId: string) {
         return this.getUserStatsUseCase.execute(userId);
     }
 
-    async uploadProfilePicture(userId: string, file: Buffer, fileName: string, contentType: string) {
-        return this.uploadProfilePictureUseCase.execute(userId, file, fileName, contentType);
+    async uploadProfilePicture(userId: string, file: any, fileName: string, mimeType: string) {
+        return this.uploadProfilePictureUseCase.execute(userId, file, fileName, mimeType);
     }
 
     async getAdmins() {
@@ -103,6 +119,10 @@ export class UserController {
         return this.saveDeviceTokenUseCase.execute(userId, token);
     }
 
+    async getNotifications(userId: string) {
+        return this.getNotificationsUseCase.execute(userId);
+    }
+
     async markNotificationsAsRead(userId: string, notificationIds: string[]) {
         return this.markNotificationsAsReadUseCase.execute(userId, notificationIds);
     }
@@ -111,23 +131,35 @@ export class UserController {
         return this.clearNotificationsUseCase.execute(userId, notificationIds);
     }
 
+    async sendNotification(userId: string, notification: any) {
+        return this.sendNotificationUseCase.execute(userId, notification);
+    }
+
     async createSession(idToken: string, expiresIn: number) {
         return this.createSessionUseCase.execute(idToken, expiresIn);
-    }
-
-    async getNotifications(userId: string, limit?: number) {
-        return this.getNotificationsUseCase.execute(userId, limit);
-    }
-
-    async sendNotification(userId: string, payload: any) {
-        return this.sendNotificationUseCase.execute(userId, payload);
     }
 
     async verifySession(sessionCookie: string, checkRevoked?: boolean) {
         return this.verifySessionUseCase.execute(sessionCookie, checkRevoked);
     }
 
-    async login(email: string, password: string) {
-        return this.loginUseCase.execute(email, password);
+    async sendPasswordReset(email: string) {
+        return this.sendPasswordResetUseCase.execute(email);
+    }
+
+    async resetPassword(userIdOrToken: string, newPassword: string, isToken: boolean = false) {
+        return this.resetPasswordUseCase.execute(userIdOrToken, newPassword, isToken);
+    }
+
+    async changePassword(userId: string, currentPassword: string, newPassword: string) {
+        return this.changePasswordUseCase.execute(userId, currentPassword, newPassword);
+    }
+
+    async registerFingerprint(userId: string, fingerprint: string, metadata: any) {
+        return this.registerFingerprintUseCase.execute(userId, fingerprint, metadata);
+    }
+
+    async getUserFingerprints(userId: string) {
+        return this.getUserFingerprintsUseCase.execute(userId);
     }
 }

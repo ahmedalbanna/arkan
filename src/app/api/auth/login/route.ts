@@ -3,14 +3,31 @@ import { handleApiError, handleUserResult } from '@/lib/utils/api-utils';
 import { container } from '@/infrastructure/di/container';
 import { UserController } from '@/modules/users/adapters/controllers/UserController';
 import { z } from 'zod';
+import { rateLimiter } from '@/lib/utils/security/rate-limiter';
+import { headers as nextHeaders } from 'next/headers';
 
 const loginSchema = z.object({
     email: z.string().email("Invalid email address"),
     password: z.string().min(1, "Password is required"),
+    rememberMe: z.boolean().optional(),
+    fingerprint: z.string().optional(),
+    fingerprintData: z.any().optional(),
 });
 
 export async function POST(request: Request) {
   try {
+    // 1. Rate Limiting
+    const headersList = await nextHeaders();
+    const ip = headersList.get('x-forwarded-for') || '127.0.0.1';
+    const { allowed, resetAt } = await rateLimiter.check('login', ip, 5, 15 * 60 * 1000); // 5 attempts per 15 mins
+
+    if (!allowed) {
+        return NextResponse.json({ 
+            error: "Too many login attempts. Please try again later.",
+            resetAt 
+        }, { status: 429 });
+    }
+
     const body = await request.json();
     const validation = loginSchema.safeParse(body);
     
@@ -18,7 +35,7 @@ export async function POST(request: Request) {
         return handleApiError(validation.error);
     }
 
-    const { email, password } = validation.data;
+    const { email, password, rememberMe, fingerprint, fingerprintData } = validation.data;
     const controller = container.resolve(UserController);
     
     const result = await controller.login(email, password);
@@ -28,7 +45,16 @@ export async function POST(request: Request) {
     }
 
     const { token, user } = result.getValue();
-    const expiresIn = 60 * 60 * 24 * 5 * 1000; // 5 days
+
+    // 2. Register Fingerprint if provided
+    if (fingerprint && fingerprintData) {
+        await controller.registerFingerprint(user.uid, fingerprint, fingerprintData);
+    }
+    
+    // 30 days if remember me, otherwise 5 days
+    const expiresIn = rememberMe 
+        ? 60 * 60 * 24 * 30 * 1000 
+        : 60 * 60 * 24 * 5 * 1000;
 
     const response = NextResponse.json({ 
         status: 'success',

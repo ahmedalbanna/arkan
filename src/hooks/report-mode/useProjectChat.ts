@@ -24,7 +24,6 @@ export function useProjectChat() {
       return apiService<{ projectContext: string; userMessage: string; history: Message[] }, { response: string }>({
         endpoint: '/api/chat/project-consultant',
         method: 'POST',
-        firebaseUser,
         data: {
           projectContext,
           userMessage,

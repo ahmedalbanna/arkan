@@ -1,11 +1,11 @@
 import { injectable } from "tsyringe";
 import { db } from "@/infrastructure/db";
-import { users } from "@/infrastructure/db/schema";
+import { users, passwordResets } from "@/infrastructure/db/schema";
 import { IAuthRepository } from "../../domain/repositories/IAuthRepository";
 import { Result } from "@/lib/utils/result";
 import { UserError } from "../../domain/errors/UserErrors";
 import { AuthCrypto } from "@/lib/utils/auth-crypto";
-import { eq } from "drizzle-orm";
+import { eq, and } from "drizzle-orm";
 import { v4 as uuidv4 } from "uuid";
 
 @injectable()
@@ -105,6 +105,67 @@ export class SQLiteAuthRepository implements IAuthRepository {
 
     async verifySessionCookie(sessionCookie: string, _checkRevoked: boolean = true): Promise<Result<{ uid: string, email?: string }, UserError>> {
         return this.verifyToken(sessionCookie);
+    }
+
+    /**
+     * SQLite specific: Generate reset token
+     */
+    async generatePasswordResetToken(email: string): Promise<Result<{ token: string, userId: string }, UserError>> {
+        try {
+            const user = await db.query.users.findFirst({
+                where: eq(users.email, email),
+            });
+
+            if (!user) {
+                // Return success even if user not found for security (to avoid email enumeration)
+                return Result.fail(UserError.notFound("If an account exists with this email, a reset link will be sent."));
+            }
+
+            const token = uuidv4().replace(/-/g, '');
+            const expiresAt = Date.now() + 60 * 60 * 1000; // 1 hour
+
+            await db.insert(passwordResets).values({
+                token,
+                userId: user.id,
+                expiresAt,
+                used: false,
+            });
+
+            return Result.ok({ token, userId: user.id });
+        } catch (error: any) {
+            return Result.fail(UserError.internal(error.message));
+        }
+    }
+
+    /**
+     * SQLite specific: Reset password with token
+     */
+    async resetPasswordWithToken(token: string, password: string): Promise<Result<void, UserError>> {
+        try {
+            const reset = await db.query.passwordResets.findFirst({
+                where: and(eq(passwordResets.token, token), eq(passwordResets.used, false)),
+            });
+
+            if (!reset || reset.expiresAt < Date.now()) {
+                return Result.fail(UserError.unauthorized("Invalid or expired reset token."));
+            }
+
+            const passwordHash = await AuthCrypto.hashPassword(password);
+            
+            await db.transaction(async (tx) => {
+                await tx.update(users)
+                    .set({ passwordHash, updatedAt: new Date().toISOString() })
+                    .where(eq(users.id, reset.userId));
+
+                await tx.update(passwordResets)
+                    .set({ used: true })
+                    .where(eq(passwordResets.token, token));
+            });
+
+            return Result.ok();
+        } catch (error: any) {
+            return Result.fail(UserError.internal(error.message));
+        }
     }
 
     /**

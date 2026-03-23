@@ -10,6 +10,7 @@ import { INotificationServiceToken } from "@/modules/users/domain/services/INoti
 import { IGenerationLogRepositoryToken } from "@/modules/ai/domain/repositories/IGenerationLogRepository";
 import { IAgentRepositoryToken } from "@/modules/ai/domain/repositories/IAgentRepository";
 import { IAiServiceToken } from "@/modules/ai/domain/services/IAiService";
+import { IEmailServiceToken } from "@/modules/users/domain/services/IEmailService";
 import { IAdminStatsRepositoryToken } from "@/modules/admin/domain/repositories/IAdminStatsRepository";
 import { IFeatureRepositoryToken } from "@/modules/admin/domain/repositories/IFeatureRepository";
 import { ITransactionRepositoryToken } from "@/modules/billing/domain/repositories/ITransactionRepository";
@@ -96,6 +97,11 @@ if (typeof window === 'undefined') {
   const { SQLiteIndexedDocumentRepository } = require("@/modules/rag/infrastructure/repositories/SQLiteIndexedDocumentRepository");
   const { SQLiteTemplateRepository } = require("@/modules/templates/infrastructure/repositories/SQLiteTemplateRepository");
   const { SQLiteSectionRepository } = require("@/modules/ai-content/infrastructure/repositories/SQLiteSectionRepository");
+  const { NodemailerEmailService } = require("@/modules/users/infrastructure/services/NodemailerEmailService");
+
+  container.register(IEmailServiceToken, {
+    useClass: NodemailerEmailService
+  }, { lifecycle: Lifecycle.Singleton });
 
   container.register(IProjectRepositoryToken, {
     useClass: SQLiteProjectRepository

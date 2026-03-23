@@ -11,6 +11,7 @@ import { ChangePasswordForm } from './ChangePasswordForm';
 import { ApiTokenView } from './ApiTokenView';
 import { ApiKeysForm } from './ApiKeysForm';
 import { GuestProfilePage } from '@/components/auth/GuestProfilePage';
+import { TrustedDevicesList } from './TrustedDevicesList';
 
 function ProfileSkeleton() {
     return (
@@ -70,6 +71,7 @@ export default function ProfilePage() {
             <UpdateProfileForm userProfile={userProfile} />
             <ApiKeysForm userProfile={userProfile} />
             <ChangePasswordForm />
+            <TrustedDevicesList userId={userProfile.id} />
             <ApiTokenView />
 
         </div>

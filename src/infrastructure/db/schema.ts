@@ -151,3 +151,18 @@ export const indexedDocuments = sqliteTable('indexed_documents', {
   status: text('status').$type<'indexed' | 'failed' | 'deleted'>().notNull(),
   errorMessage: text('error_message'),
 });
+
+export const passwordResets = sqliteTable('password_resets', {
+  token: text('token').primaryKey(),
+  userId: text('user_id').notNull(),
+  expiresAt: integer('expires_at').notNull(),
+  used: integer('used', { mode: 'boolean' }).default(false).notNull(),
+});
+
+export const userFingerprints = sqliteTable('user_fingerprints', {
+  id: text('id').primaryKey(), // uuid
+  userId: text('user_id').notNull(),
+  fingerprint: text('fingerprint').notNull(),
+  lastUsedAt: text('last_used_at').notNull(),
+  metadata: text('metadata'), // JSON string of attributes
+});

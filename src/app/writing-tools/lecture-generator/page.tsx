@@ -51,7 +51,7 @@ export default function LectureGeneratorPage() {
     const input: CreateLectureUnitInput = { ...formData, subTopics };
 
     try {
-      const data = await apiService<CreateLectureUnitInput, CreateLectureUnitOutput>({ endpoint: '/api/actions/create-lecture-unit', method: 'POST', firebaseUser: user, data: input });
+      const data = await apiService<CreateLectureUnitInput, CreateLectureUnitOutput>({ endpoint: '/api/actions/create-lecture-unit', method: 'POST', data: input });
       setResult(data);
       toast({ title: 'Generation Successful', description: 'Your lecture and practical session have been created.' });
     } catch (error) {

@@ -3,9 +3,6 @@
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { useMutation } from '@tanstack/react-query';
-import { updatePassword, EmailAuthProvider, reauthenticateWithCredential } from 'firebase/auth';
-import { useAuth } from '@/context/AuthContext';
 import { useToast } from '@/hooks';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -14,7 +11,7 @@ import { Input } from '@/components/ui/input';
 import { Loader2, KeyRound, Eye, EyeOff } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { Progress } from '@/components/ui/progress';
-import { useForgotPasswordLoggedIn } from '@/hooks/auth/use-auth-mutations';
+import { useForgotPasswordLoggedIn, useChangePassword } from '@/hooks/auth/use-auth-mutations';
 
 const passwordSchema = z.object({
   currentPassword: z.string().min(1, 'Current password is required.'),
@@ -54,15 +51,14 @@ function evaluatePasswordStrength(password: string): Strength {
     }
 }
 
-
 export function ChangePasswordForm() {
-  const { firebaseUser } = useAuth();
   const { toast } = useToast();
   const [showCurrentPassword, setShowCurrentPassword] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [passwordStrength, setPasswordStrength] = useState<Strength | null>(null);
 
   const forgotPasswordMutation = useForgotPasswordLoggedIn();
+  const changePasswordMutation = useChangePassword();
 
   const form = useForm<PasswordFormValues>({
     resolver: zodResolver(passwordSchema),
@@ -80,41 +76,17 @@ export function ChangePasswordForm() {
     }
   }, [newPasswordValue]);
 
-  const changePasswordMutation = useMutation({
-    mutationFn: async (data: PasswordFormValues) => {
-      if (!firebaseUser || !firebaseUser.email) {
-        throw new Error('User not properly authenticated.');
-      }
-      const credential = EmailAuthProvider.credential(firebaseUser.email, data.currentPassword);
-      await reauthenticateWithCredential(firebaseUser, credential);
-      await updatePassword(firebaseUser, data.newPassword);
-    },
-    onSuccess: () => {
-      toast({ title: 'Success', description: 'Your password has been updated.' });
-      form.reset();
-    },
-    onError: (error: any) => {
-      let description = 'An unexpected error occurred.';
-      if (error.code === 'auth/wrong-password' || error.code === 'auth/invalid-credential') {
-        description = 'The current password you entered is incorrect.';
-      } else if (error.code) {
-        description = error.message;
-      }
-      toast({ title: 'Error', description, variant: 'destructive' });
-    },
-  });
-
   const onSubmit = (data: PasswordFormValues) => {
-    changePasswordMutation.mutate(data);
+    changePasswordMutation.mutate(data, {
+        onSuccess: () => {
+            form.reset();
+        }
+    });
   };
 
   const handleForgotPassword = () => {
     forgotPasswordMutation.mutate();
   };
-  
-  if (firebaseUser?.providerData?.some((p: any) => p.providerId !== 'password')) {
-    return null;
-  }
 
   return (
     <Card>

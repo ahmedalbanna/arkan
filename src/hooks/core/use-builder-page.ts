@@ -31,7 +31,6 @@ export function useBuilderPageLogic() {
         endpoint: `/api/users/${firebaseUser.uid}`,
         method: 'PUT',
         data: { hasCompletedOnboarding: true },
-        firebaseUser,
       });
     },
     onSuccess: () => {

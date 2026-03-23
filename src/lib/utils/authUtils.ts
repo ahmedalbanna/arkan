@@ -4,6 +4,7 @@ import type { User as FirebaseUser } from 'firebase/auth';
 export interface LoginCredentials {
   email: string;
   password: string;
+  rememberMe?: boolean;
 }
 
 /**

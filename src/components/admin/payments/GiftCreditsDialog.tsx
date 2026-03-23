@@ -34,7 +34,7 @@ export function GiftCreditsDialog({ user }: GiftCreditsDialogProps) {
   const mutation = useMutation({
     mutationFn: (data: GiftCreditsFormValues) => {
       if (!firebaseUser) throw new Error('Admin not authenticated.');
-      return apiService<GiftCreditsFormValues & { userId: string }, { message: string }>({ endpoint: '/api/admin/gift-credits', method: 'POST', firebaseUser, data: { ...data, userId: user.id } });
+      return apiService<GiftCreditsFormValues & { userId: string }, { message: string }>({ endpoint: '/api/admin/gift-credits', method: 'POST', data: { ...data, userId: user.id } });
     },
     onSuccess: (data) => {
       toast({ title: 'Credits Gifted', description: data.message });

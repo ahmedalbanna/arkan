@@ -58,8 +58,43 @@ export class AuthApiClient {
     }
 
 
-    async forgotPasswordService(_email: string) {
-        throw new Error("Password reset not implemented in local auth yet");
+    async forgotPasswordService(email: string): Promise<Result<any, ApiError>> {
+        try {
+            const data = await apiService({
+                endpoint: '/api/auth/forgot-password',
+                method: 'POST',
+                data: { email }
+            });
+            return Result.ok(data);
+        } catch (error: any) {
+            return Result.fail(error);
+        }
+    }
+
+    async resetPasswordApi(token: string, password: string): Promise<Result<any, ApiError>> {
+        try {
+            const data = await apiService({
+                endpoint: '/api/auth/reset-password',
+                method: 'POST',
+                data: { token, password }
+            });
+            return Result.ok(data);
+        } catch (error: any) {
+            return Result.fail(error);
+        }
+    }
+
+    async changePasswordApi(passwords: { currentPassword: string, newPassword: string }): Promise<Result<any, ApiError>> {
+        try {
+            const data = await apiService({
+                endpoint: '/api/auth/change-password',
+                method: 'POST',
+                data: passwords
+            });
+            return Result.ok(data);
+        } catch (error: any) {
+            return Result.fail(error);
+        }
     }
 
     async sendPasswordResetEmailApi(userId: string, token: string): Promise<Result<any, ApiError>> {

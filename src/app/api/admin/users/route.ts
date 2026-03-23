@@ -20,7 +20,7 @@ export const GET = withAuth(async ({ request }) => {
 
     const { limit, lastVisibleId } = queryValidation.data;
     const controller = container.resolve(UserController);
-    const result = await controller.getPaginatedUsers({ limit, lastVisibleId });
+    const result = await controller.getPaginated({ limit, lastVisibleId });
     
     return handleResult(result);
   } catch (error) {

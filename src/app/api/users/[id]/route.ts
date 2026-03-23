@@ -43,7 +43,7 @@ export const PUT = withAuth(async ({ request, params, user: requester }) => {
         }
 
         const controller = container.resolve(UserController);
-        const result = await controller.updateUser(userId, validation.data, requester.email);
+        const result = await controller.updateUser(userId, validation.data);
 
         if (result.isSuccess) {
             revalidatePath(`/profile/${userId}`);

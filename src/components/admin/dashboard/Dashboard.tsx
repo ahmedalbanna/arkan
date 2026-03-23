@@ -7,6 +7,7 @@ import { StatCard } from './StatCard';
 import { AgentUsageChart } from './AgentUsageChart';
 import { RecentActivity } from './RecentActivity';
 import { UserRetentionReport } from './UserRetentionReport';
+import { AccountSharingAlert } from './AccountSharingAlert';
 import { useLocalization } from '@/context/LocalizationContext';
 import { DashboardSkeleton } from './skeletons';
 
@@ -44,6 +45,10 @@ export default function Dashboard() {
 
             {data?.userRetentionStats && (
                 <UserRetentionReport stats={data.userRetentionStats} />
+            )}
+
+            {data?.accountSharingReport && data.accountSharingReport.length > 0 && (
+                <AccountSharingAlert report={data.accountSharingReport} />
             )}
         </div>
     );

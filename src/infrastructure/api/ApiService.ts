@@ -1,9 +1,6 @@
 
 'use client';
 
-import { getAuthenticatedToken } from '@/lib/utils/authUtils';
-import type { User as FirebaseUser } from 'firebase/auth';
-
 export class ApiError extends Error {
   constructor(
     public message: string,
@@ -20,7 +17,6 @@ interface ApiServiceOptions<T> {
   method?: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
   data?: T;
   token?: string; // Allow passing token directly
-  firebaseUser?: FirebaseUser | null; // Or pass the user object
   headers?: Record<string, string>;
   isFormData?: boolean;
   responseType?: 'json' | 'blob' | 'text';
@@ -42,17 +38,12 @@ export async function apiService<TRequest = any, TResponse = any>(
     method = 'GET',
     data,
     token: directToken,
-    firebaseUser,
     headers = {},
     isFormData = false,
     responseType = 'json',
   } = options;
 
   let authToken = directToken;
-
-  if (!authToken && firebaseUser) {
-    authToken = await getAuthenticatedToken(firebaseUser);
-  }
 
   const config: RequestInit = {
     method,

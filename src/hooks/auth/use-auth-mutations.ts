@@ -73,12 +73,22 @@ export function useSignup(options?: { onSuccess?: (data: any) => void }) {
   });
 }
 
-// Placeholders for features to be implemented with local logic later if needed
 export function useForgotPassword() {
   const { toast } = useToast();
+  const router = useRouter();
+  
   return useMutation({
-    mutationFn: async (_email: string) => {
-        throw new Error("Password reset not implemented in local auth yet");
+    mutationFn: async (email: string) => {
+        const result = await container.resolve(AuthApiClient).forgotPasswordService(email);
+        if (result.isFailure) throw result.error;
+        return result.getValue();
+    },
+    onSuccess: () => {
+        toast({
+            title: 'Reset link sent',
+            description: 'If an account exists with this email, you will receive a reset link shortly.',
+        });
+        router.push('/login');
     },
     onError: (error) => handleErrorUtility(error, 'Password Reset Failed'),
   });
@@ -97,11 +107,53 @@ export function useForgotPasswordLoggedIn() {
 export function useSendPasswordReset() {
   const { toast } = useToast();
   return useMutation({
-    mutationFn: async (_userId: string) => {
-        throw new Error("Password reset not implemented in local auth yet");
+    mutationFn: async (userId: string) => {
+        // In local auth, we might want to expose this to admins 
+        // to send a reset link to a specific user by ID
+        throw new Error("Admin-initiated password reset not implemented in local auth yet");
     },
     onError: (error) => {
       handleErrorUtility(error, 'Failed to Send Email');
     },
   });
+}
+
+export function useResetPassword() {
+    const { toast } = useToast();
+    const router = useRouter();
+    
+    return useMutation({
+      mutationFn: async ({ token, password }: { token: string, password: string }) => {
+          const result = await container.resolve(AuthApiClient).resetPasswordApi(token, password);
+          if (result.isFailure) throw result.error;
+          return result.getValue();
+      },
+      onSuccess: () => {
+          toast({
+              title: 'Password reset successful',
+              description: 'Your password has been updated. You can now log in.',
+          });
+          router.push('/login');
+      },
+      onError: (error) => handleErrorUtility(error, 'Password Reset Failed'),
+    });
+}
+
+export function useChangePassword() {
+    const { toast } = useToast();
+    
+    return useMutation({
+      mutationFn: async (data: { currentPassword: string, newPassword: string }) => {
+          const result = await container.resolve(AuthApiClient).changePasswordApi(data);
+          if (result.isFailure) throw result.error;
+          return result.getValue();
+      },
+      onSuccess: () => {
+          toast({
+              title: 'Password updated',
+              description: 'Your password has been changed successfully.',
+          });
+      },
+      onError: (error) => handleErrorUtility(error, 'Password Change Failed'),
+    });
 }

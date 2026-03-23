@@ -1,6 +1,6 @@
 import { injectable } from "tsyringe";
 import { db } from "@/infrastructure/db";
-import { users, generationLogs, transactions, agents } from "@/infrastructure/db/schema";
+import { users, generationLogs, transactions, agents, userFingerprints } from "@/infrastructure/db/schema";
 import { IAdminStatsRepository, DashboardStats } from "../../domain/repositories/IAdminStatsRepository";
 import { count, eq, sql, desc, gte, and } from "drizzle-orm";
 
@@ -53,6 +53,20 @@ export class SQLiteAdminStatsRepository implements IAdminStatsRepository {
         .groupBy(sql`strftime('%Y-%m-%d', ${generationLogs.timestamp})`)
         .orderBy(sql`strftime('%Y-%m-%d', ${generationLogs.timestamp})`);
 
+        // Account Sharing Report (Users with > 3 devices)
+        const accountSharingResult = await db.select({
+            userId: userFingerprints.userId,
+            userName: users.name,
+            deviceCount: sql`count(distinct ${userFingerprints.fingerprint})`,
+            lastLogin: sql`max(${userFingerprints.lastUsedAt})`,
+        })
+        .from(userFingerprints)
+        .leftJoin(users, eq(userFingerprints.userId, users.id))
+        .groupBy(userFingerprints.userId)
+        .having(sql`count(distinct ${userFingerprints.fingerprint}) > 3`)
+        .orderBy(desc(sql`count(distinct ${userFingerprints.fingerprint})`))
+        .limit(10);
+
         // Fetch some recent activity
         const recentGenLogs = await db.query.generationLogs.findMany({
             orderBy: [desc(generationLogs.timestamp)],
@@ -102,7 +116,13 @@ export class SQLiteAdminStatsRepository implements IAdminStatsRepository {
                     date: t.date as string,
                     count: Number(t.count || 0),
                 })),
-            }
+            },
+            accountSharingReport: accountSharingResult.map(r => ({
+                userId: r.userId,
+                userName: r.userName || 'Unknown User',
+                deviceCount: Number(r.deviceCount || 0),
+                lastLogin: r.lastLogin as string,
+            }))
         };
     }
 }

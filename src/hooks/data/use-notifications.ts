@@ -54,7 +54,6 @@ export function useMarkNotificationsAsRead() {
         endpoint: '/api/notifications/mark-as-read',
         method: 'POST',
         data: { notificationIds },
-        firebaseUser,
       }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: notificationKeys.lists() });
@@ -80,7 +79,6 @@ export function useClearAllNotifications() {
         endpoint: '/api/notifications/clear',
         method: 'POST',
         data: { notificationIds },
-        firebaseUser,
       }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: notificationKeys.lists() });
