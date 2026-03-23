@@ -4,31 +4,119 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { useGoogleSignIn, useLogin } from '@/hooks/auth/use-auth-mutations';
+import { useLogin } from '@/hooks/auth/use-auth-mutations';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { AlertCircle, Loader2, Phone } from 'lucide-react';
+import { AlertCircle, Loader2 } from 'lucide-react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
-import { handleErrorUtility } from '@/lib/utils/errorUtils';
 import { LoginCredentials } from '@/lib/utils/authUtils';
 import { apiService } from '@/infrastructure/api/ApiService';
+import { handleErrorUtility } from '@/lib/utils/errorUtils';
 
-const formSchema = z.object({ email: z.string().email({ message: 'Please enter a valid email address.' }), password: z.string().min(1, { message: 'Password is required.' }) });
+const formSchema = z.object({ 
+  email: z.string().email({ message: 'Please enter a valid email address.' }), 
+  password: z.string().min(1, { message: 'Password is required.' }) 
+});
 
 export default function LoginForm() {
-  const router = useRouter();
   const loginMutation = useLogin();
-  const googleSignInMutation = useGoogleSignIn();
-  const form = useForm<LoginCredentials>({ resolver: zodResolver(formSchema), defaultValues: { email: '', password: '' } });
+  const form = useForm<LoginCredentials>({ 
+    resolver: zodResolver(formSchema), 
+    defaultValues: { email: '', password: '' } 
+  });
 
-  useEffect(() => { const errorData = loginMutation.error as any; if (errorData?.message) { form.setError('root.serverError', { type: 'manual', message: errorData.message }); } }, [loginMutation.error, form]);
-  function onSubmit(values: LoginCredentials) { form.clearErrors('root.serverError'); loginMutation.mutate(values); }
-  const handleGuestLogin = async () => { try { await apiService<undefined, unknown>({ endpoint: '/api/auth/guest', method: 'POST' }); router.push('/builder'); } catch (error) { handleErrorUtility(error, 'Guest Login Failed'); } };
-  const isPending = loginMutation.isPending || googleSignInMutation.isPending;
+  useEffect(() => { 
+    const errorData = loginMutation.error as any; 
+    if (errorData?.message) { 
+      form.setError('root.serverError', { type: 'manual', message: errorData.message }); 
+    } 
+  }, [loginMutation.error, form]);
+
+  function onSubmit(values: LoginCredentials) { 
+    form.clearErrors('root.serverError'); 
+    loginMutation.mutate(values); 
+  }
+
+  const handleGuestLogin = async () => { 
+    try { 
+      await apiService<undefined, unknown>({ endpoint: '/api/auth/guest', method: 'POST' }); 
+      window.location.href = '/builder'; 
+    } catch (error) { 
+      handleErrorUtility(error, 'Guest Login Failed'); 
+    } 
+  };
+
+  const isPending = loginMutation.isPending;
   const formLevelError = form.formState.errors.root?.serverError;
 
-  return <Form {...form}><form onSubmit={form.handleSubmit(onSubmit)} className="grid gap-4">{formLevelError && <Alert variant="destructive"><AlertCircle className="h-4 w-4" /><AlertTitle>Login Error</AlertTitle><AlertDescription>{formLevelError.message}</AlertDescription></Alert>}<FormField control={form.control} name="email" render={({ field }) => <FormItem><FormLabel>Email</FormLabel><FormControl><Input placeholder="name@example.com" {...field} disabled={isPending} /></FormControl><FormMessage /></FormItem>} /><FormField control={form.control} name="password" render={({ field }) => <FormItem><div className="flex items-center"><FormLabel>Password</FormLabel><Link href="/forgot-password" className="ml-auto inline-block text-sm underline">Forgot your password?</Link></div><FormControl><Input type="password" placeholder="••••••••" {...field} disabled={isPending} /></FormControl><FormMessage /></FormItem>} /><Button type="submit" className="w-full" disabled={isPending}>{loginMutation.isPending && <Loader2 className="me-2 h-4 w-4 animate-spin" />}Login</Button><Button variant="outline" className="w-full" type="button" onClick={() => googleSignInMutation.mutate()} disabled={isPending}>{googleSignInMutation.isPending ? <Loader2 className="me-2 h-4 w-4 animate-spin" /> : <svg className="me-2 h-4 w-4" aria-hidden="true" focusable="false" data-prefix="fab" data-icon="google" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 488 512"><path fill="currentColor" d="M488 261.8C488 403.3 391.1 504 248 504 110.8 504 0 393.2 0 256S110.8 8 248 8c66.8 0 126 21.2 172.4 56.2l-62.8 55.7C334.3 88.2 294.2 72 248 72 165.2 72 96 141.2 96 224s69.2 152 152 152c86.4 0 142-51.7 148" /></svg>}Login with Google</Button><Button variant="outline" className="w-full" type="button" onClick={() => router.push('/phone-auth')} disabled={isPending}><Phone className="me-2 h-4 w-4" />Sign in with Phone</Button><div className="relative my-2"><div className="absolute inset-0 flex items-center"><span className="w-full border-t" /></div><div className="relative flex justify-center text-xs uppercase"><span className="bg-background px-2 text-muted-foreground">Or continue without an account</span></div></div><Button variant="secondary" className="w-full" type="button" onClick={handleGuestLogin} disabled={isPending}>Continue as Guest</Button><div className="mt-4 text-center text-sm">Don&apos;t have an account? <Link href="/signup" className="underline">Sign up</Link></div></form></Form>;
+  return (
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(onSubmit)} className="grid gap-4">
+        {formLevelError && (
+          <Alert variant="destructive">
+            <AlertCircle className="h-4 w-4" />
+            <AlertTitle>Login Error</AlertTitle>
+            <AlertDescription>{formLevelError.message}</AlertDescription>
+          </Alert>
+        )}
+        <FormField 
+          control={form.control} 
+          name="email" 
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Email</FormLabel>
+              <FormControl>
+                <Input placeholder="name@example.com" {...field} disabled={isPending} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )} 
+        />
+        <FormField 
+          control={form.control} 
+          name="password" 
+          render={({ field }) => (
+            <FormItem>
+              <div className="flex items-center">
+                <FormLabel>Password</FormLabel>
+                <Link href="/forgot-password" className={`ms-auto inline-block text-sm underline ${isPending ? 'pointer-events-none opacity-50' : ''}`}>
+                  Forgot your password?
+                </Link>
+              </div>
+              <FormControl>
+                <Input type="password" placeholder="••••••••" {...field} disabled={isPending} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )} 
+        />
+        <Button type="submit" className="w-full" disabled={isPending}>
+          {loginMutation.isPending && <Loader2 className="me-2 h-4 w-4 animate-spin" />} 
+          Login
+        </Button>
+        
+        <div className="relative my-2">
+          <div className="absolute inset-0 flex items-center">
+            <span className="w-full border-t" />
+          </div>
+          <div className="relative flex justify-center text-xs uppercase">
+            <span className="bg-background px-2 text-muted-foreground">Or continue without an account</span>
+          </div>
+        </div>
+
+        <Button variant="secondary" className="w-full" type="button" onClick={handleGuestLogin} disabled={isPending}>
+          Continue as Guest
+        </Button>
+
+        <div className="mt-4 text-center text-sm">
+          Don&apos;t have an account?{" "}
+          <Link href="/signup" className="underline">
+            Sign up
+          </Link>
+        </div>
+      </form>
+    </Form>
+  );
 }

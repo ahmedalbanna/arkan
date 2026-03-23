@@ -6,6 +6,7 @@ import { AlertCircle, Bot, CreditCard, Users } from 'lucide-react';
 import { StatCard } from './StatCard';
 import { AgentUsageChart } from './AgentUsageChart';
 import { RecentActivity } from './RecentActivity';
+import { UserRetentionReport } from './UserRetentionReport';
 import { useLocalization } from '@/context/LocalizationContext';
 import { DashboardSkeleton } from './skeletons';
 
@@ -40,6 +41,10 @@ export default function Dashboard() {
                 <AgentUsageChart data={data?.agentUsageChartData || []} />
                 <RecentActivity data={data?.recentActivity || []} />
             </div>
+
+            {data?.userRetentionStats && (
+                <UserRetentionReport stats={data.userRetentionStats} />
+            )}
         </div>
     );
 }

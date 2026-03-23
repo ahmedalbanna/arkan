@@ -112,7 +112,7 @@ export function ChangePasswordForm() {
     forgotPasswordMutation.mutate();
   };
   
-  if (firebaseUser?.providerData.some(p => p.providerId !== 'password')) {
+  if (firebaseUser?.providerData?.some((p: any) => p.providerId !== 'password')) {
     return null;
   }
 

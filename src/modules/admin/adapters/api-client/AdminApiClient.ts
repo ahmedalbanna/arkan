@@ -1,7 +1,7 @@
 
 'use client';
 
-import { injectable } from "tsyringe";
+
 import { apiService, ApiError } from "@/infrastructure/api/ApiService";
 import { Result } from "@/lib/utils/result";
 
@@ -19,9 +19,21 @@ export interface DashboardStats {
         input: any;
         output: any;
     }[];
+    userRetentionStats?: {
+        activeUsersLast30Days: number;
+        topSpenders: {
+            userName: string;
+            totalSpent: number;
+            generationCount: number;
+        }[];
+        dailyGenerationTrend: {
+            date: string;
+            count: number;
+        }[];
+    };
 }
 
-@injectable()
+
 export class AdminApiClient {
     async fetchDashboardStats(token: string): Promise<Result<DashboardStats, ApiError>> {
         try {

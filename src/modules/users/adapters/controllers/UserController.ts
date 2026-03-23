@@ -17,11 +17,14 @@ import { CreateSessionUseCase } from "../../application/use-cases/CreateSessionU
 import { GetNotificationsUseCase } from "../../application/use-cases/GetNotificationsUseCase";
 import { SendNotificationUseCase } from "../../application/use-cases/SendNotificationUseCase";
 import { VerifySessionUseCase } from "../../application/use-cases/VerifySessionUseCase";
+import { LoginUseCase } from "../../application/use-cases/LoginUseCase";
 @injectable()
 export class UserController {
     constructor(
         @inject(delay(() => GetUserProfileUseCase))
         private getUserProfileUseCase: GetUserProfileUseCase,
+        @inject(delay(() => LoginUseCase))
+        private loginUseCase: LoginUseCase,
         @inject(delay(() => UpdateUserProfileUseCase))
         private updateUserProfileUseCase: UpdateUserProfileUseCase,
         @inject(delay(() => GetPaginatedUsersUseCase))
@@ -122,5 +125,9 @@ export class UserController {
 
     async verifySession(sessionCookie: string, checkRevoked?: boolean) {
         return this.verifySessionUseCase.execute(sessionCookie, checkRevoked);
+    }
+
+    async login(email: string, password: string) {
+        return this.loginUseCase.execute(email, password);
     }
 }

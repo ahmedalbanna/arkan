@@ -80,33 +80,33 @@ container.register(DeviceTokenApiClient, { useClass: DeviceTokenApiClient }, { l
 if (typeof window === 'undefined') {
   console.log("Registering server-side dependencies...");
   // Use require to avoid bundling server-only modules in the client
-  const { FirebaseProjectRepository } = require("@/modules/projects/infrastructure/repositories/FirebaseProjectRepository");
-  const { FirebaseUserRepository } = require("@/modules/users/infrastructure/repositories/FirebaseUserRepository");
-  const { FirebaseAuthRepository } = require("@/modules/users/infrastructure/repositories/FirebaseAuthRepository");
+  const { SQLiteProjectRepository } = require("@/modules/projects/infrastructure/repositories/SQLiteProjectRepository");
+  const { SQLiteUserRepository } = require("@/modules/users/infrastructure/repositories/SQLiteUserRepository");
+  const { SQLiteAuthRepository } = require("@/modules/users/infrastructure/repositories/SQLiteAuthRepository");
   const { FirebaseNotificationService } = require("@/modules/users/infrastructure/services/FirebaseNotificationService");
-  const { FirebaseGenerationLogRepository } = require("@/modules/ai/infrastructure/repositories/FirebaseGenerationLogRepository");
-  const { FirebaseAgentRepository } = require("@/modules/ai/infrastructure/repositories/FirebaseAgentRepository");
+  const { SQLiteGenerationLogRepository } = require("@/modules/ai/infrastructure/repositories/SQLiteGenerationLogRepository");
+  const { SQLiteAgentRepository } = require("@/modules/ai/infrastructure/repositories/SQLiteAgentRepository");
   const { GenkitAiService } = require("@/modules/ai/infrastructure/services/GenkitAiService");
-  const { FirebaseAdminStatsRepository } = require("@/modules/admin/infrastructure/repositories/FirebaseAdminStatsRepository");
-  const { FirebaseFeatureRepository } = require("@/modules/admin/infrastructure/repositories/FirebaseFeatureRepository");
-  const { FirebaseSettingsRepository } = require("@/modules/admin/infrastructure/repositories/FirebaseSettingsRepository");
-  const { FirebaseTransactionRepository } = require("@/modules/billing/infrastructure/repositories/FirebaseTransactionRepository");
+  const { SQLiteAdminStatsRepository } = require("@/modules/admin/infrastructure/repositories/SQLiteAdminStatsRepository");
+  const { SQLiteFeatureRepository } = require("@/modules/admin/infrastructure/repositories/SQLiteFeatureRepository");
+  const { SQLiteSettingsRepository } = require("@/modules/admin/infrastructure/repositories/SQLiteSettingsRepository");
+  const { SQLiteTransactionRepository } = require("@/modules/billing/infrastructure/repositories/SQLiteTransactionRepository");
   const { FirebaseFileStorageService } = require("@/modules/billing/infrastructure/services/FirebaseFileStorageService");
   const { DefaultRagRepository } = require("@/modules/rag/infrastructure/repositories/DefaultRagRepository");
-  const { FirebaseIndexedDocumentRepository } = require("@/modules/rag/infrastructure/repositories/FirebaseIndexedDocumentRepository");
-  const { FirebaseTemplateRepository } = require("@/modules/templates/infrastructure/repositories/FirebaseTemplateRepository");
-  const { FirebaseSectionRepository } = require("@/modules/ai-content/infrastructure/repositories/FirebaseSectionRepository");
+  const { SQLiteIndexedDocumentRepository } = require("@/modules/rag/infrastructure/repositories/SQLiteIndexedDocumentRepository");
+  const { SQLiteTemplateRepository } = require("@/modules/templates/infrastructure/repositories/SQLiteTemplateRepository");
+  const { SQLiteSectionRepository } = require("@/modules/ai-content/infrastructure/repositories/SQLiteSectionRepository");
 
   container.register(IProjectRepositoryToken, {
-    useClass: FirebaseProjectRepository
+    useClass: SQLiteProjectRepository
   }, { lifecycle: Lifecycle.Singleton });
 
   container.register(IUserRepositoryToken, {
-    useClass: FirebaseUserRepository
+    useClass: SQLiteUserRepository
   }, { lifecycle: Lifecycle.Singleton });
 
   container.register(IAuthRepositoryToken, {
-    useClass: FirebaseAuthRepository
+    useClass: SQLiteAuthRepository
   }, { lifecycle: Lifecycle.Singleton });
 
   container.register(INotificationServiceToken, {
@@ -114,11 +114,11 @@ if (typeof window === 'undefined') {
   }, { lifecycle: Lifecycle.Singleton });
 
   container.register(IGenerationLogRepositoryToken, {
-    useClass: FirebaseGenerationLogRepository
+    useClass: SQLiteGenerationLogRepository
   }, { lifecycle: Lifecycle.Singleton });
 
   container.register(IAgentRepositoryToken, {
-    useClass: FirebaseAgentRepository
+    useClass: SQLiteAgentRepository
   }, { lifecycle: Lifecycle.Singleton });
 
   container.register(IAiServiceToken, {
@@ -126,19 +126,19 @@ if (typeof window === 'undefined') {
   }, { lifecycle: Lifecycle.Singleton });
 
   container.register(IAdminStatsRepositoryToken, {
-    useClass: FirebaseAdminStatsRepository
+    useClass: SQLiteAdminStatsRepository
   }, { lifecycle: Lifecycle.Singleton });
 
   container.register(IFeatureRepositoryToken, {
-    useClass: FirebaseFeatureRepository
+    useClass: SQLiteFeatureRepository
   }, { lifecycle: Lifecycle.Singleton });
 
   container.register(ISettingsRepositoryToken, {
-    useClass: FirebaseSettingsRepository
+    useClass: SQLiteSettingsRepository
   }, { lifecycle: Lifecycle.Singleton });
 
   container.register(ITransactionRepositoryToken, {
-    useClass: FirebaseTransactionRepository
+    useClass: SQLiteTransactionRepository
   }, { lifecycle: Lifecycle.Singleton });
 
   container.register(IFileStorageServiceToken, {
@@ -150,15 +150,15 @@ if (typeof window === 'undefined') {
   }, { lifecycle: Lifecycle.Singleton });
 
   container.register(IIndexedDocumentRepositoryToken, {
-    useClass: FirebaseIndexedDocumentRepository
+    useClass: SQLiteIndexedDocumentRepository
   }, { lifecycle: Lifecycle.Singleton });
 
   container.register(ITemplateRepositoryToken, {
-    useClass: FirebaseTemplateRepository
+    useClass: SQLiteTemplateRepository
   }, { lifecycle: Lifecycle.Singleton });
 
   container.register(ISectionRepositoryToken, {
-    useClass: FirebaseSectionRepository
+    useClass: SQLiteSectionRepository
   }, { lifecycle: Lifecycle.Singleton });
 }
 

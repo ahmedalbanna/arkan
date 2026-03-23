@@ -351,4 +351,11 @@ FIREBASE_ADMIN_PRIVATE_KEY=
 - When converting a direct-`fetch(...)` component/page to `apiService`, a small full-file rewrite is often safer than stacking many local replacements. These components usually get shorter once auth, headers, and parsing are centralized, and whole-file rewrites avoid leaving mixed old/new request logic behind.
 - For Jest component tests in this repo, prefer locally mocking ESM-heavy visual dependencies like `lucide-react` rather than widening global transform settings. It keeps tests focused on behavior and avoids unnecessary parser/config churn.
 - When adding new TypeScript Jest tests, do not assume `@testing-library/jest-dom` matcher types are visible to `tsc` just because the runtime setup file requires them. Either ensure the ambient typings are configured explicitly or prefer plain Jest assertions (`toBeTruthy`, equality, length checks) in new tests to avoid typecheck-only failures.
+- **Database Migration Insights (NoSQL to SQL)**:
+    - When migrating from NoSQL (Firestore) to SQLite (Drizzle), use `text` columns for JSON fields (arrays, nested objects) and handle serialization/deserialization explicitly in the repository layer to maintain domain entity compatibility.
+    - After changing the database provider, immediately update the DI container (`src/infrastructure/di/container.ts`) and run `npm run typecheck` to catch method signature or argument order mismatches.
+    - **Repository Interface Verification**: Before implementing new repositories during a technology switch, always cross-reference the exact method signatures in the Domain Repository Interfaces (`src/modules/*/domain/repositories/*.ts`). SQL and NoSQL repository implementations often differ in argument order or data mapping, and catching these early saves time during the typecheck/fix cycle.
+    - Prefer `drizzle-kit push` for rapid schema iteration in development before committing to migrations.
+    - Create specialized seeding scripts (`sqlite-seed.ts`) when moving away from Firebase, as legacy seeding logic often relies on Firebase-specific batching or initialization.
+    - During infrastructure cleanup, perform a full sweep to delete stale repositories but carefully preserve shared services like Auth, Storage, or Notifications if they are still required.
 

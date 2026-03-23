@@ -1,0 +1,108 @@
+import { injectable } from "tsyringe";
+import { db } from "@/infrastructure/db";
+import { users, generationLogs, transactions, agents } from "@/infrastructure/db/schema";
+import { IAdminStatsRepository, DashboardStats } from "../../domain/repositories/IAdminStatsRepository";
+import { count, eq, sql, desc, gte, and } from "drizzle-orm";
+
+@injectable()
+export class SQLiteAdminStatsRepository implements IAdminStatsRepository {
+    async getDashboardStats(): Promise<DashboardStats> {
+        const [userCountResult] = await db.select({ count: count() }).from(users);
+        const [genLogCountResult] = await db.select({ count: count() }).from(generationLogs);
+        const [pendingPaymentsResult] = await db.select({ count: count() })
+            .from(transactions)
+            .where(eq(transactions.status, 'pending'));
+
+        const agentUsage = await db.select({
+            agentId: generationLogs.agentId,
+            name: agents.name,
+            count: count(generationLogs.id),
+        })
+        .from(generationLogs)
+        .leftJoin(agents, eq(generationLogs.agentId, agents.id))
+        .groupBy(generationLogs.agentId)
+        .orderBy(desc(count(generationLogs.id)))
+        .limit(10);
+
+        // Retention Stats
+        const thirtyDaysAgo = new Date();
+        thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+        const thirtyDaysAgoStr = thirtyDaysAgo.toISOString();
+
+        const [activeUsersResult] = await db.select({ count: sql`count(distinct ${generationLogs.userId})` })
+            .from(generationLogs)
+            .where(gte(generationLogs.timestamp, thirtyDaysAgoStr));
+
+        const topSpendersResult = await db.select({
+            userName: users.name,
+            totalSpent: sql`sum(${generationLogs.creditCost})`,
+            generationCount: count(generationLogs.id),
+        })
+        .from(generationLogs)
+        .leftJoin(users, eq(generationLogs.userId, users.id))
+        .groupBy(generationLogs.userId)
+        .orderBy(desc(sql`sum(${generationLogs.creditCost})`))
+        .limit(5);
+
+        const dailyTrendResult = await db.select({
+            date: sql`strftime('%Y-%m-%d', ${generationLogs.timestamp})`,
+            count: count(generationLogs.id),
+        })
+        .from(generationLogs)
+        .where(gte(generationLogs.timestamp, thirtyDaysAgoStr))
+        .groupBy(sql`strftime('%Y-%m-%d', ${generationLogs.timestamp})`)
+        .orderBy(sql`strftime('%Y-%m-%d', ${generationLogs.timestamp})`);
+
+        // Fetch some recent activity
+        const recentGenLogs = await db.query.generationLogs.findMany({
+            orderBy: [desc(generationLogs.timestamp)],
+            limit: 5,
+        });
+
+        const recentTransactions = await db.query.transactions.findMany({
+            orderBy: [desc(transactions.createdAt)],
+            limit: 5,
+        });
+
+        const recentActivity = [
+            ...recentGenLogs.map(log => ({
+                id: `log-${log.id}`,
+                type: 'generation',
+                userId: log.userId,
+                timestamp: log.timestamp,
+                details: `Generated content with agent ${log.agentId}`
+            })),
+            ...recentTransactions.map(tx => ({
+                id: `tx-${tx.id}`,
+                type: 'transaction',
+                userId: tx.userId,
+                timestamp: tx.createdAt,
+                details: `Transaction ${tx.id} - ${tx.status}`
+            }))
+        ].sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()).slice(0, 10);
+
+        return {
+            totalUsers: userCountResult.count,
+            totalGenerations: genLogCountResult.count,
+            pendingPayments: pendingPaymentsResult.count,
+            agentUsageChartData: agentUsage.map(u => ({
+                name: u.name || 'Unknown Agent',
+                agentId: u.agentId,
+                count: u.count,
+            })),
+            recentActivity,
+            userRetentionStats: {
+                activeUsersLast30Days: Number(activeUsersResult.count || 0),
+                topSpenders: topSpendersResult.map(s => ({
+                    userName: s.userName || 'Unknown User',
+                    totalSpent: Number(s.totalSpent || 0),
+                    generationCount: Number(s.generationCount || 0),
+                })),
+                dailyGenerationTrend: dailyTrendResult.map(t => ({
+                    date: t.date as string,
+                    count: Number(t.count || 0),
+                })),
+            }
+        };
+    }
+}

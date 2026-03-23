@@ -2,17 +2,6 @@
 'use client';
 
 import { injectable } from "tsyringe";
-import { initializeFirebase } from '@/firebase';
-import {
-  GoogleAuthProvider,
-  getAdditionalUserInfo,
-  sendPasswordResetEmail,
-  signInWithEmailAndPassword,
-  signInWithPopup,
-  signOut,
-  type Auth,
-  type UserCredential
-} from "firebase/auth";
 import { apiService, ApiError } from '@/infrastructure/api/ApiService';
 import { LoginCredentials } from '@/lib/utils/authUtils';
 import { SignupCredentials } from '@/components/auth/SignupForm';
@@ -21,51 +10,29 @@ import { Result } from '@/lib/utils/result';
 
 @injectable()
 export class AuthApiClient {
-    private auth: Auth;
-
-    constructor() {
-        const { auth } = initializeFirebase();
-        this.auth = auth;
-    }
+    constructor() {}
 
     // --- Authentication Functions ---
 
-    async loginWithEmail(credentials: LoginCredentials): Promise<Result<UserCredential, Error>> {
+    async loginWithEmail(credentials: LoginCredentials): Promise<Result<any, ApiError>> {
         try {
-            const result = await signInWithEmailAndPassword(
-                this.auth,
-                credentials.email,
-                credentials.password
-            );
-            return Result.ok(result);
+            const data = await apiService({
+                endpoint: '/api/auth/login',
+                method: 'POST',
+                data: credentials
+            });
+            return Result.ok(data);
         } catch (error: any) {
-            let message = error.message || "Login failed. Please try again.";
-            if (
-                error.code === "auth/invalid-credential" ||
-                error.code === "auth/user-not-found" ||
-                error.code === "auth/wrong-password" ||
-                error.code === "auth/invalid-email"
-            ) {
-                message = "Invalid email or password.";
-            }
-            return Result.fail(new Error(message));
+            return Result.fail(error);
         }
     }
 
-    async loginWithGoogle(): Promise<Result<{ user: UserCredential['user'], isNewUser: boolean }, Error>> {
-        const provider = new GoogleAuthProvider();
-        try {
-            const result = await signInWithPopup(this.auth, provider);
-            const info = getAdditionalUserInfo(result);
-            return Result.ok({ user: result.user, isNewUser: !!info?.isNewUser });
-        } catch (error: any) {
-            return Result.fail(new Error(error.message || "Google Sign-In failed."));
-        }
+    async loginWithGoogle(): Promise<Result<any, ApiError>> {
+        return Result.fail(new ApiError("Google Sign-In not supported in local auth", 400));
     }
 
     async serviceLogoutUser(): Promise<Result<any, ApiError>> {
         try {
-            await signOut(this.auth);
             const data = await apiService({ endpoint: '/api/auth/logout', method: 'POST' });
             return Result.ok(data);
         } catch (error: any) {
@@ -91,8 +58,8 @@ export class AuthApiClient {
     }
 
 
-    async forgotPasswordService(email: string) {
-        return sendPasswordResetEmail(this.auth, email);
+    async forgotPasswordService(_email: string) {
+        throw new Error("Password reset not implemented in local auth yet");
     }
 
     async sendPasswordResetEmailApi(userId: string, token: string): Promise<Result<any, ApiError>> {
