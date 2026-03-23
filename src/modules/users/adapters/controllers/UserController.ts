@@ -25,6 +25,7 @@ import { RevokeFingerprintUseCase } from "../../application/use-cases/RevokeFing
 import { RecordLoginUseCase } from "../../application/use-cases/RecordLoginUseCase";
 import { GetLoginHistoryUseCase } from "../../application/use-cases/GetLoginHistoryUseCase";
 import { LogoutAllDevicesUseCase } from "../../application/use-cases/LogoutAllDevicesUseCase";
+import { DisableUserUseCase } from "../../application/use-cases/DisableUserUseCase";
 
 @injectable()
 export class UserController {
@@ -80,7 +81,9 @@ export class UserController {
         @inject(delay(() => GetLoginHistoryUseCase))
         private getLoginHistoryUseCase: GetLoginHistoryUseCase,
         @inject(delay(() => LogoutAllDevicesUseCase))
-        private logoutAllDevicesUseCase: LogoutAllDevicesUseCase
+        private logoutAllDevicesUseCase: LogoutAllDevicesUseCase,
+        @inject(delay(() => DisableUserUseCase))
+        private disableUserUseCase: DisableUserUseCase
     ) {}
 
     async getUser(id: string) {
@@ -189,5 +192,9 @@ export class UserController {
 
     async logoutAllDevices(userId: string) {
         return this.logoutAllDevicesUseCase.execute(userId);
+    }
+
+    async disableUser(userId: string, isDisabled: boolean) {
+        return this.disableUserUseCase.execute(userId, isDisabled);
     }
 }

@@ -74,7 +74,7 @@ export default function ProfilePage() {
             <ApiKeysForm userProfile={userProfile} />
             <SecuritySettingsForm userProfile={userProfile} />
             <ChangePasswordForm />
-            <TrustedDevicesList userId={userProfile.id} />
+            <TrustedDevicesList userId={userProfile.id} currentTokenVersion={(userProfile as any).tokenVersion} />
             <LoginHistoryList userId={userProfile.id} />
             <ApiTokenView />
 

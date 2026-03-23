@@ -3,9 +3,12 @@
 import { TableRow, TableCell } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Pencil, KeyRound } from 'lucide-react';
+import { Pencil, KeyRound, Lock, Unlock, Loader2 } from 'lucide-react';
 import Link from 'next/link';
-import { useQueryClient } from '@tanstack/react-query';
+import { useQueryClient, useMutation } from '@tanstack/react-query';
+import { container } from '@/infrastructure/di/container';
+import { AdminApiClient } from '@/modules/admin/adapters/api-client/AdminApiClient';
+import { toast } from '@/hooks';
 import { useAuth } from '@/context/AuthContext';
 import { userKeys } from '@/lib/query-keys';
 import { useLocalization } from '@/context/LocalizationContext';
@@ -23,6 +26,25 @@ export function UserTableRow({ user }: UserTableRowProps) {
   const queryClient = useQueryClient();
   const { firebaseUser } = useAuth();
   const sendPasswordResetMutation = useSendPasswordReset();
+
+  const toggleLockdownMutation = useMutation({
+    mutationFn: async ({ userId, isDisabled }: { userId: string, isDisabled: boolean }) => {
+      const client = container.resolve(AdminApiClient);
+      const result = await client.setUserDisabledStatus(userId, isDisabled);
+      if (result.isFailure) throw result.error;
+      return result.getValue();
+    },
+    onSuccess: (_, variables) => {
+      toast({ 
+        title: variables.isDisabled ? 'User Locked' : 'User Restored', 
+        description: `The user account has been ${variables.isDisabled ? 'disabled' : 'enabled'}.` 
+      });
+      queryClient.invalidateQueries({ queryKey: userKeys.all() });
+    },
+    onError: (error: any) => {
+      toast({ title: 'Operation Failed', description: error.message, variant: 'destructive' });
+    }
+  });
 
   async function prefetchUser(userId: string) {
     if (!firebaseUser) return;
@@ -45,7 +67,23 @@ export function UserTableRow({ user }: UserTableRowProps) {
       <TableCell><Badge variant={user.role === 'admin' ? 'default' : 'secondary'}>{t(`roles.${user.role}`)}</Badge></TableCell>
       <TableCell>{user.credits}</TableCell>
       <TableCell>{user.getFormattedDate()}</TableCell>
-      <TableCell className="text-right">
+      <TableCell className="text-right flex items-center justify-end gap-1">
+        <Button 
+          variant="ghost" 
+          size="icon" 
+          onClick={() => toggleLockdownMutation.mutate({ userId: user.id, isDisabled: !user.isDisabled })}
+          disabled={toggleLockdownMutation.isPending}
+          className={user.isDisabled ? "text-destructive" : "text-muted-foreground"}
+          title={user.isDisabled ? "Restore User" : "Lockdown User"}
+        >
+          {toggleLockdownMutation.isPending ? (
+            <Loader2 className="h-4 w-4 animate-spin" />
+          ) : user.isDisabled ? (
+            <Lock className="h-4 w-4" />
+          ) : (
+            <Unlock className="h-4 w-4" />
+          )}
+        </Button>
         <GiftCreditsDialog user={user} />
         <AlertDialog>
           <AlertDialogTrigger asChild><Button variant="ghost" size="icon"><KeyRound className="h-4 w-4" /><span className="sr-only">Reset Password</span></Button></AlertDialogTrigger>

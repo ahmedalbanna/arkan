@@ -7,13 +7,15 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Monitor, Smartphone, Globe, Clock, XCircle, Loader2 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { toast } from "@/hooks";
 
 interface TrustedDevicesListProps {
     userId: string;
+    currentTokenVersion?: number;
 }
 
-export function TrustedDevicesList({ userId }: TrustedDevicesListProps) {
+export function TrustedDevicesList({ userId, currentTokenVersion = 1 }: TrustedDevicesListProps) {
     const queryClient = useQueryClient();
     const { data: fingerprints, isLoading } = useQuery({
         queryKey: ['user-fingerprints', userId],
@@ -78,7 +80,12 @@ export function TrustedDevicesList({ userId }: TrustedDevicesListProps) {
                                     <span className="font-medium">
                                         {device.metadata.platform || 'Unknown Device'}
                                     </span>
-                                    <span className="text-xs text-muted-foreground flex items-center gap-1">
+                                    {device.tokenVersion === currentTokenVersion ? (
+                                        <Badge variant="outline" className="text-[10px] h-4 border-green-500 text-green-600 bg-green-50">Active Session</Badge>
+                                    ) : (
+                                        <Badge variant="outline" className="text-[10px] h-4 border-slate-300 text-slate-400 bg-slate-50">Invalidated</Badge>
+                                    )}
+                                    <span className="text-xs text-muted-foreground flex items-center gap-1 ml-auto">
                                         <Globe className="h-3 w-3" />
                                         {device.metadata.language}
                                     </span>

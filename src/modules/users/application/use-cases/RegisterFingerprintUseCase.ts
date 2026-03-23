@@ -1,6 +1,6 @@
 import { injectable } from "tsyringe";
 import { db } from "@/infrastructure/db";
-import { userFingerprints } from "@/infrastructure/db/schema";
+import { userFingerprints, users } from "@/infrastructure/db/schema";
 import { Result } from "@/lib/utils/result";
 import { UserError } from "../../domain/errors/UserErrors";
 import { eq, and } from "drizzle-orm";
@@ -12,6 +12,10 @@ export class RegisterFingerprintUseCase {
         try {
             const now = new Date().toISOString();
 
+            // Get user's current token version to tag this fingerprint
+            const user = await db.query.users.findFirst({ where: eq(users.id, userId) });
+            const tokenVersion = user?.tokenVersion || 1;
+
             // 1. Check if this specific fingerprint already exists for this user
             const existing = await db.query.userFingerprints.findFirst({
                 where: and(
@@ -21,9 +25,13 @@ export class RegisterFingerprintUseCase {
             });
 
             if (existing) {
-                // Update last used timestamp
+                // Update last used timestamp and token version
                 await db.update(userFingerprints)
-                    .set({ lastUsedAt: now, metadata: JSON.stringify(metadata) })
+                    .set({ 
+                        lastUsedAt: now, 
+                        metadata: JSON.stringify(metadata),
+                        tokenVersion
+                    })
                     .where(eq(userFingerprints.id, existing.id));
                 return Result.ok();
             }
@@ -35,6 +43,7 @@ export class RegisterFingerprintUseCase {
                 fingerprint,
                 lastUsedAt: now,
                 metadata: JSON.stringify(metadata),
+                tokenVersion
             });
 
             // 3. Optional: Logic to detect account sharing 

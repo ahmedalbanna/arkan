@@ -55,4 +55,18 @@ export class AdminApiClient {
             return Result.fail(error);
         }
     }
+
+    async setUserDisabledStatus(userId: string, isDisabled: boolean, token?: string): Promise<Result<void, ApiError>> {
+        try {
+            await apiService({
+                endpoint: `/api/admin/users/${userId}/disable`,
+                method: 'POST',
+                data: { isDisabled },
+                token
+            });
+            return Result.ok();
+        } catch (error: any) {
+            return Result.fail(error);
+        }
+    }
 }

@@ -84,7 +84,7 @@ if (typeof window === 'undefined') {
   const { SQLiteProjectRepository } = require("@/modules/projects/infrastructure/repositories/SQLiteProjectRepository");
   const { SQLiteUserRepository } = require("@/modules/users/infrastructure/repositories/SQLiteUserRepository");
   const { SQLiteAuthRepository } = require("@/modules/users/infrastructure/repositories/SQLiteAuthRepository");
-  const { FirebaseNotificationService } = require("@/modules/users/infrastructure/services/FirebaseNotificationService");
+  const { SQLiteNotificationService } = require("@/modules/users/infrastructure/services/SQLiteNotificationService");
   const { SQLiteGenerationLogRepository } = require("@/modules/ai/infrastructure/repositories/SQLiteGenerationLogRepository");
   const { SQLiteAgentRepository } = require("@/modules/ai/infrastructure/repositories/SQLiteAgentRepository");
   const { GenkitAiService } = require("@/modules/ai/infrastructure/services/GenkitAiService");
@@ -116,7 +116,7 @@ if (typeof window === 'undefined') {
   }, { lifecycle: Lifecycle.Singleton });
 
   container.register(INotificationServiceToken, {
-    useClass: FirebaseNotificationService
+    useClass: SQLiteNotificationService
   }, { lifecycle: Lifecycle.Singleton });
 
   container.register(IGenerationLogRepositoryToken, {

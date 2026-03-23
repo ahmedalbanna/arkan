@@ -24,6 +24,7 @@ export interface UserProfile {
     apiKeys?: Record<string, string>; // To store keys for services like 'gemini', 'chatgpt'
     lastDailyCreditUpdate?: string; // Timestamp for the last daily credit refresh
     securitySettings?: SecuritySettings;
+    isDisabled?: boolean;
 }
 
 // TeamMember is no longer needed
@@ -47,6 +48,7 @@ export class User {
     public apiKeys?: Record<string, string>;
     public readonly lastDailyCreditUpdate?: string;
     public securitySettings: SecuritySettings;
+    public isDisabled: boolean;
 
     constructor(props: UserProperties) {
         this.id = props.id || '';
@@ -62,6 +64,7 @@ export class User {
         this.apiKeys = props.apiKeys;
         this.lastDailyCreditUpdate = props.lastDailyCreditUpdate;
         this.securitySettings = props.securitySettings || { enableLoginAlerts: true };
+        this.isDisabled = !!props.isDisabled;
     }
 
     /**

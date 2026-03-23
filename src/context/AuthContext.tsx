@@ -33,6 +33,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       });
 
       if (response.authenticated && response.user) {
+        if (response.user.isDisabled) {
+            setUser(null);
+            setStoreUserProfile(null);
+            return null;
+        }
         const userInstance = new User(response.user);
         setUser(response.user);
         setStoreUserProfile(userInstance);

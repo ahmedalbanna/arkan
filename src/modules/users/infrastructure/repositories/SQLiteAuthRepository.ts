@@ -34,6 +34,8 @@ export class SQLiteAuthRepository implements IAuthRepository {
                 createdAt: now,
                 updatedAt: now,
                 credits: 10, // Default credits for new users
+                isDisabled: false,
+                tokenVersion: 1
             });
 
             return Result.ok({ uid, email: data.email });
@@ -88,6 +90,10 @@ export class SQLiteAuthRepository implements IAuthRepository {
 
             if (!user || (payload.version !== undefined && user.tokenVersion !== payload.version)) {
                 return Result.fail(UserError.unauthorized("Session has been invalidated. Please log in again."));
+            }
+
+            if (user.isDisabled) {
+                return Result.fail(UserError.unauthorized("Your account has been disabled."));
             }
 
             return Result.ok({ uid: payload.uid, email: payload.email });
@@ -189,6 +195,10 @@ export class SQLiteAuthRepository implements IAuthRepository {
 
             if (!user || !user.passwordHash) {
                 return Result.fail(UserError.unauthorized("Invalid email or password"));
+            }
+
+            if (user.isDisabled) {
+                return Result.fail(UserError.unauthorized("Your account has been disabled. Please contact support."));
             }
 
             const isValid = await AuthCrypto.comparePassword(password, user.passwordHash);

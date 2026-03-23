@@ -15,7 +15,8 @@ export const users = sqliteTable('users', {
   lastDailyCreditUpdate: text('last_daily_credit_update'),
   passwordHash: text('password_hash'),
   securitySettings: text('security_settings'), // JSON string for preferences
-  tokenVersion: integer('token_version').default(1).notNull(),
+  tokenVersion: integer('token_version').default(1),
+  isDisabled: integer('is_disabled', { mode: 'boolean' }).default(false),
 });
 
 export const projects = sqliteTable('projects', {
@@ -167,6 +168,7 @@ export const userFingerprints = sqliteTable('user_fingerprints', {
   fingerprint: text('fingerprint').notNull(),
   lastUsedAt: text('last_used_at').notNull(),
   metadata: text('metadata'), // JSON string of attributes
+  tokenVersion: integer('token_version'), // Version of the token used when this device was last registered
 });
 
 export const loginHistory = sqliteTable('login_history', {
@@ -177,4 +179,15 @@ export const loginHistory = sqliteTable('login_history', {
   location: text('location'),
   userAgent: text('user_agent'),
   fingerprint: text('fingerprint'),
+});
+
+export const notifications = sqliteTable('notifications', {
+  id: text('id').primaryKey(), // uuid
+  userId: text('user_id').notNull(),
+  title: text('title').notNull(),
+  description: text('description').notNull(),
+  type: text('type').$type<'info' | 'success' | 'warning' | 'alert' | 'error'>().default('info').notNull(),
+  link: text('link'),
+  isRead: integer('is_read', { mode: 'boolean' }).default(false).notNull(),
+  createdAt: text('created_at').notNull(),
 });
