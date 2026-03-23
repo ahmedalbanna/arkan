@@ -1,8 +1,8 @@
 import { injectable } from "tsyringe";
 import { db } from "@/infrastructure/db";
-import { users, generationLogs, transactions, agents, userFingerprints } from "@/infrastructure/db/schema";
+import { users, generationLogs, transactions, agents, userFingerprints, loginHistory } from "@/infrastructure/db/schema";
 import { IAdminStatsRepository, DashboardStats } from "../../domain/repositories/IAdminStatsRepository";
-import { count, eq, sql, desc, gte, and } from "drizzle-orm";
+import { count, eq, sql, desc, gte, and, like } from "drizzle-orm";
 
 @injectable()
 export class SQLiteAdminStatsRepository implements IAdminStatsRepository {
@@ -67,6 +67,21 @@ export class SQLiteAdminStatsRepository implements IAdminStatsRepository {
         .orderBy(desc(sql`count(distinct ${userFingerprints.fingerprint})`))
         .limit(10);
 
+        // Multi-country logins report
+        const multiCountryResult = await db.select({
+            userId: loginHistory.userId,
+            userName: users.name,
+            countries: sql`group_concat(distinct substr(${loginHistory.location}, instr(${loginHistory.location}, ',') + 2))`,
+            loginCount: count(loginHistory.id),
+        })
+        .from(loginHistory)
+        .leftJoin(users, eq(loginHistory.userId, users.id))
+        .where(like(loginHistory.location, '%, %')) // Ensure it's a "City, Country" format
+        .groupBy(loginHistory.userId)
+        .having(sql`count(distinct substr(${loginHistory.location}, instr(${loginHistory.location}, ',') + 2)) > 1`)
+        .orderBy(desc(count(loginHistory.id)))
+        .limit(10);
+
         // Fetch some recent activity
         const recentGenLogs = await db.query.generationLogs.findMany({
             orderBy: [desc(generationLogs.timestamp)],
@@ -122,6 +137,12 @@ export class SQLiteAdminStatsRepository implements IAdminStatsRepository {
                 userName: r.userName || 'Unknown User',
                 deviceCount: Number(r.deviceCount || 0),
                 lastLogin: r.lastLogin as string,
+            })),
+            multiCountryLogins: multiCountryResult.map(r => ({
+                userId: r.userId,
+                userName: r.userName || 'Unknown User',
+                countries: (r.countries as string || '').split(','),
+                loginCount: Number(r.loginCount || 0),
             }))
         };
     }

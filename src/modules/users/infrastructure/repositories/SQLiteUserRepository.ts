@@ -153,6 +153,7 @@ export class SQLiteUserRepository implements IUserRepository {
             ...user,
             apiKeys: user.apiKeys ? JSON.parse(user.apiKeys) : undefined,
             hasCompletedOnboarding: !!user.hasCompletedOnboarding,
+            securitySettings: user.securitySettings ? JSON.parse(user.securitySettings) : undefined,
         };
     }
 
@@ -161,6 +162,7 @@ export class SQLiteUserRepository implements IUserRepository {
             ...user,
             apiKeys: user.apiKeys ? JSON.stringify(user.apiKeys) : null,
             hasCompletedOnboarding: user.hasCompletedOnboarding ? 1 : 0,
+            securitySettings: user.securitySettings ? JSON.stringify(user.securitySettings) : null,
         };
     }
 
@@ -168,6 +170,7 @@ export class SQLiteUserRepository implements IUserRepository {
         const data: any = { ...user };
         if (user.apiKeys) data.apiKeys = JSON.stringify(user.apiKeys);
         if (user.hasCompletedOnboarding !== undefined) data.hasCompletedOnboarding = user.hasCompletedOnboarding ? 1 : 0;
+        if (user.securitySettings) data.securitySettings = JSON.stringify(user.securitySettings);
         return data;
     }
 }

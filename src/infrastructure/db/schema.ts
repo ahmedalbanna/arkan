@@ -14,6 +14,7 @@ export const users = sqliteTable('users', {
   apiKeys: text('api_keys'), // JSON
   lastDailyCreditUpdate: text('last_daily_credit_update'),
   passwordHash: text('password_hash'),
+  securitySettings: text('security_settings'), // JSON string for preferences
 });
 
 export const projects = sqliteTable('projects', {

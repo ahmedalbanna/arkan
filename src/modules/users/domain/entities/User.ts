@@ -6,6 +6,10 @@ import { format } from "date-fns";
 
 export type UserRole = 'admin' | 'user'; // Removed team-specific roles
 
+export interface SecuritySettings {
+    enableLoginAlerts: boolean;
+}
+
 export interface UserProfile {
     id: string;
     name: string;
@@ -19,6 +23,7 @@ export interface UserProfile {
     hasCompletedOnboarding?: boolean;
     apiKeys?: Record<string, string>; // To store keys for services like 'gemini', 'chatgpt'
     lastDailyCreditUpdate?: string; // Timestamp for the last daily credit refresh
+    securitySettings?: SecuritySettings;
 }
 
 // TeamMember is no longer needed
@@ -41,6 +46,7 @@ export class User {
     public hasCompletedOnboarding?: boolean;
     public apiKeys?: Record<string, string>;
     public readonly lastDailyCreditUpdate?: string;
+    public securitySettings: SecuritySettings;
 
     constructor(props: UserProperties) {
         this.id = props.id || '';
@@ -55,6 +61,7 @@ export class User {
         this.hasCompletedOnboarding = props.hasCompletedOnboarding;
         this.apiKeys = props.apiKeys;
         this.lastDailyCreditUpdate = props.lastDailyCreditUpdate;
+        this.securitySettings = props.securitySettings || { enableLoginAlerts: true };
     }
 
     /**

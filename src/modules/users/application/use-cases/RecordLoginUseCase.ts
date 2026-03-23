@@ -51,7 +51,9 @@ export class RecordLoginUseCase {
                     where: eq(users.id, params.userId),
                 });
 
-                if (user?.email) {
+                const securitySettings = user?.securitySettings ? JSON.parse(user.securitySettings) : { enableLoginAlerts: true };
+
+                if (user?.email && securitySettings.enableLoginAlerts) {
                     await this.emailService.sendLoginAlert({
                         email: user.email,
                         ip: params.ip || 'Unknown',

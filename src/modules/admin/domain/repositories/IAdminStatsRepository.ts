@@ -27,6 +27,12 @@ export interface DashboardStats {
         deviceCount: number;
         lastLogin: string;
     }[];
+    multiCountryLogins?: {
+        userId: string;
+        userName: string;
+        countries: string[];
+        loginCount: number;
+    }[];
 }
 
 export interface IAdminStatsRepository {

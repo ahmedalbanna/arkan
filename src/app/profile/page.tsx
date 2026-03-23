@@ -13,6 +13,7 @@ import { ApiKeysForm } from './ApiKeysForm';
 import { GuestProfilePage } from '@/components/auth/GuestProfilePage';
 import { TrustedDevicesList } from './TrustedDevicesList';
 import { LoginHistoryList } from './LoginHistoryList';
+import { SecuritySettingsForm } from './SecuritySettingsForm';
 
 function ProfileSkeleton() {
     return (
@@ -71,6 +72,7 @@ export default function ProfilePage() {
 
             <UpdateProfileForm userProfile={userProfile} />
             <ApiKeysForm userProfile={userProfile} />
+            <SecuritySettingsForm userProfile={userProfile} />
             <ChangePasswordForm />
             <TrustedDevicesList userId={userProfile.id} />
             <LoginHistoryList userId={userProfile.id} />
