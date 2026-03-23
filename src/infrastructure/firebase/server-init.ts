@@ -18,7 +18,6 @@ if (!admin.apps.length) {
           clientEmail: firebaseAdminConfig.clientEmail,
           privateKey: firebaseAdminConfig.privateKey,
         }),
-        databaseURL: process.env.NEXT_PUBLIC_FIREBASE_DATABASE_URL,
         storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
       });
       console.log("Firebase Admin SDK initialized using environment variables.");
@@ -30,7 +29,6 @@ if (!admin.apps.length) {
         const serviceAccount = require('../../../docudec-firebase-adminsdk-2maa7-d07a19d3fc.json');
         admin.initializeApp({
             credential: admin.credential.cert(serviceAccount),
-            databaseURL: process.env.NEXT_PUBLIC_FIREBASE_DATABASE_URL,
             storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
         });
         console.log("Firebase Admin SDK initialized using local service account file.");
@@ -46,4 +44,3 @@ if (!admin.apps.length) {
 // Export the initialized admin services.
 export const adminAuth = admin.apps.length ? admin.auth() : {} as admin.auth.Auth;
 export const adminDb = admin.apps.length ? admin.firestore() : {} as admin.firestore.Firestore;
-export const adminRealtimeDb = admin.apps.length ? admin.database() : {} as admin.database.Database;

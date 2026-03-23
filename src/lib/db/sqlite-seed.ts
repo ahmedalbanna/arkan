@@ -5,8 +5,10 @@ import {
     agents, 
     agentCategories, 
     features, 
-    templates 
+    templates,
+    users
 } from "@/infrastructure/db/schema";
+import { AuthCrypto } from "@/lib/utils/auth-crypto";
 import { defaultBankAccounts } from '@/lib/db/seed-data/bank-accounts';
 import { defaultPaymentMethods } from '@/lib/db/seed-data/payment-methods';
 import { defaultFeatures } from '@/lib/db/seed-data/features';
@@ -20,6 +22,46 @@ async function seed() {
     console.log("Starting SQLite seeding process...");
 
     try {
+        // --- Users (Auth) ---
+        console.log("Seeding test users...");
+        const adminPasswordHash = await AuthCrypto.hashPassword('admin123');
+        const userPasswordHash = await AuthCrypto.hashPassword('user123');
+
+        await db.insert(users).values([
+            {
+                id: 'admin-user-id',
+                name: 'Admin User',
+                email: 'admin@arkan.com',
+                passwordHash: adminPasswordHash,
+                role: 'admin',
+                credits: 9999,
+                createdAt: new Date().toISOString(),
+                updatedAt: new Date().toISOString(),
+                hasCompletedOnboarding: true,
+                tokenVersion: 1,
+                isDisabled: false
+            },
+            {
+                id: 'normal-user-id',
+                name: 'Normal User',
+                email: 'user@arkan.com',
+                passwordHash: userPasswordHash,
+                role: 'user',
+                credits: 50,
+                createdAt: new Date().toISOString(),
+                updatedAt: new Date().toISOString(),
+                hasCompletedOnboarding: true,
+                tokenVersion: 1,
+                isDisabled: false
+            }
+        ]).onConflictDoUpdate({
+            target: users.id,
+            set: {
+                passwordHash: adminPasswordHash,
+                updatedAt: new Date().toISOString(),
+            }
+        });
+
         // --- Settings ---
         console.log("Seeding default settings...");
         await db.insert(settings).values({
