@@ -46,7 +46,15 @@ export async function POST(request: Request) {
 
     const { token, user } = result.getValue();
 
-    // 2. Register Fingerprint if provided
+    // 2. Record Login History
+    await controller.recordLogin({
+        userId: user.uid,
+        ip,
+        userAgent: headersList.get('user-agent') || 'unknown',
+        fingerprint: fingerprint || null
+    });
+
+    // 3. Register Fingerprint if provided
     if (fingerprint && fingerprintData) {
         await controller.registerFingerprint(user.uid, fingerprint, fingerprintData);
     }

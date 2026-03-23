@@ -12,6 +12,7 @@ import { ApiTokenView } from './ApiTokenView';
 import { ApiKeysForm } from './ApiKeysForm';
 import { GuestProfilePage } from '@/components/auth/GuestProfilePage';
 import { TrustedDevicesList } from './TrustedDevicesList';
+import { LoginHistoryList } from './LoginHistoryList';
 
 function ProfileSkeleton() {
     return (
@@ -72,6 +73,7 @@ export default function ProfilePage() {
             <ApiKeysForm userProfile={userProfile} />
             <ChangePasswordForm />
             <TrustedDevicesList userId={userProfile.id} />
+            <LoginHistoryList userId={userProfile.id} />
             <ApiTokenView />
 
         </div>

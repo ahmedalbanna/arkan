@@ -16,6 +16,7 @@ import {
     TestTube,
     BookOpen,
     Palette,
+    ShieldAlert,
 } from 'lucide-react';
 
 export interface NavLink {
@@ -27,6 +28,7 @@ export interface NavLink {
 
 export const navConfig: NavLink[] = [
     { href: '/admin/dashboard', labelKey: 'adminDashboard.pageTitle', icon: LayoutDashboard },
+    { href: '/admin/account-sharing', labelKey: 'Account Sharing', icon: ShieldAlert },
     { href: '/admin/rag-monitor', labelKey: 'RAG Monitor', icon: Activity },
     { href: '/admin/document-indexer', labelKey: 'Document Indexer', icon: Upload },
     { href: '/admin/rag-tester', labelKey: 'RAG Query Tester', icon: TestTube },

@@ -22,6 +22,8 @@ import { ChangePasswordUseCase } from "../../application/use-cases/ChangePasswor
 import { RegisterFingerprintUseCase } from "../../application/use-cases/RegisterFingerprintUseCase";
 import { GetUserFingerprintsUseCase } from "../../application/use-cases/GetUserFingerprintsUseCase";
 import { RevokeFingerprintUseCase } from "../../application/use-cases/RevokeFingerprintUseCase";
+import { RecordLoginUseCase } from "../../application/use-cases/RecordLoginUseCase";
+import { GetLoginHistoryUseCase } from "../../application/use-cases/GetLoginHistoryUseCase";
 
 @injectable()
 export class UserController {
@@ -71,7 +73,11 @@ export class UserController {
         @inject(delay(() => GetUserFingerprintsUseCase))
         private getUserFingerprintsUseCase: GetUserFingerprintsUseCase,
         @inject(delay(() => RevokeFingerprintUseCase))
-        private revokeFingerprintUseCase: RevokeFingerprintUseCase
+        private revokeFingerprintUseCase: RevokeFingerprintUseCase,
+        @inject(delay(() => RecordLoginUseCase))
+        private recordLoginUseCase: RecordLoginUseCase,
+        @inject(delay(() => GetLoginHistoryUseCase))
+        private getLoginHistoryUseCase: GetLoginHistoryUseCase
     ) {}
 
     async getUser(id: string) {
@@ -168,5 +174,13 @@ export class UserController {
 
     async revokeFingerprint(userId: string, fingerprintId: string) {
         return this.revokeFingerprintUseCase.execute(userId, fingerprintId);
+    }
+
+    async recordLogin(params: any) {
+        return this.recordLoginUseCase.execute(params);
+    }
+
+    async getLoginHistory(userId: string) {
+        return this.getLoginHistoryUseCase.execute(userId);
     }
 }

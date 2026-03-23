@@ -40,7 +40,18 @@ export async function POST(req: Request) {
         const signupValue = result.getValue() as any;
         const userId = signupValue.uid || signupValue.user?.uid;
 
-        // 2. Register Fingerprint if provided
+        // 2. Record Login History (Initial registration)
+        if (userId) {
+            const headersList = await import('next/headers').then(h => h.headers());
+            await controller.recordLogin({
+                userId,
+                ip: headersList.get('x-forwarded-for') || '127.0.0.1',
+                userAgent: headersList.get('user-agent') || 'unknown',
+                fingerprint: fingerprint || null
+            });
+        }
+
+        // 3. Register Fingerprint if provided
         if (fingerprint && fingerprintData && userId) {
             await controller.registerFingerprint(userId, fingerprint, fingerprintData);
         }

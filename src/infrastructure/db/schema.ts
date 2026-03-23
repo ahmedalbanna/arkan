@@ -166,3 +166,12 @@ export const userFingerprints = sqliteTable('user_fingerprints', {
   lastUsedAt: text('last_used_at').notNull(),
   metadata: text('metadata'), // JSON string of attributes
 });
+
+export const loginHistory = sqliteTable('login_history', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  userId: text('user_id').notNull(),
+  timestamp: text('timestamp').notNull(),
+  ip: text('ip'),
+  userAgent: text('user_agent'),
+  fingerprint: text('fingerprint'),
+});
