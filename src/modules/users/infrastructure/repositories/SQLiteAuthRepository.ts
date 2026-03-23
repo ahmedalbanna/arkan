@@ -5,7 +5,7 @@ import { IAuthRepository } from "../../domain/repositories/IAuthRepository";
 import { Result } from "@/lib/utils/result";
 import { UserError } from "../../domain/errors/UserErrors";
 import { AuthCrypto } from "@/lib/utils/auth-crypto";
-import { eq, and } from "drizzle-orm";
+import { eq, and, sql } from "drizzle-orm";
 import { v4 as uuidv4 } from "uuid";
 
 @injectable()
@@ -80,6 +80,16 @@ export class SQLiteAuthRepository implements IAuthRepository {
             if (!payload) {
                 return Result.fail(UserError.unauthorized("Invalid or expired token"));
             }
+
+            // SQLite specific: Check if token version matches the current user's version
+            const user = await db.query.users.findFirst({
+                where: eq(users.id, payload.uid),
+            });
+
+            if (!user || (payload.version !== undefined && user.tokenVersion !== payload.version)) {
+                return Result.fail(UserError.unauthorized("Session has been invalidated. Please log in again."));
+            }
+
             return Result.ok({ uid: payload.uid, email: payload.email });
         } catch (error: any) {
             return Result.fail(UserError.unauthorized(error.message));
@@ -186,11 +196,29 @@ export class SQLiteAuthRepository implements IAuthRepository {
                 return Result.fail(UserError.unauthorized("Invalid email or password"));
             }
 
-            const token = await AuthCrypto.createToken({ uid: user.id, email: user.email });
+            const token = await AuthCrypto.createToken({ 
+                uid: user.id, 
+                email: user.email, 
+                version: user.tokenVersion 
+            });
             return Result.ok({
                 token,
                 user: { uid: user.id, email: user.email, name: user.name }
             });
+        } catch (error: any) {
+            return Result.fail(UserError.internal(error.message));
+        }
+    }
+
+    async revokeAllSessions(userId: string): Promise<Result<void, UserError>> {
+        try {
+            await db.update(users)
+                .set({ 
+                    tokenVersion: sql`${users.tokenVersion} + 1`,
+                    updatedAt: new Date().toISOString()
+                })
+                .where(eq(users.id, userId));
+            return Result.ok();
         } catch (error: any) {
             return Result.fail(UserError.internal(error.message));
         }

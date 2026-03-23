@@ -157,3 +157,25 @@ export function useChangePassword() {
       onError: (error) => handleErrorUtility(error, 'Password Change Failed'),
     });
 }
+
+export function useLogoutAllDevices() {
+    const { toast } = useToast();
+    const queryClient = useQueryClient();
+    
+    return useMutation({
+      mutationFn: async () => {
+          const result = await container.resolve(AuthApiClient).logoutAllDevicesApi();
+          if (result.isFailure) throw result.error;
+          return result.getValue();
+      },
+      onSuccess: () => {
+          toast({
+              title: 'Sessions Invalidated',
+              description: 'You have been logged out of all devices.',
+          });
+          queryClient.clear();
+          window.location.href = '/login';
+      },
+      onError: (error) => handleErrorUtility(error, 'Global Logout Failed'),
+    });
+}

@@ -26,7 +26,7 @@ export class AuthCrypto {
   /**
    * Generates a signed JWT.
    */
-  static async createToken(payload: { uid: string; email?: string }, expiresIn: string | number = '7d'): Promise<string> {
+  static async createToken(payload: { uid: string; email?: string; version?: number }, expiresIn: string | number = '7d'): Promise<string> {
     return new jose.SignJWT(payload)
       .setProtectedHeader({ alg: ALG })
       .setIssuedAt()
@@ -37,12 +37,12 @@ export class AuthCrypto {
   /**
    * Verifies and decodes a JWT.
    */
-  static async verifyToken(token: string): Promise<{ uid: string; email?: string } | null> {
+  static async verifyToken(token: string): Promise<{ uid: string; email?: string; version?: number } | null> {
     try {
       const { payload } = await jose.jwtVerify(token, JWT_SECRET, {
         algorithms: [ALG],
       });
-      return payload as { uid: string; email?: string };
+      return payload as { uid: string; email?: string; version?: number };
     } catch (error) {
       return null;
     }

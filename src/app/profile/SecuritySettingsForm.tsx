@@ -8,7 +8,8 @@ import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks';
 import { User, SecuritySettings } from '@/modules/users/domain/entities/User';
 import { apiService } from '@/infrastructure/api/ApiService';
-import { ShieldCheck, Mail, Loader2 } from 'lucide-react';
+import { ShieldCheck, Mail, Loader2, LogOut } from 'lucide-react';
+import { useLogoutAllDevices } from '@/hooks/auth/use-auth-mutations';
 
 interface SecuritySettingsFormProps {
     userProfile: User;
@@ -17,6 +18,7 @@ interface SecuritySettingsFormProps {
 export function SecuritySettingsForm({ userProfile }: SecuritySettingsFormProps) {
     const { toast } = useToast();
     const [isLoading, setIsLoading] = useState(false);
+    const logoutAllMutation = useLogoutAllDevices();
     const [settings, setSettings] = useState<SecuritySettings>(
         userProfile.securitySettings || { enableLoginAlerts: true }
     );
@@ -68,6 +70,30 @@ export function SecuritySettingsForm({ userProfile }: SecuritySettingsFormProps)
                             onCheckedChange={handleToggleAlerts}
                             disabled={isLoading}
                         />
+                    </div>
+                </div>
+
+                <div className="pt-4 border-t">
+                    <div className="space-y-4">
+                        <div className="space-y-1">
+                            <h4 className="text-sm font-medium">Session Management</h4>
+                            <p className="text-sm text-muted-foreground">
+                                If you suspect your account is being used by someone else, you can force a logout on all your active devices.
+                            </p>
+                        </div>
+                        <Button 
+                            variant="destructive" 
+                            className="w-full sm:w-auto"
+                            onClick={() => logoutAllMutation.mutate()}
+                            disabled={logoutAllMutation.isPending}
+                        >
+                            {logoutAllMutation.isPending ? (
+                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                            ) : (
+                                <LogOut className="mr-2 h-4 w-4" />
+                            )}
+                            Force Logout All Devices
+                        </Button>
                     </div>
                 </div>
             </CardContent>

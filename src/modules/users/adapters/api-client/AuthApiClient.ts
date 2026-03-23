@@ -97,6 +97,18 @@ export class AuthApiClient {
         }
     }
 
+    async logoutAllDevicesApi(): Promise<Result<any, ApiError>> {
+        try {
+            const data = await apiService({
+                endpoint: '/api/auth/logout-all',
+                method: 'POST'
+            });
+            return Result.ok(data);
+        } catch (error: any) {
+            return Result.fail(error);
+        }
+    }
+
     async sendPasswordResetEmailApi(userId: string, token: string): Promise<Result<any, ApiError>> {
         try {
             const data = await apiService({

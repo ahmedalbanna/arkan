@@ -1,11 +1,16 @@
-import { injectable } from "tsyringe";
+import { inject, injectable } from "tsyringe";
 import { db } from "@/infrastructure/db";
 import { users, generationLogs, transactions, agents, userFingerprints, loginHistory } from "@/infrastructure/db/schema";
 import { IAdminStatsRepository, DashboardStats } from "../../domain/repositories/IAdminStatsRepository";
 import { count, eq, sql, desc, gte, and, like } from "drizzle-orm";
+import { type INotificationService, INotificationServiceToken } from "@/modules/users/domain/services/INotificationService";
 
 @injectable()
 export class SQLiteAdminStatsRepository implements IAdminStatsRepository {
+    constructor(
+        @inject(INotificationServiceToken)
+        private notificationService: INotificationService
+    ) {}
     async getDashboardStats(): Promise<DashboardStats> {
         const [userCountResult] = await db.select({ count: count() }).from(users);
         const [genLogCountResult] = await db.select({ count: count() }).from(generationLogs);
@@ -66,6 +71,19 @@ export class SQLiteAdminStatsRepository implements IAdminStatsRepository {
         .having(sql`count(distinct ${userFingerprints.fingerprint}) > 3`)
         .orderBy(desc(sql`count(distinct ${userFingerprints.fingerprint})`))
         .limit(10);
+
+        // Notify Admins about Critical Risks (> 10 devices)
+        const criticalRiskUsers = accountSharingResult.filter(r => Number(r.deviceCount) > 10);
+        if (criticalRiskUsers.length > 0) {
+            const admins = await db.query.users.findMany({ where: eq(users.role, 'admin') });
+            for (const admin of admins) {
+                await this.notificationService.send(admin.id, {
+                    title: 'Security Alert: Critical Account Sharing',
+                    description: `${criticalRiskUsers.length} user(s) detected with over 10 unique devices.`,
+                    link: '/admin/account-sharing'
+                });
+            }
+        }
 
         // Multi-country logins report
         const multiCountryResult = await db.select({

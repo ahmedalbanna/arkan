@@ -15,6 +15,7 @@ export const users = sqliteTable('users', {
   lastDailyCreditUpdate: text('last_daily_credit_update'),
   passwordHash: text('password_hash'),
   securitySettings: text('security_settings'), // JSON string for preferences
+  tokenVersion: integer('token_version').default(1).notNull(),
 });
 
 export const projects = sqliteTable('projects', {
