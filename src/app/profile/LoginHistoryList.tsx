@@ -55,6 +55,7 @@ export function LoginHistoryList({ userId }: LoginHistoryListProps) {
                     <TableHeader>
                         <TableRow>
                             <TableHead>Date & Time</TableHead>
+                            <TableHead>Location</TableHead>
                             <TableHead>IP Address</TableHead>
                             <TableHead className="hidden md:table-cell">Device / Browser</TableHead>
                         </TableRow>
@@ -68,7 +69,10 @@ export function LoginHistoryList({ userId }: LoginHistoryListProps) {
                                         {new Date(entry.timestamp).toLocaleString()}
                                     </div>
                                 </TableCell>
-                                <TableCell>{entry.ip}</TableCell>
+                                <TableCell className="text-sm">
+                                    {entry.location || 'Unknown'}
+                                </TableCell>
+                                <TableCell className="text-sm font-mono">{entry.ip}</TableCell>
                                 <TableCell className="text-xs text-muted-foreground hidden md:table-cell max-w-[200px] truncate">
                                     {entry.userAgent}
                                 </TableCell>

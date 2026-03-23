@@ -172,6 +172,7 @@ export const loginHistory = sqliteTable('login_history', {
   userId: text('user_id').notNull(),
   timestamp: text('timestamp').notNull(),
   ip: text('ip'),
+  location: text('location'),
   userAgent: text('user_agent'),
   fingerprint: text('fingerprint'),
 });
