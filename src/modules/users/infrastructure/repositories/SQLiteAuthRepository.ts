@@ -209,7 +209,7 @@ export class SQLiteAuthRepository implements IAuthRepository {
             const token = await AuthCrypto.createToken({ 
                 uid: user.id, 
                 email: user.email, 
-                version: user.tokenVersion 
+                version: user.tokenVersion ?? undefined
             });
             return Result.ok({
                 token,

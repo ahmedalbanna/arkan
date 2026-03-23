@@ -9,6 +9,7 @@ import { RecentActivity } from './RecentActivity';
 import { UserRetentionReport } from './UserRetentionReport';
 import { AccountSharingAlert } from './AccountSharingAlert';
 import { MultiCountryAlert } from './MultiCountryAlert';
+import { SecurityAuditLog } from './SecurityAuditLog';
 import { useLocalization } from '@/context/LocalizationContext';
 import { DashboardSkeleton } from './skeletons';
 
@@ -55,6 +56,8 @@ export default function Dashboard() {
             {data?.multiCountryLogins && data.multiCountryLogins.length > 0 && (
                 <MultiCountryAlert report={data.multiCountryLogins} />
             )}
+
+            <SecurityAuditLog />
         </div>
     );
 }

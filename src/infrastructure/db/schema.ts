@@ -191,3 +191,13 @@ export const notifications = sqliteTable('notifications', {
   isRead: integer('is_read', { mode: 'boolean' }).default(false).notNull(),
   createdAt: text('created_at').notNull(),
 });
+
+export const securityAuditLogs = sqliteTable('security_audit_logs', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  userId: text('user_id').notNull(),
+  action: text('action').$type<'lockdown' | 'restore' | 'session_revocation' | 'password_change'>().notNull(),
+  details: text('details'),
+  adminId: text('admin_id'),
+  timestamp: text('timestamp').notNull(),
+  ip: text('ip'),
+});

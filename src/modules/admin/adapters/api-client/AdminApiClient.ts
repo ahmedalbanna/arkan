@@ -69,4 +69,16 @@ export class AdminApiClient {
             return Result.fail(error);
         }
     }
+
+    async fetchSecurityAuditLogs(token?: string): Promise<Result<any[], ApiError>> {
+        try {
+            const data = await apiService<never, any[]>({ 
+                endpoint: '/api/admin/security-audit-logs',
+                token
+            });
+            return Result.ok(data);
+        } catch (error: any) {
+            return Result.fail(error);
+        }
+    }
 }

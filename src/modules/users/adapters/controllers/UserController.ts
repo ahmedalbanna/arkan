@@ -26,6 +26,8 @@ import { RecordLoginUseCase } from "../../application/use-cases/RecordLoginUseCa
 import { GetLoginHistoryUseCase } from "../../application/use-cases/GetLoginHistoryUseCase";
 import { LogoutAllDevicesUseCase } from "../../application/use-cases/LogoutAllDevicesUseCase";
 import { DisableUserUseCase } from "../../application/use-cases/DisableUserUseCase";
+import { LogSecurityEventUseCase } from "../../application/use-cases/LogSecurityEventUseCase";
+import { GetSecurityAuditLogsUseCase } from "../../application/use-cases/GetSecurityAuditLogsUseCase";
 
 @injectable()
 export class UserController {
@@ -83,7 +85,11 @@ export class UserController {
         @inject(delay(() => LogoutAllDevicesUseCase))
         private logoutAllDevicesUseCase: LogoutAllDevicesUseCase,
         @inject(delay(() => DisableUserUseCase))
-        private disableUserUseCase: DisableUserUseCase
+        private disableUserUseCase: DisableUserUseCase,
+        @inject(delay(() => LogSecurityEventUseCase))
+        private logSecurityEventUseCase: LogSecurityEventUseCase,
+        @inject(delay(() => GetSecurityAuditLogsUseCase))
+        private getSecurityAuditLogsUseCase: GetSecurityAuditLogsUseCase
     ) {}
 
     async getUser(id: string) {
@@ -196,5 +202,13 @@ export class UserController {
 
     async disableUser(userId: string, isDisabled: boolean) {
         return this.disableUserUseCase.execute(userId, isDisabled);
+    }
+
+    async logSecurityEvent(params: any) {
+        return this.logSecurityEventUseCase.execute(params);
+    }
+
+    async getSecurityAuditLogs() {
+        return this.getSecurityAuditLogsUseCase.execute();
     }
 }

@@ -7,12 +7,14 @@ import { AuthCrypto } from "@/lib/utils/auth-crypto";
 import { db } from "@/infrastructure/db";
 import { users } from "@/infrastructure/db/schema";
 import { eq } from "drizzle-orm";
+import { type LogSecurityEventUseCase } from "./LogSecurityEventUseCase";
 
 @injectable()
 export class ChangePasswordUseCase {
     constructor(
         @inject(IAuthRepositoryToken)
-        private authRepository: IAuthRepository
+        private authRepository: IAuthRepository,
+        private logSecurityEventUseCase: LogSecurityEventUseCase
     ) {}
 
     async execute(userId: string, currentPassword: string, newPassword: string): Promise<Result<void, UserError>> {
@@ -37,7 +39,17 @@ export class ChangePasswordUseCase {
             }
 
             // 2. Update to new password
-            return await this.authRepository.updatePassword(userId, newPassword);
+            const result = await this.authRepository.updatePassword(userId, newPassword);
+            
+            if (result.isSuccess) {
+                await this.logSecurityEventUseCase.execute({
+                    userId,
+                    action: 'password_change',
+                    details: 'User successfully updated their account password.'
+                });
+            }
+            
+            return result;
         } catch (error: any) {
             return Result.fail(UserError.internal(error.message));
         }
