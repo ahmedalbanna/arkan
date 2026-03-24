@@ -14,6 +14,7 @@ import { userKeys } from '@/lib/query-keys';
 import { useLocalization } from '@/context/LocalizationContext';
 import { User } from '@/modules/users/domain/entities/User';
 import { GiftCreditsDialog } from '../payments/GiftCreditsDialog';
+import { AdminNotificationDialog } from './AdminNotificationDialog';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { useSendPasswordReset } from '@/hooks';
 import { UserApiClient } from '@/modules/users/adapters/api-client/UserApiClient';
@@ -83,6 +84,7 @@ export function UserTableRow({ user }: UserTableRowProps) {
             <Unlock className="h-4 w-4" />
           )}
         </Button>
+        <AdminNotificationDialog user={user} />
         <GiftCreditsDialog user={user} />
         <AlertDialog>
           <AlertDialogTrigger asChild><Button variant="ghost" size="icon"><KeyRound className="h-4 w-4" /><span className="sr-only">Reset Password</span></Button></AlertDialogTrigger>

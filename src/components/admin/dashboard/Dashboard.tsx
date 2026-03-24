@@ -7,6 +7,7 @@ import { StatCard } from './StatCard';
 import { AgentUsageChart } from './AgentUsageChart';
 import { RecentActivity } from './RecentActivity';
 import { UserRetentionReport } from './UserRetentionReport';
+import { ScheduledNotificationsList } from './ScheduledNotificationsList';
 import { AccountSharingAlert } from './AccountSharingAlert';
 import { MultiCountryAlert } from './MultiCountryAlert';
 import { SecurityAuditLog } from './SecurityAuditLog';
@@ -58,6 +59,10 @@ export default function Dashboard() {
             )}
 
             <SecurityAuditLog />
+
+            <div className="mt-8">
+                <ScheduledNotificationsList />
+            </div>
         </div>
     );
 }

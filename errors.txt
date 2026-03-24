@@ -1,24 +1,51 @@
 ## Error Type
-Runtime RangeError
+Runtime TypeError
 
 ## Error Message
-Invalid time value
+Cannot read properties of undefined (reading 'id')
 
 
-    at <unknown> (src/components/shared/NotificationDropdown.tsx:104:94)
+    at <unknown> (src/components/admin/payments/TransactionList.tsx:75:55)
     at Array.map (<anonymous>:null:null)
-    at NotificationDropdown (src/components/shared/NotificationDropdown.tsx:92:38)
-    at AuthActions (src/components/shared/Header.tsx:79:7)
-    at Header (src/components/shared/Header.tsx:122:15)
-    at RootLayout (src/app/layout.tsx:139:15)
+    at TransactionList (src/components/admin/payments/TransactionList.tsx:74:34)
+    at PaymentVerificationConsole (src/components/admin/payments/PaymentVerificationConsole.tsx:28:29)
+    at ManagePaymentsPage (src/app/admin/manage-payments/page.tsx:19:7)
 
 ## Code Frame
-  102 |                     <p className="font-semibold">{notification.title}</p>
-  103 |                     <p className="text-xs text-muted-foreground">{notification.description}</p>
-> 104 |                     <p className="text-xs text-muted-foreground/80 mt-1">{formatDistanceToNow(new Date(notification.createdAt), { addSuffix: true })}</p>
-      |                                                                                              ^
-  105 |                   </div>
-  106 |                 </div>
-  107 |               </DropdownMenuItem>
+  73 |             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+  74 |                 {allTransactions.map((transaction: Transaction) => (
+> 75 |                     <TransactionCard key={transaction.id} transaction={transaction} />
+     |                                                       ^
+  76 |                 ))}
+  77 |             </div>
+  78 |             {hasNextPage && (
+
+Next.js version: 15.5.9 (Turbopack)
+
+---
+
+## Error Type
+Runtime TypeError
+
+## Error Message
+template.content.map is not a function
+
+
+    at TemplatePreview.useMemo[tocMarkdown] (src/components/report-mode/templates/ApplyTemplatePanel.tsx:40:29)
+    at TemplatePreview (src/components/report-mode/templates/ApplyTemplatePanel.tsx:38:30)
+    at ApplyTemplatePanel (src/components/report-mode/templates/ApplyTemplatePanel.tsx:86:7)
+    at useReportGenerator.useMemo[panels] (src/hooks/report-mode/useReportGenerator.ts:50:24)
+    at useReportGenerator (src/hooks/report-mode/useReportGenerator.ts:33:25)
+    at ReportModeGenerator (src/components/report-mode/ReportModeGenerator.tsx:84:27)
+    at GeneratePage (src/app/builder/page.tsx:12:7)
+
+## Code Frame
+  38 |   const tocMarkdown = useMemo(() => {
+  39 |     if (!template.content) return '';
+> 40 |     return template.content.map(chapter =>
+     |                             ^
+  41 |       `# ${chapter.title}\n${(chapter.sections || []).map(section => `  - ${section.title}`).join('\n')}`
+  42 |     ).join('\n\n');
+  43 |   }, [template]);
 
 Next.js version: 15.5.9 (Turbopack)

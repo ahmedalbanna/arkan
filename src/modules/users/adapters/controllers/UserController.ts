@@ -1,4 +1,4 @@
-import { inject, injectable, delay } from "tsyringe";
+import { inject, injectable, delay, container } from "tsyringe";
 import { GetUserProfileUseCase } from "../../application/use-cases/GetUserProfileUseCase";
 import { UpdateUserProfileUseCase } from "../../application/use-cases/UpdateUserProfileUseCase";
 import { GetPaginatedUsersUseCase } from "../../application/use-cases/GetPaginatedUsersUseCase";
@@ -16,6 +16,7 @@ import { CreateSessionUseCase } from "../../application/use-cases/CreateSessionU
 import { GetNotificationsUseCase } from "../../application/use-cases/GetNotificationsUseCase";
 import { SendNotificationUseCase } from "../../application/use-cases/SendNotificationUseCase";
 import { VerifySessionUseCase } from "../../application/use-cases/VerifySessionUseCase";
+import { INotificationService, INotificationServiceToken } from "../../domain/services/INotificationService";
 import { LoginUseCase } from "../../application/use-cases/LoginUseCase";
 import { SendPasswordResetUseCase } from "../../application/use-cases/SendPasswordResetUseCase";
 import { ChangePasswordUseCase } from "../../application/use-cases/ChangePasswordUseCase";
@@ -166,6 +167,30 @@ export class UserController {
 
     async sendNotification(userId: string, notification: any) {
         return this.sendNotificationUseCase.execute(userId, notification);
+    }
+
+    async sendBatchNotification(notification: any) {
+        const service = this.getNotificationService();
+        return service.sendToAll(notification);
+    }
+
+    async processScheduledNotifications() {
+        const service = this.getNotificationService();
+        return service.processScheduled();
+    }
+
+    async getScheduledNotifications(options?: { status?: string, limit?: number }) {
+        const service = this.getNotificationService();
+        return service.getScheduled(options);
+    }
+
+    async cancelScheduledNotification(id: string) {
+        const service = this.getNotificationService();
+        return service.cancelScheduled(id);
+    }
+
+    private getNotificationService(): INotificationService {
+        return container.resolve<INotificationService>(INotificationServiceToken);
     }
 
     async createSession(idToken: string, expiresIn: number) {

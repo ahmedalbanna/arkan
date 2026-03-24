@@ -5,10 +5,9 @@ import { useToast } from '@/hooks';
 import { initializeFirebase } from '@/firebase';
 
 const { firebaseApp: app } = initializeFirebase();
-import { DeviceTokenApiClient } from '@/modules/users/adapters/api-client/DeviceTokenApiClient';
 import { getMessaging, getToken, onMessage } from 'firebase/messaging';
 import { useEffect, useState } from 'react';
-import { runAuthenticatedResultCall } from '@/hooks/data/authenticated-client-call';
+import { apiService } from '@/infrastructure/api/ApiService';
 
 export default function FirebaseMessagingProvider({ children }: { children: React.ReactNode }) {
   const { firebaseUser } = useAuth();
@@ -26,9 +25,11 @@ export default function FirebaseMessagingProvider({ children }: { children: Reac
             const currentToken = await getToken(messaging, { vapidKey: process.env.NEXT_PUBLIC_FIREBASE_VAPID_KEY });
             if (currentToken) {
               setToken(currentToken);
-              await runAuthenticatedResultCall(firebaseUser, DeviceTokenApiClient, (client) =>
-                client.saveDeviceToken(firebaseUser.uid, currentToken),
-              );
+              await apiService({
+                  endpoint: '/api/fcm',
+                  method: 'POST',
+                  data: { userId: firebaseUser.uid, token: currentToken }
+              });
             } else {
               console.log('No registration token available. Request permission to generate one.');
             }

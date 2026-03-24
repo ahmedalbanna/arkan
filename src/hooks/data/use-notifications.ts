@@ -1,10 +1,11 @@
 'use client';
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { container } from '@/infrastructure/di/container';
-import { UserApiClient } from '@/modules/users/adapters/api-client/UserApiClient';
+import { apiService } from '@/infrastructure/api/ApiService';
 import { useAuth } from '@/context/AuthContext';
 import { useToast } from '@/hooks/util/use-toast';
+import { container } from '@/infrastructure/di/container';
+import { UserApiClient } from '@/modules/users/adapters/api-client/UserApiClient';
 
 export function useNotifications() {
   const { firebaseUser } = useAuth();
@@ -13,10 +14,8 @@ export function useNotifications() {
     queryKey: ['notifications', firebaseUser?.uid],
     queryFn: async () => {
       if (!firebaseUser) return [];
-      const client = container.resolve(UserApiClient);
-      const result = await (client as any).fetchLoginHistory(firebaseUser.uid); 
-      if (result.isFailure) throw result.error;
-      return result.getValue();
+      const result = await apiService<undefined, any[]>({ endpoint: '/api/notifications' });
+      return result;
     },
     enabled: !!firebaseUser,
   });
@@ -41,16 +40,14 @@ export function useNotifications() {
 
 export function useMarkNotificationsAsRead() {
   const queryClient = useQueryClient();
-  const { firebaseUser } = useAuth();
 
   return useMutation({
     mutationFn: async (notificationIds: string[]) => {
-      if (!firebaseUser) throw new Error('Not authenticated');
-      const client = container.resolve(UserApiClient);
-      // Assuming a method exists or adding it to the client
-      const result = await (client as any).markNotificationsAsRead(firebaseUser.uid, notificationIds);
-      if (result.isFailure) throw result.error;
-      return result.getValue();
+      return apiService({ 
+          endpoint: '/api/notifications/mark-as-read', 
+          method: 'POST', 
+          data: { notificationIds } 
+      });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['notifications'] });
@@ -60,15 +57,14 @@ export function useMarkNotificationsAsRead() {
 
 export function useClearNotifications() {
   const queryClient = useQueryClient();
-  const { firebaseUser } = useAuth();
 
   return useMutation({
     mutationFn: async (notificationIds: string[]) => {
-      if (!firebaseUser) throw new Error('Not authenticated');
-      const client = container.resolve(UserApiClient);
-      const result = await (client as any).clearNotifications(firebaseUser.uid, notificationIds);
-      if (result.isFailure) throw result.error;
-      return result.getValue();
+      return apiService({ 
+          endpoint: '/api/notifications/clear', 
+          method: 'POST', 
+          data: { notificationIds } 
+      });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['notifications'] });

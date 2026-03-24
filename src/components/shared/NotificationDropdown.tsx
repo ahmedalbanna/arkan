@@ -15,6 +15,8 @@ import { useLocalization } from '@/context/LocalizationContext';
 import { useNotifications } from '@/hooks';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { BatchNotificationDialog } from '../admin/dashboard/BatchNotificationDialog';
+import { useAuth } from '@/context/AuthContext';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -45,6 +47,7 @@ function NotificationIcon({ icon }: { icon: Notification['icon'] }) {
 export function NotificationDropdown() {
   const { t } = useLocalization();
   const router = useRouter();
+  const { userProfile } = useAuth();
   const { notifications, markAsRead, clearNotifications } = useNotifications();
 
   const unreadCount = (notifications as any[])?.filter((n: any) => !n.isRead).length ?? 0;
@@ -79,12 +82,15 @@ export function NotificationDropdown() {
       <DropdownMenuContent align="end" className="w-80">
         <DropdownMenuLabel className="flex justify-between items-center">
           <span>{t('header.notifications')}</span>
-          {notifications && notifications.length > 0 && (
-            <Button variant="ghost" size="sm" onClick={handleClearAll}>
-              <Trash2 className="mr-1 h-3 w-3" />
-              {t('header.clearAll')}
-            </Button>
-          )}
+          <div className="flex gap-2">
+            {userProfile?.role === 'admin' && <BatchNotificationDialog />}
+            {notifications && (notifications as any[]).length > 0 && (
+                <Button variant="ghost" size="sm" onClick={handleClearAll}>
+                <Trash2 className="mr-1 h-3 w-3" />
+                {t('header.clearAll')}
+                </Button>
+            )}
+          </div>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
         <ScrollArea className="h-auto max-h-80">

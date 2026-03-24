@@ -1,4 +1,4 @@
-import { sqliteTable, text, integer, real } from 'drizzle-orm/sqlite-core';
+import { sqliteTable, text, integer, real, index } from 'drizzle-orm/sqlite-core';
 
 export const users = sqliteTable('users', {
   id: text('id').primaryKey(),
@@ -193,6 +193,28 @@ export const notifications = sqliteTable('notifications', {
   isRead: integer('is_read', { mode: 'boolean' }).default(false).notNull(),
   createdAt: text('created_at').notNull(),
 });
+
+export const deviceTokens = sqliteTable('device_tokens', {
+  token: text('token').primaryKey(),
+  userId: text('user_id').notNull(),
+  updatedAt: text('updated_at').notNull(),
+});
+
+export const scheduledNotifications = sqliteTable('scheduled_notifications', {
+  id: text('id').primaryKey(), // uuid
+  title: text('title').notNull(),
+  description: text('description').notNull(),
+  type: text('type').$type<'info' | 'success' | 'warning' | 'alert' | 'error'>().default('info').notNull(),
+  link: text('link'),
+  scheduledFor: text('scheduled_at').notNull(), // ISO string
+  status: text('status').$type<'pending' | 'sent' | 'failed' | 'cancelled'>().default('pending').notNull(),
+  targetUserId: text('user_id'), // null means all users
+  createdAt: text('created_at').notNull(),
+}, (table) => ({
+  statusIdx: index('scheduled_status_idx').on(table.status),
+  scheduledForIdx: index('scheduled_time_idx').on(table.scheduledFor),
+  targetUserIdx: index('scheduled_user_idx').on(table.targetUserId),
+}));
 
 export const securityAuditLogs = sqliteTable('security_audit_logs', {
   id: integer('id').primaryKey({ autoIncrement: true }),
