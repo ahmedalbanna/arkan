@@ -44,7 +44,21 @@ export async function POST(request: Request) {
         return handleUserResult(result);
     }
 
-    const { token, user } = result.getValue();
+    const loginData = result.getValue();
+    const user = loginData.user;
+
+    // --- 2FA Challenge Check ---
+    const userProfileResult = await controller.getUser(user.uid);
+    const userProfile = userProfileResult.isSuccess ? userProfileResult.getValue() : null;
+
+    if (userProfile?.isTwoFactorEnabled) {
+        return NextResponse.json({ 
+            status: 'requires_2fa',
+            userId: user.uid
+        }, { status: 200 });
+    }
+
+    const token = loginData.token;
 
     // 2. Record Login History
     await controller.recordLogin({
@@ -58,7 +72,7 @@ export async function POST(request: Request) {
     if (fingerprint && fingerprintData) {
         await controller.registerFingerprint(user.uid, fingerprint, fingerprintData);
     }
-    
+
     // 30 days if remember me, otherwise 5 days
     const expiresIn = rememberMe 
         ? 60 * 60 * 24 * 30 * 1000 

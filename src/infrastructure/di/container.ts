@@ -98,9 +98,14 @@ if (typeof window === 'undefined') {
   const { SQLiteTemplateRepository } = require("@/modules/templates/infrastructure/repositories/SQLiteTemplateRepository");
   const { SQLiteSectionRepository } = require("@/modules/ai-content/infrastructure/repositories/SQLiteSectionRepository");
   const { NodemailerEmailService } = require("@/modules/users/infrastructure/services/NodemailerEmailService");
+  const { TwoFactorAuthService } = require("@/modules/users/infrastructure/services/TwoFactorAuthService");
 
   container.register(IEmailServiceToken, {
     useClass: NodemailerEmailService
+  }, { lifecycle: Lifecycle.Singleton });
+
+  container.register(TwoFactorAuthService, {
+    useClass: TwoFactorAuthService
   }, { lifecycle: Lifecycle.Singleton });
 
   container.register(IProjectRepositoryToken, {

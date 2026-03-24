@@ -39,10 +39,21 @@ export const withAuth = (handler: ApiHandler, options: ApiHandlerOptions = {}) =
   return async (request: NextRequest, { params }: { params: Promise<{ [key: string]: string }> }) => {
     try {
       const authorization = request.headers.get('Authorization');
-      if (!authorization?.startsWith('Bearer ')) {
+      let token = '';
+
+      if (authorization?.startsWith('Bearer ')) {
+        token = authorization.substring(7);
+      } else {
+        // Fallback to session cookie for local auth compatibility
+        const sessionCookie = request.cookies.get('__session')?.value;
+        if (sessionCookie) {
+          token = sessionCookie;
+        }
+      }
+
+      if (!token) {
         return handleApiError({ message: 'Unauthorized: Missing token' }, 401);
       }
-      const token = authorization.substring(7);
 
       const authRepo = container.resolve<any>(IAuthRepositoryToken);
       const authResult = await authRepo.verifyToken(token);

@@ -25,6 +25,8 @@ export interface UserProfile {
     lastDailyCreditUpdate?: string; // Timestamp for the last daily credit refresh
     securitySettings?: SecuritySettings;
     isDisabled?: boolean;
+    isTwoFactorEnabled?: boolean;
+    twoFactorSecret?: string;
 }
 
 // TeamMember is no longer needed

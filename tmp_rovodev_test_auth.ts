@@ -21,7 +21,7 @@ async function testAuth() {
             console.log(`   Token: ${data.token.substring(0, 20)}...`);
             console.log(`   Role: ${testUser.label.includes('Admin') ? 'admin' : 'user'}`);
         } else {
-            console.error(`❌ Failed: ${result.error.message}`);
+            console.error(`❌ Failed: ${result.error?.message || 'Unknown error'}`);
         }
     }
 }

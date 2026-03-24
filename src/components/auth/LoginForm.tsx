@@ -7,10 +7,11 @@ import { Input } from '@/components/ui/input';
 import { Checkbox } from '@/components/ui/checkbox';
 import { useLogin } from '@/hooks/auth/use-auth-mutations';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { AlertCircle, Loader2 } from 'lucide-react';
+import { AlertCircle, Loader2, ShieldCheck } from 'lucide-react';
 import { generateFingerprint } from '@/lib/utils/security/fingerprint';
 import Link from 'next/link';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
+import { toast } from '@/hooks';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { apiService } from '@/infrastructure/api/ApiService';
@@ -24,6 +25,11 @@ const formSchema = z.object({
 
 export default function LoginForm() {
   const loginMutation = useLogin();
+  const [show2FA, setShow2FA] = useState(false);
+  const [tfaUserId, setTfaUserId] = useState('');
+  const [tfaToken, setTfaToken] = useState('');
+  const [isVerifyingTFA, setIsVerifyingTFA] = useState(false);
+
   const form = useForm<z.infer<typeof formSchema>>({ 
     resolver: zodResolver(formSchema), 
     defaultValues: { email: '', password: '', rememberMe: false } 
@@ -46,8 +52,31 @@ export default function LoginForm() {
         ...values,
         fingerprint: hash,
         fingerprintData: data
-    } as any); 
+    } as any, {
+        onSuccess: (response: any) => {
+            if (response.status === 'requires_2fa') {
+                setTfaUserId(response.userId);
+                setShow2FA(true);
+            }
+        }
+    }); 
   }
+
+  const handleVerify2FA = async () => {
+    setIsVerifyingTFA(true);
+    try {
+        await apiService({
+            endpoint: '/api/auth/2fa/verify',
+            method: 'POST',
+            data: { userId: tfaUserId, token: tfaToken }
+        });
+        window.location.href = '/builder';
+    } catch (error: any) {
+        toast({ title: 'Verification Failed', description: error.message || 'Invalid 2FA code.', variant: 'destructive' });
+    } finally {
+        setIsVerifyingTFA(false);
+    }
+  };
 
   const handleGuestLogin = async () => { 
     try { 
@@ -60,6 +89,33 @@ export default function LoginForm() {
 
   const isPending = loginMutation.isPending;
   const formLevelError = form.formState.errors.root?.serverError;
+
+  if (show2FA) {
+    return (
+        <div className="space-y-6 flex flex-col items-center">
+            <div className="space-y-2 text-center">
+                <ShieldCheck className="h-12 w-12 text-primary mx-auto" />
+                <h3 className="text-xl font-bold">Two-Factor Authentication</h3>
+                <p className="text-sm text-muted-foreground">Enter the 6-digit code from your authenticator app.</p>
+            </div>
+            <div className="w-full space-y-4">
+                <Input 
+                    placeholder="000000" 
+                    value={tfaToken}
+                    onChange={(e) => setTfaToken(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                    className="text-center text-2xl tracking-[0.5em] font-mono h-12"
+                />
+                <Button className="w-full" onClick={handleVerify2FA} disabled={tfaToken.length !== 6 || isVerifyingTFA}>
+                    {isVerifyingTFA && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                    Verify & Login
+                </Button>
+                <Button variant="ghost" className="w-full" onClick={() => setShow2FA(false)}>
+                    Back to login
+                </Button>
+            </div>
+        </div>
+    );
+  }
 
   return (
     <Form {...form}>

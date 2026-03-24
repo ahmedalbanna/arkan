@@ -17,6 +17,8 @@ export const users = sqliteTable('users', {
   securitySettings: text('security_settings'), // JSON string for preferences
   tokenVersion: integer('token_version').default(1),
   isDisabled: integer('is_disabled', { mode: 'boolean' }).default(false),
+  twoFactorSecret: text('two_factor_secret'),
+  isTwoFactorEnabled: integer('is_two_factor_enabled', { mode: 'boolean' }).default(false).notNull(),
 });
 
 export const projects = sqliteTable('projects', {

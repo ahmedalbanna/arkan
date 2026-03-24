@@ -23,12 +23,7 @@ export const POST = withAuth(async ({ request, user: adminUser }) => {
     const { userId, credits, message } = validation.data;
 
     const controller = container.resolve(UserController);
-    const result = await controller.giftCredits({
-        userId,
-        credits,
-        message,
-        adminName: adminUser.name
-    });
+    const result = await controller.giftCredits(userId, credits);
 
     return handleResult(result);
 

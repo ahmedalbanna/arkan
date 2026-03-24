@@ -28,6 +28,10 @@ import { LogoutAllDevicesUseCase } from "../../application/use-cases/LogoutAllDe
 import { DisableUserUseCase } from "../../application/use-cases/DisableUserUseCase";
 import { LogSecurityEventUseCase } from "../../application/use-cases/LogSecurityEventUseCase";
 import { GetSecurityAuditLogsUseCase } from "../../application/use-cases/GetSecurityAuditLogsUseCase";
+import { Setup2FAUseCase } from "../../application/use-cases/Setup2FAUseCase";
+import { VerifyAndEnable2FAUseCase } from "../../application/use-cases/VerifyAndEnable2FAUseCase";
+import { Verify2FATokenUseCase } from "../../application/use-cases/Verify2FATokenUseCase";
+import { CleanupOldRecordsUseCase } from "../../application/use-cases/CleanupOldRecordsUseCase";
 
 @injectable()
 export class UserController {
@@ -89,7 +93,15 @@ export class UserController {
         @inject(delay(() => LogSecurityEventUseCase))
         private logSecurityEventUseCase: LogSecurityEventUseCase,
         @inject(delay(() => GetSecurityAuditLogsUseCase))
-        private getSecurityAuditLogsUseCase: GetSecurityAuditLogsUseCase
+        private getSecurityAuditLogsUseCase: GetSecurityAuditLogsUseCase,
+        @inject(delay(() => Setup2FAUseCase))
+        private setup2FAUseCase: Setup2FAUseCase,
+        @inject(delay(() => VerifyAndEnable2FAUseCase))
+        private verifyAndEnable2FAUseCase: VerifyAndEnable2FAUseCase,
+        @inject(delay(() => Verify2FATokenUseCase))
+        private verify2FATokenUseCase: Verify2FATokenUseCase,
+        @inject(delay(() => CleanupOldRecordsUseCase))
+        private cleanupOldRecordsUseCase: CleanupOldRecordsUseCase
     ) {}
 
     async getUser(id: string) {
@@ -116,8 +128,8 @@ export class UserController {
         return this.getPaginatedUsersUseCase.execute(options);
     }
 
-    async giftCredits(params: { userId: string, credits: number, message?: string, adminName: string }) {
-        return this.giftCreditsUseCase.execute(params);
+    async giftCredits(userId: string, amount: number) {
+        return this.giftCreditsUseCase.execute({ userId, credits: amount, adminName: 'Admin' });
     }
 
     async deleteUser(id: string) {
@@ -210,5 +222,21 @@ export class UserController {
 
     async getSecurityAuditLogs() {
         return this.getSecurityAuditLogsUseCase.execute();
+    }
+
+    async setup2FA(userId: string) {
+        return this.setup2FAUseCase.execute(userId);
+    }
+
+    async verifyAndEnable2FA(userId: string, token: string) {
+        return this.verifyAndEnable2FAUseCase.execute(userId, token);
+    }
+
+    async verify2FAToken(userId: string, token: string) {
+        return this.verify2FATokenUseCase.execute(userId, token);
+    }
+
+    async cleanupOldRecords(days: number = 90) {
+        return this.cleanupOldRecordsUseCase.execute(days);
     }
 }

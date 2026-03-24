@@ -14,6 +14,7 @@ import { GuestProfilePage } from '@/components/auth/GuestProfilePage';
 import { TrustedDevicesList } from './TrustedDevicesList';
 import { LoginHistoryList } from './LoginHistoryList';
 import { SecuritySettingsForm } from './SecuritySettingsForm';
+import { TwoFactorSetup } from './TwoFactorSetup';
 
 function ProfileSkeleton() {
     return (
@@ -73,6 +74,7 @@ export default function ProfilePage() {
             <UpdateProfileForm userProfile={userProfile} />
             <ApiKeysForm userProfile={userProfile} />
             <SecuritySettingsForm userProfile={userProfile} />
+            <TwoFactorSetup isAlreadyEnabled={!!(userProfile as any).isTwoFactorEnabled} />
             <ChangePasswordForm />
             <TrustedDevicesList userId={userProfile.id} currentTokenVersion={(userProfile as any).tokenVersion} />
             <LoginHistoryList userId={userProfile.id} />
