@@ -2,7 +2,7 @@
 'use client';
 
 import { useEditorStore } from '@/hooks/core/use-editor-store';
-import { BubbleMenu, EditorContent, useEditor } from '@tiptap/react';
+import { BubbleMenu, EditorContent, useEditor, type Editor } from '@tiptap/react';
 import { marked } from 'marked';
 import React, { useState } from 'react';
 import TurndownService from 'turndown';
@@ -27,7 +27,7 @@ const MarkdownEditorComponent = ({ content, onChange, editorClassName }: Markdow
   const { setActiveEditor } = useEditorStore();
   const bubbleMenuId = React.useId();
 
-  const editor: any = useEditor({
+  const editor = useEditor({
     extensions: editorExtensions(bubbleMenuId),
     content: marked.parse(content) as string,
     onBlur: ({ editor }) => {
@@ -85,13 +85,13 @@ const MarkdownEditorComponent = ({ content, onChange, editorClassName }: Markdow
           shouldShow={({ editor }) => !editor.state.selection.empty}
         >
           {editor.isActive('table') ? (
-            <div className="bg-background p-1 rounded-lg shadow-lg border flex gap-1">
+            <div className="flex items-center gap-1 rounded-lg border bg-gradient-to-r from-background/95 to-background/80 backdrop-blur-md p-1 shadow-lg transition-all duration-200">
               <Button size="sm" variant="ghost" onClick={() => editor.chain().focus().addColumnBefore().run()}>Add Col Before</Button>
               <Button size="sm" variant="ghost" onClick={() => editor.chain().focus().addRowBefore().run()}>Add Row Before</Button>
-              <Button size="sm" variant="destructive" onClick={() => editor.chain().focus().deleteTable().run()}>Delete Table</Button>
+              <Button size="sm" variant="destructive" className="h-8" onClick={() => editor.chain().focus().deleteTable().run()}>Delete Table</Button>
             </div>
           ) : (
-            <ContextualToolbar editor={editor} />
+            <ContextualToolbar editor={editor as Editor} />
           )}
         </BubbleMenu>
       )}

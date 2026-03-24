@@ -113,7 +113,7 @@ export function SectionGenerationControls({
              <div className="space-y-2">
                 <Label>Output Format</Label>
                 <div className="flex items-center flex-wrap gap-4">
-                    {(Object.keys(controls.outputStyle) as Array<keyof GenerationControlState['outputStyle']>).map(key => (
+                    {controls.outputStyle && (Object.keys(controls.outputStyle) as Array<keyof GenerationControlState['outputStyle']>).map(key => (
                          <div key={String(key)} className="flex items-center gap-2">
                             <Checkbox id={`output-${String(key)}-${section.id}`} checked={controls.outputStyle[key]} onCheckedChange={(checked) => onOutputStyleChange(key, !!checked)} />
                             <Label htmlFor={`output-${String(key)}-${section.id}`} className="capitalize">{String(key).replace(/([A-Z])/g, ' $1')}</Label>
@@ -122,7 +122,7 @@ export function SectionGenerationControls({
                 </div>
             </div>
             
-            {controls.outputStyle.heading && (
+            {controls.outputStyle?.heading && (
                 <div className="space-y-2 pl-6 border-l-2 ml-2">
                     <Label htmlFor={`includedHeadings-${section.id}`}>Included Topics (one per line)</Label>
                     <Textarea
@@ -135,7 +135,7 @@ export function SectionGenerationControls({
                 </div>
             )}
 
-            {controls.outputStyle.table && (
+            {controls.outputStyle?.table && (
                 <div className="space-y-2 pl-6 border-l-2 ml-2">
                     <Label htmlFor={`tableCaption-${section.id}`}>Table Caption (Optional)</Label>
                     <Input
@@ -147,7 +147,7 @@ export function SectionGenerationControls({
                 </div>
             )}
 
-            {controls.outputStyle.code && (
+            {controls.outputStyle?.code && (
                 <div className="space-y-2 pl-6 border-l-2 ml-2">
                     <Label htmlFor={`programmingLanguage-${section.id}`}>Programming Language</Label>
                     <Input 
@@ -159,7 +159,7 @@ export function SectionGenerationControls({
                 </div>
             )}
 
-            {controls.outputStyle.diagram && (
+            {controls.outputStyle?.diagram && (
                 <div className="space-y-2 pl-6 border-l-2 ml-2">
                     <Label htmlFor={`diagramType-${section.id}`}>Diagram Type</Label>
                     <Select value={controls.diagramType} onValueChange={(val) => handleControlChange('diagramType', val as DiagramType)}>

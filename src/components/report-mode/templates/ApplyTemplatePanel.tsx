@@ -36,7 +36,7 @@ function TemplateCard({ template, onSelect }: { template: ReportTemplateProperti
 
 function TemplatePreview({ template, onApply, onBack, isLoading }: { template: ReportTemplateProperties; onApply: () => void; onBack: () => void; isLoading: boolean; }) {
   const tocMarkdown = useMemo(() => {
-    if (!template.content) return '';
+    if (!template.content || !Array.isArray(template.content)) return '';
     return template.content.map(chapter => 
       `# ${chapter.title}\n${(chapter.sections || []).map(section => `  - ${section.title}`).join('\n')}`
     ).join('\n\n');
@@ -86,7 +86,8 @@ export default function ApplyTemplatePanel() {
       <TemplatePreview 
         template={previewTemplate}
         onApply={() => {
-            const tocMarkdown = previewTemplate.content?.map(chapter => 
+            const content = Array.isArray(previewTemplate.content) ? previewTemplate.content : [];
+            const tocMarkdown = content.map(chapter => 
                 `# ${chapter.title}\n${(chapter.sections || []).map(section => `  - ${section.title}`).join('\n')}`
             ).join('\n\n');
             if (tocMarkdown) {

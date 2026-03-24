@@ -2,50 +2,30 @@
 Runtime TypeError
 
 ## Error Message
-Cannot read properties of undefined (reading 'id')
+Cannot convert undefined or null to object
 
 
-    at <unknown> (src/components/admin/payments/TransactionList.tsx:75:55)
+    at Object.keys (<anonymous>:null:null)
+    at SectionGenerationControls (src/components/report-mode/section-controls/SectionGenerationControls.tsx:116:30)
+    at SectionAccordionItem (src/components/report-mode/generation-tools/SectionAccordionItem.tsx:151:33)
+    at <unknown> (src/components/report-mode/generation-tools/SortableChapterItem.tsx:103:17)
     at Array.map (<anonymous>:null:null)
-    at TransactionList (src/components/admin/payments/TransactionList.tsx:74:34)
-    at PaymentVerificationConsole (src/components/admin/payments/PaymentVerificationConsole.tsx:28:29)
-    at ManagePaymentsPage (src/app/admin/manage-payments/page.tsx:19:7)
+    at SortableChapterItem (src/components/report-mode/generation-tools/SortableChapterItem.tsx:102:33)
+    at <unknown> (src/components/report-mode/generation-tools/index.tsx:110:29)
+    at Array.map (<anonymous>:null:null)
+    at GenerationTools (src/components/report-mode/generation-tools/index.tsx:107:49)
+    at useReportGenerator.useMemo[panels] (src/hooks/report-mode/useReportGenerator.ts:58:24)
+    at useReportGenerator (src/hooks/report-mode/useReportGenerator.ts:35:25)
+    at ReportModeGenerator (src/components/report-mode/ReportModeGenerator.tsx:86:27)
+    at GeneratePage (src/app/builder/page.tsx:39:7)
 
 ## Code Frame
-  73 |             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-  74 |                 {allTransactions.map((transaction: Transaction) => (
-> 75 |                     <TransactionCard key={transaction.id} transaction={transaction} />
-     |                                                       ^
-  76 |                 ))}
-  77 |             </div>
-  78 |             {hasNextPage && (
-
-Next.js version: 15.5.9 (Turbopack)
-
----
-
-## Error Type
-Runtime TypeError
-
-## Error Message
-template.content.map is not a function
-
-
-    at TemplatePreview.useMemo[tocMarkdown] (src/components/report-mode/templates/ApplyTemplatePanel.tsx:40:29)
-    at TemplatePreview (src/components/report-mode/templates/ApplyTemplatePanel.tsx:38:30)
-    at ApplyTemplatePanel (src/components/report-mode/templates/ApplyTemplatePanel.tsx:86:7)
-    at useReportGenerator.useMemo[panels] (src/hooks/report-mode/useReportGenerator.ts:50:24)
-    at useReportGenerator (src/hooks/report-mode/useReportGenerator.ts:33:25)
-    at ReportModeGenerator (src/components/report-mode/ReportModeGenerator.tsx:84:27)
-    at GeneratePage (src/app/builder/page.tsx:12:7)
-
-## Code Frame
-  38 |   const tocMarkdown = useMemo(() => {
-  39 |     if (!template.content) return '';
-> 40 |     return template.content.map(chapter =>
-     |                             ^
-  41 |       `# ${chapter.title}\n${(chapter.sections || []).map(section => `  - ${section.title}`).join('\n')}`
-  42 |     ).join('\n\n');
-  43 |   }, [template]);
+  114 |                 <Label>Output Format</Label>
+  115 |                 <div className="flex items-center flex-wrap gap-4">
+> 116 |                     {(Object.keys(controls.outputStyle) as Array<keyof GenerationControlState['outputStyle']>).map(key => (
+      |                              ^
+  117 |                          <div key={String(key)} className="flex items-center gap-2">
+  118 |                             <Checkbox id={`output-${String(key)}-${section.id}`} checked={controls.outputStyle[key]} onCheckedChange={(checked) => onOutputStyleChange(key, !!checked)} />
+  119 |                             <Label htmlFor={`output-${String(key)}-${section.id}`} className="capitalize">{String(key).replace(/([A-Z])/g, ' $1')}</Label>
 
 Next.js version: 15.5.9 (Turbopack)

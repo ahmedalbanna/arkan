@@ -17,10 +17,12 @@ import { Slider } from '../ui/slider';
 import { Label } from '../ui/label';
 import { Badge } from '../ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
+import { Popover, PopoverContent, PopoverTrigger } from '../ui/popover';
 import { ToneSchema } from '@/lib/types';
 import type { Language, Tone } from '@/lib/types';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/tooltip';
 import { ProjectChat } from './chat/ProjectChat';
+import { ProjectProperties } from '@/lib/types';
 
 const ReportResults = lazy(() => import('./ReportResults'));
 
@@ -60,7 +62,7 @@ function BottomNavBar({ activeView, setActiveView }: { activeView: 'generator' |
     );
 }
 
-export default function ReportModeGenerator() {
+export default function ReportModeGenerator({ initialProject }: { initialProject?: ProjectProperties | null }) {
     const {
         locale,
         isMobile,
@@ -81,8 +83,10 @@ export default function ReportModeGenerator() {
         setIsChatOpen,
         zoomLevel,
         setZoomLevel,
-    } = useReportGenerator();
+    } = useReportGenerator(initialProject);
     
+    // States removed as Popover handles its own open state or can be controlled if needed.
+    // However, keeping them if we want to synchronize with tooltips or other logic.
     const [isControlsPanelOpen, setIsControlsPanelOpen] = useState(false);
     const [isLanguagePanelOpen, setIsLanguagePanelOpen] = useState(false);
     
@@ -126,112 +130,110 @@ export default function ReportModeGenerator() {
             
             {/* Global Controls Floating UI - LEFT */}
             <div className="fixed bottom-6 left-6 z-20 hidden lg:flex items-end gap-4">
-                <div className="relative">
-                    {isControlsPanelOpen && (
-                        <div className="absolute bottom-full mb-2 w-64 bg-background/80 backdrop-blur-sm p-4 rounded-lg border shadow-lg animate-in fade-in-0 slide-in-from-bottom-4">
-                            <div className="space-y-6">
-                                {/* Formality Slider */}
-                                <div className="space-y-2">
-                                    <div className="flex justify-between items-center">
-                                        <Label className="text-xs font-semibold tracking-wider uppercase">Formality</Label>
-                                        <Badge variant="secondary">{project.formality ?? 70}%</Badge>
-                                    </div>
-                                    <Slider
-                                        value={[project.formality ?? 70]}
-                                        onValueChange={(val) => handleFormalityChange(val[0])}
-                                        min={0}
-                                        max={100}
-                                        step={10}
-                                    />
-                                </div>
-                                {/* Complexity Slider */}
-                                <div className="space-y-2">
-                                <div className="flex justify-between items-center">
-                                        <Label className="text-xs font-semibold tracking-wider uppercase">Complexity</Label>
-                                        <Badge variant="secondary">{project.complexity ?? 50}%</Badge>
-                                    </div>
-                                    <Slider
-                                        value={[project.complexity ?? 50]}
-                                        onValueChange={(val) => handleComplexityChange(val[0])}
-                                        min={0}
-                                        max={100}
-                                        step={10}
-                                    />
-                                </div>
-                            </div>
-                        </div>
-                    )}
+                <Popover open={isControlsPanelOpen} onOpenChange={setIsControlsPanelOpen}>
                     <TooltipProvider>
                         <Tooltip>
-                            <TooltipTrigger asChild>
-                                <Button
-                                    size="icon"
-                                    className="rounded-full h-14 w-14 shadow-lg"
-                                    onClick={() => setIsControlsPanelOpen(prev => !prev)}
-                                    aria-label="Toggle global controls"
-                                >
-                                    <SlidersHorizontal className="h-6 w-6" />
-                                </Button>
-                            </TooltipTrigger>
+                            <PopoverTrigger asChild>
+                                <TooltipTrigger asChild>
+                                    <Button
+                                        size="icon"
+                                        className="rounded-full h-14 w-14 shadow-lg"
+                                        aria-label="Toggle global controls"
+                                    >
+                                        <SlidersHorizontal className="h-6 w-6" />
+                                    </Button>
+                                </TooltipTrigger>
+                            </PopoverTrigger>
                             <TooltipContent side="right"><p>Complexity & Formality</p></TooltipContent>
                         </Tooltip>
                     </TooltipProvider>
-                </div>
-
-                <div className="relative">
-                    {isLanguagePanelOpen && (
-                         <div className="absolute bottom-full mb-2 w-64 bg-background/80 backdrop-blur-sm p-4 rounded-lg border shadow-lg animate-in fade-in-0 slide-in-from-bottom-4">
-                            <div className="space-y-6">
-                                <div className="space-y-2">
-                                    <Label className="text-xs font-semibold tracking-wider uppercase">Language</Label>
-                                    <Select value={project.language ?? 'default'} onValueChange={handleLanguageChange}>
-                                        <SelectTrigger>
-                                            <SelectValue />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            <SelectItem value="default">Default</SelectItem>
-                                            <SelectItem value="en">English</SelectItem>
-                                            <SelectItem value="ar">Arabic</SelectItem>
-                                            <SelectItem value="es">Spanish</SelectItem>
-                                            <SelectItem value="fr">French</SelectItem>
-                                            <SelectItem value="de">German</SelectItem>
-                                        </SelectContent>
-                                    </Select>
+                    <PopoverContent side="top" align="start" className="w-64 p-4 mb-2 bg-background/80 backdrop-blur-sm">
+                        <div className="space-y-6">
+                            {/* Formality Slider */}
+                            <div className="space-y-2">
+                                <div className="flex justify-between items-center">
+                                    <Label className="text-xs font-semibold tracking-wider uppercase">Formality</Label>
+                                    <Badge variant="secondary">{project.formality ?? 70}%</Badge>
                                 </div>
-                                <div className="space-y-2">
-                                    <Label className="text-xs font-semibold tracking-wider uppercase">Tone</Label>
-                                    <Select value={project.tone ?? 'professional'} onValueChange={handleToneChange}>
-                                        <SelectTrigger>
-                                            <SelectValue />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            {ToneSchema.options.map(tone => (
-                                                <SelectItem key={tone} value={tone}>
-                                                    {tone.charAt(0).toUpperCase() + tone.slice(1)}
-                                                </SelectItem>
-                                            ))}
-                                        </SelectContent>
-                                    </Select>
+                                <Slider
+                                    value={[project.formality ?? 70]}
+                                    onValueChange={(val) => handleFormalityChange(val[0])}
+                                    min={0}
+                                    max={100}
+                                    step={10}
+                                />
+                            </div>
+                            {/* Complexity Slider */}
+                            <div className="space-y-2">
+                            <div className="flex justify-between items-center">
+                                    <Label className="text-xs font-semibold tracking-wider uppercase">Complexity</Label>
+                                    <Badge variant="secondary">{project.complexity ?? 50}%</Badge>
                                 </div>
+                                <Slider
+                                    value={[project.complexity ?? 50]}
+                                    onValueChange={(val) => handleComplexityChange(val[0])}
+                                    min={0}
+                                    max={100}
+                                    step={10}
+                                />
                             </div>
                         </div>
-                    )}
-                     <TooltipProvider>
+                    </PopoverContent>
+                </Popover>
+
+                <Popover open={isLanguagePanelOpen} onOpenChange={setIsLanguagePanelOpen}>
+                    <TooltipProvider>
                         <Tooltip>
-                            <TooltipTrigger asChild>
-                                <Button
-                                    size="icon"
-                                    className="rounded-full h-14 w-14 shadow-lg"
-                                    onClick={() => setIsLanguagePanelOpen(prev => !prev)}
-                                    aria-label="Toggle language and tone controls"
-                                >
-                                    <LanguageIcon className="h-6 w-6" />
-                                </Button>
-                            </TooltipTrigger>
+                            <PopoverTrigger asChild>
+                                <TooltipTrigger asChild>
+                                    <Button
+                                        size="icon"
+                                        className="rounded-full h-14 w-14 shadow-lg"
+                                        aria-label="Toggle language and tone controls"
+                                    >
+                                        <LanguageIcon className="h-6 w-6" />
+                                    </Button>
+                                </TooltipTrigger>
+                            </PopoverTrigger>
                             <TooltipContent side="right"><p>Language & Tone</p></TooltipContent>
                         </Tooltip>
                     </TooltipProvider>
-                </div>
+                    <PopoverContent side="top" align="start" className="w-64 p-4 mb-2 bg-background/80 backdrop-blur-sm">
+                        <div className="space-y-6">
+                            <div className="space-y-2">
+                                <Label className="text-xs font-semibold tracking-wider uppercase">Language</Label>
+                                <Select value={project.language ?? 'default'} onValueChange={handleLanguageChange}>
+                                    <SelectTrigger>
+                                        <SelectValue />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="default">Default</SelectItem>
+                                        <SelectItem value="en">English</SelectItem>
+                                        <SelectItem value="ar">Arabic</SelectItem>
+                                        <SelectItem value="es">Spanish</SelectItem>
+                                        <SelectItem value="fr">French</SelectItem>
+                                        <SelectItem value="de">German</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                            <div className="space-y-2">
+                                <Label className="text-xs font-semibold tracking-wider uppercase">Tone</Label>
+                                <Select value={project.tone ?? 'professional'} onValueChange={handleToneChange}>
+                                    <SelectTrigger>
+                                        <SelectValue />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {ToneSchema.options.map(tone => (
+                                            <SelectItem key={tone} value={tone}>
+                                                {tone.charAt(0).toUpperCase() + tone.slice(1)}
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                        </div>
+                    </PopoverContent>
+                </Popover>
             </div>
             
             {/* Chat FAB - RIGHT */}

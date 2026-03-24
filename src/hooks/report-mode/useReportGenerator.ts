@@ -13,7 +13,9 @@ const FileManager = lazy(() => import('@/components/report-mode/file-manager'));
 const GenerationTools = lazy(() => import('@/components/report-mode/generation-tools'));
 const ApplyTemplatePanel = lazy(() => import('@/components/report-mode/templates/ApplyTemplatePanel'));
 
-export function useReportGenerator() {
+import { ProjectProperties } from '@/lib/types';
+
+export function useReportGenerator(initialProject?: ProjectProperties | null) {
   const { t, locale } = useLocalization();
   const isMobile = useMobile();
   const [activeMobileView, setActiveMobileView] = useState<'generator' | 'result'>('result');
@@ -21,7 +23,7 @@ export function useReportGenerator() {
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [zoomLevel, setZoomLevel] = useState(1);
   const { isSaving } = useSaveProject();
-  const builderPageLogic = useBuilderPageLogic();
+  const builderPageLogic = useBuilderPageLogic(initialProject);
 
   useEffect(() => {
     document.documentElement.style.setProperty('--zoom-scale', String(zoomLevel));

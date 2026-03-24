@@ -7,9 +7,17 @@ import { apiService } from '@/infrastructure/api/ApiService';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useCallback, useEffect, useState } from 'react';
 
-export function useBuilderPageLogic() {
+import { ProjectProperties } from '@/lib/types';
+
+export function useBuilderPageLogic(initialProject?: ProjectProperties | null) {
   const { userProfile, firebaseUser, refetchUser } = useAuth();
-  const { project, updateProject, isStoreInitialized } = useBuilderStore();
+  const { project, updateProject, isStoreInitialized, loadProject } = useBuilderStore();
+
+  useEffect(() => {
+    if (initialProject && isStoreInitialized && project?.id !== initialProject.id) {
+        loadProject(initialProject);
+    }
+  }, [initialProject, isStoreInitialized, loadProject, project?.id]);
   const [showOnboarding, setShowOnboarding] = useState(false);
   const queryClient = useQueryClient();
 
