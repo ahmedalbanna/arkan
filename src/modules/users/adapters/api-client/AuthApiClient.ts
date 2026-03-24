@@ -1,12 +1,14 @@
-
-'use client';
-
-import { injectable } from "tsyringe";
 import { apiService, ApiError } from '@/infrastructure/api/ApiService';
 import { LoginCredentials } from '@/lib/utils/authUtils';
 import { SignupCredentials } from '@/components/auth/SignupForm';
 import { UserProfile } from '@/modules/users/domain/entities/User';
 import { Result } from '@/lib/utils/result';
+import { injectable } from 'tsyringe';
+
+const toApiError = (error: unknown): ApiError => {
+  if (error instanceof ApiError) return error;
+  return new ApiError(error instanceof Error ? error.message : 'Unknown error', 500);
+};
 
 @injectable()
 export class AuthApiClient {
@@ -23,7 +25,7 @@ export class AuthApiClient {
             });
             return Result.ok(data);
         } catch (error: any) {
-            return Result.fail(error);
+            return Result.fail(toApiError(error));
         }
     }
 
@@ -36,15 +38,11 @@ export class AuthApiClient {
             const data = await apiService({ endpoint: '/api/auth/logout', method: 'POST' });
             return Result.ok(data);
         } catch (error: any) {
-            return Result.fail(error);
+            return Result.fail(toApiError(error));
         }
     }
 
-    /**
-     * Signs up a new user via the dedicated API endpoint.
-     * This now handles both auth creation and profile creation in one go.
-     */
-    async serviceSignupUser(credentials: SignupCredentials): Promise<Result<any, ApiError>> {
+    async serviceSignupUser(credentials: SignupCredentials): Promise<Result<UserProfile, ApiError>> {
         try {
             const data = await apiService({
                 endpoint: '/api/auth/signup',
@@ -53,10 +51,9 @@ export class AuthApiClient {
             });
             return Result.ok(data);
         } catch (error: any) {
-            return Result.fail(error);
+            return Result.fail(toApiError(error));
         }
     }
-
 
     async forgotPasswordService(email: string): Promise<Result<any, ApiError>> {
         try {
@@ -67,7 +64,7 @@ export class AuthApiClient {
             });
             return Result.ok(data);
         } catch (error: any) {
-            return Result.fail(error);
+            return Result.fail(toApiError(error));
         }
     }
 
@@ -80,7 +77,7 @@ export class AuthApiClient {
             });
             return Result.ok(data);
         } catch (error: any) {
-            return Result.fail(error);
+            return Result.fail(toApiError(error));
         }
     }
 
@@ -93,7 +90,7 @@ export class AuthApiClient {
             });
             return Result.ok(data);
         } catch (error: any) {
-            return Result.fail(error);
+            return Result.fail(toApiError(error));
         }
     }
 
@@ -105,39 +102,32 @@ export class AuthApiClient {
             });
             return Result.ok(data);
         } catch (error: any) {
-            return Result.fail(error);
+            return Result.fail(toApiError(error));
         }
     }
 
-    async sendPasswordResetEmailApi(userId: string, token: string): Promise<Result<any, ApiError>> {
+    async sendPasswordResetEmailApi(userId: string): Promise<Result<any, ApiError>> {
         try {
             const data = await apiService({
-                endpoint: `/api/users/${userId}/reset-password`,
-                method: 'POST',
-                token,
+                endpoint: `/api/admin/users/${userId}/send-password-reset`,
+                method: 'POST'
             });
             return Result.ok(data);
         } catch (error: any) {
-            return Result.fail(error);
+            return Result.fail(toApiError(error));
         }
     }
 
-    /**
-     * Creates or updates a user profile document in Firestore.
-     * This is now the single source of truth for creating profiles.
-     */
-    async createOrUpdateUserProfileApi(userId: string, data: Partial<UserProfile>, token: string): Promise<Result<UserProfile, ApiError>> {
+    async createOrUpdateUserProfileApi(userId: string, data: Partial<UserProfile>): Promise<Result<UserProfile, ApiError>> {
         try {
-            const result = await apiService<Partial<UserProfile>, UserProfile>({
+            const response = await apiService<Partial<UserProfile>, UserProfile>({
                 endpoint: `/api/users/${userId}`,
                 method: 'PUT',
                 data,
-                token
             });
-            return Result.ok(result);
+            return Result.ok(response);
         } catch (error: any) {
-            return Result.fail(error);
+            return Result.fail(toApiError(error));
         }
     }
 }
-

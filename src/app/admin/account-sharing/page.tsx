@@ -18,7 +18,7 @@ export default function AccountSharingDashboard() {
             // We need a way to pass the token if required, but AdminApiClient 
             // usually uses the authenticated-client-call internally.
             // For now let's assume it works like other admin pages.
-            const result = await client.fetchDashboardStats(""); 
+            const result = await client.fetchDashboardStats(); 
             if (result.isFailure) throw result.error;
             return result.getValue();
         },

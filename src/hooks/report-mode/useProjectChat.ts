@@ -1,27 +1,29 @@
 'use client';
 
 import { useState } from 'react';
-import { useMutation } from '@tanstack/react-query';
 import { useAuth } from '@/context/AuthContext';
-import { useBuilderStore } from '../core/useBuilderStore';
 import { apiService } from '@/infrastructure/api/ApiService';
 
-interface Message {
-  role: 'user' | 'model';
+export interface Message {
+  role: 'user' | 'assistant' | 'system';
   content: string;
 }
 
 export function useProjectChat() {
-  const [messages, setMessages] = useState<Message[]>([]);
   const { firebaseUser } = useAuth();
-  const { project } = useBuilderStore();
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
 
-  const mutation = useMutation({
-    mutationFn: async (userMessage: string) => {
-      if (!firebaseUser || !project) throw new Error('User or project not available');
-      const projectContext = project.fullMarkdownContent;
+  const sendMessage = async (userMessage: string, projectContext: string) => {
+    if (!userMessage.trim() || !firebaseUser) return;
 
-      return apiService<{ projectContext: string; userMessage: string; history: Message[] }, { response: string }>({
+    const newUserMessage: Message = { role: 'user', content: userMessage };
+    const updatedMessages = [...messages, newUserMessage];
+    setMessages(updatedMessages);
+    setIsLoading(true);
+
+    try {
+      const response = await apiService<{ projectContext: string; userMessage: string; history: Message[] }, { response: string }>({
         endpoint: '/api/chat/project-consultant',
         method: 'POST',
         data: {
@@ -30,26 +32,24 @@ export function useProjectChat() {
           history: messages,
         },
       });
-    },
-    onSuccess: (data) => {
-      setMessages((prev) => [...prev, { role: 'model', content: data.response }]);
-    },
-    onError: (error: Error) => {
-      setMessages((prev) => [...prev, { role: 'model', content: `Sorry, an error occurred: ${error.message}` }]);
-    },
-  });
 
-  const sendMessage = (message: string) => {
-    if (!message.trim() || mutation.isPending) return;
+      const assistantMessage: Message = { role: 'assistant', content: response.response };
+      setMessages([...updatedMessages, assistantMessage]);
+    } catch (error) {
+      console.error('Failed to send message:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
-    const newUserMessage: Message = { role: 'user', content: message };
-    setMessages((prev) => [...prev, newUserMessage]);
-    mutation.mutate(message);
+  const clearChat = () => {
+    setMessages([]);
   };
 
   return {
     messages,
     sendMessage,
-    isLoading: mutation.isPending,
+    clearChat,
+    isLoading,
   };
 }

@@ -1,56 +1,34 @@
-'use client';
-
 import { injectable } from 'tsyringe';
 import { apiService, ApiError } from '@/infrastructure/api/ApiService';
 import { Result } from '@/lib/utils/result';
 
 export interface ProcessedDocumentResult {
-  markdown: string;
+  text: string;
+  metadata: {
+    pageCount: number;
+    title?: string;
+    author?: string;
+  };
 }
 
 const toApiError = (error: unknown): ApiError => {
-  if (error instanceof ApiError) {
-    return error;
-  }
-
-  return new ApiError('Unexpected document processing error', 500, error);
+  if (error instanceof ApiError) return error;
+  return new ApiError(error instanceof Error ? error.message : 'Unknown error', 500);
 };
 
 @injectable()
 export class DocumentProcessingApiClient {
-  async processFileApi(formData: FormData, token: string): Promise<Result<ProcessedDocumentResult, ApiError>> {
+  async processFileApi(formData: FormData): Promise<Result<ProcessedDocumentResult, ApiError>> {
     try {
-      const result = await apiService<FormData, ProcessedDocumentResult>({
+      const response = await apiService<FormData, ProcessedDocumentResult>({
         endpoint: '/api/process-file',
         method: 'POST',
         data: formData,
-        token,
         isFormData: true,
       });
-
-      return Result.ok(result);
+      return Result.ok(response);
     } catch (error: unknown) {
       return Result.fail(toApiError(error));
     }
-  }
-
-  async readFileContent(file: File): Promise<string> {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-
-      reader.onabort = () => reject(new Error('File reading was aborted.'));
-      reader.onerror = () => reject(new Error('Failed to read file.'));
-      reader.onload = () => {
-        resolve(reader.result as string);
-      };
-
-      const isTextFile = file.type.startsWith('text/') || file.name.endsWith('.md');
-      if (isTextFile) {
-        reader.readAsText(file);
-        return;
-      }
-
-      reader.readAsDataURL(file);
-    });
   }
 }

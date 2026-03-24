@@ -9,7 +9,6 @@ import { LocalProjectService } from '@/modules/projects/adapters/local-storage/L
 import { ProjectApiClient } from '@/modules/projects/adapters/api-client/ProjectApiClient';
 import { Project, type ProjectProperties } from '@/modules/projects/domain/entities/Project';
 import { container } from '@/infrastructure/di/container';
-import { runAuthenticatedResultCall } from './authenticated-client-call';
 
 export function useProjects() {
   const { firebaseUser } = useAuth();
@@ -23,9 +22,11 @@ export function useProjects() {
       }
 
       try {
-        const serverProjects = await runAuthenticatedResultCall(firebaseUser, ProjectApiClient, (client, token) =>
-          client.fetchProjects(token),
-        );
+        const client = container.resolve(ProjectApiClient);
+        const result = await client.fetchProjects();
+        if (result.isFailure) throw result.error;
+        
+        const serverProjects = result.getValue();
         const localService = container.resolve(LocalProjectService);
         const mergedProjects = serverProjects.map((project) => new Project(project));
 
@@ -64,9 +65,10 @@ export function useSaveProject() {
         throw new Error('User is offline.');
       }
 
-      return runAuthenticatedResultCall(firebaseUser, ProjectApiClient, (client, token) =>
-        client.saveProject(projectData, token),
-      );
+      const client = container.resolve(ProjectApiClient);
+      const result = await client.saveProject(projectData);
+      if (result.isFailure) throw result.error;
+      return result.getValue();
     },
     onSuccess: (savedProject) => {
       setHasUnsavedChanges(false);
@@ -98,9 +100,9 @@ export function useDeleteProject() {
 
       if (navigator.onLine && firebaseUser) {
         try {
-          await runAuthenticatedResultCall(firebaseUser, ProjectApiClient, (client, token) =>
-            client.deleteProject(projectId, token),
-          );
+          const client = container.resolve(ProjectApiClient);
+          const result = await client.deleteProject(projectId);
+          if (result.isFailure) throw result.error;
         } catch (error) {
           console.error('Failed to delete from server:', error);
         }

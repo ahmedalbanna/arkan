@@ -84,6 +84,9 @@ export const templateKeys = {
   pptx: () => [...templateKeys.all(), 'pptx'] as const,
   report: () => [...templateKeys.all(), 'report'] as const,
   presentation: () => [...templateKeys.all(), 'presentation'] as const,
+  lists: (type: 'docx' | 'pptx' | 'report' | 'presentation') => [...templateKeys.all(), type, 'list'] as const,
+  details: (type: 'docx' | 'pptx' | 'report' | 'presentation') => [...templateKeys.all(), type, 'detail'] as const,
+  detail: (type: 'docx' | 'pptx' | 'report' | 'presentation', id: string) => [...templateKeys.details(type), id] as const,
 };
 
 export const writingToolKeys = {

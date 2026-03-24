@@ -1,7 +1,4 @@
-
-'use client';
-
-
+import { injectable } from "tsyringe";
 import { apiService, ApiError } from "@/infrastructure/api/ApiService";
 import { Result } from "@/lib/utils/result";
 
@@ -9,7 +6,11 @@ export interface DashboardStats {
     totalUsers: number;
     totalGenerations: number;
     pendingPayments: number;
-    agentUsageChartData: { name: string; count: number }[];
+    agentUsageChartData: {
+        name: string;
+        agentId: string;
+        count: number;
+    }[];
     recentActivity: {
         id: string;
         userId: string;
@@ -45,40 +46,43 @@ export interface DashboardStats {
     }[];
 }
 
+const toApiError = (error: unknown): ApiError => {
+  if (error instanceof ApiError) return error;
+  return new ApiError(error instanceof Error ? error.message : 'Unknown error', 500);
+};
 
+@injectable()
 export class AdminApiClient {
-    async fetchDashboardStats(token: string): Promise<Result<DashboardStats, ApiError>> {
+    async fetchDashboardStats(): Promise<Result<DashboardStats, ApiError>> {
         try {
-            const data = await apiService<any, DashboardStats>({ endpoint: '/api/admin/dashboard-stats', token });
+            const data = await apiService<any, DashboardStats>({ endpoint: '/api/admin/dashboard-stats' });
             return Result.ok(data);
         } catch (error: any) {
-            return Result.fail(error);
+            return Result.fail(toApiError(error));
         }
     }
 
-    async setUserDisabledStatus(userId: string, isDisabled: boolean, token?: string): Promise<Result<void, ApiError>> {
+    async setUserDisabledStatus(userId: string, isDisabled: boolean): Promise<Result<void, ApiError>> {
         try {
             await apiService({
                 endpoint: `/api/admin/users/${userId}/disable`,
                 method: 'POST',
-                data: { isDisabled },
-                token
+                data: { isDisabled }
             });
             return Result.ok();
         } catch (error: any) {
-            return Result.fail(error);
+            return Result.fail(toApiError(error));
         }
     }
 
-    async fetchSecurityAuditLogs(token?: string): Promise<Result<any[], ApiError>> {
+    async fetchSecurityAuditLogs(): Promise<Result<any[], ApiError>> {
         try {
             const data = await apiService<never, any[]>({ 
-                endpoint: '/api/admin/security-audit-logs',
-                token
+                endpoint: '/api/admin/security-audit-logs'
             });
             return Result.ok(data);
         } catch (error: any) {
-            return Result.fail(error);
+            return Result.fail(toApiError(error));
         }
     }
 }

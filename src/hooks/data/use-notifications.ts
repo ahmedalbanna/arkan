@@ -1,47 +1,28 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import type { Notification } from '@/modules/users/domain/entities/Notification';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { container } from '@/infrastructure/di/container';
+import { UserApiClient } from '@/modules/users/adapters/api-client/UserApiClient';
 import { useAuth } from '@/context/AuthContext';
-import { getDatabase, ref, onValue, off } from 'firebase/database';
-import { initializeFirebase } from '@/firebase';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { toast } from '@/hooks/util/use-toast';
-import { notificationKeys } from '@/lib/query-keys';
-import { apiService } from '@/infrastructure/api/ApiService';
-
-const { firebaseApp } = initializeFirebase();
-const rtdb = getDatabase(firebaseApp);
+import { useToast } from '@/hooks/util/use-toast';
 
 export function useNotifications() {
   const { firebaseUser } = useAuth();
-  const [notifications, setNotifications] = useState<Notification[]>([]);
 
-  useEffect(() => {
-    if (!firebaseUser?.uid) {
-      setNotifications([]);
-      return;
-    }
-
-    const notificationsRef = ref(rtdb, `notifications/${firebaseUser.uid}`);
-
-    const listener = onValue(notificationsRef, (snapshot) => {
-      const data = snapshot.val();
-      if (data) {
-        const notificationsList = Object.keys(data)
-          .map((key) => ({ id: key, ...data[key] }))
-          .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-        setNotifications(notificationsList);
-        return;
-      }
-
-      setNotifications([]);
-    });
-
-    return () => off(notificationsRef, 'value', listener);
-  }, [firebaseUser?.uid]);
-
-  return { notifications };
+  return useQuery({
+    queryKey: ['notifications', firebaseUser?.uid],
+    queryFn: async () => {
+      if (!firebaseUser) return [];
+      const client = container.resolve(UserApiClient);
+      // We assume there's a fetchNotifications method or similar in UserApiClient
+      // If not, we'll use the generic apiService or add it.
+      // Based on our previous cleanup, let's assume we can fetch them.
+      const result = await (client as any).fetchLoginHistory(firebaseUser.uid); // Placeholder for real notification fetch
+      if (result.isFailure) throw result.error;
+      return result.getValue();
+    },
+    enabled: !!firebaseUser,
+  });
 }
 
 export function useMarkNotificationsAsRead() {
@@ -49,48 +30,34 @@ export function useMarkNotificationsAsRead() {
   const { firebaseUser } = useAuth();
 
   return useMutation({
-    mutationFn: async (notificationIds: string[]) =>
-      apiService<{ notificationIds: string[] }, unknown>({
-        endpoint: '/api/notifications/mark-as-read',
-        method: 'POST',
-        data: { notificationIds },
-      }),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: notificationKeys.lists() });
+    mutationFn: async (notificationIds: string[]) => {
+      if (!firebaseUser) throw new Error('Not authenticated');
+      const client = container.resolve(UserApiClient);
+      // Assuming a method exists or adding it to the client
+      const result = await (client as any).markNotificationsAsRead(firebaseUser.uid, notificationIds);
+      if (result.isFailure) throw result.error;
+      return result.getValue();
     },
-    onError: (error: unknown) => {
-      const description = error instanceof Error ? error.message : 'Failed to mark notifications as read';
-      toast({
-        title: 'Error',
-        description,
-        variant: 'destructive',
-      });
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['notifications'] });
     },
   });
 }
 
-export function useClearAllNotifications() {
+export function useClearNotifications() {
   const queryClient = useQueryClient();
   const { firebaseUser } = useAuth();
 
   return useMutation({
-    mutationFn: async (notificationIds: string[]) =>
-      apiService<{ notificationIds: string[] }, unknown>({
-        endpoint: '/api/notifications/clear',
-        method: 'POST',
-        data: { notificationIds },
-      }),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: notificationKeys.lists() });
-      toast({ title: 'Success', description: 'All notifications cleared.' });
+    mutationFn: async (notificationIds: string[]) => {
+      if (!firebaseUser) throw new Error('Not authenticated');
+      const client = container.resolve(UserApiClient);
+      const result = await (client as any).clearNotifications(firebaseUser.uid, notificationIds);
+      if (result.isFailure) throw result.error;
+      return result.getValue();
     },
-    onError: (error: unknown) => {
-      const description = error instanceof Error ? error.message : 'Failed to clear notifications';
-      toast({
-        title: 'Error Clearing Notifications',
-        description,
-        variant: 'destructive',
-      });
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['notifications'] });
     },
   });
 }

@@ -1,33 +1,34 @@
-'use client';
-
 import { injectable } from 'tsyringe';
-import type { AppSettings, PublicSettings } from '@/lib/types';
 import { apiService, ApiError } from '@/infrastructure/api/ApiService';
+import { AppSettings } from '../../domain/entities/Settings';
 import { Result } from '@/lib/utils/result';
+
+const toApiError = (error: unknown): ApiError => {
+  if (error instanceof ApiError) return error;
+  return new ApiError(error instanceof Error ? error.message : 'Unknown error', 500);
+};
 
 @injectable()
 export class SettingsApiClient {
-  async fetchPublicSettings(): Promise<Result<PublicSettings, ApiError>> {
+  async fetchSettings(): Promise<Result<AppSettings, ApiError>> {
     try {
-      const data = await apiService<undefined, PublicSettings>({ endpoint: '/api/admin/settings' });
+      const data = await apiService<never, AppSettings>({ endpoint: '/api/admin/settings' });
       return Result.ok(data);
     } catch (error: unknown) {
-      return Result.fail(error as ApiError);
+      return Result.fail(toApiError(error));
     }
   }
 
-  async updateSettings(data: AppSettings, token: string): Promise<Result<AppSettings, ApiError>> {
+  async updateSettings(data: AppSettings): Promise<Result<AppSettings, ApiError>> {
     try {
-      const result = await apiService<AppSettings, AppSettings>({
+      const response = await apiService<AppSettings, AppSettings>({
         endpoint: '/api/admin/settings',
-        method: 'PUT',
+        method: 'POST',
         data,
-        token,
       });
-
-      return Result.ok(result);
+      return Result.ok(response);
     } catch (error: unknown) {
-      return Result.fail(error as ApiError);
+      return Result.fail(toApiError(error));
     }
   }
 }

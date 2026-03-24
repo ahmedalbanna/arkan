@@ -1,18 +1,26 @@
 'use client';
 
 import { useQuery } from '@tanstack/react-query';
-import { analyticsKeys } from '@/lib/query-keys';
-import { AnalyticsApiClient } from '@/modules/admin/adapters/api-client/AnalyticsApiClient';
+import { container } from '@/infrastructure/di/container';
+import { AnalyticsApiClient, UserDashboardStats } from '@/modules/admin/adapters/api-client/AnalyticsApiClient';
 import { useAuth } from '@/context/AuthContext';
-import { runAuthenticatedResultCall } from './authenticated-client-call';
 
-export function useUserStats() {
+export function useUserAnalytics() {
   const { firebaseUser } = useAuth();
 
-  return useQuery({
-    queryKey: analyticsKeys.userStats(firebaseUser?.uid ?? ''),
-    queryFn: async () =>
-      runAuthenticatedResultCall(firebaseUser, AnalyticsApiClient, (client, token) => client.fetchUserStats(token)),
-    enabled: Boolean(firebaseUser),
+  return useQuery<UserDashboardStats, Error>({
+    queryKey: ['user-analytics', firebaseUser?.uid],
+    queryFn: async () => {
+      if (!firebaseUser) throw new Error('User not authenticated');
+      const client = container.resolve(AnalyticsApiClient);
+      const result = await client.fetchUserStats();
+      if (result.isFailure) throw result.error;
+      return result.getValue();
+    },
+    enabled: !!firebaseUser,
   });
+}
+
+export function useUserStats() {
+    return useUserAnalytics();
 }

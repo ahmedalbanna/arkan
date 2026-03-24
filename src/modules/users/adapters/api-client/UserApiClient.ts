@@ -1,8 +1,7 @@
 import { injectable } from 'tsyringe';
 import { apiService, ApiError } from '@/infrastructure/api/ApiService';
+import { UserProfile } from '../../domain/entities/User';
 import { Result } from '@/lib/utils/result';
-import type { UserProfile, UserRole } from '../../domain/entities/User';
-import { doc, onSnapshot, type Firestore } from 'firebase/firestore';
 
 export interface PaginatedUsersResponse {
   users: UserProfile[];
@@ -11,58 +10,55 @@ export interface PaginatedUsersResponse {
 }
 
 export interface CreateUserInput {
-  name: string;
   email: string;
-  password: string;
-  role: UserRole;
-  credits: number;
+  name: string;
+  role: 'admin' | 'user';
+  password?: string;
 }
 
 export interface CreateUserResponse {
-  user: {
-    uid: string;
-    email?: string;
-  };
+  id: string;
+  email: string;
+  name: string;
 }
 
 export interface SendNotificationInput {
   userId: string;
   title: string;
-  body: string;
+  description: string;
+  type: 'info' | 'success' | 'warning' | 'alert' | 'error';
   link?: string;
 }
 
 export interface SendNotificationResponse {
-  message?: string;
-  messageId?: string;
+  message: string;
 }
 
 const toApiError = (error: unknown): ApiError => {
-  if (error instanceof ApiError) {
-    return error;
-  }
-
-  return new ApiError('Unexpected API client error', 500, error);
+  if (error instanceof ApiError) return error;
+  return new ApiError(error instanceof Error ? error.message : 'Unknown error', 500);
 };
 
 @injectable()
 export class UserApiClient {
-  async fetchUserById(id: string, token: string): Promise<Result<UserProfile, ApiError>> {
+  async fetchUserById(id: string): Promise<Result<UserProfile, ApiError>> {
     try {
-      const data = await apiService<never, UserProfile>({ endpoint: `/api/users/${id}`, token });
+      const data = await apiService<never, UserProfile>({ endpoint: `/api/users/${id}` });
       return Result.ok(data);
     } catch (error: unknown) {
       return Result.fail(toApiError(error));
     }
   }
 
-  async fetchUserProfile(id: string, token: string): Promise<Result<UserProfile, ApiError>> {
-    return this.fetchUserById(id, token);
+  async fetchUserProfile(id: string): Promise<Result<UserProfile, ApiError>> {
+    return this.fetchUserById(id);
   }
 
   async fetchUserFingerprints(userId: string): Promise<Result<any[], ApiError>> {
     try {
-      const data = await apiService<never, any[]>({ endpoint: `/api/users/${userId}/fingerprints` });
+      const data = await apiService<never, any[]>({ 
+        endpoint: `/api/users/${userId}/fingerprints`
+      });
       return Result.ok(data);
     } catch (error: unknown) {
       return Result.fail(toApiError(error));
@@ -83,22 +79,22 @@ export class UserApiClient {
 
   async fetchLoginHistory(userId: string): Promise<Result<any[], ApiError>> {
     try {
-      const data = await apiService<never, any[]>({ endpoint: `/api/users/${userId}/login-history` });
+      const data = await apiService<never, any[]>({ 
+        endpoint: `/api/users/${userId}/login-history`
+      });
       return Result.ok(data);
     } catch (error: unknown) {
       return Result.fail(toApiError(error));
     }
   }
 
-  async updateUser(id: string, data: Partial<UserProfile>, token: string): Promise<Result<UserProfile, ApiError>> {
+  async updateUser(id: string, data: Partial<UserProfile>): Promise<Result<UserProfile, ApiError>> {
     try {
       const response = await apiService<Partial<UserProfile>, UserProfile>({
         endpoint: `/api/users/${id}`,
         method: 'PUT',
         data,
-        token,
       });
-
       return Result.ok(response);
     } catch (error: unknown) {
       return Result.fail(toApiError(error));
@@ -106,65 +102,54 @@ export class UserApiClient {
   }
 
   async getPaginatedUsers(
-    options: { limit: number; lastVisibleId?: string },
-    token: string,
+    limit: number,
+    lastVisibleId?: string,
   ): Promise<Result<PaginatedUsersResponse, ApiError>> {
     try {
-      const params = new URLSearchParams();
-      params.append('limit', options.limit.toString());
-      if (options.lastVisibleId) {
-        params.append('lastVisibleId', options.lastVisibleId);
-      }
+      const query = new URLSearchParams({ limit: limit.toString() });
+      if (lastVisibleId) query.set('lastVisibleId', lastVisibleId);
 
-      const response = await apiService<never, PaginatedUsersResponse>({
-        endpoint: `/api/admin/users?${params.toString()}`,
-        token,
+      const data = await apiService<never, PaginatedUsersResponse>({
+        endpoint: `/api/admin/users?${query.toString()}`,
       });
-
-      return Result.ok(response);
+      return Result.ok(data);
     } catch (error: unknown) {
       return Result.fail(toApiError(error));
     }
   }
 
-  async createUser(data: CreateUserInput, token: string): Promise<Result<CreateUserResponse, ApiError>> {
+  async createUser(data: CreateUserInput): Promise<Result<CreateUserResponse, ApiError>> {
     try {
       const response = await apiService<CreateUserInput, CreateUserResponse>({
         endpoint: '/api/admin/users',
         method: 'POST',
         data,
-        token,
       });
-
       return Result.ok(response);
     } catch (error: unknown) {
       return Result.fail(toApiError(error));
     }
   }
 
-  async adminUpdateUser(id: string, data: Partial<UserProfile>, token: string): Promise<Result<UserProfile, ApiError>> {
+  async adminUpdateUser(id: string, data: Partial<UserProfile>): Promise<Result<UserProfile, ApiError>> {
     try {
       const response = await apiService<Partial<UserProfile>, UserProfile>({
         endpoint: `/api/admin/users/${id}`,
         method: 'PUT',
         data,
-        token,
       });
-
       return Result.ok(response);
     } catch (error: unknown) {
       return Result.fail(toApiError(error));
     }
   }
 
-  async deleteUser(id: string, token: string): Promise<Result<{ message: string }, ApiError>> {
+  async deleteUser(id: string): Promise<Result<{ message: string }, ApiError>> {
     try {
       const response = await apiService<never, { message: string }>({
         endpoint: `/api/admin/users/${id}`,
         method: 'DELETE',
-        token,
       });
-
       return Result.ok(response);
     } catch (error: unknown) {
       return Result.fail(toApiError(error));
@@ -172,50 +157,28 @@ export class UserApiClient {
   }
 
   async sendNotification(
-    variables: SendNotificationInput,
-    token: string,
+    data: SendNotificationInput,
   ): Promise<Result<SendNotificationResponse, ApiError>> {
     try {
       const response = await apiService<SendNotificationInput, SendNotificationResponse>({
-        endpoint: '/api/admin/notifications/send',
+        endpoint: '/api/admin/notifications',
         method: 'POST',
-        data: variables,
-        token,
+        data,
       });
-
       return Result.ok(response);
     } catch (error: unknown) {
       return Result.fail(toApiError(error));
     }
   }
 
+  // Legacy/Firebase specific - can be removed if not needed anymore
   subscribeToUserProfile(
-    userId: string,
-    firestore: Firestore,
-    callback: (user: UserProfile | null) => void,
+    _id: string,
+    _firestore: any,
+    _callback: (user: UserProfile | null) => void,
   ): () => void {
-    if (typeof window === 'undefined' || !firestore) {
-      return () => {};
-    }
-
-    const userDocRef = doc(firestore, 'users', userId);
-
-    const unsubscribe = onSnapshot(
-      userDocRef,
-      (snapshot) => {
-        if (snapshot.exists()) {
-          callback({ id: snapshot.id, ...snapshot.data() } as UserProfile);
-          return;
-        }
-
-        callback(null);
-      },
-      (error) => {
-        console.error('Error listening to user profile:', error);
-        callback(null);
-      },
-    );
-
-    return unsubscribe;
+    // This previously used Firestore onSnapshot. 
+    // For SQLite, we should probably rely on manual refetch or WebSockets.
+    return () => {};
   }
 }

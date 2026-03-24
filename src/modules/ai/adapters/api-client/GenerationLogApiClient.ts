@@ -1,59 +1,34 @@
-'use client';
-
 import { injectable } from 'tsyringe';
 import { apiService, ApiError } from '@/infrastructure/api/ApiService';
 import { Result } from '@/lib/utils/result';
 
-export interface GenerationLog {
-  id: string;
-  agentId: string;
-  userId: string;
-  userName: string;
-  input: unknown;
-  output: unknown;
-  createdAt: string;
-}
-
-interface FetchLogsParams {
-  token: string;
-  limit: number;
-  agentId?: string;
-  userId?: string;
-  lastVisibleId?: string;
-}
-
-export interface GenerationLogsPage {
-  logs: GenerationLog[];
+export interface GenerationLogResponse {
+  logs: any[];
   hasNextPage: boolean;
   lastVisibleId: string | null;
 }
 
 const toApiError = (error: unknown): ApiError => {
-  if (error instanceof ApiError) {
-    return error;
-  }
-
-  return new ApiError('Unexpected generation logs error', 500, error);
+  if (error instanceof ApiError) return error;
+  return new ApiError(error instanceof Error ? error.message : 'Unknown error', 500);
 };
 
 @injectable()
 export class GenerationLogApiClient {
-  async fetchGenerationLogs(params: FetchLogsParams): Promise<Result<GenerationLogsPage, ApiError>> {
-    const { token, limit, agentId, userId, lastVisibleId } = params;
-
-    if (!token) {
-      return Result.fail(new ApiError('Authentication token is required.', 401));
-    }
-
-    const queryParams = new URLSearchParams({ limit: limit.toString() });
-    if (agentId) queryParams.append('agentId', agentId);
-    if (userId) queryParams.append('userId', userId);
-    if (lastVisibleId) queryParams.append('lastVisibleId', lastVisibleId);
-
+  async fetchLogsApi(params: {
+    limit: number;
+    agentId?: string;
+    userId?: string;
+    lastVisibleId?: string;
+  }): Promise<Result<GenerationLogResponse, ApiError>> {
     try {
-      const data = await apiService<undefined, GenerationLogsPage>({
-        endpoint: `/api/admin/logs?${queryParams.toString()}`,
-        token,
+      const query = new URLSearchParams({ limit: params.limit.toString() });
+      if (params.agentId) query.set('agentId', params.agentId);
+      if (params.userId) query.set('userId', params.userId);
+      if (params.lastVisibleId) query.set('lastVisibleId', params.lastVisibleId);
+
+      const data = await apiService<never, GenerationLogResponse>({
+        endpoint: `/api/admin/manage-generations?${query.toString()}`,
       });
       return Result.ok(data);
     } catch (error: unknown) {

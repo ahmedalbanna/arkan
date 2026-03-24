@@ -1,94 +1,79 @@
 'use client';
 
-import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { container } from '@/infrastructure/di/container';
+import { TransactionApiClient, VerifyPaymentVariables } from '@/modules/billing/adapters/api-client/TransactionApiClient';
 import { useAuth } from '@/context/AuthContext';
-import { transactionKeys } from '@/lib/query-keys';
-import { TransactionApiClient } from '@/modules/billing/adapters/api-client/TransactionApiClient';
-import { toast, useToast } from '@/hooks/util/use-toast';
-import { Transaction, type TransactionProperties } from '@/modules/billing/domain/entities/Transaction';
-import { runAuthenticatedResultCall } from './authenticated-client-call';
+import { useToast } from '@/hooks/util/use-toast';
 
-export type TransactionStatus = 'pending' | 'verified' | 'rejected';
+export function useTransactions(status?: string) {
+  const { firebaseUser } = useAuth();
 
-export interface VerifyPaymentVariables {
-  transactionId: string;
-  userId: string;
-  creditsToGrant: number;
-  status: TransactionStatus;
-  adminNotes?: string;
+  return useQuery({
+    queryKey: ['transactions', status],
+    queryFn: async () => {
+      if (!firebaseUser) return [];
+      const client = container.resolve(TransactionApiClient);
+      const result = await client.fetchTransactions(status);
+      if (result.isFailure) throw result.error;
+      return result.getValue();
+    },
+    enabled: !!firebaseUser,
+  });
 }
 
-const TRANSACTIONS_PER_PAGE = 6;
+export function useUserTransactions() {
+  const { firebaseUser } = useAuth();
 
-export function useTransactions(status: TransactionStatus) {
-  const { firebaseUser, isLoading: authLoading } = useAuth();
-
-  return useInfiniteQuery({
-    queryKey: transactionKeys.list(status),
-    queryFn: async ({ pageParam }) => {
-      const results = await runAuthenticatedResultCall(firebaseUser, TransactionApiClient, (client, token) =>
-        client.getTransactions({ token, status, limit: TRANSACTIONS_PER_PAGE, lastVisibleId: pageParam }),
-      );
-
-      return {
-        ...results,
-        transactions: results.transactions.map((transaction) => new Transaction(transaction)),
-      };
+  return useQuery({
+    queryKey: ['user-transactions', firebaseUser?.uid],
+    queryFn: async () => {
+      if (!firebaseUser) return [];
+      const client = container.resolve(TransactionApiClient);
+      const result = await client.fetchUserTransactions();
+      if (result.isFailure) throw result.error;
+      return result.getValue();
     },
-    initialPageParam: undefined as string | undefined,
-    getNextPageParam: (lastPage) => (lastPage.hasNextPage ? lastPage.lastVisibleId ?? undefined : undefined),
-    enabled: !authLoading && Boolean(firebaseUser),
+    enabled: !!firebaseUser,
   });
 }
 
 export function useVerifyPayment() {
   const queryClient = useQueryClient();
-  const { firebaseUser } = useAuth();
-
-  return useMutation({
-    mutationFn: async (variables: VerifyPaymentVariables) =>
-      runAuthenticatedResultCall(firebaseUser, TransactionApiClient, (client, token) => client.verifyPayment(variables, token)),
-    onSuccess: (_data, variables) => {
-      toast({ title: 'Success', description: `Transaction has been ${variables.status}.` });
-      queryClient.invalidateQueries({ queryKey: transactionKeys.lists() });
-    },
-    onError: (error: Error) => {
-      toast({ title: 'Verification Failed', description: error.message, variant: 'destructive' });
-    },
-  });
-}
-
-export function useUserTransactions() {
-  const { firebaseUser, isLoading: authLoading } = useAuth();
-
-  return useQuery({
-    queryKey: transactionKeys.lists(),
-    queryFn: async () => {
-      const results = await runAuthenticatedResultCall(firebaseUser, TransactionApiClient, (client, token) =>
-        client.fetchUserTransactions(token),
-      );
-      return results.map((transaction: TransactionProperties) => new Transaction(transaction));
-    },
-    enabled: !authLoading && Boolean(firebaseUser),
-  });
-}
-
-export function useSubmitPaymentProof(options?: { onSuccess?: () => void }) {
-  const { firebaseUser } = useAuth();
-  const queryClient = useQueryClient();
   const { toast } = useToast();
 
   return useMutation({
-    mutationFn: async (formData: FormData) =>
-      runAuthenticatedResultCall(firebaseUser, TransactionApiClient, (client, token) =>
-        client.submitPaymentProof({ formData, token }),
-      ),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: transactionKeys.lists() });
-      options?.onSuccess?.();
+    mutationFn: async (variables: VerifyPaymentVariables) => {
+      const client = container.resolve(TransactionApiClient);
+      const result = await client.verifyPayment(variables);
+      if (result.isFailure) throw result.error;
+      return result.getValue();
     },
-    onError: (error: Error) => {
-      toast({ title: 'Submission Failed', description: error.message, variant: 'destructive' });
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['transactions'] });
+      toast({ title: 'Success', description: 'Payment verified successfully.' });
+    },
+    onError: (error: any) => {
+      toast({ title: 'Error', description: error.message || 'Failed to verify payment.', variant: 'destructive' });
+    },
+  });
+}
+
+export function useSubmitPaymentProof() {
+  const { toast } = useToast();
+
+  return useMutation({
+    mutationFn: async (formData: FormData) => {
+      const client = container.resolve(TransactionApiClient);
+      const result = await client.submitPaymentProof(formData);
+      if (result.isFailure) throw result.error;
+      return result.getValue();
+    },
+    onSuccess: () => {
+      toast({ title: 'Success', description: 'Payment proof submitted successfully.' });
+    },
+    onError: (error: any) => {
+      toast({ title: 'Error', description: error.message || 'Failed to submit proof.', variant: 'destructive' });
     },
   });
 }

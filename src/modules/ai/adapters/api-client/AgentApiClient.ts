@@ -1,55 +1,50 @@
-'use client';
-
 import { injectable } from 'tsyringe';
-import type { AgentProperties } from '@/lib/types';
 import { apiService, ApiError } from '@/infrastructure/api/ApiService';
+import { AgentProperties } from '../../domain/entities/Agent';
 import { Result } from '@/lib/utils/result';
 
 export interface AgentCategory {
   id: string;
   name: string;
-  description?: string;
+  description: string | null;
+  icon: string | null;
+  order: number | null;
 }
 
 const toApiError = (error: unknown): ApiError => {
-  if (error instanceof ApiError) {
-    return error;
-  }
-
-  return new ApiError('Unexpected agent API error', 500, error);
+  if (error instanceof ApiError) return error;
+  return new ApiError(error instanceof Error ? error.message : 'Unknown error', 500);
 };
 
 @injectable()
 export class AgentApiClient {
-  async fetchAgentsApi(token: string, category?: string): Promise<Result<AgentProperties[], ApiError>> {
+  async fetchAgentsApi(category?: string): Promise<Result<AgentProperties[], ApiError>> {
     try {
-      const url = new URL('/api/agents', window.location.origin);
-      if (category) {
-        url.searchParams.append('category', category);
-      }
-      const data = await apiService<undefined, AgentProperties[]>({ endpoint: url.toString(), token });
+      const endpoint = category 
+        ? `/api/agents?category=${category}` 
+        : '/api/agents';
+      const data = await apiService<never, AgentProperties[]>({ endpoint });
       return Result.ok(data);
     } catch (error: unknown) {
       return Result.fail(toApiError(error));
     }
   }
 
-  async fetchAgentByIdApi(id: string, token: string): Promise<Result<AgentProperties, ApiError>> {
+  async fetchAgentByIdApi(id: string): Promise<Result<AgentProperties, ApiError>> {
     try {
-      const data = await apiService<undefined, AgentProperties>({ endpoint: `/api/agents/${id}`, token });
+      const data = await apiService<never, AgentProperties>({ endpoint: `/api/agents/${id}` });
       return Result.ok(data);
     } catch (error: unknown) {
       return Result.fail(toApiError(error));
     }
   }
 
-  async createAgentApi(data: Omit<AgentProperties, 'id'> & { id: string }, token: string): Promise<Result<AgentProperties, ApiError>> {
+  async createAgentApi(data: Omit<AgentProperties, 'id'> & { id: string }): Promise<Result<AgentProperties, ApiError>> {
     try {
-      const response = await apiService<typeof data, AgentProperties>({
+      const response = await apiService<Omit<AgentProperties, 'id'> & { id: string }, AgentProperties>({
         endpoint: '/api/agents',
         method: 'POST',
         data,
-        token,
       });
       return Result.ok(response);
     } catch (error: unknown) {
@@ -57,13 +52,12 @@ export class AgentApiClient {
     }
   }
 
-  async updateAgentApi(id: string, data: Partial<AgentProperties>, token: string): Promise<Result<AgentProperties, ApiError>> {
+  async updateAgentApi(id: string, data: Partial<AgentProperties>): Promise<Result<AgentProperties, ApiError>> {
     try {
       const response = await apiService<Partial<AgentProperties>, AgentProperties>({
         endpoint: `/api/agents/${id}`,
         method: 'PUT',
         data,
-        token,
       });
       return Result.ok(response);
     } catch (error: unknown) {
@@ -71,12 +65,11 @@ export class AgentApiClient {
     }
   }
 
-  async deleteAgentApi(id: string, token: string): Promise<Result<{ message: string }, ApiError>> {
+  async deleteAgentApi(id: string): Promise<Result<{ message: string }, ApiError>> {
     try {
-      const response = await apiService<undefined, { message: string }>({
+      const response = await apiService<never, { message: string }>({
         endpoint: `/api/agents/${id}`,
         method: 'DELETE',
-        token,
       });
       return Result.ok(response);
     } catch (error: unknown) {
@@ -84,9 +77,9 @@ export class AgentApiClient {
     }
   }
 
-  async fetchAgentCategoriesApi(token: string): Promise<Result<AgentCategory[], ApiError>> {
+  async fetchAgentCategoriesApi(): Promise<Result<AgentCategory[], ApiError>> {
     try {
-      const data = await apiService<undefined, AgentCategory[]>({ endpoint: '/api/agent-categories', token });
+      const data = await apiService<never, AgentCategory[]>({ endpoint: '/api/agent-categories' });
       return Result.ok(data);
     } catch (error: unknown) {
       return Result.fail(toApiError(error));

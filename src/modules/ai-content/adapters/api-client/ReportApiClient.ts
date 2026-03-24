@@ -1,5 +1,3 @@
-'use client';
-
 import { injectable } from 'tsyringe';
 import { apiService, ApiError } from '@/infrastructure/api/ApiService';
 import { Result } from '@/lib/utils/result';
@@ -10,20 +8,19 @@ export interface GeneratedReportSectionResponse {
 
 const toApiError = (error: unknown): ApiError => {
   if (error instanceof ApiError) return error;
-  return new ApiError('Unexpected report API error', 500, error);
+  return new ApiError(error instanceof Error ? error.message : 'Unknown error', 500);
 };
 
 @injectable()
 export class ReportApiClient {
-  async generateReportSectionApi(body: unknown, token: string): Promise<Result<GeneratedReportSectionResponse, ApiError>> {
+  async generateReportSectionApi(body: unknown): Promise<Result<GeneratedReportSectionResponse, ApiError>> {
     try {
-      const data = await apiService<unknown, GeneratedReportSectionResponse>({
+      const response = await apiService<unknown, GeneratedReportSectionResponse>({
         endpoint: '/api/generate/section',
         method: 'POST',
         data: body,
-        token,
       });
-      return Result.ok(data);
+      return Result.ok(response);
     } catch (error: unknown) {
       return Result.fail(toApiError(error));
     }

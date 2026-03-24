@@ -1,43 +1,39 @@
-'use client';
-
-import { injectable } from "tsyringe";
+import { injectable } from 'tsyringe';
 import { apiService, ApiError } from '@/infrastructure/api/ApiService';
-import type { Feature } from '@/modules/admin/domain/entities/Feature';
-import { Result } from "@/lib/utils/result";
+import { Feature } from '../../domain/entities/Feature';
+import { Result } from '@/lib/utils/result';
 
 export interface UpdateFeatureVariables {
-  featureId: string;
-  payload: {
-    isEnabled: boolean;
-  };
+  id: string;
+  data: Partial<Feature>;
 }
+
+const toApiError = (error: unknown): ApiError => {
+  if (error instanceof ApiError) return error;
+  return new ApiError(error instanceof Error ? error.message : 'Unknown error', 500);
+};
 
 @injectable()
 export class FeatureApiClient {
-  async fetchFeaturesApi(token: string): Promise<Result<Feature[], ApiError>> {
+  async fetchFeaturesApi(): Promise<Result<Feature[], ApiError>> {
     try {
-        const data = await apiService<undefined, Feature[]>({
-            endpoint: '/api/admin/features',
-            token,
-        });
-        return Result.ok(data);
-    } catch (error: any) {
-        return Result.fail(error);
+      const data = await apiService<never, Feature[]>({ endpoint: '/api/features' });
+      return Result.ok(data);
+    } catch (error: unknown) {
+      return Result.fail(toApiError(error));
     }
   }
 
-  async updateFeatureApi(variables: UpdateFeatureVariables, token: string): Promise<Result<any, ApiError>> {
+  async updateFeatureApi(variables: UpdateFeatureVariables): Promise<Result<any, ApiError>> {
     try {
-        const { featureId, payload } = variables;
-        const data = await apiService({
-            endpoint: `/api/admin/features/${featureId}`,
-            method: 'PUT',
-            data: payload,
-            token,
-        });
-        return Result.ok(data);
-    } catch (error: any) {
-        return Result.fail(error);
+      const response = await apiService<Partial<Feature>, any>({
+        endpoint: `/api/features`,
+        method: 'PUT',
+        data: { id: variables.id, ...variables.data },
+      });
+      return Result.ok(response);
+    } catch (error: unknown) {
+      return Result.fail(toApiError(error));
     }
   }
 }

@@ -1,60 +1,30 @@
-/**
- * Hook: useRAGRetrieval
- *
- * React hook for retrieving context from the RAG system
- */
-
 'use client';
 
-import { useState } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { apiService } from '@/infrastructure/api/ApiService';
+import { useState } from 'react';
 
-interface RetrievalSource {
-  content: string;
-  score: number;
-  sourceFile?: string;
-  type: string;
-}
-
-interface RetrievalState {
-  isRetrieving: boolean;
-  error: string | null;
-  context: string | null;
-  sources: RetrievalSource[];
-}
-
-interface RetrieveContextResponse {
+export interface RetrieveContextResponse {
   context: string;
-  sources?: RetrievalSource[];
+  sources: {
+    fileName: string;
+    score: number;
+    text: string;
+  }[];
 }
 
-export function useRAGRetrieval() {
+export function useRagRetrieval() {
   const { firebaseUser } = useAuth();
-  const [state, setState] = useState<RetrievalState>({
-    isRetrieving: false,
-    error: null,
-    context: null,
-    sources: [],
-  });
+  const [isLoading, setIsLoading] = useState(false);
 
   const retrieveContext = async (
-    query: string,
-    projectId?: string,
-    options: { topK?: number; minScore?: number } = {},
-  ) => {
-    if (!firebaseUser) {
-      setState((prev) => ({ ...prev, error: 'User not authenticated' }));
-      return null;
-    }
+    query: string, 
+    projectId?: string, 
+    options: { topK?: number; minScore?: number } = {}
+  ): Promise<RetrieveContextResponse | null> => {
+    if (!firebaseUser || !query.trim()) return null;
 
-    setState({
-      isRetrieving: true,
-      error: null,
-      context: null,
-      sources: [],
-    });
-
+    setIsLoading(true);
     try {
       const data = await apiService<
         { query: string; userId: string; projectId?: string; topK: number; minScore: number },
@@ -71,38 +41,17 @@ export function useRAGRetrieval() {
         },
       });
 
-      setState({
-        isRetrieving: false,
-        error: null,
-        context: data.context,
-        sources: data.sources ?? [],
-      });
-
-      return data.context;
-    } catch (error: unknown) {
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-      setState({
-        isRetrieving: false,
-        error: errorMessage,
-        context: null,
-        sources: [],
-      });
+      return data;
+    } catch (error) {
+      console.error('RAG Retrieval failed:', error);
       return null;
+    } finally {
+      setIsLoading(false);
     }
-  };
-
-  const reset = () => {
-    setState({
-      isRetrieving: false,
-      error: null,
-      context: null,
-      sources: [],
-    });
   };
 
   return {
     retrieveContext,
-    reset,
-    ...state,
+    isLoading,
   };
 }

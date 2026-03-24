@@ -1,10 +1,6 @@
-
-
 import { format } from "date-fns";
 
-// --- Types moved from types.ts ---
-
-export type UserRole = 'admin' | 'user'; // Removed team-specific roles
+export type UserRole = 'admin' | 'user';
 
 export interface SecuritySettings {
     enableLoginAlerts: boolean;
@@ -21,18 +17,14 @@ export interface UserProfile {
     bio?: string;
     profilePictureUrl?: string;
     hasCompletedOnboarding?: boolean;
-    apiKeys?: Record<string, string>; // To store keys for services like 'gemini', 'chatgpt'
-    lastDailyCreditUpdate?: string; // Timestamp for the last daily credit refresh
+    apiKeys?: Record<string, string>;
+    lastDailyCreditUpdate?: string;
     securitySettings?: SecuritySettings;
     isDisabled?: boolean;
     isTwoFactorEnabled?: boolean;
     twoFactorSecret?: string;
+    tokenVersion?: number;
 }
-
-// TeamMember is no longer needed
-// export interface TeamMember { ... }
-
-// --- End of moved types ---
 
 export type UserProperties = Partial<UserProfile> & { id?: string };
 
@@ -51,6 +43,8 @@ export class User {
     public readonly lastDailyCreditUpdate?: string;
     public securitySettings: SecuritySettings;
     public isDisabled: boolean;
+    public isTwoFactorEnabled: boolean;
+    public tokenVersion: number;
 
     constructor(props: UserProperties) {
         this.id = props.id || '';
@@ -67,21 +61,21 @@ export class User {
         this.lastDailyCreditUpdate = props.lastDailyCreditUpdate;
         this.securitySettings = props.securitySettings || { enableLoginAlerts: true };
         this.isDisabled = !!props.isDisabled;
+        this.isTwoFactorEnabled = !!props.isTwoFactorEnabled;
+        this.tokenVersion = props.tokenVersion || 1;
     }
 
-    /**
-     * Returns the user's initials, useful for avatars.
-     */
     public getInitials(): string {
         if (!this.name) return '?';
         return this.name.split(' ').map(n => n[0]).join('').toUpperCase();
     }
     
-    /**
-     * Returns a formatted string for the creation date.
-     */
     public getFormattedDate(): string {
         if (!this.createdAt) return 'N/A';
-        return format(new Date(this.createdAt), 'd MMM yyyy');
+        try {
+            return format(new Date(this.createdAt), 'd MMM yyyy');
+        } catch {
+            return 'N/A';
+        }
     }
 }

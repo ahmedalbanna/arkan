@@ -1,130 +1,27 @@
+import { injectable } from 'tsyringe';
+import { apiService, ApiError } from '@/infrastructure/api/ApiService';
+import { Result } from '@/lib/utils/result';
 
-'use client';
-
-import type { CitationStyle, DiagramTypeSchema, ParaphraseMode, SummarizeLength } from "@/ai/schemas";
-import { apiService, ApiError } from "@/infrastructure/api/ApiService";
-import { Result } from "@/lib/utils/result";
-import { z } from "zod";
-
-// Base types for form data
-export interface ParaphraseTextVariables {
-    text: string;
-    mode: ParaphraseMode;
-}
-export interface SummarizeTextVariables {
-    text: string;
-    length: SummarizeLength;
-}
-export interface GenerateQuizVariables {
-    text: string;
-    numQuestions: number;
-    questionType: 'multiple-choice' | 'true-false' | 'direct-question';
-}
-export interface HumanizeTextVariables {
-    text: string;
-}
-export interface DetectAIVariables {
-    text: string;
-}
-export interface GrammarCheckVariables {
-    text: string;
-}
-export interface GenerateCitationVariables {
-    sourceText: string;
-    style: CitationStyle;
-}
-export interface FactCheckVariables {
-    text: string;
-}
-export interface PlagiarismCheckVariables {
-    text: string;
-}
-export interface AIResearcherVariables {
-    topic: string;
-}
-export interface TopicExplainerVariables {
-    topic: string;
-}
-export interface RewriteTextVariables {
-    text: string;
-    style: string;
-}
-export interface SummarizeTextWithRatioVariables {
-    text: string;
-    ratio: number;
-}
-export interface WriteDocumentVariables {
-    topic: string;
-    documentType: string;
-    knowledge?: string;
-    tableOfContents?: string[];
-}
-export interface IdeaGenerationVariables {
-    specialization: string;
-    domain?: string;
-    region?: string;
-    circumstances?: string;
-    additionalContext?: string;
-}
-export interface GeneratePresentationOutlineVariables {
-    prompt: string;
-    documentation?: string;
-}
-export interface GeneratePlantUMLVariables {
-    description: string;
-    diagramType: z.infer<typeof DiagramTypeSchema>;
-}
-
-export interface ManipulateTextVariables {
-    textToManipulate: string;
-    command: string;
-}
-export interface TranslateTextVariables {
-    text: string;
-    targetLang: string;
-}
-export interface SolveAssignmentsVariables {
-    text: string;
-}
-export interface GenerateProjectBlueprintVariables {
-    projectName: string;
-    projectType: string;
-    description: string;
-    targetAudience: string;
-    complexity: 'Simple' | 'Medium' | 'Complex' | 'Enterprise';
-    features: string;
-    techStack?: string;
-    budget?: string;
-    timeline?: string;
-}
-
-
-import { injectable } from "tsyringe";
+const toApiError = (error: unknown): ApiError => {
+  if (error instanceof ApiError) return error;
+  return new ApiError(error instanceof Error ? error.message : 'Unknown error', 500);
+};
 
 @injectable()
 export class WritingToolsApiClient {
-    /**
-     * A generic API handler for all writing tools.
-     * It now uses the centralized apiService.
-     * @param endpoint The specific API endpoint for the tool (e.g., '/api/writing-tools/summarize').
-     * @param variables An object containing the request body and the auth token.
-     * @returns A promise that resolves to the API response.
-     */
-    async writingToolApi<TRequest, TResponse>(
-        endpoint: string,
-        variables: { data: TRequest; token: string }
-    ): Promise<Result<TResponse, ApiError>> {
-        try {
-            const { token, data } = variables;
-            const result = await apiService<TRequest, TResponse>({
-                endpoint,
-                method: 'POST',
-                data,
-                token
-            });
-            return Result.ok(result);
-        } catch (error: any) {
-            return Result.fail(error);
-        }
+  async executeToolApi<TRequest = any, TResponse = any>(
+    toolName: string,
+    data: TRequest,
+  ): Promise<Result<TResponse, ApiError>> {
+    try {
+      const response = await apiService<TRequest, TResponse>({
+        endpoint: `/api/writing-tools/${toolName}`,
+        method: 'POST',
+        data,
+      });
+      return Result.ok(response);
+    } catch (error: unknown) {
+      return Result.fail(toApiError(error));
     }
+  }
 }

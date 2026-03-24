@@ -1,54 +1,29 @@
-/**
- * Hook: useRAGIndexing
- *
- * React hook for indexing documents into the RAG system
- */
-
 'use client';
 
-import { useState } from 'react';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '@/context/AuthContext';
 import { apiService } from '@/infrastructure/api/ApiService';
+import { useToast } from '@/hooks/util/use-toast';
 
-interface IndexingState {
-  isIndexing: boolean;
-  error: string | null;
-  success: boolean;
-  chunksCreated: number;
+export interface IndexDocumentResponse {
+  message: string;
+  documentId: string;
 }
 
-interface IndexDocumentResponse {
-  chunksCreated?: number;
-}
-
-export function useRAGIndexing() {
+export function useRagIndexing() {
   const { firebaseUser } = useAuth();
-  const [state, setState] = useState<IndexingState>({
-    isIndexing: false,
-    error: null,
-    success: false,
-    chunksCreated: 0,
-  });
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
 
-  const indexDocument = async (
-    content: string,
-    fileName: string,
-    projectId?: string,
-    type: 'user_upload' | 'reference' = 'user_upload',
-  ) => {
-    if (!firebaseUser) {
-      setState((prev) => ({ ...prev, error: 'User not authenticated' }));
-      return false;
-    }
+  return useMutation({
+    mutationFn: async ({ content, fileName, projectId, type }: { 
+      content: string; 
+      fileName: string; 
+      projectId?: string; 
+      type: 'user_upload' | 'reference' 
+    }) => {
+      if (!firebaseUser) throw new Error('User not authenticated');
 
-    setState({
-      isIndexing: true,
-      error: null,
-      success: false,
-      chunksCreated: 0,
-    });
-
-    try {
       const data = await apiService<
         { content: string; fileName: string; userId: string; projectId?: string; type: 'user_upload' | 'reference' },
         IndexDocumentResponse
@@ -64,100 +39,14 @@ export function useRAGIndexing() {
         },
       });
 
-      const chunksCreated = data.chunksCreated ?? 0;
-      setState({
-        isIndexing: false,
-        error: null,
-        success: true,
-        chunksCreated,
-      });
-
-      return chunksCreated;
-    } catch (error: unknown) {
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-      setState({
-        isIndexing: false,
-        error: errorMessage,
-        success: false,
-        chunksCreated: 0,
-      });
-      return false;
-    }
-  };
-
-  const indexMultipleDocuments = async (
-    documents: Array<{ content: string; fileName: string; type?: 'user_upload' | 'reference' }>,
-    projectId?: string,
-  ) => {
-    if (!firebaseUser) {
-      setState((prev) => ({ ...prev, error: 'User not authenticated' }));
-      return false;
-    }
-
-    setState({
-      isIndexing: true,
-      error: null,
-      success: false,
-      chunksCreated: 0,
-    });
-
-    try {
-      let totalChunks = 0;
-      const errors: string[] = [];
-
-      for (const doc of documents) {
-        const result = await indexDocument(doc.content, doc.fileName, projectId, doc.type ?? 'user_upload');
-
-        if (typeof result === 'number') {
-          totalChunks += result;
-        } else {
-          errors.push(`Failed to index: ${doc.fileName}`);
-        }
-      }
-
-      if (errors.length > 0) {
-        setState({
-          isIndexing: false,
-          error: errors.join(', '),
-          success: false,
-          chunksCreated: totalChunks,
-        });
-        return false;
-      }
-
-      setState({
-        isIndexing: false,
-        error: null,
-        success: true,
-        chunksCreated: totalChunks,
-      });
-
-      return true;
-    } catch (error: unknown) {
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-      setState({
-        isIndexing: false,
-        error: errorMessage,
-        success: false,
-        chunksCreated: 0,
-      });
-      return false;
-    }
-  };
-
-  const reset = () => {
-    setState({
-      isIndexing: false,
-      error: null,
-      success: false,
-      chunksCreated: 0,
-    });
-  };
-
-  return {
-    indexDocument,
-    indexMultipleDocuments,
-    reset,
-    ...state,
-  };
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['rag-documents'] });
+      toast({ title: 'Success', description: 'Document indexed successfully for RAG.' });
+    },
+    onError: (error: any) => {
+      toast({ title: 'Indexing Failed', description: error.message, variant: 'destructive' });
+    },
+  });
 }

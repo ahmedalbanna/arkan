@@ -9,7 +9,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from './util/use-toast';
 import { agentKeys } from '@/lib/query-keys';
 import { getFromCache, saveToCache } from '@/lib/utils/cache';
-import { runAuthenticatedResultCall } from './data/authenticated-client-call';
+import { container } from '@/infrastructure/di/container';
 
 const AGENTS_CACHE_KEY = 'agents-list';
 
@@ -56,9 +56,12 @@ export function useAgentManager() {
   const { data, isLoading, error, refetch } = useQuery({
     queryKey: agentKeys.all(),
     queryFn: async () => {
-      const fetchedAgents = await runAuthenticatedResultCall(firebaseUser, AgentApiClient, (client, token) =>
-        client.fetchAgentsApi(token),
-      );
+      if (!firebaseUser) return [];
+      const client = container.resolve(AgentApiClient);
+      const result = await client.fetchAgentsApi();
+      if (result.isFailure) throw result.error;
+      
+      const fetchedAgents = result.getValue();
       saveToCache(AGENTS_CACHE_KEY, fetchedAgents);
       return fetchedAgents;
     },
@@ -78,10 +81,12 @@ export function useAgentManager() {
   const selectedAgent = agents.find((agent) => agent.id === selectedAgentId) || null;
 
   const createMutation = useMutation({
-    mutationFn: async (data: Omit<AgentProperties, 'id'>) =>
-      runAuthenticatedResultCall(firebaseUser, AgentApiClient, (client, token) =>
-        client.createAgentApi(data as Omit<AgentProperties, 'id'> & { id: string }, token),
-      ),
+    mutationFn: async (data: Omit<AgentProperties, 'id'> & { id: string }) => {
+      const client = container.resolve(AgentApiClient);
+      const result = await client.createAgentApi(data);
+      if (result.isFailure) throw result.error;
+      return result.getValue();
+    },
     onSuccess: (newAgent) => {
       queryClient.invalidateQueries({ queryKey: agentKeys.all() });
       selectAgent(newAgent.id);
@@ -89,20 +94,24 @@ export function useAgentManager() {
   });
 
   const updateMutation = useMutation({
-    mutationFn: async ({ id, data }: { id: string; data: Partial<AgentProperties> }) =>
-      runAuthenticatedResultCall(firebaseUser, AgentApiClient, (client, token) =>
-        client.updateAgentApi(id, data, token),
-      ),
+    mutationFn: async ({ id, data }: { id: string; data: Partial<AgentProperties> }) => {
+      const client = container.resolve(AgentApiClient);
+      const result = await client.updateAgentApi(id, data);
+      if (result.isFailure) throw result.error;
+      return result.getValue();
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: agentKeys.all() });
     },
   });
 
   const deleteMutation = useMutation({
-    mutationFn: async (id: string) =>
-      runAuthenticatedResultCall(firebaseUser, AgentApiClient, (client, token) =>
-        client.deleteAgentApi(id, token),
-      ),
+    mutationFn: async (id: string) => {
+      const client = container.resolve(AgentApiClient);
+      const result = await client.deleteAgentApi(id);
+      if (result.isFailure) throw result.error;
+      return result.getValue();
+    },
     onSuccess: (_result, id) => {
       queryClient.invalidateQueries({ queryKey: agentKeys.all() });
       if (selectedAgentId === id) {

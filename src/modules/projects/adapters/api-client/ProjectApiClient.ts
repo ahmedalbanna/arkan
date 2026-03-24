@@ -1,53 +1,59 @@
+import { injectable } from 'tsyringe';
+import { apiService, ApiError } from '@/infrastructure/api/ApiService';
+import { ProjectProperties } from '../../domain/entities/ProjectProperties';
+import { Result } from '@/lib/utils/result';
 
-import { injectable } from "tsyringe";
-import { apiService, ApiError } from "@/infrastructure/api/ApiService";
-import { ProjectProperties } from "../../domain/entities/Project";
-import { Result } from "@/lib/utils/result";
+const toApiError = (error: unknown): ApiError => {
+  if (error instanceof ApiError) return error;
+  return new ApiError(error instanceof Error ? error.message : 'Unknown error', 500);
+};
 
 @injectable()
 export class ProjectApiClient {
-    async fetchProjects(token: string): Promise<Result<ProjectProperties[], ApiError>> {
+    async fetchProjects(): Promise<Result<ProjectProperties[], ApiError>> {
         try {
-            const data = await apiService<any, ProjectProperties[]>({ endpoint: '/api/projects', token });
+            const data = await apiService<never, ProjectProperties[]>({ 
+                endpoint: '/api/projects'
+            });
             return Result.ok(data);
-        } catch (error: any) {
-            return Result.fail(error);
+        } catch (error: unknown) {
+            return Result.fail(toApiError(error));
         }
     }
 
-    async fetchProjectById(id: string, token: string): Promise<Result<ProjectProperties, ApiError>> {
+    async fetchProjectById(id: string): Promise<Result<ProjectProperties, ApiError>> {
         try {
-            const data = await apiService<any, ProjectProperties>({ endpoint: `/api/projects/${id}`, token });
+            const data = await apiService<never, ProjectProperties>({ 
+                endpoint: `/api/projects/${id}`
+            });
             return Result.ok(data);
-        } catch (error: any) {
-            return Result.fail(error);
+        } catch (error: unknown) {
+            return Result.fail(toApiError(error));
         }
     }
 
-    async saveProject(data: ProjectProperties, token: string): Promise<Result<ProjectProperties, ApiError>> {
+    async saveProject(data: ProjectProperties): Promise<Result<ProjectProperties, ApiError>> {
         try {
-            const result = await apiService<ProjectProperties, ProjectProperties>({
-                endpoint: '/api/projects',
+            const response = await apiService<ProjectProperties, ProjectProperties>({
+                endpoint: `/api/projects`,
                 method: 'POST',
                 data,
-                token
             });
-            return Result.ok(result);
-        } catch (error: any) {
-            return Result.fail(error);
+            return Result.ok(response);
+        } catch (error: unknown) {
+            return Result.fail(toApiError(error));
         }
     }
 
-    async deleteProject(id: string, token: string): Promise<Result<{ message: string }, ApiError>> {
+    async deleteProject(id: string): Promise<Result<{ message: string }, ApiError>> {
         try {
-            const result = await apiService<any, { message: string }>({
+            const response = await apiService<never, { message: string }>({
                 endpoint: `/api/projects/${id}`,
-                method: 'DELETE',
-                token
+                method: 'DELETE'
             });
-            return Result.ok(result);
-        } catch (error: any) {
-            return Result.fail(error);
+            return Result.ok(response);
+        } catch (error: unknown) {
+            return Result.fail(toApiError(error));
         }
     }
 }
