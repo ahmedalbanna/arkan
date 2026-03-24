@@ -22,10 +22,8 @@ export function useRagIndexing() {
       projectId?: string; 
       type: 'user_upload' | 'reference' 
     }) => {
-      if (!firebaseUser) throw new Error('User not authenticated');
-
       const data = await apiService<
-        { content: string; fileName: string; userId: string; projectId?: string; type: 'user_upload' | 'reference' },
+        { content: string; fileName: string; projectId?: string; type: 'user_upload' | 'reference' },
         IndexDocumentResponse
       >({
         endpoint: '/api/rag/index-document',
@@ -33,7 +31,6 @@ export function useRagIndexing() {
         data: {
           content,
           fileName,
-          userId: firebaseUser.uid,
           projectId,
           type,
         },

@@ -11,7 +11,7 @@
 export const userKeys = {
   all: () => ['users'] as const,
   lists: () => [...userKeys.all(), 'list'] as const,
-  list: (page: number) => [...userKeys.lists(), { page }] as const,
+  list: (options: { limit: number; lastVisibleId?: string | null }) => [...userKeys.lists(), options] as const,
   details: () => [...userKeys.all(), 'detail'] as const,
   profile: (userId: string) => [...userKeys.details(), userId] as const,
   admins: () => [...userKeys.all(), 'admins'] as const,

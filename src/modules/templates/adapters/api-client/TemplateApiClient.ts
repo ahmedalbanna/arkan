@@ -30,14 +30,13 @@ export class TemplateApiClient {
   }
 
   async saveDocxTemplateApi(
-    key: string,
-    data: any,
+    options: { id: string; data: any }
   ): Promise<Result<any, ApiError>> {
     try {
       const response = await apiService<any, any>({
-        endpoint: `/api/templates/docx/${key}`,
+        endpoint: `/api/templates/docx/${options.id}`,
         method: 'POST',
-        data,
+        data: options.data,
       });
       return Result.ok(response);
     } catch (error: unknown) {
@@ -78,14 +77,13 @@ export class TemplateApiClient {
   }
 
   async savePptxTemplateApi(
-    key: string,
-    data: any,
+    options: { id: string; data: any }
   ): Promise<Result<any, ApiError>> {
     try {
       const response = await apiService<any, any>({
-        endpoint: `/api/templates/pptx/${key}`,
+        endpoint: `/api/templates/pptx/${options.id}`,
         method: 'POST',
-        data,
+        data: options.data,
       });
       return Result.ok(response);
     } catch (error: unknown) {
@@ -126,14 +124,13 @@ export class TemplateApiClient {
   }
 
   async saveReportTemplateApi(
-    templateId: string,
-    data: any,
+    options: { id: string; data: any }
   ): Promise<Result<any, ApiError>> {
     try {
       const response = await apiService<any, any>({
-        endpoint: `/api/templates/report/${templateId}`,
+        endpoint: `/api/templates/report/${options.id}`,
         method: 'POST',
-        data,
+        data: options.data,
       });
       return Result.ok(response);
     } catch (error: unknown) {
@@ -174,14 +171,13 @@ export class TemplateApiClient {
   }
 
   async savePresentationTemplateApi(
-    templateId: string,
-    data: any,
+    options: { id: string; data: any }
   ): Promise<Result<any, ApiError>> {
     try {
       const response = await apiService<any, any>({
-        endpoint: `/api/templates/presentation/${templateId}`,
+        endpoint: `/api/templates/presentation/${options.id}`,
         method: 'POST',
-        data,
+        data: options.data,
       });
       return Result.ok(response);
     } catch (error: unknown) {

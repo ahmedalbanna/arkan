@@ -5,7 +5,7 @@ import { userKeys } from '@/lib/query-keys';
 import { useAuth } from '@/context/AuthContext';
 import { User } from '@/modules/users/domain/entities/User';
 import { UserApiClient } from '@/modules/users/adapters/api-client/UserApiClient';
-import { runAuthenticatedResultCall } from '@/hooks/data/authenticated-client-call';
+import { container } from '@/infrastructure/di/container';
 
 const USERS_PER_PAGE = 10;
 
@@ -24,13 +24,14 @@ export function useUserManagementConsole() {
   } = useInfiniteQuery({
     queryKey: userKeys.lists(),
     queryFn: async ({ pageParam }) => {
-      const result = await runAuthenticatedResultCall(firebaseUser, UserApiClient, (client, token) =>
-        client.getPaginatedUsers({ limit: USERS_PER_PAGE, lastVisibleId: pageParam }, token),
-      );
+      const client = container.resolve(UserApiClient);
+      const result = await client.getPaginatedUsers({ limit: USERS_PER_PAGE, lastVisibleId: pageParam });
+      if (result.isFailure) throw result.error;
+      const data = result.getValue();
 
       return {
-        ...result,
-        users: result.users.map((user) => new User(user)),
+        ...data,
+        users: data.users.map((user) => new User(user)),
       };
     },
     initialPageParam: undefined as string | undefined,

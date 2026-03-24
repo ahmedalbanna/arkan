@@ -195,7 +195,7 @@ type FileFormValues = z.infer<typeof fileSchema>;
 
 export function PurchaseCreditsDialog({ trigger }: { trigger: React.ReactNode }) {
   const { t } = useLocalization();
-  const { firebaseUser } = useAuth();
+  const { userProfile: firebaseUser } = useAuth();
   const { toast } = useToast();
   const [isOpen, setIsOpen] = useState(false);
   const [step, setStep] = useState(1);
@@ -247,12 +247,12 @@ export function PurchaseCreditsDialog({ trigger }: { trigger: React.ReactNode })
     
     const formData = new FormData();
     formData.append('file', data.file);
-    formData.append('userId', firebaseUser.uid);
+    formData.append('userId', firebaseUser.id);
     formData.append('credits', credits.toString());
     formData.append('price', price.toFixed(2));
     formData.append('planId', `custom-${credits}`);
     formData.append('planName', `${credits} Credits`);
-    formData.append('userName', firebaseUser.displayName || 'N/A');
+    formData.append('userName', firebaseUser.name || 'N/A');
     formData.append('userEmail', firebaseUser.email || 'N/A');
 
     mutation.mutate(formData);
@@ -367,13 +367,13 @@ export function PurchaseCreditsDialog({ trigger }: { trigger: React.ReactNode })
                     </CardHeader>
                     <CardContent>
                       <div className="flex items-center justify-between p-3 bg-muted rounded-lg">
-                        <span className="text-sm font-mono">{firebaseUser?.uid || t('submitPayment.pleaseLogin')}</span>
+                        <span className="text-sm font-mono">{firebaseUser?.id || t('submitPayment.pleaseLogin')}</span>
                         <Button 
                           variant="ghost" 
                           size="sm" 
                           onClick={() => {
-                            if (firebaseUser?.uid) {
-                              navigator.clipboard.writeText(firebaseUser.uid);
+                            if (firebaseUser?.id) {
+                              navigator.clipboard.writeText(firebaseUser.id);
                               toast({ title: t('common.copied') });
                             }
                           }}

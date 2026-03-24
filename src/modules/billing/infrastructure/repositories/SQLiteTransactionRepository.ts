@@ -2,7 +2,7 @@ import { injectable } from "tsyringe";
 import { db } from "@/infrastructure/db";
 import { transactions } from "@/infrastructure/db/schema";
 import { ITransactionRepository } from "../../domain/repositories/ITransactionRepository";
-import { TransactionProperties } from "../../domain/entities/Transaction";
+import { Transaction, TransactionProperties } from "../../domain/entities/Transaction";
 import { Result } from "@/lib/utils/result";
 import { BillingError } from "../../domain/errors/BillingErrors";
 import { eq, desc, and, gte, lte, lt } from "drizzle-orm";
@@ -10,7 +10,7 @@ import { v4 as uuidv4 } from "uuid";
 
 @injectable()
 export class SQLiteTransactionRepository implements ITransactionRepository {
-    async getById(id: string): Promise<Result<TransactionProperties, BillingError>> {
+    async getById(id: string): Promise<Result<Transaction, BillingError>> {
         try {
             const result = await db.query.transactions.findFirst({
                 where: eq(transactions.id, id),
@@ -18,36 +18,36 @@ export class SQLiteTransactionRepository implements ITransactionRepository {
             if (!result) {
                 return Result.fail(BillingError.notFound(`Transaction with id ${id} not found`));
             }
-            return Result.ok(result as TransactionProperties);
+            return Result.ok(new Transaction(result as TransactionProperties));
         } catch (error: any) {
             return Result.fail(BillingError.internal(error.message));
         }
     }
 
-    async getAll(): Promise<Result<TransactionProperties[], BillingError>> {
+    async getAll(): Promise<Result<Transaction[], BillingError>> {
         try {
             const results = await db.query.transactions.findMany({
                 orderBy: [desc(transactions.createdAt)],
             });
-            return Result.ok(results as TransactionProperties[]);
+            return Result.ok(results.map(r => new Transaction(r as TransactionProperties)));
         } catch (error: any) {
             return Result.fail(BillingError.internal(error.message));
         }
     }
 
-    async getByUserId(userId: string): Promise<Result<TransactionProperties[], BillingError>> {
+    async getByUserId(userId: string): Promise<Result<Transaction[], BillingError>> {
         try {
             const results = await db.query.transactions.findMany({
                 where: eq(transactions.userId, userId),
                 orderBy: [desc(transactions.createdAt)],
             });
-            return Result.ok(results as TransactionProperties[]);
+            return Result.ok(results.map(r => new Transaction(r as TransactionProperties)));
         } catch (error: any) {
             return Result.fail(BillingError.internal(error.message));
         }
     }
 
-    async save(data: Omit<TransactionProperties, 'id'>): Promise<Result<TransactionProperties, BillingError>> {
+    async save(data: Omit<TransactionProperties, 'id'>): Promise<Result<Transaction, BillingError>> {
         try {
             const id = uuidv4();
             const dataToSave = {
@@ -56,13 +56,13 @@ export class SQLiteTransactionRepository implements ITransactionRepository {
                 createdAt: data.createdAt || new Date().toISOString()
             };
             await db.insert(transactions).values(dataToSave as any);
-            return Result.ok(dataToSave as TransactionProperties);
+            return Result.ok(new Transaction(dataToSave as TransactionProperties));
         } catch (error: any) {
             return Result.fail(BillingError.saveError(error.message));
         }
     }
 
-    async update(id: string, data: Partial<TransactionProperties>): Promise<Result<TransactionProperties, BillingError>> {
+    async update(id: string, data: Partial<TransactionProperties>): Promise<Result<Transaction, BillingError>> {
         try {
             await db.update(transactions)
                 .set(data)
@@ -73,7 +73,7 @@ export class SQLiteTransactionRepository implements ITransactionRepository {
         }
     }
 
-    async getPaginated(options: { status?: string, limit: number, lastVisibleId?: string }): Promise<Result<{ transactions: TransactionProperties[], hasNextPage: boolean, lastVisibleId: string | null }, BillingError>> {
+    async getPaginated(options: { status?: string, limit: number, lastVisibleId?: string }): Promise<Result<{ transactions: Transaction[], hasNextPage: boolean, lastVisibleId: string | null }, BillingError>> {
         try {
             let whereClause = undefined;
             if (options.status) {
@@ -95,7 +95,7 @@ export class SQLiteTransactionRepository implements ITransactionRepository {
             });
 
             const hasNextPage = results.length > options.limit;
-            const items = results.slice(0, options.limit) as TransactionProperties[];
+            const items = results.slice(0, options.limit).map(r => new Transaction(r as TransactionProperties));
             const lastId = hasNextPage ? items[items.length - 1].id : null;
 
             return Result.ok({ transactions: items, hasNextPage, lastVisibleId: lastId });
@@ -104,7 +104,7 @@ export class SQLiteTransactionRepository implements ITransactionRepository {
         }
     }
 
-    async getByDateRange(startDate: string, endDate: string): Promise<Result<TransactionProperties[], BillingError>> {
+    async getByDateRange(startDate: string, endDate: string): Promise<Result<Transaction[], BillingError>> {
         try {
             const results = await db.query.transactions.findMany({
                 where: and(
@@ -113,7 +113,7 @@ export class SQLiteTransactionRepository implements ITransactionRepository {
                 ),
                 orderBy: [desc(transactions.createdAt)],
             });
-            return Result.ok(results as TransactionProperties[]);
+            return Result.ok(results.map(r => new Transaction(r as TransactionProperties)));
         } catch (error: any) {
             return Result.fail(BillingError.internal(error.message));
         }

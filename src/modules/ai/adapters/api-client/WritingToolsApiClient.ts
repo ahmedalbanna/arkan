@@ -24,4 +24,11 @@ export class WritingToolsApiClient {
       return Result.fail(toApiError(error));
     }
   }
+
+  async writingToolApi<TRequest = any, TResponse = any>(
+    toolName: string,
+    data: TRequest,
+  ): Promise<Result<TResponse, ApiError>> {
+    return this.executeToolApi(toolName, data);
+  }
 }

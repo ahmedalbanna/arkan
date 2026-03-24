@@ -15,7 +15,7 @@ export function useProjectChat() {
   const [isLoading, setIsLoading] = useState(false);
 
   const sendMessage = async (userMessage: string, projectContext: string) => {
-    if (!userMessage.trim() || !firebaseUser) return;
+    if (!userMessage.trim()) return;
 
     const newUserMessage: Message = { role: 'user', content: userMessage };
     const updatedMessages = [...messages, newUserMessage];

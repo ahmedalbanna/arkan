@@ -5,6 +5,7 @@
 import { useSections } from '@/hooks';
 import { SectionDataTable } from '@/components/admin/sections/SectionDataTable';
 import { columns } from '@/components/admin/sections/columns';
+import { SectionProperties } from '@/modules/ai-content/domain/entities/Section';
 import { Skeleton } from '@/components/ui/skeleton';
 import { SectionFormDialog } from '@/components/admin/sections/SectionFormDialog';
 import { useLocalization } from '@/context/LocalizationContext';
@@ -35,7 +36,7 @@ export default function ManageSectionsPage() {
                 <h1 className="text-3xl font-bold font-headline">{t('admin.manageSections.title')}</h1>
                 <SectionFormDialog />
             </div>
-            <SectionDataTable columns={columns} data={sections || []} />
+            <SectionDataTable columns={columns as any} data={(sections || []) as SectionProperties[]} />
         </div>
     );
 }

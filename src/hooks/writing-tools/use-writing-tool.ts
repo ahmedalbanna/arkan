@@ -4,19 +4,21 @@ import { useAuth } from '@/context/AuthContext';
 import { toast } from '@/hooks';
 import { WritingToolsApiClient } from '@/modules/ai/adapters/api-client/WritingToolsApiClient';
 import { useMutation, type UseMutationOptions } from '@tanstack/react-query';
-import { runAuthenticatedResultCall } from '../data/authenticated-client-call';
+import { container } from '@/infrastructure/di/container';
 
 export function useWritingTool<TData = unknown, TVariables = any>(
   endpoint: string,
   options?: Omit<UseMutationOptions<TData, Error, TVariables>, 'mutationFn'>,
 ) {
-  const { firebaseUser, refetchUser } = useAuth();
+  const { refetchUser } = useAuth();
 
   return useMutation<TData, Error, TVariables>({
-    mutationFn: async (data: TVariables) =>
-      runAuthenticatedResultCall(firebaseUser, WritingToolsApiClient, (client, token) =>
-        client.writingToolApi<TVariables, TData>(endpoint, { data, token }),
-      ),
+    mutationFn: async (data: TVariables) => {
+      const client = container.resolve(WritingToolsApiClient);
+      const result = await client.writingToolApi<TVariables, TData>(endpoint, data);
+      if (result.isFailure) throw result.error;
+      return result.getValue();
+    },
     onSuccess: (data, variables, context) => {
       refetchUser();
       if (options?.onSuccess) {

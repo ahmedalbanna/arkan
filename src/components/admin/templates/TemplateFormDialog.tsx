@@ -10,7 +10,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Loader2, Save } from 'lucide-react';
-import { useCreateDocxTemplate, useCreatePptxTemplate, useCreateReportTemplate, useUpdateDocxTemplate, useUpdatePptxTemplate, useUpdateReportTemplate } from '@/hooks';
+import { useSaveTemplate } from '@/hooks';
 import { ReportTemplate, DocxTemplate, PptxTemplate } from '@/lib/types';
 import { useToast } from '@/hooks';
 
@@ -36,16 +36,8 @@ type FormValues = z.infer<typeof formSchema>;
 
 export function TemplateFormDialog({ isOpen, onOpenChange, template, templateType }: TemplateFormDialogProps) {
     const { toast } = useToast();
-    const createDocxMutation = useCreateDocxTemplate();
-    const updateDocxMutation = useUpdateDocxTemplate();
-    const createPptxMutation = useCreatePptxTemplate();
-    const updatePptxMutation = useUpdatePptxTemplate();
-    const createReportMutation = useCreateReportTemplate();
-    const updateReportMutation = useUpdateReportTemplate();
-
-    const isPending = createDocxMutation.isPending || updateDocxMutation.isPending ||
-                      createPptxMutation.isPending || updatePptxMutation.isPending ||
-                      createReportMutation.isPending || updateReportMutation.isPending;
+    const saveTemplateMutation = useSaveTemplate(templateType);
+    const isPending = saveTemplateMutation.isPending;
 
     const form = useForm<FormValues>({
         resolver: zodResolver(formSchema),
@@ -68,32 +60,18 @@ export function TemplateFormDialog({ isOpen, onOpenChange, template, templateTyp
             onSuccess: () => onOpenChange(false),
         };
 
-        if (templateType === 'docx' || templateType === 'pptx') {
-            try {
-                const styles = data.stylesJson ? JSON.parse(data.stylesJson) : {};
-                const payload = { ...data, styles };
-                if (template) {
-                    if (templateType === 'docx') updateDocxMutation.mutate({ key: template.id, styles: payload }, mutationOptions);
-                    if (templateType === 'pptx') updatePptxMutation.mutate({ key: template.id, styles: payload }, mutationOptions);
-                } else {
-                    if (templateType === 'docx') createDocxMutation.mutate(payload, mutationOptions);
-                    if (templateType === 'pptx') createPptxMutation.mutate(payload, mutationOptions);
-                }
-            } catch (e) {
-                toast({ title: "Invalid JSON", description: "The styles JSON is not valid.", variant: 'destructive' });
-            }
-        } else if (templateType === 'report') {
-            try {
-                const content = data.contentJson ? JSON.parse(data.contentJson) : [];
-                const payload = { ...data, content };
-                if (template) {
-                    updateReportMutation.mutate({ templateId: template.id, data: payload }, mutationOptions);
-                } else {
-                    createReportMutation.mutate(payload as any, mutationOptions);
-                }
-            } catch (e) {
-                toast({ title: "Invalid JSON", description: "The content JSON for the report template is not valid.", variant: 'destructive' });
-            }
+        try {
+            const styles = data.stylesJson ? JSON.parse(data.stylesJson) : {};
+            const content = data.contentJson ? JSON.parse(data.contentJson) : [];
+            const payload = { 
+                ...data, 
+                styles: (templateType === 'docx' || templateType === 'pptx') ? styles : undefined,
+                content: templateType === 'report' ? content : undefined
+            };
+            
+            saveTemplateMutation.mutate({ id: data.id, data: payload }, mutationOptions);
+        } catch (e) {
+            toast({ title: "Invalid JSON", description: "The JSON is not valid.", variant: 'destructive' });
         }
     };
 

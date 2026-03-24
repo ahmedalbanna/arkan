@@ -49,7 +49,7 @@ export function ApiKeysForm({ userProfile }: ApiKeysFormProps) {
       gemini: data.gemini || '',
       chatgpt: data.chatgpt || '',
     };
-    updateUserMutation.mutate({ userId: userProfile.id, data: { apiKeys } });
+    updateUserMutation.mutate({ id: userProfile.id, data: { apiKeys } });
   };
 
   return (

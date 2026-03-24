@@ -36,17 +36,16 @@ describe('useProjectChat', () => {
     const { result } = renderHook(() => useProjectChat(), { wrapper: createWrapper(queryClient) });
 
     await act(async () => {
-      result.current.sendMessage('Hello there');
+      result.current.sendMessage('Hello there', '# Project Context');
     });
 
     await waitFor(() => expect(result.current.messages).toHaveLength(2));
     expect(apiService).toHaveBeenCalledWith(expect.objectContaining({
       endpoint: '/api/chat/project-consultant',
       method: 'POST',
-      firebaseUser,
     }));
     expect(result.current.messages[0]).toEqual({ role: 'user', content: 'Hello there' });
-    expect(result.current.messages[1]).toEqual({ role: 'model', content: 'Generated answer' });
+    expect(result.current.messages[1]).toEqual({ role: 'assistant', content: 'Generated answer' });
   });
 
   it('records an error response from the model when the request fails', async () => {
@@ -56,7 +55,7 @@ describe('useProjectChat', () => {
     const { result } = renderHook(() => useProjectChat(), { wrapper: createWrapper(queryClient) });
 
     await act(async () => {
-      result.current.sendMessage('Need help');
+      result.current.sendMessage('Need help', '# Project Context');
     });
 
     await waitFor(() => expect(result.current.messages).toHaveLength(2));

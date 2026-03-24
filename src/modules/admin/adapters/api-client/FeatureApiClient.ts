@@ -4,8 +4,8 @@ import { Feature } from '../../domain/entities/Feature';
 import { Result } from '@/lib/utils/result';
 
 export interface UpdateFeatureVariables {
-  id: string;
-  data: Partial<Feature>;
+  featureId: string;
+  payload: Partial<Feature>;
 }
 
 const toApiError = (error: unknown): ApiError => {
@@ -29,7 +29,7 @@ export class FeatureApiClient {
       const response = await apiService<Partial<Feature>, any>({
         endpoint: `/api/features`,
         method: 'PUT',
-        data: { id: variables.id, ...variables.data },
+        data: { id: variables.featureId, ...variables.payload },
       });
       return Result.ok(response);
     } catch (error: unknown) {

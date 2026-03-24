@@ -10,6 +10,7 @@ import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { cn } from '@/lib/utils/cn';
 import { useAuth } from '@/context/AuthContext';
+import { container } from '@/infrastructure/di/container';
 import { TransactionApiClient } from '@/modules/billing/adapters/api-client/TransactionApiClient';
 import { useToast } from '@/hooks';
 import { useLocalization } from '@/context/LocalizationContext';
@@ -45,9 +46,13 @@ export function FinancialReportExporter() {
 
     setIsLoading(true);
     try {
-      const transactions = await runAuthenticatedResultCall(firebaseUser, TransactionApiClient, (client, token) =>
-        client.fetchTransactionsForReport({ startDate: dateRange.from!.toISOString(), endDate: dateRange.to!.toISOString(), token }),
-      );
+      const client = container.resolve(TransactionApiClient);
+      const result = await client.fetchTransactionsForReport({ 
+        startDate: dateRange.from!.toISOString(), 
+        endDate: dateRange.to!.toISOString() 
+      });
+      if (result.isFailure) throw result.error;
+      const transactions = result.getValue();
 
       if (transactions.length === 0) {
         toast({ title: t('adminFinancialReport.noData'), description: t('adminFinancialReport.noDataDesc') });

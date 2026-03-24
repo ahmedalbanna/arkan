@@ -54,9 +54,9 @@ function FeatureCard({ feature }: { feature: Feature }) {
 
 export default function FeatureManager() {
   const { t } = useLocalization();
-  const { features, isLoaded, isError } = useFeatures();
+  const { data: features, isLoading, isError } = useFeatures();
 
-  if (!isLoaded) {
+  if (isLoading) {
     return (
       <div className="space-y-4">
         {Array.from({ length: 5 }).map((_, i) => <FeatureSkeleton key={i} />)}
@@ -75,7 +75,7 @@ export default function FeatureManager() {
 
   return (
     <div className="space-y-4">
-      {features.map((feature) => (
+      {(features || []).map((feature: any) => (
         <FeatureCard key={feature.id} feature={feature} />
       ))}
     </div>

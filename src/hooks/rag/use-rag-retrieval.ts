@@ -22,19 +22,18 @@ export function useRagRetrieval() {
     projectId?: string, 
     options: { topK?: number; minScore?: number } = {}
   ): Promise<RetrieveContextResponse | null> => {
-    if (!firebaseUser || !query.trim()) return null;
+    if (!query.trim()) return null;
 
     setIsLoading(true);
     try {
       const data = await apiService<
-        { query: string; userId: string; projectId?: string; topK: number; minScore: number },
+        { query: string; projectId?: string; topK: number; minScore: number },
         RetrieveContextResponse
       >({
         endpoint: '/api/rag/retrieve-context',
         method: 'POST',
         data: {
           query,
-          userId: firebaseUser.uid,
           projectId,
           topK: options.topK ?? 5,
           minScore: options.minScore ?? 0.5,

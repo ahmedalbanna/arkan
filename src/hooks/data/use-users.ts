@@ -24,15 +24,18 @@ export function useUserProfile(userId: string) {
   });
 }
 
-export function usePaginatedUsers(limit: number, lastVisibleId?: string) {
+export function usePaginatedUsers(options: { limit: number; lastVisibleId?: string | null }) {
   const { firebaseUser } = useAuth();
 
   return useQuery({
-    queryKey: userKeys.list({ limit, lastVisibleId }),
+    queryKey: userKeys.list(options),
     queryFn: async () => {
       if (!firebaseUser) return null;
       const client = container.resolve(UserApiClient);
-      const result = await client.getPaginatedUsers(limit, lastVisibleId);
+      const result = await client.getPaginatedUsers({
+          limit: options.limit,
+          lastVisibleId: options.lastVisibleId ?? undefined
+      });
       if (result.isFailure) throw result.error;
       return result.getValue();
     },
@@ -40,12 +43,12 @@ export function usePaginatedUsers(limit: number, lastVisibleId?: string) {
   });
 }
 
-export function useCreateUser() {
+export function useCreateUser(options?: { onSuccess?: () => void }) {
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
   return useMutation({
-    mutationFn: async (data: CreateUserInput) => {
+    mutationFn: async (data: any) => {
       const client = container.resolve(UserApiClient);
       const result = await client.createUser(data);
       if (result.isFailure) throw result.error;
@@ -54,6 +57,7 @@ export function useCreateUser() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: userKeys.all() });
       toast({ title: 'Success', description: 'User created successfully.' });
+      options?.onSuccess?.();
     },
     onError: (error: any) => {
       toast({ title: 'Error', description: error.message || 'Failed to create user.', variant: 'destructive' });
@@ -84,7 +88,25 @@ export function useUpdateUser() {
 }
 
 export function useAdminUpdateUser() {
-    return useUpdateUser();
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
+
+  return useMutation({
+    mutationFn: async ({ id, data, userId }: { id: string; data: Partial<UserProfile>, userId?: string }) => {
+      const client = container.resolve(UserApiClient);
+      const result = await client.adminUpdateUser({ id: id || userId || '', data });
+      if (result.isFailure) throw result.error;
+      return result.getValue();
+    },
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: userKeys.profile(data.id) });
+      queryClient.invalidateQueries({ queryKey: userKeys.all() });
+      toast({ title: 'Success', description: 'User updated successfully.' });
+    },
+    onError: (error: any) => {
+      toast({ title: 'Error', description: error.message || 'Failed to update user.', variant: 'destructive' });
+    },
+  });
 }
 
 export function useDeleteUser() {

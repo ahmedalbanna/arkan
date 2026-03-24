@@ -68,11 +68,9 @@ export default function ApplyTemplatePanel() {
   const { data: templates, isLoading, isError, error } = useReportTemplates();
   const [searchQuery, setSearchQuery] = useState('');
   const [previewTemplate, setPreviewTemplate] = useState<ReportTemplateProperties | null>(null);
-  const { updateProject } = useBuilderStore();
+  const { updateProject, project } = useBuilderStore();
 
-  const { handleSelectTemplate, isApplyingTemplate } = useApplyReportTemplate(() => {
-    setPreviewTemplate(null); // Go back to list after applying
-  });
+  const { handleSelectTemplate, isApplyingTemplate } = useApplyReportTemplate();
 
   const filteredTemplates = useMemo(() => {
     if (!templates) return [];
@@ -98,7 +96,10 @@ export default function ApplyTemplatePanel() {
                 });
             }
             
-            handleSelectTemplate(previewTemplate)
+            if (project?.id) {
+                handleSelectTemplate(previewTemplate.id, project.id);
+                setPreviewTemplate(null);
+            }
         }}
         onBack={() => setPreviewTemplate(null)}
         isLoading={isApplyingTemplate}

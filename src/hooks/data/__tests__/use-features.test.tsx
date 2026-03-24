@@ -32,7 +32,7 @@ describe('use-features hooks', () => {
 
     const { result } = renderHook(() => useFeatures(), { wrapper: createWrapper(queryClient) });
 
-    await waitFor(() => expect(result.current.features).toHaveLength(1));
+    await waitFor(() => expect(result.current.data).toHaveLength(1));
     expect(runAuthenticatedResultCall).toHaveBeenCalled();
   });
 

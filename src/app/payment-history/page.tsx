@@ -7,7 +7,8 @@ import { AlertCircle, CreditCard, History } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import type { Transaction } from '@/modules/billing/domain/entities/Transaction';
+import { Transaction } from '@/modules/billing/domain/entities/Transaction';
+import { TransactionProperties } from '@/modules/billing/domain/entities/Transaction';
 
 function PaymentHistorySkeleton() {
     return (
@@ -86,11 +87,11 @@ export default function PaymentHistoryPage() {
                                     </TableRow>
                                 </TableHeader>
                                 <TableBody>
-                                    {transactions.map((t: Transaction) => (
+                                    {(transactions as any[]).map((t: TransactionProperties) => (
                                         <TableRow key={t.id}>
-                                            <TableCell>{t.getFormattedDate()}</TableCell>
+                                            <TableCell>{new Transaction(t).getFormattedDate()}</TableCell>
                                             <TableCell className="font-medium">{t.planName} (+{t.credits} credits)</TableCell>
-                                            <TableCell>{t.getFormattedPrice()}</TableCell>
+                                            <TableCell>{new Transaction(t).getFormattedPrice()}</TableCell>
                                             <TableCell>
                                                 <Badge variant={
                                                     t.status === 'verified' ? 'default'

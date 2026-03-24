@@ -12,12 +12,11 @@ import { toast } from '@/hooks';
 import { useAuth } from '@/context/AuthContext';
 import { userKeys } from '@/lib/query-keys';
 import { useLocalization } from '@/context/LocalizationContext';
-import { User } from '@/lib/types';
+import { User } from '@/modules/users/domain/entities/User';
 import { GiftCreditsDialog } from '../payments/GiftCreditsDialog';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { useSendPasswordReset } from '@/hooks';
 import { UserApiClient } from '@/modules/users/adapters/api-client/UserApiClient';
-import { runAuthenticatedResultCall } from '@/hooks/data/authenticated-client-call';
 
 interface UserTableRowProps { user: User; }
 
@@ -51,10 +50,10 @@ export function UserTableRow({ user }: UserTableRowProps) {
     await queryClient.prefetchQuery({
       queryKey: userKeys.profile(userId),
       queryFn: async () => {
-        const profile = await runAuthenticatedResultCall(firebaseUser, UserApiClient, (client, token) =>
-          client.fetchUserById(userId, token),
-        );
-        return new User(profile);
+        const client = container.resolve(UserApiClient);
+        const result = await client.fetchUserById(userId);
+        if (result.isFailure) throw result.error;
+        return new User(result.getValue());
       },
       staleTime: 1000 * 60,
     });

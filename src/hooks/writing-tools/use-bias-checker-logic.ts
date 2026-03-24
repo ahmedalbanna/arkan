@@ -9,7 +9,7 @@ import { useWritingTool, useToast } from '@/hooks';
 import { useDropzone } from 'react-dropzone';
 import { useAuth } from '@/context/AuthContext';
 import { DocumentProcessingApiClient } from '@/modules/ai-content/adapters/api-client/DocumentProcessingApiClient';
-import { runAuthenticatedResultCall } from '../data/authenticated-client-call';
+import { container } from '@/infrastructure/di/container';
 import type { BiasCheckOutput } from '@/ai/schemas';
 
 const biasCheckSchema = z.object({
@@ -48,10 +48,11 @@ export function useBiasCheckerLogic() {
     formData.append('file', file);
 
     try {
-      const result = await runAuthenticatedResultCall(firebaseUser, DocumentProcessingApiClient, (client, token) =>
-        client.processFileApi(formData, token),
-      );
-      form.setValue('text', result.markdown, { shouldValidate: true });
+      const client = container.resolve(DocumentProcessingApiClient);
+      const result = await client.processFileApi(formData);
+      if (result.isFailure) throw result.error;
+      const data = result.getValue();
+      form.setValue('text', data.markdown || data.text, { shouldValidate: true });
       toast({ title: 'File Processed', description: `Text extracted from ${file.name}.` });
       refetchUser();
     } catch (error: any) {

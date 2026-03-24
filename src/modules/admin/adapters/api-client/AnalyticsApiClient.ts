@@ -26,10 +26,10 @@ const toApiError = (error: unknown): ApiError => {
 
 @injectable()
 export class AnalyticsApiClient {
-    async fetchUserStats(): Promise<Result<UserDashboardStats, ApiError>> {
+    async fetchUserStats(userId: string): Promise<Result<UserDashboardStats, ApiError>> {
         try {
             const data = await apiService<never, UserDashboardStats>({ 
-                endpoint: '/api/stats'
+                endpoint: `/api/stats?userId=${userId}`
             });
             return Result.ok(data);
         } catch (error: any) {

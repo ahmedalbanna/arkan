@@ -4,6 +4,7 @@ import { Result } from '@/lib/utils/result';
 
 export interface ProcessedDocumentResult {
   text: string;
+  markdown: string;
   metadata: {
     pageCount: number;
     title?: string;

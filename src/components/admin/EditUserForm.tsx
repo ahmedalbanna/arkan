@@ -24,7 +24,7 @@ import {
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { useAdminUpdateUser, useSendNotification } from '@/hooks';
+import { useAdminUpdateUser, useNotifications } from '@/hooks';
 import { UserProfile } from '@/lib/types';
 import { Loader2, Save, Send } from 'lucide-react';
 import { useEffect, useState } from 'react';
@@ -67,7 +67,7 @@ export default function EditUserForm({ user }: EditUserFormProps) {
   const { userProfile: adminProfile } = useAuth();
   const { toast } = useToast();
   const updateUserMutation = useAdminUpdateUser();
-  const sendNotificationMutation = useSendNotification();
+  const { sendNotification, isSending: isSendingNotification } = useNotifications();
 
   const [isConfirming, setIsConfirming] = useState(false);
   const [pendingData, setPendingData] = useState<Partial<ProfileFormValues> | null>(null);
@@ -118,14 +118,15 @@ export default function EditUserForm({ user }: EditUserFormProps) {
     if (!pendingData) return;
 
     updateUserMutation.mutate(
-      { userId: user.id, data: pendingData },
+      { id: user.id, data: pendingData as any },
       {
         onSuccess: () => {
           if (notificationMessage.trim()) {
-            sendNotificationMutation.mutate({
+            sendNotification({
               userId: user.id,
               title: 'Your Account Has Been Updated',
-              body: `An administrator made changes to your account. Reason: "${notificationMessage}"`,
+              description: `An administrator made changes to your account. Reason: "${notificationMessage}"`,
+              type: 'info',
               link: `/profile/${user.id}`,
             });
           }
@@ -136,7 +137,7 @@ export default function EditUserForm({ user }: EditUserFormProps) {
     setNotificationMessage('');
   }
 
-  const isMutating = updateUserMutation.isPending || sendNotificationMutation.isPending;
+  const isMutating = updateUserMutation.isPending || isSendingNotification;
   const isAdmin = adminProfile?.role === 'admin';
 
   return (

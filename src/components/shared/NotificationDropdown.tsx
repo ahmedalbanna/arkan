@@ -12,7 +12,7 @@ import {
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useLocalization } from '@/context/LocalizationContext';
-import { useClearAllNotifications, useMarkNotificationsAsRead, useNotifications } from '@/hooks';
+import { useNotifications } from '@/hooks';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import {
@@ -45,15 +45,13 @@ function NotificationIcon({ icon }: { icon: Notification['icon'] }) {
 export function NotificationDropdown() {
   const { t } = useLocalization();
   const router = useRouter();
-  const { notifications } = useNotifications();
-  const markAsReadMutation = useMarkNotificationsAsRead();
-  const clearAllMutation = useClearAllNotifications();
+  const { notifications, markAsRead, clearNotifications } = useNotifications();
 
-  const unreadCount = notifications?.filter(n => !n.isRead).length ?? 0;
+  const unreadCount = (notifications as any[])?.filter((n: any) => !n.isRead).length ?? 0;
 
-  function handleNotificationClick(notification: Notification) {
+  function handleNotificationClick(notification: any) {
     if (!notification.isRead) {
-      markAsReadMutation.mutate([notification.id]);
+      markAsRead([notification.id]);
     }
     if (notification.link) {
       router.push(notification.link);
@@ -62,9 +60,9 @@ export function NotificationDropdown() {
 
   function handleClearAll(e: React.MouseEvent) {
     e.stopPropagation();
-    if (notifications && notifications.length > 0) {
-      const notificationIds = notifications.map(n => n.id);
-      clearAllMutation.mutate(notificationIds);
+    if (notifications && (notifications as any[]).length > 0) {
+      const notificationIds = (notifications as any[]).map((n: any) => n.id);
+      clearNotifications(notificationIds);
     }
   }
 
@@ -82,7 +80,7 @@ export function NotificationDropdown() {
         <DropdownMenuLabel className="flex justify-between items-center">
           <span>{t('header.notifications')}</span>
           {notifications && notifications.length > 0 && (
-            <Button variant="ghost" size="sm" onClick={handleClearAll} disabled={clearAllMutation.isPending}>
+            <Button variant="ghost" size="sm" onClick={handleClearAll}>
               <Trash2 className="mr-1 h-3 w-3" />
               {t('header.clearAll')}
             </Button>
@@ -91,7 +89,7 @@ export function NotificationDropdown() {
         <DropdownMenuSeparator />
         <ScrollArea className="h-auto max-h-80">
           {notifications && notifications.length > 0 ? (
-            notifications.map(notification => (
+            (notifications as any[]).map((notification: any) => (
               <DropdownMenuItem key={notification.id} className="items-start" onSelect={(e) => { e.preventDefault(); handleNotificationClick(notification); }}>
                 <div className="flex items-start gap-3">
                   <div className="relative">
@@ -103,7 +101,17 @@ export function NotificationDropdown() {
                   <div>
                     <p className="font-semibold">{notification.title}</p>
                     <p className="text-xs text-muted-foreground">{notification.description}</p>
-                    <p className="text-xs text-muted-foreground/80 mt-1">{formatDistanceToNow(new Date(notification.createdAt), { addSuffix: true })}</p>
+                    {notification.createdAt && (
+                      <p className="text-xs text-muted-foreground/80 mt-1">
+                        {(() => {
+                          try {
+                            return formatDistanceToNow(new Date(notification.createdAt), { addSuffix: true });
+                          } catch (e) {
+                            return 'Recent';
+                          }
+                        })()}
+                      </p>
+                    )}
                   </div>
                 </div>
               </DropdownMenuItem>

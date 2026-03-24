@@ -16,11 +16,15 @@ const toApiError = (error: unknown): ApiError => {
 
 @injectable()
 export class TransactionApiClient {
-  async fetchTransactions(status?: string): Promise<Result<TransactionProperties[], ApiError>> {
+  async fetchTransactions(options: { status?: string; limit?: number; lastVisibleId?: string } = {}): Promise<Result<any, ApiError>> {
     try {
-      const query = status ? `?status=${status}` : '';
-      const data = await apiService<never, TransactionProperties[]>({ 
-        endpoint: `/api/transactions${query}`
+      const query = new URLSearchParams();
+      if (options.status) query.append('status', options.status);
+      if (options.limit) query.append('limit', options.limit.toString());
+      if (options.lastVisibleId) query.append('lastVisibleId', options.lastVisibleId);
+
+      const data = await apiService<never, any>({ 
+        endpoint: `/api/transactions?${query.toString()}`
       });
       return Result.ok(data);
     } catch (error: unknown) {
@@ -64,12 +68,12 @@ export class TransactionApiClient {
     }
   }
 
-  async submitPaymentProof(formData: FormData): Promise<Result<{ message?: string }, ApiError>> {
+  async submitPaymentProof(options: { formData: FormData }): Promise<Result<{ message?: string }, ApiError>> {
     try {
       const response = await apiService<FormData, { message?: string }>({
         endpoint: '/api/payment/request',
         method: 'POST',
-        data: formData,
+        data: options.formData,
         isFormData: true,
       });
       return Result.ok(response);

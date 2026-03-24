@@ -69,7 +69,7 @@ describe('use-sections hooks', () => {
     const { result } = renderHook(() => useUpdateSection(), { wrapper: createWrapper(queryClient) });
 
     await act(async () => {
-      await result.current.mutateAsync({ sectionId: 's1', data: { title: 'Updated Intro' } });
+      await result.current.mutateAsync({ id: 's1', data: { title: 'Updated Intro' } });
     });
 
     expect(invalidateQueriesSpy).toHaveBeenCalledWith({ queryKey: sectionKeys.lists() });

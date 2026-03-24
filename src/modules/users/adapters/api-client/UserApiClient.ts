@@ -102,12 +102,11 @@ export class UserApiClient {
   }
 
   async getPaginatedUsers(
-    limit: number,
-    lastVisibleId?: string,
+    options: { limit: number; lastVisibleId?: string }
   ): Promise<Result<PaginatedUsersResponse, ApiError>> {
     try {
-      const query = new URLSearchParams({ limit: limit.toString() });
-      if (lastVisibleId) query.set('lastVisibleId', lastVisibleId);
+      const query = new URLSearchParams({ limit: options.limit.toString() });
+      if (options.lastVisibleId) query.set('lastVisibleId', options.lastVisibleId);
 
       const data = await apiService<never, PaginatedUsersResponse>({
         endpoint: `/api/admin/users?${query.toString()}`,
@@ -118,9 +117,9 @@ export class UserApiClient {
     }
   }
 
-  async createUser(data: CreateUserInput): Promise<Result<CreateUserResponse, ApiError>> {
+  async createUser(data: any): Promise<Result<CreateUserResponse, ApiError>> {
     try {
-      const response = await apiService<CreateUserInput, CreateUserResponse>({
+      const response = await apiService<any, CreateUserResponse>({
         endpoint: '/api/admin/users',
         method: 'POST',
         data,
@@ -131,12 +130,12 @@ export class UserApiClient {
     }
   }
 
-  async adminUpdateUser(id: string, data: Partial<UserProfile>): Promise<Result<UserProfile, ApiError>> {
+  async adminUpdateUser(options: { id: string; data: Partial<UserProfile> }): Promise<Result<UserProfile, ApiError>> {
     try {
       const response = await apiService<Partial<UserProfile>, UserProfile>({
-        endpoint: `/api/admin/users/${id}`,
+        endpoint: `/api/admin/users/${options.id}`,
         method: 'PUT',
-        data,
+        data: options.data,
       });
       return Result.ok(response);
     } catch (error: unknown) {

@@ -1,6 +1,6 @@
 'use client';
 
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient, useInfiniteQuery } from '@tanstack/react-query';
 import { container } from '@/infrastructure/di/container';
 import { TransactionApiClient, VerifyPaymentVariables } from '@/modules/billing/adapters/api-client/TransactionApiClient';
 import { useAuth } from '@/context/AuthContext';
@@ -9,15 +9,17 @@ import { useToast } from '@/hooks/util/use-toast';
 export function useTransactions(status?: string) {
   const { firebaseUser } = useAuth();
 
-  return useQuery({
+  return useInfiniteQuery({
     queryKey: ['transactions', status],
-    queryFn: async () => {
-      if (!firebaseUser) return [];
+    queryFn: async ({ pageParam }) => {
+      if (!firebaseUser) return { transactions: [], hasNextPage: false, lastVisibleId: null };
       const client = container.resolve(TransactionApiClient);
-      const result = await client.fetchTransactions(status);
+      const result = await client.fetchTransactions({ status, lastVisibleId: pageParam as string });
       if (result.isFailure) throw result.error;
       return result.getValue();
     },
+    initialPageParam: undefined,
+    getNextPageParam: (lastPage: any) => lastPage.hasNextPage ? lastPage.lastVisibleId : undefined,
     enabled: !!firebaseUser,
   });
 }
@@ -59,18 +61,21 @@ export function useVerifyPayment() {
   });
 }
 
-export function useSubmitPaymentProof() {
+export function useSubmitPaymentProof(options?: { onSuccess?: () => void }) {
   const { toast } = useToast();
+  const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: async (formData: FormData) => {
       const client = container.resolve(TransactionApiClient);
-      const result = await client.submitPaymentProof(formData);
+      const result = await client.submitPaymentProof({ formData });
       if (result.isFailure) throw result.error;
       return result.getValue();
     },
     onSuccess: () => {
       toast({ title: 'Success', description: 'Payment proof submitted successfully.' });
+      queryClient.invalidateQueries({ queryKey: ['transactions'] });
+      options?.onSuccess?.();
     },
     onError: (error: any) => {
       toast({ title: 'Error', description: error.message || 'Failed to submit proof.', variant: 'destructive' });

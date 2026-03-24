@@ -96,7 +96,7 @@ export function useAgentManager() {
   const updateMutation = useMutation({
     mutationFn: async ({ id, data }: { id: string; data: Partial<AgentProperties> }) => {
       const client = container.resolve(AgentApiClient);
-      const result = await client.updateAgentApi(id, data);
+      const result = await client.updateAgentApi({ id, data });
       if (result.isFailure) throw result.error;
       return result.getValue();
     },

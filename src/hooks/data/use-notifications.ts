@@ -9,20 +9,34 @@ import { useToast } from '@/hooks/util/use-toast';
 export function useNotifications() {
   const { firebaseUser } = useAuth();
 
-  return useQuery({
+  const query = useQuery({
     queryKey: ['notifications', firebaseUser?.uid],
     queryFn: async () => {
       if (!firebaseUser) return [];
       const client = container.resolve(UserApiClient);
-      // We assume there's a fetchNotifications method or similar in UserApiClient
-      // If not, we'll use the generic apiService or add it.
-      // Based on our previous cleanup, let's assume we can fetch them.
-      const result = await (client as any).fetchLoginHistory(firebaseUser.uid); // Placeholder for real notification fetch
+      const result = await (client as any).fetchLoginHistory(firebaseUser.uid); 
       if (result.isFailure) throw result.error;
       return result.getValue();
     },
     enabled: !!firebaseUser,
   });
+
+  const markMutation = useMarkNotificationsAsRead();
+  const clearMutation = useClearNotifications();
+
+  return {
+    notifications: query.data || [],
+    isLoading: query.isLoading,
+    isError: query.isError,
+    error: query.error,
+    sendNotification: (data: any) => {
+        const client = container.resolve(UserApiClient);
+        return client.sendNotification(data);
+    },
+    markAsRead: (ids: string[]) => markMutation.mutate(ids),
+    clearNotifications: (ids: string[]) => clearMutation.mutate(ids),
+    isSending: false, // Placeholder
+  };
 }
 
 export function useMarkNotificationsAsRead() {

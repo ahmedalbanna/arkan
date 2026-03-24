@@ -2,7 +2,7 @@
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useLocalization } from '@/context/LocalizationContext';
-import { useDocxStyles, usePptxStyles, useReportTemplates } from '@/hooks';
+import { useTemplates } from '@/hooks';
 import { Loader2, PlusCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { TemplateCard } from './TemplateCard';
@@ -16,11 +16,12 @@ type TemplateType = 'docx' | 'pptx' | 'report';
 type TemplateData = DocxTemplate | PptxTemplate | ReportTemplate;
 
 const DocxTemplateManager = ({ onEdit }: { onEdit: (template: TemplateData) => void }) => {
-    const { templates, isLoading } = useDocxStyles();
+    const { data: templates, isLoading } = useTemplates('docx');
     if(isLoading) return <Loader2 className="animate-spin" />;
+    const templatesList = Array.isArray(templates) ? templates : Object.values(templates || {});
     return (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {Object.values(templates).map(template => (
+            {templatesList.map((template: any) => (
                 <TemplateCard key={template.id} template={new DocxTemplate(template)} onEdit={() => onEdit(new DocxTemplate(template))} templateType="docx" />
             ))}
         </div>
@@ -28,11 +29,12 @@ const DocxTemplateManager = ({ onEdit }: { onEdit: (template: TemplateData) => v
 };
 
 const PptxTemplateManager = ({ onEdit }: { onEdit: (template: TemplateData) => void }) => {
-    const { templates, isLoading } = usePptxStyles();
+    const { data: templates, isLoading } = useTemplates('pptx');
     if(isLoading) return <Loader2 className="animate-spin" />;
+    const templatesList = Array.isArray(templates) ? templates : Object.values(templates || {});
     return (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {Object.values(templates).map(template => (
+            {templatesList.map((template: any) => (
                 <TemplateCard key={template.id} template={new PptxTemplate(template)} onEdit={() => onEdit(new PptxTemplate(template))} templateType="pptx" />
             ))}
         </div>
@@ -40,12 +42,12 @@ const PptxTemplateManager = ({ onEdit }: { onEdit: (template: TemplateData) => v
 };
 
 const ReportTemplateManager = ({ onEdit }: { onEdit: (template: TemplateData) => void }) => {
-    const { data, isLoading } = useReportTemplates();
+    const { data: templates, isLoading } = useTemplates('report');
     if(isLoading) return <Loader2 className="animate-spin" />;
-    const templates = Array.isArray(data) ? data : [];
+    const templatesList = Array.isArray(templates) ? templates : [];
     return (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {templates.map(template => (
+            {templatesList.map((template: any) => (
                 <TemplateCard key={template.id} template={new ReportTemplate(template)} onEdit={() => onEdit(new ReportTemplate(template))} templateType="report" />
             ))}
         </div>

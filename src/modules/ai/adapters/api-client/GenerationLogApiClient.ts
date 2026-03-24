@@ -35,4 +35,23 @@ export class GenerationLogApiClient {
       return Result.fail(toApiError(error));
     }
   }
+
+  async fetchGenerationLogs(params: {
+    limit: number;
+    userId?: string;
+    lastVisibleId?: string;
+  }): Promise<Result<GenerationLogResponse, ApiError>> {
+    try {
+      const query = new URLSearchParams({ limit: params.limit.toString() });
+      if (params.userId) query.set('userId', params.userId);
+      if (params.lastVisibleId) query.set('lastVisibleId', params.lastVisibleId);
+
+      const data = await apiService<never, GenerationLogResponse>({
+        endpoint: `/api/admin/manage-generations?${query.toString()}`,
+      });
+      return Result.ok(data);
+    } catch (error: unknown) {
+      return Result.fail(toApiError(error));
+    }
+  }
 }

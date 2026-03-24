@@ -12,6 +12,7 @@ import {
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { useApplyReportTemplate, useReportTemplates } from '@/hooks/data/use-templates';
+import { useBuilderStore } from '@/hooks';
 import { AlertCircle, FileText, Loader2 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '../../ui/card';
 import { ScrollArea } from '../../ui/scroll-area';
@@ -48,10 +49,11 @@ export function ReportTemplateDialog({ isOpen, onOpenChange }: ReportTemplateDia
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedTemplateId, setSelectedTemplateId] = useState<string | null>(null);
 
+  const { project } = useBuilderStore();
   const {
       handleSelectTemplate,
       isApplyingTemplate,
-  } = useApplyReportTemplate(() => onOpenChange(false));
+  } = useApplyReportTemplate();
 
 
   const filteredTemplates = useMemo(() => {
@@ -109,8 +111,10 @@ export function ReportTemplateDialog({ isOpen, onOpenChange }: ReportTemplateDia
                         key={template.id} 
                         template={template} 
                         onSelect={() => {
+                            if (!project?.id) return;
                             setSelectedTemplateId(template.id);
-                            handleSelectTemplate(template);
+                            handleSelectTemplate(template.id, project.id);
+                            onOpenChange(false);
                         }} 
                         isLoading={isApplyingTemplate && selectedTemplateId === template.id}
                     />

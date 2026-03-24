@@ -2,14 +2,14 @@ import { injectable } from "tsyringe";
 import { db } from "@/infrastructure/db";
 import { users } from "@/infrastructure/db/schema";
 import { IUserRepository } from "../../domain/repositories/IUserRepository";
-import { UserProfile } from "../../domain/entities/User";
+import { User, UserProfile } from "../../domain/entities/User";
 import { Result } from "@/lib/utils/result";
 import { UserError } from "../../domain/errors/UserErrors";
 import { eq, sql, desc, lt } from "drizzle-orm";
 
 @injectable()
 export class SQLiteUserRepository implements IUserRepository {
-    async getById(id: string): Promise<Result<UserProfile, UserError>> {
+    async getById(id: string): Promise<Result<User, UserError>> {
         try {
             if (!id) return Result.fail(UserError.notFound());
             const user = await db.query.users.findFirst({
@@ -18,26 +18,26 @@ export class SQLiteUserRepository implements IUserRepository {
             if (!user) {
                 return Result.fail(UserError.notFound());
             }
-            return Result.ok(this.toDomain(user));
+            return Result.ok(new User(this.toDomain(user)));
         } catch (error: any) {
             return Result.fail(UserError.internal(error.message));
         }
     }
 
-    async save(user: UserProfile): Promise<Result<UserProfile, UserError>> {
+    async save(user: UserProfile): Promise<Result<User, UserError>> {
         try {
             const data = this.toPersistence(user);
             await db.insert(users).values(data).onConflictDoUpdate({
                 target: users.id,
                 set: data,
             });
-            return Result.ok(user);
+            return Result.ok(new User(user));
         } catch (error: any) {
             return Result.fail(UserError.internal(error.message));
         }
     }
 
-    async update(id: string, data: Partial<UserProfile>): Promise<Result<UserProfile, UserError>> {
+    async update(id: string, data: Partial<UserProfile>): Promise<Result<User, UserError>> {
         try {
             const persistenceData = this.toPersistencePartial(data);
             await db.update(users)
@@ -111,7 +111,7 @@ export class SQLiteUserRepository implements IUserRepository {
         }
     }
 
-    async getPaginated({ limit, lastVisibleId }: { limit: number, lastVisibleId?: string }): Promise<Result<{ users: UserProfile[], hasNextPage: boolean, lastVisibleId: string | null }, UserError>> {
+    async getPaginated({ limit, lastVisibleId }: { limit: number, lastVisibleId?: string }): Promise<Result<{ users: User[], hasNextPage: boolean, lastVisibleId: string | null }, UserError>> {
         try {
             let whereClause = undefined;
             if (lastVisibleId) {
@@ -128,7 +128,7 @@ export class SQLiteUserRepository implements IUserRepository {
             });
 
             const hasNextPage = results.length > limit;
-            const usersList = results.slice(0, limit).map(this.toDomain);
+            const usersList = results.slice(0, limit).map(data => new User(this.toDomain(data)));
             const newLastVisibleId = hasNextPage ? usersList[usersList.length - 1].id : null;
 
             return Result.ok({ users: usersList, hasNextPage, lastVisibleId: newLastVisibleId });
@@ -137,12 +137,12 @@ export class SQLiteUserRepository implements IUserRepository {
         }
     }
 
-    async getAdmins(): Promise<Result<UserProfile[], UserError>> {
+    async getAdmins(): Promise<Result<User[], UserError>> {
         try {
             const results = await db.query.users.findMany({
                 where: eq(users.role, 'admin'),
             });
-            return Result.ok(results.map(this.toDomain));
+            return Result.ok(results.map(data => new User(this.toDomain(data))));
         } catch (error: any) {
             return Result.fail(UserError.internal(error.message));
         }

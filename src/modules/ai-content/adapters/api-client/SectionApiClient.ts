@@ -32,12 +32,12 @@ export class SectionApiClient {
     }
   }
 
-  async updateSection(sectionId: string, data: Partial<SectionProperties>): Promise<Result<SectionProperties, ApiError>> {
+  async updateSection(options: { id: string; data: Partial<SectionProperties> }): Promise<Result<SectionProperties, ApiError>> {
     try {
       const response = await apiService<Partial<SectionProperties>, SectionProperties>({
-        endpoint: `/api/admin/sections/${sectionId}`,
+        endpoint: `/api/admin/sections/${options.id}`,
         method: 'PUT',
-        data,
+        data: options.data,
       });
       return Result.ok(response);
     } catch (error: unknown) {

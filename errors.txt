@@ -1,31 +1,24 @@
- POST /api/auth/login 200 in 2260ms
- GET /builder 200 in 399ms
- GET /api/auth/me 200 in 426ms
- GET /api/admin/settings 200 in 467ms
- GET /profile 200 in 286ms
-API Route Error: { message: 'Unauthorized: Missing token' }
- GET /api/users/admin-user-id/fingerprints 401 in 954ms
- GET /api/users/admin-user-id/login-history 200 in 1459ms
-API Route Error: { message: 'Unauthorized: Missing token' }
- GET /api/users/admin-user-id/fingerprints 401 in 550ms
-Registering server-side dependencies...
-Firebase Admin SDK initialized using environment variables.
-Registering server-side dependencies...
-Firebase Admin SDK initialized using environment variables.
-API Route Error: { message: 'Unauthorized: Missing token' }
- GET /api/users/admin-user-id/fingerprints 401 in 832ms
-Registering server-side dependencies...
-Firebase Admin SDK initialized using environment variables.
-API Route Error: { message: 'Unauthorized: Missing token' }
- GET /api/users/admin-user-id/fingerprints 401 in 829ms
-Registering server-side dependencies...
-Firebase Admin SDK initialized using environment variables.
-API Route Error: { message: 'Unauthorized: Missing token' }
- GET /api/users/admin-user-id/fingerprints 401 in 802ms
- GET /api/users/admin-user-id/login-history 200 in 1072ms
-API Route Error: { message: 'Unauthorized: Missing token' }
- GET /api/users/admin-user-id/fingerprints 401 in 626ms
-Registering server-side dependencies...
-Firebase Admin SDK initialized using environment variables.
-Registering server-side dependencies...
-Firebase Admin SDK initialized using environment variables.
+## Error Type
+Runtime RangeError
+
+## Error Message
+Invalid time value
+
+
+    at <unknown> (src/components/shared/NotificationDropdown.tsx:104:94)
+    at Array.map (<anonymous>:null:null)
+    at NotificationDropdown (src/components/shared/NotificationDropdown.tsx:92:38)
+    at AuthActions (src/components/shared/Header.tsx:79:7)
+    at Header (src/components/shared/Header.tsx:122:15)
+    at RootLayout (src/app/layout.tsx:139:15)
+
+## Code Frame
+  102 |                     <p className="font-semibold">{notification.title}</p>
+  103 |                     <p className="text-xs text-muted-foreground">{notification.description}</p>
+> 104 |                     <p className="text-xs text-muted-foreground/80 mt-1">{formatDistanceToNow(new Date(notification.createdAt), { addSuffix: true })}</p>
+      |                                                                                              ^
+  105 |                   </div>
+  106 |                 </div>
+  107 |               </DropdownMenuItem>
+
+Next.js version: 15.5.9 (Turbopack)

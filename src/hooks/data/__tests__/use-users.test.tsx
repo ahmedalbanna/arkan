@@ -90,7 +90,7 @@ describe('use-users hooks', () => {
     });
 
     await act(async () => {
-      await result.current.mutateAsync({ userId: 'user-1', data: { name: 'Updated Name' } });
+      await result.current.mutateAsync({ id: 'user-1', data: { name: 'Updated Name' } });
     });
 
     expect(invalidateQueriesSpy).toHaveBeenCalledWith({ queryKey: userKeys.lists() });

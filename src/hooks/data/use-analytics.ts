@@ -13,7 +13,7 @@ export function useUserAnalytics() {
     queryFn: async () => {
       if (!firebaseUser) throw new Error('User not authenticated');
       const client = container.resolve(AnalyticsApiClient);
-      const result = await client.fetchUserStats();
+      const result = await client.fetchUserStats(firebaseUser.uid);
       if (result.isFailure) throw result.error;
       return result.getValue();
     },

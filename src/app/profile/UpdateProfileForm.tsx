@@ -42,7 +42,7 @@ export function UpdateProfileForm({ userProfile }: UpdateProfileFormProps) {
   }, [userProfile, form]);
 
   const onSubmit = (data: ProfileFormValues) => {
-    updateUserMutation.mutate({ userId: userProfile.id, data });
+    updateUserMutation.mutate({ id: userProfile.id, data });
   };
 
   return (

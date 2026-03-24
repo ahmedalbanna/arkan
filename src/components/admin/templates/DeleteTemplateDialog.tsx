@@ -12,7 +12,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
-import { useDeleteDocxTemplate, useDeletePptxTemplate, useDeleteReportTemplate } from "@/hooks";
+import { useDeleteTemplate } from "@/hooks";
 import { Loader2 } from "lucide-react";
 
 interface DeleteTemplateDialogProps {
@@ -28,14 +28,7 @@ export function DeleteTemplateDialog({
   templateType,
   children,
 }: DeleteTemplateDialogProps) {
-  const deleteDocxMutation = useDeleteDocxTemplate();
-  const deletePptxMutation = useDeletePptxTemplate();
-  const deleteReportMutation = useDeleteReportTemplate();
-
-  const mutation =
-    templateType === 'docx' ? deleteDocxMutation :
-    templateType === 'pptx' ? deletePptxMutation :
-    deleteReportMutation;
+  const mutation = useDeleteTemplate(templateType);
 
   const handleDelete = () => {
     mutation.mutate(templateId);

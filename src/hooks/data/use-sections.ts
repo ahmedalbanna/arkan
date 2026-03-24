@@ -59,7 +59,7 @@ export function useUpdateSection() {
   return useMutation({
     mutationFn: async ({ id, data }: { id: string; data: Partial<SectionProperties> }) => {
       const client = container.resolve(SectionApiClient);
-      const result = await client.updateSection(id, data);
+      const result = await client.updateSection({ id, data });
       if (result.isFailure) throw result.error;
       return result.getValue();
     },

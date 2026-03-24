@@ -6,12 +6,17 @@ import { toast } from '@/hooks/util/use-toast';
 import { TemplateApiClient } from '@/modules/templates/adapters/api-client/TemplateApiClient';
 import { templateKeys } from '@/lib/query-keys';
 import type { DocxTemplateProperties } from '@/lib/types';
-import { runAuthenticatedResultCall, unwrapResult } from './authenticated-client-call';
+import { container } from '@/infrastructure/di/container';
 
 export function useDocxStyles() {
   const { data: templates, ...rest } = useQuery<Record<string, DocxTemplateProperties>>({
     queryKey: templateKeys.docx(),
-    queryFn: async () => unwrapResult(await new TemplateApiClient().fetchDocxTemplatesApi()),
+    queryFn: async () => {
+        const result = await container.resolve(TemplateApiClient).fetchDocxTemplatesApi();
+        if (result.isFailure) throw result.error;
+        const list = result.getValue();
+        return list.reduce((acc: any, t: any) => ({ ...acc, [t.id]: t }), {});
+    },
     staleTime: 1000 * 60 * 60,
   });
 
@@ -20,13 +25,14 @@ export function useDocxStyles() {
 
 export function useUpdateDocxTemplate() {
   const queryClient = useQueryClient();
-  const { firebaseUser } = useAuth();
 
   return useMutation({
-    mutationFn: async ({ key, styles }: { key: string; styles: unknown }) =>
-      runAuthenticatedResultCall(firebaseUser, TemplateApiClient, (client, token) =>
-        client.updateDocxTemplateApi(key, { styles } as Partial<DocxTemplateProperties>, token),
-      ),
+    mutationFn: async ({ key, styles }: { key: string; styles: unknown }) => {
+        const client = container.resolve(TemplateApiClient);
+        const result = await client.saveDocxTemplateApi({ id: key, data: { styles } });
+        if (result.isFailure) throw result.error;
+        return result.getValue();
+    },
     onSuccess: (_data, { key }) => {
       toast({ title: 'Template Saved', description: `Style changes for "${key}" have been saved.` });
       queryClient.invalidateQueries({ queryKey: templateKeys.docx() });
@@ -40,13 +46,14 @@ export function useUpdateDocxTemplate() {
 
 export function useDeleteDocxTemplate() {
   const queryClient = useQueryClient();
-  const { firebaseUser } = useAuth();
 
   return useMutation({
-    mutationFn: async (key: string) =>
-      runAuthenticatedResultCall(firebaseUser, TemplateApiClient, (client, token) =>
-        client.deleteDocxTemplateApi(key, token),
-      ),
+    mutationFn: async (key: string) => {
+        const client = container.resolve(TemplateApiClient);
+        const result = await client.deleteDocxTemplateApi(key);
+        if (result.isFailure) throw result.error;
+        return result.getValue();
+    },
     onSuccess: (_data, key) => {
       toast({ title: 'Template Deleted', description: `Template "${key}" has been deleted.` });
       queryClient.invalidateQueries({ queryKey: templateKeys.docx() });
@@ -60,13 +67,14 @@ export function useDeleteDocxTemplate() {
 
 export function useCreateDocxTemplate() {
   const queryClient = useQueryClient();
-  const { firebaseUser } = useAuth();
 
   return useMutation({
-    mutationFn: async (data: { id: string; name: string; description: string }) =>
-      runAuthenticatedResultCall(firebaseUser, TemplateApiClient, (client, token) =>
-        client.createDocxTemplateApi(data, token),
-      ),
+    mutationFn: async (data: { id: string; name: string; description: string }) => {
+        const client = container.resolve(TemplateApiClient);
+        const result = await client.saveDocxTemplateApi({ id: data.id, data });
+        if (result.isFailure) throw result.error;
+        return result.getValue();
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: templateKeys.docx() });
     },
@@ -75,13 +83,11 @@ export function useCreateDocxTemplate() {
 
 export function useRefreshDocxTemplateImage() {
   const queryClient = useQueryClient();
-  const { firebaseUser } = useAuth();
 
   return useMutation({
-    mutationFn: async (variables: { templateId: string; prompt: string }) =>
-      runAuthenticatedResultCall(firebaseUser, TemplateApiClient, (client, token) =>
-        client.refreshTemplateImage({ ...variables, templateType: 'docx' }, token),
-      ),
+    mutationFn: async (variables: { templateId: string; prompt: string }) => {
+        throw new Error("Image refresh not implemented for SQLite templates yet");
+    },
     onSuccess: () => {
       toast({ title: 'Image Refreshing', description: 'The new template preview is being generated.' });
       queryClient.invalidateQueries({ queryKey: templateKeys.docx() });

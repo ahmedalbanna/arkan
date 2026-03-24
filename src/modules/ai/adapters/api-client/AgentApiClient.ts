@@ -52,12 +52,12 @@ export class AgentApiClient {
     }
   }
 
-  async updateAgentApi(id: string, data: Partial<AgentProperties>): Promise<Result<AgentProperties, ApiError>> {
+  async updateAgentApi(options: { id: string; data: Partial<AgentProperties> }): Promise<Result<AgentProperties, ApiError>> {
     try {
       const response = await apiService<Partial<AgentProperties>, AgentProperties>({
-        endpoint: `/api/agents/${id}`,
+        endpoint: `/api/agents/${options.id}`,
         method: 'PUT',
-        data,
+        data: options.data,
       });
       return Result.ok(response);
     } catch (error: unknown) {

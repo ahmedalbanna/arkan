@@ -19,12 +19,13 @@ interface ProjectChatProps {
 
 export function ProjectChat({ isOpen, onClose }: ProjectChatProps) {
     const { messages, sendMessage, isLoading } = useProjectChat();
+    const projectContext = ''; // Placeholder, you should pass actual context here
     const [inputValue, setInputValue] = useState('');
     const scrollAreaRef = useRef<HTMLDivElement>(null);
 
     const handleSend = () => {
         if (inputValue.trim()) {
-            sendMessage(inputValue);
+            sendMessage(inputValue, projectContext);
             setInputValue('');
         }
     };
@@ -52,14 +53,14 @@ export function ProjectChat({ isOpen, onClose }: ProjectChatProps) {
                 <div className="space-y-4 p-4">
                     {messages.map((message, index) => (
                         <div key={index} className={cn("flex items-start gap-3", message.role === 'user' ? 'justify-end' : '')}>
-                            {message.role === 'model' && (
+                            {(message.role === 'assistant') && (
                                 <Avatar className="h-8 w-8">
                                     <AvatarFallback>🤖</AvatarFallback>
                                 </Avatar>
                             )}
                              <div className={cn(
                                  "prose prose-sm dark:prose-invert max-w-[80%] p-3 rounded-lg",
-                                 message.role === 'model' ? 'bg-muted' : 'bg-primary text-primary-foreground'
+                                 (message.role === 'assistant') ? 'bg-muted' : 'bg-primary text-primary-foreground'
                              )}>
                                 <ReactMarkdown components={markdownComponents}>{message.content}</ReactMarkdown>
                             </div>

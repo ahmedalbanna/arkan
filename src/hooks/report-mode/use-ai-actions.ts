@@ -161,9 +161,10 @@ export function useAiActions({ editor: initialEditor }: AiActionsProps = {}) {
         instructionText: container.resolve(PromptBuilder).buildSectionPrompt(section, currentProject),
       };
 
-      return runAuthenticatedResultCall(firebaseUser, ReportApiClient, (client, token) =>
-        client.generateReportSectionApi(body, token),
-      );
+      const client = container.resolve(ReportApiClient);
+      const result = await client.generateReportSectionApi(body);
+      if (result.isFailure) throw result.error;
+      return result.getValue();
     },
     onSuccess: (data, sectionId) => {
       updateProject((currentProject) => currentProject.updateSection(sectionId, (section) => section.withProps({ content: data.content })));

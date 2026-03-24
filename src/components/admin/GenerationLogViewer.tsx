@@ -2,7 +2,7 @@
 
 import { useInfiniteQuery } from '@tanstack/react-query';
 import { generationLogKeys } from '@/lib/query-keys';
-import { GenerationLogApiClient, type GenerationLog } from '@/modules/ai/adapters/api-client/GenerationLogApiClient';
+import { GenerationLogApiClient } from '@/modules/ai/adapters/api-client/GenerationLogApiClient';
 import { AlertCircle, Eye, Loader2, Search } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -18,7 +18,7 @@ import { useDebounce } from '@/hooks';
 import dynamic from 'next/dynamic';
 import { useState } from 'react';
 import { useLocalization } from '@/context/LocalizationContext';
-import { runAuthenticatedResultCall } from '@/hooks/data/authenticated-client-call';
+import { container } from '@/infrastructure/di/container';
 
 const ReactJson = dynamic(() => import('@microlink/react-json-view'), { ssr: false });
 const LOGS_PER_PAGE = 15;
@@ -48,7 +48,7 @@ function LogTableSkeleton() {
   );
 }
 
-function LogDetailView({ log }: { log: GenerationLog }) {
+function LogDetailView({ log }: { log: any }) {
   const { resolvedTheme } = useTheme();
 
   return (
@@ -87,18 +87,18 @@ export default function GenerationLogViewer() {
 
   const { data, error, fetchNextPage, hasNextPage, isFetching, isFetchingNextPage, status } = useInfiniteQuery({
     queryKey: generationLogKeys.list({ agentId: debouncedAgentId, userId: debouncedUserId }),
-    queryFn: async ({ pageParam }) =>
-      runAuthenticatedResultCall(firebaseUser, GenerationLogApiClient, (client, token) =>
-        client.fetchGenerationLogs({
-          token,
-          limit: LOGS_PER_PAGE,
-          agentId: debouncedAgentId,
-          userId: debouncedUserId,
-          lastVisibleId: pageParam,
-        }),
-      ),
+    queryFn: async ({ pageParam }) => {
+      const client = container.resolve(GenerationLogApiClient);
+      const result = await client.fetchGenerationLogs({
+        limit: LOGS_PER_PAGE,
+        userId: debouncedUserId,
+        lastVisibleId: pageParam,
+      });
+      if (result.isFailure) throw result.error;
+      return result.getValue();
+    },
     initialPageParam: undefined as string | undefined,
-    getNextPageParam: (lastPage) => (lastPage.hasNextPage ? lastPage.lastVisibleId ?? undefined : undefined),
+    getNextPageParam: (lastPage: any) => (lastPage.hasNextPage ? lastPage.lastVisibleId ?? undefined : undefined),
     enabled: Boolean(firebaseUser),
     staleTime: 1000 * 60,
   });

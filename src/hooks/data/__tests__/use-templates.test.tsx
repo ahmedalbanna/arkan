@@ -45,10 +45,9 @@ const { templateKeys } = require('@/lib/query-keys') as {
   };
 };
 
-const { useDeletePresentationTemplate, useUpdateReportTemplate } = require('../use-templates') as {
-  useUpdateReportTemplate: typeof import('../use-templates').useUpdateReportTemplate;
-  useDeletePresentationTemplate: typeof import('../use-templates').useDeletePresentationTemplate;
-};
+const { useSaveTemplate, useDeleteTemplate } = require('../use-templates');
+const useUpdateReportTemplate = () => useSaveTemplate('report');
+const useDeletePresentationTemplate = () => useDeleteTemplate('pptx');
 
 describe('use-templates mutations', () => {
   const firebaseUser = { uid: 'admin-1' } as { uid: string };
@@ -81,7 +80,7 @@ describe('use-templates mutations', () => {
 
     await act(async () => {
       await result.current.mutateAsync({
-        templateId: 'report-1',
+        id: 'report-1',
         data: {
           name: 'Updated Report Template',
           description: 'Updated description',

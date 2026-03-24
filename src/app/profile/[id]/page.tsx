@@ -9,6 +9,7 @@ import { Mail, Gem, Calendar, Pencil } from 'lucide-react';
 import { format } from 'date-fns';
 import { useLocalization } from '@/context/LocalizationContext';
 import { useUserProfile } from '@/hooks';
+import { User } from '@/modules/users/domain/entities/User';
 import { Skeleton } from '@/components/ui/skeleton';
 import { use, Suspense, lazy } from 'react';
 import { useAuth } from '@/context/AuthContext';
@@ -65,7 +66,7 @@ function ProfilePageContent({ userId }: { userId: string }) {
             <Avatar className="w-24 h-24 mx-auto mb-4 border-4 border-primary/20">
               <AvatarImage src={user.profilePictureUrl ?? ''} alt={user.name} />
               <AvatarFallback className="text-3xl">
-                {user.getInitials()}
+                {new User(user).getInitials()}
               </AvatarFallback>
             </Avatar>
           <CardTitle className="text-3xl font-headline">{user.name}</CardTitle>

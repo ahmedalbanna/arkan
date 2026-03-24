@@ -19,12 +19,12 @@ import { Textarea } from '@/components/ui/textarea';
 import { useLocalization } from '@/context/LocalizationContext';
 import { useToast } from '@/hooks';
 import { usePublicSettings } from '@/hooks/data/use-settings';
-import { runAuthenticatedResultCall } from '@/hooks/data/authenticated-client-call';
 import { useAuth } from '@/context/AuthContext';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import type { AppSettings } from '@/lib/types';
 import { settingsKeys } from '@/lib/query-keys';
 import { SettingsApiClient } from '@/modules/admin/adapters/api-client/SettingsApiClient';
+import { container } from '@/infrastructure/di/container';
 
 
 // Schemas for validation
@@ -68,15 +68,11 @@ const settingsSchema = z.object({
 
 type SettingsFormValues = z.infer<typeof settingsSchema>;
 
-async function updateSettings(variables: {
-    data: AppSettings;
-    firebaseUser: NonNullable<ReturnType<typeof useAuth>['firebaseUser']>;
-}): Promise<AppSettings> {
-    return runAuthenticatedResultCall(
-        variables.firebaseUser,
-        SettingsApiClient,
-        (client, token) => client.updateSettings(variables.data, token),
-    );
+async function updateSettings(data: AppSettings): Promise<AppSettings> {
+    const client = container.resolve(SettingsApiClient);
+    const result = await client.updateSettings(data);
+    if (result.isFailure) throw result.error;
+    return result.getValue();
 }
 
 function getPaymentMethodIcon(type: string) {
@@ -138,7 +134,7 @@ export default function AdminSettingsPage() {
             toast({ title: t('adminSettings.errorToastTitle'), description: 'Admin not authenticated.', variant: 'destructive' });
             return;
         }
-        mutation.mutate({ data: data as AppSettings, firebaseUser });
+        mutation.mutate(data as AppSettings);
     };
 
     const addNewMethod = () => {

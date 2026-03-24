@@ -7,7 +7,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { useLocalization } from '@/context/LocalizationContext';
 import { Button } from '@/components/ui/button';
 import { useTransactions } from '@/hooks';
-import type { TransactionStatus } from '@/modules/billing/adapters/api-client/TransactionApiClient';
+type TransactionStatus = 'pending' | 'verified' | 'rejected';
 import { Transaction } from '@/modules/billing/domain/entities/Transaction';
 
 
@@ -58,7 +58,7 @@ export function TransactionList({ status }: { status: TransactionStatus }) {
         );
     }
 
-    const allTransactions = data?.pages.flatMap(page => page.transactions) ?? [];
+    const allTransactions = (data as any)?.pages?.flatMap((page: any) => page.transactions) ?? [];
 
     if (allTransactions.length === 0) {
         return (

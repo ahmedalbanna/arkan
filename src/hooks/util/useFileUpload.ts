@@ -6,7 +6,7 @@ import { useAuth } from '@/context/AuthContext';
 import { useToast } from '@/hooks/util/use-toast';
 import { DocumentProcessingApiClient } from '@/modules/ai-content/adapters/api-client/DocumentProcessingApiClient';
 import { UseFormSetValue } from 'react-hook-form';
-import { runAuthenticatedResultCall } from '../data/authenticated-client-call';
+import { container } from '@/infrastructure/di/container';
 
 interface UseFileUploadOptions {
   onSuccess?: (fileName: string) => void;
@@ -56,11 +56,12 @@ export function useFileUpload(
     formData.append('file', file);
 
     try {
-      const result = await runAuthenticatedResultCall(firebaseUser, DocumentProcessingApiClient, (client, token) =>
-        client.processFileApi(formData, token),
-      );
+      const client = container.resolve(DocumentProcessingApiClient);
+      const result = await client.processFileApi(formData);
+      if (result.isFailure) throw result.error;
+      const data = result.getValue();
 
-      setValue(fieldName, result.markdown, { shouldValidate: true });
+      setValue(fieldName, data.markdown || data.text, { shouldValidate: true });
 
       const successMsg = `Text extracted from ${file.name}.`;
       toast({ title: 'File Processed', description: successMsg });
