@@ -62,10 +62,10 @@ function TagInput({ label, value, onChange, placeholder }: { label: string; valu
 
     return (
         <div className="space-y-2">
-            <Label>{label}</Label>
-            <div className="flex flex-wrap gap-2 p-2 border rounded-md min-h-[40px]">
+            <Label className="text-sm font-semibold">{label}</Label>
+            <div className="flex flex-wrap gap-2 rounded-lg border border-border/60 bg-muted/20 p-2 min-h-[44px]">
                 {value.map((item, index) => (
-                    <Badge key={index} variant="secondary" className="flex items-center gap-1">
+                    <Badge key={index} variant="secondary" className="flex items-center gap-1 px-2 py-1 text-xs">
                         {item}
                         <button onClick={() => handleRemove(index)} className="rounded-full hover:bg-muted-foreground/20">
                             <X className="h-3 w-3" />
@@ -77,7 +77,7 @@ function TagInput({ label, value, onChange, placeholder }: { label: string; valu
                     onChange={(e) => setInputValue(e.target.value)}
                     onKeyDown={handleKeyDown}
                     placeholder={placeholder}
-                    className="flex-1 border-none focus-visible:ring-0 focus-visible:ring-offset-0 p-0 h-auto"
+                    className="flex-1 border-none focus-visible:ring-0 focus-visible:ring-offset-0 p-0 h-auto text-sm"
                 />
             </div>
         </div>
@@ -247,9 +247,9 @@ export default function ProjectSettingsPanel() {
 
   return (
     <Card className="h-full flex flex-col border-0 shadow-none">
-      <CardHeader>
-        <CardTitle>Project Settings</CardTitle>
-        <CardDescription>
+      <CardHeader className="pb-3">
+        <CardTitle className="text-base font-semibold tracking-tight">Project Settings</CardTitle>
+        <CardDescription className="text-xs">
           Manage the metadata for your project. This information will automatically update the cover page.
         </CardDescription>
       </CardHeader>
@@ -257,130 +257,135 @@ export default function ProjectSettingsPanel() {
         <Form {...form}>
           <form className="space-y-4 h-full flex flex-col">
             <ScrollArea className="flex-grow pr-4 -mr-4">
-              <div className="space-y-4">
+              <div className="space-y-5">
                 <FormField control={form.control} name="name" render={({ field }) => (
-                  <FormItem><FormLabel>Project Name</FormLabel><FormControl><Input {...field} onBlur={handleBlur} /></FormControl><FormMessage /></FormItem>
+                  <FormItem><FormLabel className="text-sm font-semibold">Project Name</FormLabel><FormControl><Input {...field} onBlur={handleBlur} /></FormControl><FormMessage /></FormItem>
                 )} />
                 <FormField control={form.control} name="projectDescription" render={({ field }) => (
-                  <FormItem><FormLabel>Project Description</FormLabel><FormControl><Textarea {...field} rows={3} onBlur={handleBlur} /></FormControl><FormMessage /></FormItem>
+                  <FormItem><FormLabel className="text-sm font-semibold">Project Description</FormLabel><FormControl><Textarea {...field} rows={3} onBlur={handleBlur} className="min-h-[120px]" /></FormControl><FormMessage /></FormItem>
                 )} />
                 
-                <FormField
-                  control={form.control}
-                  name="projectType"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Document Type</FormLabel>
-                      <FormControl>
-                        <CustomSelect
-                          value={field.value || ''}
-                          onChange={(value) => {
-                            field.onChange(value);
-                            handleBlur();
-                          }}
-                          options={documentTypeOptions}
-                          placeholder="e.g., Graduation Project"
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
+                <div className="grid gap-4 lg:grid-cols-2">
+                  <FormField
                     control={form.control}
-                    name="specialization"
+                    name="projectType"
                     render={({ field }) => (
-                        <FormItem>
-                            <FormLabel>Specialization</FormLabel>
-                            <FormControl>
-                                <CustomSelect
-                                    value={field.value || ''}
-                                    onChange={(value) => {
-                                        field.onChange(value);
-                                        handleBlur();
-                                    }}
-                                    options={specializationOptions}
-                                    placeholder="e.g., Artificial Intelligence, Web Development"
-                                />
-                            </FormControl>
-                            <FormMessage />
-                        </FormItem>
+                      <FormItem>
+                        <FormLabel className="text-sm font-semibold">Document Type</FormLabel>
+                        <FormControl>
+                          <CustomSelect
+                            value={field.value || ''}
+                            onChange={(value) => {
+                              field.onChange(value);
+                              handleBlur();
+                            }}
+                            options={documentTypeOptions}
+                            placeholder="e.g., Graduation Project"
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
                     )}
-                />
+                  />
 
-                <FormField
-                    control={form.control}
-                    name="educationalLevel"
-                    render={({ field }) => (
-                        <FormItem>
-                            <FormLabel>Educational Level</FormLabel>
-                            <FormControl>
-                                <CustomSelect
-                                    value={field.value || ''}
-                                    onChange={(value) => {
-                                        field.onChange(value);
-                                        handleBlur();
-                                    }}
-                                    options={educationalLevelOptions}
-                                    placeholder="e.g., Bachelor's Degree, PhD"
-                                />
-                            </FormControl>
-                            <FormMessage />
-                        </FormItem>
-                    )}
-                />
-                
-                <FormField
-                    control={form.control}
-                    name="university"
-                    render={({ field }) => (
-                        <FormItem>
-                            <FormLabel>University</FormLabel>
-                            <FormControl>
-                                <CustomSelect
-                                    value={field.value || ''}
-                                    onChange={(value) => {
-                                        field.onChange(value);
-                                        handleBlur();
-                                    }}
-                                    options={universityOptions}
-                                    placeholder="e.g., King Saud University"
-                                />
-                            </FormControl>
-                            <FormMessage />
-                        </FormItem>
-                    )}
-                />
-                
-                <FormField
-                  control={form.control}
-                  name="citationStyle"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Citation Style</FormLabel>
-                      <FormControl>
-                        <CustomSelect
-                          value={field.value || ''}
-                          onChange={(value) => {
-                            field.onChange(value);
-                            handleBlur();
-                          }}
-                          options={citationStyleOptions}
-                          placeholder="Select citation style..."
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                  <FormField
+                      control={form.control}
+                      name="specialization"
+                      render={({ field }) => (
+                          <FormItem>
+                              <FormLabel className="text-sm font-semibold">Specialization</FormLabel>
+                              <FormControl>
+                                  <CustomSelect
+                                      value={field.value || ''}
+                                      onChange={(value) => {
+                                          field.onChange(value);
+                                          handleBlur();
+                                      }}
+                                      options={specializationOptions}
+                                      placeholder="e.g., Artificial Intelligence, Web Development"
+                                  />
+                              </FormControl>
+                              <FormMessage />
+                          </FormItem>
+                      )}
+                  />
 
-                <Card>
-                    <CardHeader><CardTitle className="text-base">Global AI Settings</CardTitle></CardHeader>
-                    <CardContent className="space-y-4">
+                  <FormField
+                      control={form.control}
+                      name="educationalLevel"
+                      render={({ field }) => (
+                          <FormItem>
+                              <FormLabel className="text-sm font-semibold">Educational Level</FormLabel>
+                              <FormControl>
+                                  <CustomSelect
+                                      value={field.value || ''}
+                                      onChange={(value) => {
+                                          field.onChange(value);
+                                          handleBlur();
+                                      }}
+                                      options={educationalLevelOptions}
+                                      placeholder="e.g., Bachelor's Degree, PhD"
+                                  />
+                              </FormControl>
+                              <FormMessage />
+                          </FormItem>
+                      )}
+                  />
+                  
+                  <FormField
+                      control={form.control}
+                      name="university"
+                      render={({ field }) => (
+                          <FormItem>
+                              <FormLabel className="text-sm font-semibold">University</FormLabel>
+                              <FormControl>
+                                  <CustomSelect
+                                      value={field.value || ''}
+                                      onChange={(value) => {
+                                          field.onChange(value);
+                                          handleBlur();
+                                      }}
+                                      options={universityOptions}
+                                      placeholder="e.g., King Saud University"
+                                  />
+                              </FormControl>
+                              <FormMessage />
+                          </FormItem>
+                      )}
+                  />
+                  
+                  <FormField
+                    control={form.control}
+                    name="citationStyle"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-sm font-semibold">Citation Style</FormLabel>
+                        <FormControl>
+                          <CustomSelect
+                            value={field.value || ''}
+                            onChange={(value) => {
+                              field.onChange(value);
+                              handleBlur();
+                            }}
+                            options={citationStyleOptions}
+                            placeholder="Select citation style..."
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
+                <Card className="border-border/60 bg-muted/10">
+                    <CardHeader className="pb-3">
+                        <CardTitle className="text-base font-semibold tracking-tight">Global AI Settings</CardTitle>
+                        <CardDescription className="text-xs">Set default behavior, language, and style controls for the entire report.</CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-5">
                         <FormField control={form.control} name="language" render={({ field }) => (
                           <FormItem>
-                            <FormLabel>Language</FormLabel>
+                            <FormLabel className="text-sm font-semibold">Language</FormLabel>
                             <Select onValueChange={(value) => { field.onChange(value); handleBlur(); }} value={field.value}>
                                 <FormControl><SelectTrigger><SelectValue/></SelectTrigger></FormControl>
                                 <SelectContent>
@@ -398,7 +403,7 @@ export default function ProjectSettingsPanel() {
 
                         <FormField control={form.control} name="complexity" render={({ field }) => (
                           <FormItem>
-                            <div className="flex justify-between items-center"><FormLabel>Complexity</FormLabel><Badge variant="outline">{field.value}%</Badge></div>
+                            <div className="flex justify-between items-center"><FormLabel className="text-sm font-semibold">Complexity</FormLabel><Badge variant="outline">{field.value}%</Badge></div>
                             <FormControl>
                                 <Slider value={[field.value ?? 50]} onValueChange={(v) => field.onChange(v[0])} onBlur={handleBlur} min={0} max={100} step={10} />
                             </FormControl>
@@ -407,10 +412,10 @@ export default function ProjectSettingsPanel() {
                         )} />
                         
                         <div className="space-y-3">
-                            <Label>Behaviors &amp; Personas</Label>
+                            <Label className="text-sm font-semibold">Behaviors &amp; Personas</Label>
                             <div className="space-y-2">
                                 {behaviors.map((item, index) => (
-                                    <div key={item.id} className="flex items-center gap-2 rounded-md border p-2 bg-muted/50">
+                                    <div key={item.id} className="flex items-center gap-2 rounded-md border border-border/60 p-2 bg-background">
                                         <Input
                                             {...form.register(`behaviors.${index}.name`)}
                                             onBlur={handleBlur}

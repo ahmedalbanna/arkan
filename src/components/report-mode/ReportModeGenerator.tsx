@@ -130,7 +130,7 @@ export default function ReportModeGenerator({ initialProject }: { initialProject
             <OnboardingGuide isOpen={showOnboarding} onOpenChange={setShowOnboarding} onComplete={handleOnboardingComplete} />
             
             {/* Global Controls Floating UI - LEFT */}
-            <div className="fixed bottom-6 left-6 z-20 hidden lg:flex items-end gap-4">
+            <div className="fixed bottom-6 left-6 z-20 hidden lg:flex items-end gap-3">
                 <Popover open={isControlsPanelOpen} onOpenChange={setIsControlsPanelOpen}>
                     <TooltipProvider>
                         <Tooltip>
@@ -138,17 +138,17 @@ export default function ReportModeGenerator({ initialProject }: { initialProject
                                 <TooltipTrigger asChild>
                                     <Button
                                         size="icon"
-                                        className="rounded-full h-14 w-14 shadow-lg"
+                                        className="h-12 w-12 rounded-full shadow-md bg-background/90 backdrop-blur-sm border border-border/60"
                                         aria-label="Toggle global controls"
                                     >
-                                        <SlidersHorizontal className="h-6 w-6" />
+                                        <SlidersHorizontal className="h-5 w-5" />
                                     </Button>
                                 </TooltipTrigger>
                             </PopoverTrigger>
                             <TooltipContent side="right"><p>Complexity & Formality</p></TooltipContent>
                         </Tooltip>
                     </TooltipProvider>
-                    <PopoverContent side="top" align="start" className="w-64 p-4 mb-2 bg-background/80 backdrop-blur-sm">
+                    <PopoverContent side="top" align="start" className="w-64 p-4 mb-2 bg-background/90 backdrop-blur-sm border border-border/60 shadow-lg">
                         <div className="space-y-6">
                             {/* Formality Slider */}
                             <div className="space-y-2">
@@ -189,17 +189,17 @@ export default function ReportModeGenerator({ initialProject }: { initialProject
                                 <TooltipTrigger asChild>
                                     <Button
                                         size="icon"
-                                        className="rounded-full h-14 w-14 shadow-lg"
+                                        className="h-12 w-12 rounded-full shadow-md bg-background/90 backdrop-blur-sm border border-border/60"
                                         aria-label="Toggle language and tone controls"
                                     >
-                                        <LanguageIcon className="h-6 w-6" />
+                                        <LanguageIcon className="h-5 w-5" />
                                     </Button>
                                 </TooltipTrigger>
                             </PopoverTrigger>
                             <TooltipContent side="right"><p>Language & Tone</p></TooltipContent>
                         </Tooltip>
                     </TooltipProvider>
-                    <PopoverContent side="top" align="start" className="w-64 p-4 mb-2 bg-background/80 backdrop-blur-sm">
+                    <PopoverContent side="top" align="start" className="w-64 p-4 mb-2 bg-background/90 backdrop-blur-sm border border-border/60 shadow-lg">
                         <div className="space-y-6">
                             <div className="space-y-2">
                                 <Label className="text-xs font-semibold tracking-wider uppercase">Language</Label>
@@ -244,11 +244,11 @@ export default function ReportModeGenerator({ initialProject }: { initialProject
                         <TooltipTrigger asChild>
                             <Button
                                 size="icon"
-                                className="rounded-full h-16 w-16 shadow-lg"
+                                className="h-12 w-12 rounded-full shadow-md bg-background/90 backdrop-blur-sm border border-border/60"
                                 aria-label="Consult with AI Agents"
                                 onClick={() => setIsChatOpen(prev => !prev)}
                             >
-                                <MessageSquare className="h-8 w-8" />
+                                <MessageSquare className="h-5 w-5" />
                             </Button>
                         </TooltipTrigger>
                         <TooltipContent side="left">
@@ -259,7 +259,7 @@ export default function ReportModeGenerator({ initialProject }: { initialProject
             </div>
 
             {/* Zoom Controls - CENTER */}
-            <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-20 hidden lg:flex items-center gap-1 border bg-background/80 backdrop-blur-sm p-1 rounded-lg shadow-lg">
+            <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-20 hidden lg:flex items-center gap-1 border border-border/60 bg-background/90 backdrop-blur-sm p-1 rounded-lg shadow-md">
                 <TooltipProvider>
                     <Tooltip>
                         <TooltipTrigger asChild>
