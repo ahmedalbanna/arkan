@@ -36,16 +36,16 @@ export function CollapsibleSidePanel({
 
   return (
     <div className={cn(
-      "self-start flex flex-row bg-background border rounded-lg",
+      "self-start flex flex-row bg-background border rounded-lg shadow-sm",
       isMobile && "mb-16",
       className
     )}>
-      <div className="flex flex-col gap-2 border-r p-2">
+      <div className="flex flex-col gap-2 border-r border-border/60 bg-muted/10 p-2">
         <TooltipProvider>
           {panels.map((panel) => (
             <Tooltip key={panel.key} delayDuration={0}>
               <TooltipTrigger asChild>
-                <Button variant={activeKey === panel.key ? 'secondary' : 'ghost'} size="icon" onClick={() => onActiveKeyChange(panel.key)} aria-label={panel.title}>
+                <Button variant={activeKey === panel.key ? 'secondary' : 'ghost'} size="icon" onClick={() => onActiveKeyChange(panel.key)} aria-label={panel.title} className="h-9 w-9">
                   {panel.icon}
                 </Button>
               </TooltipTrigger>
@@ -56,7 +56,7 @@ export function CollapsibleSidePanel({
           ))}
         </TooltipProvider>
       </div>
-      <div className="flex-1 p-4 w-px">
+      <div className="flex-1 p-4 sm:p-5 w-px">
         {activePanel?.content}
       </div>
     </div>

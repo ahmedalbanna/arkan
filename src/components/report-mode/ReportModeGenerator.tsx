@@ -7,6 +7,7 @@ import { BookOpenText, Settings, SlidersHorizontal, Languages as LanguageIcon, M
 import React, { Suspense, lazy, useState } from 'react';
 import { Button } from '../ui/button';
 import { CollapsibleSidePanel } from '../ui/CollapsibleSidePanel';
+import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@/components/ui/resizable';
 import { BuilderPageSkeleton } from '@/app/builder/loading';
 import { OnboardingGuide } from '@/components/onboarding/OnboardingGuide';
 import { Input } from '@/components/ui/input';
@@ -312,23 +313,46 @@ export default function ReportModeGenerator({ initialProject }: { initialProject
                 <div className="flex flex-col flex-grow">
                      <div className="pb-16 lg:pb-0 flex-grow">
                         <Suspense fallback={<ReportSkeleton />}>
-                            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start h-full" dir={locale === 'ar' ? 'rtl' : 'ltr'}>
-                                <div className={cn(
-                                    "lg:col-span-4 xl:col-span-4 h-full",
-                                    isMobile && activeMobileView !== 'generator' && "hidden"
-                                )}>
-                                    <CollapsibleSidePanel
-                                        panels={panels}
-                                        activeKey={activePanelKey}
-                                        onActiveKeyChange={setActivePanelKey}
-                                    />
-                                </div>
-                                <div className={cn(
-                                    "lg:col-span-8 xl:col-span-8 h-full",
-                                    isMobile && activeMobileView !== 'result' && "hidden"
-                                )}>
-                                    <ReportResults activePanelKey={activePanelKey} />
-                                </div>
+                            <div className="h-full" dir={locale === 'ar' ? 'rtl' : 'ltr'}>
+                                {isMobile ? (
+                                    <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start h-full">
+                                        <div className={cn(
+                                            "lg:col-span-4 xl:col-span-4 h-full",
+                                            isMobile && activeMobileView !== 'generator' && "hidden"
+                                        )}>
+                                            <CollapsibleSidePanel
+                                                panels={panels}
+                                                activeKey={activePanelKey}
+                                                onActiveKeyChange={setActivePanelKey}
+                                            />
+                                        </div>
+                                        <div className={cn(
+                                            "lg:col-span-8 xl:col-span-8 h-full",
+                                            isMobile && activeMobileView !== 'result' && "hidden"
+                                        )}>
+                                            <ReportResults activePanelKey={activePanelKey} />
+                                        </div>
+                                    </div>
+                                ) : (
+                                    <ResizablePanelGroup direction="horizontal" className="h-full">
+                                        <ResizablePanel defaultSize={35} minSize={28} maxSize={45}>
+                                            <div className="h-full">
+                                                <CollapsibleSidePanel
+                                                    panels={panels}
+                                                    activeKey={activePanelKey}
+                                                    onActiveKeyChange={setActivePanelKey}
+                                                    className="h-full"
+                                                />
+                                            </div>
+                                        </ResizablePanel>
+                                        <ResizableHandle withHandle />
+                                        <ResizablePanel defaultSize={65} minSize={55}>
+                                            <div className="h-full">
+                                                <ReportResults activePanelKey={activePanelKey} />
+                                            </div>
+                                        </ResizablePanel>
+                                    </ResizablePanelGroup>
+                                )}
                             </div>
                         </Suspense>
                         {isMobile && <BottomNavBar activeView={activeMobileView} setActiveView={setActiveMobileView} />}

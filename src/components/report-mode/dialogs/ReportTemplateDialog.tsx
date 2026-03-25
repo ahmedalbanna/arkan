@@ -28,9 +28,9 @@ interface ReportTemplateDialogProps {
 
 function TemplateCard({ template, onSelect, isLoading }: { template: ReportTemplateProperties, onSelect: () => void, isLoading: boolean }) {
   return (
-    <Card className="hover:shadow-md transition-shadow">
-      <CardHeader>
-        <CardTitle className="text-lg">{template.name}</CardTitle>
+    <Card className="hover:shadow-md transition-shadow border-border/60">
+      <CardHeader className="pb-3">
+        <CardTitle className="text-base font-semibold">{template.name}</CardTitle>
       </CardHeader>
       <CardContent>
         <p className="text-sm text-muted-foreground min-h-[40px]">{template.description}</p>
@@ -79,7 +79,7 @@ export function ReportTemplateDialog({ isOpen, onOpenChange }: ReportTemplateDia
       </DialogTrigger>
       <DialogContent className="max-w-4xl h-[80vh] flex flex-col">
         <DialogHeader>
-          <DialogTitle>{t('manageTemplates.reportTitle')}</DialogTitle>
+          <DialogTitle className="text-base font-semibold tracking-tight">{t('manageTemplates.reportTitle')}</DialogTitle>
           <DialogDescription>{t('manageTemplates.reportDescription')}</DialogDescription>
         </DialogHeader>
         <div className="relative">

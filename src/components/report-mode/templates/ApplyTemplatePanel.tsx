@@ -18,14 +18,14 @@ import { ReportTemplateProperties } from '@/modules/templates/domain/entities/Re
 function TemplateCard({ template, onSelect }: { template: ReportTemplateProperties; onSelect: () => void }) {
   return (
     <Card 
-      className="hover:shadow-md transition-shadow cursor-pointer"
+      className="hover:shadow-md transition-shadow cursor-pointer border-border/60"
       onClick={onSelect}
       onKeyDown={(e) => e.key === 'Enter' && onSelect()}
       role="button"
       tabIndex={0}
     >
-      <CardHeader className="pb-4">
-        <CardTitle className="text-base">{template.name}</CardTitle>
+      <CardHeader className="pb-3">
+        <CardTitle className="text-base font-semibold">{template.name}</CardTitle>
       </CardHeader>
       <CardContent>
         <p className="text-sm text-muted-foreground min-h-[40px] line-clamp-3">{template.description}</p>
@@ -49,12 +49,12 @@ function TemplatePreview({ template, onApply, onBack, isLoading }: { template: R
         Back to Templates
       </Button>
       <CardHeader className="p-0 mb-2">
-        <CardTitle>{template.name}</CardTitle>
-        <CardDescription>{template.description}</CardDescription>
+        <CardTitle className="text-base font-semibold">{template.name}</CardTitle>
+        <CardDescription className="text-sm">{template.description}</CardDescription>
       </CardHeader>
       <Label className="text-sm font-semibold mt-4 mb-2">Template Structure</Label>
-      <ScrollArea className="flex-grow border rounded-md p-4 bg-muted/30 mb-4">
-        <MarkdownViewer content={tocMarkdown} />
+      <ScrollArea className="flex-grow border border-border/60 rounded-md p-4 bg-muted/20 mb-4 shadow-sm">
+        <MarkdownViewer content={tocMarkdown} className="leading-relaxed" />
       </ScrollArea>
       <Button onClick={onApply} disabled={isLoading} className="w-full">
         {isLoading ? <Loader2 className="h-4 w-4 animate-spin"/> : 'Apply This Template'}

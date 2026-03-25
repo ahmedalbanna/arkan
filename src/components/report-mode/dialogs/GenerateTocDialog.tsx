@@ -43,14 +43,14 @@ export function GenerateTocDialog({ isOpen, onOpenChange, onApply }: GenerateToc
         <Dialog open={isOpen} onOpenChange={onOpenChange}>
             <DialogContent className="sm:max-w-[600px]">
                 <DialogHeader>
-                    <DialogTitle>Generate Table of Contents with AI</DialogTitle>
+                    <DialogTitle className="text-base font-semibold tracking-tight">Generate Table of Contents with AI</DialogTitle>
                     <DialogDescription>
                         The AI will analyze your project description to suggest a logical chapter and section structure for your report.
                     </DialogDescription>
                 </DialogHeader>
                 <div className="py-4 space-y-4 max-h-[70vh] overflow-y-auto pr-2">
                     <form id="toc-form" onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-                        <Card>
+                        <Card className="border-border/60 bg-muted/20">
                             <CardHeader className="pb-2">
                                 <CardDescription>This information from your project settings will be used to generate the TOC.</CardDescription>
                             </CardHeader>
@@ -60,7 +60,7 @@ export function GenerateTocDialog({ isOpen, onOpenChange, onApply }: GenerateToc
                             </CardContent>
                         </Card>
                         
-                        <div>
+                        <div className="space-y-2">
                             <Label htmlFor="additional-instructions">Additional Instructions (Optional)</Label>
                             <Textarea
                                 id="additional-instructions"
@@ -75,7 +75,7 @@ export function GenerateTocDialog({ isOpen, onOpenChange, onApply }: GenerateToc
                     {(mutation.isPending || results) && (
                         <div className="space-y-2">
                             <Label>Suggested Structure</Label>
-                            <ScrollArea className="h-48 rounded-md border p-4 bg-muted/50">
+                            <ScrollArea className="h-48 rounded-md border border-border/60 p-4 bg-muted/20">
                                 {mutation.isPending ? (
                                     <div className="flex items-center justify-center h-full">
                                         <Loader2 className="h-6 w-6 animate-spin text-primary" />

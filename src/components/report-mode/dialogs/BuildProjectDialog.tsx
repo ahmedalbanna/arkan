@@ -59,7 +59,7 @@ export function BuildProjectDialog({
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-4xl h-[90vh] flex flex-col">
         <DialogHeader>
-          <DialogTitle>Confirm Project Build</DialogTitle>
+          <DialogTitle className="text-base font-semibold tracking-tight">Confirm Project Build</DialogTitle>
           <DialogDescription>
             Review the complete generation plan. The AI will generate content for all selected sections.
           </DialogDescription>
@@ -67,23 +67,23 @@ export function BuildProjectDialog({
 
         <Tabs value={viewMode} onValueChange={(v) => setViewMode(v as any)} className="flex-1 flex flex-col min-h-0">
           <div className="flex-shrink-0 flex justify-between items-center mb-2">
-            <TabsList>
-              <TabsTrigger value="plan"><Eye className="mr-2 h-4 w-4" /> Generation Plan</TabsTrigger>
-              <TabsTrigger value="prompt"><Code className="mr-2 h-4 w-4" /> Final Prompt</TabsTrigger>
+            <TabsList className="rounded-lg bg-muted/20 p-1">
+              <TabsTrigger value="plan" className="text-xs font-medium data-[state=active]:bg-background data-[state=active]:shadow-sm"><Eye className="mr-2 h-4 w-4" /> Generation Plan</TabsTrigger>
+              <TabsTrigger value="prompt" className="text-xs font-medium data-[state=active]:bg-background data-[state=active]:shadow-sm"><Code className="mr-2 h-4 w-4" /> Final Prompt</TabsTrigger>
             </TabsList>
           </div>
 
           <TabsContent value="plan" className="flex-1 overflow-hidden -mx-6 px-6">
             <ScrollArea className="h-full pr-4">
-              <Accordion type="multiple" defaultValue={chaptersToBuild.map(c => c.id)}>
+              <Accordion type="multiple" defaultValue={chaptersToBuild.map(c => c.id)} className="space-y-3">
                 {chaptersToBuild.map(chapter => (
-                  <AccordionItem value={chapter.id} key={chapter.id}>
-                    <AccordionTrigger className="text-lg font-semibold">{chapter.title}</AccordionTrigger>
-                    <AccordionContent className="space-y-3 pl-4 border-l-2 ml-2">
+                  <AccordionItem value={chapter.id} key={chapter.id} className="border rounded-lg overflow-hidden">
+                    <AccordionTrigger className="text-base font-semibold px-4 py-3 bg-muted/10 border-b">{chapter.title}</AccordionTrigger>
+                    <AccordionContent className="space-y-3 px-4 py-4 bg-background">
                       {chapter.sections.map(section => (
-                        <Card key={section.id} className="bg-muted/50">
+                        <Card key={section.id} className="bg-muted/20 border">
                           <CardHeader className="p-3">
-                            <CardTitle className="text-base">{section.title}</CardTitle>
+                            <CardTitle className="text-sm font-semibold">{section.title}</CardTitle>
                           </CardHeader>
                           <CardContent className="space-y-4 text-sm p-3 pt-0">
                             <div className="space-y-1">
@@ -116,15 +116,15 @@ export function BuildProjectDialog({
 
           <TabsContent value="prompt" className="flex-1 overflow-hidden -mx-6 px-6">
             <ScrollArea className="h-full">
-              <div className="p-4 border rounded-md bg-muted/50">
-                <MarkdownViewer content={`\`\`\`markdown\n${finalProjectPrompt}\n\`\`\``} />
+              <div className="p-4 border rounded-md bg-muted/20 shadow-sm">
+                <MarkdownViewer content={`\`\`\`markdown\n${finalProjectPrompt}\n\`\`\``} className="leading-relaxed" />
               </div>
             </ScrollArea>
           </TabsContent>
         </Tabs>
 
         <div className="py-4">
-          <Alert variant="destructive">
+          <Alert variant="destructive" className="border-border/60">
             <AlertTriangle className="h-4 w-4" />
             <AlertDescription>
               This action will consume credits for each section generated. The exact cost depends on the complexity and number of sections.
