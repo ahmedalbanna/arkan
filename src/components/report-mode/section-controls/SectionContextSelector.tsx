@@ -100,7 +100,7 @@ export function SectionContextSelector({ sectionId }: SectionContextSelectorProp
                                        Object.keys((section as any).context?.externalContext || {}).length;
                     return (
                       <SelectItem key={section.id} value={section.id} className="text-xs">
-                        {section.title} ({contextCount} link{contextCount > 1 ? 's' : ''})
+                        <span className="truncate break-words">{section.title} ({contextCount} link{contextCount > 1 ? 's' : ''})</span>
                       </SelectItem>
                     );
                   })}
@@ -132,13 +132,13 @@ export function SectionContextSelector({ sectionId }: SectionContextSelectorProp
               <div className="space-y-2 p-4">
                 {sectionOptions.length > 0 ? (
                   sectionOptions.map((option) => (
-                    <label key={`section-${option.id}`} className="flex items-center gap-2 rounded-md border px-3 py-2 text-sm">
+                    <label key={`section-${option.id}`} className="flex items-center gap-2 rounded-md border px-3 py-2 text-sm min-w-0">
                       <Checkbox
                         id={`context-sec-${sectionId}-${option.id}`}
                         checked={!!currentSelection.sections?.[option.id]}
                         onCheckedChange={(checked) => handleContextChange(sectionId, 'sections', option.id, checked ? 'context' : false)}
                       />
-                      <span className="truncate" title={option.label}>{option.label}</span>
+                      <span className="truncate break-words" title={option.label}>{option.label}</span>
                     </label>
                   ))
                 ) : (
@@ -159,14 +159,14 @@ export function SectionContextSelector({ sectionId }: SectionContextSelectorProp
               <div className="space-y-2 p-4">
                 {fileOptions.length > 0 ? (
                   fileOptions.map((option) => (
-                    <div key={`file-${option.id}`} className="flex items-center justify-between gap-2 rounded-md border px-3 py-2 text-sm">
+                    <div key={`file-${option.id}`} className="flex items-center justify-between gap-2 rounded-md border px-3 py-2 text-sm min-w-0">
                       <label className="flex items-center gap-2 min-w-0">
                         <Checkbox
                           id={`context-file-${sectionId}-${option.id}`}
                           checked={!!currentSelection.externalContext?.[option.id]}
                           onCheckedChange={(checked) => handleContextChange(sectionId, 'externalContext', option.id, checked ? 'context' : false)}
                         />
-                        <span className="truncate" title={option.label}>{option.label}</span>
+                        <span className="truncate break-words" title={option.label}>{option.label}</span>
                       </label>
                       <Badge variant="outline" className="text-xs capitalize shrink-0">{externalContext.find(f => f.id === option.id)?.type}</Badge>
                     </div>

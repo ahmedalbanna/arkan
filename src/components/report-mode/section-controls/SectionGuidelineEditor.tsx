@@ -50,7 +50,7 @@ export function GuidelineEditor({ itemKey }: GuidelineEditorProps) {
           defaultValue={prompt}
           onBlur={(e) => setPrompt(e.target.value)}
           rows={5}
-          className="min-h-[140px]"
+          className="min-h-[140px] w-full"
         />
       </div>
       <div className="space-y-3">
@@ -62,12 +62,12 @@ export function GuidelineEditor({ itemKey }: GuidelineEditorProps) {
           {guidelines.length > 0 ? (
             <ul className="space-y-1">
               {guidelines.map((guideline, index) => (
-                <li key={index} className="flex items-center justify-between text-xs p-2 rounded-md border bg-background">
-                  <span>{guideline}</span>
+                <li key={index} className="flex items-center justify-between text-xs p-2 rounded-md border bg-background gap-2">
+                  <span className="truncate break-words">{guideline}</span>
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="h-7 w-7"
+                    className="h-7 w-7 shrink-0"
                     onClick={() => handleRemoveGuideline(index)}
                   >
                     <Trash2 className="h-3.5 w-3.5 text-destructive" />

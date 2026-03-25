@@ -80,7 +80,7 @@ export function SectionAccordionItem({
 
     return (
         <AccordionItem value={section.id} key={section.id} className="bg-background border rounded-lg overflow-hidden shadow-sm" ref={setNodeRef} style={style} {...attributes}>
-            <div className="flex items-center px-4 py-3 bg-muted/10 border-b">
+            <div className="flex flex-wrap items-center gap-2 px-4 py-3 bg-muted/10 border-b">
                 {isProjectBuildMode && (
                     <div className="flex items-center gap-2" onClick={(e) => { e.stopPropagation(); toggleSectionSelection(section.id); }}>
                         <Checkbox
@@ -89,21 +89,21 @@ export function SectionAccordionItem({
                         />
                     </div>
                 )}
-                <AccordionTrigger className={cn("flex-1 hover:no-underline py-0", isProjectBuildMode && "ml-2")}>
-                    <div className="flex items-center gap-3 flex-1 min-w-0 group">
-                        <div {...listeners} className="p-1.5 rounded-md cursor-grab touch-none -ml-2 flex items-center gap-2 text-muted-foreground transition-colors hover:bg-muted/40">
+                <AccordionTrigger className={cn("flex-1 hover:no-underline py-0 min-w-0", isProjectBuildMode && "ml-2")}>
+                    <div className="flex flex-wrap items-center gap-3 flex-1 min-w-0 group">
+                        <div {...listeners} className="p-1.5 rounded-md cursor-grab touch-none -ml-2 flex items-center gap-2 text-muted-foreground transition-colors hover:bg-muted/40 shrink-0">
                             <span className="text-[11px] w-8 text-left">{chapterIndex >= 0 ? `${chapterIndex + 1}.${sectionIndex + 1}`: `${sectionIndex + 1}`}</span>
                             <GripVertical className="h-5 w-5" />
                         </div>
-                        {isGenerating && <Loader2 className="h-4 w-4 animate-spin" />}
-                        <span className="text-sm font-medium p-0 h-auto truncate group-hover:text-foreground">
+                        {isGenerating && <Loader2 className="h-4 w-4 animate-spin shrink-0" />}
+                        <span className="text-sm font-medium p-0 h-auto truncate break-words group-hover:text-foreground min-w-0">
                             {section.title}
                         </span>
                         {totalContext > 0 && (
                           <TooltipProvider>
                             <Tooltip>
                               <TooltipTrigger asChild>
-                                <div className="flex items-center gap-1 ml-2 rounded-full border border-primary/20 bg-primary/10 px-2 py-0.5 text-primary">
+                                <div className="flex items-center gap-1 ml-2 rounded-full border border-primary/20 bg-primary/10 px-2 py-0.5 text-primary shrink-0">
                                   <LinkIcon className="h-3.5 w-3.5" />
                                   <span className="text-[11px] font-medium">{totalContext}</span>
                                 </div>
@@ -124,22 +124,31 @@ export function SectionAccordionItem({
                     <Tabs defaultValue="controls" className="w-full">
                         <div className="px-4 pt-4">
                             <TooltipProvider>
-                                <TabsList className="grid w-full grid-cols-3 rounded-lg bg-muted/20 p-1">
+                                <TabsList className="grid w-full grid-cols-3 rounded-lg bg-muted/20 p-1 gap-1">
                                     <Tooltip>
                                         <TooltipTrigger asChild>
-                                            <TabsTrigger value="controls" className="gap-2 text-xs font-medium data-[state=active]:bg-background data-[state=active]:shadow-sm"><SlidersHorizontal className="h-4 w-4" /> Controls</TabsTrigger>
+                                            <TabsTrigger value="controls" className="gap-2 text-[11px] sm:text-xs font-medium data-[state=active]:bg-background data-[state=active]:shadow-sm px-2">
+                                                <SlidersHorizontal className="h-4 w-4 shrink-0" />
+                                                <span className="truncate">Controls</span>
+                                            </TabsTrigger>
                                         </TooltipTrigger>
                                         <TooltipContent><p>Controls</p></TooltipContent>
                                     </Tooltip>
                                     <Tooltip>
                                         <TooltipTrigger asChild>
-                                            <TabsTrigger value="prompt" className="gap-2 text-xs font-medium data-[state=active]:bg-background data-[state=active]:shadow-sm"><StickyNote className="h-4 w-4" /> Prompt</TabsTrigger>
+                                            <TabsTrigger value="prompt" className="gap-2 text-[11px] sm:text-xs font-medium data-[state=active]:bg-background data-[state=active]:shadow-sm px-2">
+                                                <StickyNote className="h-4 w-4 shrink-0" />
+                                                <span className="truncate">Prompt</span>
+                                            </TabsTrigger>
                                         </TooltipTrigger>
                                         <TooltipContent><p>Edit Prompt</p></TooltipContent>
                                     </Tooltip>
                                     <Tooltip>
                                         <TooltipTrigger asChild>
-                                            <TabsTrigger value="context" className="gap-2 text-xs font-medium data-[state=active]:bg-background data-[state=active]:shadow-sm"><LinkIcon className="h-4 w-4" /> {t('builder.reportGenerator.tool_tab_context')}</TabsTrigger>
+                                            <TabsTrigger value="context" className="gap-2 text-[11px] sm:text-xs font-medium data-[state=active]:bg-background data-[state=active]:shadow-sm px-2">
+                                                <LinkIcon className="h-4 w-4 shrink-0" />
+                                                <span className="truncate">{t('builder.reportGenerator.tool_tab_context')}</span>
+                                            </TabsTrigger>
                                         </TooltipTrigger>
                                         <TooltipContent><p>{t('builder.reportGenerator.tool_tab_context')}</p></TooltipContent>
                                     </Tooltip>
