@@ -312,6 +312,7 @@ FIREBASE_ADMIN_PRIVATE_KEY=
 ## Notes
 
 - When converting function-based modules (especially `adapters/api-client/*`) to class-based DI services, treat it as a 3-part refactor: update the module, register it in `src/infrastructure/di/container.ts`, then update every consumer/import in hooks, stores, and components. Skipping the consumer sweep leaves the codebase in a mixed pattern.
+- When relocating UI controls between panels (e.g., moving section-specific tabs or actions to a right sidebar), lift the active selection state to the highest shared owner (such as `useReportGenerator`) and pass it down through the panel component. Remove the original control from list items to avoid duplicated actions and inconsistent state.
 - Before doing bulk `find_and_replace_code` changes, inspect the exact file contents with `open_files`/`expand_code_chunks` first. Several files in this project look similar but differ slightly in imports or surrounding code, so guessing exact match strings causes avoidable failed edits.
 - Before refactoring a client/helper, `grep` for real call sites first. Some adapters or imports may be unused, partially migrated, or temporarily stubbed in the UI, so updating presumed consumers without verifying usage wastes time and creates avoidable churn.
 - If a large route/module needs a structural rewrite and targeted replacements keep failing, prefer reading the full file and then replacing the whole file in one controlled edit instead of stacking many brittle partial replacements.

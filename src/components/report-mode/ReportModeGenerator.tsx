@@ -23,6 +23,7 @@ import { ToneSchema } from '@/lib/types';
 import type { Language, Tone } from '@/lib/types';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/tooltip';
 import { ProjectChat } from './chat/ProjectChat';
+import { SectionTabsPanel } from './generation-tools/SectionTabsPanel';
 import { ProjectProperties } from '@/lib/types';
 
 const ReportResults = lazy(() => import('./ReportResults'));
@@ -84,7 +85,19 @@ export default function ReportModeGenerator({ initialProject }: { initialProject
         setIsChatOpen,
         zoomLevel,
         setZoomLevel,
+        activeSectionId,
     } = useReportGenerator(initialProject);
+    
+    const activeSection = activeSectionId ? project?.getSection(activeSectionId) ?? null : null;
+    const showSectionTabs = activePanelKey === 'generate';
+    const reportPanelContent = showSectionTabs ? (
+        <div className="h-full grid grid-cols-1 xl:grid-cols-[minmax(0,1fr)_360px] gap-4">
+            <ReportResults activePanelKey={activePanelKey} />
+            <SectionTabsPanel section={activeSection} className="h-full" />
+        </div>
+    ) : (
+        <ReportResults activePanelKey={activePanelKey} />
+    );
     
     // States removed as Popover handles its own open state or can be controlled if needed.
     // However, keeping them if we want to synchronize with tooltips or other logic.
@@ -129,6 +142,7 @@ export default function ReportModeGenerator({ initialProject }: { initialProject
         <div className="relative flex-grow flex flex-col">
             <OnboardingGuide isOpen={showOnboarding} onOpenChange={setShowOnboarding} onComplete={handleOnboardingComplete} />
             
+            {/* Ensure tabs don't show for missing section */}
             {/* Global Controls Floating UI - LEFT */}
             <div className="fixed bottom-6 left-6 z-20 hidden lg:flex items-end gap-3">
                 <Popover open={isControlsPanelOpen} onOpenChange={setIsControlsPanelOpen}>
@@ -330,7 +344,7 @@ export default function ReportModeGenerator({ initialProject }: { initialProject
                                             "lg:col-span-8 xl:col-span-8 h-full",
                                             isMobile && activeMobileView !== 'result' && "hidden"
                                         )}>
-                                            <ReportResults activePanelKey={activePanelKey} />
+                                            {reportPanelContent}
                                         </div>
                                     </div>
                                 ) : (
@@ -348,7 +362,7 @@ export default function ReportModeGenerator({ initialProject }: { initialProject
                                         <ResizableHandle withHandle />
                                         <ResizablePanel defaultSize={65} minSize={55}>
                                             <div className="h-full">
-                                                <ReportResults activePanelKey={activePanelKey} />
+                                                {reportPanelContent}
                                             </div>
                                         </ResizablePanel>
                                     </ResizablePanelGroup>

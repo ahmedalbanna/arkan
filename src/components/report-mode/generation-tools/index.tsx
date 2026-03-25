@@ -1,9 +1,5 @@
-
 'use client';
 
-import {
-  Accordion
-} from "@/components/ui/accordion";
 import { Button } from '@/components/ui/button';
 import {
   Card,
@@ -35,8 +31,15 @@ import { ScrollArea } from "../../ui/scroll-area";
 import { SectionAccordionItem } from "./SectionAccordionItem";
 import { SortableChapterItem } from "./SortableChapterItem";
 
+interface GenerationToolsProps {
+  activeSectionId: string | null;
+  onActiveSectionChange: (sectionId: string | null) => void;
+}
 
-export default function GenerationTools() {
+export default function GenerationTools({
+  activeSectionId,
+  onActiveSectionChange,
+}: GenerationToolsProps) {
   const {
     t,
     handleDragEnd,
@@ -61,6 +64,10 @@ export default function GenerationTools() {
   const isIndeterminate = useMemo(() => selectedSectionsForBuild.size > 0 && !isAllSelected, [selectedSectionsForBuild, isAllSelected]);
 
   const canBuildProject = project && project.content.length > 0;
+
+  const handleActivateSection = (sectionId: string) => {
+    onActiveSectionChange(sectionId);
+  };
 
   return (
     <>
@@ -103,7 +110,7 @@ export default function GenerationTools() {
               <div className="h-full pr-4 -mr-4">
                 <DndContext collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
                   <SortableContext items={(project?.content || []).map(c => c.id)} strategy={verticalListSortingStrategy}>
-                    <Accordion type="multiple" className="w-full space-y-2">
+                    <div className="w-full space-y-2">
                       {(project?.content || []).map((item, index) => {
                         if (item instanceof Chapter) {
                           return (
@@ -115,6 +122,8 @@ export default function GenerationTools() {
                               selectedSectionsForBuild={selectedSectionsForBuild}
                               toggleChapterSelection={toggleChapterSelection}
                               toggleSectionSelection={toggleSectionSelection}
+                              activeSectionId={activeSectionId}
+                              onActivateSection={handleActivateSection}
                             />
                           )
                         }
@@ -128,12 +137,14 @@ export default function GenerationTools() {
                               isProjectBuildMode={isProjectBuildMode}
                               isSelected={selectedSectionsForBuild.has(item.id)}
                               toggleSectionSelection={toggleSectionSelection}
+                              isActive={activeSectionId === item.id}
+                              onActivate={handleActivateSection}
                             />
                           );
                         }
                         return null;
                       })}
-                    </Accordion>
+                    </div>
                   </SortableContext>
                 </DndContext>
               </div>

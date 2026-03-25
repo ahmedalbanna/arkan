@@ -1,11 +1,5 @@
-
 'use client';
 
-import {
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion";
 import { Button } from '@/components/ui/button';
 import { Chapter } from '@/lib/types';
 import { useSortable } from '@dnd-kit/sortable';
@@ -26,6 +20,8 @@ interface SortableChapterItemProps {
   selectedSectionsForBuild: Set<string>;
   toggleChapterSelection: (chapterId: string, select: boolean) => void;
   toggleSectionSelection: (sectionId: string) => void;
+  activeSectionId: string | null;
+  onActivateSection: (sectionId: string) => void;
 }
 
 export function SortableChapterItem({
@@ -35,6 +31,8 @@ export function SortableChapterItem({
   selectedSectionsForBuild,
   toggleChapterSelection,
   toggleSectionSelection,
+  activeSectionId,
+  onActivateSection,
 }: SortableChapterItemProps) {
     const { 
         updateProject
@@ -69,7 +67,7 @@ export function SortableChapterItem({
 
   return (
     <div ref={setNodeRef} style={style} {...attributes}>
-      <AccordionItem value={chapter.id} className="bg-card border rounded-lg shadow-sm overflow-hidden">
+      <div className="bg-card border rounded-lg shadow-sm overflow-hidden">
         <div className="flex items-center px-4 py-3 bg-muted/10 border-b">
           {isProjectBuildMode && (
             <div className="flex items-center gap-2 mr-2">
@@ -82,7 +80,7 @@ export function SortableChapterItem({
               />
             </div>
           )}
-          <AccordionTrigger className="flex-1 hover:no-underline py-0">
+          <div className="flex-1 py-0">
             <div className="flex items-center gap-3 flex-1 min-w-0 group">
               {listeners && (
                 <div {...listeners} className="p-1.5 rounded-md cursor-grab touch-none -ml-2 flex items-center gap-2 text-muted-foreground transition-colors hover:bg-muted/40">
@@ -94,30 +92,30 @@ export function SortableChapterItem({
                 {chapter.title}
               </span>
             </div>
-          </AccordionTrigger>
-        </div>
-        <AccordionContent>
-          <div className="border-t border-border/60 px-4 py-4 space-y-4 bg-background">
-            <div className="w-full space-y-2">
-              {chapter.sections.map((section, sectionIndex) => (
-                <SectionAccordionItem
-                  key={section.id}
-                  section={section}
-                  sectionIndex={sectionIndex}
-                  chapterIndex={index}
-                  isProjectBuildMode={isProjectBuildMode}
-                  isSelected={selectedSectionsForBuild.has(section.id)}
-                  toggleSectionSelection={toggleSectionSelection}
-                />
-              ))}
-            </div>
-            <Button size="sm" variant="outline" onClick={() => handleAddSection(chapter.id)} className="w-full">
-              <PlusCircle className="me-2 h-4 w-4" />
-              Add New Section
-            </Button>
           </div>
-        </AccordionContent>
-      </AccordionItem>
+        </div>
+        <div className="border-t border-border/60 px-4 py-4 space-y-4 bg-background">
+          <div className="w-full space-y-2">
+            {chapter.sections.map((section, sectionIndex) => (
+              <SectionAccordionItem
+                key={section.id}
+                section={section}
+                sectionIndex={sectionIndex}
+                chapterIndex={index}
+                isProjectBuildMode={isProjectBuildMode}
+                isSelected={selectedSectionsForBuild.has(section.id)}
+                toggleSectionSelection={toggleSectionSelection}
+                isActive={activeSectionId === section.id}
+                onActivate={onActivateSection}
+              />
+            ))}
+          </div>
+          <Button size="sm" variant="outline" onClick={() => handleAddSection(chapter.id)} className="w-full">
+            <PlusCircle className="me-2 h-4 w-4" />
+            Add New Section
+          </Button>
+        </div>
+      </div>
     </div>
   );
 };

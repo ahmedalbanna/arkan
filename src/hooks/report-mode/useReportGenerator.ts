@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useBuilderPageLogic } from '@/hooks/core/use-builder-page';
@@ -22,6 +21,7 @@ export function useReportGenerator(initialProject?: ProjectProperties | null) {
   const [activePanelKey, setActivePanelKey] = useState('settings');
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [zoomLevel, setZoomLevel] = useState(1);
+  const [activeSectionId, setActiveSectionId] = useState<string | null>(null);
   const { isSaving } = useSaveProject();
   const builderPageLogic = useBuilderPageLogic(initialProject);
 
@@ -55,9 +55,12 @@ export function useReportGenerator(initialProject?: ProjectProperties | null) {
         key: 'generate',
         title: t('builder.reportGenerator.toolsTitle'),
         icon: React.createElement(BookOpenCheck, { className: "h-5 w-5" }),
-        content: React.createElement(GenerationTools),
+        content: React.createElement(GenerationTools, {
+          activeSectionId,
+          onActiveSectionChange: setActiveSectionId,
+        }),
     },
-  ], [t]);
+  ], [t, activeSectionId]);
 
   return {
     ...builderPageLogic,
@@ -74,5 +77,7 @@ export function useReportGenerator(initialProject?: ProjectProperties | null) {
     setIsChatOpen,
     zoomLevel,
     setZoomLevel,
+    activeSectionId,
+    setActiveSectionId,
   };
 }
