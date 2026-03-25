@@ -73,57 +73,59 @@ export function SectionGenerationControls({
 
     return (
         <div className="space-y-6">
-            <div className="space-y-3">
-                <Label htmlFor={`formality-${section.id}`}>{t('builder.reportGenerator.tool_formality_label')}</Label>
-                <Slider id={`formality-${section.id}`} value={[controls.formality]} onValueChange={(val) => handleControlChange('formality', val[0])} max={100} step={1} />
-                <div className="flex justify-between text-xs text-muted-foreground">
-                    <span>{t('builder.reportGenerator.tool_formality_informal')}</span>
-                    <span>{t('builder.reportGenerator.tool_formality_balanced')}</span>
-                    <span>{t('builder.reportGenerator.tool_formality_formal')}</span>
+            <div className="grid gap-6 lg:grid-cols-2">
+                <div className="space-y-3">
+                    <Label htmlFor={`formality-${section.id}`}>{t('builder.reportGenerator.tool_formality_label')}</Label>
+                    <Slider id={`formality-${section.id}`} value={[controls.formality]} onValueChange={(val) => handleControlChange('formality', val[0])} max={100} step={1} />
+                    <div className="flex justify-between text-xs text-muted-foreground">
+                        <span>{t('builder.reportGenerator.tool_formality_informal')}</span>
+                        <span>{t('builder.reportGenerator.tool_formality_balanced')}</span>
+                        <span>{t('builder.reportGenerator.tool_formality_formal')}</span>
+                    </div>
+                </div>
+                
+                <div className="space-y-2">
+                    <Label htmlFor={`tone-${section.id}`}>{t('builder.reportGenerator.tool_tone_label')}</Label>
+                    {isCustomTone ? (
+                        <Input
+                            id={`tone-${section.id}`}
+                            value={controls.tone}
+                            onChange={(e) => handleControlChange('tone', e.target.value as Tone)}
+                            onBlur={(e) => {
+                                if (e.target.value.trim() === '') handleControlChange('tone', 'professional');
+                            }}
+                            placeholder="Enter custom tone..."
+                        />
+                    ) : (
+                        <Select value={controls.tone} onValueChange={handleToneChange}>
+                            <SelectTrigger id={`tone-${section.id}`}>
+                                <SelectValue placeholder={t('reportGenerator.tool_tone_placeholder')} />
+                            </SelectTrigger>
+                            <SelectContent>
+                                {toneOptions.map(opt => (
+                                    <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
+                                ))}
+                                <SelectItem value="custom">Custom...</SelectItem>
+                            </SelectContent>
+                        </Select>
+                    )}
                 </div>
             </div>
-            
-            <div className="space-y-2">
-                <Label htmlFor={`tone-${section.id}`}>{t('builder.reportGenerator.tool_tone_label')}</Label>
-                {isCustomTone ? (
-                    <Input
-                        id={`tone-${section.id}`}
-                        value={controls.tone}
-                        onChange={(e) => handleControlChange('tone', e.target.value as Tone)}
-                        onBlur={(e) => {
-                            if (e.target.value.trim() === '') handleControlChange('tone', 'professional');
-                        }}
-                        placeholder="Enter custom tone..."
-                    />
-                ) : (
-                    <Select value={controls.tone} onValueChange={handleToneChange}>
-                        <SelectTrigger id={`tone-${section.id}`}>
-                            <SelectValue placeholder={t('reportGenerator.tool_tone_placeholder')} />
-                        </SelectTrigger>
-                        <SelectContent>
-                            {toneOptions.map(opt => (
-                                <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
-                            ))}
-                            <SelectItem value="custom">Custom...</SelectItem>
-                        </SelectContent>
-                    </Select>
-                )}
-            </div>
 
-             <div className="space-y-2">
+            <div className="space-y-2">
                 <Label>Output Format</Label>
-                <div className="flex items-center flex-wrap gap-4">
+                <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
                     {controls.outputStyle && (Object.keys(controls.outputStyle) as Array<keyof GenerationControlState['outputStyle']>).map(key => (
-                         <div key={String(key)} className="flex items-center gap-2">
+                         <label key={String(key)} className="flex items-center gap-2 rounded-md border px-3 py-2 text-sm">
                             <Checkbox id={`output-${String(key)}-${section.id}`} checked={controls.outputStyle[key]} onCheckedChange={(checked) => onOutputStyleChange(key, !!checked)} />
-                            <Label htmlFor={`output-${String(key)}-${section.id}`} className="capitalize">{String(key).replace(/([A-Z])/g, ' $1')}</Label>
-                        </div>
+                            <span className="capitalize">{String(key).replace(/([A-Z])/g, ' $1')}</span>
+                        </label>
                     ))}
                 </div>
             </div>
             
             {controls.outputStyle?.heading && (
-                <div className="space-y-2 pl-6 border-l-2 ml-2">
+                <div className="space-y-2 rounded-lg border bg-muted/20 p-4">
                     <Label htmlFor={`includedHeadings-${section.id}`}>Included Topics (one per line)</Label>
                     <Textarea
                         id={`includedHeadings-${section.id}`}
@@ -136,7 +138,7 @@ export function SectionGenerationControls({
             )}
 
             {controls.outputStyle?.table && (
-                <div className="space-y-2 pl-6 border-l-2 ml-2">
+                <div className="space-y-2 rounded-lg border bg-muted/20 p-4">
                     <Label htmlFor={`tableCaption-${section.id}`}>Table Caption (Optional)</Label>
                     <Input
                         id={`tableCaption-${section.id}`}
@@ -148,7 +150,7 @@ export function SectionGenerationControls({
             )}
 
             {controls.outputStyle?.code && (
-                <div className="space-y-2 pl-6 border-l-2 ml-2">
+                <div className="space-y-2 rounded-lg border bg-muted/20 p-4">
                     <Label htmlFor={`programmingLanguage-${section.id}`}>Programming Language</Label>
                     <Input 
                         id={`programmingLanguage-${section.id}`}
@@ -160,7 +162,7 @@ export function SectionGenerationControls({
             )}
 
             {controls.outputStyle?.diagram && (
-                <div className="space-y-2 pl-6 border-l-2 ml-2">
+                <div className="space-y-2 rounded-lg border bg-muted/20 p-4">
                     <Label htmlFor={`diagramType-${section.id}`}>Diagram Type</Label>
                     <Select value={controls.diagramType} onValueChange={(val) => handleControlChange('diagramType', val as DiagramType)}>
                         <SelectTrigger id={`diagramType-${section.id}`}><SelectValue /></SelectTrigger>
@@ -174,7 +176,7 @@ export function SectionGenerationControls({
             )}
 
             {controls.outputStyle?.includeCitations && (
-                 <div className="space-y-2 pl-6">
+                 <div className="space-y-2 rounded-lg border bg-muted/20 p-4">
                     <Label htmlFor={`citationStyle-${section.id}`}>Citation Style</Label>
                     <Select value={controls.citationStyle} onValueChange={(val) => handleControlChange('citationStyle', val as any)}>
                         <SelectTrigger id={`citationStyle-${section.id}`}><SelectValue placeholder="Select citation style..." /></SelectTrigger>
@@ -199,7 +201,7 @@ export function SectionGenerationControls({
                 />
             </div>
 
-            <Card className="bg-muted/50 border-dashed">
+            <Card className="bg-muted/30 border-dashed">
                 <CardHeader className="flex flex-row items-center justify-between p-3">
                     <div className="flex items-center gap-2">
                         <Info className="w-4 h-4 text-muted-foreground"/>
