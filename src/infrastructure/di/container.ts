@@ -41,6 +41,8 @@ import { ImageConversionApiClient } from "@/modules/ai/adapters/api-client/Image
 import { TransactionApiClient } from "@/modules/billing/adapters/api-client/TransactionApiClient";
 import { AuthApiClient } from "@/modules/users/adapters/api-client/AuthApiClient";
 import { DeviceTokenApiClient } from "@/modules/users/adapters/api-client/DeviceTokenApiClient";
+import { NotificationApiClient } from "@/modules/users/adapters/api-client/NotificationApiClient";
+import { RagApiClient } from "@/modules/rag/adapters/api-client/RagApiClient";
 import { CreditService } from "@/modules/billing/application/services/CreditService";
 import { LocalProjectService } from "@/modules/projects/adapters/local-storage/LocalProjectService";
 import { PromptBuilder } from "@/modules/ai-content/domain/services/PromptBuilder";
@@ -76,6 +78,8 @@ container.register(ImageConversionApiClient, { useClass: ImageConversionApiClien
 container.register(TransactionApiClient, { useClass: TransactionApiClient }, { lifecycle: Lifecycle.Singleton });
 container.register(AuthApiClient, { useClass: AuthApiClient }, { lifecycle: Lifecycle.Singleton });
 container.register(DeviceTokenApiClient, { useClass: DeviceTokenApiClient }, { lifecycle: Lifecycle.Singleton });
+container.register(NotificationApiClient, { useClass: NotificationApiClient }, { lifecycle: Lifecycle.Singleton });
+container.register(RagApiClient, { useClass: RagApiClient }, { lifecycle: Lifecycle.Singleton });
 
 // Server-side registration (Conditional)
 if (typeof window === 'undefined') {

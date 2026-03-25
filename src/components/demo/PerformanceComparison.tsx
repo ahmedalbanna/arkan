@@ -32,6 +32,7 @@ export function PerformanceComparison() {
     setResults([]);
 
     try {
+      // We use raw fetch here because we need the stream reader for real-time updates
       const response = await fetch('/api/demo/benchmark', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },

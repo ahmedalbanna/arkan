@@ -76,6 +76,7 @@ export const sectionKeys = {
 
 export const agentKeys = {
   all: () => ['agents'] as const,
+  categories: () => [...agentKeys.all(), 'categories'] as const,
 };
 
 export const templateKeys = {
@@ -92,4 +93,9 @@ export const templateKeys = {
 export const writingToolKeys = {
   all: () => ['writing-tools'] as const,
   tool: (name: string) => [...writingToolKeys.all(), name] as const,
+};
+
+export const ragKeys = {
+  all: () => ['rag'] as const,
+  documents: () => [...ragKeys.all(), 'documents'] as const,
 };

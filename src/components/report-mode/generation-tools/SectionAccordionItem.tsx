@@ -68,8 +68,8 @@ export function SectionAccordionItem({
     const getContextNames = (proj: Project | null, sec: Section): string[] => {
         if (!proj || !sec.context) return [];
     
-        const sectionNames = Object.keys(sec.context.sections || {}).map(id => proj.getSection(id)?.title || 'Untitled Section');
-        const fileNames = Object.keys(sec.context.externalContext || {}).map(id => proj.externalContext.find(f => f.id === id)?.fileName || 'Untitled File');
+        const sectionNames = Object.keys(sec.context.sections || {}).map(id => proj?.getSection(id)?.title || 'Untitled Section');
+        const fileNames = Object.keys(sec.context.externalContext || {}).map(id => proj?.externalContext?.find(f => f.id === id)?.fileName || 'Untitled File');
     
         return [...sectionNames, ...fileNames];
     };

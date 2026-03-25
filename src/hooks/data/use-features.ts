@@ -5,12 +5,13 @@ import { container } from '@/infrastructure/di/container';
 import { FeatureApiClient, UpdateFeatureVariables } from '@/modules/admin/adapters/api-client/FeatureApiClient';
 import { useAuth } from '@/context/AuthContext';
 import { useToast } from '@/hooks/util/use-toast';
+import { featureKeys } from '@/lib/query-keys';
 
 export function useFeatures() {
   const { firebaseUser } = useAuth();
 
   return useQuery({
-    queryKey: ['features'],
+    queryKey: featureKeys.all(),
     queryFn: async () => {
       if (!firebaseUser) return [];
       const client = container.resolve(FeatureApiClient);
@@ -34,7 +35,7 @@ export function useUpdateFeature() {
       return result.getValue();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['features'] });
+      queryClient.invalidateQueries({ queryKey: featureKeys.all() });
       toast({ title: 'Success', description: 'Feature updated successfully.' });
     },
     onError: (error: any) => {

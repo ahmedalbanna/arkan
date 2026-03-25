@@ -2,13 +2,10 @@
 
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '@/context/AuthContext';
-import { apiService } from '@/infrastructure/api/ApiService';
+import { container } from '@/infrastructure/di/container';
+import { RagApiClient } from '@/modules/rag/adapters/api-client/RagApiClient';
 import { useToast } from '@/hooks/util/use-toast';
-
-export interface IndexDocumentResponse {
-  message: string;
-  documentId: string;
-}
+import { ragKeys } from '@/lib/query-keys';
 
 export function useRagIndexing() {
   const { firebaseUser } = useAuth();
@@ -22,24 +19,19 @@ export function useRagIndexing() {
       projectId?: string; 
       type: 'user_upload' | 'reference' 
     }) => {
-      const data = await apiService<
-        { content: string; fileName: string; projectId?: string; type: 'user_upload' | 'reference' },
-        IndexDocumentResponse
-      >({
-        endpoint: '/api/rag/index-document',
-        method: 'POST',
-        data: {
-          content,
-          fileName,
-          projectId,
-          type,
-        },
+      const client = container.resolve(RagApiClient);
+      const result = await client.indexDocument({
+        content,
+        fileName,
+        projectId,
+        type,
       });
 
-      return data;
+      if (result.isFailure) throw result.error;
+      return result.getValue();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['rag-documents'] });
+      queryClient.invalidateQueries({ queryKey: ragKeys.all() });
       toast({ title: 'Success', description: 'Document indexed successfully for RAG.' });
     },
     onError: (error: any) => {

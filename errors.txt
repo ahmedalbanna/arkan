@@ -2,11 +2,10 @@
 Runtime TypeError
 
 ## Error Message
-Cannot convert undefined or null to object
+Cannot read properties of undefined (reading 'includeCitations')
 
 
-    at Object.keys (<anonymous>:null:null)
-    at SectionGenerationControls (src/components/report-mode/section-controls/SectionGenerationControls.tsx:116:30)
+    at SectionGenerationControls (src/components/report-mode/section-controls/SectionGenerationControls.tsx:176:35)
     at SectionAccordionItem (src/components/report-mode/generation-tools/SectionAccordionItem.tsx:151:33)
     at <unknown> (src/components/report-mode/generation-tools/SortableChapterItem.tsx:103:17)
     at Array.map (<anonymous>:null:null)
@@ -20,12 +19,12 @@ Cannot convert undefined or null to object
     at GeneratePage (src/app/builder/page.tsx:39:7)
 
 ## Code Frame
-  114 |                 <Label>Output Format</Label>
-  115 |                 <div className="flex items-center flex-wrap gap-4">
-> 116 |                     {(Object.keys(controls.outputStyle) as Array<keyof GenerationControlState['outputStyle']>).map(key => (
-      |                              ^
-  117 |                          <div key={String(key)} className="flex items-center gap-2">
-  118 |                             <Checkbox id={`output-${String(key)}-${section.id}`} checked={controls.outputStyle[key]} onCheckedChange={(checked) => onOutputStyleChange(key, !!checked)} />
-  119 |                             <Label htmlFor={`output-${String(key)}-${section.id}`} className="capitalize">{String(key).replace(/([A-Z])/g, ' $1')}</Label>
+  174 |             )}
+  175 |
+> 176 |             {controls.outputStyle.includeCitations && (
+      |                                   ^
+  177 |                  <div className="space-y-2 pl-6">
+  178 |                     <Label htmlFor={`citationStyle-${section.id}`}>Citation Style</Label>
+  179 |                     <Select value={controls.citationStyle} onValueChange={(val) => handleControlChange('citationStyle', val as any)}>
 
 Next.js version: 15.5.9 (Turbopack)

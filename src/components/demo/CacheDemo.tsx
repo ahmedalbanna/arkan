@@ -11,6 +11,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { RefreshCw, Trash2 } from 'lucide-react';
 import { Progress } from '@/components/ui/progress';
+import { apiService } from '@/infrastructure/api/ApiService';
 
 interface CacheStats {
   embeddings: {
@@ -38,8 +39,7 @@ export function CacheDemo() {
   const fetchStats = async () => {
     setLoading(true);
     try {
-      const response = await fetch('/api/demo/cache-stats');
-      const data = await response.json();
+      const data = await apiService<never, CacheStats>({ endpoint: '/api/demo/cache-stats' });
       setStats(data);
     } catch (error) {
       console.error('Failed to fetch cache stats:', error);
@@ -50,7 +50,7 @@ export function CacheDemo() {
 
   const clearCache = async () => {
     try {
-      await fetch('/api/demo/cache-stats', { method: 'DELETE' });
+      await apiService({ endpoint: '/api/demo/cache-stats', method: 'DELETE' });
       await fetchStats();
     } catch (error) {
       console.error('Failed to clear cache:', error);

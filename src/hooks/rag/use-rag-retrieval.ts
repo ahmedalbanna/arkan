@@ -1,17 +1,9 @@
 'use client';
 
 import { useAuth } from '@/context/AuthContext';
-import { apiService } from '@/infrastructure/api/ApiService';
+import { container } from '@/infrastructure/di/container';
+import { RagApiClient, RetrieveContextResponse } from '@/modules/rag/adapters/api-client/RagApiClient';
 import { useState } from 'react';
-
-export interface RetrieveContextResponse {
-  context: string;
-  sources: {
-    fileName: string;
-    score: number;
-    text: string;
-  }[];
-}
 
 export function useRagRetrieval() {
   const { firebaseUser } = useAuth();
@@ -26,21 +18,16 @@ export function useRagRetrieval() {
 
     setIsLoading(true);
     try {
-      const data = await apiService<
-        { query: string; projectId?: string; topK: number; minScore: number },
-        RetrieveContextResponse
-      >({
-        endpoint: '/api/rag/retrieve-context',
-        method: 'POST',
-        data: {
-          query,
-          projectId,
-          topK: options.topK ?? 5,
-          minScore: options.minScore ?? 0.5,
-        },
+      const client = container.resolve(RagApiClient);
+      const result = await client.retrieveContext({
+        query,
+        projectId,
+        topK: options.topK ?? 5,
+        minScore: options.minScore ?? 0.5,
       });
 
-      return data;
+      if (result.isFailure) throw result.error;
+      return result.getValue();
     } catch (error) {
       console.error('RAG Retrieval failed:', error);
       return null;

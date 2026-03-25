@@ -9,7 +9,7 @@ const arrayMove = <T>(array: T[], from: number, to: number): T[] => {
   newArray.splice(to, 0, moved);
   return newArray;
 };
-import { Language, Behavior, Tone } from '@/modules/ai-content/domain/entities/ControlTypes';
+import { Language, Behavior, Tone, defaultControls } from '@/modules/ai-content/domain/entities/ControlTypes';
 import { parseMarkdownToContent } from '@/lib/project/markdown-parser'; 
 import { applyReportTemplate } from '@/lib/project/template';
 
@@ -248,7 +248,7 @@ export class Project {
 
   public addSectionToChapter(chapterId: string, sectionTitle: string, content?: string): Project {
     return this.updateChapter(chapterId, (chapter) =>
-        chapter.addSection(new Section({ title: sectionTitle, type: 'report', content }))
+        chapter.addSection(new Section({ title: sectionTitle, type: 'report', content, controls: { ...defaultControls } }))
     );
   }
 
@@ -346,7 +346,7 @@ export class Project {
         } else if (currentChapter) {
             const title = line.replace(/^\s*-\s*/, '').replace(/^\d+\.\d+\.?\s*/, '').trim();
             if (title) {
-                const newSection = new Section({ title, type: 'report' });
+                const newSection = new Section({ title, type: 'report', controls: { ...defaultControls } });
                 currentChapter = currentChapter.addSection(newSection);
             }
         }

@@ -2,12 +2,10 @@
 
 import { useState } from 'react';
 import { useAuth } from '@/context/AuthContext';
-import { apiService } from '@/infrastructure/api/ApiService';
+import { container } from '@/infrastructure/di/container';
+import { ReportApiClient, ChatMessage } from '@/modules/ai-content/adapters/api-client/ReportApiClient';
 
-export interface Message {
-  role: 'user' | 'assistant' | 'system';
-  content: string;
-}
+export interface Message extends ChatMessage {}
 
 export function useProjectChat() {
   const { firebaseUser } = useAuth();
@@ -23,17 +21,16 @@ export function useProjectChat() {
     setIsLoading(true);
 
     try {
-      const response = await apiService<{ projectContext: string; userMessage: string; history: Message[] }, { response: string }>({
-        endpoint: '/api/chat/project-consultant',
-        method: 'POST',
-        data: {
-          projectContext,
-          userMessage,
-          history: messages,
-        },
+      const client = container.resolve(ReportApiClient);
+      const result = await client.projectConsultantChat({
+        projectContext,
+        userMessage,
+        history: messages as ChatMessage[],
       });
 
-      const assistantMessage: Message = { role: 'assistant', content: response.response };
+      if (result.isFailure) throw result.error;
+      
+      const assistantMessage: Message = { role: 'assistant', content: result.getValue().response };
       setMessages([...updatedMessages, assistantMessage]);
     } catch (error) {
       console.error('Failed to send message:', error);

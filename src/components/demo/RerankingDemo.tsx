@@ -13,6 +13,7 @@ import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Loader2, ArrowRight } from 'lucide-react';
+import { apiService } from '@/infrastructure/api/ApiService';
 
 interface ComparisonResult {
   strategy: string;
@@ -36,13 +37,12 @@ export function RerankingDemo() {
 
     setLoading(true);
     try {
-      const response = await fetch('/api/demo/rerank-compare', {
+      const data = await apiService<{ query: string; strategy: string }, { comparisons: ComparisonResult[] }>({
+        endpoint: '/api/demo/rerank-compare',
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ query, strategy }),
+        data: { query, strategy },
       });
 
-      const data = await response.json();
       setComparisons(data.comparisons || []);
     } catch (error) {
       console.error('Comparison failed:', error);

@@ -1,21 +1,22 @@
 'use client';
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { apiService } from '@/infrastructure/api/ApiService';
 import { useAuth } from '@/context/AuthContext';
-import { useToast } from '@/hooks/util/use-toast';
 import { container } from '@/infrastructure/di/container';
-import { UserApiClient } from '@/modules/users/adapters/api-client/UserApiClient';
+import { NotificationApiClient } from '@/modules/users/adapters/api-client/NotificationApiClient';
+import { notificationKeys } from '@/lib/query-keys';
 
 export function useNotifications() {
   const { firebaseUser } = useAuth();
 
   const query = useQuery({
-    queryKey: ['notifications', firebaseUser?.uid],
+    queryKey: notificationKeys.lists(),
     queryFn: async () => {
       if (!firebaseUser) return [];
-      const result = await apiService<undefined, any[]>({ endpoint: '/api/notifications' });
-      return result;
+      const client = container.resolve(NotificationApiClient);
+      const result = await client.fetchNotifications();
+      if (result.isFailure) throw result.error;
+      return result.getValue();
     },
     enabled: !!firebaseUser,
   });
@@ -29,7 +30,7 @@ export function useNotifications() {
     isError: query.isError,
     error: query.error,
     sendNotification: (data: any) => {
-        const client = container.resolve(UserApiClient);
+        const client = container.resolve(NotificationApiClient);
         return client.sendNotification(data);
     },
     markAsRead: (ids: string[]) => markMutation.mutate(ids),
@@ -43,14 +44,13 @@ export function useMarkNotificationsAsRead() {
 
   return useMutation({
     mutationFn: async (notificationIds: string[]) => {
-      return apiService({ 
-          endpoint: '/api/notifications/mark-as-read', 
-          method: 'POST', 
-          data: { notificationIds } 
-      });
+      const client = container.resolve(NotificationApiClient);
+      const result = await client.markAsRead(notificationIds);
+      if (result.isFailure) throw result.error;
+      return result.getValue();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['notifications'] });
+      queryClient.invalidateQueries({ queryKey: notificationKeys.all() });
     },
   });
 }
@@ -60,14 +60,13 @@ export function useClearNotifications() {
 
   return useMutation({
     mutationFn: async (notificationIds: string[]) => {
-      return apiService({ 
-          endpoint: '/api/notifications/clear', 
-          method: 'POST', 
-          data: { notificationIds } 
-      });
+      const client = container.resolve(NotificationApiClient);
+      const result = await client.clearNotifications(notificationIds);
+      if (result.isFailure) throw result.error;
+      return result.getValue();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['notifications'] });
+      queryClient.invalidateQueries({ queryKey: notificationKeys.all() });
     },
   });
 }

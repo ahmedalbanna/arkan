@@ -6,12 +6,13 @@ import { SettingsApiClient } from '@/modules/admin/adapters/api-client/SettingsA
 import { useAuth } from '@/context/AuthContext';
 import { useToast } from '@/hooks/util/use-toast';
 import { AppSettings } from '@/modules/admin/domain/entities/Settings';
+import { settingsKeys } from '@/lib/query-keys';
 
 export function useSettings() {
   const { firebaseUser } = useAuth();
 
   return useQuery({
-    queryKey: ['admin-settings'],
+    queryKey: settingsKeys.all(),
     queryFn: async () => {
       if (!firebaseUser) return null;
       const client = container.resolve(SettingsApiClient);
@@ -25,7 +26,7 @@ export function useSettings() {
 
 export function usePublicSettings() {
   return useQuery({
-    queryKey: ['public-settings'],
+    queryKey: settingsKeys.public(),
     queryFn: async () => {
       const client = container.resolve(SettingsApiClient);
       const result = await client.fetchSettings();
@@ -47,8 +48,7 @@ export function useUpdateSettings() {
       return result.getValue();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['admin-settings'] });
-      queryClient.invalidateQueries({ queryKey: ['public-settings'] });
+      queryClient.invalidateQueries({ queryKey: settingsKeys.all() });
       toast({ title: 'Success', description: 'Settings updated successfully.' });
     },
     onError: (error: any) => {

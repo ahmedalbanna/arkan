@@ -173,7 +173,7 @@ export function SectionGenerationControls({
                 </div>
             )}
 
-            {controls.outputStyle.includeCitations && (
+            {controls.outputStyle?.includeCitations && (
                  <div className="space-y-2 pl-6">
                     <Label htmlFor={`citationStyle-${section.id}`}>Citation Style</Label>
                     <Select value={controls.citationStyle} onValueChange={(val) => handleControlChange('citationStyle', val as any)}>

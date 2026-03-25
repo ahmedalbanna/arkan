@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { v4 as uuidv4 } from 'uuid';
+import { defaultControls } from './ControlTypes';
 
 export const SectionStatusSchema = z.enum(['pending', 'in_progress', 'completed', 'failed']);
 export type SectionStatus = z.infer<typeof SectionStatusSchema>;
@@ -65,7 +66,7 @@ export class Section {
     this.aiOutput = props.aiOutput || null;
     this.lastUpdated = props.lastUpdated || new Date().toISOString();
     this.with = props.with || [];
-    this.controls = props.controls || {};
+    this.controls = props.controls || { ...defaultControls };
     this.prompt = props.prompt || '';
     this.rules = props.rules || [];
     this.guidelines = props.guidelines || [];

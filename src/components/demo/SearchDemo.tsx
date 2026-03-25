@@ -13,6 +13,7 @@ import { Badge } from '@/components/ui/badge';
 import { Search, Loader2, CheckCircle } from 'lucide-react';
 import { Slider } from '@/components/ui/slider';
 import { Switch } from '@/components/ui/switch';
+import { apiService } from '@/infrastructure/api/ApiService';
 
 interface SearchResult {
   content: string;
@@ -40,19 +41,18 @@ export function SearchDemo() {
     const startTime = Date.now();
 
     try {
-      const response = await fetch('/api/demo/search', {
+      const data = await apiService<any, any>({
+        endpoint: '/api/demo/search',
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
+        data: {
           query,
           topK,
           minScore,
           useCache,
           rerank,
-        }),
+        },
       });
 
-      const data = await response.json();
       setResults(data.sources || []);
       setSearchTime(Date.now() - startTime);
       setCacheHit(data.cacheHit || false);

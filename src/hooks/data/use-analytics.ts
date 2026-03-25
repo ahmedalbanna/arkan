@@ -4,12 +4,13 @@ import { useQuery } from '@tanstack/react-query';
 import { container } from '@/infrastructure/di/container';
 import { AnalyticsApiClient, UserDashboardStats } from '@/modules/admin/adapters/api-client/AnalyticsApiClient';
 import { useAuth } from '@/context/AuthContext';
+import { analyticsKeys } from '@/lib/query-keys';
 
 export function useUserAnalytics() {
   const { firebaseUser } = useAuth();
 
   return useQuery<UserDashboardStats, Error>({
-    queryKey: ['user-analytics', firebaseUser?.uid],
+    queryKey: analyticsKeys.userStats(firebaseUser?.uid || ''),
     queryFn: async () => {
       if (!firebaseUser) throw new Error('User not authenticated');
       const client = container.resolve(AnalyticsApiClient);

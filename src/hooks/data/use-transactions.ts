@@ -5,16 +5,17 @@ import { container } from '@/infrastructure/di/container';
 import { TransactionApiClient, VerifyPaymentVariables } from '@/modules/billing/adapters/api-client/TransactionApiClient';
 import { useAuth } from '@/context/AuthContext';
 import { useToast } from '@/hooks/util/use-toast';
+import { transactionKeys } from '@/lib/query-keys';
 
-export function useTransactions(status?: string) {
+export function useTransactions(status: string = 'all') {
   const { firebaseUser } = useAuth();
 
   return useInfiniteQuery({
-    queryKey: ['transactions', status],
+    queryKey: transactionKeys.list(status),
     queryFn: async ({ pageParam }) => {
       if (!firebaseUser) return { transactions: [], hasNextPage: false, lastVisibleId: null };
       const client = container.resolve(TransactionApiClient);
-      const result = await client.fetchTransactions({ status, lastVisibleId: pageParam as string });
+      const result = await client.fetchTransactions({ status: status === 'all' ? undefined : status, lastVisibleId: pageParam as string });
       if (result.isFailure) throw result.error;
       return result.getValue();
     },
@@ -28,7 +29,7 @@ export function useUserTransactions() {
   const { firebaseUser } = useAuth();
 
   return useQuery({
-    queryKey: ['user-transactions', firebaseUser?.uid],
+    queryKey: ['user-transactions', firebaseUser?.uid], // TODO: Add to transactionKeys if needed
     queryFn: async () => {
       if (!firebaseUser) return [];
       const client = container.resolve(TransactionApiClient);
@@ -52,7 +53,7 @@ export function useVerifyPayment() {
       return result.getValue();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['transactions'] });
+      queryClient.invalidateQueries({ queryKey: transactionKeys.all() });
       toast({ title: 'Success', description: 'Payment verified successfully.' });
     },
     onError: (error: any) => {
@@ -74,7 +75,7 @@ export function useSubmitPaymentProof(options?: { onSuccess?: () => void }) {
     },
     onSuccess: () => {
       toast({ title: 'Success', description: 'Payment proof submitted successfully.' });
-      queryClient.invalidateQueries({ queryKey: ['transactions'] });
+      queryClient.invalidateQueries({ queryKey: transactionKeys.all() });
       options?.onSuccess?.();
     },
     onError: (error: any) => {

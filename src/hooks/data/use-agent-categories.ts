@@ -3,14 +3,13 @@
 import { useQuery } from '@tanstack/react-query';
 import { useAuth } from '@/context/AuthContext';
 import { AgentApiClient } from '@/modules/ai/adapters/api-client/AgentApiClient';
-import { runAuthenticatedResultCall } from './authenticated-client-call';
-
 import { container } from '@/infrastructure/di/container';
+import { agentKeys } from '@/lib/query-keys';
 
 export function useAgentCategories() {
   const { firebaseUser } = useAuth();
   const { data, ...rest } = useQuery({
-    queryKey: ['agent-categories'],
+    queryKey: agentKeys.categories(),
     queryFn: async () => {
       if (!firebaseUser) return [];
       const client = container.resolve(AgentApiClient);

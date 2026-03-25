@@ -4,12 +4,13 @@ import { useQuery } from '@tanstack/react-query';
 import { container } from '@/infrastructure/di/container';
 import { AdminApiClient, DashboardStats } from '@/modules/admin/adapters/api-client/AdminApiClient';
 import { useAuth } from '@/context/AuthContext';
+import { adminKeys } from '@/lib/query-keys';
 
 export function useAdminDashboard() {
   const { firebaseUser } = useAuth();
 
   return useQuery<DashboardStats, Error>({
-    queryKey: ['admin-stats'],
+    queryKey: adminKeys.dashboardStats(),
     queryFn: async () => {
       if (!firebaseUser) throw new Error('User not authenticated');
       const client = container.resolve(AdminApiClient);
