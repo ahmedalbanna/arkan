@@ -2,10 +2,8 @@
 
 import { A4Page } from '@/components/shared/A4Page';
 import {
-  Card,
   CardContent,
   CardDescription,
-  CardHeader,
   CardTitle,
 } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -154,7 +152,7 @@ const ReportResults = ({ activePanelKey }: ReportResultsProps) => {
   }
 
   return (
-    <Card className="h-full flex flex-col overflow-hidden">
+    <div className="h-full flex flex-col overflow-hidden rounded-lg border bg-card text-card-foreground shadow-sm">
       <Collapsible open={isSuggestionVisible} onOpenChange={setIsSuggestionVisible} className="border-b border-border/60">
         <CollapsibleTrigger asChild>
             <div className="flex items-center justify-between p-5 cursor-pointer bg-muted/30 hover:bg-muted/40">
@@ -199,7 +197,7 @@ const ReportResults = ({ activePanelKey }: ReportResultsProps) => {
               </div>
           </ScrollArea>
       </CardContent>
-    </Card>
+    </div>
   );
 };
 
