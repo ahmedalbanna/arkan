@@ -69,8 +69,8 @@ export function SortableChapterItem({
 
   return (
     <div ref={setNodeRef} style={style} {...attributes}>
-      <AccordionItem value={chapter.id} className="bg-muted/30 border rounded-lg">
-        <div className="flex items-center px-4 py-2">
+      <AccordionItem value={chapter.id} className="bg-card border rounded-lg shadow-sm overflow-hidden">
+        <div className="flex items-center px-4 py-3 bg-muted/10 border-b">
           {isProjectBuildMode && (
             <div className="flex items-center gap-2 mr-2">
               <Checkbox
@@ -83,21 +83,21 @@ export function SortableChapterItem({
             </div>
           )}
           <AccordionTrigger className="flex-1 hover:no-underline py-0">
-            <div className="flex items-center gap-2 flex-1 min-w-0">
+            <div className="flex items-center gap-3 flex-1 min-w-0 group">
               {listeners && (
-                <div {...listeners} className="p-1 cursor-grab touch-none -ml-2 flex items-center gap-1 text-muted-foreground">
-                  <span className="text-sm w-4 text-center font-semibold">{index + 1}.</span>
+                <div {...listeners} className="p-1.5 rounded-md cursor-grab touch-none -ml-2 flex items-center gap-2 text-muted-foreground transition-colors hover:bg-muted/40">
+                  <span className="text-xs w-5 text-center font-semibold">{index + 1}.</span>
                   <GripVertical className="h-5 w-5" />
                 </div>
               )}
-              <span className="font-semibold truncate p-0 h-auto flex-1 text-left min-w-0">
+              <span className="text-base font-semibold tracking-tight truncate p-0 h-auto flex-1 text-left min-w-0">
                 {chapter.title}
               </span>
             </div>
           </AccordionTrigger>
         </div>
         <AccordionContent>
-          <div className="border-t px-4 py-4 space-y-4">
+          <div className="border-t border-border/60 px-4 py-4 space-y-4 bg-background">
             <div className="w-full space-y-2">
               {chapter.sections.map((section, sectionIndex) => (
                 <SectionAccordionItem

@@ -155,11 +155,11 @@ const ReportResults = ({ activePanelKey }: ReportResultsProps) => {
 
   return (
     <Card className="h-full flex flex-col overflow-hidden">
-      <Collapsible open={isSuggestionVisible} onOpenChange={setIsSuggestionVisible} className="border-b">
+      <Collapsible open={isSuggestionVisible} onOpenChange={setIsSuggestionVisible} className="border-b border-border/60">
         <CollapsibleTrigger asChild>
-            <div className="flex items-center justify-between p-4 cursor-pointer hover:bg-muted/50">
+            <div className="flex items-center justify-between p-5 cursor-pointer bg-muted/30 hover:bg-muted/40">
                 <div>
-                    <CardTitle className="font-headline text-lg">
+                    <CardTitle className="font-headline text-base font-semibold tracking-tight">
                       {t('builder.reportGenerator.resultsTitle')}
                     </CardTitle>
                     <CardDescription className="text-xs">
@@ -173,7 +173,7 @@ const ReportResults = ({ activePanelKey }: ReportResultsProps) => {
             </div>
         </CollapsibleTrigger>
         <CollapsibleContent>
-            <div className="p-4 border-t bg-muted/30 space-y-2">
+            <div className="p-5 border-t border-border/60 bg-muted/20 space-y-2">
                 <div className="flex items-center gap-2 text-sm">
                     <Lightbulb className="h-4 w-4 text-yellow-500" />
                     <span className="font-semibold">Suggestion:</span>
@@ -194,7 +194,7 @@ const ReportResults = ({ activePanelKey }: ReportResultsProps) => {
 
       <CardContent className="flex-grow flex flex-col p-0 bg-slate-200 dark:bg-slate-900/50 min-h-0">
           <ScrollArea className="flex-grow">
-              <div className="py-4">
+              <div className="py-5">
                   {renderContent()}
               </div>
           </ScrollArea>

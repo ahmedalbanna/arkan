@@ -41,7 +41,7 @@ export function TableOfContentForm() {
           setIsTocDialogOpen(false);
         }}
       />
-      <div className="p-4 h-full flex flex-col">
+      <div className="p-5 h-full flex flex-col">
           <header className="mb-6 text-center">
               <h1 className="text-2xl font-bold font-headline">Structure Your Document</h1>
               <p className="text-muted-foreground">
@@ -51,11 +51,11 @@ export function TableOfContentForm() {
           
           <div className="flex-grow flex flex-col gap-4">
             <Tabs defaultValue="edit" className="h-screen flex-grow flex flex-col min-h-0">
-                <TabsList className="grid w-full grid-cols-2">
-                    <TabsTrigger value="edit">Edit</TabsTrigger>
-                    <TabsTrigger value="view">View</TabsTrigger>
+                <TabsList className="grid w-full grid-cols-2 rounded-lg bg-muted/20 p-1">
+                    <TabsTrigger value="edit" className="text-xs font-medium data-[state=active]:bg-background data-[state=active]:shadow-sm">Edit</TabsTrigger>
+                    <TabsTrigger value="view" className="text-xs font-medium data-[state=active]:bg-background data-[state=active]:shadow-sm">View</TabsTrigger>
                 </TabsList>
-                <TabsContent value="edit" className="flex-grow flex flex-col space-y-2 mt-4">
+                <TabsContent value="edit" className="flex-grow flex flex-col space-y-3 mt-5">
                     <Label htmlFor="toc-textarea" className="font-semibold">Table of Contents Markdown</Label>
                     <Textarea
                         id="toc-textarea"
@@ -66,8 +66,8 @@ export function TableOfContentForm() {
                     />
                     <p className="text-xs text-muted-foreground">Use '#' for chapter titles and '-' for section titles.</p>
                 </TabsContent>
-                <TabsContent value="view" className="flex-grow mt-4 border rounded-md p-4 bg-muted/30">
-                     <MarkdownViewer content={tocText} />
+                <TabsContent value="view" className="flex-grow mt-5 border rounded-md p-4 bg-muted/20 shadow-sm">
+                     <MarkdownViewer content={tocText} className="leading-relaxed" />
                 </TabsContent>
             </Tabs>
               

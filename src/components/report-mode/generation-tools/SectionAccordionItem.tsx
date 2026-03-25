@@ -79,8 +79,8 @@ export function SectionAccordionItem({
 
 
     return (
-        <AccordionItem value={section.id} key={section.id} className="bg-background border rounded-lg overflow-hidden" ref={setNodeRef} style={style} {...attributes}>
-            <div className="flex items-center px-4 py-3 bg-muted/20">
+        <AccordionItem value={section.id} key={section.id} className="bg-background border rounded-lg overflow-hidden shadow-sm" ref={setNodeRef} style={style} {...attributes}>
+            <div className="flex items-center px-4 py-3 bg-muted/10 border-b">
                 {isProjectBuildMode && (
                     <div className="flex items-center gap-2" onClick={(e) => { e.stopPropagation(); toggleSectionSelection(section.id); }}>
                         <Checkbox
@@ -90,22 +90,22 @@ export function SectionAccordionItem({
                     </div>
                 )}
                 <AccordionTrigger className={cn("flex-1 hover:no-underline py-0", isProjectBuildMode && "ml-2")}>
-                    <div className="flex items-center gap-3 flex-1 min-w-0">
-                        <div {...listeners} className="p-1 cursor-grab touch-none -ml-2 flex items-center gap-2 text-muted-foreground">
-                            <span className="text-xs w-8 text-left">{chapterIndex >= 0 ? `${chapterIndex + 1}.${sectionIndex + 1}`: `${sectionIndex + 1}`}</span>
+                    <div className="flex items-center gap-3 flex-1 min-w-0 group">
+                        <div {...listeners} className="p-1.5 rounded-md cursor-grab touch-none -ml-2 flex items-center gap-2 text-muted-foreground transition-colors hover:bg-muted/40">
+                            <span className="text-[11px] w-8 text-left">{chapterIndex >= 0 ? `${chapterIndex + 1}.${sectionIndex + 1}`: `${sectionIndex + 1}`}</span>
                             <GripVertical className="h-5 w-5" />
                         </div>
                         {isGenerating && <Loader2 className="h-4 w-4 animate-spin" />}
-                        <span className="font-semibold p-0 h-auto truncate">
+                        <span className="text-sm font-medium p-0 h-auto truncate group-hover:text-foreground">
                             {section.title}
                         </span>
                         {totalContext > 0 && (
                           <TooltipProvider>
                             <Tooltip>
                               <TooltipTrigger asChild>
-                                <div className="flex items-center gap-1 ml-2 rounded-full bg-blue-50 px-2 py-0.5 text-blue-600">
+                                <div className="flex items-center gap-1 ml-2 rounded-full border border-primary/20 bg-primary/10 px-2 py-0.5 text-primary">
                                   <LinkIcon className="h-3.5 w-3.5" />
-                                  <span className="text-xs font-medium">{totalContext}</span>
+                                  <span className="text-[11px] font-medium">{totalContext}</span>
                                 </div>
                               </TooltipTrigger>
                               <TooltipContent side="top">
@@ -124,22 +124,22 @@ export function SectionAccordionItem({
                     <Tabs defaultValue="controls" className="w-full">
                         <div className="px-4 pt-4">
                             <TooltipProvider>
-                                <TabsList className="grid w-full grid-cols-3">
+                                <TabsList className="grid w-full grid-cols-3 rounded-lg bg-muted/20 p-1">
                                     <Tooltip>
                                         <TooltipTrigger asChild>
-                                            <TabsTrigger value="controls" className="gap-2 text-xs sm:text-sm"><SlidersHorizontal className="h-4 w-4" /> Controls</TabsTrigger>
+                                            <TabsTrigger value="controls" className="gap-2 text-xs font-medium data-[state=active]:bg-background data-[state=active]:shadow-sm"><SlidersHorizontal className="h-4 w-4" /> Controls</TabsTrigger>
                                         </TooltipTrigger>
                                         <TooltipContent><p>Controls</p></TooltipContent>
                                     </Tooltip>
                                     <Tooltip>
                                         <TooltipTrigger asChild>
-                                            <TabsTrigger value="prompt" className="gap-2 text-xs sm:text-sm"><StickyNote className="h-4 w-4" /> Prompt</TabsTrigger>
+                                            <TabsTrigger value="prompt" className="gap-2 text-xs font-medium data-[state=active]:bg-background data-[state=active]:shadow-sm"><StickyNote className="h-4 w-4" /> Prompt</TabsTrigger>
                                         </TooltipTrigger>
                                         <TooltipContent><p>Edit Prompt</p></TooltipContent>
                                     </Tooltip>
                                     <Tooltip>
                                         <TooltipTrigger asChild>
-                                            <TabsTrigger value="context" className="gap-2 text-xs sm:text-sm"><LinkIcon className="h-4 w-4" /> {t('builder.reportGenerator.tool_tab_context')}</TabsTrigger>
+                                            <TabsTrigger value="context" className="gap-2 text-xs font-medium data-[state=active]:bg-background data-[state=active]:shadow-sm"><LinkIcon className="h-4 w-4" /> {t('builder.reportGenerator.tool_tab_context')}</TabsTrigger>
                                         </TooltipTrigger>
                                         <TooltipContent><p>{t('builder.reportGenerator.tool_tab_context')}</p></TooltipContent>
                                     </Tooltip>
@@ -164,7 +164,7 @@ export function SectionAccordionItem({
                             </TabsContent>
                         </div>
                     </Tabs>
-                    <div className="p-4 border-t bg-muted/10">
+                    <div className="p-4 border-t border-border/60 bg-muted/20 rounded-b-lg shadow-[inset_0_1px_0_rgba(255,255,255,0.5)]">
                         <TooltipProvider>
                             <Tooltip>
                                 <TooltipTrigger asChild>
