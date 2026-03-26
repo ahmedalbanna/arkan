@@ -45,7 +45,7 @@ To democratize access to professional-grade writing tools by leveraging cutting-
 ### Competitive Advantages
 
 #### Technology Stack
-- **AI Models**: Google Gemini 2.5 Flash Lite, Ollama (Gemma 2B, Phi-3 Mini, Llama 3 8B), Nomic Embed Text.
+- **AI Models**: Google Gemini 2.5 Flash Lite, Ollama (Gemma 2B, Phi-3 Mini, Llama 3.1), Nomic Embed Text.
 - **Vector Database**: Qdrant for high-performance semantic search.
 - **Performance Optimization**: Sub-100ms search latency, advanced caching.
 - **Type Safety**: Fully typed codebase with TypeScript and Zod.

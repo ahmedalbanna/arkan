@@ -18,11 +18,12 @@
 - **Zod Schemas**: Type-safe validation for all AI inputs and outputs.
 
 ### Backend Services
-- **Firebase**:
-  - **Authentication**: Secure user auth with email, Google, and phone providers.
-  - **Firestore**: NoSQL database for user data, projects, and metadata.
-  - **Firebase Storage**: File storage for user uploads (e.g., payment proofs).
-  - **Firebase Functions**: Serverless functions for backend logic.
+- **Local Infrastructure**:
+  - **Database**: SQLite with Drizzle ORM for all application data.
+  - **Authentication**: Local JWT-based auth with bcrypt password hashing.
+  - **File Storage**: Local filesystem storage for user uploads (`storage/uploads`).
+- **Firebase (Legacy/Bridge)**:
+  - **Admin SDK**: Used server-side for FCM and legacy auth integration.
 - **Qdrant**: High-performance vector database for the RAG system.
 
 ### UI Framework & Components

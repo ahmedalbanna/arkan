@@ -50,13 +50,13 @@ Arkan serves as an intelligent writing assistant that combines cutting-edge AI t
 
 ## Technology Foundation
 - **Frontend**: Next.js 15 with React 18 and TypeScript.
-- **AI Engine**: Google Genkit with Gemini, Ollama (Gemma, Phi-3, Llama 3).
+- **AI Engine**: Google Genkit with Gemini, Ollama (Gemma, Phi-3, Llama 3.1).
 - **RAG System**:
   - **Embedding Model**: Ollama with `nomic-embed-text`.
   - **Vector Database**: Qdrant.
-- **Backend**: Firebase (Auth, Firestore, Storage, Functions).
+- **Backend**: SQLite (Drizzle ORM), Local File Storage, Node.js.
 - **UI Framework**: Radix UI with Tailwind CSS.
-- **State Management**: Zustand and React Query.
+- **State Management**: Zustand and React Query (TanStack).
 
 ## Current Status
 Arkan is a stable, production-ready application with a full suite of AI writing tools and an advanced RAG system. The current focus is on increasing test coverage, refining the user experience, and monitoring performance.

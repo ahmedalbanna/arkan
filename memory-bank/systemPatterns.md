@@ -37,7 +37,7 @@ To provide relevant, up-to-date, and domain-specific context to AI models, reduc
         2.  `Chunking`: Text is split into smaller, overlapping chunks.
         3.  `Embedding`: Each chunk is converted into a vector using Ollama (`nomic-embed-text`).
         4.  `Storage`: Vectors and metadata are stored in Qdrant.
-    - **Implementation**: `src/lib/rag/indexer.ts`
+    - **Implementation**: `src/modules/rag/infrastructure/indexer.ts`
 
 2.  **Retrieval Pipeline**:
     - **Input**: User query (string).
@@ -47,13 +47,13 @@ To provide relevant, up-to-date, and domain-specific context to AI models, reduc
         3.  `Filtering`: Results are filtered by `projectId`, `userId`, etc.
         4.  `Re-ranking`: Results are re-ordered using a hybrid approach (semantic + keyword) for better relevance.
         5.  `Context Formatting`: Top results are formatted into a context string for the LLM.
-    - **Implementation**: `src/lib/rag/retrieval.ts` & `src/lib/rag/reranker.ts`
+    - **Implementation**: `src/modules/rag/infrastructure/retrieval.ts` & `src/modules/rag/infrastructure/reranker.ts`
 
 ### **Components**
-- **Vector Store**: `src/lib/rag/vector-store.ts` (Factory pattern to switch between in-memory and Qdrant).
-- **Qdrant Adapter**: `src/lib/rag/qdrant-adapter.ts` (Production-ready implementation).
-- **Embedding Service**: `src/lib/rag/embeddings.ts` (Handles communication with Ollama).
-- **Caching**: `src/lib/rag/cache.ts` (In-memory LRU cache for embeddings and search results).
+- **Vector Store**: `src/modules/rag/infrastructure/vector-store.ts` (Factory pattern to switch between in-memory and Qdrant).
+- **Qdrant Adapter**: `src/modules/rag/infrastructure/qdrant-adapter.ts` (Production-ready implementation).
+- **Embedding Service**: `src/modules/rag/infrastructure/embeddings.ts` (Handles communication with Ollama).
+- **Caching**: `src/modules/rag/infrastructure/cache.ts` (In-memory LRU cache for embeddings and search results).
 
 ### **Benefits**
 - **Reduces Hallucinations**: Grounds AI responses in factual data.
@@ -97,13 +97,13 @@ To provide users with a real-time, context-aware AI assistant that can answer qu
 
 ### 1. Zustand Store Pattern (Client-side)
 **Purpose**: Lightweight global state management for UI and session data.
-- **Implementation**: `src/hooks/core/useBuilderStore.ts`
-- **Usage**: Manages the active project, application status (`loading`, `dirty`, `saving`), and user settings.
+- **Implementation**: `src/modules/[domain]/adapters/state/`
+- **Usage**: Manages the active project, application status (`loading`, `dirty`, `saving`), and user settings. Stores are co-located with their domain.
 
 ### 2. React Query Pattern (Server-side Cache)
 **Purpose**: Server state management with caching, refetching, and synchronization.
-- **Implementation**: Used throughout `src/hooks/data/`.
-- **Benefits**: Reduces redundant API calls, provides optimistic updates, handles background refetching.
+- **Implementation**: Domain-specific hooks in `src/modules/[domain]/adapters/hooks/`.
+- **Benefits**: Reduces redundant API calls, provides optimistic updates, handles background refetching. Uses centralized key factory in `src/infrastructure/api/query-keys.ts`.
 
 ## Error Handling Patterns
 
@@ -128,6 +128,12 @@ To provide users with a real-time, context-aware AI assistant that can answer qu
 **Purpose**: Avoids CORS issues and provides a security layer for fetching external images.
 - **Implementation**: `src/app/api/proxy/convert/route.ts`
 - **Features**: Whitelists allowed domains to prevent abuse (SSRF).
+
+### 3. Local File Storage
+**Purpose**: Self-contained file management without cloud dependencies.
+- **Service**: `LocalFileStorageService` (implements `IFileStorageService`).
+- **Storage**: Files are persisted in the root `storage/uploads/` directory.
+- **Serving**: Files are served through a secure API route `src/app/api/storage/[...path]/route.ts` with path traversal protection.
 
 ## Developer Experience Patterns
 

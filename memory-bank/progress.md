@@ -36,7 +36,8 @@
 ✅ **API Documentation System**: Interactive, self-documenting API portal.
 ✅ **AI Project Consultant Chat**: In-app conversational AI to assist with project development.
 ✅ **Architectural Hardening**: Reached 100% Clean Architecture (DDD) compliance.
-✅ **Firebase Client Decommissioning**: Fully migrated to local SQLite/Cookie-based auth.
+✅ **Firebase Client Decommissioning**: Fully migrated to local SQLite/Cookie-based auth and removed client-side SDKs.
+✅ **Local File Storage**: Replaced Firebase Cloud Storage with local filesystem storage.
 ✅ **AI Infrastructure Refinement**: Categorized flows and unified tool schemas.
 - 🔄 **Test Coverage Expansion**: Increase unit and integration test coverage to 40%+.
 - 🔄 **Performance Monitoring**: Implement real-time monitoring.

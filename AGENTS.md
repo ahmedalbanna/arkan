@@ -51,8 +51,10 @@ patterns in this project (cn() utility, CVA variants, forwardRef).
 - **Framework:** Next.js 15 (App Router, Server Actions, PWA via `@ducanh2912/next-pwa`)
 - **React version:** React 18 (with strict mode enabled)
 - **AI backend:** Google Genkit 1.x with Ollama models (Gemma 2B, Phi-3 Mini, Llama 3.1)
-- **Database/Auth:** Firebase (Firestore, Authentication, Storage, FCM)
-- **Vector store:** Qdrant (for RAG) via `@qdrant/js-client-rest`
+- **Database/Auth:** SQLite (Drizzle ORM) for data and local auth; Firebase Admin SDK (server-side only) for legacy support and FCM.
+- **File Storage:** Local filesystem-based storage (`storage/uploads/`).
+- **Vector store:** Qdrant (for RAG) via `@qdrant/js-client-rest`.
+- **No Client-side Firebase**: The project is fully independent of client-side Firebase SDKs. Authentication is local (SQLite + JWT), and files are served locally. Do not re-introduce `firebase/auth`, `firebase/app`, or `firebase/firestore` in client components.
 - **UI library:** shadcn/ui (Radix UI primitives) + Tailwind CSS
 - **State management:** Zustand (client store) + TanStack Query (server state)
 - **Forms:** React Hook Form + Zod validation
@@ -223,11 +225,12 @@ Each module in `src/modules/` follows the same four-layer structure:
 
 - **Firestore rules** are in `firestore.rules` — always deny by default, whitelist explicitly
 - User roles: `'admin'` and `'user'` — check role before any privileged operation
-- User profile fields editable by users are explicitly allowlisted in Firestore rules
-- Firebase Admin SDK is server-only — never import `firebase-admin` in client components
-- Session management uses HTTP-only cookies set via `/api/auth/session`
-- Server-side Firebase initialization is in `src/infrastructure/firebase/server-init.ts`
-- Client-side Firebase is initialized in `src/firebase/` — use the provided `provider.tsx` hooks
+- User profile fields editable by users are explicitly allowlisted in database schemas.
+- Firebase Admin SDK is server-only — never import `firebase-admin` in client components.
+- **No Client-side Firebase**: The project has been fully purged of client-side Firebase SDKs. Do not re-introduce `firebase/auth`, `firebase/app`, or `firebase/firestore` in client components.
+- **Local File Storage**: Firebase Cloud Storage is no longer used. Files are stored locally in `storage/uploads/` and served via `/api/storage/[...path]`.
+- Session management uses HTTP-only cookies set via `/api/auth/session`.
+- Server-side Firebase initialization (Admin SDK only) is in `src/infrastructure/firebase/server-init.ts`. Firestore initialization is currently disabled.
 
 ---
 
@@ -451,6 +454,11 @@ FIREBASE_ADMIN_PRIVATE_KEY=
     - **DI Container Split Anti-pattern**: Do NOT split server-only DI registrations into a separate file loaded only via `instrumentation.ts`. In Turbopack dev mode, hot-reloaded API routes resolve from the container before `instrumentation.ts` re-runs, causing "unregistered dependency token" errors. Keep all registrations in `container.ts` using `typeof window === 'undefined'` + `require()` — this runs synchronously whenever the module is loaded on the server, with no timing race.
     - **Genkit Duplicate Prompt Warning**: The `ERROR: /prompt/X already has an entry in the registry. Overwriting.` warning in dev is a Genkit hot-reload artifact — not a real error. It occurs when the dev server re-evaluates modules that call `ai.definePrompt()`. It is harmless and can be ignored.
     - **Git Corrupt History Recovery**: When `git push` fails due to missing/corrupted objects deep in history, create `.git/shallow` containing the SHA of the last accessible commit. This tells git to treat that commit as a root (no parents), allowing push of all accessible history without the missing objects.
+- **Variable Shadowing in React**: When using `useAuth()`, prefer naming the destructured variable `user: authUser` if the component already uses a local `user` property (e.g., in a list or prop). This prevents "Duplicate identifier" errors and improves clarity.
+- **Controlled Input Fallbacks**: To avoid "changing a controlled input to be uncontrolled" errors, always provide a fallback value (e.g., `value={val || ''}`) for text inputs if the underlying state might be initially `null` or `undefined`.
+- **Local File Storage Transition**: Replaced Firebase Cloud Storage with a local filesystem-based solution. The `LocalFileStorageService` saves files to `storage/uploads/` and returns relative API URLs (`/api/storage/uploads/...`).
+- **Secure File Serving**: The dynamic route `src/app/api/storage/[...path]/route.ts` serves local files. It MUST include path traversal protection (`relativePath.includes('..')`) and use `mime-types` for correct `Content-Type` headers.
+- **Isolated Modules and Decorators**: In classes using `tsyringe` decorators (like `@injectable()`), always import domain interfaces using `import type` (e.g., `import { type IUserRepository } ...`). This prevents "type referenced in a decorated signature" errors when `isolatedModules` and `emitDecoratorMetadata` are enabled.
 
 
 ### Security Patterns
