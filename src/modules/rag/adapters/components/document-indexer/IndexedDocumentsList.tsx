@@ -47,9 +47,13 @@ export function IndexedDocumentsList() {
 
   useEffect(() => { fetchDocuments(); }, []);
 
-  const filteredDocuments = documents.filter((doc) => doc.sourceFile.toLowerCase().includes(searchQuery.toLowerCase()) && (!filterProject || doc.projectId === filterProject));
-  const projects = Array.from(new Set(documents.map((d) => d.projectId)));
-  const totalChunks = documents.reduce((sum, d) => sum + d.chunksCount, 0);
+  const safeDocuments = Array.isArray(documents) ? documents : [];
+  const filteredDocuments = safeDocuments.filter((doc) => 
+    doc.sourceFile?.toLowerCase().includes(searchQuery.toLowerCase()) && 
+    (!filterProject || doc.projectId === filterProject)
+  );
+  const projects = Array.from(new Set(safeDocuments.map((d) => d.projectId)));
+  const totalChunks = safeDocuments.reduce((sum, d) => sum + (d.chunksCount || 0), 0);
 
   return (
     <Card>

@@ -11,12 +11,20 @@ import { RagController } from '@/modules/rag/adapters/controllers/RagController'
 export async function GET(_request: NextRequest) {
   try {
     const controller = container.resolve(RagController);
-    const documents = await controller.getIndexedDocuments();
-    const stats = await controller.getStats();
+    const documentsResult = await controller.getIndexedDocuments();
+    const statsResult = await controller.getStats();
+
+    if (documentsResult.isFailure) {
+      return NextResponse.json({ error: documentsResult.error?.message || 'Failed to fetch documents' }, { status: 500 });
+    }
+
+    if (statsResult.isFailure) {
+      return NextResponse.json({ error: statsResult.error?.message || 'Failed to fetch stats' }, { status: 500 });
+    }
 
     return NextResponse.json({
-      documents,
-      ...stats,
+      documents: documentsResult.getValue(),
+      ...statsResult.getValue(),
       timestamp: new Date().toISOString(),
     });
 
