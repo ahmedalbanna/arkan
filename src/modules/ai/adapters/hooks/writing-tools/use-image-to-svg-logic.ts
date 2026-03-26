@@ -63,7 +63,11 @@ export function useImageToSvgLogic() {
   });
 
   const mutation = useMutation({
-    mutationFn: (formData: FormData) => container.resolve(ImageConversionApiClient).convertImageToSvgApi(formData),
+    mutationFn: async (formData: FormData) => {
+      const result = await container.resolve(ImageConversionApiClient).convertImageToSvgApi(formData);
+      if (result.isFailure) throw result.error;
+      return result.getValue();
+    },
     onSuccess: (data) => {
       setSvgResult(data);
       toast({ title: 'Conversion Successful', description: 'Image has been converted to SVG.' });
