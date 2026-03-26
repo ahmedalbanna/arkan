@@ -2,20 +2,27 @@
 
 ## Architectural Patterns
 
-### 1. Modular AI Flow Pattern
-**Purpose**: Standardized approach for creating AI-powered operations.
-- **Implementation**: `src/ai/flows/`
-- **Benefits**: Type safety with Zod, consistent error handling, reusability.
+### 1. Strict Clean Architecture (DDD)
+**Purpose**: Absolute separation of concerns between business logic, orchestration, and infrastructure.
+- **Domain Layer**: Pure entities, repository interfaces, and service interfaces. Zero external dependencies (except for basic utils).
+- **Application Layer**: Use Cases that orchestrate domain logic. Implementation-agnostic.
+- **Adapter Layer**: Controllers (API routes), Hooks (logic-heavy), State (Zustand), and Smart Components.
+- **Infrastructure Layer**: Concrete implementations (SQLite, Qdrant, SMTP, JWT).
 
-### 2. Component Composition Pattern
-**Purpose**: Building complex UI from smaller, reusable pieces.
-- **Implementation**: `src/components/` (e.g., `ReportGenerator`, admin dashboards).
-- **Benefits**: Maintainability, scalability, and code reuse.
+### 2. Modular AI & Schema Pattern
+**Purpose**: Standardized approach for AI operations with unified data contracts.
+- **Implementation**: Categorized flows in `src/modules/ai/infrastructure/flows/`.
+- **Unified Schemas**: Single source of truth for tool/flow Zod schemas in `infrastructure/tools/schemas.ts`.
+- **Literal Enforcement**: Using `as const` for union-based output types.
 
-### 3. Service Layer Pattern
-**Purpose**: Abstracting API calls and business logic.
-- **Implementation**: `src/services/`
-- **Benefits**: Centralized logic, easier testing, separation of concerns.
+### 3. Dependency Injection (tsyringe)
+**Purpose**: Decoupling components and services for testability and inversion of control.
+- **Implementation**: Token-based injection in `src/infrastructure/di/container.ts`.
+- **React Integration**: Standardized `useService(token)` hook for client-side resolution.
+
+### 4. Functional Injection Pattern
+**Purpose**: Maintaining domain purity for complex transformations.
+- **Implementation**: Domain methods (e.g., `Project.applyTemplate`) accept infrastructure functions as callbacks rather than importing them directly.
 
 ## RAG & Vector Search Pattern
 
@@ -102,8 +109,8 @@ To provide users with a real-time, context-aware AI assistant that can answer qu
 
 ### 1. Centralized API Error Handling
 **Purpose**: Consistent error handling for all API routes.
-- **Implementation**: `src/lib/utils/api-utils.ts` (`handleApiError`)
-- **Benefits**: Standardized error responses, handles Zod validation and Firebase errors automatically.
+- **Implementation**: `src/infrastructure/api/api-utils.ts` (`handleApiError`)
+- **Benefits**: Standardized error responses, utilizes the **Result Pattern** for explicit error flow throughout the stack.
 
 ### 2. Document Processing Error Handling
 **Purpose**: Robust error handling for document generation (DOCX, PPTX).

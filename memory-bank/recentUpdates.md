@@ -1,6 +1,19 @@
 # Recent Updates - Arkan Memory Bank
 
-*Last Updated: January 2026*
+*Last Updated: March 2026*
+
+## March 2026 Updates
+
+### **Full Architectural Hardening & Firebase Decommissioning**
+**Date**: March 2026
+**Summary**: Completed a massive refactor to align the entire project with strict Clean Architecture (DDD) principles.
+
+- **Module-Centric Organization**: Relocated all Hooks, Smart Components, and Zustand Stores into their respective domain modules (`users`, `projects`, `ai`, `ai-content`, `billing`, `rag`, `templates`, `admin`).
+- **Legacy Cleanup**: Completely removed `src/lib` and `src/hooks/data` / `src/hooks/core` directories.
+- **AI Ecosystem Refinement**: Categorized 40+ AI flows and unified all tool/flow schemas into a single infrastructure source of truth.
+- **Local Auth Completion**: Fully removed Firebase Client SDK logic. Implemented injectable `CookieService`, `SessionService`, `PasswordService`, and `TokenService`.
+- **Infrastructure Purity**: Decoupled RAG Vector Store and Domain Entities from Firebase types, utilizing native JS types and functional injection for complex parsing logic.
+- **React Performance**: Optimized store access with atomic selectors and implemented memoization for the Report Builder sub-components.
 
 ## January 2026 Updates
 

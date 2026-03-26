@@ -37,16 +37,21 @@
 
 ## Architecture Patterns
 
-### Code Organization
+### Code Organization (Clean Architecture)
 ```
 src/
-├── ai/         # AI flows, prompts, tools, schemas
-├── app/        # Next.js App Router pages and API routes
-├── components/ # Reusable UI components
-├── hooks/      # Custom React hooks (data fetching, UI logic)
-├── lib/        # Core business logic, models, utilities
-├── services/   # API service layers
-└── types/      # Legacy TypeScript type definitions
+├── app/            # Next.js App Router pages and API routes
+├── modules/        # Domain modules (Clean Architecture / DDD)
+│   └── [domain]/
+│       ├── domain/         # Entities, Repo Interfaces, Schemas
+│       ├── application/    # Use Cases, Application Services
+│       ├── adapters/       # Controllers, hooks, state, smart components
+│       └── infrastructure/ # DB/External service implementations
+├── components/     # Pure UI & Shared layout components
+│   ├── ui/             # shadcn/Radix primitives
+│   └── shared/         # Header, Footer, Providers
+├── hooks/          # Generic framework/utility hooks
+└── infrastructure/ # Cross-cutting concerns (API, DI, DB, Security)
 ```
 
 ### RAG Architecture
@@ -80,7 +85,9 @@ src/
 ## Security Architecture
 
 ### Authentication & Authorization
-- **Firebase Auth**: Secure authentication with session cookies.
+- **Local Auth (SQLite)**: Secure local authentication with JWT and bcrypt.
+- **Injectable Auth Services**: `IPasswordService` and `ITokenService` for flexible implementation.
+- **Cookie-Based Sessions**: Automated session management via `ICookieService`.
 - **Middleware**: Route protection for authenticated and admin-only routes.
 - **Role-Based Access Control (RBAC)**: 'admin' vs 'user' roles enforced on the server.
 

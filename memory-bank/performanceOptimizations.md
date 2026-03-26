@@ -1,6 +1,22 @@
 # Performance Optimizations - Arkan
 
-*Last Updated: January 2026*
+*Last Updated: March 2026*
+
+## React Rendering Optimizations (March 2026)
+
+### **Atomic State Selectors**
+- **Purpose**: Minimize component re-renders when using Zustand global stores.
+- **Mechanism**: Use narrow, atomic selectors (`useStore(state => state.value)`) instead of monolithic destructuring.
+- **Impact**: Significant reduction in Virtual DOM diffing overhead for logic-heavy pages like the Report Builder.
+
+### **Component Memoization**
+- **Purpose**: Prevent unnecessary re-renders of complex document previews and forms.
+- **Implementation**: Wrapped `ReportResults`, `TableOfContentForm`, and `ReportSteps` in `React.memo`.
+- **Benefit**: Ensures that document preview only re-renders when the actual content or active panel changes.
+
+### **DI Resolution Efficiency**
+- **Purpose**: Minimize service resolution overhead in the UI layer.
+- **Implementation**: Created a `useService(token)` hook that utilizes `useMemo` to cache resolved instances from the `tsyringe` container.
 
 ## Agent Lab Performance Enhancements
 
