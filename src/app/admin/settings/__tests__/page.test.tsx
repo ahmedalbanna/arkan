@@ -29,7 +29,7 @@ import AdminSettingsPage from '../page';
 
 describe('AdminSettingsPage', () => {
   const toast = jest.fn();
-  const firebaseUser = { uid: 'admin-1' } as { uid: string };
+  const user = { uid: 'admin-1' } as { uid: string };
 
   const renderPage = () => {
     const queryClient = new QueryClient({
@@ -48,7 +48,7 @@ describe('AdminSettingsPage', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    useAuth.mockReturnValue({ firebaseUser });
+    useAuth.mockReturnValue({ user });
     useToast.mockReturnValue({ toast });
     usePublicSettings.mockReturnValue({
       data: { newUserCredits: 10, paymentMethods: [] },
@@ -88,7 +88,7 @@ describe('AdminSettingsPage', () => {
   });
 
   it('shows an auth error toast when there is no admin user', async () => {
-    useAuth.mockReturnValue({ firebaseUser: null });
+    useAuth.mockReturnValue({ user: null });
 
     renderPage();
 

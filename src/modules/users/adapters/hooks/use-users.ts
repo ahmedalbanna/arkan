@@ -9,28 +9,28 @@ import { useToast } from '@/hooks/util/use-toast';
 import { UserProfile } from '@/modules/users/domain/entities/User';
 
 export function useUserProfile(userId: string) {
-  const { firebaseUser } = useAuth();
+  const { user } = useAuth();
 
   return useQuery({
     queryKey: userKeys.profile(userId),
     queryFn: async () => {
-      if (!firebaseUser || !userId) return null;
+      if (!user || !userId) return null;
       const client = container.resolve(UserApiClient);
       const result = await client.fetchUserProfile(userId);
       if (result.isFailure) throw result.error;
       return result.getValue();
     },
-    enabled: !!firebaseUser && !!userId,
+    enabled: !!user && !!userId,
   });
 }
 
 export function usePaginatedUsers(options: { limit: number; lastVisibleId?: string | null }) {
-  const { firebaseUser } = useAuth();
+  const { user } = useAuth();
 
   return useQuery({
     queryKey: userKeys.list(options),
     queryFn: async () => {
-      if (!firebaseUser) return null;
+      if (!user) return null;
       const client = container.resolve(UserApiClient);
       const result = await client.getPaginatedUsers({
           limit: options.limit,
@@ -39,7 +39,7 @@ export function usePaginatedUsers(options: { limit: number; lastVisibleId?: stri
       if (result.isFailure) throw result.error;
       return result.getValue();
     },
-    enabled: !!firebaseUser,
+    enabled: !!user,
   });
 }
 

@@ -112,7 +112,7 @@ function NavContent({ isMobile = false, closeSheet }: { isMobile?: boolean, clos
 
 function AdminLayoutContent({ children }: { children: ReactNode }) {
     const { t } = useLocalization();
-    const { userProfile, isLoading: isAuthLoading, firebaseUser } = useAuth();
+    const { userProfile, isLoading: isAuthLoading, user } = useAuth();
     const logoutMutation = useLogout();
     const [isSheetOpen, setIsSheetOpen] = useState(false);
 
@@ -171,7 +171,7 @@ function AdminLayoutContent({ children }: { children: ReactNode }) {
                         <DropdownMenuContent align="end">
                             <DropdownMenuLabel>{userProfile.name}</DropdownMenuLabel>
                             <DropdownMenuSeparator />
-                            <DropdownMenuItem asChild><Link href={`/profile/${firebaseUser?.uid}`}>Profile</Link></DropdownMenuItem>
+                            <DropdownMenuItem asChild><Link href={`/profile/${user?.uid}`}>Profile</Link></DropdownMenuItem>
                             <DropdownMenuItem asChild><Link href="/builder">Go to Builder</Link></DropdownMenuItem>
                             <DropdownMenuSeparator />
                             <DropdownMenuItem onClick={() => logoutMutation.mutate()}>Logout</DropdownMenuItem>

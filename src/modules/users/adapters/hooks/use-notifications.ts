@@ -7,18 +7,18 @@ import { NotificationApiClient } from '@/modules/users/adapters/api-client/Notif
 import { notificationKeys } from '@/infrastructure/api/query-keys';
 
 export function useNotifications() {
-  const { firebaseUser } = useAuth();
+  const { user } = useAuth();
 
   const query = useQuery({
     queryKey: notificationKeys.lists(),
     queryFn: async () => {
-      if (!firebaseUser) return [];
+      if (!user) return [];
       const client = container.resolve(NotificationApiClient);
       const result = await client.fetchNotifications();
       if (result.isFailure) throw result.error;
       return result.getValue();
     },
-    enabled: !!firebaseUser,
+    enabled: !!user,
   });
 
   const markMutation = useMarkNotificationsAsRead();

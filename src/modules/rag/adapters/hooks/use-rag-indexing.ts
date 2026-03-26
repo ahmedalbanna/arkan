@@ -8,7 +8,7 @@ import { useToast } from '@/hooks/util/use-toast';
 import { ragKeys } from '@/infrastructure/api/query-keys';
 
 export function useRagIndexing() {
-  const { firebaseUser } = useAuth();
+  const { user } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
 

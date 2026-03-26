@@ -8,12 +8,12 @@ import { useToast } from '@/hooks/util/use-toast';
 import { transactionKeys } from '@/infrastructure/api/query-keys';
 
 export function useTransactions(status: string = 'all') {
-  const { firebaseUser } = useAuth();
+  const { user } = useAuth();
 
   return useInfiniteQuery({
     queryKey: transactionKeys.list(status),
     queryFn: async ({ pageParam }) => {
-      if (!firebaseUser) return { transactions: [], hasNextPage: false, lastVisibleId: null };
+      if (!user) return { transactions: [], hasNextPage: false, lastVisibleId: null };
       const client = container.resolve(TransactionApiClient);
       const result = await client.fetchTransactions({ status: status === 'all' ? undefined : status, lastVisibleId: pageParam as string });
       if (result.isFailure) throw result.error;
@@ -21,23 +21,23 @@ export function useTransactions(status: string = 'all') {
     },
     initialPageParam: undefined,
     getNextPageParam: (lastPage: any) => lastPage.hasNextPage ? lastPage.lastVisibleId : undefined,
-    enabled: !!firebaseUser,
+    enabled: !!user,
   });
 }
 
 export function useUserTransactions() {
-  const { firebaseUser } = useAuth();
+  const { user } = useAuth();
 
   return useQuery({
-    queryKey: ['user-transactions', firebaseUser?.uid], // TODO: Add to transactionKeys if needed
+    queryKey: ['user-transactions', user?.uid], // TODO: Add to transactionKeys if needed
     queryFn: async () => {
-      if (!firebaseUser) return [];
+      if (!user) return [];
       const client = container.resolve(TransactionApiClient);
       const result = await client.fetchUserTransactions();
       if (result.isFailure) throw result.error;
       return result.getValue();
     },
-    enabled: !!firebaseUser,
+    enabled: !!user,
   });
 }
 

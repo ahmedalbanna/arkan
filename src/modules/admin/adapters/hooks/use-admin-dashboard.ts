@@ -7,17 +7,17 @@ import { useAuth } from '@/context/AuthContext';
 import { adminKeys } from '@/infrastructure/api/query-keys';
 
 export function useAdminDashboard() {
-  const { firebaseUser } = useAuth();
+  const { user } = useAuth();
 
   return useQuery<DashboardStats, Error>({
     queryKey: adminKeys.dashboardStats(),
     queryFn: async () => {
-      if (!firebaseUser) throw new Error('User not authenticated');
+      if (!user) throw new Error('User not authenticated');
       const client = container.resolve(AdminApiClient);
       const result = await client.fetchDashboardStats();
       if (result.isFailure) throw result.error;
       return result.getValue();
     },
-    enabled: !!firebaseUser,
+    enabled: !!user,
   });
 }

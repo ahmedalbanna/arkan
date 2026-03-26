@@ -30,11 +30,11 @@ export default function ManageAgentsPage() {
     // Initial fetch is handled by useQuery in the hook
     // This effect is no longer needed
     // useEffect(() => {
-    //     if (firebaseUser) {
+    //     if (user) {
     //         handleFetch();
     //     }
     // // eslint-disable-next-line react-hooks/exhaustive-deps
-    // }, [firebaseUser]);
+    // }, [user]);
 
     return (
         <>

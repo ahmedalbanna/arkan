@@ -10,7 +10,7 @@ import { useBuilderStore } from '@/hooks';
 import { apiService } from '@/infrastructure/api/ApiService';
 
 interface AuthContextType {
-  firebaseUser: any | null; // Kept name for compatibility, but holds local user now
+  user: any | null;
   userProfile: User | null;
   isLoading: boolean;
   isGuest: boolean;
@@ -66,7 +66,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     fetchMe();
   }, [fetchMe]);
 
-  const { data: userProfile, refetch: refetchProfile } = useQuery<User | null>({
+  const { data: userProfile } = useQuery<User | null>({
     queryKey: userKeys.profile(user?.id ?? ''),
     queryFn: async () => {
       if (!user) return null;
@@ -84,7 +84,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   }, [user, queryClient, fetchMe]);
 
   const value = {
-    firebaseUser: user ? { uid: user.id, email: user.email, displayName: user.name } as any : null,
+    user: user ? { uid: user.id, email: user.email, displayName: user.name } as any : null,
     userProfile: userProfile ?? null,
     isLoading: authIsLoading,
     isGuest,

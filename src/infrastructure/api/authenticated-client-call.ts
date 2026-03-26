@@ -3,22 +3,21 @@
 import { container } from '@/infrastructure/di/container';
 import { getAuthenticatedToken } from '@/modules/users/domain/utils/authUtils';
 import { Result } from '@/infrastructure/utils/result';
-import type { User as FirebaseUser } from 'firebase/auth';
 
 type ClientConstructor<TClient> = new (...args: unknown[]) => TClient;
 
 const getAuthenticationError = (): Error => new Error('User not authenticated');
 
 export const runAuthenticatedClientCall = async <TClient, TResult>(
-  firebaseUser: FirebaseUser | null | undefined,
+  user: { uid: string; getIdToken: (force: boolean) => Promise<string> } | null | undefined,
   clientClass: ClientConstructor<TClient>,
   callback: (client: TClient, token: string) => Promise<TResult>,
 ): Promise<TResult> => {
-  if (!firebaseUser) {
+  if (!user) {
     throw getAuthenticationError();
   }
 
-  const token = await getAuthenticatedToken(firebaseUser);
+  const token = await getAuthenticatedToken(user);
   const client = container.resolve(clientClass);
 
   return callback(client, token);
@@ -37,10 +36,10 @@ export const unwrapResult = <TValue, TError>(result: Result<TValue, TError>): TV
 };
 
 export const runAuthenticatedResultCall = async <TClient, TValue, TError>(
-  firebaseUser: FirebaseUser | null | undefined,
+  user: { uid: string; getIdToken: (force: boolean) => Promise<string> } | null | undefined,
   clientClass: ClientConstructor<TClient>,
   callback: (client: TClient, token: string) => Promise<Result<TValue, TError>>,
 ): Promise<TValue> => {
-  const result = await runAuthenticatedClientCall(firebaseUser, clientClass, callback);
+  const result = await runAuthenticatedClientCall(user, clientClass, callback);
   return unwrapResult(result);
 };

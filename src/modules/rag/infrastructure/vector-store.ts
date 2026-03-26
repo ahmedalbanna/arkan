@@ -1,12 +1,11 @@
 /**
  * Vector Store Implementation for RAG
  * 
- * This module provides a simple in-memory vector store with persistence to Firestore.
- * For production, consider using dedicated vector databases like Pinecone or Qdrant.
+ * This module provides a simple in-memory vector store.
+ * For production, consider using dedicated vector databases like Qdrant.
  */
 
-import { adminDb as db } from '@/infrastructure/firebase/server-init';
-import { collection, doc, setDoc, getDocs, query, where, Timestamp } from 'firebase/firestore';
+import { v4 as uuidv4 } from 'uuid';
 
 export interface DocumentChunk {
   id: string;
@@ -50,31 +49,16 @@ function cosineSimilarity(a: number[], b: number[]): number {
 }
 
 /**
- * Vector Store Class
+ * Vector Store Class (In-Memory)
  */
 export class VectorStore {
   private chunks: Map<string, DocumentChunk> = new Map();
-  private collectionName = 'vector_embeddings';
 
   /**
    * Add a document chunk to the vector store
    */
   async addChunk(chunk: DocumentChunk): Promise<void> {
     this.chunks.set(chunk.id, chunk);
-
-    // Persist to Firestore
-    try {
-      const docRef = doc(db as any, this.collectionName, chunk.id);
-      await (setDoc as any)(docRef, {
-        content: chunk.content,
-        embedding: chunk.embedding || [],
-        metadata: chunk.metadata,
-        createdAt: Timestamp.now(),
-      });
-    } catch (error) {
-      console.error('Error persisting chunk to Firestore:', error);
-      // Don't throw - allow in-memory storage to continue
-    }
   }
 
   /**
@@ -124,29 +108,10 @@ export class VectorStore {
   }
 
   /**
-   * Load chunks from Firestore for a specific project
+   * Memory store doesn't persist, so no-op
    */
-  async loadProjectChunks(projectId: string): Promise<void> {
-    try {
-      const q = query(
-        collection(db as any, this.collectionName),
-        where('metadata.projectId', '==', projectId)
-      );
-
-      const snapshot = await getDocs(q);
-      snapshot.forEach(doc => {
-        const data = doc.data();
-        const chunk: DocumentChunk = {
-          id: doc.id,
-          content: data.content,
-          embedding: data.embedding,
-          metadata: data.metadata,
-        };
-        this.chunks.set(chunk.id, chunk);
-      });
-    } catch (error) {
-      console.error('Error loading chunks from Firestore:', error);
-    }
+  async loadProjectChunks(_projectId: string): Promise<void> {
+    // No-op for memory store
   }
 
   /**
@@ -190,7 +155,6 @@ export function getVectorStore(): VectorStore | any {
       return qdrantStoreInstance;
 
     case 'memory':
-    case 'firestore':
     default:
       if (!vectorStoreInstance) {
         vectorStoreInstance = new VectorStore();

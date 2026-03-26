@@ -23,7 +23,7 @@ export function useSummarizerLogic() {
   const { t } = useLocalization();
   const [summarizedText, setSummarizedText] = useState('');
   const [isCopied, setIsCopied] = useState(false);
-  const { firebaseUser, refetchUser } = useAuth();
+  const { user, refetchUser } = useAuth();
   const [isUploading, setIsUploading] = useState(false);
   const { toast } = useToast();
 
@@ -46,7 +46,7 @@ export function useSummarizerLogic() {
     const file = acceptedFiles[0];
     if (!file) return;
 
-    if (!firebaseUser) {
+    if (!user) {
       toast({ title: "Authentication Error", description: "You must be logged in to process files.", variant: "destructive" });
       return;
     }
@@ -68,7 +68,7 @@ export function useSummarizerLogic() {
     } finally {
       setIsUploading(false);
     }
-  }, [firebaseUser, form, refetchUser, toast, t]);
+  }, [user, form, refetchUser, toast, t]);
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,

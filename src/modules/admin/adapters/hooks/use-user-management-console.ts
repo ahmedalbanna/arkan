@@ -10,7 +10,7 @@ import { container } from '@/infrastructure/di/container';
 const USERS_PER_PAGE = 10;
 
 export function useUserManagementConsole() {
-  const { firebaseUser, isLoading: authLoading } = useAuth();
+  const { user, isLoading: authLoading } = useAuth();
 
   const {
     data,
@@ -36,7 +36,7 @@ export function useUserManagementConsole() {
     },
     initialPageParam: undefined as string | undefined,
     getNextPageParam: (lastPage) => (lastPage.hasNextPage ? lastPage.lastVisibleId ?? undefined : undefined),
-    enabled: !authLoading && Boolean(firebaseUser),
+    enabled: !authLoading && Boolean(user),
     staleTime: 1000 * 60 * 5,
   });
 

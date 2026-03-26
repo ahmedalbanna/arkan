@@ -29,7 +29,7 @@ interface AiActionsProps {
 export function useAiActions({ editor: initialEditor }: AiActionsProps = {}) {
   const { t } = useLocalization();
   const { toast } = useToast();
-  const { firebaseUser, refetchUser } = useAuth();
+  const { user, refetchUser } = useAuth();
   const { project, updateProject } = useBuilderStore();
   const { activeEditor } = useEditorStore();
   const queryClient = useQueryClient();
@@ -148,7 +148,7 @@ export function useAiActions({ editor: initialEditor }: AiActionsProps = {}) {
     mutationKey: ['generateReportSection'],
     mutationFn: async (sectionId: string) => {
       const currentProject = useBuilderStore.getState().project;
-      if (!currentProject || !firebaseUser) throw new Error('Project or user not found.');
+      if (!currentProject || !user) throw new Error('Project or user not found.');
 
       const section = currentProject.getSection(sectionId);
       if (!section) throw new Error('Section not found.');
@@ -171,8 +171,8 @@ export function useAiActions({ editor: initialEditor }: AiActionsProps = {}) {
     },
     onSuccess: (data, sectionId) => {
       updateProject((currentProject) => currentProject.updateSection(sectionId, (section) => section.withProps({ content: data.content })));
-      if (project?.id && firebaseUser?.uid) {
-        queryClient.invalidateQueries({ queryKey: projectKeys.detail(firebaseUser.uid, project.id) });
+      if (project?.id && user?.uid) {
+        queryClient.invalidateQueries({ queryKey: projectKeys.detail(user.uid, project.id) });
       }
       refetchUser();
       toast({ title: 'Generation In Progress', description: 'The AI is generating your content. It will appear automatically when ready.' });
@@ -187,7 +187,7 @@ export function useAiActions({ editor: initialEditor }: AiActionsProps = {}) {
     mutationFn: async (variables: { chapterId: string; sectionIds: string[] }) => {
       const { chapterId, sectionIds } = variables;
       const currentProject = useBuilderStore.getState().project;
-      if (!currentProject || !firebaseUser) throw new Error('User or project not found.');
+      if (!currentProject || !user) throw new Error('User or project not found.');
 
       const chapter = currentProject.getChapter(chapterId);
       if (!chapter) throw new Error('Chapter not found.');
@@ -206,7 +206,7 @@ export function useAiActions({ editor: initialEditor }: AiActionsProps = {}) {
         })),
       };
 
-      const result = await runAuthenticatedResultCall(firebaseUser, WritingToolsApiClient, (client, token) =>
+      const result = await runAuthenticatedResultCall(user, WritingToolsApiClient, (client, token) =>
         client.writingToolApi<any, { markdownContent: string }>('/api/writing-tools/generate-chapter', { data: body, token }),
       );
 
@@ -230,7 +230,7 @@ export function useAiActions({ editor: initialEditor }: AiActionsProps = {}) {
   const generateProjectMutation = useMutation({
     mutationKey: ['generateProjectContent'],
     mutationFn: async ({ project, selectedSectionIds }: { project: Project; selectedSectionIds: Set<string> }) => {
-      if (!firebaseUser) throw new Error('User not found.');
+      if (!user) throw new Error('User not found.');
       if (selectedSectionIds.size === 0) throw new Error('No sections were selected for generation.');
 
       for (const sectionId of selectedSectionIds) {

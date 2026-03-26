@@ -88,7 +88,7 @@ function getPaymentMethodIcon(type: string) {
 // Main Settings Page Component
 export default function AdminSettingsPage() {
     const { t } = useLocalization();
-    const { firebaseUser } = useAuth();
+    const { user } = useAuth();
     const { toast } = useToast();
     const queryClient = useQueryClient();
 
@@ -130,7 +130,7 @@ export default function AdminSettingsPage() {
     });
 
     const onSubmit = async (data: SettingsFormValues) => {
-        if (!firebaseUser) {
+        if (!user) {
             toast({ title: t('adminSettings.errorToastTitle'), description: 'Admin not authenticated.', variant: 'destructive' });
             return;
         }

@@ -22,7 +22,7 @@ const { runAuthenticatedResultCall } = jest.requireMock('@/infrastructure/api/au
 const { useSections, useCreateSection, useUpdateSection, useDeleteSection } = require('../use-sections') as typeof import('../use-sections');
 
 describe('use-sections hooks', () => {
-  const firebaseUser = { uid: 'admin-1' } as { uid: string };
+  const user = { uid: 'admin-1' } as { uid: string };
 
   const createWrapper = (queryClient: QueryClient) => {
     const Wrapper = ({ children }: { children: React.ReactNode }) => (
@@ -34,7 +34,7 @@ describe('use-sections hooks', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    useAuth.mockReturnValue({ firebaseUser });
+    useAuth.mockReturnValue({ user });
   });
 
   it('loads and normalizes sections through the authenticated helper', async () => {

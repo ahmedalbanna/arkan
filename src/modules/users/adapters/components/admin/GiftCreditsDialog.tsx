@@ -25,26 +25,25 @@ const giftCreditsSchema = z.object({
 type GiftCreditsFormValues = z.infer<typeof giftCreditsSchema>;
 interface GiftCreditsDialogProps { user: User; }
 
-export function GiftCreditsDialog({ user }: GiftCreditsDialogProps) {
+export function GiftCreditsDialog({ user: targetUser }: GiftCreditsDialogProps) {
   const [isOpen, setIsOpen] = useState(false);
-  const { firebaseUser } = useAuth();
+  const { user: authUser } = useAuth();
   const queryClient = useQueryClient();
-
   const form = useForm<GiftCreditsFormValues>({ resolver: zodResolver(giftCreditsSchema), defaultValues: { credits: 10, message: '' } });
 
   const mutation = useMutation({
     mutationFn: (data: GiftCreditsFormValues) => {
-      if (!firebaseUser) throw new Error('Admin not authenticated.');
-      return apiService<GiftCreditsFormValues & { userId: string }, { message: string }>({
-        endpoint: '/api/admin/gift-credits',
-        method: 'POST',
-        data: { ...data, userId: user.id },
+      if (!authUser) throw new Error('Admin not authenticated.');
+      return apiService<GiftCreditsFormValues & { userId: string }, { message: string }>({ 
+        endpoint: '/api/admin/gift-credits', 
+        method: 'POST', 
+        data: { ...data, userId: targetUser.id } 
       });
     },
     onSuccess: (data) => {
       toast({ title: 'Credits Gifted', description: data.message });
-      queryClient.invalidateQueries({ queryKey: userKeys.lists() });
-      queryClient.invalidateQueries({ queryKey: userKeys.profile(user.id) });
+      queryClient.invalidateQueries({ queryKey: userKeys.all() });
+      queryClient.invalidateQueries({ queryKey: userKeys.profile(targetUser.id) });
       setIsOpen(false);
       form.reset();
     },
@@ -57,7 +56,7 @@ export function GiftCreditsDialog({ user }: GiftCreditsDialogProps) {
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild><Button variant="ghost" size="icon"><Gift className="h-4 w-4" /><span className="sr-only">Gift Credits</span></Button></DialogTrigger>
       <DialogContent>
-        <DialogHeader><DialogTitle>Gift Credits to {user.name}</DialogTitle><DialogDescription>Send credits to this user. They will be notified of your gift.</DialogDescription></DialogHeader>
+        <DialogHeader><DialogTitle>Gift Credits to {targetUser.name}</DialogTitle><DialogDescription>Send credits to this user. They will be notified of your gift.</DialogDescription></DialogHeader>
         <Form {...form}><form onSubmit={form.handleSubmit((data) => mutation.mutate(data))} className="space-y-4">
           <FormField control={form.control} name="credits" render={({ field }) => <FormItem><FormLabel>Credits to Gift</FormLabel><FormControl><Input type="number" {...field} disabled={mutation.isPending} /></FormControl><FormMessage /></FormItem>} />
           <FormField control={form.control} name="message" render={({ field }) => <FormItem><FormLabel>Message (Optional)</FormLabel><FormControl><Textarea placeholder="e.g., Thanks for being a great customer!" {...field} disabled={mutation.isPending} /></FormControl><FormMessage /></FormItem>} />

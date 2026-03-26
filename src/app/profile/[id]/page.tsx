@@ -43,7 +43,7 @@ function ProfileSkeleton() {
 function ProfilePageContent({ userId }: { userId: string }) {
   const { t } = useLocalization();
   const { data: user, isLoading } = useUserProfile(userId);
-  const { userProfile: currentUser, firebaseUser } = useAuth();
+  const { userProfile: currentUser, user: authUser } = useAuth();
   
   const canEdit = currentUser?.role === 'admin' || currentUser?.id === userId;
 

@@ -1,4 +1,3 @@
-import type { User as FirebaseUser } from 'firebase/auth';
 
 
 export interface LoginCredentials {
@@ -8,18 +7,17 @@ export interface LoginCredentials {
 }
 
 /**
- * Checks if a Firebase user is authenticated and returns their ID token.
+ * Checks if a user is authenticated and returns their ID token.
  * Throws a consistent error if the user is not authenticated.
  * This should be used at the beginning of any authenticated API service function.
  *
- * @param firebaseUser The Firebase user object, which can be null.
- * @returns A promise that resolves with the user's ID token.
- * @throws An error with the message "User not authenticated" if firebaseUser is null.
+ * @param user The user object, which can be null.
+ * @returns A promise that resolves with the user's token.
+ * @throws An error with the message "User not authenticated" if user is null.
  */
-export const getAuthenticatedToken = async (firebaseUser: FirebaseUser | null): Promise<string> => {
-  if (!firebaseUser) {
+export const getAuthenticatedToken = async (user: { uid: string; getIdToken: (force: boolean) => Promise<string> } | null): Promise<string> => {
+  if (!user) {
     throw new Error("User not authenticated");
   }
-  // Force refresh the token to ensure it's not a cached, revoked token.
-  return await firebaseUser.getIdToken(true);
+  return await user.getIdToken(true);
 };

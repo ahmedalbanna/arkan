@@ -21,10 +21,10 @@ import { UserApiClient } from '@/modules/users/adapters/api-client/UserApiClient
 
 interface UserTableRowProps { user: User; }
 
-export function UserTableRow({ user }: UserTableRowProps) {
+export function UserTableRow({ user: targetUser }: UserTableRowProps) {
   const { t } = useLocalization();
   const queryClient = useQueryClient();
-  const { firebaseUser } = useAuth();
+  const { user: authUser } = useAuth();
   const sendPasswordResetMutation = useSendPasswordReset();
 
   const toggleLockdownMutation = useMutation({
@@ -47,7 +47,7 @@ export function UserTableRow({ user }: UserTableRowProps) {
   });
 
   async function prefetchUser(userId: string) {
-    if (!firebaseUser) return;
+    if (!authUser) return;
     await queryClient.prefetchQuery({
       queryKey: userKeys.profile(userId),
       queryFn: async () => {
@@ -62,39 +62,39 @@ export function UserTableRow({ user }: UserTableRowProps) {
 
   return (
     <TableRow>
-      <TableCell className="font-medium">{user.name}</TableCell>
-      <TableCell>{user.email}</TableCell>
-      <TableCell><Badge variant={user.role === 'admin' ? 'default' : 'secondary'}>{t(`roles.${user.role}`)}</Badge></TableCell>
-      <TableCell>{user.credits}</TableCell>
-      <TableCell>{user.getFormattedDate()}</TableCell>
+      <TableCell className="font-medium">{targetUser.name}</TableCell>
+      <TableCell>{targetUser.email}</TableCell>
+      <TableCell><Badge variant={targetUser.role === 'admin' ? 'default' : 'secondary'}>{t(`roles.${targetUser.role}`)}</Badge></TableCell>
+      <TableCell>{targetUser.credits}</TableCell>
+      <TableCell>{targetUser.getFormattedDate()}</TableCell>
       <TableCell className="text-right flex items-center justify-end gap-1">
         <Button 
           variant="ghost" 
           size="icon" 
-          onClick={() => toggleLockdownMutation.mutate({ userId: user.id, isDisabled: !user.isDisabled })}
+          onClick={() => toggleLockdownMutation.mutate({ userId: targetUser.id, isDisabled: !targetUser.isDisabled })}
           disabled={toggleLockdownMutation.isPending}
-          className={user.isDisabled ? "text-destructive" : "text-muted-foreground"}
-          title={user.isDisabled ? "Restore User" : "Lockdown User"}
+          className={targetUser.isDisabled ? "text-destructive" : "text-muted-foreground"}
+          title={targetUser.isDisabled ? "Restore User" : "Lockdown User"}
         >
           {toggleLockdownMutation.isPending ? (
             <Loader2 className="h-4 w-4 animate-spin" />
-          ) : user.isDisabled ? (
+          ) : targetUser.isDisabled ? (
             <Lock className="h-4 w-4" />
           ) : (
             <Unlock className="h-4 w-4" />
           )}
         </Button>
-        <AdminNotificationDialog user={user} />
-        <GiftCreditsDialog user={user} />
+        <AdminNotificationDialog user={targetUser} />
+        <GiftCreditsDialog user={targetUser} />
         <AlertDialog>
           <AlertDialogTrigger asChild><Button variant="ghost" size="icon"><KeyRound className="h-4 w-4" /><span className="sr-only">Reset Password</span></Button></AlertDialogTrigger>
           <AlertDialogContent>
-            <AlertDialogHeader><AlertDialogTitle>Reset Password</AlertDialogTitle><AlertDialogDescription>An email will be sent to {user.email} with instructions to reset their password. Are you sure?</AlertDialogDescription></AlertDialogHeader>
-            <AlertDialogFooter><AlertDialogCancel>Cancel</AlertDialogCancel><AlertDialogAction onClick={() => sendPasswordResetMutation.mutate(user.id)}>Send Reset Email</AlertDialogAction></AlertDialogFooter>
+            <AlertDialogHeader><AlertDialogTitle>Reset Password</AlertDialogTitle><AlertDialogDescription>An email will be sent to {targetUser.email} with instructions to reset their password. Are you sure?</AlertDialogDescription></AlertDialogHeader>
+            <AlertDialogFooter><AlertDialogCancel>Cancel</AlertDialogCancel><AlertDialogAction onClick={() => sendPasswordResetMutation.mutate(targetUser.id)}>Send Reset Email</AlertDialogAction></AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>
-        <Button asChild variant="ghost" size="icon" onMouseEnter={() => prefetchUser(user.id)} aria-label={`${t('manageUsers.editUserSr')} ${user.name}`}>
-          <Link href={`/admin/manage-users/${user.id}/edit`}><Pencil className="h-4 w-4" /></Link>
+        <Button asChild variant="ghost" size="icon" onMouseEnter={() => prefetchUser(targetUser.id)} aria-label={`${t('manageUsers.editUserSr')} ${targetUser.name}`}>
+          <Link href={`/admin/manage-users/${targetUser.id}/edit`}><Pencil className="h-4 w-4" /></Link>
         </Button>
       </TableCell>
     </TableRow>

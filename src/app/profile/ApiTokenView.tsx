@@ -11,14 +11,14 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { getAuthenticatedToken } from '@/modules/users/domain/utils/authUtils';
 
 export function ApiTokenView() {
-  const { firebaseUser } = useAuth();
+  const { user } = useAuth();
   const [token, setToken] = useState<string | null>(null);
   const [isCopied, setIsCopied] = useState(false);
   const { toast } = useToast();
 
   const handleShowToken = async () => {
-    if (firebaseUser) {
-      const idToken = await getAuthenticatedToken(firebaseUser);
+    if (user) {
+      const idToken = await getAuthenticatedToken(user);
       setToken(idToken);
     }
   };

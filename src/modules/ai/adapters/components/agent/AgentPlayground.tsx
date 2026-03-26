@@ -31,7 +31,7 @@ type PlaygroundFormValues = z.infer<typeof formSchema>;
 
 function AgentPlayground({ agent }: AgentPlaygroundProps) {
   const { responses, setResponse } = useAgentManager();
-  const { firebaseUser, isGuest } = useAuth();
+  const { user, isGuest } = useAuth();
 
   const form = useForm<PlaygroundFormValues>({
     resolver: zodResolver(formSchema),
@@ -62,8 +62,8 @@ function AgentPlayground({ agent }: AgentPlaygroundProps) {
   });
 
   async function onSubmit(values: PlaygroundFormValues) {
-    if (!agent || !firebaseUser) return;
-    const token = await getAuthenticatedToken(firebaseUser);
+    if (!agent || !user) return;
+    const token = await getAuthenticatedToken(user);
     const systemPrompt = `${agent.prompt}\n\n${(agent.guidelines || []).join('\n')}`;
     mutation.mutate({ systemPrompt, userPrompt: values.userPrompt, token });
   }

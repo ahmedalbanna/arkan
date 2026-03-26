@@ -10,7 +10,7 @@ import Link from 'next/link';
 // The 'featuredProjects' prop is no longer used but kept to avoid breaking changes if the page is rendered from different places.
 export default function HomePageContent({ }: { featuredProjects: any[] }) {
     const { t, locale } = useLocalization();
-    const { firebaseUser } = useAuth();
+    const { user } = useAuth();
 
     const features = [
         {
@@ -97,7 +97,7 @@ export default function HomePageContent({ }: { featuredProjects: any[] }) {
                         style={{ animationDelay: '3s' } as React.CSSProperties}
                     >
                         <Button asChild size="lg" className="font-headline text-lg w-full sm:w-auto shadow-lg hover:shadow-primary/30 transition-shadow">
-                            <Link href={firebaseUser ? "/builder" : "/login"}>
+                            <Link href={user ? "/builder" : "/login"}>
                                 {t('home.exploreProjects')} <ArrowRight className="ml-2 rtl:ml-0 rtl:mr-2" />
                             </Link>
                         </Button>

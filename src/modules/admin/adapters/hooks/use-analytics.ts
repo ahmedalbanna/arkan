@@ -7,18 +7,18 @@ import { useAuth } from '@/context/AuthContext';
 import { analyticsKeys } from '@/infrastructure/api/query-keys';
 
 export function useUserAnalytics() {
-  const { firebaseUser } = useAuth();
+  const { user } = useAuth();
 
   return useQuery<UserDashboardStats, Error>({
-    queryKey: analyticsKeys.userStats(firebaseUser?.uid || ''),
+    queryKey: analyticsKeys.userStats(user?.uid || ''),
     queryFn: async () => {
-      if (!firebaseUser) throw new Error('User not authenticated');
+      if (!user) throw new Error('User not authenticated');
       const client = container.resolve(AnalyticsApiClient);
-      const result = await client.fetchUserStats(firebaseUser.uid);
+      const result = await client.fetchUserStats(user.uid);
       if (result.isFailure) throw result.error;
       return result.getValue();
     },
-    enabled: !!firebaseUser,
+    enabled: !!user,
   });
 }
 

@@ -8,12 +8,12 @@ import { useAuth } from '@/context/AuthContext';
 import { useToast } from '@/hooks/util/use-toast';
 
 export function useTemplates(type: 'docx' | 'pptx' | 'report') {
-  const { firebaseUser } = useAuth();
+  const { user } = useAuth();
 
   return useQuery({
     queryKey: templateKeys.lists(type),
     queryFn: async () => {
-      if (!firebaseUser) return [];
+      if (!user) return [];
       const client = container.resolve(TemplateApiClient);
       let result;
       if (type === 'docx') result = await client.fetchDocxTemplatesApi();
@@ -23,17 +23,17 @@ export function useTemplates(type: 'docx' | 'pptx' | 'report') {
       if (result.isFailure) throw result.error;
       return result.getValue();
     },
-    enabled: !!firebaseUser,
+    enabled: !!user,
   });
 }
 
 export function useTemplate(type: 'docx' | 'pptx' | 'report', id: string) {
-  const { firebaseUser } = useAuth();
+  const { user } = useAuth();
 
   return useQuery({
     queryKey: templateKeys.detail(type, id),
     queryFn: async () => {
-      if (!firebaseUser || !id) return null;
+      if (!user || !id) return null;
       const client = container.resolve(TemplateApiClient);
       let result;
       if (type === 'docx') result = await client.fetchDocxTemplateByIdApi(id);
@@ -43,7 +43,7 @@ export function useTemplate(type: 'docx' | 'pptx' | 'report', id: string) {
       if (result.isFailure) throw result.error;
       return result.getValue();
     },
-    enabled: !!firebaseUser && !!id,
+    enabled: !!user && !!id,
   });
 }
 

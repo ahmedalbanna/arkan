@@ -29,7 +29,7 @@ const { runAuthenticatedResultCall } = jest.requireMock('@/infrastructure/api/au
 };
 
 describe('use-users hooks', () => {
-  const firebaseUser = { uid: 'user-1' } as { uid: string };
+  const user = { uid: 'user-1' } as { uid: string };
 
   const createWrapper = (queryClient: QueryClient) => {
     const Wrapper = ({ children }: { children: React.ReactNode }) => (
@@ -42,7 +42,7 @@ describe('use-users hooks', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    useAuth.mockReturnValue({ firebaseUser });
+    useAuth.mockReturnValue({ user });
   });
 
   it('loads a user profile and normalizes it into a User entity', async () => {

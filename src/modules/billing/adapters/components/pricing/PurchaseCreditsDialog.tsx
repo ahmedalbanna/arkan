@@ -196,7 +196,7 @@ type FileFormValues = z.infer<typeof fileSchema>;
 
 export function PurchaseCreditsDialog({ trigger }: { trigger: React.ReactNode }) {
   const { t } = useLocalization();
-  const { userProfile: firebaseUser } = useAuth();
+  const { userProfile: user } = useAuth();
   const { toast } = useToast();
   const [isOpen, setIsOpen] = useState(false);
   const [step, setStep] = useState(1);
@@ -244,17 +244,17 @@ export function PurchaseCreditsDialog({ trigger }: { trigger: React.ReactNode })
   }
 
   async function onSubmit(data: FileFormValues) {
-    if (!firebaseUser) return;
+    if (!user) return;
     
     const formData = new FormData();
     formData.append('file', data.file);
-    formData.append('userId', firebaseUser.id);
+    formData.append('userId', user.id);
     formData.append('credits', credits.toString());
     formData.append('price', price.toFixed(2));
     formData.append('planId', `custom-${credits}`);
     formData.append('planName', `${credits} Credits`);
-    formData.append('userName', firebaseUser.name || 'N/A');
-    formData.append('userEmail', firebaseUser.email || 'N/A');
+    formData.append('userName', user.name || 'N/A');
+    formData.append('userEmail', user.email || 'N/A');
 
     mutation.mutate(formData);
   }
@@ -368,13 +368,13 @@ export function PurchaseCreditsDialog({ trigger }: { trigger: React.ReactNode })
                     </CardHeader>
                     <CardContent>
                       <div className="flex items-center justify-between p-3 bg-muted rounded-lg">
-                        <span className="text-sm font-mono">{firebaseUser?.id || t('submitPayment.pleaseLogin')}</span>
+                        <span className="text-sm font-mono">{user?.id || t('submitPayment.pleaseLogin')}</span>
                         <Button 
                           variant="ghost" 
                           size="sm" 
                           onClick={() => {
-                            if (firebaseUser?.id) {
-                              navigator.clipboard.writeText(firebaseUser.id);
+                            if (user?.id) {
+                              navigator.clipboard.writeText(user.id);
                               toast({ title: t('common.copied') });
                             }
                           }}

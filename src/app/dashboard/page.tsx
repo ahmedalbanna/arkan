@@ -46,7 +46,7 @@ function DashboardSkeleton() {
 
 export default function UserDashboardPage() {
     const { t } = useLocalization();
-    const { userProfile, firebaseUser } = useAuth();
+    const { userProfile, user } = useAuth();
     const { data: stats, isLoading, isError, error } = useUserStats();
     const router = useRouter();
     const [isCreatingChat, setIsCreatingChat] = useState(false);

@@ -9,18 +9,18 @@ import { AppSettings } from '@/modules/admin/domain/entities/Settings';
 import { settingsKeys } from '@/infrastructure/api/query-keys';
 
 export function useSettings() {
-  const { firebaseUser } = useAuth();
+  const { user } = useAuth();
 
   return useQuery({
     queryKey: settingsKeys.all(),
     queryFn: async () => {
-      if (!firebaseUser) return null;
+      if (!user) return null;
       const client = container.resolve(SettingsApiClient);
       const result = await client.fetchSettings();
       if (result.isFailure) throw result.error;
       return result.getValue();
     },
-    enabled: !!firebaseUser,
+    enabled: !!user,
   });
 }
 

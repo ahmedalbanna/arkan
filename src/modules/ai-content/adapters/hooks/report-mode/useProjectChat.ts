@@ -8,7 +8,7 @@ import { ReportApiClient, ChatMessage } from '@/modules/ai-content/adapters/api-
 export interface Message extends ChatMessage {}
 
 export function useProjectChat() {
-  const { firebaseUser } = useAuth();
+  const { user } = useAuth();
   const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 

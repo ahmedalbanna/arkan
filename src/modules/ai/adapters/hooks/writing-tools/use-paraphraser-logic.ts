@@ -24,7 +24,7 @@ export function useParaphraserLogic() {
   const { t } = useLocalization();
   const [isCopied, setIsCopied] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
-  const { firebaseUser, refetchUser } = useAuth();
+  const { user, refetchUser } = useAuth();
   const { toast } = useToast();
 
   const paraphraseMutation = useWritingTool('/api/writing-tools/paraphrase');
@@ -38,7 +38,7 @@ export function useParaphraserLogic() {
     const file = acceptedFiles[0];
     if (!file) return;
 
-    if (!firebaseUser) {
+    if (!user) {
       toast({ title: t('writingTools.paraphraser.toastAuthError'), description: t('writingTools.paraphraser.toastAuthErrorDesc'), variant: "destructive" });
       return;
     }
@@ -60,7 +60,7 @@ export function useParaphraserLogic() {
     } finally {
       setIsUploading(false);
     }
-  }, [firebaseUser, form, refetchUser, toast, t]);
+  }, [user, form, refetchUser, toast, t]);
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,

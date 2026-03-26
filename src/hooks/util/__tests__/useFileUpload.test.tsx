@@ -19,7 +19,7 @@ const { runAuthenticatedResultCall } = jest.requireMock('@/infrastructure/api/au
 const { useFileUpload } = require('../useFileUpload') as typeof import('../useFileUpload');
 
 describe('useFileUpload', () => {
-  const firebaseUser = { uid: 'upload-user-1' } as { uid: string };
+  const user = { uid: 'upload-user-1' } as { uid: string };
   const toast = jest.fn();
   const refetchUser = jest.fn();
   const setValue = jest.fn();
@@ -27,7 +27,7 @@ describe('useFileUpload', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     capturedOnDrop = undefined;
-    useAuth.mockReturnValue({ firebaseUser, refetchUser });
+    useAuth.mockReturnValue({ user, refetchUser });
     useToast.mockReturnValue({ toast });
   });
 

@@ -49,14 +49,14 @@ const useAgentUIState = create<AgentState>((set) => ({
 }));
 
 export function useAgentManager() {
-  const { firebaseUser } = useAuth();
+  const { user } = useAuth();
   const queryClient = useQueryClient();
   const { selectedAgentId, selectAgent, ...uiState } = useAgentUIState();
 
   const { data, isLoading, error, refetch } = useQuery({
     queryKey: agentKeys.all(),
     queryFn: async () => {
-      if (!firebaseUser) return [];
+      if (!user) return [];
       const client = container.resolve(AgentApiClient);
       const result = await client.fetchAgentsApi();
       if (result.isFailure) throw result.error;
@@ -70,7 +70,7 @@ export function useAgentManager() {
       const cacheService = container.resolve<ICacheService>(ICacheServiceToken);
       return cacheService.get<AgentProperties[]>(AGENTS_CACHE_KEY);
     },
-    enabled: Boolean(firebaseUser),
+    enabled: Boolean(user),
     staleTime: 1000 * 60 * 5,
   });
 

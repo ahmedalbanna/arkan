@@ -33,12 +33,12 @@ const navLinks: NavLink[] = [
 function NavLinks() {
   const pathname = usePathname();
   const { t } = useLocalization();
-  const { firebaseUser } = useAuth();
+  const { user } = useAuth();
 
   return (
     <nav className="hidden md:flex flex-wrap items-center justify-center gap-1 mx-auto">
       {navLinks
-        .filter(link => link.auth === 'any' || (link.auth && !!firebaseUser))
+        .filter(link => link.auth === 'any' || (link.auth && !!user))
         .map((link) => (
           <Button
             key={link.href}
@@ -92,7 +92,7 @@ function GuestActions() {
 
 export function Header() {
   const { t } = useLocalization();
-  const { firebaseUser, isLoading } = useAuth();
+  const { user, isLoading } = useAuth();
   const [isClient, setIsClient] = useState(false);
 
   useEffect(() => {
@@ -118,7 +118,7 @@ export function Header() {
                 <Skeleton className="h-8 w-20" />
                 <Skeleton className="h-8 w-8 rounded-full" />
               </div>
-            ) : firebaseUser ? (
+            ) : user ? (
               <AuthActions />
             ) : (
               <GuestActions />

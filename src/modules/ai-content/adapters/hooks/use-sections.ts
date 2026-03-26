@@ -12,18 +12,18 @@ const sectionKeys = {
 };
 
 export function useSections() {
-  const { firebaseUser } = useAuth();
+  const { user } = useAuth();
 
   return useQuery({
     queryKey: sectionKeys.all,
     queryFn: async () => {
-      if (!firebaseUser) return [];
+      if (!user) return [];
       const client = container.resolve(SectionApiClient);
       const result = await client.fetchSections();
       if (result.isFailure) throw result.error;
       return result.getValue();
     },
-    enabled: !!firebaseUser,
+    enabled: !!user,
   });
 }
 

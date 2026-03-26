@@ -83,7 +83,7 @@ export default function GenerationLogViewer() {
   const debouncedAgentId = useDebounce(agentIdFilter, 500);
   const debouncedUserId = useDebounce(userIdFilter, 500);
   const { t } = useLocalization();
-  const { firebaseUser, isLoading: authLoading } = useAuth();
+  const { user, isLoading: authLoading } = useAuth();
 
   const { data, error, fetchNextPage, hasNextPage, isFetching, isFetchingNextPage, status } = useInfiniteQuery({
     queryKey: generationLogKeys.list({ agentId: debouncedAgentId, userId: debouncedUserId }),
@@ -99,7 +99,7 @@ export default function GenerationLogViewer() {
     },
     initialPageParam: undefined as string | undefined,
     getNextPageParam: (lastPage: any) => (lastPage.hasNextPage ? lastPage.lastVisibleId ?? undefined : undefined),
-    enabled: Boolean(firebaseUser),
+    enabled: Boolean(user),
     staleTime: 1000 * 60,
   });
 

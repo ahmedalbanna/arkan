@@ -34,12 +34,12 @@ function formatTransactionsToMarkdown(transactions: TransactionProperties[], dat
 export function FinancialReportExporter() {
   const [dateRange, setDateRange] = useState<DateRange | undefined>();
   const [isLoading, setIsLoading] = useState(false);
-  const { firebaseUser } = useAuth();
+  const { user } = useAuth();
   const { toast } = useToast();
   const { t } = useLocalization();
 
   async function handleExport() {
-    if (!dateRange?.from || !dateRange?.to || !firebaseUser) {
+    if (!dateRange?.from || !dateRange?.to || !user) {
       toast({ title: t('adminFinancialReport.missingInfoError'), description: t('adminFinancialReport.missingInfoDesc'), variant: 'destructive' });
       return;
     }

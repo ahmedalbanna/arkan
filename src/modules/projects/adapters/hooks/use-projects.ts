@@ -11,13 +11,13 @@ import { Project, type ProjectProperties } from '@/modules/projects/domain/entit
 import { container } from '@/infrastructure/di/container';
 
 export function useProjects() {
-  const { firebaseUser } = useAuth();
-  const projectScope = firebaseUser?.uid ?? 'anonymous';
+  const { user } = useAuth();
+  const projectScope = user?.uid ?? 'anonymous';
 
   const { data, ...rest } = useQuery<Project[]>({
     queryKey: projectKeys.lists(projectScope),
     queryFn: async () => {
-      if (!firebaseUser) {
+      if (!user) {
         return [];
       }
 
@@ -42,7 +42,7 @@ export function useProjects() {
         return localProjects.map((project: ProjectProperties) => new Project(project));
       }
     },
-    enabled: Boolean(firebaseUser),
+    enabled: Boolean(user),
   });
 
   return { projects: data, projectScope, ...rest };
@@ -51,12 +51,12 @@ export function useProjects() {
 export function useSaveProject() {
   const queryClient = useQueryClient();
   const { setHasUnsavedChanges } = useBuilderStore();
-  const { firebaseUser } = useAuth();
-  const projectScope = firebaseUser?.uid ?? 'anonymous';
+  const { user } = useAuth();
+  const projectScope = user?.uid ?? 'anonymous';
 
   const saveProjectMutation = useMutation({
     mutationFn: async (projectData: ProjectProperties) => {
-      if (!navigator.onLine || !firebaseUser) {
+      if (!navigator.onLine || !user) {
         toast({
           title: 'Offline',
           description: 'You are offline. Please connect to the internet to save the project.',
@@ -90,15 +90,15 @@ export function useSaveProject() {
 
 export function useDeleteProject() {
   const queryClient = useQueryClient();
-  const { firebaseUser } = useAuth();
-  const projectScope = firebaseUser?.uid ?? 'anonymous';
+  const { user } = useAuth();
+  const projectScope = user?.uid ?? 'anonymous';
 
   return useMutation({
     mutationFn: async (projectId: string) => {
       const localService = container.resolve(LocalProjectService);
       const localDelete = localService.deleteProject(projectId);
 
-      if (navigator.onLine && firebaseUser) {
+      if (navigator.onLine && user) {
         try {
           const client = container.resolve(ProjectApiClient);
           const result = await client.deleteProject(projectId);

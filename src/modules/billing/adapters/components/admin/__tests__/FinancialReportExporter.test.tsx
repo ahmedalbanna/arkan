@@ -18,7 +18,7 @@ describe('FinancialReportExporter', () => {
   const toast = jest.fn();
   beforeEach(() => {
     jest.clearAllMocks();
-    useAuth.mockReturnValue({ firebaseUser: { uid: 'admin-1' } });
+    useAuth.mockReturnValue({ user: { uid: 'admin-1' } });
     useToast.mockReturnValue({ toast });
     useLocalization.mockReturnValue({ t: (key: string) => key });
   });

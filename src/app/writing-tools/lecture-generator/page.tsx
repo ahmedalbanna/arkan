@@ -23,7 +23,7 @@ export default function LectureGeneratorPage() {
   const [formData, setFormData] = useState<Omit<CreateLectureUnitInput, 'subTopics'>>({ lectureTopic: '', professorNotes: '', sessionDuration: 90, numActivities: 3, targetAudience: 'University-level students' });
   const [subTopicsStr, setSubTopicsStr] = useState('');
   const { toast } = useToast();
-  const { firebaseUser: user } = useAuth();
+  const { user: user } = useAuth();
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;

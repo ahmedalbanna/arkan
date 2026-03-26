@@ -8,18 +8,18 @@ import { useToast } from '@/hooks/util/use-toast';
 import { featureKeys } from '@/infrastructure/api/query-keys';
 
 export function useFeatures() {
-  const { firebaseUser } = useAuth();
+  const { user } = useAuth();
 
   return useQuery({
     queryKey: featureKeys.all(),
     queryFn: async () => {
-      if (!firebaseUser) return [];
+      if (!user) return [];
       const client = container.resolve(FeatureApiClient);
       const result = await client.fetchFeaturesApi();
       if (result.isFailure) throw result.error;
       return result.getValue();
     },
-    enabled: !!firebaseUser,
+    enabled: !!user,
   });
 }
 

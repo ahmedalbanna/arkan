@@ -22,7 +22,7 @@ type FactCheckFormValues = z.infer<typeof factCheckSchema>;
 export function useFactCheckerLogic() {
   const { t } = useLocalization();
   const [isUploading, setIsUploading] = useState(false);
-  const { firebaseUser, refetchUser } = useAuth();
+  const { user, refetchUser } = useAuth();
   const { toast } = useToast();
 
   const mutation = useWritingTool('/api/writing-tools/fact-checker', {
@@ -40,7 +40,7 @@ export function useFactCheckerLogic() {
     const file = acceptedFiles[0];
     if (!file) return;
 
-    if (!firebaseUser) {
+    if (!user) {
       toast({ title: t('writingTools.aiDetector.toastAuthError'), variant: "destructive" });
       return;
     }
@@ -62,7 +62,7 @@ export function useFactCheckerLogic() {
     } finally {
       setIsUploading(false);
     }
-  }, [firebaseUser, form, refetchUser, toast, t]);
+  }, [user, form, refetchUser, toast, t]);
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,

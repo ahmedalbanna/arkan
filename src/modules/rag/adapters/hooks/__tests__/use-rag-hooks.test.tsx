@@ -10,11 +10,11 @@ const { useRagRetrieval } = require('../use-rag-retrieval') as typeof import('..
 const { useRagIndexing } = require('../use-rag-indexing') as typeof import('../use-rag-indexing');
 
 describe('RAG hooks', () => {
-  const firebaseUser = { uid: 'rag-user-1' } as { uid: string };
+  const user = { uid: 'rag-user-1' } as { uid: string };
 
   beforeEach(() => {
     jest.clearAllMocks();
-    useAuth.mockReturnValue({ firebaseUser });
+    useAuth.mockReturnValue({ user });
   });
 
   it('retrieves context through apiService and stores sources', async () => {

@@ -10,7 +10,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { ProjectProperties } from '@/modules/projects/domain/entities/Project';
 
 export function useBuilderPageLogic(initialProject?: ProjectProperties | null) {
-  const { userProfile, firebaseUser, refetchUser } = useAuth();
+  const { userProfile, user, refetchUser } = useAuth();
   const project = useBuilderStore(state => state.project);
   const updateProject = useBuilderStore(state => state.updateProject);
   const isStoreInitialized = useBuilderStore(state => state.isStoreInitialized);
@@ -34,19 +34,19 @@ export function useBuilderPageLogic(initialProject?: ProjectProperties | null) {
 
   const onboardingMutation = useMutation({
     mutationFn: async () => {
-      if (!firebaseUser) {
+      if (!user) {
         throw new Error('User not authenticated');
       }
 
       return apiService<{ hasCompletedOnboarding: boolean }, unknown>({
-        endpoint: `/api/users/${firebaseUser.uid}`,
+        endpoint: `/api/users/${user.uid}`,
         method: 'PUT',
         data: { hasCompletedOnboarding: true },
       });
     },
     onSuccess: () => {
-      if (firebaseUser?.uid) {
-        queryClient.invalidateQueries({ queryKey: userKeys.profile(firebaseUser.uid) });
+      if (user?.uid) {
+        queryClient.invalidateQueries({ queryKey: userKeys.profile(user.uid) });
       }
       refetchUser();
     },

@@ -1,6 +1,5 @@
 
 import { FirebaseError as AdminFirebaseError } from 'firebase-admin/app';
-import { FirebaseError as ClientFirebaseError } from 'firebase/app';
 
 /**
  * Custom error class for wrapping Firebase errors to be identified easily.
@@ -19,11 +18,11 @@ export class CustomFirebaseError extends Error {
 }
 
 /**
- * Checks if an error is a Firebase Admin or Client SDK error.
+ * Checks if an error is a Firebase Admin error.
  * @param error The error to check.
  * @returns True if the error has a 'code' property, which is characteristic of Firebase errors.
  */
-function isFirebaseError(error: any): error is AdminFirebaseError | ClientFirebaseError {
+function isFirebaseError(error: any): error is AdminFirebaseError {
   return error && typeof error.code === 'string' && typeof error.message === 'string';
 }
 

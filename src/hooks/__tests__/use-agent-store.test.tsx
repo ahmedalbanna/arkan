@@ -13,7 +13,7 @@ const { getFromCache, saveToCache } = jest.requireMock('@/lib/utils/cache') as {
 const { useAgentManager } = require('../use-agent-store') as typeof import('../use-agent-store');
 
 describe('useAgentManager', () => {
-  const firebaseUser = { uid: 'agent-user-1' } as { uid: string };
+  const user = { uid: 'agent-user-1' } as { uid: string };
 
   const createWrapper = (queryClient: QueryClient) => {
     const Wrapper = ({ children }: { children: React.ReactNode }) => (
@@ -25,7 +25,7 @@ describe('useAgentManager', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    useAuth.mockReturnValue({ firebaseUser });
+    useAuth.mockReturnValue({ user });
     getFromCache.mockReturnValue(undefined);
   });
 

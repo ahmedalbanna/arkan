@@ -58,7 +58,7 @@ export default function AnalystAgent() {
   const { t } = useLocalization();
   const { project, updateProject } = useBuilderStore();
   const externalContext = project?.externalContext || [];
-  const { firebaseUser, refetchUser, isGuest } = useAuth();
+  const { user, refetchUser, isGuest } = useAuth();
   const { resolvedTheme } = useTheme();
   const [markdownResult, setMarkdownResult] = useState<string | null>(null);
 
@@ -96,7 +96,7 @@ export default function AnalystAgent() {
       toast({ title: t('builder.files.toasts.contextRequired'), description: t('builder.files.toasts.contextRequiredDesc'), variant: 'destructive' });
       return;
     }
-    if (!firebaseUser) return;
+    if (!user) return;
     setMarkdownResult(null);
     analysisMutation.mutate({ prompt: data.prompt, contextFiles: [...externalContext] });
   }
@@ -109,7 +109,7 @@ export default function AnalystAgent() {
   }
 
   const isProcessing = analysisMutation.isPending;
-  const canAnalyze = !isGuest && !isProcessing && (firebaseUser?.uid ? project?.meta?.author === firebaseUser.uid : false);
+  const canAnalyze = !isGuest && !isProcessing && (user?.uid ? project?.meta?.author === user.uid : false);
 
   return (
     <Card className="h-full flex flex-col">

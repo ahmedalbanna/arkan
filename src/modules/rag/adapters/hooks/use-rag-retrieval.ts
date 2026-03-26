@@ -6,7 +6,7 @@ import { RagApiClient, RetrieveContextResponse } from '@/modules/rag/adapters/ap
 import { useState } from 'react';
 
 export function useRagRetrieval() {
-  const { firebaseUser } = useAuth();
+  const { user } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
 
   const retrieveContext = async (

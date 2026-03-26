@@ -20,7 +20,7 @@ interface ApiTesterProps {
 }
 
 export function ApiTester({ endpoint }: ApiTesterProps) {
-  const { firebaseUser } = useAuth();
+  const { user } = useAuth();
   const { toast } = useToast();
   const { resolvedTheme } = useTheme();
   const [body, setBody] = useState(endpoint.requestBody ? JSON.stringify(endpoint.requestBody, null, 2) : '');
@@ -34,7 +34,7 @@ export function ApiTester({ endpoint }: ApiTesterProps) {
     setResponse(null);
 
     try {
-      if (endpoint.auth !== 'public' && !firebaseUser) {
+      if (endpoint.auth !== 'public' && !user) {
         throw new Error('Authentication required for this endpoint.');
       }
 

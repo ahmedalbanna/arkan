@@ -20,7 +20,7 @@ type BiasCheckFormValues = z.infer<typeof biasCheckSchema>;
 
 export function useBiasCheckerLogic() {
   const [isUploading, setIsUploading] = useState(false);
-  const { firebaseUser, refetchUser } = useAuth();
+  const { user, refetchUser } = useAuth();
   const { toast } = useToast();
 
   const mutation = useWritingTool('/api/writing-tools/bias-checker', {
@@ -38,7 +38,7 @@ export function useBiasCheckerLogic() {
     const file = acceptedFiles[0];
     if (!file) return;
 
-    if (!firebaseUser) {
+    if (!user) {
       toast({ title: 'Authentication Error', description: 'You must be logged in to process files.', variant: "destructive" });
       return;
     }
@@ -60,7 +60,7 @@ export function useBiasCheckerLogic() {
     } finally {
       setIsUploading(false);
     }
-  }, [firebaseUser, form, refetchUser, toast]);
+  }, [user, form, refetchUser, toast]);
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,

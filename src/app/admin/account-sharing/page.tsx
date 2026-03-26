@@ -9,7 +9,7 @@ import { ShieldCheck, Loader2 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 
 export default function AccountSharingDashboard() {
-    const { firebaseUser } = useAuth();
+    const { user } = useAuth();
     
     const { data, isLoading } = useQuery({
         queryKey: ['admin-stats'],
@@ -22,7 +22,7 @@ export default function AccountSharingDashboard() {
             if (result.isFailure) throw result.error;
             return result.getValue();
         },
-        enabled: !!firebaseUser
+        enabled: !!user
     });
 
     if (isLoading) {

@@ -50,7 +50,7 @@ const useUpdateReportTemplate = () => useSaveTemplate('report');
 const useDeletePresentationTemplate = () => useDeleteTemplate('pptx');
 
 describe('use-templates mutations', () => {
-  const firebaseUser = { uid: 'admin-1' } as { uid: string };
+  const user = { uid: 'admin-1' } as { uid: string };
 
   const createWrapper = (queryClient: QueryClient) => {
     const Wrapper = ({ children }: { children: React.ReactNode }) => (
@@ -63,7 +63,7 @@ describe('use-templates mutations', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    useAuth.mockReturnValue({ firebaseUser });
+    useAuth.mockReturnValue({ user });
   });
 
   it('invalidates report template queries after updating a report template', async () => {

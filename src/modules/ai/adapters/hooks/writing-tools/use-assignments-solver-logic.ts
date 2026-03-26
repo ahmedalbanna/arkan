@@ -21,7 +21,7 @@ export function useAssignmentsSolverLogic() {
   const { t } = useLocalization();
   const [solvedAssignments, setSolvedAssignments] = useState('');
   const [isCopied, setIsCopied] = useState(false);
-  const { firebaseUser, refetchUser } = useAuth();
+  const { user, refetchUser } = useAuth();
   const [isUploading, setIsUploading] = useState(false);
   const { toast } = useToast();
 
@@ -44,7 +44,7 @@ export function useAssignmentsSolverLogic() {
     const file = acceptedFiles[0];
     if (!file) return;
 
-    if (!firebaseUser) {
+    if (!user) {
       toast({ title: "Authentication Error", description: "You must be logged in to process files.", variant: "destructive" });
       return;
     }
@@ -66,7 +66,7 @@ export function useAssignmentsSolverLogic() {
     } finally {
       setIsUploading(false);
     }
-  }, [firebaseUser, form, refetchUser, toast, t]);
+  }, [user, form, refetchUser, toast, t]);
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,

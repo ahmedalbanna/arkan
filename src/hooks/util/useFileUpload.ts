@@ -33,14 +33,14 @@ export function useFileUpload(
   } = options;
 
   const [isUploading, setIsUploading] = useState(false);
-  const { firebaseUser, refetchUser } = useAuth();
+  const { user, refetchUser } = useAuth();
   const { toast } = useToast();
 
   const onDrop = useCallback(async (acceptedFiles: File[]) => {
     const file = acceptedFiles[0];
     if (!file) return;
 
-    if (!firebaseUser) {
+    if (!user) {
       const errorMsg = 'You must be logged in to process files.';
       toast({
         title: 'Authentication Error',
@@ -79,7 +79,7 @@ export function useFileUpload(
     } finally {
       setIsUploading(false);
     }
-  }, [fieldName, firebaseUser, onError, onSuccess, refetchUser, setValue, toast]);
+  }, [fieldName, user, onError, onSuccess, refetchUser, setValue, toast]);
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,

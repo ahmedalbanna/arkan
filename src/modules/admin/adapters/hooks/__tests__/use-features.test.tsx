@@ -11,7 +11,7 @@ const { useAuth } = jest.requireMock('@/context/AuthContext') as { useAuth: jest
 const { runAuthenticatedResultCall } = jest.requireMock('@/infrastructure/api/authenticated-client-call') as { runAuthenticatedResultCall: jest.Mock };
 
 describe('use-features hooks', () => {
-  const firebaseUser = { uid: 'admin-1' } as { uid: string };
+  const user = { uid: 'admin-1' } as { uid: string };
 
   const createWrapper = (queryClient: QueryClient) => {
     const Wrapper = ({ children }: { children: React.ReactNode }) => (
@@ -23,7 +23,7 @@ describe('use-features hooks', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    useAuth.mockReturnValue({ firebaseUser });
+    useAuth.mockReturnValue({ user });
   });
 
   it('loads features through the authenticated helper', async () => {

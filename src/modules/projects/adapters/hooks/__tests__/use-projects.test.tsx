@@ -79,7 +79,7 @@ const { useDeleteProject, useProjects } = require('../use-projects') as {
 };
 
 describe('use-projects hooks', () => {
-  const firebaseUser = { uid: 'project-user-1' } as { uid: string };
+  const user = { uid: 'project-user-1' } as { uid: string };
   const localService = {
     saveProject: jest.fn(),
     getAllProjects: jest.fn(),
@@ -97,7 +97,7 @@ describe('use-projects hooks', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    useAuth.mockReturnValue({ firebaseUser });
+    useAuth.mockReturnValue({ user });
     container.resolve.mockImplementation((token: unknown) => {
       if (token === LocalProjectService) {
         return localService;

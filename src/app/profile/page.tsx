@@ -42,7 +42,7 @@ function ProfileSkeleton() {
 
 export default function ProfilePage() {
     const { t } = useLocalization();
-    const { userProfile, firebaseUser, isLoading, isGuest } = useAuth();
+    const { userProfile, user, isLoading, isGuest } = useAuth();
 
     if (isLoading) {
         return (
@@ -56,7 +56,7 @@ export default function ProfilePage() {
         return <GuestProfilePage />;
     }
 
-    if (!userProfile || !firebaseUser) {
+    if (!userProfile || !user) {
         notFound();
     }
 
