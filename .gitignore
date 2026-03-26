@@ -56,7 +56,6 @@ acli.exe
 /.firebase/
 /.idx/
 /.vscode/
-/public/
 package-lock.json
 /qdrant_storage/*
 .cursor-server
