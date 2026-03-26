@@ -6,7 +6,7 @@ import { useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { z } from 'zod';
 
-import { PptxStyleOptionsSchema } from '@/ai/schemas/template-schemas';
+import { PptxStyleOptionsSchema } from '@/modules/ai/domain/schemas/template-schemas';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -17,7 +17,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/util/use-toast';
 import { convertMarkdownToPdf, convertMarkdownToPptx } from '@/modules/templates/infrastructure/exporters/pptx/markdown-to-pptx-converter';
 import { templates as pptxTemplates } from '@/modules/templates/infrastructure/PptxStyles';
-import { type PptxStyleOptions } from '@/ai/schemas/template-schemas';
+import { type PptxStyleOptions } from '@/modules/ai/domain/schemas/template-schemas';
 
 const markdownToPptxSchema = z.object({
   markdown: z.string().min(10, 'Markdown content must be at least 10 characters long.'),

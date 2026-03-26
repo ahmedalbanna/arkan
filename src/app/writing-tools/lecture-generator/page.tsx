@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { type CreateLectureUnitOutput, type CreateLectureUnitInput } from '@/ai/schemas/lecture-generator';
+import { type CreateLectureUnitOutput, type CreateLectureUnitInput } from '@/modules/ai/domain/schemas/lecture-generator';
 import { useToast } from '@/hooks';
 import { useAuth } from '@/context/AuthContext';
 import ReactMarkdown from 'react-markdown';

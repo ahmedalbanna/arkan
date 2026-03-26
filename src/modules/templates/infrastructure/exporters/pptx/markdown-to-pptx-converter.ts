@@ -15,7 +15,7 @@ import { DEFAULT_CODE_FONT, DEFAULT_FONT, layout } from '@/modules/templates/inf
 import { createSlidesWithContent, type FontOptions } from '@/modules/templates/infrastructure/exporters/pptx/slide-layout-engine';
 import { processPlantUml } from '@/modules/ai/domain/utils/plantuml-utils';
 import { convertMarkdownToPdf } from '@/modules/ai-content/infrastructure/utils/pdf-utils'; // Import the moved function
-import { PptxStyleOptions } from '@/ai/schemas';
+import { PptxStyleOptions } from '@/modules/ai/domain/schemas';
 
 export interface PptxConversionOptions {
     styles?: PptxStyleOptions;

@@ -13,7 +13,7 @@ import { arrayBufferToBase64 } from '@/infrastructure/utils/arrayBufferToBase64'
 import { getProxiedImageBuffer } from '../../utils/ProxiedImage';
 import { DEFAULT_CODE_FONT, layout } from './constants';
 import type { FontOptions } from './slide-layout-engine';
-import { PptxStyleOptions } from '@/ai/schemas';
+import { PptxStyleOptions } from '@/modules/ai/domain/schemas';
 
 /**
  * Transforms inline markdown content (strong, emphasis, links, etc.) into an array of PptxGenJS TextProps runs.

@@ -2,7 +2,7 @@
 'use server';
 
 import { z } from 'zod';
-import { generateImage } from '@/ai/flows/generate-image';
+import { generateImage } from '@/modules/ai/infrastructure/flows/media/generate-image';
 import { withAuth, handleApiError, createApiResponse } from '@/infrastructure/api/api-utils';
 import { container } from '@/infrastructure/di/container';
 import { AiController } from '@/modules/ai/adapters/controllers/AiController';

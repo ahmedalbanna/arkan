@@ -1,7 +1,7 @@
 
 'use client';
 
-import { DiagramType, DiagramTypeSchema, ToneSchema } from '@/ai/schemas';
+import { DiagramType, DiagramTypeSchema, ToneSchema } from '@/modules/ai/domain/schemas';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';

@@ -2,7 +2,7 @@
 'use client';
 
 import { type PptxTemplateProperties } from '@/modules/templates/domain/entities/PptxTemplate';
-import type { PptxStyleOptions } from '@/ai/schemas/template-schemas';
+import type { PptxStyleOptions } from '@/modules/ai/domain/schemas/template-schemas';
 
 export type PptxTemplateKey = 'modern' | 'dark' | 'professional';
 

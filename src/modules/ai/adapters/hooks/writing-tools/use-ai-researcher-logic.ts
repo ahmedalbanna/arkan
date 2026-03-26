@@ -5,7 +5,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useWritingTool, useProjects, useToast } from '@/hooks';
-import type { AIResearcherOutput, LiteratureReviewOutput, QuestionAnsweringOutput, FactRetrievalOutput } from '@/ai/schemas';
+import type { AIResearcherOutput, LiteratureReviewOutput, QuestionAnsweringOutput, FactRetrievalOutput } from '@/modules/ai/domain/schemas';
 import { useLocalization } from '@/context/LocalizationContext';
 import { useMemo, useRef, useState, useEffect } from 'react';
 import { useBuilderStore } from '@/modules/projects/adapters/state/useBuilderStore';

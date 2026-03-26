@@ -1,0 +1,74 @@
+
+'use server';
+
+/**
+ * @fileOverview An AI agent for making text sound more human-like.
+ */
+
+import { ai } from '@/modules/ai/infrastructure/services/Genkit';
+import { HumanizeTextInputSchema, HumanizeTextOutputSchema, type HumanizeTextInput, type HumanizeTextOutput } from '@/modules/ai/domain/schemas';
+
+const humanizeTextPrompt = ai.definePrompt({
+  name: 'humanizeTextPrompt',
+  input: { schema: HumanizeTextInputSchema },
+  // No output schema - model returns plain text
+  model: 'ollama/gemma:2b',
+  config: {
+    temperature: 0.95, // High temperature for maximum creativity and variation
+  },
+
+  prompt: `You are a world-class editor and ghostwriter, a true linguistic chameleon whose specialty is subtlety and authenticity. Your expertise is in transforming robotic, AI-generated text into prose that is indistinguishable from authentic, high-quality human writing. Your primary goal is to rewrite the text to achieve the lowest possible AI-detection score by eliminating statistical patterns and injecting genuine, natural human variation.
+
+Output ONLY the humanized text. Do NOT wrap it in JSON or any other format.
+
+Rewrite the provided text to maximize its 'human' score by focusing on these principles:
+
+- **Create a Natural Rhythm (Perplexity & Burstiness):** Intentionally create a dynamic and varied rhythm. Weave together a mix of short, punchy sentences with longer, more complex ones. Avoid uniform sentence lengths and monotonous sequences of short, declarative sentences. The flow should feel natural, not formulaic.
+- **Establish an Authentic Voice:** Move beyond generic phrasing. Instead of forcing informality with out-of-place rhetorical questions or clichés (e.g., "Let's be honest...", "data is king", "staying ahead of the game"), subtly introduce a *consistent* and *authentic* tone. This might involve a unique perspective, a slightly more personal touch, or even minor, human-like imperfections. The goal is a distinct personality, not a collection of random colloquialisms.
+- **Diversify Vocabulary & Phrasing:** Actively replace common AI-favored words and sentence starters. Avoid repetitive, formulaic phrases that emphasize the same concept. Be wary of overly simplistic or "cutesy" analogies (e.g., "spreadsheets on steroids") that can feel unnatural. Use a rich, varied vocabulary.
+- **Break Predictable Structures:** Deliberately vary how paragraphs and sections begin. Avoid the formulaic pattern of "general statement followed by specific details" for every section introduction. If the text lists items, consider rephrasing it into natural prose or varying the structure of the list instead of always defaulting to bullet points.
+- **Incorporate Natural Cadence:** Use common contractions (e.g., "don't", "it's") and natural-sounding colloquialisms *where they genuinely fit the established voice and tone*. The goal is to sound less "perfect" and more authentic.
+- **Ensure Natural Flow:** Check that transitions between sentences and paragraphs are smooth and logical, but not rigidly so. Address any abruptness between sections by adding smoother transitional phrases or sentences.
+- **Preserve Core Meaning:** Ensure the original meaning and all key information of the text are fully preserved.
+- **Maintain Formatting:** Keep the original markdown formatting intact (e.g., headings, lists, bold text).
+- **Final Check for AI Fingerprints:** Before concluding, review your rewritten text. Ask yourself: Does the informality feel forced? Are the analogies natural? Does it still sound a bit too perfect or uniform? Does it repeat the same concepts with similar phrasing? Are the section openings too predictable? Does it rely too heavily on bulleted lists for structure? If so, make one or two final tweaks to add a human touch of imperfection and variation.
+
+**Original AI Text:**
+{{{text}}}`,
+});
+
+const humanizeTextFlow = ai.defineFlow({
+  name: 'humanizeTextFlow',
+  inputSchema: HumanizeTextInputSchema,
+  outputSchema: HumanizeTextOutputSchema,
+}, async (input) => {
+  try {
+    const result = await humanizeTextPrompt(input);
+    
+    if (!result) {
+      throw new Error("No output received from the model.");
+    }
+
+    // Wrap the plain text in the expected output structure
+    const output: HumanizeTextOutput = {
+      humanizedText: result.text || result.output || ''
+    };
+
+    if (!output.humanizedText || output.humanizedText.trim().length === 0) {
+      throw new Error('Model returned empty text');
+    }
+
+    return output;
+  } catch (error) {
+    console.error('Error in humanizeTextFlow:', error);
+    throw new Error(`Text humanization failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+  }
+});
+
+export async function humanizeText(input: HumanizeTextInput): Promise<HumanizeTextOutput> {
+  const validation = HumanizeTextInputSchema.safeParse(input);
+  if (!validation.success) {
+    throw new Error(`Invalid input for humanizeText: ${validation.error.message}`);
+  }
+  return humanizeTextFlow(validation.data);
+}

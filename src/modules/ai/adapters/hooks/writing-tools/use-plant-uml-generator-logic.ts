@@ -6,7 +6,7 @@ import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useWritingTool, useToast } from '@/hooks';
-import { DiagramTypeSchema } from '@/ai/schemas';
+import { DiagramTypeSchema } from '@/modules/ai/domain/schemas';
 import pako from 'pako';
 
 // Helper to encode the deflated PlantUML code for the PlantUML server

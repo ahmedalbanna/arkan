@@ -10,7 +10,7 @@ import { useDropzone } from 'react-dropzone';
 import { useAuth } from '@/context/AuthContext';
 import { DocumentProcessingApiClient } from '@/modules/ai-content/adapters/api-client/DocumentProcessingApiClient';
 import { container } from '@/infrastructure/di/container';
-import type { FactCheckOutput } from '@/ai/schemas';
+import type { FactCheckOutput } from '@/modules/ai/domain/schemas';
 import { useLocalization } from '@/context/LocalizationContext';
 
 const factCheckSchema = z.object({

@@ -6,7 +6,7 @@ import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useWritingTool, useToast } from '@/hooks';
-import { CitationStyleSchema } from '@/ai/schemas';
+import { CitationStyleSchema } from '@/modules/ai/domain/schemas';
 import { useLocalization } from '@/context/LocalizationContext';
 
 const citationSchema = z.object({

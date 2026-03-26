@@ -92,13 +92,13 @@ npm run qdrant:stats  # Show Qdrant stats
   - `src/app/api/` — API route handlers (grouped by domain)
   - `src/app/admin/` — Admin-only pages (dashboard, user management, RAG monitor, etc.)
   - `src/app/writing-tools/` — Individual writing tool pages (23+ tools)
-- `src/ai/` — All AI logic (Genkit flows, prompts, schemas, tools)
-  - `src/ai/flows/` — Individual Genkit flow definitions (one file per flow)
-  - `src/ai/prompts/` — Shared prompt templates
-  - `src/ai/schemas/` — Zod schemas for all AI flow inputs/outputs
-  - `src/ai/tools/` — Genkit tool definitions used by flows
-  - `src/ai/genkit.ts` — Genkit instance + Ollama model config
 - `src/modules/` — Domain modules following Clean Architecture (DDD)
+  - Each module: `domain/`, `application/`, `adapters/`, `infrastructure/`
+  - **`domain/schemas/`**: High-level flow input/output Zod schemas.
+  - **`infrastructure/flows/`**: Genkit flow definitions, categorized by type (academic, writing, media, etc.).
+  - **`infrastructure/prompts/`**: AI prompt templates.
+  - **`infrastructure/tools/`**: Genkit tool definitions and a `schemas.ts` for tool-specific structures.
+  - **`infrastructure/services/Genkit.ts`**: The shared Genkit instance and model configuration.
   - Each module: `domain/`, `application/`, `adapters/`, `infrastructure/`
   - **`domain/schemas/`**: Module-specific Zod schemas (moved from `src/lib/schemas/`)
   - **`adapters/hooks/`**: Feature-specific hooks (moved from `src/hooks/data/`)
@@ -155,12 +155,14 @@ Each module in `src/modules/` follows the same four-layer structure:
 
 ### AI Flows (Genkit)
 
-- Each AI flow lives in its own file under `src/ai/flows/`
-- All flow files must have `'use server';` at the top
-- Define input/output Zod schemas in `src/ai/schemas/` and import from `@/ai/schemas`
-- Use the pattern: define prompt → define flow → export async wrapper function
-- Always handle errors with try/catch and throw descriptive `Error` objects
-- Use `MODEL_BY_TASK` constants from `src/ai/genkit.ts` for consistent model selection:
+- AI flows are located in `src/modules/ai/infrastructure/flows/`, organized by category.
+- All flow files must have `'use server';` at the top.
+- Define input/output Zod schemas in `src/modules/ai/domain/schemas/`.
+- **Literal Type Enforcement**: When a flow output schema uses `z.enum`, the implementation must return strings with `as const` (e.g., `status: 'success' as const`) to satisfy strict TypeScript checking.
+- **Unified Tool Schemas**: Tool-specific schemas and their inferred types should be centralized in `src/modules/ai/infrastructure/tools/schemas.ts` to prevent circular dependencies and "File is not a module" errors.
+- Use the pattern: define prompt → define flow → export async wrapper function.
+- Always handle errors with try/catch and return `Result<T, AiError>` objects.
+- Use `MODEL_BY_TASK` constants from `@/modules/ai/infrastructure/services/Genkit` for consistent model selection:
   - `GEMMA_2B` — fast text generation, conversion tasks
   - `PHI3_MINI` — structured output, reports, analysis
   - `LLAMA3_8B` — complex academic/research tasks
@@ -419,10 +421,16 @@ FIREBASE_ADMIN_PRIVATE_KEY=
 - **Foundational Logic**: Foundational utilities (e.g., `cn`, `result`, `randomId`) and cross-cutting infrastructure (e.g., `ApiService`, `api-utils`, `cache`, `i18n`, `security`) reside in `src/infrastructure/`.
 - **Domain Logic Co-location**: All domain-specific logic, including utilities (e.g., `plantuml-utils`), schemas (e.g., `ProjectSchema`), and infrastructure services (e.g., `pdf-utils`), must live within its respective module under `src/modules/`.
 - **Refactoring Strategy**: When performing large-scale directory moves, use a 3-pass sweep: 1) Physically move files, 2) Perform global import updates using path aliases, 3) Run `npm run typecheck` and manually resolve relative path discrepancies in deep module trees.
+- **Surgical Code Updates**: For critical files with many imports (like `WritingToolRegistry` or barrel files), prefer using `create_file` with the full content over many small `sed` or `find_and_replace_code` calls. This avoids accidental corruption from overlapping regex matches.
+- **Dependency Inversion for Tools**: Ensure AI tools are defined using the Genkit instance resolved from the module's service layer (`infrastructure/services/Genkit.ts`) rather than global instances to maintain architectural isolation.
+- **Barrel Export Integrity**: When renaming or categorizing exports in a barrel file (like `flows/index.ts`), always cross-reference with the `WritingToolRegistry` to ensure key-function mapping remains consistent.
 - **Legacy Cleanup**: The `src/lib` and `src/hooks/core` directories have been retired to eliminate architectural drift. Do not re-introduce them. All shared logic must now be categorized as either generic Infrastructure or domain-specific Module logic.
 - **CSS Hygiene**: Avoid defining complex layout logic (like A4 dimensions or zoom scales) in global CSS if it's managed by React state. Prefer utility-first Tailwind classes and scoped component logic to keep `globals.css` lean and prevent orphaned styles during refactors.
 - **Functional Injection for Pure Domains**: When a domain entity (e.g., `Project`) needs to perform a complex transformation that depends on infrastructure (e.g., Markdown parsing), do not import the infrastructure helper directly. Instead, pass the helper as a typed callback to the entity's method. This keeps the Domain layer free of framework/library dependencies.
 - **Direct Module Imports**: Never use a monolithic `types.ts` or `index.ts` re-export file for domain entities. Components and hooks must import entities (e.g., `User`, `Project`, `Section`) directly from their respective module paths to enforce strict encapsulation and avoid circular dependencies.
 - **Memoization Pitfall**: When wrapping components in `React.memo()`, explicitly import `React` from `'react'` to avoid runtime `ReferenceError` in certain build environments (like Turbopack).
 - **Zustand Performance**: Always use atomic selectors (`useStore(state => state.value)`) instead of monolithic destructuring (`const { value } = useStore()`) in high-frequency components to minimize re-renders when unrelated store properties change.
+- **AI Tool Registry**: The `WritingToolRegistry` (`src/modules/ai/application/services/WritingToolRegistry.ts`) maps tool names to their categorized flow implementations and schemas. When adding a new tool, register it here using the standardized function names from the flows index.
+- **Infrastructure Gateway**: `GenkitAiService` acts as the primary gateway for running flows. Prefer calling flows through this service to leverage the request queue and model selector features.
+- **Git Recovery**: If bulk file moves or deletions cause working tree issues, use `git show stable:<path> > <new-path>` to recover specific file contents accurately.
 

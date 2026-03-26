@@ -3,7 +3,7 @@
 import { handleApiError, withAuth, handleTemplateResult } from '@/infrastructure/api/api-utils';
 import { container } from '@/infrastructure/di/container';
 import { TemplateController } from '@/modules/templates/adapters/controllers/TemplateController';
-import { UpdatePresentationTemplateSchema } from '@/ai/schemas';
+import { UpdatePresentationTemplateSchema } from '@/modules/ai/domain/schemas';
 
 // GET a single presentation template
 export const GET = withAuth(async ({ params }) => {

@@ -10,7 +10,7 @@ import { useAuth } from '@/context/AuthContext';
 import { useBuilderStore } from '@/modules/projects/adapters/state/useBuilderStore';
 import { ReportApiClient } from '@/modules/ai-content/adapters/api-client/ReportApiClient';
 import { container } from '@/infrastructure/di/container';
-import type { SectionName } from '@/ai/schemas';
+import type { SectionName } from '@/modules/ai/domain/schemas';
 import { PromptBuilder } from '@/modules/ai-content/domain/services/PromptBuilder';
 import { WritingToolsApiClient } from '@/modules/ai/adapters/api-client/WritingToolsApiClient';
 import { Chapter } from '@/modules/ai-content/domain/entities/Chapter';

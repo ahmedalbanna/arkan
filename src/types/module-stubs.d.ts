@@ -34,7 +34,7 @@ declare module '@/lib/db/seed-data/proposal-templates' {
 //   export const REPORT_GENERATION_TEMPLATES: any;
 // }
 
-declare module '@/ai/flows/generate-presentation-outline' {
+declare module '@/modules/ai/infrastructure/flows/generate-presentation-outline' {
   export function generatePresentationOutline(...args: any[]): Promise<any>;
 }
 

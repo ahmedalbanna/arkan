@@ -275,8 +275,8 @@ export type MyFlowInput = z.infer<typeof MyFlowInputSchema>;
 export type MyFlowOutput = z.infer<typeof MyFlowOutputSchema>;
 
 // 2. Create flow in src/ai/flows/my-flow.ts
-import { ai } from '@/ai/genkit';
-import { MyFlowInputSchema, MyFlowOutputSchema } from '@/ai/schemas';
+import { ai } from '@/modules/ai/infrastructure/services/Genkit';
+import { MyFlowInputSchema, MyFlowOutputSchema } from '@/modules/ai/domain/schemas';
 
 export const myFlow = ai.defineFlow({
   name: 'myFlow',
@@ -291,7 +291,7 @@ export const myFlow = ai.defineFlow({
 export { myFlow } from './my-flow';
 
 // 4. Use in components
-import { myFlow } from '@/ai/flows';
+import { myFlow } from '@/modules/ai/infrastructure/flows';
 
 const result = await myFlow({ 
   prompt: "Generate content",

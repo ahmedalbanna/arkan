@@ -1,7 +1,7 @@
 // Route disabled - pending refactor to new architecture
 // eslint-disable-next-line @typescript-eslint/no-empty-function
 export {};
-// import { generateImage } from '@/ai/flows/generate-image';
+// import { generateImage } from '@/modules/ai/infrastructure/flows/media/generate-image';
 // import { adminDb } from '@/infrastructure/firebase/server-init';
 // import { createApiResponse, handleApiError, withAuth } from '@/infrastructure/api/api-utils';
 // import { logGeneration } from '@/services/generation-service';

@@ -279,8 +279,8 @@ export type FlowOutput = z.infer<typeof FlowOutputSchema>;
 
 ```typescript
 // src/ai/flows/my-flow.ts
-import { ai } from '@/ai/genkit';
-import { FlowInputSchema, FlowOutputSchema } from '@/ai/schemas';
+import { ai } from '@/modules/ai/infrastructure/services/Genkit';
+import { FlowInputSchema, FlowOutputSchema } from '@/modules/ai/domain/schemas';
 
 export const myFlow = ai.defineFlow({
   name: 'myFlow',

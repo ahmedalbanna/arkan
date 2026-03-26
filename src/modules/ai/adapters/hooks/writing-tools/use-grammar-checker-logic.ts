@@ -6,7 +6,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useWritingTool, useToast } from '@/hooks';
-import type { GrammarCheckOutput } from '@/ai/schemas';
+import type { GrammarCheckOutput } from '@/modules/ai/domain/schemas';
 import { useDropzone } from 'react-dropzone';
 import { useAuth } from '@/context/AuthContext';
 import { DocumentProcessingApiClient } from '@/modules/ai-content/adapters/api-client/DocumentProcessingApiClient';

@@ -1,0 +1,84 @@
+
+'use server';
+
+/**
+ * @fileOverview An AI agent for summarizing text.
+ */
+
+import { ai } from '@/modules/ai/infrastructure/services/Genkit';
+import { SummarizeInputSchema, SummarizeLength, SummarizeOutputSchema, type SummarizeInput, type SummarizeOutput } from '@/modules/ai/domain/schemas';
+import { RECOMMENDED_TEMPERATURES } from '@/modules/ai/domain/utils/json-output-validator';
+import z from 'zod';
+
+const lengthDescriptions: Record<SummarizeLength, string> = {
+    short: "a single, concise paragraph (approximately 50-100 words).",
+    medium: "a few paragraphs, capturing the main points and key supporting details (approximately 150-300 words).",
+    long: "a detailed summary, covering all significant topics and arguments (approximately 400-600 words).",
+};
+
+const summarizePrompt = ai.definePrompt({
+    name: 'summarizeTextPrompt',
+    input: { schema: z.object({ text: z.string(), instruction: z.string() }) },
+    // No output schema - model returns plain text
+    model: 'ollama/gemma:2b',
+    config: {
+        temperature: RECOMMENDED_TEMPERATURES.PRECISE,
+    },
+    prompt: `You are a professional text summarizer.
+
+Output ONLY the summary text. Do NOT wrap it in JSON or any other format.
+
+**Task:**
+- Read the text below carefully
+- Create a summary that is {{{instruction}}}
+- Output ONLY the summary text
+
+**Text to Summarize:**
+---
+{{{text}}}
+---`,
+});
+
+const summarizeTextFlow = ai.defineFlow({
+    name: 'summarizeTextFlow',
+    inputSchema: SummarizeInputSchema,
+    outputSchema: SummarizeOutputSchema
+}, async (input) => {
+    const instruction = lengthDescriptions[input.length] || lengthDescriptions.medium;
+    
+    try {
+        const result = await summarizePrompt({ ...input, instruction });
+
+        if (!result) {
+            throw new Error("No output received from the model.");
+        }
+
+        // Wrap the plain text in the expected output structure
+        const output: SummarizeOutput = {
+            summary: result.text || result.output || ''
+        };
+
+        if (!output.summary || output.summary.trim().length === 0) {
+            throw new Error('Model returned empty summary');
+        }
+
+        return output;
+    } catch (error) {
+        console.error('Error in summarizeTextFlow:', error);
+        throw new Error(`Failed to summarize text: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+});
+
+export async function summarizeText(input: SummarizeInput): Promise<SummarizeOutput> {
+    const validation = SummarizeInputSchema.safeParse(input);
+    if (!validation.success) {
+        throw new Error(`Invalid input for summarizeText: ${validation.error.message}`);
+    }
+    
+    try {
+        return await summarizeTextFlow(validation.data);
+    } catch (error) {
+        console.error('Error in summarizeText:', error);
+        throw error;
+    }
+}

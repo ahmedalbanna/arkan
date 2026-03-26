@@ -1,7 +1,7 @@
 
 'use client';
 
-import type { PlagiarismCheckOutput } from '@/ai/schemas';
+import type { PlagiarismCheckOutput } from '@/modules/ai/domain/schemas';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';

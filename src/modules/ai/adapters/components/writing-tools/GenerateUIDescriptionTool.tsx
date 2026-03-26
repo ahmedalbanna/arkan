@@ -1,6 +1,6 @@
 'use client';
 
-import { GenerateUIDescriptionInputSchema, type GenerateUIDescriptionInput } from '@/ai/schemas';
+import { GenerateUIDescriptionInputSchema, type GenerateUIDescriptionInput } from '@/modules/ai/domain/schemas';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';

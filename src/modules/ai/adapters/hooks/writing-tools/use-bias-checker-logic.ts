@@ -10,7 +10,7 @@ import { useDropzone } from 'react-dropzone';
 import { useAuth } from '@/context/AuthContext';
 import { DocumentProcessingApiClient } from '@/modules/ai-content/adapters/api-client/DocumentProcessingApiClient';
 import { container } from '@/infrastructure/di/container';
-import type { BiasCheckOutput } from '@/ai/schemas';
+import type { BiasCheckOutput } from '@/modules/ai/domain/schemas';
 
 const biasCheckSchema = z.object({
   text: z.string().min(50, 'Please enter at least 50 characters for an accurate analysis.'),

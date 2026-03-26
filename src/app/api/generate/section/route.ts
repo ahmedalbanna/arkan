@@ -2,10 +2,10 @@
 'use server';
 
 import { z } from 'zod';
-import { generateReportSection } from '@/ai/flows/generate-report-section';
+import { generateReportSection } from '@/modules/ai/infrastructure/flows/generation/generate-report-section';
 import { withAuth, handleApiError, createApiResponse } from '@/infrastructure/api/api-utils';
-import { GenerateSectionInputSchema } from '@/ai/schemas';
-import { executeWithQueue, generateRequestId, selectModel } from '@/ai';
+import { GenerateSectionInputSchema } from '@/modules/ai/domain/schemas';
+import { ai } from '@/modules/ai/infrastructure/services/Genkit';
 import { container } from '@/infrastructure/di/container';
 import { AiController } from '@/modules/ai/adapters/controllers/AiController';
 
