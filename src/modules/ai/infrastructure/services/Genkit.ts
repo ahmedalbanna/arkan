@@ -1,4 +1,3 @@
-
 import { genkit } from 'genkit';
 import { ollama } from 'genkitx-ollama';
 

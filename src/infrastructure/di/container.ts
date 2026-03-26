@@ -33,7 +33,6 @@ import { SettingsApiClient } from "@/modules/admin/adapters/api-client/SettingsA
 import { SectionApiClient } from "@/modules/ai-content/adapters/api-client/SectionApiClient";
 import { DocumentProcessingApiClient } from "@/modules/ai-content/adapters/api-client/DocumentProcessingApiClient";
 import { ReportApiClient } from "@/modules/ai-content/adapters/api-client/ReportApiClient";
-import { WritingToolRegistry } from "@/modules/ai/application/services/WritingToolRegistry";
 import { WritingToolsApiClient } from "@/modules/ai/adapters/api-client/WritingToolsApiClient";
 import { AgentApiClient } from "@/modules/ai/adapters/api-client/AgentApiClient";
 import { GenerationLogApiClient } from "@/modules/ai/adapters/api-client/GenerationLogApiClient";
@@ -47,9 +46,8 @@ import { CreditService } from "@/modules/billing/application/services/CreditServ
 import { LocalProjectService } from "@/modules/projects/adapters/local-storage/LocalProjectService";
 import { PromptBuilder } from "@/modules/ai-content/domain/services/PromptBuilder";
 
-// Register Client API Clients (always)
+// Register Client API Clients (always — safe for browser)
 container.register(PromptBuilder, { useClass: PromptBuilder }, { lifecycle: Lifecycle.Singleton });
-container.register(WritingToolRegistry, { useClass: WritingToolRegistry }, { lifecycle: Lifecycle.Singleton });
 container.register(CreditService, { useClass: CreditService }, { lifecycle: Lifecycle.Singleton });
 container.register(LocalProjectService, { useClass: LocalProjectService }, { lifecycle: Lifecycle.Singleton });
 container.register(WritingToolsApiClient, { useClass: WritingToolsApiClient }, { lifecycle: Lifecycle.Singleton });
@@ -61,15 +59,6 @@ container.register(AnalyticsApiClient, { useClass: AnalyticsApiClient }, { lifec
 container.register(FeatureApiClient, { useClass: FeatureApiClient }, { lifecycle: Lifecycle.Singleton });
 container.register(SettingsApiClient, { useClass: SettingsApiClient }, { lifecycle: Lifecycle.Singleton });
 container.register(SectionApiClient, { useClass: SectionApiClient }, { lifecycle: Lifecycle.Singleton });
-
-// Register Exporters (Lazy load implementations if they have complex deps)
-const { DocxExportService } = require("@/modules/ai-content/infrastructure/exporters/DocxExportService");
-const { PptxExportService } = require("@/modules/ai-content/infrastructure/exporters/PptxExportService");
-const { PdfExportService } = require("@/modules/ai-content/infrastructure/exporters/PdfExportService");
-
-container.register(IDocxExportServiceToken, { useClass: DocxExportService }, { lifecycle: Lifecycle.Singleton });
-container.register(IPptxExportServiceToken, { useClass: PptxExportService }, { lifecycle: Lifecycle.Singleton });
-container.register(PdfExportService, { useClass: PdfExportService }, { lifecycle: Lifecycle.Singleton });
 container.register(DocumentProcessingApiClient, { useClass: DocumentProcessingApiClient }, { lifecycle: Lifecycle.Singleton });
 container.register(ReportApiClient, { useClass: ReportApiClient }, { lifecycle: Lifecycle.Singleton });
 container.register(AgentApiClient, { useClass: AgentApiClient }, { lifecycle: Lifecycle.Singleton });
@@ -81,10 +70,11 @@ container.register(DeviceTokenApiClient, { useClass: DeviceTokenApiClient }, { l
 container.register(NotificationApiClient, { useClass: NotificationApiClient }, { lifecycle: Lifecycle.Singleton });
 container.register(RagApiClient, { useClass: RagApiClient }, { lifecycle: Lifecycle.Singleton });
 
-// Server-side registration (Conditional)
+// Server-side registration (Conditional).
+// require() is used for all server-only modules to prevent static bundling.
+// The async_hooks Node.js built-in is stubbed for browser builds via next.config.ts turbopack.resolveAlias.
 if (typeof window === 'undefined') {
   console.log("Registering server-side dependencies...");
-  // Use require to avoid bundling server-only modules in the client
   const { SQLiteProjectRepository } = require("@/modules/projects/infrastructure/repositories/SQLiteProjectRepository");
   const { SQLiteUserRepository } = require("@/modules/users/infrastructure/repositories/SQLiteUserRepository");
   const { SQLiteAuthRepository } = require("@/modules/users/infrastructure/repositories/SQLiteAuthRepository");
@@ -92,6 +82,7 @@ if (typeof window === 'undefined') {
   const { SQLiteGenerationLogRepository } = require("@/modules/ai/infrastructure/repositories/SQLiteGenerationLogRepository");
   const { SQLiteAgentRepository } = require("@/modules/ai/infrastructure/repositories/SQLiteAgentRepository");
   const { GenkitAiService } = require("@/modules/ai/infrastructure/services/GenkitAiService");
+  const { WritingToolRegistry } = require("@/modules/ai/application/services/WritingToolRegistry");
   const { SQLiteAdminStatsRepository } = require("@/modules/admin/infrastructure/repositories/SQLiteAdminStatsRepository");
   const { SQLiteFeatureRepository } = require("@/modules/admin/infrastructure/repositories/SQLiteFeatureRepository");
   const { SQLiteSettingsRepository } = require("@/modules/admin/infrastructure/repositories/SQLiteSettingsRepository");
@@ -101,80 +92,34 @@ if (typeof window === 'undefined') {
   const { SQLiteIndexedDocumentRepository } = require("@/modules/rag/infrastructure/repositories/SQLiteIndexedDocumentRepository");
   const { SQLiteTemplateRepository } = require("@/modules/templates/infrastructure/repositories/SQLiteTemplateRepository");
   const { SQLiteSectionRepository } = require("@/modules/ai-content/infrastructure/repositories/SQLiteSectionRepository");
+  const { DocxExportService } = require("@/modules/ai-content/infrastructure/exporters/DocxExportService");
+  const { PptxExportService } = require("@/modules/ai-content/infrastructure/exporters/PptxExportService");
+  const { PdfExportService } = require("@/modules/ai-content/infrastructure/exporters/PdfExportService");
   const { NodemailerEmailService } = require("@/modules/users/infrastructure/services/NodemailerEmailService");
   const { TwoFactorAuthService } = require("@/modules/users/infrastructure/services/TwoFactorAuthService");
 
-  container.register(IEmailServiceToken, {
-    useClass: NodemailerEmailService
-  }, { lifecycle: Lifecycle.Singleton });
-
-  container.register(TwoFactorAuthService, {
-    useClass: TwoFactorAuthService
-  }, { lifecycle: Lifecycle.Singleton });
-
-  container.register(IProjectRepositoryToken, {
-    useClass: SQLiteProjectRepository
-  }, { lifecycle: Lifecycle.Singleton });
-
-  container.register(IUserRepositoryToken, {
-    useClass: SQLiteUserRepository
-  }, { lifecycle: Lifecycle.Singleton });
-
-  container.register(IAuthRepositoryToken, {
-    useClass: SQLiteAuthRepository
-  }, { lifecycle: Lifecycle.Singleton });
-
-  container.register(INotificationServiceToken, {
-    useClass: SQLiteNotificationService
-  }, { lifecycle: Lifecycle.Singleton });
-
-  container.register(IGenerationLogRepositoryToken, {
-    useClass: SQLiteGenerationLogRepository
-  }, { lifecycle: Lifecycle.Singleton });
-
-  container.register(IAgentRepositoryToken, {
-    useClass: SQLiteAgentRepository
-  }, { lifecycle: Lifecycle.Singleton });
-
-  container.register(IAiServiceToken, {
-    useClass: GenkitAiService
-  }, { lifecycle: Lifecycle.Singleton });
-
-  container.register(IAdminStatsRepositoryToken, {
-    useClass: SQLiteAdminStatsRepository
-  }, { lifecycle: Lifecycle.Singleton });
-
-  container.register(IFeatureRepositoryToken, {
-    useClass: SQLiteFeatureRepository
-  }, { lifecycle: Lifecycle.Singleton });
-
-  container.register(ISettingsRepositoryToken, {
-    useClass: SQLiteSettingsRepository
-  }, { lifecycle: Lifecycle.Singleton });
-
-  container.register(ITransactionRepositoryToken, {
-    useClass: SQLiteTransactionRepository
-  }, { lifecycle: Lifecycle.Singleton });
-
-  container.register(IFileStorageServiceToken, {
-    useClass: FirebaseFileStorageService
-  }, { lifecycle: Lifecycle.Singleton });
-
-  container.register(IRagRepositoryToken, {
-    useClass: DefaultRagRepository
-  }, { lifecycle: Lifecycle.Singleton });
-
-  container.register(IIndexedDocumentRepositoryToken, {
-    useClass: SQLiteIndexedDocumentRepository
-  }, { lifecycle: Lifecycle.Singleton });
-
-  container.register(ITemplateRepositoryToken, {
-    useClass: SQLiteTemplateRepository
-  }, { lifecycle: Lifecycle.Singleton });
-
-  container.register(ISectionRepositoryToken, {
-    useClass: SQLiteSectionRepository
-  }, { lifecycle: Lifecycle.Singleton });
+  container.register(IEmailServiceToken, { useClass: NodemailerEmailService }, { lifecycle: Lifecycle.Singleton });
+  container.register(TwoFactorAuthService, { useClass: TwoFactorAuthService }, { lifecycle: Lifecycle.Singleton });
+  container.register(IProjectRepositoryToken, { useClass: SQLiteProjectRepository }, { lifecycle: Lifecycle.Singleton });
+  container.register(IUserRepositoryToken, { useClass: SQLiteUserRepository }, { lifecycle: Lifecycle.Singleton });
+  container.register(IAuthRepositoryToken, { useClass: SQLiteAuthRepository }, { lifecycle: Lifecycle.Singleton });
+  container.register(INotificationServiceToken, { useClass: SQLiteNotificationService }, { lifecycle: Lifecycle.Singleton });
+  container.register(IGenerationLogRepositoryToken, { useClass: SQLiteGenerationLogRepository }, { lifecycle: Lifecycle.Singleton });
+  container.register(IAgentRepositoryToken, { useClass: SQLiteAgentRepository }, { lifecycle: Lifecycle.Singleton });
+  container.register(IAiServiceToken, { useClass: GenkitAiService }, { lifecycle: Lifecycle.Singleton });
+  container.register(IDocxExportServiceToken, { useClass: DocxExportService }, { lifecycle: Lifecycle.Singleton });
+  container.register(IPptxExportServiceToken, { useClass: PptxExportService }, { lifecycle: Lifecycle.Singleton });
+  container.register(PdfExportService, { useClass: PdfExportService }, { lifecycle: Lifecycle.Singleton });
+  container.register(WritingToolRegistry, { useClass: WritingToolRegistry }, { lifecycle: Lifecycle.Singleton });
+  container.register(IAdminStatsRepositoryToken, { useClass: SQLiteAdminStatsRepository }, { lifecycle: Lifecycle.Singleton });
+  container.register(IFeatureRepositoryToken, { useClass: SQLiteFeatureRepository }, { lifecycle: Lifecycle.Singleton });
+  container.register(ISettingsRepositoryToken, { useClass: SQLiteSettingsRepository }, { lifecycle: Lifecycle.Singleton });
+  container.register(ITransactionRepositoryToken, { useClass: SQLiteTransactionRepository }, { lifecycle: Lifecycle.Singleton });
+  container.register(IFileStorageServiceToken, { useClass: FirebaseFileStorageService }, { lifecycle: Lifecycle.Singleton });
+  container.register(IRagRepositoryToken, { useClass: DefaultRagRepository }, { lifecycle: Lifecycle.Singleton });
+  container.register(IIndexedDocumentRepositoryToken, { useClass: SQLiteIndexedDocumentRepository }, { lifecycle: Lifecycle.Singleton });
+  container.register(ITemplateRepositoryToken, { useClass: SQLiteTemplateRepository }, { lifecycle: Lifecycle.Singleton });
+  container.register(ISectionRepositoryToken, { useClass: SQLiteSectionRepository }, { lifecycle: Lifecycle.Singleton });
 }
 
 export { container };

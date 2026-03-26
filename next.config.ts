@@ -1,6 +1,7 @@
 
 import type { NextConfig, SizeLimit } from 'next';
 import withPWA from "@ducanh2912/next-pwa";
+import path from 'path';
 
 const pwaConfig = withPWA({
   dest: 'public',
@@ -82,6 +83,10 @@ const nextConfig: NextConfig = {
     return config;
   },
   turbopack: {
+    resolveAlias: {
+      // async_hooks is a Node.js built-in — stub it out in the browser bundle
+      async_hooks: { browser: path.resolve('./src/infrastructure/stubs/async-hooks-stub.js') },
+    },
   },
   experimental: {
     serverActions: { bodySizeLimit: '10mb' as SizeLimit },

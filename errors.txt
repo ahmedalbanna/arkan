@@ -1,22 +1,55 @@
-## Error Type
-Runtime ReferenceError
+⚡ stable ~/arkan npm run dev
 
-## Error Message
-React is not defined
+> nextn@0.1.0 dev
+> next dev --turbopack --port 9002
 
+   ▲ Next.js 15.5.9 (Turbopack)
+   - Local:        http://localhost:9002
+   - Network:      http://10.128.1.88:9002
+   - Environments: .env.local, .env
+   - Experiments (use with caution):
+     ✓ useCache
+     · serverActions
 
-    at __TURBOPACK__module__evaluation__ (src/modules/ai-content/adapters/components/report-mode/ReportResults.tsx:80:7)
-    at <unknown> (.next/static/chunks/b1a17_modules_ai-content_adapters_components_report-mode_ReportResults_tsx_6cc5bd76._.js:26:16)
-    at ReportModeGenerator (src/modules/ai-content/adapters/components/report-mode/ReportModeGenerator.tsx:99:9)
-    at GeneratePage (src/app/builder/page.tsx:39:7)
-
-## Code Frame
-  78 | }
-  79 |
-> 80 | const ReportResults = ({ activePanelKey }: ReportResultsProps) => {
-     |       ^
-  81 |   const { t } = useLocalization();
-  82 |   const project = useBuilderStore(state => state.project);
-  83 |   const version = useBuilderStore(state => state.version);
-
-Next.js version: 15.5.9 (Turbopack)
+ ✓ Starting...
+ ○ Compiling instrumentation Node.js ...
+ ✓ Compiled instrumentation Node.js in 15.7s
+ ✓ Compiled instrumentation Edge in 31ms
+ERROR: /prompt/literatureReviewPrompt already has an entry in the registry. Overwriting.
+ERROR: /executable-prompt/literatureReviewPrompt already has an entry in the registry. Overwriting.
+Firebase Admin SDK initialized using environment variables.
+Registering server-side dependencies...
+ ✓ Ready in 19.7s
+ ○ Compiling /login ...
+ ✓ Compiled /login in 17.4s
+ GET /login 200 in 18588ms
+ ○ Compiling /favicon.ico ...
+ ⚠ Cross origin request detected from 9002-01kegbftgsxwkfgqv12wpvwprn.cloudspaces.litng.ai to /_next/* resource. In a future major version of Next.js, you will need to explicitly configure "allowedDevOrigins" in next.config to allow this.
+Read more: https://nextjs.org/docs/app/api-reference/config/next-config-js/allowedDevOrigins
+ GET /favicon.ico?favicon.7ed73651.ico 200 in 1397ms
+ ✓ Compiled /favicon.ico in 1926ms
+API Route Error: Error: Cannot inject the dependency "authRepository" at position #0 of "VerifySessionUseCase" constructor. Reason:
+    Attempted to resolve unregistered dependency token: "Symbol(IAuthRepository)"
+    at UserController.verifySession (src/modules/users/adapters/controllers/UserController.ts:201:42)
+    at GET (src/app/api/auth/me/route.ts:17:43)
+  199 |
+  200 |     async verifySession(sessionCookie: string, checkRevoked?: boolean) {
+> 201 |         return this.verifySessionUseCase.execute(sessionCookie, checkRevoked);
+      |                                          ^
+  202 |     }
+  203 |
+  204 |     async sendPasswordReset(email: string) {
+ GET /api/auth/me 500 in 2392ms
+ ✓ Compiled /api/auth/login in 497ms
+API Route Error: Error: Cannot inject the dependency "authRepository" at position #0 of "LoginUseCase" constructor. Reason:
+    Attempted to resolve unregistered dependency token: "Symbol(IAuthRepository)"
+    at UserController.login (src/modules/users/adapters/controllers/UserController.ts:113:34)
+    at POST (src/app/api/auth/login/route.ts:41:37)
+  111 |
+  112 |     async login(email: string, password: string) {
+> 113 |         return this.loginUseCase.execute(email, password);
+      |                                  ^
+  114 |     }
+  115 |
+  116 |     async createUser(data: any) {
+ POST /api/auth/login 500 in 930ms
