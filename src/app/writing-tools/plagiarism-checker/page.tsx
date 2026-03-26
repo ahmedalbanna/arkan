@@ -1,7 +1,7 @@
 
 'use client';
 
-import { PlagiarismCheckerTool } from '@/components/writing-tools/PlagiarismCheckerTool';
+import { PlagiarismCheckerTool } from '@/modules/ai/adapters/components/writing-tools/PlagiarismCheckerTool';
 import { CopyCheck } from 'lucide-react';
 import { useLocalization } from '@/context/LocalizationContext';
 

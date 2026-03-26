@@ -8,7 +8,7 @@
  * - Compare strategies
  */
 
-import { RAGQueryTesterInterface } from '@/components/admin/rag-tester/RAGQueryTesterInterface';
+import { RAGQueryTesterInterface } from '@/modules/rag/adapters/components/rag-tester/RAGQueryTesterInterface';
 
 export default function RAGTesterPage() {
   return (

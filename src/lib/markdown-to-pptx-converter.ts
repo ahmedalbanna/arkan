@@ -10,9 +10,9 @@ import remarkRehype from 'remark-rehype';
 import { unified } from 'unified';
 import { PdfExportService } from '@/modules/ai-content/infrastructure/exporters/PdfExportService';
 import { container } from '@/infrastructure/di/container';
-import { getNodeText, splitAstIntoSlides } from './pptx-convert/ast-utils';
-import { DEFAULT_CODE_FONT, DEFAULT_FONT, layout } from './pptx-convert/constants';
-import { createSlidesWithContent, type FontOptions } from './pptx-convert/slide-layout-engine';
+import { getNodeText, splitAstIntoSlides } from '@/modules/templates/infrastructure/exporters/pptx/ast-utils';
+import { DEFAULT_CODE_FONT, DEFAULT_FONT, layout } from '@/modules/templates/infrastructure/exporters/pptx/constants';
+import { createSlidesWithContent, type FontOptions } from '@/modules/templates/infrastructure/exporters/pptx/slide-layout-engine';
 import { processPlantUml } from './utils/processPlantUml';
 import { convertMarkdownToPdf } from './utils/pdf-utils'; // Import the moved function
 import { PptxStyleOptions } from '@/ai/schemas';

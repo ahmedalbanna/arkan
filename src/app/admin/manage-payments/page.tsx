@@ -1,4 +1,4 @@
-import { PaymentVerificationConsole } from "@/components/admin/payments/PaymentVerificationConsole";
+import { PaymentVerificationConsole } from '@/modules/billing/adapters/components/admin/PaymentVerificationConsole';
 import { CreditCard } from "lucide-react";
 import { getTranslator } from '@/lib/utils/i18n';
 

@@ -1,6 +1,6 @@
 'use client';
 
-import { GenerateUIDescriptionTool } from '@/components/writing-tools/GenerateUIDescriptionTool';
+import { GenerateUIDescriptionTool } from '@/modules/ai/adapters/components/writing-tools/GenerateUIDescriptionTool';
 import { LayoutTemplate } from 'lucide-react';
 import { useLocalization } from '@/context/LocalizationContext';
 

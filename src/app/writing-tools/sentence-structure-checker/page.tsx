@@ -1,7 +1,7 @@
 
 'use client';
 
-import { SentenceStructureCheckerTool } from '@/components/writing-tools/SentenceStructureCheckerTool';
+import { SentenceStructureCheckerTool } from '@/modules/ai/adapters/components/writing-tools/SentenceStructureCheckerTool';
 import { Workflow } from 'lucide-react';
 
 export default function SentenceStructureCheckerPage() {

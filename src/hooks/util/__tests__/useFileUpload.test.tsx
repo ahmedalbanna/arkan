@@ -4,7 +4,7 @@ let capturedOnDrop: ((files: File[]) => Promise<void>) | undefined;
 
 jest.mock('@/context/AuthContext', () => ({ useAuth: jest.fn() }));
 jest.mock('@/hooks/util/use-toast', () => ({ useToast: jest.fn() }));
-jest.mock('../../data/authenticated-client-call', () => ({ runAuthenticatedResultCall: jest.fn() }));
+jest.mock('@/infrastructure/api/authenticated-client-call', () => ({ runAuthenticatedResultCall: jest.fn() }));
 jest.mock('react-dropzone', () => ({
   useDropzone: jest.fn((options: { onDrop: (files: File[]) => Promise<void> }) => {
     capturedOnDrop = options.onDrop;
@@ -14,7 +14,7 @@ jest.mock('react-dropzone', () => ({
 
 const { useAuth } = jest.requireMock('@/context/AuthContext') as { useAuth: jest.Mock };
 const { useToast } = jest.requireMock('@/hooks/util/use-toast') as { useToast: jest.Mock };
-const { runAuthenticatedResultCall } = jest.requireMock('../../data/authenticated-client-call') as { runAuthenticatedResultCall: jest.Mock };
+const { runAuthenticatedResultCall } = jest.requireMock('@/infrastructure/api/authenticated-client-call') as { runAuthenticatedResultCall: jest.Mock };
 
 const { useFileUpload } = require('../useFileUpload') as typeof import('../useFileUpload');
 

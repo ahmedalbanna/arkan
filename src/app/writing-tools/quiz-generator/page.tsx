@@ -1,7 +1,7 @@
 
 'use client';
 
-import { QuizGeneratorTool } from '@/components/writing-tools/QuizGeneratorTool';
+import { QuizGeneratorTool } from '@/modules/ai/adapters/components/writing-tools/QuizGeneratorTool';
 import { FileQuestion } from 'lucide-react';
 import { useLocalization } from '@/context/LocalizationContext';
 

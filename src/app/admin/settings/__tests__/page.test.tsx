@@ -18,12 +18,12 @@ jest.mock('@/context/LocalizationContext', () => ({
 jest.mock('@/context/AuthContext', () => ({ useAuth: jest.fn() }));
 jest.mock('@/hooks', () => ({ useToast: jest.fn() }));
 jest.mock('@/hooks/data/use-settings', () => ({ usePublicSettings: jest.fn() }));
-jest.mock('@/hooks/data/authenticated-client-call', () => ({ runAuthenticatedResultCall: jest.fn() }));
+jest.mock('@/infrastructure/api/authenticated-client-call', () => ({ runAuthenticatedResultCall: jest.fn() }));
 
 const { useAuth } = jest.requireMock('@/context/AuthContext') as { useAuth: jest.Mock };
 const { useToast } = jest.requireMock('@/hooks') as { useToast: jest.Mock };
 const { usePublicSettings } = jest.requireMock('@/hooks/data/use-settings') as { usePublicSettings: jest.Mock };
-const { runAuthenticatedResultCall } = jest.requireMock('@/hooks/data/authenticated-client-call') as { runAuthenticatedResultCall: jest.Mock };
+const { runAuthenticatedResultCall } = jest.requireMock('@/infrastructure/api/authenticated-client-call') as { runAuthenticatedResultCall: jest.Mock };
 
 import AdminSettingsPage from '../page';
 

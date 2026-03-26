@@ -1,7 +1,7 @@
 'use client';
 
 import { Presentation } from 'lucide-react';
-import { MarkdownToPptxTool } from '@/components/writing-tools/MarkdownToPptxTool';
+import { MarkdownToPptxTool } from '@/modules/ai/adapters/components/writing-tools/MarkdownToPptxTool';
 
 export default function MarkdownToPptxPage() {
   return (

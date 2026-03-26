@@ -10,7 +10,7 @@ import { UpdateProfileForm } from './UpdateProfileForm';
 import { ChangePasswordForm } from './ChangePasswordForm';
 import { ApiTokenView } from './ApiTokenView';
 import { ApiKeysForm } from './ApiKeysForm';
-import { GuestProfilePage } from '@/components/auth/GuestProfilePage';
+import { GuestProfilePage } from '@/modules/users/adapters/components/auth/GuestProfilePage';
 import { TrustedDevicesList } from './TrustedDevicesList';
 import { LoginHistoryList } from './LoginHistoryList';
 import { SecuritySettingsForm } from './SecuritySettingsForm';

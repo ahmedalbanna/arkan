@@ -1,4 +1,4 @@
-import { PlantUMLGeneratorTool } from "@/components/writing-tools/PlantUMLGeneratorTool";
+import { PlantUMLGeneratorTool } from "@/modules/ai/adapters/components/writing-tools/PlantUMLGeneratorTool";
 import { GitGraph } from "lucide-react";
 
 export default function GenerateDiagramPage() {

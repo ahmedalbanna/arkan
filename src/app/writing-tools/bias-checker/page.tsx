@@ -1,7 +1,7 @@
 
 'use client';
 
-import { BiasCheckerTool } from '@/components/writing-tools/BiasCheckerTool';
+import { BiasCheckerTool } from '@/modules/ai/adapters/components/writing-tools/BiasCheckerTool';
 import { Scale } from 'lucide-react';
 
 export default function BiasCheckerPage() {

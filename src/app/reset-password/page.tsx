@@ -1,5 +1,5 @@
 import { Metadata } from "next";
-import ResetPasswordForm from "@/components/auth/ResetPasswordForm";
+import ResetPasswordForm from "@/modules/users/adapters/components/auth/ResetPasswordForm";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Suspense } from "react";
 

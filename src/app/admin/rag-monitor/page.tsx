@@ -4,9 +4,9 @@
  * Admin page for monitoring RAG system health and performance
  */
 
-import { RAGHealthMonitor } from '@/components/admin/rag/RAGHealthMonitor';
-import { RAGStatsPanel } from '@/components/admin/rag/RAGStatsPanel';
-import { RAGQueryTester } from '@/components/admin/rag/RAGQueryTester';
+import { RAGHealthMonitor } from '@/modules/rag/adapters/components/rag/RAGHealthMonitor';
+import { RAGStatsPanel } from '@/modules/rag/adapters/components/rag/RAGStatsPanel';
+import { RAGQueryTester } from '@/modules/rag/adapters/components/rag/RAGQueryTester';
 
 export default function RAGMonitorPage() {
   return (

@@ -1,7 +1,7 @@
 
 'use client';
 
-import { AITextTune } from '@/components/writing-tools/AITextTune';
+import { AITextTune } from '@/modules/ai/adapters/components/writing-tools/AITextTune';
 import { PenSquare } from 'lucide-react';
 
 export default function TextStylistPage() {

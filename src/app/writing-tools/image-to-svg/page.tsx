@@ -1,6 +1,6 @@
 'use client';
 
-import { ImageToSvgTool } from '@/components/writing-tools/ImageToSvgTool';
+import { ImageToSvgTool } from '@/modules/ai/adapters/components/writing-tools/ImageToSvgTool';
 import { ImageUp } from 'lucide-react';
 
 export default function ImageToSvgPage() {

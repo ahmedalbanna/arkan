@@ -1,6 +1,6 @@
 'use client';
 
-import { CitationGeneratorTool } from '@/components/writing-tools/CitationGeneratorTool';
+import { CitationGeneratorTool } from '@/modules/ai/adapters/components/writing-tools/CitationGeneratorTool';
 import { Quote } from 'lucide-react';
 import { useLocalization } from '@/context/LocalizationContext';
 

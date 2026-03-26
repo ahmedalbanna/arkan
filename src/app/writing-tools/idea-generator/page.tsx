@@ -1,7 +1,7 @@
 
 'use client';
 
-import { IdeaGeneratorTool } from '@/components/writing-tools/IdeaGeneratorTool';
+import { IdeaGeneratorTool } from '@/modules/ai/adapters/components/writing-tools/IdeaGeneratorTool';
 import { Brain } from 'lucide-react';
 import { useLocalization } from '@/context/LocalizationContext';
 

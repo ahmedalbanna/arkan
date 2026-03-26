@@ -1,7 +1,7 @@
 
 'use client';
 
-import { FactCheckerTool } from '@/components/writing-tools/FactCheckerTool';
+import { FactCheckerTool } from '@/modules/ai/adapters/components/writing-tools/FactCheckerTool';
 import { CheckCircle } from 'lucide-react';
 import { useLocalization } from '@/context/LocalizationContext';
 

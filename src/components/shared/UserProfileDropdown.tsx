@@ -12,7 +12,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useAuth } from '@/context/AuthContext';
-import { useLogout } from '@/hooks/auth/use-auth-mutations';
+import { useLogout } from '@/modules/users/adapters/hooks/use-auth-mutations';
 import { useLocalization } from '@/context/LocalizationContext';
 import Link from 'next/link';
 import { User, LayoutDashboard, AreaChart, LogOut, BookOpenCheck } from 'lucide-react';

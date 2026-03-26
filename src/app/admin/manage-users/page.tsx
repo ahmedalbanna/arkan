@@ -1,4 +1,4 @@
-import UserManagementConsole from '@/components/admin/users/UserManagementConsole';
+import UserManagementConsole from '@/modules/users/adapters/components/admin/UserManagementConsole';
 import { Users } from 'lucide-react';
 import { getTranslator } from '@/lib/utils/i18n';
 

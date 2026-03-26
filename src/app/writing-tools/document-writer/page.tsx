@@ -1,7 +1,7 @@
 
 'use client';
 
-import { DocumentWriterTool } from '@/components/writing-tools/DocumentWriterTool';
+import { DocumentWriterTool } from '@/modules/ai/adapters/components/writing-tools/DocumentWriterTool';
 import { FileEdit } from 'lucide-react';
 import { useLocalization } from '@/context/LocalizationContext';
 

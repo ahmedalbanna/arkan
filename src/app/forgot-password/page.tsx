@@ -1,5 +1,5 @@
 
-import ForgotPasswordForm from '@/components/auth/ForgotPasswordForm';
+import ForgotPasswordForm from '@/modules/users/adapters/components/auth/ForgotPasswordForm';
 import Image from 'next/image';
 
 export default function ForgotPasswordPage() {

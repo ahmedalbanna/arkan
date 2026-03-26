@@ -2,7 +2,7 @@
 
 'use client';
 
-import { useAiActions } from '@/hooks/report-mode/use-ai-actions';
+import { useAiActions } from '@/modules/ai-content/adapters/hooks/report-mode/use-ai-actions';
 import { useBrowserSpeech } from '@/hooks';
 import { useLocalization } from '@/context/LocalizationContext';
 import { Editor } from '@tiptap/react';

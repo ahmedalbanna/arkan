@@ -1,7 +1,7 @@
 
 'use client';
 
-import { HumanizerTool } from '@/components/writing-tools/HumanizerTool';
+import { HumanizerTool } from '@/modules/ai/adapters/components/writing-tools/HumanizerTool';
 import { useLocalization } from '@/context/LocalizationContext';
 import { UserCheck } from 'lucide-react';
 

@@ -1,4 +1,4 @@
-import FeatureManager from '@/components/admin/FeatureManager';
+import FeatureManager from '@/modules/admin/adapters/components/FeatureManager';
 import { SlidersHorizontal } from 'lucide-react';
 import { getTranslator } from '@/lib/utils/i18n';
 

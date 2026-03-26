@@ -1,6 +1,6 @@
 'use client';
 
-import { TemplateManagementConsole } from '@/components/admin/templates/TemplateManagementConsole';
+import { TemplateManagementConsole } from '@/modules/templates/adapters/components/admin/templates/TemplateManagementConsole';
 import { useLocalization } from '@/context/LocalizationContext';
 import { Palette } from 'lucide-react';
 

@@ -1,7 +1,7 @@
 
 'use client';
 
-import { SummarizerTool } from '@/components/writing-tools/SummarizerTool';
+import { SummarizerTool } from '@/modules/ai/adapters/components/writing-tools/SummarizerTool';
 import { BookOpenText } from 'lucide-react';
 import { useLocalization } from '@/context/LocalizationContext';
 

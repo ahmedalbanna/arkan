@@ -11,7 +11,7 @@ import { Input } from '@/components/ui/input';
 import { Loader2, KeyRound, Eye, EyeOff } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { Progress } from '@/components/ui/progress';
-import { useForgotPasswordLoggedIn, useChangePassword } from '@/hooks/auth/use-auth-mutations';
+import { useForgotPasswordLoggedIn, useChangePassword } from '@/modules/users/adapters/hooks/use-auth-mutations';
 
 const passwordSchema = z.object({
   currentPassword: z.string().min(1, 'Current password is required.'),

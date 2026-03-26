@@ -1,6 +1,6 @@
 'use client';
 
-import { AIResearcherTool } from '@/components/writing-tools/AIResearcherTool';
+import { AIResearcherTool } from '@/modules/ai/adapters/components/writing-tools/AIResearcherTool';
 import { useLocalization } from '@/context/LocalizationContext';
 import { Search } from 'lucide-react';
 

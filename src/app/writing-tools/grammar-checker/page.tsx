@@ -1,7 +1,7 @@
 
 'use client';
 
-import { GrammarCheckerTool } from '@/components/writing-tools/GrammarCheckerTool';
+import { GrammarCheckerTool } from '@/modules/ai/adapters/components/writing-tools/GrammarCheckerTool';
 import { SpellCheck } from 'lucide-react';
 import { useLocalization } from '@/context/LocalizationContext';
 

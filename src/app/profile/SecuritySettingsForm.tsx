@@ -9,7 +9,7 @@ import { useToast } from '@/hooks';
 import { User, SecuritySettings } from '@/modules/users/domain/entities/User';
 import { apiService } from '@/infrastructure/api/ApiService';
 import { ShieldCheck, Mail, Loader2, LogOut } from 'lucide-react';
-import { useLogoutAllDevices } from '@/hooks/auth/use-auth-mutations';
+import { useLogoutAllDevices } from '@/modules/users/adapters/hooks/use-auth-mutations';
 
 interface SecuritySettingsFormProps {
     userProfile: User;

@@ -3,9 +3,9 @@
 
 import { useUserStats } from '@/hooks';
 import { useAuth } from '@/context/AuthContext';
-import { StatCard } from '@/components/admin/dashboard/StatCard';
-import { AgentUsageChart } from '@/components/admin/dashboard/AgentUsageChart';
-import { RecentActivity } from '@/components/admin/dashboard/RecentActivity';
+import { StatCard } from '@/modules/admin/adapters/components/dashboard/StatCard';
+import { AgentUsageChart } from '@/modules/admin/adapters/components/dashboard/AgentUsageChart';
+import { RecentActivity } from '@/modules/admin/adapters/components/dashboard/RecentActivity';
 import { AlertCircle, Bot, History, AreaChart, TrendingDown, Gem, MessageSquare, Loader2, UserCog, CreditCard } from 'lucide-react';
 import { Card, CardHeader, CardContent, CardTitle, CardDescription } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';

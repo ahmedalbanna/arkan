@@ -1,6 +1,6 @@
 import { apiService, ApiError } from '@/infrastructure/api/ApiService';
 import { LoginCredentials } from '@/lib/utils/authUtils';
-import { SignupCredentials } from '@/components/auth/SignupForm';
+import { SignupCredentials } from '@/modules/users/adapters/components/auth/SignupForm';
 import { UserProfile } from '@/modules/users/domain/entities/User';
 import { Result } from '@/lib/utils/result';
 import { injectable } from 'tsyringe';

@@ -8,7 +8,7 @@ import remarkGfm from 'remark-gfm';
 import remarkStringify from 'remark-stringify';
 import { type Root as MdastRoot, type RootContent } from 'mdast';
 import { Chapter, Section, type ProjectContent, type SectionProperties } from '@/lib/types';
-import { getNodeText } from '@/lib/pptx-convert/ast-utils';
+import { getNodeText } from '@/modules/templates/infrastructure/exporters/pptx/ast-utils';
 
 /**
  * Parses a markdown string and converts it into a structured array of Chapter and Section objects.

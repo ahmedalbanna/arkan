@@ -1,7 +1,7 @@
 
 'use client';
 
-import SignupForm from '@/components/auth/SignupForm';
+import SignupForm from '@/modules/users/adapters/components/auth/SignupForm';
 import { useLocalization } from '@/context/LocalizationContext';
 import { UserPlus } from 'lucide-react';
 import Image from 'next/image';

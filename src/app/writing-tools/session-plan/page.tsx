@@ -1,4 +1,4 @@
-import { SessionPlanGenerator } from "@/components/writing-tools/SessionPlanGenerator";
+import { SessionPlanGenerator } from "@/modules/ai/adapters/components/writing-tools/SessionPlanGenerator";
 import { PlaneIcon } from "lucide-react";
 
 export default function SessionPlanGeneratorPage() {

@@ -11,7 +11,7 @@ import { useToast } from '@/hooks';
 import { useAuth } from '@/context/AuthContext';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
-import { SessionPlanDisplay } from '@/components/writing-tools/SessionPlanDisplay';
+import { SessionPlanDisplay } from '@/modules/ai/adapters/components/writing-tools/SessionPlanDisplay';
 import { markdownComponents } from '@/lib/utils/markdown-styles';
 import { apiService } from '@/infrastructure/api/ApiService';
 

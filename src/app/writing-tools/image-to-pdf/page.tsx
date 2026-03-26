@@ -1,6 +1,6 @@
 'use client';
 
-import { ImageToPdfTool } from '@/components/writing-tools/ImageToPdfTool';
+import { ImageToPdfTool } from '@/modules/ai/adapters/components/writing-tools/ImageToPdfTool';
 import { useLocalization } from '@/context/LocalizationContext';
 import { Images } from 'lucide-react';
 

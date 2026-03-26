@@ -1,4 +1,4 @@
-import ReportModeGenerator from '@/components/report-mode/ReportModeGenerator';
+import ReportModeGenerator from '@/modules/ai-content/adapters/components/report-mode/ReportModeGenerator';
 import { BuilderPageSkeleton } from './loading';
 import { Suspense } from 'react';
 import { cookies } from 'next/headers';

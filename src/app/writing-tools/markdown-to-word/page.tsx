@@ -1,6 +1,6 @@
 'use client';
 
-import { MarkdownToWordTool } from '@/components/writing-tools/MarkdownToWordTool';
+import { MarkdownToWordTool } from '@/modules/ai/adapters/components/writing-tools/MarkdownToWordTool';
 import { FileText } from 'lucide-react';
 
 export default function MarkdownToWordPage() {

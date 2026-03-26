@@ -100,13 +100,15 @@ npm run qdrant:stats  # Show Qdrant stats
   - `src/ai/genkit.ts` — Genkit instance + Ollama model config
 - `src/modules/` — Domain modules following Clean Architecture (DDD)
   - Each module: `domain/`, `application/`, `adapters/`, `infrastructure/`
+  - **`adapters/hooks/`**: Feature-specific hooks (moved from `src/hooks/data/`)
+  - **`adapters/components/`**: "Smart" components containing logic and hooks (moved from `src/components/admin/`, etc.)
   - Modules: `admin`, `ai`, `ai-content`, `billing`, `projects`, `rag`, `templates`, `users`
-- `src/components/` — React components (organized by feature/page)
-  - `src/components/ui/` — Base shadcn/ui components
-  - `src/components/shared/` — App-wide shared components
-  - `src/components/writing-tools/` — Writing tool UI components
-  - `src/components/report-mode/` — Report builder components
-- `src/hooks/` — Custom React hooks (organized by domain)
+- `src/components/` — Pure/Shared React components
+  - `src/components/ui/` — Base shadcn/ui components (stateless Radix primitives)
+  - `src/components/shared/` — App-wide UI (Header, ThemeToggle, AppProviders)
+- `src/hooks/` — Generic utility hooks
+  - `src/hooks/util/` — Non-domain hooks (`use-service`, `use-toast`, `use-mobile`)
+  - `src/hooks/core/` — Core framework/state hooks (`useBuilderStore`, `use-editor-store`)
 - `src/context/` — React context providers (`AuthContext`, `LocalizationContext`)
 - `src/infrastructure/` — Cross-cutting infrastructure (DI container, Firebase init)
 - `src/lib/` — Utilities, types, and helper modules
@@ -137,6 +139,7 @@ Each module in `src/modules/` follows the same four-layer structure:
 - Use `tsyringe` with `@injectable()` / `@inject()` decorators
 - Register all implementations in `src/infrastructure/di/container.ts`
 - Server-only repositories are `require()`-loaded inside the `typeof window === 'undefined'` guard to avoid client bundle contamination
+- **React Components**: Use the `useService(token)` hook from `@/hooks/util/use-service` to resolve dependencies within components. This ensures proper memoization and DI access in the client.
 - Resolve via `container.resolve(ClassName)` — do not `new` services directly
 - In Next.js route handlers, prefer resolving controllers/use cases through the DI container once metadata is set up correctly; avoid falling back to ad-hoc manual wiring unless there is a proven runtime blocker
 - For controller-to-use-case injection in this codebase, prefer `@inject(delay(() => UseCase))` on constructor parameters to avoid `TypeInfo not known for "undefined"` issues from import order / circular initialization in Next.js
@@ -369,6 +372,9 @@ FIREBASE_ADMIN_PRIVATE_KEY=
     - During infrastructure cleanup, perform a full sweep to delete stale repositories and initialization logic (e.g., in `server-init.ts`). For example, remove `admin.database()` calls if RTDB is no longer used, as they can trigger runtime errors if configuration URLs are missing. Carefully preserve shared services like Auth, Storage, or Notifications if they are still required.
     - **Shared Utility Sweeps**: After a major technology shift (like removing Firebase), perform a dedicated sweep of shared utilities (`ApiService.ts`, `errorUtils.ts`, etc.) to remove deprecated types and logic. These "quiet" dependencies can leak old architectural patterns into new code if not removed.
     - **Dependency Injection for New Services**: When introducing new cross-cutting services (like `IEmailService`), define a domain-level interface and use a unique `Symbol` token for registration in the DI container. This maintains loose coupling even when implementation details (like SMTP vs. API-based email) change.
+    - **Module-Based Frontend Migration**: When relocating components/hooks to module adapters, immediately update `tailwind.config.ts` to include the new directory in the `content` array. Failing to do so will result in missing CSS utility styles for those components.
+    - **Mass Import Refactoring**: For large-scale file moves, use `sed` or `grep/xargs` with absolute path aliases (`@/modules/...`) to update imports repo-wide. This is significantly more efficient than individual `find_and_replace_code` calls but requires careful regex validation.
+    - **Hydration & Suspense**: Always verify that any client component using `useSearchParams` is wrapped in a `<Suspense>` boundary in its parent page to prevent hydration mismatches and build-time errors in Next.js 15.
 
 ### Security Patterns
 - **Rate Limiting**: For single-instance SQLite deployments, use the in-memory `rate-limiter.ts` utility. For serverless or multi-instance environments, migrate this utility to use an external store like Redis.

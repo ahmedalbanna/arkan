@@ -1,4 +1,4 @@
-import Dashboard from '@/components/admin/dashboard/Dashboard';
+import Dashboard from '@/modules/admin/adapters/components/dashboard/Dashboard';
 import { LayoutDashboard } from 'lucide-react';
 import { getTranslator } from '@/lib/utils/i18n';
 

@@ -1,7 +1,7 @@
 
 'use client';
 
-import { TopicExplainerTool } from '@/components/writing-tools/TopicExplainerTool';
+import { TopicExplainerTool } from '@/modules/ai/adapters/components/writing-tools/TopicExplainerTool';
 import { Lightbulb } from 'lucide-react';
 import { useLocalization } from '@/context/LocalizationContext';
 

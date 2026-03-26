@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useGenerateTocLogic } from '@/hooks/writing-tools/use-generate-toc-logic';
+import { useGenerateTocLogic } from '@/modules/ai/adapters/hooks/writing-tools/use-generate-toc-logic';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';

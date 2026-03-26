@@ -11,7 +11,7 @@ import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { LanguageToggle } from '@/components/shared/LanguageToggle';
 import { ThemeToggle } from '@/components/shared/ThemeToggle';
-import { PurchaseCreditsDialog } from '../pricing/PurchaseCreditsDialog';
+import { PurchaseCreditsDialog } from '@/modules/billing/adapters/components/pricing/PurchaseCreditsDialog';
 import { Gem } from 'lucide-react';
 import { MobileNav } from './MobileNav';
 import { UserProfileDropdown } from './UserProfileDropdown';

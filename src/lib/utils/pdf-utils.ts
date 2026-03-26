@@ -10,8 +10,8 @@ import { unified } from 'unified';
 
 import { PdfExportService } from '@/modules/ai-content/infrastructure/exporters/PdfExportService';
 import { container } from '@/infrastructure/di/container';
-import { splitAstIntoSlides } from '../pptx-convert/ast-utils';
-import { DEFAULT_CODE_FONT, DEFAULT_FONT } from '../pptx-convert/constants';
+import { splitAstIntoSlides } from '@/modules/templates/infrastructure/exporters/pptx/ast-utils';
+import { DEFAULT_CODE_FONT, DEFAULT_FONT } from '@/modules/templates/infrastructure/exporters/pptx/constants';
 import { processPlantUml } from './processPlantUml';
 
 export async function convertMarkdownToPdf(

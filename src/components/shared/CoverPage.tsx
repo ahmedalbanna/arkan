@@ -8,7 +8,7 @@ import React, { useRef, useState } from 'react';
 import ContentEditable, { ContentEditableEvent } from 'react-contenteditable';
 import { useBuilderStore } from '@/hooks';
 import { cn } from '@/lib/utils/cn';
-import { useImageUpload } from '@/hooks/core/useImageUpload';
+import { useImageUpload } from '@/modules/ai/adapters/hooks/useImageUpload';
 import { ToggleGroup, ToggleGroupItem } from '../ui/toggle-group';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/tooltip';
 import { Button } from '../ui/button';

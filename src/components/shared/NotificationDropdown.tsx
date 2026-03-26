@@ -15,7 +15,7 @@ import { useLocalization } from '@/context/LocalizationContext';
 import { useNotifications } from '@/hooks';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { BatchNotificationDialog } from '../admin/dashboard/BatchNotificationDialog';
+import { BatchNotificationDialog } from '@/modules/admin/adapters/components/dashboard/BatchNotificationDialog';
 import { useAuth } from '@/context/AuthContext';
 import {
   DropdownMenu,

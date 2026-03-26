@@ -1,6 +1,6 @@
 
 
-import LoginForm from '@/components/auth/LoginForm';
+import LoginForm from '@/modules/users/adapters/components/auth/LoginForm';
 import { KeyRound } from 'lucide-react';
 import Image from 'next/image';
 

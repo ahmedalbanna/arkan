@@ -8,7 +8,7 @@
  * - Manage indexed documents
  */
 
-import { DocumentIndexerInterface } from '@/components/admin/document-indexer/DocumentIndexerInterface';
+import { DocumentIndexerInterface } from '@/modules/rag/adapters/components/document-indexer/DocumentIndexerInterface';
 
 export default function DocumentIndexerPage() {
   return (

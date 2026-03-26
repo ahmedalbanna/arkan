@@ -1,6 +1,6 @@
 'use client';
 
-import { InvisibleTextDetector } from '@/components/writing-tools/InvisibleTextDetector';
+import { InvisibleTextDetector } from '@/modules/ai/adapters/components/writing-tools/InvisibleTextDetector';
 import { EyeOff } from 'lucide-react';
 
 export default function InvisibleTextDetectorPage() {

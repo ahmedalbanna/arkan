@@ -1,7 +1,7 @@
 
 'use client';
 
-import { ParaphraserTool } from '@/components/writing-tools/ParaphraserTool';
+import { ParaphraserTool } from '@/modules/ai/adapters/components/writing-tools/ParaphraserTool';
 import { Repeat } from 'lucide-react';
 import { useLocalization } from '@/context/LocalizationContext';
 

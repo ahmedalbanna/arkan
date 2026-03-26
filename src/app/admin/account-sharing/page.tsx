@@ -4,7 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { container } from "@/infrastructure/di/container";
 import { AdminApiClient } from "@/modules/admin/adapters/api-client/AdminApiClient";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { AccountSharingAlert } from "@/components/admin/dashboard/AccountSharingAlert";
+import { AccountSharingAlert } from '@/modules/admin/adapters/components/dashboard/AccountSharingAlert';
 import { ShieldCheck, Loader2 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 

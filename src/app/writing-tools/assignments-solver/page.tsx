@@ -1,6 +1,6 @@
 'use client';
 
-import { AssignmentsSolverTool } from '@/components/writing-tools/AssignmentsSolverTool';
+import { AssignmentsSolverTool } from '@/modules/ai/adapters/components/writing-tools/AssignmentsSolverTool';
 import { BookCheck } from 'lucide-react';
 import { useLocalization } from '@/context/LocalizationContext';
 

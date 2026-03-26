@@ -1,6 +1,6 @@
 'use client';
 
-import { AIToolCard } from '@/components/writing-tools/AIToolCard';
+import { AIToolCard } from '@/modules/ai/adapters/components/writing-tools/AIToolCard';
 import { useLocalization } from '@/context/LocalizationContext';
 import { PenSquare } from 'lucide-react';
 

@@ -1,7 +1,7 @@
 
 'use client';
 
-import { AIDetectorTool } from '@/components/writing-tools/AIDetectorTool';
+import { AIDetectorTool } from '@/modules/ai/adapters/components/writing-tools/AIDetectorTool';
 import { Fingerprint } from 'lucide-react';
 import { useLocalization } from '@/context/LocalizationContext';
 

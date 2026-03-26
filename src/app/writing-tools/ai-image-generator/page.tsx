@@ -1,7 +1,7 @@
 
 'use client';
 
-import { AIImageGeneratorTool } from '@/components/writing-tools/AIImageGeneratorTool';
+import { AIImageGeneratorTool } from '@/modules/ai/adapters/components/writing-tools/AIImageGeneratorTool';
 import { Image as ImageIcon } from 'lucide-react';
 
 export default function AiImageGeneratorPage() {

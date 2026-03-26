@@ -3,11 +3,11 @@
 'use client';
 
 import { useSections } from '@/hooks';
-import { SectionDataTable } from '@/components/admin/sections/SectionDataTable';
-import { columns } from '@/components/admin/sections/columns';
+import { SectionDataTable } from '@/modules/ai-content/adapters/components/admin/sections/SectionDataTable';
+import { columns } from '@/modules/ai-content/adapters/components/admin/sections/columns';
 import { SectionProperties } from '@/modules/ai-content/domain/entities/Section';
 import { Skeleton } from '@/components/ui/skeleton';
-import { SectionFormDialog } from '@/components/admin/sections/SectionFormDialog';
+import { SectionFormDialog } from '@/modules/ai-content/adapters/components/admin/sections/SectionFormDialog';
 import { useLocalization } from '@/context/LocalizationContext';
 
 export default function ManageSectionsPage() {

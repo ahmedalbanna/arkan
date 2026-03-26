@@ -1,6 +1,6 @@
 'use client';
 
-import { ProjectBlueprintTool } from '@/components/writing-tools/ProjectBlueprintTool';
+import { ProjectBlueprintTool } from '@/modules/ai/adapters/components/writing-tools/ProjectBlueprintTool';
 import { Building2 } from 'lucide-react';
 import { useLocalization } from '@/context/LocalizationContext';
 

@@ -1,8 +1,8 @@
 
 'use client';
 
-import AgentPlayground from '@/components/agent/AgentPlayground';
-import { AgentList } from '@/components/sidebar/AgentList';
+import AgentPlayground from '@/modules/ai/adapters/components/agent/AgentPlayground';
+import { AgentList } from '@/modules/ai/adapters/components/sidebar/AgentList';
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@/components/ui/resizable';
 import { useAgentManager } from '@/hooks/use-agent-store';
 import { Bot, RefreshCw, AlertCircle } from 'lucide-react';

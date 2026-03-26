@@ -26,7 +26,7 @@ jest.mock('@/lib/utils/cookie-management', () => ({
   clearGuestCookie: jest.fn(),
 }));
 
-jest.mock('@/hooks/data/authenticated-client-call', () => ({
+jest.mock('@/infrastructure/api/authenticated-client-call', () => ({
   runAuthenticatedResultCall: jest.fn(),
 }));
 
@@ -58,7 +58,7 @@ const { hasGuestCookie, clearGuestCookie } = jest.requireMock('@/lib/utils/cooki
   clearGuestCookie: jest.Mock;
 };
 
-const { runAuthenticatedResultCall } = jest.requireMock('@/hooks/data/authenticated-client-call') as {
+const { runAuthenticatedResultCall } = jest.requireMock('@/infrastructure/api/authenticated-client-call') as {
   runAuthenticatedResultCall: jest.Mock;
 };
 

@@ -18,7 +18,7 @@ import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
 import { useLocalization } from '@/context/LocalizationContext';
 import { useToast } from '@/hooks';
-import { usePublicSettings } from '@/hooks/data/use-settings';
+import { usePublicSettings } from '@/modules/admin/adapters/hooks/use-settings';
 import { useAuth } from '@/context/AuthContext';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import type { AppSettings } from '@/lib/types';
