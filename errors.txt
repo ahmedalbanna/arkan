@@ -1,30 +1,22 @@
 ## Error Type
-Runtime TypeError
+Runtime ReferenceError
 
 ## Error Message
-Cannot read properties of undefined (reading 'includeCitations')
+React is not defined
 
 
-    at SectionGenerationControls (src/components/report-mode/section-controls/SectionGenerationControls.tsx:176:35)
-    at SectionAccordionItem (src/components/report-mode/generation-tools/SectionAccordionItem.tsx:151:33)
-    at <unknown> (src/components/report-mode/generation-tools/SortableChapterItem.tsx:103:17)
-    at Array.map (<anonymous>:null:null)
-    at SortableChapterItem (src/components/report-mode/generation-tools/SortableChapterItem.tsx:102:33)
-    at <unknown> (src/components/report-mode/generation-tools/index.tsx:110:29)
-    at Array.map (<anonymous>:null:null)
-    at GenerationTools (src/components/report-mode/generation-tools/index.tsx:107:49)
-    at useReportGenerator.useMemo[panels] (src/hooks/report-mode/useReportGenerator.ts:58:24)
-    at useReportGenerator (src/hooks/report-mode/useReportGenerator.ts:35:25)
-    at ReportModeGenerator (src/components/report-mode/ReportModeGenerator.tsx:86:27)
+    at __TURBOPACK__module__evaluation__ (src/modules/ai-content/adapters/components/report-mode/ReportResults.tsx:80:7)
+    at <unknown> (.next/static/chunks/b1a17_modules_ai-content_adapters_components_report-mode_ReportResults_tsx_6cc5bd76._.js:26:16)
+    at ReportModeGenerator (src/modules/ai-content/adapters/components/report-mode/ReportModeGenerator.tsx:99:9)
     at GeneratePage (src/app/builder/page.tsx:39:7)
 
 ## Code Frame
-  174 |             )}
-  175 |
-> 176 |             {controls.outputStyle.includeCitations && (
-      |                                   ^
-  177 |                  <div className="space-y-2 pl-6">
-  178 |                     <Label htmlFor={`citationStyle-${section.id}`}>Citation Style</Label>
-  179 |                     <Select value={controls.citationStyle} onValueChange={(val) => handleControlChange('citationStyle', val as any)}>
+  78 | }
+  79 |
+> 80 | const ReportResults = ({ activePanelKey }: ReportResultsProps) => {
+     |       ^
+  81 |   const { t } = useLocalization();
+  82 |   const project = useBuilderStore(state => state.project);
+  83 |   const version = useBuilderStore(state => state.version);
 
 Next.js version: 15.5.9 (Turbopack)

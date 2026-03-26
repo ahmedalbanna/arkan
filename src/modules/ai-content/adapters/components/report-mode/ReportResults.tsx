@@ -1,5 +1,6 @@
 'use client';
 
+import React, { useState } from 'react';
 import { A4Page } from '@/components/shared/A4Page';
 import {
   CardContent,
@@ -14,7 +15,6 @@ import { CoverPage } from '@/components/shared/CoverPage';
 import { BookOpenCheck, Brush, LayoutList, Bot, FileVideo, FileText, ChevronDown, Lightbulb, History } from 'lucide-react';
 import { TableOfContentForm } from './TableOfContentForm';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
-import { useState } from 'react';
 import { formatDistanceToNow } from 'date-fns';
 import { Button } from '@/components/ui/button';
 import { FileContentViewer } from './file-manager/FileContentViewer';
