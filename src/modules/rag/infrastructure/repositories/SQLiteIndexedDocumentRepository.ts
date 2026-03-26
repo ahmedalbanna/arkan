@@ -2,7 +2,7 @@ import { injectable } from "tsyringe";
 import { db } from "@/infrastructure/db";
 import { indexedDocuments } from "@/infrastructure/db/schema";
 import { IIndexedDocumentRepository, IndexedDocumentRecord } from "../../domain/repositories/IIndexedDocumentRepository";
-import { Result } from "@/lib/utils/result";
+import { Result } from "@/infrastructure/utils/result";
 import { RagError } from "../../domain/errors/RagErrors";
 import { eq, desc, count, sql, like, or, and } from "drizzle-orm";
 import { v4 as uuidv4 } from "uuid";

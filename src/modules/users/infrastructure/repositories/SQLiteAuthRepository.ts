@@ -2,7 +2,7 @@ import { injectable } from "tsyringe";
 import { db } from "@/infrastructure/db";
 import { users, passwordResets } from "@/infrastructure/db/schema";
 import { IAuthRepository } from "../../domain/repositories/IAuthRepository";
-import { Result } from "@/lib/utils/result";
+import { Result } from "@/infrastructure/utils/result";
 import { UserError } from "../../domain/errors/UserErrors";
 import { AuthCrypto } from "@/modules/users/domain/utils/auth-crypto";
 import { eq, and, sql } from "drizzle-orm";

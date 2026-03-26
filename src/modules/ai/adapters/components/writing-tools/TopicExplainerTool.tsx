@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useTopicExplainerLogic } from '@/modules/ai/adapters/hooks/writing-tools/use-topic-explainer-logic';
-import { markdownComponents } from '@/lib/utils/markdown-styles';
+import { markdownComponents } from '@/modules/ai-content/adapters/components/report-mode/markdown-styles';
 import { Loader2, Sparkles } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 

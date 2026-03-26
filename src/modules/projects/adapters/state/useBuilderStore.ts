@@ -1,13 +1,13 @@
 'use client';
 
-import { Chapter, Project, Section, TocSection, type ProjectProperties, User } from '@/lib/types';
+import { Chapter, Project, Section, TocSection, type ProjectProperties, User } from '@/infrastructure/utils/types';
 import { LocalProjectService } from '@/modules/projects/adapters/local-storage/LocalProjectService';
 import { container } from '@/infrastructure/di/container';
 import { useEffect } from 'react';
 import { create } from 'zustand';
 import { toast } from '@/hooks/util/use-toast';
 import { useEditorStore } from '@/modules/ai-content/adapters/state/use-editor-store';
-import { projectFromFile } from '@/lib/project/io'; // Import from new location
+import { projectFromFile } from '@/modules/projects/infrastructure/io/io'; // Import from new location
 
 interface BuilderState {
     project: Project | null;

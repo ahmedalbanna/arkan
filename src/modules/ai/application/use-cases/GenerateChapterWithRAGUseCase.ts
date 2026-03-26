@@ -5,7 +5,7 @@ import { IAiServiceToken } from "../../domain/services/IAiService";
 import type { IGenerationLogRepository } from "../../domain/repositories/IGenerationLogRepository";
 import { IGenerationLogRepositoryToken } from "../../domain/repositories/IGenerationLogRepository";
 import { DeductCreditsUseCase } from "@/modules/users/application/use-cases/DeductCreditsUseCase";
-import { Result } from "@/lib/utils/result";
+import { Result } from "@/infrastructure/utils/result";
 import { AiError } from "../../domain/errors/AiErrors";
 
 @injectable()

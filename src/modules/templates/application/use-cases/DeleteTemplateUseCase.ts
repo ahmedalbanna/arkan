@@ -1,7 +1,7 @@
 import { inject, injectable } from "tsyringe";
 import type { ITemplateRepository, TemplateType } from "../../domain/repositories/ITemplateRepository";
 import { ITemplateRepositoryToken } from "../../domain/repositories/ITemplateRepository";
-import { Result } from "@/lib/utils/result";
+import { Result } from "@/infrastructure/utils/result";
 import { TemplateError } from "../../domain/errors/TemplateErrors";
 
 @injectable()

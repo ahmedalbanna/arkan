@@ -1,7 +1,7 @@
 import { injectable } from "tsyringe";
 import { db } from "@/infrastructure/db";
 import { notifications } from "@/infrastructure/db/schema";
-import { Result } from "@/lib/utils/result";
+import { Result } from "@/infrastructure/utils/result";
 import { UserError } from "../../domain/errors/UserErrors";
 import { eq, desc, and, inArray } from "drizzle-orm";
 import { v4 as uuidv4 } from "uuid";

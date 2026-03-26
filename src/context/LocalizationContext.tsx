@@ -2,7 +2,7 @@
 
 import ar from '@/locales/ar.json';
 import en from '@/locales/en.json';
-import { translate } from '@/lib/utils/translation';
+import { translate } from '@/infrastructure/i18n/translation';
 import { createContext, ReactNode, useContext, useEffect, useState } from 'react';
 
 type Locale = 'en' | 'ar';

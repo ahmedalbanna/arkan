@@ -4,7 +4,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '@/context/AuthContext';
 import { container } from '@/infrastructure/di/container';
 import { NotificationApiClient } from '@/modules/users/adapters/api-client/NotificationApiClient';
-import { notificationKeys } from '@/lib/query-keys';
+import { notificationKeys } from '@/infrastructure/api/query-keys';
 
 export function useNotifications() {
   const { firebaseUser } = useAuth();

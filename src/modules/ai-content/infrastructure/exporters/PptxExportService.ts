@@ -5,7 +5,7 @@ import {
     ExportOptions 
 } from "@/modules/ai-content/domain/services/IExportService";
 import { Project, ProjectContent } from "@/modules/projects/domain/entities/Project";
-import { convertMarkdownToPptx, type PptxConversionOptions } from "@/lib/markdown-to-pptx-converter";
+import { convertMarkdownToPptx, type PptxConversionOptions } from "@/modules/templates/infrastructure/exporters/pptx/markdown-to-pptx-converter";
 import { Chapter } from "@/modules/ai-content/domain/entities/Chapter";
 
 @injectable()

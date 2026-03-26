@@ -1,11 +1,11 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { act, renderHook, waitFor } from '@testing-library/react';
-import { sectionKeys } from '@/lib/query-keys';
+import { sectionKeys } from '@/infrastructure/api/query-keys';
 
 jest.mock('@/context/AuthContext', () => ({ useAuth: jest.fn() }));
 jest.mock('@/hooks/util/use-toast', () => ({ toast: jest.fn() }));
 jest.mock('@/infrastructure/api/authenticated-client-call', () => ({ runAuthenticatedResultCall: jest.fn() }));
-jest.mock('@/lib/types', () => ({
+jest.mock('@/infrastructure/utils/types', () => ({
   Section: class MockSection {
     id?: string;
     title?: string;

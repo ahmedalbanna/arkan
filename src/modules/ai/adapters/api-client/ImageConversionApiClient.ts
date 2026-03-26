@@ -2,7 +2,7 @@
 
 import { injectable } from 'tsyringe';
 import { apiService, ApiError } from '@/infrastructure/api/ApiService';
-import { Result } from '@/lib/utils/result';
+import { Result } from '@/infrastructure/utils/result';
 
 const API_ENDPOINT = '/api/svg-conversion';
 

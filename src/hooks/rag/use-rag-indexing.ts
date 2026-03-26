@@ -5,7 +5,7 @@ import { useAuth } from '@/context/AuthContext';
 import { container } from '@/infrastructure/di/container';
 import { RagApiClient } from '@/modules/rag/adapters/api-client/RagApiClient';
 import { useToast } from '@/hooks/util/use-toast';
-import { ragKeys } from '@/lib/query-keys';
+import { ragKeys } from '@/infrastructure/api/query-keys';
 
 export function useRagIndexing() {
   const { firebaseUser } = useAuth();

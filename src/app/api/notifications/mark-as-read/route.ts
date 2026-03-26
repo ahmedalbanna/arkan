@@ -3,13 +3,13 @@ import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import { container } from '@/infrastructure/di/container';
 import { UserController } from '@/modules/users/adapters/controllers/UserController';
-import { withAuth, handleApiError, createApiResponse } from '@/lib/utils/api-utils';
+import { withAuth, handleApiError, createApiResponse } from '@/infrastructure/api/api-utils';
 
 const markAsReadSchema = z.object({
   notificationIds: z.array(z.string()).min(1),
 });
 
-import { handleUserResult } from '@/lib/utils/api-utils';
+import { handleUserResult } from '@/infrastructure/api/api-utils';
 
 export const POST = withAuth(async ({ request, user }) => {
     try {

@@ -3,7 +3,7 @@ import { inject, injectable } from "tsyringe";
 import type { ITransactionRepository } from "../../domain/repositories/ITransactionRepository";
 import { ITransactionRepositoryToken } from "../../domain/repositories/ITransactionRepository";
 import { TransactionProperties } from "../../domain/entities/Transaction";
-import { Result } from "@/lib/utils/result";
+import { Result } from "@/infrastructure/utils/result";
 import { BillingError } from "../../domain/errors/BillingErrors";
 
 @injectable()

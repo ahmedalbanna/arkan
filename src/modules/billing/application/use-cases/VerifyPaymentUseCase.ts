@@ -5,7 +5,7 @@ import { ITransactionRepositoryToken } from "../../domain/repositories/ITransact
 import { AddCreditsUseCase } from "@/modules/users/application/use-cases/AddCreditsUseCase";
 import type { INotificationService } from "@/modules/users/domain/services/INotificationService";
 import { INotificationServiceToken } from "@/modules/users/domain/services/INotificationService";
-import { Result } from "@/lib/utils/result";
+import { Result } from "@/infrastructure/utils/result";
 import { BillingError } from "../../domain/errors/BillingErrors";
 
 @injectable()

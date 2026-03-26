@@ -13,10 +13,10 @@ import { container } from '@/infrastructure/di/container';
 import type { SectionName } from '@/ai/schemas';
 import { PromptBuilder } from '@/modules/ai-content/domain/services/PromptBuilder';
 import { WritingToolsApiClient } from '@/modules/ai/adapters/api-client/WritingToolsApiClient';
-import { Chapter, type Project, type Section, type ExternalContextType } from '@/lib/types';
-import { parseMarkdownToContent } from '@/lib/project/markdown-parser';
+import { Chapter, type Project, type Section, type ExternalContextType } from '@/infrastructure/utils/types';
+import { parseMarkdownToContent } from '@/modules/projects/infrastructure/io/markdown-parser';
 import { useEditorStore } from '@/modules/ai-content/adapters/state/use-editor-store';
-import { projectKeys } from '@/lib/query-keys';
+import { projectKeys } from '@/infrastructure/api/query-keys';
 import { runAuthenticatedResultCall } from '@/infrastructure/api/authenticated-client-call';
 
 interface AiActionsProps {

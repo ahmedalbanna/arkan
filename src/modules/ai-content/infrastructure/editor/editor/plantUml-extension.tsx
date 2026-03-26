@@ -7,7 +7,7 @@ import pako from 'pako';
 import { Textarea } from '@/components/ui/textarea';
 import Image from 'next/image';
 import { useDebounce } from '@/hooks';
-import { encode64 } from '@/lib/utils/encode64';
+import { encode64 } from '@/infrastructure/utils/encode64';
 
 const PlantUMLComponent = (props: any) => {
   const [code, setCode] = useState(props.node.attrs.code || '@startuml\nactor User\nUser -> System: Do something\n@enduml');

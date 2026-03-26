@@ -8,14 +8,14 @@ import { Calendar as CalendarIcon, Download, Loader2 } from 'lucide-react';
 import { format } from 'date-fns';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { cn } from '@/lib/utils/cn';
+import { cn } from '@/infrastructure/utils/cn';
 import { useAuth } from '@/context/AuthContext';
 import { container } from '@/infrastructure/di/container';
 import { TransactionApiClient } from '@/modules/billing/adapters/api-client/TransactionApiClient';
 import { useToast } from '@/hooks';
 import { useLocalization } from '@/context/LocalizationContext';
 import { convertMarkdownToPdf } from '@/modules/ai-content/infrastructure/utils/pdf-utils';
-import type { TransactionProperties } from '@/lib/types';
+import type { TransactionProperties } from '@/infrastructure/utils/types';
 import { runAuthenticatedResultCall } from '@/infrastructure/api/authenticated-client-call';
 
 function formatTransactionsToMarkdown(transactions: TransactionProperties[], dateRange: DateRange): string {

@@ -13,7 +13,7 @@ import {
 } from '@/components/ui/dialog';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useBuilderStore } from '@/hooks';
-import type { Chapter, Section, Project } from '@/lib/types';
+import type { Chapter, Section, Project } from '@/infrastructure/utils/types';
 
 import { AlertTriangle, Building, Code, Eye, Link as LinkIcon, Loader2, StickyNote } from 'lucide-react';
 import { useMemo, useState } from 'react';

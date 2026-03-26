@@ -1,6 +1,6 @@
 
 import { z } from 'zod';
-import { withAuth, handleApiError, handleBillingResult } from '@/lib/utils/api-utils';
+import { withAuth, handleApiError, handleBillingResult } from '@/infrastructure/api/api-utils';
 import { container } from '@/infrastructure/di/container';
 import { BillingController } from '@/modules/billing/adapters/controllers/BillingController';
 

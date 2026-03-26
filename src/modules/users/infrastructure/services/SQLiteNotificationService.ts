@@ -2,7 +2,7 @@ import { injectable } from "tsyringe";
 import { db } from "@/infrastructure/db";
 import { notifications, users, deviceTokens, scheduledNotifications } from "@/infrastructure/db/schema";
 import type { INotificationService, NotificationPayload } from "../../domain/services/INotificationService";
-import { Result } from "@/lib/utils/result";
+import { Result } from "@/infrastructure/utils/result";
 import { UserError } from "../../domain/errors/UserErrors";
 import { eq, desc, and, inArray, lte } from "drizzle-orm";
 import { v4 as uuidv4 } from "uuid";

@@ -9,8 +9,8 @@ import {
 } from "@/components/ui/dialog";
 import { useLocalization } from "@/context/LocalizationContext";
 import { useBuilderStore, useToast } from '@/hooks';
-import { ExternalContextType } from '@/lib/types';
-import { cn } from "@/lib/utils/cn";
+import { ExternalContextType } from '@/infrastructure/utils/types';
+import { cn } from "@/infrastructure/utils/cn";
 import { AtomIcon, FileText, ImageIcon, Loader2, UploadCloud, X } from 'lucide-react';
 import { useState, useCallback } from 'react';
 import { useDropzone } from 'react-dropzone';
@@ -26,7 +26,7 @@ import { Badge } from "@/components/ui/badge";
 import { PdfPreview } from './PdfPreview';
 import Image from 'next/image';
 import ReactMarkdown from 'react-markdown';
-import { markdownComponents } from '@/lib/utils/markdown-styles';
+import { markdownComponents } from '@/modules/ai-content/adapters/components/report-mode/markdown-styles';
 import AnalystAgent from "./AnalystAgent";
 import { FileContentViewer } from './FileContentViewer';
 

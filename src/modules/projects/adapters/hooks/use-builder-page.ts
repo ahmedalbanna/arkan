@@ -2,12 +2,12 @@
 
 import { useAuth } from '@/context/AuthContext';
 import { useBuilderStore, useInitializeBuilderStore } from '@/hooks';
-import { userKeys } from '@/lib/query-keys';
+import { userKeys } from '@/infrastructure/api/query-keys';
 import { apiService } from '@/infrastructure/api/ApiService';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useCallback, useEffect, useState } from 'react';
 
-import { ProjectProperties } from '@/lib/types';
+import { ProjectProperties } from '@/infrastructure/utils/types';
 
 export function useBuilderPageLogic(initialProject?: ProjectProperties | null) {
   const { userProfile, firebaseUser, refetchUser } = useAuth();

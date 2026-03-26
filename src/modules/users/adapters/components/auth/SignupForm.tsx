@@ -7,7 +7,7 @@ import { useLocalization } from '@/context/LocalizationContext';
 import { useSignup } from '@/modules/users/adapters/hooks/use-auth-mutations';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Loader2 } from 'lucide-react';
-import { generateFingerprint } from '@/lib/utils/security/fingerprint';
+import { generateFingerprint } from '@/infrastructure/security/fingerprint';
 import Link from 'next/link';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';

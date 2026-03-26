@@ -9,10 +9,10 @@ import {
     users
 } from "@/infrastructure/db/schema";
 import { AuthCrypto } from "@/modules/users/domain/utils/auth-crypto";
-import { defaultBankAccounts } from '@/lib/db/seed-data/bank-accounts';
-import { defaultPaymentMethods } from '@/lib/db/seed-data/payment-methods';
-import { defaultFeatures } from '@/lib/db/seed-data/features';
-import { defaultSections } from '@/lib/db/seed-data/sections';
+import { defaultBankAccounts } from "./seed-data/bank-accounts";
+import { defaultPaymentMethods } from "./seed-data/payment-methods";
+import { defaultFeatures } from "./seed-data/features";
+import { defaultSections } from "./seed-data/sections";
 import { defaultAgents, defaultAgentCategories } from './seed-data/agents';
 import { defaultReportTemplates } from './seed-data/report-templates';
 import { templates as defaultDocxTemplates } from '@/modules/ai-content/infrastructure/exporters/DocxStyles';

@@ -1,6 +1,6 @@
 'use server';
 
-import { createApiResponse, handleApiError, withAuth } from '@/lib/utils/api-utils';
+import { createApiResponse, handleApiError, withAuth } from '@/infrastructure/api/api-utils';
 import { container } from '@/infrastructure/di/container';
 import { AdminController } from '@/modules/admin/adapters/controllers/AdminController';
 

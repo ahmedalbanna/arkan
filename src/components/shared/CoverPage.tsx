@@ -1,13 +1,13 @@
 
 'use client';
 
-import { Project, type ProjectProperties } from '@/lib/types';
+import { Project, type ProjectProperties } from '@/infrastructure/utils/types';
 import { Landmark, UploadCloud, Frame, Loader2, Book, Building, Brush, BookCopy } from 'lucide-react';
 import Image from 'next/image';
 import React, { useRef, useState } from 'react';
 import ContentEditable, { ContentEditableEvent } from 'react-contenteditable';
 import { useBuilderStore } from '@/hooks';
-import { cn } from '@/lib/utils/cn';
+import { cn } from '@/infrastructure/utils/cn';
 import { useImageUpload } from '@/modules/ai/adapters/hooks/useImageUpload';
 import { ToggleGroup, ToggleGroupItem } from '../ui/toggle-group';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/tooltip';

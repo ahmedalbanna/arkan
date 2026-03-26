@@ -1,12 +1,12 @@
 
 'use client';
 
-import { projectFromFile, downloadProjectAsFile } from '@/lib/project/io';
+import { projectFromFile, downloadProjectAsFile } from '@/modules/projects/infrastructure/io/io';
 import { useBuilderStore } from '@/modules/projects/adapters/state/useBuilderStore';
 import { useRouter } from 'next/navigation';
 import { useCallback } from 'react';
 import { toast } from '@/hooks/util/use-toast';
-import type { Project } from '@/lib/types';
+import type { Project } from '@/infrastructure/utils/types';
 
 /**
  * Custom hook for handling project file operations (upload, download, etc.)

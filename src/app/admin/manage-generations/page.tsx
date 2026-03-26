@@ -1,6 +1,6 @@
 import GenerationLogViewer from "@/components/admin/GenerationLogViewer";
 import { History } from "lucide-react";
-import { getTranslator } from '@/lib/utils/i18n';
+import { getTranslator } from '@/infrastructure/i18n/i18n';
 
 export default async function ManageGenerationsPage() {
   const t = await getTranslator();

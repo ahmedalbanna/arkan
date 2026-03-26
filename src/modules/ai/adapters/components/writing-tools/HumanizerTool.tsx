@@ -7,7 +7,7 @@ import { Label } from '@/components/ui/label';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Textarea } from '@/components/ui/textarea';
 import { useHumanizerLogic } from '@/modules/ai/adapters/hooks/writing-tools/use-humanizer-logic';
-import { markdownComponents } from '@/lib/utils/markdown-styles';
+import { markdownComponents } from '@/modules/ai-content/adapters/components/report-mode/markdown-styles';
 import { Check, Copy, Loader2, Sparkles } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 

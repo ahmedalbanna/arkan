@@ -1,5 +1,5 @@
 
-import { handleResult, handleApiError, withAuth } from '@/lib/utils/api-utils';
+import { handleResult, handleApiError, withAuth } from '@/infrastructure/api/api-utils';
 import { container } from '@/infrastructure/di/container';
 import { UserController } from '@/modules/users/adapters/controllers/UserController';
 

@@ -3,7 +3,7 @@ import { db } from "@/infrastructure/db";
 import { transactions } from "@/infrastructure/db/schema";
 import { ITransactionRepository } from "../../domain/repositories/ITransactionRepository";
 import { Transaction, TransactionProperties } from "../../domain/entities/Transaction";
-import { Result } from "@/lib/utils/result";
+import { Result } from "@/infrastructure/utils/result";
 import { BillingError } from "../../domain/errors/BillingErrors";
 import { eq, desc, and, gte, lte, lt } from "drizzle-orm";
 import { v4 as uuidv4 } from "uuid";

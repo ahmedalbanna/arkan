@@ -3,7 +3,7 @@ import { inject, injectable } from "tsyringe";
 import type { IProjectRepository } from "../../domain/repositories/IProjectRepository";
 import { IProjectRepositoryToken } from "../../domain/repositories/IProjectRepository";
 import { Project, ProjectProperties } from "../../domain/entities/Project";
-import { Result } from "@/lib/utils/result";
+import { Result } from "@/infrastructure/utils/result";
 import { ProjectError } from "../../domain/errors/ProjectErrors";
 
 @injectable()

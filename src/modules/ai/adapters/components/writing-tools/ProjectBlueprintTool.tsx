@@ -9,7 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Textarea } from '@/components/ui/textarea';
 import { useLocalization } from '@/context/LocalizationContext';
 import { useProjectBlueprintLogic } from '@/modules/ai/adapters/hooks/writing-tools/use-project-blueprint-logic';
-import { markdownComponents } from '@/lib/utils/markdown-styles';
+import { markdownComponents } from '@/modules/ai-content/adapters/components/report-mode/markdown-styles';
 import { Check, Copy, Loader2, Building2, Download, FileText } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 

@@ -3,7 +3,7 @@ import { inject, injectable } from "tsyringe";
 import type { IAgentRepository } from "../../domain/repositories/IAgentRepository";
 import { IAgentRepositoryToken } from "../../domain/repositories/IAgentRepository";
 import { Agent } from "../../domain/entities/Agent";
-import { Result } from "@/lib/utils/result";
+import { Result } from "@/infrastructure/utils/result";
 import { AiError } from "../../domain/errors/AiErrors";
 
 @injectable()

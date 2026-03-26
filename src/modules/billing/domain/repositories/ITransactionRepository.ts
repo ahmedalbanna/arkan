@@ -1,6 +1,6 @@
 
 import { TransactionProperties } from "../entities/Transaction";
-import { Result } from "@/lib/utils/result";
+import { Result } from "@/infrastructure/utils/result";
 import { BillingError } from "../errors/BillingErrors";
 
 export interface ITransactionRepository {

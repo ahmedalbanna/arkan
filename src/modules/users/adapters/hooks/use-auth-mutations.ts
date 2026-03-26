@@ -6,9 +6,9 @@ import { AuthApiClient } from '@/modules/users/adapters/api-client/AuthApiClient
 import { container } from '@/infrastructure/di/container';
 import { UserApiClient } from '@/modules/users/adapters/api-client/UserApiClient';
 import { useToast } from '@/hooks/util/use-toast';
-import { handleErrorUtility } from '@/lib/utils/errorUtils';
+import { handleErrorUtility } from '@/infrastructure/api/errorUtils';
 import { useAuth } from '@/context/AuthContext';
-import { userKeys } from '@/lib/query-keys';
+import { userKeys } from '@/infrastructure/api/query-keys';
 import { LoginCredentials } from '@/modules/users/domain/utils/authUtils';
 import { SignupCredentials } from '@/modules/users/adapters/components/auth/SignupForm';
 

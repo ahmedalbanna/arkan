@@ -4,7 +4,7 @@ import { useQuery } from '@tanstack/react-query';
 import { container } from '@/infrastructure/di/container';
 import { AdminApiClient, DashboardStats } from '@/modules/admin/adapters/api-client/AdminApiClient';
 import { useAuth } from '@/context/AuthContext';
-import { adminKeys } from '@/lib/query-keys';
+import { adminKeys } from '@/infrastructure/api/query-keys';
 
 export function useAdminDashboard() {
   const { firebaseUser } = useAuth();

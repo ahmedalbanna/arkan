@@ -2,7 +2,7 @@ import { injectable } from "tsyringe";
 import { db } from "@/infrastructure/db";
 import { sections } from "@/infrastructure/db/schema";
 import { ISectionRepository, SectionDefinition } from "../../domain/repositories/ISectionRepository";
-import { Result } from "@/lib/utils/result";
+import { Result } from "@/infrastructure/utils/result";
 import { AIContentError } from "../../domain/errors/AIContentErrors";
 import { eq } from "drizzle-orm";
 

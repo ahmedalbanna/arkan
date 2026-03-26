@@ -12,7 +12,7 @@ import { Loader2, Languages, Copy, Check } from 'lucide-react';
 import { useWritingTool, useToast } from '@/hooks';
 import { useState } from 'react';
 import ReactMarkdown from 'react-markdown';
-import { markdownComponents } from '@/lib/utils/markdown-styles';
+import { markdownComponents } from '@/modules/ai-content/adapters/components/report-mode/markdown-styles';
 import { ScrollArea } from '@/components/ui/scroll-area';
 
 const languages = [

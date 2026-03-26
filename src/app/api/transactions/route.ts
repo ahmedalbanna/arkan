@@ -1,5 +1,5 @@
 
-import { withAuth, handleApiError, createApiResponse } from '@/lib/utils/api-utils';
+import { withAuth, handleApiError, createApiResponse } from '@/infrastructure/api/api-utils';
 import { container } from '@/infrastructure/di/container';
 import { BillingController } from '@/modules/billing/adapters/controllers/BillingController';
 

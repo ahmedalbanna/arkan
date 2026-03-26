@@ -6,7 +6,7 @@ import { executeWithQueue } from "@/ai/model-request-queue";
 import { selectModel } from "@/ai/model-selector";
 import { generateRequestId } from "@/ai/model-performance-monitor";
 
-import { Result } from "@/lib/utils/result";
+import { Result } from "@/infrastructure/utils/result";
 import { AiError } from "../../domain/errors/AiErrors";
 
 @injectable()

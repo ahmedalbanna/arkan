@@ -1,6 +1,6 @@
 
 
-import { defaultControls, ReportTemplateProperties, SectionProperties } from '@/lib/types';
+import { defaultControls, ReportTemplateProperties, SectionProperties } from '@/infrastructure/utils/types';
 import { defaultSections } from './sections';
 
 const getSection = (id: string): SectionProperties => {

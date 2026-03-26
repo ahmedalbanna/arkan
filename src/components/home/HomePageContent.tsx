@@ -3,7 +3,7 @@
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/context/AuthContext';
 import { useLocalization } from '@/context/LocalizationContext';
-import { cn } from '@/lib/utils/cn';
+import { cn } from '@/infrastructure/utils/cn';
 import { ArrowRight, FileText, Bot, FileSpreadsheet, Presentation, GitGraph, BookCheck } from 'lucide-react';
 import Link from 'next/link';
 

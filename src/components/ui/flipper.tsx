@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { cn } from '@/lib/utils/cn';
+import { cn } from '@/infrastructure/utils/cn';
 
 interface FlipperProps {
   front: React.ReactNode;

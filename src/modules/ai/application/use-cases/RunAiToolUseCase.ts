@@ -6,7 +6,7 @@ import type { IGenerationLogRepository } from "../../domain/repositories/IGenera
 import { IGenerationLogRepositoryToken } from "../../domain/repositories/IGenerationLogRepository";
 import { DeductCreditsUseCase } from "@/modules/users/application/use-cases/DeductCreditsUseCase";
 import { WritingToolRegistry } from "../services/WritingToolRegistry";
-import { Result } from "@/lib/utils/result";
+import { Result } from "@/infrastructure/utils/result";
 import { AiError } from "../../domain/errors/AiErrors";
 
 export interface RunAiToolInput<TInput> {

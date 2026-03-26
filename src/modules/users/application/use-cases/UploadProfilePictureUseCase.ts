@@ -5,7 +5,7 @@ import { IUserRepositoryToken } from "../../domain/repositories/IUserRepository"
 import type { IFileStorageService } from "@/modules/billing/domain/services/IFileStorageService";
 import { IFileStorageServiceToken } from "@/modules/billing/domain/services/IFileStorageService";
 
-import { Result } from "@/lib/utils/result";
+import { Result } from "@/infrastructure/utils/result";
 import { UserError } from "../../domain/errors/UserErrors";
 
 @injectable()

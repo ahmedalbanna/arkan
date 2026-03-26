@@ -1,6 +1,6 @@
 // src/app/api/admin/templates/presentation/[id]/route.ts
 
-import { handleApiError, withAuth, handleTemplateResult } from '@/lib/utils/api-utils';
+import { handleApiError, withAuth, handleTemplateResult } from '@/infrastructure/api/api-utils';
 import { container } from '@/infrastructure/di/container';
 import { TemplateController } from '@/modules/templates/adapters/controllers/TemplateController';
 import { UpdatePresentationTemplateSchema } from '@/ai/schemas';

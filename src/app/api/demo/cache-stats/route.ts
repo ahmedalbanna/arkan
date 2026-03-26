@@ -6,7 +6,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { container } from '@/infrastructure/di/container';
 import { RagController } from '@/modules/rag/adapters/controllers/RagController';
-import { handleRagResult } from '@/lib/utils/api-utils';
+import { handleRagResult } from '@/infrastructure/api/api-utils';
 
 export async function GET(_request: NextRequest) {
   try {

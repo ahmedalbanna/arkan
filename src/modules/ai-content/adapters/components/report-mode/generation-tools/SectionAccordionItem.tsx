@@ -3,13 +3,13 @@
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { useBuilderStore } from '@/hooks';
 import { useAiActions } from '@/modules/ai-content/adapters/hooks/report-mode/use-ai-actions';
-import { cn } from '@/lib/utils/cn';
+import { cn } from '@/infrastructure/utils/cn';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { GripVertical, Link as LinkIcon, Loader2 } from 'lucide-react';
 import React from 'react';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Section, type Project } from '@/lib/types';
+import { Section, type Project } from '@/infrastructure/utils/types';
 
 interface SectionAccordionItemProps {
     section: Section;

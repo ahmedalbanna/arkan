@@ -1,7 +1,7 @@
 import "reflect-metadata";
 import { GetProjectByIdUseCase } from "../GetProjectByIdUseCase";
 import { IProjectRepository } from "../../../domain/repositories/IProjectRepository";
-import { Result } from "@/lib/utils/result";
+import { Result } from "@/infrastructure/utils/result";
 import { ProjectError } from "../../../domain/errors/ProjectErrors";
 
 describe("GetProjectByIdUseCase", () => {

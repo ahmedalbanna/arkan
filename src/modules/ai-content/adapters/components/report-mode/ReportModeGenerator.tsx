@@ -2,7 +2,7 @@
 'use client';
 
 import { useLocalization } from '@/context/LocalizationContext';
-import { cn } from '@/lib/utils/cn';
+import { cn } from '@/infrastructure/utils/cn';
 import { BookOpenText, Settings, SlidersHorizontal, Languages as LanguageIcon, MessageSquare, ZoomOut, ZoomIn } from 'lucide-react';
 import React, { Suspense, lazy, useState } from 'react';
 import { Button } from '@/components/ui/button';
@@ -19,12 +19,12 @@ import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { ToneSchema } from '@/lib/types';
-import type { Language, Tone } from '@/lib/types';
+import { ToneSchema } from '@/infrastructure/utils/types';
+import type { Language, Tone } from '@/infrastructure/utils/types';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { ProjectChat } from './chat/ProjectChat';
 import { SectionTabsPanel } from './generation-tools/SectionTabsPanel';
-import { ProjectProperties } from '@/lib/types';
+import { ProjectProperties } from '@/infrastructure/utils/types';
 
 const ReportResults = lazy(() => import('./ReportResults'));
 

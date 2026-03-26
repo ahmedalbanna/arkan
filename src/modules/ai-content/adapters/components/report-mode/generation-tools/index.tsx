@@ -26,7 +26,7 @@ import { useMemo } from "react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { BuildProjectDialog } from "../dialogs/BuildProjectDialog";
-import { Chapter, Section } from '@/lib/types';
+import { Chapter, Section } from '@/infrastructure/utils/types';
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { SectionAccordionItem } from "./SectionAccordionItem";
 import { SortableChapterItem } from "./SortableChapterItem";

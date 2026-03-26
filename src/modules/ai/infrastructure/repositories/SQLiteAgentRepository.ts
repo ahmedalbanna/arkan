@@ -3,7 +3,7 @@ import { db } from "@/infrastructure/db";
 import { agents, agentCategories } from "@/infrastructure/db/schema";
 import { IAgentRepository } from "../../domain/repositories/IAgentRepository";
 import { Agent, AgentProperties } from "../../domain/entities/Agent";
-import { Result } from "@/lib/utils/result";
+import { Result } from "@/infrastructure/utils/result";
 import { AiError } from "../../domain/errors/AiErrors";
 import { eq, and } from "drizzle-orm";
 

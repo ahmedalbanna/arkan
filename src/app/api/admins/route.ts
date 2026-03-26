@@ -1,4 +1,4 @@
-import { createApiResponse, handleApiError } from '@/lib/utils/api-utils';
+import { createApiResponse, handleApiError } from '@/infrastructure/api/api-utils';
 import { container } from '@/infrastructure/di/container';
 import { UserController } from '@/modules/users/adapters/controllers/UserController';
 

@@ -1,6 +1,6 @@
 import UserManagementConsole from '@/modules/users/adapters/components/admin/UserManagementConsole';
 import { Users } from 'lucide-react';
-import { getTranslator } from '@/lib/utils/i18n';
+import { getTranslator } from '@/infrastructure/i18n/i18n';
 
 export default async function ManageUsersPage() {
   const t = await getTranslator();

@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { handleApiError } from '@/lib/utils/api-utils';
+import { handleApiError } from '@/infrastructure/api/api-utils';
 
 export async function POST(_req: Request) {
   try {

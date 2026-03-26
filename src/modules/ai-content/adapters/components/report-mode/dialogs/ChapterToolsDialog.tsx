@@ -10,14 +10,14 @@ import {
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { useChapterActions } from '@/modules/ai-content/adapters/hooks/report-mode/use-chapter-actions';
-import { Chapter } from '@/lib/types';
+import { Chapter } from '@/infrastructure/utils/types';
 import { Loader2, Wand2, PlusCircle, Link as LinkIcon, Edit } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Slider } from '@/components/ui/slider';
 import ReactMarkdown from 'react-markdown';
-import { markdownComponents } from '@/lib/utils/markdown-styles';
+import { markdownComponents } from '@/modules/ai-content/adapters/components/report-mode/markdown-styles';
 import { DiffView } from '@/components/shared/DiffView';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Form } from '@/components/ui/form';

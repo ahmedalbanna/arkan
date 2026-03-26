@@ -1,6 +1,6 @@
 
 import { Project, ProjectProperties } from "../entities/Project";
-import { Result } from "@/lib/utils/result";
+import { Result } from "@/infrastructure/utils/result";
 import { ProjectError } from "../errors/ProjectErrors";
 
 export interface IProjectRepository {

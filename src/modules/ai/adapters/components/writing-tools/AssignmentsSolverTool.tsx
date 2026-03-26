@@ -8,7 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Textarea } from '@/components/ui/textarea';
 import { useLocalization } from '@/context/LocalizationContext';
 import { useAssignmentsSolverLogic } from '@/modules/ai/adapters/hooks/writing-tools/use-assignments-solver-logic';
-import { markdownComponents } from '@/lib/utils/markdown-styles';
+import { markdownComponents } from '@/modules/ai-content/adapters/components/report-mode/markdown-styles';
 import { Check, Copy, Loader2, BookCheck, UploadCloud, Download } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 

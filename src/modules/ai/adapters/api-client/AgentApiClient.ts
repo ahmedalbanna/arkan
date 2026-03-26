@@ -1,7 +1,7 @@
 import { injectable } from 'tsyringe';
 import { apiService, ApiError } from '@/infrastructure/api/ApiService';
 import { AgentProperties } from '../../domain/entities/Agent';
-import { Result } from '@/lib/utils/result';
+import { Result } from '@/infrastructure/utils/result';
 
 export interface AgentCategory {
   id: string;

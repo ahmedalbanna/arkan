@@ -1,9 +1,9 @@
 import { inject, injectable } from "tsyringe";
 import { db } from "@/infrastructure/db";
 import { loginHistory, users, userFingerprints } from "@/infrastructure/db/schema";
-import { Result } from "@/lib/utils/result";
+import { Result } from "@/infrastructure/utils/result";
 import { UserError } from "../../domain/errors/UserErrors";
-import { getLocationFromIp } from "@/lib/utils/security/location";
+import { getLocationFromIp } from "@/infrastructure/security/location";
 import { type IEmailService, IEmailServiceToken } from "../../domain/services/IEmailService";
 import { eq, desc, and, ne } from "drizzle-orm";
 

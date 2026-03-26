@@ -25,7 +25,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { useAdminUpdateUser, useNotifications } from '@/hooks';
-import { UserProfile } from '@/lib/types';
+import { UserProfile } from '@/infrastructure/utils/types';
 import { Loader2, Save, Send } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useAuth } from '@/context/AuthContext';

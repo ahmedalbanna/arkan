@@ -3,7 +3,7 @@
 export {};
 // import { generateImage } from '@/ai/flows/generate-image';
 // import { adminDb } from '@/infrastructure/firebase/server-init';
-// import { createApiResponse, handleApiError, withAuth } from '@/lib/utils/api-utils';
+// import { createApiResponse, handleApiError, withAuth } from '@/infrastructure/api/api-utils';
 // import { logGeneration } from '@/services/generation-service';
 // import { getStorage } from 'firebase-admin/storage';
 // import { z } from 'zod';

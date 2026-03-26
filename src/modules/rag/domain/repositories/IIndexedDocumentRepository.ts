@@ -17,7 +17,7 @@ export interface IndexedDocumentRecord {
   errorMessage?: string;
 }
 
-import { Result } from "@/lib/utils/result";
+import { Result } from "@/infrastructure/utils/result";
 import { RagError } from "../errors/RagErrors";
 
 export interface IIndexedDocumentRepository {

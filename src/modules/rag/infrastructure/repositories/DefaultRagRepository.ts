@@ -8,7 +8,7 @@ import { RAGConfig, validateRAGConfig } from "@/modules/rag/infrastructure/confi
 import { generateEmbedding } from "@/modules/rag/infrastructure/embeddings";
 import { getReranker, type RerankStrategy } from "@/modules/rag/infrastructure/reranker";
 import { getVectorStore } from "@/modules/rag/infrastructure/vector-store";
-import { Result } from "@/lib/utils/result";
+import { Result } from "@/infrastructure/utils/result";
 import { RagError } from "../../domain/errors/RagErrors";
 
 @injectable()

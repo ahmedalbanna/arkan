@@ -2,7 +2,7 @@
 import { inject, injectable } from "tsyringe";
 import type { INotificationService, NotificationPayload } from "../../domain/services/INotificationService";
 import { INotificationServiceToken } from "../../domain/services/INotificationService";
-import { Result } from "@/lib/utils/result";
+import { Result } from "@/infrastructure/utils/result";
 import { UserError } from "../../domain/errors/UserErrors";
 
 @injectable()

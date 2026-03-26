@@ -9,7 +9,7 @@ import { IUserRepositoryToken } from "@/modules/users/domain/repositories/IUserR
 import type { INotificationService } from "@/modules/users/domain/services/INotificationService";
 import { INotificationServiceToken } from "@/modules/users/domain/services/INotificationService";
 import { TransactionProperties } from "../../domain/entities/Transaction";
-import { Result } from "@/lib/utils/result";
+import { Result } from "@/infrastructure/utils/result";
 import { BillingError } from "../../domain/errors/BillingErrors";
 
 @injectable()

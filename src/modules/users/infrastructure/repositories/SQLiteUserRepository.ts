@@ -3,7 +3,7 @@ import { db } from "@/infrastructure/db";
 import { users } from "@/infrastructure/db/schema";
 import { IUserRepository } from "../../domain/repositories/IUserRepository";
 import { User, UserProfile } from "../../domain/entities/User";
-import { Result } from "@/lib/utils/result";
+import { Result } from "@/infrastructure/utils/result";
 import { UserError } from "../../domain/errors/UserErrors";
 import { eq, sql, desc, lt } from "drizzle-orm";
 

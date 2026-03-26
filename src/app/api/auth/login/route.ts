@@ -1,9 +1,9 @@
 import { NextResponse } from 'next/server';
-import { handleApiError, handleUserResult } from '@/lib/utils/api-utils';
+import { handleApiError, handleUserResult } from '@/infrastructure/api/api-utils';
 import { container } from '@/infrastructure/di/container';
 import { UserController } from '@/modules/users/adapters/controllers/UserController';
 import { z } from 'zod';
-import { rateLimiter } from '@/lib/utils/security/rate-limiter';
+import { rateLimiter } from '@/infrastructure/security/rate-limiter';
 import { headers as nextHeaders } from 'next/headers';
 
 const loginSchema = z.object({

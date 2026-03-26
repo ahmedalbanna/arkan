@@ -1,7 +1,7 @@
 import { injectable } from "tsyringe";
 const { authenticator } = require('otplib');
 import QRCode from "qrcode";
-import { Result } from "@/lib/utils/result";
+import { Result } from "@/infrastructure/utils/result";
 
 @injectable()
 export class TwoFactorAuthService {

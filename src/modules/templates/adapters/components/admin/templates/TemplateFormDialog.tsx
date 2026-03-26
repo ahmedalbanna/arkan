@@ -11,7 +11,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Loader2, Save } from 'lucide-react';
 import { useSaveTemplate } from '@/hooks';
-import { ReportTemplate, DocxTemplate, PptxTemplate } from '@/lib/types';
+import { ReportTemplate, DocxTemplate, PptxTemplate } from '@/infrastructure/utils/types';
 import { useToast } from '@/hooks';
 
 type TemplateData = DocxTemplate | PptxTemplate | ReportTemplate;

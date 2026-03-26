@@ -5,7 +5,7 @@ import { IAuthRepositoryToken } from '@/modules/users/domain/repositories/IAuthR
 import { CustomFirebaseError, handleFirebaseError } from '@/infrastructure/firebase/error';
 import { NextResponse, type NextRequest } from 'next/server';
 import { ZodError } from 'zod';
-import { Result } from './result';
+import { Result } from '@/infrastructure/utils/result';
 import { Telemetry } from '@/modules/ai/infrastructure/services/Telemetry';
 import { UserError, UserErrorType } from '@/modules/users/domain/errors/UserErrors';
 import { ProjectError, ProjectErrorType } from '@/modules/projects/domain/errors/ProjectErrors';

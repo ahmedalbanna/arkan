@@ -1,6 +1,6 @@
 import Dashboard from '@/modules/admin/adapters/components/dashboard/Dashboard';
 import { LayoutDashboard } from 'lucide-react';
-import { getTranslator } from '@/lib/utils/i18n';
+import { getTranslator } from '@/infrastructure/i18n/i18n';
 
 // This page is now a Server Component by default.
 export default async function DashboardPage() {

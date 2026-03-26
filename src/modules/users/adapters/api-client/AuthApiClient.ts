@@ -2,7 +2,7 @@ import { apiService, ApiError } from '@/infrastructure/api/ApiService';
 import { LoginCredentials } from '@/modules/users/domain/utils/authUtils';
 import { SignupCredentials } from '@/modules/users/adapters/components/auth/SignupForm';
 import { UserProfile } from '@/modules/users/domain/entities/User';
-import { Result } from '@/lib/utils/result';
+import { Result } from '@/infrastructure/utils/result';
 import { injectable } from 'tsyringe';
 
 const toApiError = (error: unknown): ApiError => {

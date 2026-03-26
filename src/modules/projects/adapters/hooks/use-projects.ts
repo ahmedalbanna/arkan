@@ -1,7 +1,7 @@
 'use client';
 
 import { toast } from '@/hooks/util/use-toast';
-import { projectKeys } from '@/lib/query-keys';
+import { projectKeys } from '@/infrastructure/api/query-keys';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useBuilderStore } from '@/modules/projects/adapters/state/useBuilderStore';
 import { useAuth } from '@/context/AuthContext';

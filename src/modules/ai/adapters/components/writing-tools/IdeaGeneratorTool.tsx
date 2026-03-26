@@ -11,7 +11,7 @@ import { useIdeaGeneratorLogic } from '@/modules/ai/adapters/hooks/writing-tools
 import { Loader2, Sparkles } from 'lucide-react';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import ReactMarkdown from 'react-markdown';
-import { markdownComponents } from '@/lib/utils/markdown-styles';
+import { markdownComponents } from '@/modules/ai-content/adapters/components/report-mode/markdown-styles';
 
 export function IdeaGeneratorTool() {
   const {

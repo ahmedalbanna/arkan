@@ -5,7 +5,7 @@ import { container } from '@/infrastructure/di/container';
 import { TransactionApiClient, VerifyPaymentVariables } from '@/modules/billing/adapters/api-client/TransactionApiClient';
 import { useAuth } from '@/context/AuthContext';
 import { useToast } from '@/hooks/util/use-toast';
-import { transactionKeys } from '@/lib/query-keys';
+import { transactionKeys } from '@/infrastructure/api/query-keys';
 
 export function useTransactions(status: string = 'all') {
   const { firebaseUser } = useAuth();

@@ -6,7 +6,7 @@
 // has been moved to the client-side for better performance and simplicity.
 // The file is kept to avoid breaking changes if it's referenced, but it will not be used.
 
-import { createApiResponse, handleApiError } from '@/lib/utils/api-utils';
+import { createApiResponse, handleApiError } from '@/infrastructure/api/api-utils';
 
 export async function POST() {
     return handleApiError({ message: 'This endpoint is deprecated.' }, 410); // 410 Gone

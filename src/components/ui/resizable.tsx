@@ -4,7 +4,7 @@
 import { GripVertical } from "lucide-react"
 import { PanelResizeHandle, type PanelResizeHandleProps } from "react-resizable-panels"
 
-import { cn } from "@/lib/utils/cn"
+import { cn } from "@/infrastructure/utils/cn"
 
 import {
   Panel as ResizablePanel,

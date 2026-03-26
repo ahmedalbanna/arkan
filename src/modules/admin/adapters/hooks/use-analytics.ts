@@ -4,7 +4,7 @@ import { useQuery } from '@tanstack/react-query';
 import { container } from '@/infrastructure/di/container';
 import { AnalyticsApiClient, UserDashboardStats } from '@/modules/admin/adapters/api-client/AnalyticsApiClient';
 import { useAuth } from '@/context/AuthContext';
-import { analyticsKeys } from '@/lib/query-keys';
+import { analyticsKeys } from '@/infrastructure/api/query-keys';
 
 export function useUserAnalytics() {
   const { firebaseUser } = useAuth();

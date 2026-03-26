@@ -1,6 +1,6 @@
 
 import { z } from 'zod';
-import { withAuth, handleApiError, handleTemplateResult } from '@/lib/utils/api-utils';
+import { withAuth, handleApiError, handleTemplateResult } from '@/infrastructure/api/api-utils';
 import { container } from '@/infrastructure/di/container';
 import { TemplateController } from '@/modules/templates/adapters/controllers/TemplateController';
 

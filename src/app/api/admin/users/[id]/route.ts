@@ -1,7 +1,7 @@
 
 import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
-import { withAuth, handleApiError, handleResult } from '@/lib/utils/api-utils';
+import { withAuth, handleApiError, handleResult } from '@/infrastructure/api/api-utils';
 import { container } from '@/infrastructure/di/container';
 import { UserController } from '@/modules/users/adapters/controllers/UserController';
 

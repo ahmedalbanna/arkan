@@ -10,8 +10,8 @@ const arrayMove = <T>(array: T[], from: number, to: number): T[] => {
   return newArray;
 };
 import { Language, Behavior, Tone, defaultControls } from '@/modules/ai-content/domain/entities/ControlTypes';
-import { parseMarkdownToContent } from '@/lib/project/markdown-parser'; 
-import { applyReportTemplate } from '@/lib/project/template';
+import { parseMarkdownToContent } from '@/modules/projects/infrastructure/io/markdown-parser'; 
+import { applyReportTemplate } from '@/modules/projects/infrastructure/io/template';
 
 // Flexible Type for Project Content - strictly enforcing structure now
 export type ProjectContent = readonly (Chapter | Section)[];

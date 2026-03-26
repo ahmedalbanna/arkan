@@ -2,7 +2,7 @@ import { injectable } from "tsyringe";
 import { db } from "@/infrastructure/db";
 import { templates } from "@/infrastructure/db/schema";
 import { ITemplateRepository, Template, TemplateType } from "../../domain/repositories/ITemplateRepository";
-import { Result } from "@/lib/utils/result";
+import { Result } from "@/infrastructure/utils/result";
 import { TemplateError } from "../../domain/errors/TemplateErrors";
 import { eq, and, desc } from "drizzle-orm";
 

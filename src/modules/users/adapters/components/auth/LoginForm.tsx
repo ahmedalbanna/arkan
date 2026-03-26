@@ -8,14 +8,14 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { useLogin } from '@/modules/users/adapters/hooks/use-auth-mutations';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { AlertCircle, Loader2, ShieldCheck } from 'lucide-react';
-import { generateFingerprint } from '@/lib/utils/security/fingerprint';
+import { generateFingerprint } from '@/infrastructure/security/fingerprint';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { toast } from '@/hooks';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { apiService } from '@/infrastructure/api/ApiService';
-import { handleErrorUtility } from '@/lib/utils/errorUtils';
+import { handleErrorUtility } from '@/infrastructure/api/errorUtils';
 
 const formSchema = z.object({ 
   email: z.string().email({ message: 'Please enter a valid email address.' }), 

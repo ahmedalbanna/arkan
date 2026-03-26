@@ -4,7 +4,7 @@ import { useQuery } from '@tanstack/react-query';
 import { useAuth } from '@/context/AuthContext';
 import { AgentApiClient } from '@/modules/ai/adapters/api-client/AgentApiClient';
 import { container } from '@/infrastructure/di/container';
-import { agentKeys } from '@/lib/query-keys';
+import { agentKeys } from '@/infrastructure/api/query-keys';
 
 export function useAgentCategories() {
   const { firebaseUser } = useAuth();

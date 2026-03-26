@@ -1,5 +1,5 @@
 // C:\Users\ahmed\source\repos\arkan\src\app\api\admin\sections\[id]\route.ts
-import { withAuth, handleApiError, handleAIContentResult } from '@/lib/utils/api-utils';
+import { withAuth, handleApiError, handleAIContentResult } from '@/infrastructure/api/api-utils';
 import { z } from 'zod';
 import { container } from '@/infrastructure/di/container';
 import { AIContentController } from '@/modules/ai-content/adapters/controllers/AIContentController';

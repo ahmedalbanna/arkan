@@ -9,7 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Textarea } from '@/components/ui/textarea';
 import { useLocalization } from '@/context/LocalizationContext';
 import { useToast, useWritingTool } from '@/hooks';
-import { markdownComponents } from '@/lib/utils/markdown-styles';
+import { markdownComponents } from '@/modules/ai-content/adapters/components/report-mode/markdown-styles';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Check, Copy, Loader2, Sparkles } from 'lucide-react';
 import { useState } from 'react';

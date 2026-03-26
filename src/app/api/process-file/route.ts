@@ -1,7 +1,7 @@
 
 'use server';
 
-import { createApiResponse, handleApiError, withAuth } from '@/lib/utils/api-utils';
+import { createApiResponse, handleApiError, withAuth } from '@/infrastructure/api/api-utils';
 import { container } from '@/infrastructure/di/container';
 import { AiController } from '@/modules/ai/adapters/controllers/AiController';
 

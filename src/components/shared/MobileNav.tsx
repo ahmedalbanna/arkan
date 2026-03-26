@@ -15,7 +15,7 @@ import { useLocalization } from '@/context/LocalizationContext';
 import { useAuth } from '@/context/AuthContext';
 import { useState } from 'react';
 import { usePathname } from 'next/navigation';
-import { cn } from '@/lib/utils/cn';
+import { cn } from '@/infrastructure/utils/cn';
 
 interface NavLink {
   href: string;

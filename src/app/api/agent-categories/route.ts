@@ -1,5 +1,5 @@
 // src/app/api/agent-categories/route.ts
-import { handleApiError, createApiResponse, withAuth } from '@/lib/utils/api-utils';
+import { handleApiError, createApiResponse, withAuth } from '@/infrastructure/api/api-utils';
 import { container } from '@/infrastructure/di/container';
 import { AiController } from '@/modules/ai/adapters/controllers/AiController';
 

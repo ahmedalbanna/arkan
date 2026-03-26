@@ -1,6 +1,6 @@
 
 import { z } from 'zod';
-import { withAuth, handleApiError, createApiResponse } from '@/lib/utils/api-utils';
+import { withAuth, handleApiError, createApiResponse } from '@/infrastructure/api/api-utils';
 import { container } from '@/infrastructure/di/container';
 import { AdminController } from '@/modules/admin/adapters/controllers/AdminController';
 

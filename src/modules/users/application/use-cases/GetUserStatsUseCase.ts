@@ -4,7 +4,7 @@ import type { IGenerationLogRepository } from "@/modules/ai/domain/repositories/
 import { IGenerationLogRepositoryToken } from "@/modules/ai/domain/repositories/IGenerationLogRepository";
 import type { IAgentRepository } from "@/modules/ai/domain/repositories/IAgentRepository";
 import { IAgentRepositoryToken } from "@/modules/ai/domain/repositories/IAgentRepository";
-import { Result } from "@/lib/utils/result";
+import { Result } from "@/infrastructure/utils/result";
 import { UserError } from "../../domain/errors/UserErrors";
 
 export interface UserStats {

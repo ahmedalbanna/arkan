@@ -13,7 +13,7 @@ import { Slider } from '@/components/ui/slider';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Textarea } from '@/components/ui/textarea';
 import { useTextStylistLogic } from '@/modules/ai/adapters/hooks/writing-tools/use-text-stylist-logic';
-import { markdownComponents } from '@/lib/utils/markdown-styles';
+import { markdownComponents } from '@/modules/ai-content/adapters/components/report-mode/markdown-styles';
 import { BookOpenText, Check, Copy, Edit3, Eye, Lightbulb, Loader2, Scissors, Sparkles, Wand2 } from 'lucide-react';
 import { Controller } from 'react-hook-form';
 import ReactMarkdown from 'react-markdown';

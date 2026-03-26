@@ -9,7 +9,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { useLocalization } from '@/context/LocalizationContext';
 import { useGrammarCheckerLogic } from '@/modules/ai/adapters/hooks/writing-tools/use-grammar-checker-logic';
-import { markdownComponents } from '@/lib/utils/markdown-styles';
+import { markdownComponents } from '@/modules/ai-content/adapters/components/report-mode/markdown-styles';
 import { ArrowRight, Check, Copy, Loader2, Sparkles, UploadCloud, Filter } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import { Checkbox } from '@/components/ui/checkbox';

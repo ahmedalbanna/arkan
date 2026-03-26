@@ -1,7 +1,7 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { act, renderHook, waitFor } from '@testing-library/react';
 import { User } from '@/modules/users/domain/entities/User';
-import { userKeys } from '@/lib/query-keys';
+import { userKeys } from '@/infrastructure/api/query-keys';
 import { useCreateUser, useUserProfile, useUpdateUser } from '../use-users';
 
 jest.mock('@/context/AuthContext', () => ({
@@ -12,7 +12,7 @@ jest.mock('@/hooks', () => ({
   toast: jest.fn(),
 }));
 
-jest.mock('@/lib/utils/errorUtils', () => ({
+jest.mock('@/infrastructure/api/errorUtils', () => ({
   handleErrorUtility: jest.fn(),
 }));
 

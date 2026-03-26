@@ -13,7 +13,7 @@ export interface Template {
 
 export type TemplateType = 'docx' | 'pptx' | 'report' | 'presentation';
 
-import { Result } from "@/lib/utils/result";
+import { Result } from "@/infrastructure/utils/result";
 import { TemplateError } from "../errors/TemplateErrors";
 
 export interface ITemplateRepository {

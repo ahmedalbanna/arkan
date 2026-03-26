@@ -3,7 +3,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { container } from '@/infrastructure/di/container';
 import { UserApiClient } from '@/modules/users/adapters/api-client/UserApiClient';
-import { userKeys } from '@/lib/query-keys';
+import { userKeys } from '@/infrastructure/api/query-keys';
 import { useAuth } from '@/context/AuthContext';
 import { useToast } from '@/hooks/util/use-toast';
 import { UserProfile } from '@/modules/users/domain/entities/User';

@@ -4,7 +4,7 @@
 import { ColumnDef } from '@tanstack/react-table';
 import { Badge } from '@/components/ui/badge';
 import { SectionActions } from './SectionActions';
-import { Section } from '@/lib/types';
+import { Section } from '@/infrastructure/utils/types';
 
 export const columns: ColumnDef<Section>[] = [
   {

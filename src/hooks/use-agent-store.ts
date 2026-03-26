@@ -1,14 +1,14 @@
 'use client';
 
 import { create } from 'zustand';
-import type { AgentProperties } from '@/lib/types';
+import type { AgentProperties } from '@/infrastructure/utils/types';
 import { AgentApiClient } from '@/modules/ai/adapters/api-client/AgentApiClient';
 import { useAuth } from '@/context/AuthContext';
 import { useEffect } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from './util/use-toast';
-import { agentKeys } from '@/lib/query-keys';
-import { getFromCache, saveToCache } from '@/lib/utils/cache';
+import { agentKeys } from '@/infrastructure/api/query-keys';
+import { getFromCache, saveToCache } from "@/infrastructure/cache/BrowserCache";
 import { container } from '@/infrastructure/di/container';
 
 const AGENTS_CACHE_KEY = 'agents-list';

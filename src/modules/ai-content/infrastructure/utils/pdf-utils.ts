@@ -1,4 +1,4 @@
-import type { PptxConversionOptions } from '@/lib/markdown-to-pptx-converter';
+import type { PptxConversionOptions } from '@/modules/templates/infrastructure/exporters/pptx/markdown-to-pptx-converter';
 import { templates } from '@/modules/templates/infrastructure/PptxStyles';
 import type { Root as MdastRoot } from 'mdast';
 import rehypeSanitize from 'rehype-sanitize';

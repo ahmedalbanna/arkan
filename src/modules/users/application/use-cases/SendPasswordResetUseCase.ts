@@ -2,7 +2,7 @@ import { inject, injectable } from "tsyringe";
 import { type IAuthRepository, IAuthRepositoryToken } from "../../domain/repositories/IAuthRepository";
 import { type IEmailService, IEmailServiceToken } from "../../domain/services/IEmailService";
 import { SQLiteAuthRepository } from "../../infrastructure/repositories/SQLiteAuthRepository";
-import { Result } from "@/lib/utils/result";
+import { Result } from "@/infrastructure/utils/result";
 import { UserError } from "../../domain/errors/UserErrors";
 
 @injectable()

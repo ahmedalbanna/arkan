@@ -1,6 +1,6 @@
 
 import { UserProfile } from "../entities/User";
-import { Result } from "@/lib/utils/result";
+import { Result } from "@/infrastructure/utils/result";
 import { UserError } from "../errors/UserErrors";
 
 export interface IUserRepository {

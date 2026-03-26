@@ -6,7 +6,7 @@ import { SettingsApiClient } from '@/modules/admin/adapters/api-client/SettingsA
 import { useAuth } from '@/context/AuthContext';
 import { useToast } from '@/hooks/util/use-toast';
 import { AppSettings } from '@/modules/admin/domain/entities/Settings';
-import { settingsKeys } from '@/lib/query-keys';
+import { settingsKeys } from '@/infrastructure/api/query-keys';
 
 export function useSettings() {
   const { firebaseUser } = useAuth();

@@ -1,5 +1,5 @@
 
-import type { Project, Section } from '@/lib/types';
+import type { Project, Section } from '@/infrastructure/utils/types';
 
 /**
  * Extracts context names (section names and file names) from a section's context.

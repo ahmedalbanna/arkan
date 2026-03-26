@@ -1,6 +1,6 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { render, screen, waitFor } from '@testing-library/react';
-import { userKeys } from '@/lib/query-keys';
+import { userKeys } from '@/infrastructure/api/query-keys';
 import { UserApiClient } from '@/modules/users/adapters/api-client/UserApiClient';
 import { AuthProvider, useAuth } from '../AuthContext';
 

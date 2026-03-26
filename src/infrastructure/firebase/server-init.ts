@@ -1,5 +1,5 @@
 import admin from 'firebase-admin';
-import { firebaseAdminConfig } from '@/lib/config';
+import { firebaseAdminConfig } from '@/infrastructure/config/config';
 
 // This file should be imported only on the server-side.
 // It initializes the Firebase Admin SDK.

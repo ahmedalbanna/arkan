@@ -3,9 +3,9 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
-import type { ProjectProperties } from '@/lib/types';
-import { convertMarkdownToPptx } from '@/lib/markdown-to-pptx-converter';
-import type { PptxConversionOptions } from '@/lib/markdown-to-pptx-converter';
+import type { ProjectProperties } from '@/infrastructure/utils/types';
+import { convertMarkdownToPptx } from '@/modules/templates/infrastructure/exporters/pptx/markdown-to-pptx-converter';
+import type { PptxConversionOptions } from '@/modules/templates/infrastructure/exporters/pptx/markdown-to-pptx-converter';
 
 const projectExportSchema = z.object({
   project: z.any().refine(val => val && typeof val === 'object' && val.id, { message: "Project object is invalid." }),

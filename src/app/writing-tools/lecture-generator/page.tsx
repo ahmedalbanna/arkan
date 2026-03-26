@@ -12,7 +12,7 @@ import { useAuth } from '@/context/AuthContext';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { SessionPlanDisplay } from '@/modules/ai/adapters/components/writing-tools/SessionPlanDisplay';
-import { markdownComponents } from '@/lib/utils/markdown-styles';
+import { markdownComponents } from '@/modules/ai-content/adapters/components/report-mode/markdown-styles';
 import { apiService } from '@/infrastructure/api/ApiService';
 
 const MarkdownPreview = ({ content }: { content: string }) => <div className="prose dark:prose-invert prose-sm max-w-none p-4 bg-muted rounded-md"><ReactMarkdown remarkPlugins={[remarkGfm]} components={markdownComponents}>{content}</ReactMarkdown></div>;

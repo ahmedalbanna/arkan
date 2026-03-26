@@ -1,7 +1,7 @@
 import { inject, injectable } from "tsyringe";
 import { db } from "@/infrastructure/db";
 import { users } from "@/infrastructure/db/schema";
-import { Result } from "@/lib/utils/result";
+import { Result } from "@/infrastructure/utils/result";
 import { UserError } from "../../domain/errors/UserErrors";
 import { eq } from "drizzle-orm";
 import { type IAuthRepository, IAuthRepositoryToken } from "../../domain/repositories/IAuthRepository";

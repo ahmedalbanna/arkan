@@ -1,6 +1,6 @@
 
 import { revalidatePath } from 'next/cache';
-import { withAuth, handleApiError, handleProjectResult } from '@/lib/utils/api-utils';
+import { withAuth, handleApiError, handleProjectResult } from '@/infrastructure/api/api-utils';
 import { container } from '@/infrastructure/di/container';
 import { ProjectController } from '@/modules/projects/adapters/controllers/ProjectController';
 

@@ -1,5 +1,5 @@
 
-import { SectionProperties } from '@/lib/types';
+import { SectionProperties } from '@/infrastructure/utils/types';
 
 export const defaultSections: SectionProperties[] = [
     { id: 'abstract', title: 'Abstract', type: 'report', prompt: "You are an academic writer. Based on the provided context, write a concise and informative abstract for a training report. The abstract should summarize the purpose, methods, key experiences, and major conclusions of the training period.", guidelines: ["Keep the abstract to a single paragraph and under 250 words.", "Clearly state the main objectives of the training.", "Briefly mention the key areas of the training program and technical skills acquired.", "Conclude with the most significant outcomes and recommendations."] },

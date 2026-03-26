@@ -1,7 +1,7 @@
 import { injectable } from 'tsyringe';
 import { apiService, ApiError } from '@/infrastructure/api/ApiService';
 import { UserProfile } from '../../domain/entities/User';
-import { Result } from '@/lib/utils/result';
+import { Result } from '@/infrastructure/utils/result';
 
 export interface PaginatedUsersResponse {
   users: UserProfile[];

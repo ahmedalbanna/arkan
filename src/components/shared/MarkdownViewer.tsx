@@ -1,8 +1,8 @@
 
 'use client';
 
-import { cn } from '@/lib/utils/cn';
-import { markdownComponents } from '@/lib/utils/markdown-styles';
+import { cn } from '@/infrastructure/utils/cn';
+import { markdownComponents } from '@/modules/ai-content/adapters/components/report-mode/markdown-styles';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { ScrollArea } from '../ui/scroll-area';

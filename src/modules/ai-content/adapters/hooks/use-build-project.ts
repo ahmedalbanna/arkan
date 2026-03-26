@@ -2,7 +2,7 @@
 'use client';
 
 import { useBuilderStore } from '@/modules/projects/adapters/state/useBuilderStore';
-import type { Project, Section } from '@/lib/types';
+import type { Project, Section } from '@/infrastructure/utils/types';
 
 export function useBuildProject() {
     const { project } = useBuilderStore();

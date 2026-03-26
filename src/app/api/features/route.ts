@@ -1,5 +1,5 @@
 
-import { createApiResponse, handleApiError } from '@/lib/utils/api-utils';
+import { createApiResponse, handleApiError } from '@/infrastructure/api/api-utils';
 import { container } from '@/infrastructure/di/container';
 import { AdminController } from '@/modules/admin/adapters/controllers/AdminController';
 

@@ -1,6 +1,6 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { act, renderHook, waitFor } from '@testing-library/react';
-import { featureKeys } from '@/lib/query-keys';
+import { featureKeys } from '@/infrastructure/api/query-keys';
 import { useFeatures, useUpdateFeature } from '../use-features';
 
 jest.mock('@/context/AuthContext', () => ({ useAuth: jest.fn() }));

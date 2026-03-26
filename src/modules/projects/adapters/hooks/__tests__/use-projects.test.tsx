@@ -66,7 +66,7 @@ const { LocalProjectService } = require('@/modules/projects/adapters/local-stora
   LocalProjectService: unknown;
 };
 
-const { projectKeys } = require('@/lib/query-keys') as {
+const { projectKeys } = require('@/infrastructure/api/query-keys') as {
   projectKeys: {
     detail: (userId: string, projectId: string) => readonly unknown[];
     lists: (userId: string) => readonly unknown[];

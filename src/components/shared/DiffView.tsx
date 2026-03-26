@@ -1,8 +1,8 @@
 
 'use client';
 
-import { cn } from "@/lib/utils/cn";
-import type { DiffPart } from "@/lib/utils/diff";
+import { cn } from "@/infrastructure/utils/cn";
+import type { DiffPart } from "@/modules/projects/domain/utils/diff";
 
 export const DiffView = ({ diff }: { diff: DiffPart[] }) => {
     return (

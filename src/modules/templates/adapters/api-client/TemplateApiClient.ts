@@ -1,6 +1,6 @@
 import { injectable } from 'tsyringe';
 import { apiService, ApiError } from '@/infrastructure/api/ApiService';
-import { Result } from '@/lib/utils/result';
+import { Result } from '@/infrastructure/utils/result';
 
 const toApiError = (error: unknown): ApiError => {
   if (error instanceof ApiError) return error;

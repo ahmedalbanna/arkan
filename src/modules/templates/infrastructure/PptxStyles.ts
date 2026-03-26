@@ -1,7 +1,7 @@
 
 'use client';
 
-import type { PptxTemplateProperties } from '@/lib/types';
+import type { PptxTemplateProperties } from '@/infrastructure/utils/types';
 import type { PptxStyleOptions } from '@/ai/schemas/template-schemas';
 
 export type PptxTemplateKey = 'modern' | 'dark' | 'professional';

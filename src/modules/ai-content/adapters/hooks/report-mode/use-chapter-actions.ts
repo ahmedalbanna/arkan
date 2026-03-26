@@ -6,9 +6,9 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useWritingTool, useToast } from '@/hooks';
 import { useState, useMemo, useEffect, useCallback } from 'react';
-import { DiffPart, computeDiff } from '@/lib/utils/diff';
+import { DiffPart, computeDiff } from '@/modules/projects/domain/utils/diff';
 import { useBuilderStore } from '@/modules/projects/adapters/state/useBuilderStore';
-import { Chapter, SectionContext } from '@/lib/types';
+import { Chapter, SectionContext } from '@/infrastructure/utils/types';
 
 type ManipulationType = 'rewrite' | 'summarize' | 'style-editor' | 'readability-enhancer' | 'conciseness-checker' | 'clarity-advisor';
 

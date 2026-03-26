@@ -10,7 +10,7 @@ import { container } from '@/infrastructure/di/container';
 import { AdminApiClient } from '@/modules/admin/adapters/api-client/AdminApiClient';
 import { toast } from '@/hooks';
 import { useAuth } from '@/context/AuthContext';
-import { userKeys } from '@/lib/query-keys';
+import { userKeys } from '@/infrastructure/api/query-keys';
 import { useLocalization } from '@/context/LocalizationContext';
 import { User } from '@/modules/users/domain/entities/User';
 import { GiftCreditsDialog } from '@/modules/users/adapters/components/payments/GiftCreditsDialog';

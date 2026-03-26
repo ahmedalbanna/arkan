@@ -1,7 +1,7 @@
 'use client';
 
-import { userKeys } from '@/lib/query-keys';
-import { hasGuestCookie, clearGuestCookie } from '@/lib/utils/cookie-management';
+import { userKeys } from '@/infrastructure/api/query-keys';
+import { hasGuestCookie, clearGuestCookie } from "@/modules/users/infrastructure/services/CookieManager";
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { User } from '@/modules/users/domain/entities/User';
 import { createContext, ReactNode, useCallback, useContext, useEffect, useState } from 'react';

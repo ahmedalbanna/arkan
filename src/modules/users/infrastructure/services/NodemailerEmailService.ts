@@ -1,7 +1,7 @@
 import { injectable } from "tsyringe";
 import nodemailer from "nodemailer";
 import { IEmailService } from "../../domain/services/IEmailService";
-import { Result } from "@/lib/utils/result";
+import { Result } from "@/infrastructure/utils/result";
 
 @injectable()
 export class NodemailerEmailService implements IEmailService {

@@ -12,7 +12,7 @@ const RetrieveContextSchema = z.object({
   minScore: z.number().min(0).max(1).default(0.5),
 });
 
-import { handleRagResult } from '@/lib/utils/api-utils';
+import { handleRagResult } from '@/infrastructure/api/api-utils';
 
 export async function POST(request: NextRequest) {
   try {

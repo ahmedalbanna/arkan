@@ -3,7 +3,7 @@
 
 import { z } from 'zod';
 import { generateReportSection } from '@/ai/flows/generate-report-section';
-import { withAuth, handleApiError, createApiResponse } from '@/lib/utils/api-utils';
+import { withAuth, handleApiError, createApiResponse } from '@/infrastructure/api/api-utils';
 import { GenerateSectionInputSchema } from '@/ai/schemas';
 import { executeWithQueue, generateRequestId, selectModel } from '@/ai';
 import { container } from '@/infrastructure/di/container';

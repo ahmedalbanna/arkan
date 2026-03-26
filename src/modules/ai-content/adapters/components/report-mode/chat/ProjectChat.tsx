@@ -6,10 +6,10 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import ReactMarkdown from 'react-markdown';
-import { markdownComponents } from "@/lib/utils/markdown-styles";
+import { markdownComponents } from "@/modules/ai-content/adapters/components/report-mode/markdown-styles";
 import { useProjectChat } from "@/modules/ai-content/adapters/hooks/report-mode/useProjectChat";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { cn } from "@/lib/utils/cn";
+import { cn } from "@/infrastructure/utils/cn";
 import { useState, useRef, useEffect } from "react";
 
 interface ProjectChatProps {

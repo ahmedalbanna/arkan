@@ -1,5 +1,5 @@
 
-import type { BankAccount } from '@/lib/types';
+import type { BankAccount } from '@/infrastructure/utils/types';
 
 
 export const defaultBankAccounts: BankAccount[] = [

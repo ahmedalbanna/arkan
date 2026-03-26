@@ -8,7 +8,7 @@ export interface SectionDefinition {
     model?: string;
 }
 
-import { Result } from "@/lib/utils/result";
+import { Result } from "@/infrastructure/utils/result";
 import { AIContentError } from "../errors/AIContentErrors";
 
 export interface ISectionRepository {

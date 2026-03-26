@@ -1,4 +1,4 @@
-import { handleApiError } from '@/lib/utils/api-utils';
+import { handleApiError } from '@/infrastructure/api/api-utils';
 import type { UserProfile } from '@/modules/users/domain/entities/User';
 
 /**

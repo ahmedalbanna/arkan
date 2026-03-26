@@ -3,8 +3,8 @@
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useAgentManager } from '@/hooks/use-agent-store';
-import type { AgentProperties } from '@/lib/types';
-import { cn } from '@/lib/utils/cn';
+import type { AgentProperties } from '@/infrastructure/utils/types';
+import { cn } from '@/infrastructure/utils/cn';
 import { MoreHorizontal, PlusCircle, Search, Sparkles } from 'lucide-react';
 import React, { useMemo, useState } from 'react';
 import { Input } from '@/components/ui/input';

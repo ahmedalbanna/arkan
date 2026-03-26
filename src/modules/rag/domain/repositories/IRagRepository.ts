@@ -96,7 +96,7 @@ export interface RagRerankComparisonResult {
     initialResultCount: number;
 }
 
-import { Result } from "@/lib/utils/result";
+import { Result } from "@/infrastructure/utils/result";
 import { RagError } from "../errors/RagErrors";
 
 export interface IRagRepository {

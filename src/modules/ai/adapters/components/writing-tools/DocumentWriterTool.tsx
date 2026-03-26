@@ -9,7 +9,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { useDocumentWriterLogic } from '@/modules/ai/adapters/hooks/writing-tools/use-document-writer-logic';
-import { markdownComponents } from '@/lib/utils/markdown-styles';
+import { markdownComponents } from '@/modules/ai-content/adapters/components/report-mode/markdown-styles';
 import { Check, Copy, Loader2, Sparkles } from 'lucide-react';
 import { Controller } from 'react-hook-form';
 import ReactMarkdown from 'react-markdown';

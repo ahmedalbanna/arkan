@@ -1,7 +1,7 @@
 
 'use client';
 
-import { cn } from '@/lib/utils/cn';
+import { cn } from '@/infrastructure/utils/cn';
 import React from 'react';
 
 interface A4PageProps {

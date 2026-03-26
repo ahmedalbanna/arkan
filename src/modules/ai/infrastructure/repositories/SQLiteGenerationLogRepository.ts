@@ -2,7 +2,7 @@ import { injectable } from "tsyringe";
 import { db } from "@/infrastructure/db";
 import { generationLogs, agents, users } from "@/infrastructure/db/schema";
 import { IGenerationLogRepository, GenerationLog } from "../../domain/repositories/IGenerationLogRepository";
-import { Result } from "@/lib/utils/result";
+import { Result } from "@/infrastructure/utils/result";
 import { AiError } from "../../domain/errors/AiErrors";
 import { eq, desc, and, lt } from "drizzle-orm";
 

@@ -4,7 +4,7 @@
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { useMobile } from '@/hooks';
-import { cn } from '@/lib/utils/cn';
+import { cn } from '@/infrastructure/utils/cn';
 import { type ReactElement, type ReactNode } from 'react';
 
 export interface PanelItem {

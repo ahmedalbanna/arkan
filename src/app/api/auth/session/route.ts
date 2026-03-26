@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { handleApiError, handleUserResult } from '@/lib/utils/api-utils';
+import { handleApiError, handleUserResult } from '@/infrastructure/api/api-utils';
 import { container } from '@/infrastructure/di/container';
 import { UserController } from '@/modules/users/adapters/controllers/UserController';
 

@@ -5,7 +5,7 @@ import { container } from '@/infrastructure/di/container';
 import { FeatureApiClient, UpdateFeatureVariables } from '@/modules/admin/adapters/api-client/FeatureApiClient';
 import { useAuth } from '@/context/AuthContext';
 import { useToast } from '@/hooks/util/use-toast';
-import { featureKeys } from '@/lib/query-keys';
+import { featureKeys } from '@/infrastructure/api/query-keys';
 
 export function useFeatures() {
   const { firebaseUser } = useAuth();

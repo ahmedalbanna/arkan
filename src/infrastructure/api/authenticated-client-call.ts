@@ -2,7 +2,7 @@
 
 import { container } from '@/infrastructure/di/container';
 import { getAuthenticatedToken } from '@/modules/users/domain/utils/authUtils';
-import { Result } from '@/lib/utils/result';
+import { Result } from '@/infrastructure/utils/result';
 import type { User as FirebaseUser } from 'firebase/auth';
 
 type ClientConstructor<TClient> = new (...args: unknown[]) => TClient;

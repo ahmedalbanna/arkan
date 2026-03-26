@@ -3,7 +3,7 @@
 'use server';
 
 
-import type { ProjectProperties } from '@/lib/types';
+import type { ProjectProperties } from '@/infrastructure/utils/types';
 import { container } from '@/infrastructure/di/container';
 import { IDocxExportServiceToken } from '@/modules/ai-content/domain/services/IExportService';
 import type { ConversionOptions } from '@/modules/ai-content/domain/types/export-types';

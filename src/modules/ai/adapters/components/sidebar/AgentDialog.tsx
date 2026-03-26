@@ -20,7 +20,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { useAgentManager } from '@/hooks/use-agent-store';
-import type { AgentProperties } from '@/lib/types';
+import type { AgentProperties } from '@/infrastructure/utils/types';
 import { v4 as uuidv4 } from 'uuid';
 import { toast } from '@/components/ui/use-toast';
 import { useAgentCategories } from '@/hooks';

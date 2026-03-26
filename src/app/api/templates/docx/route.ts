@@ -1,11 +1,11 @@
 
-import { createApiResponse, handleApiError, withAuth } from '@/lib/utils/api-utils';
+import { createApiResponse, handleApiError, withAuth } from '@/infrastructure/api/api-utils';
 import { container } from '@/infrastructure/di/container';
 import { TemplateController } from '@/modules/templates/adapters/controllers/TemplateController';
 import { templates as defaultTemplates } from '@/modules/ai-content/infrastructure/exporters/DocxStyles';
-import { createDocxTemplateSchema } from '@/lib/schemas/api-schemas';
+import { createDocxTemplateSchema } from '@/modules/users/domain/schemas/UserSchemas';
 
-import { handleTemplateResult } from '@/lib/utils/api-utils';
+import { handleTemplateResult } from '@/infrastructure/api/api-utils';
 
 export async function GET() {
     try {

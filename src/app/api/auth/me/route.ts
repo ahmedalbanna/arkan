@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
 import { container } from '@/infrastructure/di/container';
 import { UserController } from '@/modules/users/adapters/controllers/UserController';
-import { handleApiError } from '@/lib/utils/api-utils';
+import { handleApiError } from '@/infrastructure/api/api-utils';
 
 export async function GET() {
   try {

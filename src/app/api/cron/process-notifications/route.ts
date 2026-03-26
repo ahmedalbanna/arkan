@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { container } from '@/infrastructure/di/container';
 import { UserController } from '@/modules/users/adapters/controllers/UserController';
-import { handleApiError, handleUserResult } from '@/lib/utils/api-utils';
+import { handleApiError, handleUserResult } from '@/infrastructure/api/api-utils';
 
 /**
  * CRON endpoint to process scheduled notifications.

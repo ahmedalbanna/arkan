@@ -1,7 +1,7 @@
 'use client';
 
 import { useInfiniteQuery } from '@tanstack/react-query';
-import { generationLogKeys } from '@/lib/query-keys';
+import { generationLogKeys } from '@/infrastructure/api/query-keys';
 import { GenerationLogApiClient } from '@/modules/ai/adapters/api-client/GenerationLogApiClient';
 import { AlertCircle, Eye, Loader2, Search } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';

@@ -1,5 +1,5 @@
 
-import { handleApiError, createApiResponse, withAuth } from '@/lib/utils/api-utils';
+import { handleApiError, createApiResponse, withAuth } from '@/infrastructure/api/api-utils';
 import { z } from 'zod';
 import { container } from '@/infrastructure/di/container';
 import { AiController } from '@/modules/ai/adapters/controllers/AiController';

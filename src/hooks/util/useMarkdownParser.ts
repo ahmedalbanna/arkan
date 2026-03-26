@@ -7,7 +7,7 @@ import remarkParse from 'remark-parse';
 import remarkGfm from 'remark-gfm';
 import remarkStringify from 'remark-stringify';
 import { type Root as MdastRoot, type RootContent } from 'mdast';
-import { Chapter, Section, type ProjectContent, type SectionProperties } from '@/lib/types';
+import { Chapter, Section, type ProjectContent, type SectionProperties } from '@/infrastructure/utils/types';
 import { getNodeText } from '@/modules/templates/infrastructure/exporters/pptx/ast-utils';
 
 /**

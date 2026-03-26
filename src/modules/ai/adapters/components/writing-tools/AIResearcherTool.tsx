@@ -12,7 +12,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { useAIResearcherLogic, useAddToProjectDialogLogic, type ResearchMode } from '@/modules/ai/adapters/hooks/writing-tools/use-ai-researcher-logic';
 import { PdfExportService } from '@/modules/ai-content/infrastructure/exporters/PdfExportService';
 import { container } from '@/infrastructure/di/container';
-import { markdownComponents } from '@/lib/utils/markdown-styles';
+import { markdownComponents } from '@/modules/ai-content/adapters/components/report-mode/markdown-styles';
 import { AlertCircle, BookOpen, CheckCircle, Copy, FileDown, FileText, HelpCircle, Loader2, PlusCircle, Search, Sparkles } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import { Button } from '@/components/ui/button';

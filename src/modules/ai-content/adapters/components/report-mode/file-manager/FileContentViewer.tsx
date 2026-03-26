@@ -1,7 +1,7 @@
 'use client';
 
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { markdownComponents } from '@/lib/utils/markdown-styles';
+import { markdownComponents } from '@/modules/ai-content/adapters/components/report-mode/markdown-styles';
 import Image from 'next/image';
 import ReactMarkdown from 'react-markdown';
 import { PdfPreview } from './PdfPreview';

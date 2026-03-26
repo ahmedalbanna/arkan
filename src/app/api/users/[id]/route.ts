@@ -1,8 +1,8 @@
 
 import { revalidatePath } from "next/cache";
-import { withAuth, handleApiError, handleResult } from "@/lib/utils/api-utils";
+import { withAuth, handleApiError, handleResult } from "@/infrastructure/api/api-utils";
 import { container } from "@/infrastructure/di/container";
-import { adminUpdateUserSchema, userUpdateSchema } from "@/lib/schemas/api-schemas";
+import { adminUpdateUserSchema, userUpdateSchema } from "@/modules/users/domain/schemas/UserSchemas";
 import { checkUserAccessPermission, checkUserUpdatePermission } from "@/modules/users/domain/utils/authorization";
 import { UserController } from "@/modules/users/adapters/controllers/UserController";
 

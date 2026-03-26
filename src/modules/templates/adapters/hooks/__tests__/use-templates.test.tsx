@@ -25,7 +25,7 @@ jest.mock('../../core/useBuilderStore', () => ({
   })),
 }));
 
-jest.mock('@/lib/project/template', () => ({
+jest.mock('@/modules/projects/infrastructure/io/template', () => ({
   applyReportTemplate: jest.fn(),
 }));
 
@@ -37,7 +37,7 @@ const { runAuthenticatedResultCall } = jest.requireMock('@/infrastructure/api/au
   runAuthenticatedResultCall: jest.Mock;
 };
 
-const { templateKeys } = require('@/lib/query-keys') as {
+const { templateKeys } = require('@/infrastructure/api/query-keys') as {
   templateKeys: {
     report: () => readonly unknown[];
     presentation: () => readonly unknown[];

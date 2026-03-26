@@ -1,6 +1,6 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { renderHook, waitFor } from '@testing-library/react';
-import { settingsKeys } from '@/lib/query-keys';
+import { settingsKeys } from '@/infrastructure/api/query-keys';
 import { usePublicSettings } from '../use-settings';
 
 jest.mock('@/infrastructure/api/authenticated-client-call', () => ({ unwrapResult: jest.fn() }));

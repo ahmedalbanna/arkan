@@ -3,7 +3,7 @@ import { db } from "@/infrastructure/db";
 import { projects } from "@/infrastructure/db/schema";
 import { IProjectRepository } from "../../domain/repositories/IProjectRepository";
 import { Project, ProjectProperties } from "../../domain/entities/Project";
-import { Result } from "@/lib/utils/result";
+import { Result } from "@/infrastructure/utils/result";
 import { ProjectError } from "../../domain/errors/ProjectErrors";
 import { eq, desc, and } from "drizzle-orm";
 import { Telemetry } from "@/modules/ai/infrastructure/services/Telemetry";

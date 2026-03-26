@@ -4,7 +4,7 @@ import type { IGenerationLogRepository } from "../../../ai/domain/repositories/I
 import { IGenerationLogRepositoryToken } from "../../../ai/domain/repositories/IGenerationLogRepository";
 import type { IUserRepository } from "../../../users/domain/repositories/IUserRepository";
 import { IUserRepositoryToken } from "../../../users/domain/repositories/IUserRepository";
-import { Result } from "@/lib/utils/result";
+import { Result } from "@/infrastructure/utils/result";
 import { AiError } from "../../../ai/domain/errors/AiErrors";
 
 @injectable()

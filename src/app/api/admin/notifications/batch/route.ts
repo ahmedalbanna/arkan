@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { withAuth, handleApiError, handleUserResult } from '@/lib/utils/api-utils';
+import { withAuth, handleApiError, handleUserResult } from '@/infrastructure/api/api-utils';
 import { container } from '@/infrastructure/di/container';
 import { UserController } from '@/modules/users/adapters/controllers/UserController';
 

@@ -4,8 +4,8 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '@/context/AuthContext';
 import { toast } from '@/hooks/util/use-toast';
 import { TemplateApiClient } from '@/modules/templates/adapters/api-client/TemplateApiClient';
-import { templateKeys } from '@/lib/query-keys';
-import type { DocxTemplateProperties } from '@/lib/types';
+import { templateKeys } from '@/infrastructure/api/query-keys';
+import type { DocxTemplateProperties } from '@/infrastructure/utils/types';
 import { container } from '@/infrastructure/di/container';
 
 export function useDocxStyles() {

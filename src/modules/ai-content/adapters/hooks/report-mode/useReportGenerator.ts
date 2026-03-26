@@ -12,7 +12,7 @@ const FileManager = lazy(() => import('@/modules/ai-content/adapters/components/
 const GenerationTools = lazy(() => import('@/modules/ai-content/adapters/components/report-mode/generation-tools'));
 const ApplyTemplatePanel = lazy(() => import('@/modules/ai-content/adapters/components/report-mode/templates/ApplyTemplatePanel'));
 
-import { ProjectProperties } from '@/lib/types';
+import { ProjectProperties } from '@/infrastructure/utils/types';
 
 export function useReportGenerator(initialProject?: ProjectProperties | null) {
   const { t, locale } = useLocalization();

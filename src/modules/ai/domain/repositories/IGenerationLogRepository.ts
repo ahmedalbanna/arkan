@@ -8,7 +8,7 @@ export interface GenerationLog {
     timestamp?: string;
 }
 
-import { Result } from "@/lib/utils/result";
+import { Result } from "@/infrastructure/utils/result";
 import { AiError } from "../errors/AiErrors";
 
 export interface IGenerationLogRepository {

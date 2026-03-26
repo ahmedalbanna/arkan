@@ -4,7 +4,7 @@ import type { IRagRepository } from "../../domain/repositories/IRagRepository";
 import { IRagRepositoryToken } from "../../domain/repositories/IRagRepository";
 import type { IIndexedDocumentRepository } from "../../domain/repositories/IIndexedDocumentRepository";
 import { IIndexedDocumentRepositoryToken } from "../../domain/repositories/IIndexedDocumentRepository";
-import { Result } from "@/lib/utils/result";
+import { Result } from "@/infrastructure/utils/result";
 import { RagError } from "../../domain/errors/RagErrors";
 
 @injectable()

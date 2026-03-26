@@ -10,7 +10,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Textarea } from '@/components/ui/textarea';
 import { useLocalization } from '@/context/LocalizationContext';
 import { useSummarizerLogic } from '@/modules/ai/adapters/hooks/writing-tools/use-summarizer-logic';
-import { markdownComponents } from '@/lib/utils/markdown-styles';
+import { markdownComponents } from '@/modules/ai-content/adapters/components/report-mode/markdown-styles';
 import { Check, Copy, Loader2, Sparkles, UploadCloud } from 'lucide-react';
 import { Controller } from 'react-hook-form';
 import ReactMarkdown from 'react-markdown';

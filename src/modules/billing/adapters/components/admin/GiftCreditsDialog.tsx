@@ -11,10 +11,10 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Gift, Loader2 } from 'lucide-react';
-import { User } from '@/lib/types';
+import { User } from '@/infrastructure/utils/types';
 import { useAuth } from '@/context/AuthContext';
 import { toast } from '@/hooks';
-import { userKeys } from '@/lib/query-keys';
+import { userKeys } from '@/infrastructure/api/query-keys';
 import { apiService } from '@/infrastructure/api/ApiService';
 
 const giftCreditsSchema = z.object({

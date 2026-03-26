@@ -12,7 +12,7 @@ const IndexDocumentSchema = z.object({
   type: z.enum(['user_upload', 'reference']).default('user_upload'),
 });
 
-import { handleRagResult } from '@/lib/utils/api-utils';
+import { handleRagResult } from '@/infrastructure/api/api-utils';
 
 export async function POST(request: NextRequest) {
   try {

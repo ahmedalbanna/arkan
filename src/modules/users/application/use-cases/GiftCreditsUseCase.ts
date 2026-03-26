@@ -4,7 +4,7 @@ import type { IUserRepository } from "../../domain/repositories/IUserRepository"
 import { IUserRepositoryToken } from "../../domain/repositories/IUserRepository";
 import type { INotificationService } from "../../domain/services/INotificationService";
 import { INotificationServiceToken } from "../../domain/services/INotificationService";
-import { Result } from "@/lib/utils/result";
+import { Result } from "@/infrastructure/utils/result";
 import { UserError } from "../../domain/errors/UserErrors";
 
 @injectable()

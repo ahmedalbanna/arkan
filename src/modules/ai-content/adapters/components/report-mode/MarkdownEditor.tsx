@@ -7,10 +7,10 @@ import { marked } from 'marked';
 import React, { useState } from 'react';
 import TurndownService from 'turndown';
 import { gfm } from 'turndown-plugin-gfm';
-import { editorExtensions, handleHtmlPaste, handlePlainPaste } from '@/lib/tiptap-extensions';
+import { editorExtensions, handleHtmlPaste, handlePlainPaste } from '@/modules/ai-content/infrastructure/editor/tiptap-extensions';
 import { Button } from '@/components/ui/button';
-import { ContextualToolbar } from '@/lib/editor/ToolBar';
-import { cn } from '@/lib/utils/cn';
+import { ContextualToolbar } from '@/modules/ai-content/infrastructure/editor/editor/ToolBar';
+import { cn } from '@/infrastructure/utils/cn';
 
 // Turndown Service Initialization
 const turndownService = new TurndownService({ headingStyle: 'atx' });

@@ -3,7 +3,7 @@
 import LanguageDirectionManager from '@/components/shared/LanguageDirectionManager';
 import { Header } from '@/components/shared/Header';
 import { Toaster } from '@/components/ui/toaster';
-import { cn } from '@/lib/utils/cn';
+import { cn } from '@/infrastructure/utils/cn';
 import type { Metadata, Viewport } from 'next';
 import { redirect } from 'next/dist/client/components/navigation';
 import localFont from 'next/font/local';

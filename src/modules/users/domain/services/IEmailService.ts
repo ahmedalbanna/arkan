@@ -1,4 +1,4 @@
-import { Result } from "@/lib/utils/result";
+import { Result } from "@/infrastructure/utils/result";
 
 export interface IEmailService {
     sendPasswordResetEmail(email: string, resetLink: string): Promise<Result<void, Error>>;

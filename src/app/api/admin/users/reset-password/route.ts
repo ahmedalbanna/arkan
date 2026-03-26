@@ -2,8 +2,8 @@
 'use server';
 
 import { z } from 'zod';
-import { generateRandomPassword } from '@/lib/utils/randomPassword';
-import { handleResult, handleApiError, withAuth } from '@/lib/utils/api-utils';
+import { generateRandomPassword } from "@/modules/users/domain/utils/randomPassword";
+import { handleResult, handleApiError, withAuth } from '@/infrastructure/api/api-utils';
 import { container } from '@/infrastructure/di/container';
 import { UserController } from '@/modules/users/adapters/controllers/UserController';
 

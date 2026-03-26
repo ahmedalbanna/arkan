@@ -1,11 +1,11 @@
 
-import { createApiResponse, handleApiError, withAuth } from '@/lib/utils/api-utils';
+import { createApiResponse, handleApiError, withAuth } from '@/infrastructure/api/api-utils';
 import { z } from 'zod';
 import { container } from '@/infrastructure/di/container';
 import { TemplateController } from '@/modules/templates/adapters/controllers/TemplateController';
 import { templates as defaultTemplates } from '@/modules/templates/infrastructure/PptxStyles';
 
-import { handleTemplateResult } from '@/lib/utils/api-utils';
+import { handleTemplateResult } from '@/infrastructure/api/api-utils';
 
 export async function GET() {
     try {
