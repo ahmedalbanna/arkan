@@ -38,6 +38,10 @@ export * from '@/modules/admin/adapters/hooks/use-settings';
 export * from '@/modules/templates/adapters/hooks/use-docx-templates';
 export * from '@/modules/templates/adapters/hooks/use-pptx-templates';
 
+// RAG Hooks
+export * from '@/modules/rag/adapters/hooks/use-rag-indexing';
+export * from '@/modules/rag/adapters/hooks/use-rag-retrieval';
+
 
 // Writing Tools Logic Hooks
 export * from '@/modules/ai/adapters/hooks/writing-tools/use-ai-detector-logic';
