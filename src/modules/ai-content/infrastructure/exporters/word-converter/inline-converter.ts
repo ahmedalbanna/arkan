@@ -1,6 +1,6 @@
 // src/lib/word-converter/inline-converter.ts
 
-import { getProxiedImageBuffer } from '@/lib/utils/ProxiedImage';
+import { getProxiedImageBuffer } from '@/modules/templates/infrastructure/utils/ProxiedImage';
 import {
   ExternalHyperlink,
   FootnoteReferenceRun,

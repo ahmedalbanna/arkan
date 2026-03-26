@@ -9,7 +9,7 @@ import { useToast } from '@/hooks/util/use-toast';
 import { handleErrorUtility } from '@/lib/utils/errorUtils';
 import { useAuth } from '@/context/AuthContext';
 import { userKeys } from '@/lib/query-keys';
-import { LoginCredentials } from '@/lib/utils/authUtils';
+import { LoginCredentials } from '@/modules/users/domain/utils/authUtils';
 import { SignupCredentials } from '@/modules/users/adapters/components/auth/SignupForm';
 
 export function useLogin() {

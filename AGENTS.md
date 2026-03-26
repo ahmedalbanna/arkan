@@ -100,8 +100,9 @@ npm run qdrant:stats  # Show Qdrant stats
   - `src/ai/genkit.ts` — Genkit instance + Ollama model config
 - `src/modules/` — Domain modules following Clean Architecture (DDD)
   - Each module: `domain/`, `application/`, `adapters/`, `infrastructure/`
-  - **`adapters/hooks/`**: Feature-specific hooks (moved from `src/hooks/data/`)
-  - **`adapters/components/`**: "Smart" components containing logic and hooks (moved from `src/components/admin/`, etc.)
+  - **`adapters/hooks/`**: Feature-specific hooks.
+  - **`adapters/components/`**: "Smart" components containing logic and hooks.
+  - **`adapters/state/`**: Localized state management (Zustand stores) for the module.
   - Modules: `admin`, `ai`, `ai-content`, `billing`, `projects`, `rag`, `templates`, `users`
 - `src/components/` — Pure/Shared React components
   - `src/components/ui/` — Base shadcn/ui components (stateless Radix primitives)
@@ -375,6 +376,8 @@ FIREBASE_ADMIN_PRIVATE_KEY=
     - **Module-Based Frontend Migration**: When relocating components/hooks to module adapters, immediately update `tailwind.config.ts` to include the new directory in the `content` array. Failing to do so will result in missing CSS utility styles for those components.
     - **Mass Import Refactoring**: For large-scale file moves, use `sed` or `grep/xargs` with absolute path aliases (`@/modules/...`) to update imports repo-wide. This is significantly more efficient than individual `find_and_replace_code` calls but requires careful regex validation.
     - **Hydration & Suspense**: Always verify that any client component using `useSearchParams` is wrapped in a `<Suspense>` boundary in its parent page to prevent hydration mismatches and build-time errors in Next.js 15.
+    - **State Management Localization**: Move domain-specific Zustand stores from `src/hooks/core/` to their respective module's `adapters/state/` directory. This ensures that state is encapsulated alongside the logic and components that use it.
+    - **API Standardization**: Ensure all API clients in `adapters/api-client/` follow the `Result<T, ApiError>` pattern. This provides consistent error handling and type safety across the frontend. Refactor any raw `fetch` or `Promise<T>` calls to use the `ApiService` wrapper.
 
 ### Security Patterns
 - **Rate Limiting**: For single-instance SQLite deployments, use the in-memory `rate-limiter.ts` utility. For serverless or multi-instance environments, migrate this utility to use an external store like Redis.

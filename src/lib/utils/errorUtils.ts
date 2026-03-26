@@ -2,7 +2,7 @@
 'use client';
 
 import { toast } from "@/hooks";
-import { Telemetry } from "./telemetry";
+import { Telemetry } from '@/modules/ai/infrastructure/services/Telemetry';
 
 /**
  * A centralized utility for handling and displaying client-side errors.

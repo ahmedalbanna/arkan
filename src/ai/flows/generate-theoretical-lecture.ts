@@ -12,7 +12,7 @@ import {
   type GenerateTheoreticalLectureInput,
   type GenerateTheoreticalLectureOutput,
 } from '@/ai/schemas/lecture-generator';
-import { withRetry } from '@/lib/utils/ai-utils';
+import { withRetry } from '@/modules/ai/domain/utils/ai-utils';
 
 // Define the AI Prompt
 const generateTheoreticalLecturePrompt = ai.definePrompt({

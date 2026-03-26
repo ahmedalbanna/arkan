@@ -1,6 +1,6 @@
 // src/lib/markdown-to-word-converter.ts
 
-import { processPlantUml } from '@/lib/utils/processPlantUml';
+import { processPlantUml } from '@/modules/ai/domain/utils/plantuml-utils';
 import {
   AlignmentType,
   Document,

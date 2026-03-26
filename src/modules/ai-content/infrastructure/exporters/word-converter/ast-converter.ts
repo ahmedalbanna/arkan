@@ -1,6 +1,6 @@
 // src/lib/word-converter/ast-converter.ts
 
-import { getProxiedImageBuffer } from '@/lib/utils/ProxiedImage';
+import { getProxiedImageBuffer } from '@/modules/templates/infrastructure/utils/ProxiedImage';
 import {
   AlignmentType,
   ImageRun,

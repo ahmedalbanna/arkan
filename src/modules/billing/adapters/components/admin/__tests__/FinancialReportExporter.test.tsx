@@ -5,7 +5,7 @@ jest.mock('@/context/AuthContext', () => ({ useAuth: jest.fn() }));
 jest.mock('@/hooks', () => ({ useToast: jest.fn() }));
 jest.mock('@/context/LocalizationContext', () => ({ useLocalization: jest.fn() }));
 jest.mock('@/infrastructure/api/authenticated-client-call', () => ({ runAuthenticatedResultCall: jest.fn() }));
-jest.mock('@/lib/utils/pdf-utils', () => ({ convertMarkdownToPdf: jest.fn() }));
+jest.mock('@/modules/ai-content/infrastructure/utils/pdf-utils', () => ({ convertMarkdownToPdf: jest.fn() }));
 jest.mock('@/components/ui/calendar', () => ({ Calendar: () => <div data-testid="calendar" /> }));
 
 const { useAuth } = jest.requireMock('@/context/AuthContext') as { useAuth: jest.Mock };

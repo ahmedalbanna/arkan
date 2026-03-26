@@ -8,7 +8,7 @@ import {
     templates,
     users
 } from "@/infrastructure/db/schema";
-import { AuthCrypto } from "@/lib/utils/auth-crypto";
+import { AuthCrypto } from "@/modules/users/domain/utils/auth-crypto";
 import { defaultBankAccounts } from '@/lib/db/seed-data/bank-accounts';
 import { defaultPaymentMethods } from '@/lib/db/seed-data/payment-methods';
 import { defaultFeatures } from '@/lib/db/seed-data/features';

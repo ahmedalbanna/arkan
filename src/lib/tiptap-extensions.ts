@@ -20,7 +20,7 @@ import PlantUML from './editor/plantUml-extension'; // Import the new extension
 import SlashCommand from './editor/slash-command';
 import { marked } from 'marked';
 import mammoth from 'mammoth';
-import { editorPlantUml } from './utils/processPlantUml';
+import { editorPlantUml } from '@/modules/ai/domain/utils/plantuml-utils';
 import AIImageGeneratorNode from './editor/ai-image-generator-extension';
 import { Color } from '@tiptap/extension-color';
 import TextStyle from '@tiptap/extension-text-style';

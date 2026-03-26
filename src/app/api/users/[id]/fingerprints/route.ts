@@ -1,7 +1,7 @@
 import { withAuth, handleApiError, handleResult } from "@/lib/utils/api-utils";
 import { container } from "@/infrastructure/di/container";
 import { UserController } from "@/modules/users/adapters/controllers/UserController";
-import { checkUserAccessPermission } from "@/lib/utils/authorization";
+import { checkUserAccessPermission } from "@/modules/users/domain/utils/authorization";
 
 export const GET = withAuth(async ({ params, user: requester }) => {
     try {

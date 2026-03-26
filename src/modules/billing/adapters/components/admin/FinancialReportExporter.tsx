@@ -14,7 +14,7 @@ import { container } from '@/infrastructure/di/container';
 import { TransactionApiClient } from '@/modules/billing/adapters/api-client/TransactionApiClient';
 import { useToast } from '@/hooks';
 import { useLocalization } from '@/context/LocalizationContext';
-import { convertMarkdownToPdf } from '@/lib/utils/pdf-utils';
+import { convertMarkdownToPdf } from '@/modules/ai-content/infrastructure/utils/pdf-utils';
 import type { TransactionProperties } from '@/lib/types';
 import { runAuthenticatedResultCall } from '@/infrastructure/api/authenticated-client-call';
 

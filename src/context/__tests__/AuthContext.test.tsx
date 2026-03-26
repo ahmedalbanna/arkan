@@ -17,7 +17,7 @@ jest.mock('@/hooks', () => ({
   useBuilderStore: jest.fn(),
 }));
 
-jest.mock('@/lib/utils/session-management', () => ({
+jest.mock('@/modules/users/infrastructure/services/SessionManager', () => ({
   manageSession: jest.fn(),
 }));
 
@@ -49,7 +49,7 @@ const { useBuilderStore } = jest.requireMock('@/hooks') as {
   useBuilderStore: jest.Mock;
 };
 
-const { manageSession } = jest.requireMock('@/lib/utils/session-management') as {
+const { manageSession } = jest.requireMock('@/modules/users/infrastructure/services/SessionManager') as {
   manageSession: jest.Mock;
 };
 

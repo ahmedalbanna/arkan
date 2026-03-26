@@ -6,7 +6,7 @@ import { CustomFirebaseError, handleFirebaseError } from '@/infrastructure/fireb
 import { NextResponse, type NextRequest } from 'next/server';
 import { ZodError } from 'zod';
 import { Result } from './result';
-import { Telemetry } from './telemetry';
+import { Telemetry } from '@/modules/ai/infrastructure/services/Telemetry';
 import { UserError, UserErrorType } from '@/modules/users/domain/errors/UserErrors';
 import { ProjectError, ProjectErrorType } from '@/modules/projects/domain/errors/ProjectErrors';
 import { BillingError, BillingErrorType } from '@/modules/billing/domain/errors/BillingErrors';

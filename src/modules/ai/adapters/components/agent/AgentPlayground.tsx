@@ -17,7 +17,7 @@ import { useMutation } from '@tanstack/react-query';
 import { toast } from '@/components/ui/use-toast';
 import { ResponseDisplay } from './ResponseDisplay';
 import { useAuth } from '@/context/AuthContext';
-import { getAuthenticatedToken } from '@/lib/utils/authUtils';
+import { getAuthenticatedToken } from '@/modules/users/domain/utils/authUtils';
 
 interface AgentPlaygroundProps {
   agent: AgentProperties | null;

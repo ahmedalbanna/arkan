@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { AlertTriangle, Check, Copy } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { getAuthenticatedToken } from '@/lib/utils/authUtils';
+import { getAuthenticatedToken } from '@/modules/users/domain/utils/authUtils';
 
 export function ApiTokenView() {
   const { firebaseUser } = useAuth();

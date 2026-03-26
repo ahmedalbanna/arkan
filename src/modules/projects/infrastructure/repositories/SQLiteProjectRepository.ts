@@ -6,7 +6,7 @@ import { Project, ProjectProperties } from "../../domain/entities/Project";
 import { Result } from "@/lib/utils/result";
 import { ProjectError } from "../../domain/errors/ProjectErrors";
 import { eq, desc, and } from "drizzle-orm";
-import { Telemetry } from "@/lib/utils/telemetry";
+import { Telemetry } from "@/modules/ai/infrastructure/services/Telemetry";
 
 @injectable()
 export class SQLiteProjectRepository implements IProjectRepository {

@@ -4,7 +4,7 @@ import { users, passwordResets } from "@/infrastructure/db/schema";
 import { IAuthRepository } from "../../domain/repositories/IAuthRepository";
 import { Result } from "@/lib/utils/result";
 import { UserError } from "../../domain/errors/UserErrors";
-import { AuthCrypto } from "@/lib/utils/auth-crypto";
+import { AuthCrypto } from "@/modules/users/domain/utils/auth-crypto";
 import { eq, and, sql } from "drizzle-orm";
 import { v4 as uuidv4 } from "uuid";
 

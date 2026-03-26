@@ -1,7 +1,7 @@
 'use client';
 
 import { container } from '@/infrastructure/di/container';
-import { getAuthenticatedToken } from '@/lib/utils/authUtils';
+import { getAuthenticatedToken } from '@/modules/users/domain/utils/authUtils';
 import { Result } from '@/lib/utils/result';
 import type { User as FirebaseUser } from 'firebase/auth';
 

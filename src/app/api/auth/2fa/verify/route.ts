@@ -41,7 +41,7 @@ export async function POST(request: Request) {
     const { SQLiteAuthRepository } = require("@/modules/users/infrastructure/repositories/SQLiteAuthRepository");
     const authRepo = container.resolve(SQLiteAuthRepository);
     
-    const { AuthCrypto } = require("@/lib/utils/auth-crypto");
+    const { AuthCrypto } = require("@/modules/users/domain/utils/auth-crypto");
     const sessionToken = await AuthCrypto.createToken({ 
         uid: user.id, 
         email: user.email, 

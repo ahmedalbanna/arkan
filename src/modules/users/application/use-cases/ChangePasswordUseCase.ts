@@ -3,7 +3,7 @@ import { type IAuthRepository, IAuthRepositoryToken } from "../../domain/reposit
 import { SQLiteAuthRepository } from "../../infrastructure/repositories/SQLiteAuthRepository";
 import { Result } from "@/lib/utils/result";
 import { UserError } from "../../domain/errors/UserErrors";
-import { AuthCrypto } from "@/lib/utils/auth-crypto";
+import { AuthCrypto } from "@/modules/users/domain/utils/auth-crypto";
 import { db } from "@/infrastructure/db";
 import { users } from "@/infrastructure/db/schema";
 import { eq } from "drizzle-orm";

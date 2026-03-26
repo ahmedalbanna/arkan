@@ -13,8 +13,8 @@ import { container } from '@/infrastructure/di/container';
 import { getNodeText, splitAstIntoSlides } from '@/modules/templates/infrastructure/exporters/pptx/ast-utils';
 import { DEFAULT_CODE_FONT, DEFAULT_FONT, layout } from '@/modules/templates/infrastructure/exporters/pptx/constants';
 import { createSlidesWithContent, type FontOptions } from '@/modules/templates/infrastructure/exporters/pptx/slide-layout-engine';
-import { processPlantUml } from './utils/processPlantUml';
-import { convertMarkdownToPdf } from './utils/pdf-utils'; // Import the moved function
+import { processPlantUml } from '@/modules/ai/domain/utils/plantuml-utils';
+import { convertMarkdownToPdf } from '@/modules/ai-content/infrastructure/utils/pdf-utils'; // Import the moved function
 import { PptxStyleOptions } from '@/ai/schemas';
 
 export interface PptxConversionOptions {
