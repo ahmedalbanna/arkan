@@ -89,7 +89,7 @@ export function SectionGenerationControls({
                     {isCustomTone ? (
                         <Input
                             id={`tone-${section.id}`}
-                            value={controls.tone}
+                            value={controls.tone || ''}
                             onChange={(e) => handleControlChange('tone', e.target.value as Tone)}
                             onBlur={(e) => {
                                 if (e.target.value.trim() === '') handleControlChange('tone', 'professional');
