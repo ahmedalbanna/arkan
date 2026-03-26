@@ -1,7 +1,8 @@
 'use client';
 
 import { userKeys } from '@/infrastructure/api/query-keys';
-import { hasGuestCookie, clearGuestCookie } from "@/modules/users/infrastructure/services/CookieManager";
+import { type ICookieService, ICookieServiceToken } from "@/modules/users/domain/services/ICookieService";
+import { container } from "@/infrastructure/di/container";
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { User } from '@/modules/users/domain/entities/User';
 import { createContext, ReactNode, useCallback, useContext, useEffect, useState } from 'react';
@@ -46,13 +47,15 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       } else {
         setUser(null);
         setStoreUserProfile(null);
-        setIsGuest(hasGuestCookie());
+        const cookieService = container.resolve<ICookieService>(ICookieServiceToken);
+        setIsGuest(cookieService.hasGuestCookie());
         return null;
       }
     } catch (error) {
       setUser(null);
       setStoreUserProfile(null);
-      setIsGuest(hasGuestCookie());
+      const cookieService = container.resolve<ICookieService>(ICookieServiceToken);
+      setIsGuest(cookieService.hasGuestCookie());
       return null;
     } finally {
       setAuthIsLoading(false);

@@ -1,15 +1,23 @@
-import { injectable } from "tsyringe";
+import { inject, injectable } from "tsyringe";
 import { db } from "@/infrastructure/db";
 import { users, passwordResets } from "@/infrastructure/db/schema";
-import { IAuthRepository } from "../../domain/repositories/IAuthRepository";
+import { type IAuthRepository } from "../../domain/repositories/IAuthRepository";
 import { Result } from "@/infrastructure/utils/result";
 import { UserError } from "../../domain/errors/UserErrors";
-import { AuthCrypto } from "@/modules/users/domain/utils/auth-crypto";
+import { type IPasswordService, IPasswordServiceToken } from "../../domain/services/IPasswordService";
+import { type ITokenService, ITokenServiceToken } from "../../domain/services/ITokenService";
 import { eq, and, sql } from "drizzle-orm";
 import { v4 as uuidv4 } from "uuid";
 
 @injectable()
 export class SQLiteAuthRepository implements IAuthRepository {
+    constructor(
+        @inject(IPasswordServiceToken)
+        private passwordService: IPasswordService,
+        @inject(ITokenServiceToken)
+        private tokenService: ITokenService
+    ) {}
+
     async create(data: { email: string, password?: string, name: string }): Promise<Result<{ uid: string, email?: string }, UserError>> {
         try {
             // Check if user already exists
@@ -22,7 +30,7 @@ export class SQLiteAuthRepository implements IAuthRepository {
             }
 
             const uid = uuidv4();
-            const passwordHash = data.password ? await AuthCrypto.hashPassword(data.password) : null;
+            const passwordHash = data.password ? await this.passwordService.hash(data.password) : null;
             const now = new Date().toISOString();
 
             await db.insert(users).values({
@@ -46,9 +54,7 @@ export class SQLiteAuthRepository implements IAuthRepository {
 
     async updateEmail(userId: string, email: string): Promise<Result<void, UserError>> {
         try {
-            await db.update(users)
-                .set({ email, updatedAt: new Date().toISOString() })
-                .where(eq(users.id, userId));
+            await db.update(users).set({ email, updatedAt: new Date().toISOString() }).where(eq(users.id, userId));
             return Result.ok();
         } catch (error: any) {
             return Result.fail(UserError.internal(error.message));
@@ -57,10 +63,8 @@ export class SQLiteAuthRepository implements IAuthRepository {
 
     async updatePassword(userId: string, password: string): Promise<Result<void, UserError>> {
         try {
-            const passwordHash = await AuthCrypto.hashPassword(password);
-            await db.update(users)
-                .set({ passwordHash, updatedAt: new Date().toISOString() })
-                .where(eq(users.id, userId));
+            const passwordHash = await this.passwordService.hash(password);
+            await db.update(users).set({ passwordHash, updatedAt: new Date().toISOString() }).where(eq(users.id, userId));
             return Result.ok();
         } catch (error: any) {
             return Result.fail(UserError.internal(error.message));
@@ -78,7 +82,7 @@ export class SQLiteAuthRepository implements IAuthRepository {
 
     async verifyToken(token: string): Promise<Result<{ uid: string, email?: string }, UserError>> {
         try {
-            const payload = await AuthCrypto.verifyToken(token);
+            const payload = await this.tokenService.verify<{ uid: string; email?: string; version?: number }>(token);
             if (!payload) {
                 return Result.fail(UserError.unauthorized("Invalid or expired token"));
             }
@@ -106,13 +110,13 @@ export class SQLiteAuthRepository implements IAuthRepository {
         try {
             // In our SQLite implementation, the idToken IS already our JWT or a temporary code.
             // For simplicity, we'll verify the token first.
-            const payload = await AuthCrypto.verifyToken(idToken);
+            const payload = await this.tokenService.verify<any>(idToken);
             if (!payload) {
                 return Result.fail(UserError.unauthorized("Invalid token for session creation"));
             }
 
             // Create a longer-lived session JWT
-            const sessionToken = await AuthCrypto.createToken(payload, options.expiresIn / 1000);
+            const sessionToken = await this.tokenService.create(payload, options.expiresIn / 1000);
             return Result.ok(sessionToken);
         } catch (error: any) {
             return Result.fail(UserError.internal(error.message));
@@ -120,12 +124,10 @@ export class SQLiteAuthRepository implements IAuthRepository {
     }
 
     async verifySessionCookie(sessionCookie: string, _checkRevoked: boolean = true): Promise<Result<{ uid: string, email?: string }, UserError>> {
+        // In local auth, session cookie is just another JWT we verify same way
         return this.verifyToken(sessionCookie);
     }
 
-    /**
-     * SQLite specific: Generate reset token
-     */
     async generatePasswordResetToken(email: string): Promise<Result<{ token: string, userId: string }, UserError>> {
         try {
             const user = await db.query.users.findFirst({
@@ -133,16 +135,15 @@ export class SQLiteAuthRepository implements IAuthRepository {
             });
 
             if (!user) {
-                // Return success even if user not found for security (to avoid email enumeration)
-                return Result.fail(UserError.notFound("If an account exists with this email, a reset link will be sent."));
+                return Result.fail(UserError.notFound("No user found with this email address."));
             }
 
-            const token = uuidv4().replace(/-/g, '');
-            const expiresAt = Date.now() + 60 * 60 * 1000; // 1 hour
+            const token = uuidv4();
+            const expiresAt = Date.now() + 3600000; // 1 hour
 
             await db.insert(passwordResets).values({
-                token,
                 userId: user.id,
+                token,
                 expiresAt,
                 used: false,
             });
@@ -153,9 +154,6 @@ export class SQLiteAuthRepository implements IAuthRepository {
         }
     }
 
-    /**
-     * SQLite specific: Reset password with token
-     */
     async resetPasswordWithToken(token: string, password: string): Promise<Result<void, UserError>> {
         try {
             const reset = await db.query.passwordResets.findFirst({
@@ -166,7 +164,7 @@ export class SQLiteAuthRepository implements IAuthRepository {
                 return Result.fail(UserError.unauthorized("Invalid or expired reset token."));
             }
 
-            const passwordHash = await AuthCrypto.hashPassword(password);
+            const passwordHash = await this.passwordService.hash(password);
             
             await db.transaction(async (tx) => {
                 await tx.update(users)
@@ -184,9 +182,6 @@ export class SQLiteAuthRepository implements IAuthRepository {
         }
     }
 
-    /**
-     * SQLite specific: Sign in logic (not in interface, but needed for internal use)
-     */
     async signIn(email: string, password: string): Promise<Result<{ token: string, user: { uid: string, email: string, name: string } }, UserError>> {
         try {
             const user = await db.query.users.findFirst({
@@ -201,12 +196,12 @@ export class SQLiteAuthRepository implements IAuthRepository {
                 return Result.fail(UserError.unauthorized("Your account has been disabled. Please contact support."));
             }
 
-            const isValid = await AuthCrypto.comparePassword(password, user.passwordHash);
+            const isValid = await this.passwordService.compare(password, user.passwordHash);
             if (!isValid) {
                 return Result.fail(UserError.unauthorized("Invalid email or password"));
             }
 
-            const token = await AuthCrypto.createToken({ 
+            const token = await this.tokenService.create({ 
                 uid: user.id, 
                 email: user.email, 
                 version: user.tokenVersion ?? undefined

@@ -1,6 +1,4 @@
 
-import { Timestamp } from 'firebase-admin/firestore';
-
 export interface IndexedDocumentRecord {
   id: string;
   projectId: string;
@@ -10,7 +8,7 @@ export interface IndexedDocumentRecord {
   fileSize: number;
   type: 'report' | 'reference' | 'context' | 'user_upload';
   timestamp: number;
-  indexedAt: Timestamp;
+  indexedAt: Date | string;
   chunkSize: number;
   overlap: number;
   status: 'indexed' | 'failed' | 'deleted';

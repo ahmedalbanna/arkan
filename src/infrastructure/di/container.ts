@@ -21,6 +21,11 @@ import { ITemplateRepositoryToken } from "@/modules/templates/domain/repositorie
 import { ISectionRepositoryToken } from "@/modules/ai-content/domain/repositories/ISectionRepository";
 import { ISettingsRepositoryToken } from "@/modules/admin/domain/repositories/ISettingsRepository";
 import { IDocxExportServiceToken, IPptxExportServiceToken } from "@/modules/ai-content/domain/services/IExportService";
+import { ICookieServiceToken } from "@/modules/users/domain/services/ICookieService";
+import { ISessionServiceToken } from "@/modules/users/domain/services/ISessionService";
+import { IPasswordServiceToken } from "@/modules/users/domain/services/IPasswordService";
+import { ITokenServiceToken } from "@/modules/users/domain/services/ITokenService";
+import { ICacheServiceToken } from "@/infrastructure/cache/ICacheService";
 
 // Client-side implementations (Safe to import anywhere)
 import { ProjectApiClient } from "@/modules/projects/adapters/api-client/ProjectApiClient";
@@ -45,8 +50,14 @@ import { RagApiClient } from "@/modules/rag/adapters/api-client/RagApiClient";
 import { CreditService } from "@/modules/billing/application/services/CreditService";
 import { LocalProjectService } from "@/modules/projects/adapters/local-storage/LocalProjectService";
 import { PromptBuilder } from "@/modules/ai-content/domain/services/PromptBuilder";
+import { CookieManager } from "@/modules/users/infrastructure/services/CookieManager";
+import { SessionManager } from "@/modules/users/infrastructure/services/SessionManager";
+import { BrowserCache } from "@/infrastructure/cache/BrowserCache";
 
 // Register Client API Clients (always — safe for browser)
+container.register(ICookieServiceToken, { useClass: CookieManager }, { lifecycle: Lifecycle.Singleton });
+container.register(ISessionServiceToken, { useClass: SessionManager }, { lifecycle: Lifecycle.Singleton });
+container.register(ICacheServiceToken, { useClass: BrowserCache }, { lifecycle: Lifecycle.Singleton });
 container.register(PromptBuilder, { useClass: PromptBuilder }, { lifecycle: Lifecycle.Singleton });
 container.register(CreditService, { useClass: CreditService }, { lifecycle: Lifecycle.Singleton });
 container.register(LocalProjectService, { useClass: LocalProjectService }, { lifecycle: Lifecycle.Singleton });
@@ -97,7 +108,11 @@ if (typeof window === 'undefined') {
   const { PdfExportService } = require("@/modules/ai-content/infrastructure/exporters/PdfExportService");
   const { NodemailerEmailService } = require("@/modules/users/infrastructure/services/NodemailerEmailService");
   const { TwoFactorAuthService } = require("@/modules/users/infrastructure/services/TwoFactorAuthService");
+  const { BcryptPasswordService } = require("@/modules/users/infrastructure/services/BcryptPasswordService");
+  const { JoseTokenService } = require("@/modules/users/infrastructure/services/JoseTokenService");
 
+  container.register(IPasswordServiceToken, { useClass: BcryptPasswordService }, { lifecycle: Lifecycle.Singleton });
+  container.register(ITokenServiceToken, { useClass: JoseTokenService }, { lifecycle: Lifecycle.Singleton });
   container.register(IEmailServiceToken, { useClass: NodemailerEmailService }, { lifecycle: Lifecycle.Singleton });
   container.register(TwoFactorAuthService, { useClass: TwoFactorAuthService }, { lifecycle: Lifecycle.Singleton });
   container.register(IProjectRepositoryToken, { useClass: SQLiteProjectRepository }, { lifecycle: Lifecycle.Singleton });

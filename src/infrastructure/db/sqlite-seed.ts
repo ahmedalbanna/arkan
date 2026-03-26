@@ -8,7 +8,7 @@ import {
     templates,
     users
 } from "@/infrastructure/db/schema";
-import { AuthCrypto } from "@/modules/users/domain/utils/auth-crypto";
+import { BcryptPasswordService } from "@/modules/users/infrastructure/services/BcryptPasswordService";
 import { defaultBankAccounts } from "./seed-data/bank-accounts";
 import { defaultPaymentMethods } from "./seed-data/payment-methods";
 import { defaultFeatures } from "./seed-data/features";
@@ -24,8 +24,9 @@ async function seed() {
     try {
         // --- Users (Auth) ---
         console.log("Seeding test users...");
-        const adminPasswordHash = await AuthCrypto.hashPassword('admin123');
-        const userPasswordHash = await AuthCrypto.hashPassword('user123');
+        const passwordService = new BcryptPasswordService();
+        const adminPasswordHash = await passwordService.hash('admin123');
+        const userPasswordHash = await passwordService.hash('user123');
 
         await db.insert(users).values([
             {

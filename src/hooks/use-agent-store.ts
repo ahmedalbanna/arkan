@@ -8,8 +8,8 @@ import { useEffect } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from './util/use-toast';
 import { agentKeys } from '@/infrastructure/api/query-keys';
-import { getFromCache, saveToCache } from "@/infrastructure/cache/BrowserCache";
-import { container } from '@/infrastructure/di/container';
+import { type ICacheService, ICacheServiceToken } from "@/infrastructure/cache/ICacheService";
+import { container } from "@/infrastructure/di/container";
 
 const AGENTS_CACHE_KEY = 'agents-list';
 
@@ -62,10 +62,14 @@ export function useAgentManager() {
       if (result.isFailure) throw result.error;
       
       const fetchedAgents = result.getValue();
-      saveToCache(AGENTS_CACHE_KEY, fetchedAgents);
+      const cacheService = container.resolve<ICacheService>(ICacheServiceToken);
+      cacheService.set(AGENTS_CACHE_KEY, fetchedAgents);
       return fetchedAgents;
     },
-    initialData: () => getFromCache<AgentProperties[]>(AGENTS_CACHE_KEY),
+    initialData: () => {
+      const cacheService = container.resolve<ICacheService>(ICacheServiceToken);
+      return cacheService.get<AgentProperties[]>(AGENTS_CACHE_KEY);
+    },
     enabled: Boolean(firebaseUser),
     staleTime: 1000 * 60 * 5,
   });

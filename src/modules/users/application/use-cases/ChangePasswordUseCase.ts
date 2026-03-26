@@ -1,9 +1,8 @@
 import { inject, injectable } from "tsyringe";
 import { type IAuthRepository, IAuthRepositoryToken } from "../../domain/repositories/IAuthRepository";
-import { SQLiteAuthRepository } from "../../infrastructure/repositories/SQLiteAuthRepository";
 import { Result } from "@/infrastructure/utils/result";
 import { UserError } from "../../domain/errors/UserErrors";
-import { AuthCrypto } from "@/modules/users/domain/utils/auth-crypto";
+import { type IPasswordService, IPasswordServiceToken } from "../../domain/services/IPasswordService";
 import { db } from "@/infrastructure/db";
 import { users } from "@/infrastructure/db/schema";
 import { eq } from "drizzle-orm";
@@ -14,16 +13,13 @@ export class ChangePasswordUseCase {
     constructor(
         @inject(IAuthRepositoryToken)
         private authRepository: IAuthRepository,
+        @inject(IPasswordServiceToken)
+        private passwordService: IPasswordService,
         private logSecurityEventUseCase: LogSecurityEventUseCase
     ) {}
 
     async execute(userId: string, currentPassword: string, newPassword: string): Promise<Result<void, UserError>> {
         try {
-            // Only SQLite support for now
-            if (!(this.authRepository instanceof SQLiteAuthRepository)) {
-                return Result.fail(UserError.internal("Password change not supported for this provider."));
-            }
-
             // 1. Verify current password
             const user = await db.query.users.findFirst({
                 where: eq(users.id, userId),
@@ -33,7 +29,7 @@ export class ChangePasswordUseCase {
                 return Result.fail(UserError.notFound("User credentials not found."));
             }
 
-            const isPasswordValid = await AuthCrypto.comparePassword(currentPassword, user.passwordHash);
+            const isPasswordValid = await this.passwordService.compare(currentPassword, user.passwordHash);
             if (!isPasswordValid) {
                 return Result.fail(UserError.unauthorized("The current password you entered is incorrect."));
             }
