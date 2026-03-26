@@ -155,50 +155,15 @@ a {
   }
 }
 
-@layer components {
-  .a4-page {
-    @apply bg-background shadow-lg mx-auto;
-    width: 210mm;
-    min-height: 297mm;
-  }
-  .a4-page-max {
-    @apply bg-background shadow-lg mx-auto;
-    max-width: 210mm;
-    min-height: 297mm;
-  }
-  .zoomable-content {
-    transform: scale(var(--zoom-scale, 1));
-    transform-origin: top center;
-    transition: transform 0.2s ease-out;
-  }
-}
 @layer utilities {
-  .max-w-a4 {
-    max-width: 210mm;
-  }
   .bg-dot-pattern {
     background-image: radial-gradient(circle at 1px 1px, hsl(var(--border)) 1px, transparent 0);
     background-size: 20px 20px;
   }
 }
+
 @media (width >= 1920px) {
   .container {
     max-width: 1920px;
-}
-}
-.ai-gradient-background {
-    background: radial-gradient(circle at 100% 100%, #1e1b4b 0, #171717 50%, #1e1b4b 100%);
-}
-.glowing-border {
-  border: 1px solid transparent;
-  background:
-    linear-gradient(to right, #171717, #171717),
-    linear-gradient(to bottom, #a855f7, #6366f1, #ec4899);
-  background-clip: padding-box, border-box;
-  background-origin: padding-box, border-box;
-}
-
-.bg-dot-pattern {
-    background-image: radial-gradient(circle at 1px 1px, hsl(var(--border)) 1px, transparent 0);
-    background-size: 20px 20px;
+  }
 }

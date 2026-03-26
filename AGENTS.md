@@ -151,6 +151,7 @@ Each module in `src/modules/` follows the same four-layer structure:
 - In Next.js route handlers, prefer resolving controllers/use cases through the DI container once metadata is set up correctly; avoid falling back to ad-hoc manual wiring unless there is a proven runtime blocker
 - For controller-to-use-case injection in this codebase, prefer `@inject(delay(() => UseCase))` on constructor parameters to avoid `TypeInfo not known for "undefined"` issues from import order / circular initialization in Next.js
 - Keep `reflect-metadata` initialization centralized in `src/instrumentation.ts` and `src/infrastructure/di/container.ts`; do not scatter `import "reflect-metadata"` across use cases/controllers as a workaround
+- **Functional Injection**: For domain entities that require complex parsing or transformations (e.g., Markdown to Project), avoid importing infrastructure helpers directly into the domain. Instead, pass the infrastructure function as a typed callback to the domain method. This maintains the Clean Architecture boundary.
 
 ### AI Flows (Genkit)
 
@@ -182,6 +183,8 @@ Each module in `src/modules/` follows the same four-layer structure:
 - Prefer explicit return types on exported functions
 - Use Zod for all runtime validation, especially for AI flow inputs/outputs and API payloads
 - Avoid `any` — use `unknown` and narrow with type guards
+- **Direct Domain Imports**: Avoid using monolithic `types.ts` re-export files. Components and hooks should import domain entities (e.g., `User`, `Project`, `Section`) directly from their respective module directories to ensure proper encapsulation and avoid circular dependencies.
+- **Entity Consolidation**: Keep domain entities and their corresponding `Properties` interfaces in the same file (e.g., `Project.ts`) to reduce file fragmentation and simplify the type system.
 
 ### React / Next.js
 
