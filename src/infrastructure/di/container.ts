@@ -98,7 +98,7 @@ if (typeof window === 'undefined') {
   const { SQLiteFeatureRepository } = require("@/modules/admin/infrastructure/repositories/SQLiteFeatureRepository");
   const { SQLiteSettingsRepository } = require("@/modules/admin/infrastructure/repositories/SQLiteSettingsRepository");
   const { SQLiteTransactionRepository } = require("@/modules/billing/infrastructure/repositories/SQLiteTransactionRepository");
-  const { FirebaseFileStorageService } = require("@/modules/billing/infrastructure/services/FirebaseFileStorageService");
+  const { LocalFileStorageService } = require("@/modules/billing/infrastructure/services/LocalFileStorageService");
   const { DefaultRagRepository } = require("@/modules/rag/infrastructure/repositories/DefaultRagRepository");
   const { SQLiteIndexedDocumentRepository } = require("@/modules/rag/infrastructure/repositories/SQLiteIndexedDocumentRepository");
   const { SQLiteTemplateRepository } = require("@/modules/templates/infrastructure/repositories/SQLiteTemplateRepository");
@@ -130,7 +130,7 @@ if (typeof window === 'undefined') {
   container.register(IFeatureRepositoryToken, { useClass: SQLiteFeatureRepository }, { lifecycle: Lifecycle.Singleton });
   container.register(ISettingsRepositoryToken, { useClass: SQLiteSettingsRepository }, { lifecycle: Lifecycle.Singleton });
   container.register(ITransactionRepositoryToken, { useClass: SQLiteTransactionRepository }, { lifecycle: Lifecycle.Singleton });
-  container.register(IFileStorageServiceToken, { useClass: FirebaseFileStorageService }, { lifecycle: Lifecycle.Singleton });
+  container.register(IFileStorageServiceToken, { useClass: LocalFileStorageService }, { lifecycle: Lifecycle.Singleton });
   container.register(IRagRepositoryToken, { useClass: DefaultRagRepository }, { lifecycle: Lifecycle.Singleton });
   container.register(IIndexedDocumentRepositoryToken, { useClass: SQLiteIndexedDocumentRepository }, { lifecycle: Lifecycle.Singleton });
   container.register(ITemplateRepositoryToken, { useClass: SQLiteTemplateRepository }, { lifecycle: Lifecycle.Singleton });

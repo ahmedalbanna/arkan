@@ -43,4 +43,4 @@ if (!admin.apps.length) {
 
 // Export the initialized admin services.
 export const adminAuth = admin.apps.length ? admin.auth() : {} as admin.auth.Auth;
-export const adminDb = admin.apps.length ? admin.firestore() : {} as admin.firestore.Firestore;
+// export const adminDb = admin.apps.length ? admin.firestore() : {} as admin.firestore.Firestore;
