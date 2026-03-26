@@ -2,7 +2,7 @@
 'use client';
 
 import { useState } from 'react';
-import { useToast } from '../util/use-toast';
+import { useToast } from '@/hooks/util/use-toast';
 
 export function useImageUpload() {
     const [isUploading, setIsUploading] = useState(false);

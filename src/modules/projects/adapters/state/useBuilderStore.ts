@@ -5,8 +5,8 @@ import { LocalProjectService } from '@/modules/projects/adapters/local-storage/L
 import { container } from '@/infrastructure/di/container';
 import { useEffect } from 'react';
 import { create } from 'zustand';
-import { toast } from '../util/use-toast';
-import { useEditorStore } from './use-editor-store';
+import { toast } from '@/hooks/util/use-toast';
+import { useEditorStore } from '@/modules/ai-content/adapters/state/use-editor-store';
 import { projectFromFile } from '@/lib/project/io'; // Import from new location
 
 interface BuilderState {

@@ -3,7 +3,7 @@
 
 import { useLocalization } from '@/context/LocalizationContext';
 import { useEffect, useMemo, useState } from 'react';
-import { useBuilderStore } from './useBuilderStore';
+import { useBuilderStore } from '@/modules/projects/adapters/state/useBuilderStore';
 import { Behavior } from '@/lib/types';
 
 export function useGuidelineEditor(itemKey: string) {
