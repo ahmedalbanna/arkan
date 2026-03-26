@@ -24,7 +24,7 @@ import type { Language, Tone } from '@/infrastructure/utils/types';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { ProjectChat } from './chat/ProjectChat';
 import { SectionTabsPanel } from './generation-tools/SectionTabsPanel';
-import { ProjectProperties } from '@/infrastructure/utils/types';
+import { type ProjectProperties } from '@/modules/projects/domain/entities/Project';
 
 const ReportResults = lazy(() => import('./ReportResults'));
 

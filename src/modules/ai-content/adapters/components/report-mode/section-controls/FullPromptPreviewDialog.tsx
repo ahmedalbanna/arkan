@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Copy, Check } from 'lucide-react';
 import { useBuilderStore } from '@/hooks';
 
-import type { Section } from '@/infrastructure/utils/types';
+import type { Section } from '@/modules/ai-content/domain/entities/Section';
 import { PromptBuilder } from '@/modules/ai-content/domain/services/PromptBuilder';
 import { container } from '@/infrastructure/di/container';
 

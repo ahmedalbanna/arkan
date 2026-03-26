@@ -1,6 +1,6 @@
 import { injectable } from 'tsyringe';
 import { apiService, ApiError } from '@/infrastructure/api/ApiService';
-import { ProjectProperties } from '../../domain/entities/ProjectProperties';
+import { type ProjectProperties } from '../../domain/entities/Project';
 import { Result } from '@/infrastructure/utils/result';
 
 const toApiError = (error: unknown): ApiError => {

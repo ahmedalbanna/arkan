@@ -1,6 +1,5 @@
 export * from '@/modules/users/domain/entities/User';
 export { Project } from '@/modules/projects/domain/entities/Project';
-export * from '@/modules/projects/domain/entities/ProjectProperties';
 export * from '@/modules/ai-content/domain/entities/Chapter';
 export * from '@/modules/ai-content/domain/entities/Section';
 export * from '@/modules/ai-content/domain/entities/TOC';
@@ -22,3 +21,4 @@ export type { PptxStyleOptions } from '@/ai/schemas/template-schemas';
 export type { ProjectContent } from '@/modules/projects/domain/entities/Project';
 export { fileSchema } from '@/modules/billing/domain/schemas/PaymentSchemas';
 export * from '@/modules/ai-content/infrastructure/exporters/word-converter/types';
+export type { ProjectProperties } from '@/modules/projects/domain/entities/Project';

@@ -6,7 +6,7 @@ import { useBuilderStore } from '@/modules/projects/adapters/state/useBuilderSto
 import { useRouter } from 'next/navigation';
 import { useCallback } from 'react';
 import { toast } from '@/hooks/util/use-toast';
-import type { Project } from '@/infrastructure/utils/types';
+import type { Project } from '@/modules/projects/domain/entities/Project';
 
 /**
  * Custom hook for handling project file operations (upload, download, etc.)

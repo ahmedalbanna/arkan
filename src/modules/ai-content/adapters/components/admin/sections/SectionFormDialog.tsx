@@ -20,7 +20,7 @@ import { z } from 'zod';
 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useCreateSection, useUpdateSection } from '@/hooks';
-import { Section } from '@/infrastructure/utils/types';
+import { Section } from '@/modules/ai-content/domain/entities/Section';
 
 const SectionSchema = z.object({
   id: z.string().min(3, 'ID must be at least 3 characters'),

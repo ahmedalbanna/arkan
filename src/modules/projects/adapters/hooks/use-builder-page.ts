@@ -7,7 +7,7 @@ import { apiService } from '@/infrastructure/api/ApiService';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useCallback, useEffect, useState } from 'react';
 
-import { ProjectProperties } from '@/infrastructure/utils/types';
+import { ProjectProperties } from '@/modules/projects/domain/entities/Project';
 
 export function useBuilderPageLogic(initialProject?: ProjectProperties | null) {
   const { userProfile, firebaseUser, refetchUser } = useAuth();

@@ -1,4 +1,4 @@
-import { Project, type ProjectProperties } from '@/infrastructure/utils/types';
+import { Project, type ProjectProperties } from '@/modules/projects/domain/entities/Project';
 
 /**
  * Creates a Project instance from a file.

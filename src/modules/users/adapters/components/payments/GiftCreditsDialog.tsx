@@ -11,7 +11,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Gift, Loader2 } from 'lucide-react';
-import { User } from '@/infrastructure/utils/types';
+import { User } from '@/modules/users/domain/entities/User';
 import { useAuth } from '@/context/AuthContext';
 import { toast } from '@/hooks';
 import { userKeys } from '@/infrastructure/api/query-keys';

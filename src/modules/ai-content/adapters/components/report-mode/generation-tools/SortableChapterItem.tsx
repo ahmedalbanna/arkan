@@ -1,7 +1,7 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
-import { Chapter } from '@/infrastructure/utils/types';
+import { Chapter } from '@/modules/ai-content/domain/entities/Chapter';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import {

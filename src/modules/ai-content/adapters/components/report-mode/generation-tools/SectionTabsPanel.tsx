@@ -6,7 +6,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/comp
 import { useLocalization } from '@/context/LocalizationContext';
 import { useBuilderStore } from '@/hooks';
 import { useAiActions } from '@/modules/ai-content/adapters/hooks/report-mode/use-ai-actions';
-import { Section } from '@/infrastructure/utils/types';
+import { Section } from '@/modules/ai-content/domain/entities/Section';
 import { cn } from '@/infrastructure/utils/cn';
 import { Link as LinkIcon, Loader2, SlidersHorizontal, Sparkles, StickyNote } from 'lucide-react';
 import { SectionContextSelector } from '../section-controls/SectionContextSelector';

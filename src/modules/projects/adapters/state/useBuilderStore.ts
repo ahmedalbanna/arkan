@@ -1,6 +1,10 @@
 'use client';
 
-import { Chapter, Project, Section, TocSection, type ProjectProperties, User } from '@/infrastructure/utils/types';
+import { Project, type ProjectProperties } from '@/modules/projects/domain/entities/Project';
+import { Chapter } from '@/modules/ai-content/domain/entities/Chapter';
+import { Section } from '@/modules/ai-content/domain/entities/Section';
+import { User } from '@/modules/users/domain/entities/User';
+import { TocSection } from '@/modules/ai-content/domain/entities/TOC';;
 import { LocalProjectService } from '@/modules/projects/adapters/local-storage/LocalProjectService';
 import { container } from '@/infrastructure/di/container';
 import { useEffect } from 'react';
@@ -86,7 +90,8 @@ const useBuilderStore = create<BuilderState>((set, get) => ({
     },
 
     updateProjectFromMarkdown: (markdown: string) => {
-        get().updateProject(p => p.updateProjectFromMarkdown(markdown));
+        const { parseMarkdownToContent } = require('@/modules/projects/infrastructure/io/markdown-parser');
+        get().updateProject(p => p.updateProjectFromMarkdown(markdown, parseMarkdownToContent));
     },
 
     loadProject: (projectData) => {

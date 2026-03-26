@@ -10,8 +10,9 @@ const arrayMove = <T>(array: T[], from: number, to: number): T[] => {
   return newArray;
 };
 import { Language, Behavior, Tone, defaultControls } from '@/modules/ai-content/domain/entities/ControlTypes';
-import { parseMarkdownToContent } from '@/modules/projects/infrastructure/io/markdown-parser'; 
-import { applyReportTemplate } from '@/modules/projects/infrastructure/io/template';
+// Infrastructure dependencies moved to domain services or passed as arguments to avoid leakage
+// import { parseMarkdownToContent } from '@/modules/projects/infrastructure/io/markdown-parser'; 
+// import { applyReportTemplate } from '@/modules/projects/infrastructure/io/template';
 
 // Flexible Type for Project Content - strictly enforcing structure now
 export type ProjectContent = readonly (Chapter | Section)[];
@@ -236,8 +237,8 @@ export class Project {
     return this.with({ tableOfContentsMarkdown: toc });
   }
 
-  public updateProjectFromMarkdown(markdown: string): Project {
-    const newContent = parseMarkdownToContent(markdown, this.content);
+  public updateProjectFromMarkdown(markdown: string, parser: (markdown: string, existing: ProjectContent) => ProjectContent): Project {
+    const newContent = parser(markdown, this.content);
     return this.with({ content: [...newContent] });
   }
 
@@ -359,8 +360,8 @@ export class Project {
     return newContent;
   }
 
-  public applyTemplate(template: ReportTemplateProperties, allSections: SectionProperties[]): Project {
-      return applyReportTemplate(this, template);
+  public applyTemplate(template: ReportTemplateProperties, applier: (project: Project, template: ReportTemplateProperties) => Project): Project {
+      return applier(this, template);
   }
 
   // --- Serialization ---

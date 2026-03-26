@@ -2,7 +2,7 @@
 'use client';
 
 import { injectable } from "tsyringe";
-import type { ProjectProperties } from '@/infrastructure/utils/types';
+import type { ProjectProperties } from '@/modules/projects/domain/entities/Project';
 import { openDB, type IDBPDatabase } from 'idb';
 
 const DB_NAME = 'ArkanProjectsDB';

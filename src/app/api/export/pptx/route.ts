@@ -3,7 +3,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
-import type { ProjectProperties } from '@/infrastructure/utils/types';
+import { type ProjectProperties } from '@/modules/projects/domain/entities/Project';
 import { convertMarkdownToPptx } from '@/modules/templates/infrastructure/exporters/pptx/markdown-to-pptx-converter';
 import type { PptxConversionOptions } from '@/modules/templates/infrastructure/exporters/pptx/markdown-to-pptx-converter';
 

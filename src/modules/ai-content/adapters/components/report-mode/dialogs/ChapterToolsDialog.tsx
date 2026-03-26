@@ -10,7 +10,7 @@ import {
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { useChapterActions } from '@/modules/ai-content/adapters/hooks/report-mode/use-chapter-actions';
-import { Chapter } from '@/infrastructure/utils/types';
+import { Chapter } from '@/modules/ai-content/domain/entities/Chapter';
 import { Loader2, Wand2, PlusCircle, Link as LinkIcon, Edit } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Label } from '@/components/ui/label';

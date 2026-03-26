@@ -100,21 +100,27 @@ npm run qdrant:stats  # Show Qdrant stats
   - `src/ai/genkit.ts` — Genkit instance + Ollama model config
 - `src/modules/` — Domain modules following Clean Architecture (DDD)
   - Each module: `domain/`, `application/`, `adapters/`, `infrastructure/`
-  - **`adapters/hooks/`**: Feature-specific hooks.
-  - **`adapters/components/`**: "Smart" components containing logic and hooks.
-  - **`adapters/state/`**: Localized state management (Zustand stores) for the module.
+  - **`domain/schemas/`**: Module-specific Zod schemas (moved from `src/lib/schemas/`)
+  - **`adapters/hooks/`**: Feature-specific hooks (moved from `src/hooks/data/`)
+  - **`adapters/components/`**: "Smart" components containing logic and hooks
+  - **`adapters/state/`**: Localized state management (Zustand stores) for the module
+  - **`infrastructure/utils/`**: Module-specific infrastructure utilities (e.g., pdf-utils)
   - Modules: `admin`, `ai`, `ai-content`, `billing`, `projects`, `rag`, `templates`, `users`
 - `src/components/` — Pure/Shared React components
   - `src/components/ui/` — Base shadcn/ui components (stateless Radix primitives)
   - `src/components/shared/` — App-wide UI (Header, ThemeToggle, AppProviders)
 - `src/hooks/` — Generic utility hooks
   - `src/hooks/util/` — Non-domain hooks (`use-service`, `use-toast`, `use-mobile`)
-  - `src/hooks/core/` — Core framework/state hooks (`useBuilderStore`, `use-editor-store`)
 - `src/context/` — React context providers (`AuthContext`, `LocalizationContext`)
-- `src/infrastructure/` — Cross-cutting infrastructure (DI container, Firebase init)
-- `src/lib/` — Utilities, types, and helper modules
-  - `src/lib/utils/` — Utility functions (use `cn()` for Tailwind class merging)
-  - `src/lib/query-keys.ts` — Centralized TanStack Query key factory
+- `src/infrastructure/` — Cross-cutting infrastructure
+  - **`infrastructure/api/`**: `ApiService.ts`, `api-utils.ts`, `query-keys.ts`, `errorUtils.ts`
+  - **`infrastructure/cache/`**: `BrowserCache.ts` (moved from `src/lib/utils/cache.ts`)
+  - **`infrastructure/utils/`**: Foundational utilities (`cn`, `result`, `randomId`, `types.ts`)
+  - **`infrastructure/security/`**: `rate-limiter.ts`, `fingerprint.ts`, `location.ts`
+  - **`infrastructure/db/`**: SQLite database, schema, and seeding logic
+  - **`infrastructure/i18n/`**: Translation and localization logic
+  - **`infrastructure/config/`**: Global application configuration
+  - **`infrastructure/di/`**: Dependency Injection container configuration
 - `src/locales/` — Translation files (`en.json`, `ar.json`)
 - `scripts/` — Standalone scripts for Qdrant migration, data loading, etc.
 
@@ -399,4 +405,16 @@ FIREBASE_ADMIN_PRIVATE_KEY=
 - **Defensive UI Data Handling**: Always wrap external data formatting (e.g., `new Date(createdAt)` or `formatDistanceToNow`) in defensive checks or `try-catch` blocks. This prevents runtime crashes (like `Invalid time value`) if the backend returns malformed data or if a hook is temporarily using a placeholder.
 - **Admin UI Guards**: When adding administrative features to shared/global components (like the Notification Dropdown or Header), always wrap them in explicit role checks (e.g., `userProfile?.role === 'admin'`) to ensure they are hidden from standard users.
 - **Relational Indexing**: For high-growth tables like generation logs or notifications, proactively add indices to columns used in filters or cron-job queries (e.g., `status`, `userId`, `scheduledFor`) within the Drizzle schema to maintain performance over time.
+- **Removal of src/lib**: The `src/lib` directory has been completely removed. All contents have been moved to `src/infrastructure/` (generic) or `src/modules/*/` (domain-specific). Do not create new files in `src/lib`.
+- **Relocated Schemas**: Zod schemas for validation now live in `src/modules/*/domain/schemas/`.
+- **Relocated Exporters**: Heavy infrastructure exporters (PPTX, PDF) now live in `src/modules/templates/infrastructure/exporters/` or similar module-specific infrastructure paths.
+- **Relocated Editor Logic**: Tiptap extensions and editor controllers now live in `src/modules/ai-content/infrastructure/editor/`.
+- **Standardized API Service**: Always use `apiService` from `@/infrastructure/api/ApiService` for client-server communication. Ensure all methods return a `Result` object for consistent error handling.
+- **Next.js 15 Compatibility**: Always wrap components using `useSearchParams` in a `<Suspense>` boundary to avoid build-time errors and hydration mismatches.
+- **Tailwind Content Updates**: When creating new module component directories, ensure they are added to the `content` array in `tailwind.config.ts`.
+- **Import Aliases**: Always prefer absolute path aliases (`@/modules/...`, `@/infrastructure/...`) over deep relative paths (`../../../`) to maintain stability during architectural changes.
+- **Foundational Logic**: Foundational utilities (e.g., `cn`, `result`, `randomId`) and cross-cutting infrastructure (e.g., `ApiService`, `api-utils`, `cache`, `i18n`, `security`) reside in `src/infrastructure/`.
+- **Domain Logic Co-location**: All domain-specific logic, including utilities (e.g., `plantuml-utils`), schemas (e.g., `ProjectSchema`), and infrastructure services (e.g., `pdf-utils`), must live within its respective module under `src/modules/`.
+- **Refactoring Strategy**: When performing large-scale directory moves, use a 3-pass sweep: 1) Physically move files, 2) Perform global import updates using path aliases, 3) Run `npm run typecheck` and manually resolve relative path discrepancies in deep module trees.
+- **Legacy Cleanup**: The `src/lib` and `src/hooks/core` directories have been retired to eliminate architectural drift. Do not re-introduce them. All shared logic must now be categorized as either generic Infrastructure or domain-specific Module logic.
 

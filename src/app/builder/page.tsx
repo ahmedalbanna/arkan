@@ -2,7 +2,7 @@ import ReportModeGenerator from '@/modules/ai-content/adapters/components/report
 import { BuilderPageSkeleton } from './loading';
 import { Suspense } from 'react';
 import { cookies } from 'next/headers';
-import { ProjectProperties } from '@/infrastructure/utils/types';
+import { type ProjectProperties } from '@/modules/projects/domain/entities/Project';
 
 async function getInitialProject(id: string, token: string | undefined) {
   if (!id || !token) return null;
