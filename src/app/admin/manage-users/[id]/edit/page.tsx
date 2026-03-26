@@ -12,7 +12,7 @@ import { Button } from '@/components/ui/button';
 import { ChevronLeft } from 'lucide-react';
 
 // Dynamically import the EditUserForm
-const EditUserFormComponent = lazy(() => import('@/components/admin/EditUserForm'));
+const EditUserFormComponent = lazy(() => import('@/modules/users/adapters/components/admin/EditUserForm'));
 
 function EditUserPageSkeleton() {
   return (
@@ -61,7 +61,6 @@ function EditUserPageContent({ userId }: { userId: string }) {
             </Button>
             <HeaderSection userName={user.name} />
             <Suspense fallback={<EditUserPageSkeleton />}>
-                {/* @ts-expect-error - Lazy loaded component prop type mismatch */}
                 <EditUserFormComponent user={user} />
             </Suspense>
         </div>
