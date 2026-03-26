@@ -79,7 +79,10 @@ interface ReportResultsProps {
 
 const ReportResults = ({ activePanelKey }: ReportResultsProps) => {
   const { t } = useLocalization();
-  const { project, version, updateProjectFromMarkdown, selectedFileId } = useBuilderStore();
+  const project = useBuilderStore(state => state.project);
+  const version = useBuilderStore(state => state.version);
+  const updateProjectFromMarkdown = useBuilderStore(state => state.updateProjectFromMarkdown);
+  const selectedFileId = useBuilderStore(state => state.selectedFileId);
   const [isSuggestionVisible, setIsSuggestionVisible] = useState(true);
 
   const handleContentChange = (newMarkdown: string) => {
@@ -201,4 +204,4 @@ const ReportResults = ({ activePanelKey }: ReportResultsProps) => {
   );
 };
 
-export default ReportResults;
+export default React.memo(ReportResults);

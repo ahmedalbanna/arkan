@@ -12,7 +12,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { MarkdownViewer } from '@/components/shared/MarkdownViewer';
 
 export function TableOfContentForm() {
-  const { project, applyTableOfContents } = useBuilderStore();
+  const project = useBuilderStore(state => state.project);
+  const applyTableOfContents = useBuilderStore(state => state.applyTableOfContents);
   const { toast } = useToast();
   const [tocText, setTocText] = useState('');
   const [isTocDialogOpen, setIsTocDialogOpen] = useState(false);
@@ -86,3 +87,4 @@ export function TableOfContentForm() {
     </>
   );
 }
+export default React.memo(TableOfContentForm);

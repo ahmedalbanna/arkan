@@ -11,7 +11,10 @@ import { ProjectProperties } from '@/modules/projects/domain/entities/Project';
 
 export function useBuilderPageLogic(initialProject?: ProjectProperties | null) {
   const { userProfile, firebaseUser, refetchUser } = useAuth();
-  const { project, updateProject, isStoreInitialized, loadProject } = useBuilderStore();
+  const project = useBuilderStore(state => state.project);
+  const updateProject = useBuilderStore(state => state.updateProject);
+  const isStoreInitialized = useBuilderStore(state => state.isStoreInitialized);
+  const loadProject = useBuilderStore(state => state.loadProject);
 
   useEffect(() => {
     if (initialProject && isStoreInitialized && project?.id !== initialProject.id) {
