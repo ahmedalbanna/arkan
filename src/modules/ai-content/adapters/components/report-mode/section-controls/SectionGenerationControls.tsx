@@ -8,7 +8,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Slider } from '@/components/ui/slider';
 import { useLocalization } from '@/context/LocalizationContext';
 import { useBuilderStore } from '@/hooks';
-import type { GenerationControlState, Section, Tone } from '@/infrastructure/utils/types';
+import { type GenerationControlState, type Tone } from '@/modules/ai-content/domain/entities/ControlTypes';
+import { Section } from '@/modules/ai-content/domain/entities/Section';
 import { Eye, Info } from 'lucide-react';
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';

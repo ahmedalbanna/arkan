@@ -25,7 +25,8 @@ import { Input } from '@/components/ui/input';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
-import { fileSchema, PaymentMethod } from '@/infrastructure/utils/types';
+import { fileSchema } from '@/modules/billing/domain/schemas/PaymentSchemas';
+import { type PaymentMethod } from '@/modules/billing/domain/entities/PaymentMethod';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 

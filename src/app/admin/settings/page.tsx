@@ -21,7 +21,7 @@ import { useToast } from '@/hooks';
 import { usePublicSettings } from '@/modules/admin/adapters/hooks/use-settings';
 import { useAuth } from '@/context/AuthContext';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import type { AppSettings } from '@/infrastructure/utils/types';
+import { type SettingsProperties as AppSettings } from '@/modules/admin/domain/entities/Settings';
 import { settingsKeys } from '@/infrastructure/api/query-keys';
 import { SettingsApiClient } from '@/modules/admin/adapters/api-client/SettingsApiClient';
 import { container } from '@/infrastructure/di/container';

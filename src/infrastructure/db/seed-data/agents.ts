@@ -1,5 +1,5 @@
 
-import type { AgentProperties } from '@/infrastructure/utils/types';
+import { type AgentProperties } from '@/modules/ai/domain/entities/Agent';
 
 export const defaultAgentCategories = [
     { id: 'content-creation', name: 'Content Creation', icon: 'PenSquare' },

@@ -5,7 +5,7 @@ import { useAuth } from '@/context/AuthContext';
 import { toast } from '@/hooks/util/use-toast';
 import { TemplateApiClient } from '@/modules/templates/adapters/api-client/TemplateApiClient';
 import { templateKeys } from '@/infrastructure/api/query-keys';
-import type { DocxTemplateProperties } from '@/infrastructure/utils/types';
+import { type DocxTemplateProperties } from '@/modules/templates/domain/entities/DocxTemplate';
 import { container } from '@/infrastructure/di/container';
 
 export function useDocxStyles() {

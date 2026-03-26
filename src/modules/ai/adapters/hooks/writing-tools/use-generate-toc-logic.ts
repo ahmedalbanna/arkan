@@ -6,7 +6,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useToast, useBuilderStore } from '@/hooks';
 import { GenerateTocOutputSchema } from '@/ai/schemas';
-import type { TocSection } from '@/infrastructure/utils/types';
+import { type TocSection } from '@/modules/ai-content/domain/entities/TOC';
 import { useMutation } from '@tanstack/react-query';
 import { useMemo } from 'react';
 

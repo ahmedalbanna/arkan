@@ -10,6 +10,10 @@ export interface IAuthRepository {
     verifyToken(token: string): Promise<Result<{ uid: string, email?: string }, UserError>>;
     createSessionCookie(idToken: string, options: { expiresIn: number }): Promise<Result<string, UserError>>;
     verifySessionCookie(sessionCookie: string, checkRevoked?: boolean): Promise<Result<{ uid: string, email?: string }, UserError>>;
+    signIn(email: string, password: string): Promise<Result<{ token: string, user: { uid: string, email: string, name: string } }, UserError>>;
+    generatePasswordResetToken(email: string): Promise<Result<{ token: string, userId: string }, UserError>>;
+    resetPasswordWithToken(token: string, password: string): Promise<Result<void, UserError>>;
+    revokeAllSessions(userId: string): Promise<Result<void, UserError>>;
 }
 
 export const IAuthRepositoryToken = Symbol("IAuthRepository");

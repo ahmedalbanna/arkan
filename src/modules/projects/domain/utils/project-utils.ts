@@ -1,5 +1,6 @@
 
-import type { Project, Section } from '@/infrastructure/utils/types';
+import { Project } from '@/modules/projects/domain/entities/Project';
+import { Section } from '@/modules/ai-content/domain/entities/Section';
 
 /**
  * Extracts context names (section names and file names) from a section's context.

@@ -1,5 +1,5 @@
 // src/app/api/admin/templates/report/route.ts
-import { CreateReportTemplateSchema } from '@/infrastructure/utils/types';
+import { CreateReportTemplateSchema } from '@/modules/templates/domain/entities/ReportTemplate';
 import { handleApiError, withAuth, handleTemplateResult } from '@/infrastructure/api/api-utils';
 import { container } from '@/infrastructure/di/container';
 import { TemplateController } from '@/modules/templates/adapters/controllers/TemplateController';

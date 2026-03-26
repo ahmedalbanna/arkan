@@ -15,7 +15,7 @@ import { TransactionApiClient } from '@/modules/billing/adapters/api-client/Tran
 import { useToast } from '@/hooks';
 import { useLocalization } from '@/context/LocalizationContext';
 import { convertMarkdownToPdf } from '@/modules/ai-content/infrastructure/utils/pdf-utils';
-import type { TransactionProperties } from '@/infrastructure/utils/types';
+import { type TransactionProperties } from '@/modules/billing/domain/entities/Transaction';
 import { runAuthenticatedResultCall } from '@/infrastructure/api/authenticated-client-call';
 
 function formatTransactionsToMarkdown(transactions: TransactionProperties[], dateRange: DateRange): string {

@@ -5,7 +5,7 @@ import { sectionKeys } from '@/infrastructure/api/query-keys';
 jest.mock('@/context/AuthContext', () => ({ useAuth: jest.fn() }));
 jest.mock('@/hooks/util/use-toast', () => ({ toast: jest.fn() }));
 jest.mock('@/infrastructure/api/authenticated-client-call', () => ({ runAuthenticatedResultCall: jest.fn() }));
-jest.mock('@/infrastructure/utils/types', () => ({
+jest.mock('@/modules/ai-content/domain/entities/Section', () => ({
   Section: class MockSection {
     id?: string;
     title?: string;

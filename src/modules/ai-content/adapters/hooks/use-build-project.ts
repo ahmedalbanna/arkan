@@ -2,7 +2,8 @@
 'use client';
 
 import { useBuilderStore } from '@/modules/projects/adapters/state/useBuilderStore';
-import type { Project, Section } from '@/infrastructure/utils/types';
+import { Project } from '@/modules/projects/domain/entities/Project';
+import { Section } from '@/modules/ai-content/domain/entities/Section';
 
 export function useBuildProject() {
     const { project } = useBuilderStore();

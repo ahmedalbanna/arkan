@@ -1,6 +1,8 @@
 
 
-import { defaultControls, ReportTemplateProperties, SectionProperties } from '@/infrastructure/utils/types';
+import { defaultControls } from '@/modules/ai-content/domain/entities/ControlTypes';
+import { type ReportTemplateProperties } from '@/modules/templates/domain/entities/ReportTemplate';
+import { type SectionProperties } from '@/modules/ai-content/domain/entities/Section';
 import { defaultSections } from './sections';
 
 const getSection = (id: string): SectionProperties => {

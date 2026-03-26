@@ -8,7 +8,8 @@ import { useWritingTool, useToast } from '@/hooks';
 import { useState, useMemo, useEffect, useCallback } from 'react';
 import { DiffPart, computeDiff } from '@/modules/projects/domain/utils/diff';
 import { useBuilderStore } from '@/modules/projects/adapters/state/useBuilderStore';
-import { Chapter, SectionContext } from '@/infrastructure/utils/types';
+import { Chapter } from '@/modules/ai-content/domain/entities/Chapter';
+import { type SectionContext } from '@/modules/ai-content/domain/entities/ControlTypes';
 
 type ManipulationType = 'rewrite' | 'summarize' | 'style-editor' | 'readability-enhancer' | 'conciseness-checker' | 'clarity-advisor';
 

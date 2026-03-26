@@ -4,7 +4,7 @@
 import { useLocalization } from '@/context/LocalizationContext';
 import { useBuilderStore } from '@/modules/projects/adapters/state/useBuilderStore';
 import { useMemo, useCallback } from 'react';
-import type { SectionContext, ExternalContextType } from '@/infrastructure/utils/types';
+import { type SectionContext, type ExternalContextType } from '@/modules/ai-content/domain/entities/ControlTypes';
 
 export function useContextSelector(itemKey: string) {
     const { t } = useLocalization();

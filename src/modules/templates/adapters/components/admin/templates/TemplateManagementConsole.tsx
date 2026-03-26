@@ -10,7 +10,7 @@ import { useState } from 'react';
 import { TemplateFormDialog } from './TemplateFormDialog';
 import { PptxTemplate } from '@/modules/templates/domain/entities/PptxTemplate';
 import { DocxTemplate } from '@/modules/templates/domain/entities/DocxTemplate';
-import { ReportTemplate } from '@/infrastructure/utils/types';
+import { ReportTemplate } from '@/modules/templates/domain/entities/ReportTemplate';
 
 type TemplateType = 'docx' | 'pptx' | 'report';
 type TemplateData = DocxTemplate | PptxTemplate | ReportTemplate;

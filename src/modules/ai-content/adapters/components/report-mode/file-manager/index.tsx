@@ -9,7 +9,7 @@ import {
 } from "@/components/ui/dialog";
 import { useLocalization } from "@/context/LocalizationContext";
 import { useBuilderStore, useToast } from '@/hooks';
-import { ExternalContextType } from '@/infrastructure/utils/types';
+import { type ExternalContextType } from '@/modules/ai-content/domain/entities/ControlTypes';
 import { cn } from "@/infrastructure/utils/cn";
 import { AtomIcon, FileText, ImageIcon, Loader2, UploadCloud, X } from 'lucide-react';
 import { useState, useCallback } from 'react';

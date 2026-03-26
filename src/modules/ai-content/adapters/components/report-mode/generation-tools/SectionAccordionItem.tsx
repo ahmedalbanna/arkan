@@ -9,7 +9,8 @@ import { CSS } from '@dnd-kit/utilities';
 import { GripVertical, Link as LinkIcon, Loader2 } from 'lucide-react';
 import React from 'react';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Section, type Project } from '@/infrastructure/utils/types';
+import { Section } from '@/modules/ai-content/domain/entities/Section';
+import { type Project } from '@/modules/projects/domain/entities/Project';
 
 interface SectionAccordionItemProps {
     section: Section;

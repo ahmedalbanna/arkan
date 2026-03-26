@@ -4,7 +4,7 @@
 import { useLocalization } from '@/context/LocalizationContext';
 import { useEffect, useMemo, useState } from 'react';
 import { useBuilderStore } from '@/modules/projects/adapters/state/useBuilderStore';
-import { Behavior } from '@/infrastructure/utils/types';
+import { type Behavior } from '@/modules/ai-content/domain/entities/ControlTypes';
 
 export function useGuidelineEditor(itemKey: string) {
     const { t } = useLocalization();

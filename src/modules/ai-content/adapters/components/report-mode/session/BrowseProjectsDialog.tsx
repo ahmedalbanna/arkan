@@ -20,7 +20,7 @@ import { formatDistanceToNow } from "date-fns";
 import { useBuilderStore } from "@/modules/projects/adapters/state/useBuilderStore";
 import { useRouter } from "next/navigation";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Project } from "@/infrastructure/utils/types";
+import { Project } from '@/modules/projects/domain/entities/Project';
 
 function ProjectListSkeleton() {
     return (

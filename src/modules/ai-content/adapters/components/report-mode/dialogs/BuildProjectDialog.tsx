@@ -13,7 +13,9 @@ import {
 } from '@/components/ui/dialog';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useBuilderStore } from '@/hooks';
-import type { Chapter, Section, Project } from '@/infrastructure/utils/types';
+import { Chapter } from '@/modules/ai-content/domain/entities/Chapter';
+import { Section } from '@/modules/ai-content/domain/entities/Section';
+import { Project } from '@/modules/projects/domain/entities/Project';
 
 import { AlertTriangle, Building, Code, Eye, Link as LinkIcon, Loader2, StickyNote } from 'lucide-react';
 import { useMemo, useState } from 'react';

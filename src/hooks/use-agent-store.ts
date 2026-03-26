@@ -1,7 +1,7 @@
 'use client';
 
 import { create } from 'zustand';
-import type { AgentProperties } from '@/infrastructure/utils/types';
+import { type AgentProperties } from '@/modules/ai/domain/entities/Agent';
 import { AgentApiClient } from '@/modules/ai/adapters/api-client/AgentApiClient';
 import { useAuth } from '@/context/AuthContext';
 import { useEffect } from 'react';

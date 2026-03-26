@@ -17,7 +17,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/util/use-toast';
 import { convertMarkdownToPdf, convertMarkdownToPptx } from '@/modules/templates/infrastructure/exporters/pptx/markdown-to-pptx-converter';
 import { templates as pptxTemplates } from '@/modules/templates/infrastructure/PptxStyles';
-import type { PptxStyleOptions } from '@/infrastructure/utils/types';
+import { type PptxStyleOptions } from '@/ai/schemas/template-schemas';
 
 const markdownToPptxSchema = z.object({
   markdown: z.string().min(10, 'Markdown content must be at least 10 characters long.'),

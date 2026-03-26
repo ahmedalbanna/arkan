@@ -7,7 +7,10 @@ import remarkParse from 'remark-parse';
 import remarkGfm from 'remark-gfm';
 import remarkStringify from 'remark-stringify';
 import { type Root as MdastRoot, type RootContent } from 'mdast';
-import { Chapter, Section, type ProjectContent, type SectionProperties } from '@/infrastructure/utils/types';
+import { Chapter } from '@/modules/ai-content/domain/entities/Chapter';
+import { Section } from '@/modules/ai-content/domain/entities/Section';
+import { type ProjectContent } from '@/modules/projects/domain/entities/Project';
+import { type SectionProperties } from '@/modules/ai-content/domain/entities/Section';
 import { getNodeText } from '@/modules/templates/infrastructure/exporters/pptx/ast-utils';
 
 /**

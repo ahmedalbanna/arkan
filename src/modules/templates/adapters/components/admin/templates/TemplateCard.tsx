@@ -6,7 +6,9 @@ import { Button } from '@/components/ui/button';
 import { MoreHorizontal } from 'lucide-react';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { DeleteTemplateDialog } from './DeleteTemplateDialog';
-import { ReportTemplate, DocxTemplate, PptxTemplate } from '@/infrastructure/utils/types';
+import { ReportTemplate } from '@/modules/templates/domain/entities/ReportTemplate';
+import { DocxTemplate } from '@/modules/templates/domain/entities/DocxTemplate';
+import { PptxTemplate } from '@/modules/templates/domain/entities/PptxTemplate';
 
 type TemplateData = DocxTemplate | PptxTemplate | ReportTemplate;
 

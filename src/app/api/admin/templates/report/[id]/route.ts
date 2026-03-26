@@ -1,7 +1,7 @@
 // src/app/api/admin/templates/report/[id]/route.ts
 
 import { handleApiError, withAuth, handleTemplateResult } from '@/infrastructure/api/api-utils';
-import { UpdateReportTemplateSchema } from '@/infrastructure/utils/types';
+import { UpdateReportTemplateSchema } from '@/modules/templates/domain/entities/ReportTemplate';
 import { container } from '@/infrastructure/di/container';
 import { TemplateController } from '@/modules/templates/adapters/controllers/TemplateController';
 

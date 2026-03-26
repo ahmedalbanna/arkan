@@ -5,7 +5,7 @@ import { useAuth } from '@/context/AuthContext';
 import { toast } from '@/hooks/util/use-toast';
 import { TemplateApiClient } from '@/modules/templates/adapters/api-client/TemplateApiClient';
 import { templateKeys } from '@/infrastructure/api/query-keys';
-import type { PptxTemplateProperties } from '@/infrastructure/utils/types';
+import { type PptxTemplateProperties } from '@/modules/templates/domain/entities/PptxTemplate';
 import { container } from '@/infrastructure/di/container';
 
 export function usePptxStyles() {
