@@ -1,0 +1,2 @@
+make chat as content in right panel.
+replace Global Project Controls input to Global AI Settings input

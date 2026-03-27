@@ -17,12 +17,7 @@ import Image from 'next/image';
 import { Label } from '@/components/ui/label';
 import { CustomSelect } from '@/components/ui/CustomSelect';
 import { useImageUpload } from '@/modules/ai/adapters/hooks/useImageUpload';
-import { LanguageSchema, BehaviorSchema, type Behavior, CitationStyleSchema, Tone } from '@/modules/ai-content/domain/entities/ControlTypes';
 import { type ProjectProperties } from '@/modules/projects/domain/entities/Project';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Slider } from '@/components/ui/slider';
-import { Badge } from '@/components/ui/badge';
-import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 
 const settingsSchema = z.object({
   name: z.string().min(1, 'Project name is required.'),
@@ -34,56 +29,10 @@ const settingsSchema = z.object({
   course: z.string().optional(),
   educationalLevel: z.string().optional(),
   teamMembers: z.string().optional(),
-  language: LanguageSchema.optional(),
-  complexity: z.number().min(0).max(100).optional(),
-  formality: z.number().min(0).max(100).optional(),
-  tone: z.string().optional(),
-  behaviors: z.array(BehaviorSchema).optional(),
-  rules: z.array(z.string()).optional(),
-  constraints: z.array(z.string()).optional(),
   citationStyle: z.string().optional(),
 });
 
 type SettingsFormValues = z.infer<typeof settingsSchema>;
-
-function TagInput({ label, value, onChange, placeholder }: { label: string; value: string[]; onChange: (value: string[]) => void; placeholder: string }) {
-    const [inputValue, setInputValue] = useState('');
-
-    const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-        if (e.key === 'Enter' && inputValue.trim()) {
-            e.preventDefault();
-            onChange([...value, inputValue.trim()]);
-            setInputValue('');
-        }
-    };
-
-    const handleRemove = (index: number) => {
-        onChange(value.filter((_, i) => i !== index));
-    };
-
-    return (
-        <div className="space-y-2">
-            <Label className="text-sm font-semibold">{label}</Label>
-            <div className="flex flex-wrap gap-2 rounded-lg border border-border/60 bg-muted/20 p-2 min-h-[44px]">
-                {value.map((item, index) => (
-                    <Badge key={index} variant="secondary" className="flex items-center gap-1 px-2 py-1 text-xs">
-                        {item}
-                        <button onClick={() => handleRemove(index)} className="rounded-full hover:bg-muted-foreground/20">
-                            <X className="h-3 w-3" />
-                        </button>
-                    </Badge>
-                ))}
-                <Input
-                    value={inputValue}
-                    onChange={(e) => setInputValue(e.target.value)}
-                    onKeyDown={handleKeyDown}
-                    placeholder={placeholder}
-                    className="flex-1 border-none focus-visible:ring-0 focus-visible:ring-offset-0 p-0 h-auto text-sm"
-                />
-            </div>
-        </div>
-    )
-}
 
 export default function ProjectSettingsPanel() {
   const { project, updateProject } = useBuilderStore();
@@ -102,13 +51,6 @@ export default function ProjectSettingsPanel() {
       course: '',
       educationalLevel: '',
       teamMembers: '',
-      language: 'default',
-      complexity: 50,
-      formality: 70,
-      tone: 'professional',
-      behaviors: [],
-      rules: [],
-      constraints: [],
       citationStyle: 'APA7',
     }
   });
@@ -125,13 +67,6 @@ export default function ProjectSettingsPanel() {
         course: project.course || '',
         educationalLevel: project.educationalLevel || '',
         teamMembers: Array.isArray(project.teamMembers) ? project.teamMembers.join(', ') : '',
-        language: project.language || 'default',
-        complexity: project.complexity ?? 50,
-        formality: project.formality ?? 70,
-        tone: project.tone || 'professional',
-        behaviors: project.behaviors ? [...project.behaviors] : [],
-        rules: project.rules ? [...project.rules] : [],
-        constraints: project.constraints ? [...project.constraints] : [],
         citationStyle: project.citationStyle || 'APA7',
       });
       setLogoPreview(project.logoUrl || null);
@@ -150,8 +85,6 @@ export default function ProjectSettingsPanel() {
       return p.with(updatePayload);
     });
   };
-
-  const { fields: behaviors, append: appendBehavior, remove: removeBehavior } = useFieldArray({ control: form.control, name: "behaviors" });
   
   const documentTypeOptions = [
       { value: 'Graduation Project', label: 'Graduation Project' },
@@ -378,85 +311,6 @@ export default function ProjectSettingsPanel() {
                   />
                 </div>
 
-                <Card className="border-border/60 bg-muted/10">
-                    <CardHeader className="pb-3">
-                        <CardTitle className="text-base font-semibold tracking-tight">Global AI Settings</CardTitle>
-                        <CardDescription className="text-xs">Set default behavior, language, and style controls for the entire report.</CardDescription>
-                    </CardHeader>
-                    <CardContent className="space-y-5">
-                        <FormField control={form.control} name="language" render={({ field }) => (
-                          <FormItem>
-                            <FormLabel className="text-sm font-semibold">Language</FormLabel>
-                            <Select onValueChange={(value) => { field.onChange(value); handleBlur(); }} value={field.value}>
-                                <FormControl><SelectTrigger><SelectValue/></SelectTrigger></FormControl>
-                                <SelectContent>
-                                    <SelectItem value="default">Default</SelectItem>
-                                    <SelectItem value="en">English</SelectItem>
-                                    <SelectItem value="ar">Arabic</SelectItem>
-                                    <SelectItem value="es">Spanish</SelectItem>
-                                    <SelectItem value="fr">French</SelectItem>
-                                    <SelectItem value="de">German</SelectItem>
-                                </SelectContent>
-                            </Select>
-                            <FormMessage />
-                          </FormItem>
-                        )} />
-
-                        <FormField control={form.control} name="complexity" render={({ field }) => (
-                          <FormItem>
-                            <div className="flex justify-between items-center"><FormLabel className="text-sm font-semibold">Complexity</FormLabel><Badge variant="outline">{field.value}%</Badge></div>
-                            <FormControl>
-                                <Slider value={[field.value ?? 50]} onValueChange={(v) => field.onChange(v[0])} onBlur={handleBlur} min={0} max={100} step={10} />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )} />
-                        
-                        <div className="space-y-3">
-                            <Label className="text-sm font-semibold">Behaviors &amp; Personas</Label>
-                            <div className="space-y-2">
-                                {behaviors.map((item, index) => (
-                                    <div key={item.id} className="flex items-center gap-2 rounded-md border border-border/60 p-2 bg-background">
-                                        <Input
-                                            {...form.register(`behaviors.${index}.name`)}
-                                            onBlur={handleBlur}
-                                            placeholder="e.g., 'Act as an expert academic writer'"
-                                            className="flex-grow bg-background border-transparent focus-visible:ring-1 focus-visible:ring-ring"
-                                        />
-                                        <Controller
-                                            control={form.control}
-                                            name={`behaviors.${index}.type`}
-                                            render={({ field }) => (
-                                                <ToggleGroup
-                                                    type="single"
-                                                    value={field.value}
-                                                    onValueChange={(value) => { if (value) { field.onChange(value); handleBlur(); } }}
-                                                    className="shrink-0"
-                                                    size="sm"
-                                                >
-                                                    <ToggleGroupItem value="persona">Persona</ToggleGroupItem>
-                                                    <ToggleGroupItem value="behavior">Behavior</ToggleGroupItem>
-                                                </ToggleGroup>
-                                            )}
-                                        />
-                                        <Button type="button" variant="ghost" size="icon" onClick={() => removeBehavior(index)}>
-                                            <Trash2 className="h-4 w-4 text-destructive" />
-                                        </Button>
-                                    </div>
-                                ))}
-                            </div>
-                            <Button type="button" size="sm" variant="outline" className="w-full" onClick={() => appendBehavior({ name: '', type: 'behavior' })}>Add Behavior</Button>
-                        </div>
-                        
-                        <FormField control={form.control} name="rules" render={({ field }) => (
-                            <TagInput label="Mandatory Rules" placeholder="Add a rule and press Enter" value={field.value || []} onChange={(value) => { field.onChange(value); handleBlur(); }} />
-                        )} />
-                        
-                        <FormField control={form.control} name="constraints" render={({ field }) => (
-                             <TagInput label="Constraints / What to Avoid" placeholder="Add a constraint and press Enter" value={field.value || []} onChange={(value) => { field.onChange(value); handleBlur(); }} />
-                        )} />
-                    </CardContent>
-                </Card>
 
               </div>
             </ScrollArea>
