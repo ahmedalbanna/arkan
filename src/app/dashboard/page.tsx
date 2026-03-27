@@ -44,64 +44,100 @@ function DashboardSkeleton() {
     );
 }
 
+import { Badge } from '@/components/ui/badge';
+import { cn } from '@/infrastructure/utils/cn';
+
 export default function UserDashboardPage() {
     const { t } = useLocalization();
     const { userProfile, user } = useAuth();
     const { data: stats, isLoading, isError, error } = useUserStats();
     const router = useRouter();
-    const [isCreatingChat, setIsCreatingChat] = useState(false);
 
     return (
-        <div className="container mx-auto max-w-7xl px-4 py-12">
-            <div className="flex justify-between items-start mb-12 flex-wrap gap-4">
-                <div className="text-center sm:text-left">
-                    <h1 className="text-4xl md:text-5xl font-headline font-bold text-primary flex items-center justify-center sm:justify-start gap-4">
-                        <AreaChart className="w-10 h-10" />
-                        {t('userDashboard.pageTitle')}
-                    </h1>
-                    <p className="text-lg text-muted-foreground mt-2">
-                        {t('userDashboard.pageSubtitle', { name: userProfile?.name })}
+        <div className="flex flex-col min-h-screen bg-background relative overflow-hidden">
+            {/* Immersive Background */}
+            <div
+                className="absolute inset-0 z-0 pointer-events-none"
+                style={{
+                    background: 'radial-gradient(circle at 50% -20%, hsl(var(--primary) / 0.08), transparent 50%)'
+                }}
+            />
+            <div className="absolute inset-0 opacity-[0.03] dark:opacity-[0.05] pointer-events-none" style={{ backgroundImage: 'radial-gradient(#000 1px, transparent 1px)', backgroundSize: '32px 32px' }} />
+
+            <div className="container relative z-10 mx-auto max-w-[1600px] px-6 py-20 md:py-32">
+                <div className="flex flex-col md:flex-row md:items-end justify-between gap-10 mb-24 animate-in fade-in duration-1000">
+                    <div className="space-y-6">
+                        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/20">
+                            <Badge variant="outline" className="h-5 text-[9px] uppercase tracking-widest font-bold border-primary/20 text-primary bg-background">Personal Matrix</Badge>
+                            <div className="h-3 w-px bg-primary/20" />
+                            <span className="text-[10px] font-bold uppercase tracking-widest text-primary/80">Command Center</span>
+                        </div>
+
+                        <div className="space-y-2">
+                            <h1 className="text-5xl md:text-7xl font-headline font-bold tracking-tighter text-foreground leading-[0.9] flex items-center gap-6">
+                                <AreaChart className="w-12 h-12 md:w-16 md:h-16 text-primary animate-pulse" />
+                                {t('userDashboard.pageTitle')}
+                            </h1>
+                            <p className="text-xl text-muted-foreground max-w-2xl italic font-serif leading-relaxed opacity-80">
+                                {t('userDashboard.pageSubtitle', { name: userProfile?.name })}
+                            </p>
+                        </div>
+                    </div>
+
+                    <div className="flex items-center gap-3 bg-muted/20 p-1.5 rounded-2xl border border-border/40 backdrop-blur-sm shadow-sm">
+                        <Button asChild variant="ghost" size="sm" className="h-10 px-6 gap-2 text-[10px] font-bold uppercase tracking-widest hover:bg-primary/10 hover:text-primary transition-all duration-300">
+                            <Link href="/profile">
+                                <UserCog className="h-4 w-4"/>
+                                Identity Matrix
+                            </Link>
+                        </Button>
+                        <div className="h-5 w-px bg-border/60 mx-1" />
+                        <Button asChild variant="ghost" size="sm" className="h-10 px-6 gap-2 text-[10px] font-bold uppercase tracking-widest hover:bg-primary/10 hover:text-primary transition-all duration-300">
+                            <Link href="/payment-history">
+                                <CreditCard className="h-4 w-4"/>
+                                Ledger History
+                            </Link>
+                        </Button>
+                    </div>
+                </div>
+
+                <div className="animate-in fade-in slide-in-from-bottom-8 duration-1000 delay-300">
+                    {isLoading && <DashboardSkeleton />}
+
+                    {isError && (
+                        <div className="py-20 text-center border-2 border-dashed rounded-[32px] bg-destructive/5 text-destructive border-destructive/20 max-w-md mx-auto">
+                            <AlertCircle className="mx-auto h-10 w-10 mb-4 opacity-40" />
+                            <h4 className="text-xs font-bold uppercase tracking-wider mb-1">Matrix Error</h4>
+                            <p className="text-[11px] italic leading-relaxed px-8 opacity-80">Failed to synchronize dashboard metrics. {error.message}</p>
+                        </div>
+                    )}
+
+                    {stats && !isLoading && (
+                        <div className="space-y-12">
+                            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                                <StatCard title={t('userDashboard.totalGenerations')} value={stats.totalGenerations.toString()} icon={Bot} />
+                                <StatCard title={t('userDashboard.creditsRemaining')} value={(userProfile?.credits ?? 0).toString()} icon={Gem} />
+                                <StatCard title={t('userDashboard.creditsUsed')} value={stats.creditsUsed.toString()} icon={TrendingDown} />
+                            </div>
+
+                            <div className="grid gap-10 md:grid-cols-2 lg:grid-cols-7">
+                                <div className="lg:col-span-4 rounded-[40px] border-none shadow-2xl shadow-primary/5 bg-card overflow-hidden">
+                                    <AgentUsageChart data={stats.agentUsageChartData} />
+                                </div>
+                                <div className="lg:col-span-3 rounded-[40px] border-none shadow-2xl shadow-primary/5 bg-card overflow-hidden">
+                                    <RecentActivity data={stats.recentActivity} />
+                                </div>
+                            </div>
+                        </div>
+                    )}
+                </div>
+
+                <footer className="mt-32 pt-12 border-t border-border/40 text-center space-y-4">
+                    <p className="text-[10px] text-muted-foreground/40 font-bold uppercase tracking-[0.4em]">
+                        Arkan Intelligence Suite • Terminal Node V1.0 Stable
                     </p>
-                </div>
-                 <div className="flex gap-2 justify-center w-full sm:w-auto">
-                    <Button asChild variant="outline">
-                        <Link href="/profile">
-                            <UserCog className="mr-2 h-4 w-4"/>
-                            View Profile
-                        </Link>
-                    </Button>
-                    <Button asChild variant="outline">
-                         <Link href="/payment-history">
-                            <CreditCard className="mr-2 h-4 w-4"/>
-                            Payment History
-                        </Link>
-                    </Button>
-                </div>
+                </footer>
             </div>
-
-            {isLoading && <DashboardSkeleton />}
-
-            {isError && (
-                 <div className="p-8 text-center text-destructive border rounded-lg">
-                    <AlertCircle className="mx-auto h-8 w-8 mb-2" />
-                    <p>{t('userDashboard.errorLoading', { message: error.message })}</p>
-                </div>
-            )}
-
-            {stats && !isLoading && (
-                <div className="space-y-8">
-                    <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                        <StatCard title={t('userDashboard.totalGenerations')} value={stats.totalGenerations.toString()} icon={Bot} />
-                        <StatCard title={t('userDashboard.creditsRemaining')} value={(userProfile?.credits ?? 0).toString()} icon={Gem} />
-                        <StatCard title={t('userDashboard.creditsUsed')} value={stats.creditsUsed.toString()} icon={TrendingDown} />
-                    </div>
-
-                    <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-7">
-                        <AgentUsageChart data={stats.agentUsageChartData} />
-                        <RecentActivity data={stats.recentActivity} />
-                    </div>
-                </div>
-            )}
         </div>
     );
 }

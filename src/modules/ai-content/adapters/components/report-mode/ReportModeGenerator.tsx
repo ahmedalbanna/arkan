@@ -13,25 +13,13 @@ import { cn } from '@/infrastructure/utils/cn';
 import { SessionActions } from '@/modules/ai-content/adapters/components/report-mode/session/SessionActions';
 import { useReportGenerator } from '@/modules/ai-content/adapters/hooks/report-mode/useReportGenerator';
 import { type ProjectProperties } from '@/modules/projects/domain/entities/Project';
-import { formatDistanceToNow } from 'date-fns';
 import { BookOpenText, Settings, ZoomIn, ZoomOut } from 'lucide-react';
 import { Suspense, lazy } from 'react';
 
 
 const ReportResults = lazy(() => import('./ReportResults'));
 
-function ReportSkeleton() {
-    return (
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 h-full items-start">
-            <div className="lg:col-span-4">
-                <BuilderPageSkeleton />
-            </div>
-            <div className="lg:col-span-8">
-                <BuilderPageSkeleton />
-            </div>
-        </div>
-    );
-}
+
 
 function BottomNavBar({ activeView, setActiveView }: { activeView: 'generator' | 'result', setActiveView: (view: 'generator' | 'result') => void }) {
     return (
@@ -90,13 +78,41 @@ export default function ReportModeGenerator({ initialProject }: { initialProject
     }
 
     return (
-        <div className="relative flex-grow flex flex-col bg-background">
+        <div className="relative flex-grow flex flex-col bg-background min-h-screen overflow-hidden">
             <OnboardingGuide isOpen={showOnboarding} onOpenChange={setShowOnboarding} onComplete={handleOnboardingComplete} />
+            <Suspense fallback={<BuilderPageSkeleton />}>
+            {/* Premium Sticky Global Header */}
+            <header className="h-16 border-b bg-background/80 backdrop-blur-xl sticky top-0 z-50 px-6 flex items-center justify-between transition-all duration-500">
+                <div className="flex items-center gap-4">
+                    <div className="h-9 w-9 rounded-xl bg-primary flex items-center justify-center shadow-lg shadow-primary/20 animate-in zoom-in-50 duration-700">
+                        <BookOpenText className="h-5 w-5 text-primary-foreground" />
+                    </div>
+                    <div className="flex flex-col min-w-0">
+                        <div className="flex items-center gap-2">
+                            <Input
+                                className="text-lg font-headline font-bold tracking-tight text-foreground border-0 focus-visible:ring-0 focus-visible:ring-offset-0 p-0 h-auto bg-transparent truncate max-w-[200px] lg:max-w-[400px]"
+                                value={project?.name || ''}
+                                onChange={(e) => updateProjectName(e.target.value)}
+                                onBlur={() => updateProject(p => p)}
+                                placeholder={'UNTITLED PROJECT'}
+                            />
+                            <Badge variant="outline" className="h-5 text-[9px] uppercase tracking-widest font-bold border-primary/20 text-primary bg-primary/5 hidden sm:flex">
+                                Pro Node
+                            </Badge>
+                        </div>
+                        <p className="text-[9px] text-muted-foreground font-bold uppercase tracking-[0.2em] leading-none opacity-40">
+                            Arkan Intelligent Document Suite
+                        </p>
+                    </div>
+                </div>
 
-
+                <div className="flex items-center gap-3">
+                    <SessionActions isSaving={false} />
+                </div>
+            </header>
 
             {/* Premium Zoom HUD - CENTER */}
-            <div className="fixed bottom-8 left-1/2 -translate-x-1/2 z-40 hidden lg:flex items-center gap-1 border bg-background/60 backdrop-blur-xl p-1 rounded-2xl shadow-2xl shadow-primary/10 border-white/10 ring-1 ring-black/5 dark:ring-white/10 animate-in fade-in slide-in-from-bottom-4 duration-1000">
+            <div className="fixed bottom-10 left-1/2 -translate-x-1/2 z-40 hidden lg:flex items-center gap-1 border bg-background/60 backdrop-blur-xl p-1 rounded-2xl shadow-2xl shadow-primary/10 border-white/10 ring-1 ring-black/5 dark:ring-white/10 animate-in fade-in slide-in-from-bottom-4 duration-1000">
                 <TooltipProvider>
                     <Tooltip>
                         <TooltipTrigger asChild>
@@ -146,105 +162,88 @@ export default function ReportModeGenerator({ initialProject }: { initialProject
                 </TooltipProvider>
             </div>
 
-
-            <div className="flex-grow flex flex-col mx-auto px-4 py-8 w-full">
-                {/* Global Header Zone */}
-                <div className="flex justify-between items-start mb-4 gap-4 max-w-full">
-                    <div className="flex-1 space-y-2 overflow-auto">
-                        <Input
-                            className="text-xl font-semibold text-foreground border-0 focus-visible:ring-0 focus-visible:ring-offset-0 p-0 h-auto bg-transparent"
-                            value={project?.name || ''}
-                            onChange={(e) => updateProjectName(e.target.value)}
-                            onBlur={() => updateProject(p => p)}
-                            placeholder={'Untitled Project'}
-                        />
-                        {project?.meta.updated && (
-                            <p className="text-xs text-muted-foreground pt-1">
-                                Updated {formatDistanceToNow(new Date(project.meta.updated), { addSuffix: true })}
-                            </p>
-                        )}
-                    </div>
-                    <div className="flex-none">
-                        <SessionActions isSaving={false} />
-                    </div>
+            <main className="flex-1 flex flex-col relative z-10 overflow-hidden">
+                {/* Immersive Global Environment Layer */}
+                <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden">
+                    <div className="absolute inset-0 opacity-[0.03] dark:opacity-[0.05]" style={{ backgroundImage: 'radial-gradient(#000 1px, transparent 1px)', backgroundSize: '32px 32px' }} />
+                    <div className="absolute inset-0" style={{ background: 'radial-gradient(circle at 50% -20%, hsl(var(--primary) / 0.05), transparent 50%)' }} />
                 </div>
-                {/* Zoom Controls - CENTER */}
-                <div className="flex flex-col flex-grow">
-                    <div className="pb-16 lg:pb-0 flex-grow">
-                        <Suspense fallback={<ReportSkeleton />}>
-                            <div className="h-full" dir={locale === 'ar' ? 'rtl' : 'ltr'}>
-                                {isMobile ? (
-                                    <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start h-full">
-                                        <div className={cn(
-                                            "lg:col-span-4 xl:col-span-4 h-full",
-                                            isMobile && activeMobileView !== 'generator' && "hidden"
-                                        )}>
+
+                <div className="relative z-10 flex-1 flex flex-col p-6 max-w-[1800px] mx-auto w-full h-full">
+
+                        <div className="h-full" dir={locale === 'ar' ? 'rtl' : 'ltr'}>
+                            {isMobile ? (
+                                <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start h-full">
+                                    <div className={cn(
+                                        "lg:col-span-4 xl:col-span-4 h-full",
+                                        isMobile && activeMobileView !== 'generator' && "hidden"
+                                    )}>
+                                        <CollapsibleSidePanel
+                                            panels={leftPanels}
+                                            activeKey={activePanelKey}
+                                            onActiveKeyChange={setActivePanelKey}
+                                        />
+                                    </div>
+                                    <div className={cn(
+                                        "lg:col-span-8 xl:col-span-8 h-full",
+                                        isMobile && activeMobileView !== 'result' && "hidden"
+                                    )}>
+                                        <div className="flex flex-col gap-6 h-full">
+                                            <ReportResults activePanelKey={activePanelKey} />
+                                            <CollapsibleSidePanel
+                                                panels={rightPanels}
+                                                activeKey={activeRightPanelKey}
+                                                onActiveKeyChange={setActiveRightPanelKey}
+                                                side="right"
+                                            />
+                                        </div>
+                                    </div>
+                                </div>
+                            ) : (
+                                <ResizablePanelGroup direction="horizontal" className="h-full items-stretch">
+                                    {/* Left Zone - Setup Tools */}
+                                    <ResizablePanel defaultSize={22} minSize={18} maxSize={35}>
+                                        <div className="h-full pr-3">
                                             <CollapsibleSidePanel
                                                 panels={leftPanels}
                                                 activeKey={activePanelKey}
                                                 onActiveKeyChange={setActivePanelKey}
+                                                className="h-full border-none shadow-none bg-transparent"
                                             />
                                         </div>
-                                        <div className={cn(
-                                            "lg:col-span-8 xl:col-span-8 h-full",
-                                            isMobile && activeMobileView !== 'result' && "hidden"
-                                        )}>
-                                            <div className="flex flex-col gap-6 h-full">
-                                                <ReportResults activePanelKey={activePanelKey} />
-                                                <CollapsibleSidePanel
-                                                    panels={rightPanels}
-                                                    activeKey={activeRightPanelKey}
-                                                    onActiveKeyChange={setActiveRightPanelKey}
-                                                    side="right"
-                                                />
-                                            </div>
+                                    </ResizablePanel>
+
+                                    <ResizableHandle withHandle className="bg-transparent hover:bg-primary/10 transition-colors w-1.5" />
+
+                                    {/* Center Zone - Document Canvas */}
+                                    <ResizablePanel defaultSize={56} minSize={40}>
+                                        <div className="h-full px-3">
+                                            <ReportResults activePanelKey={activePanelKey} />
                                         </div>
-                                    </div>
-                                ) : (
-                                    <ResizablePanelGroup direction="horizontal" className="h-full items-stretch">
-                                        {/* Left Zone - Tools */}
-                                        <ResizablePanel defaultSize={25} minSize={20} maxSize={35}>
-                                            <div className="h-full pr-2">
-                                                <CollapsibleSidePanel
-                                                    panels={leftPanels}
-                                                    activeKey={activePanelKey}
-                                                    onActiveKeyChange={setActivePanelKey}
-                                                    className="h-full"
-                                                />
-                                            </div>
-                                        </ResizablePanel>
+                                    </ResizablePanel>
 
-                                        <ResizableHandle withHandle />
+                                    <ResizableHandle withHandle className="bg-transparent hover:bg-primary/10 transition-colors w-1.5" />
 
-                                        {/* Center Zone - Preview */}
-                                        <ResizablePanel defaultSize={50} minSize={40}>
-                                            <div className="h-full px-2">
-                                                <ReportResults activePanelKey={activePanelKey} />
-                                            </div>
-                                        </ResizablePanel>
+                                    {/* Right Zone - AI Context */}
+                                    <ResizablePanel defaultSize={22} minSize={18} maxSize={35}>
+                                        <div className="h-full pl-3">
+                                            <CollapsibleSidePanel
+                                                panels={rightPanels}
+                                                activeKey={activeRightPanelKey}
+                                                onActiveKeyChange={setActiveRightPanelKey}
+                                                side="right"
+                                                className="h-full border-none shadow-none bg-transparent"
+                                            />
+                                        </div>
+                                    </ResizablePanel>
+                                </ResizablePanelGroup>
+                            )}
+                        </div>
 
-                                        <ResizableHandle withHandle />
-
-                                        {/* Right Zone - Context */}
-                                        <ResizablePanel defaultSize={25} minSize={20} maxSize={35}>
-                                            <div className="h-full pl-2">
-                                                <CollapsibleSidePanel
-                                                    panels={rightPanels}
-                                                    activeKey={activeRightPanelKey}
-                                                    onActiveKeyChange={setActiveRightPanelKey}
-                                                    side="right"
-                                                    className="h-full"
-                                                />
-                                            </div>
-                                        </ResizablePanel>
-                                    </ResizablePanelGroup>
-                                )}
-                            </div>
-                        </Suspense>
-                        {isMobile && <BottomNavBar activeView={activeMobileView} setActiveView={setActiveMobileView} />}
-                    </div>
+                    {isMobile && <BottomNavBar activeView={activeMobileView} setActiveView={setActiveMobileView} />}
                 </div>
-            </div>
+                </main>
+            </Suspense>
         </div>
     );
 }

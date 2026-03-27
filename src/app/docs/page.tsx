@@ -118,65 +118,149 @@ const features = [
   },
 ];
 
+import { Badge } from '@/components/ui/badge';
+import { Separator } from '@/components/ui/separator';
+import { cn } from '@/infrastructure/utils/cn';
+
 export default function DocsPage() {
     const { t } = useLocalization();
 
     return (
-        <div className="container mx-auto max-w-7xl px-4 py-12">
-            <div className="text-center mb-16 animate-fade-in-up">
-                <h1 className="text-4xl md:text-5xl font-headline font-bold text-primary flex items-center justify-center gap-4">
-                    <BrainCircuit className="w-10 h-10" />
-                    {t('docs.pageTitle')}
-                </h1>
-                <p className="text-lg text-muted-foreground mt-2">
-                    {t('docs.pageSubtitle')}
-                </p>
-            </div>
+        <div className="flex flex-col min-h-screen bg-background relative overflow-hidden">
+            {/* Immersive Background */}
+            <div
+                className="absolute inset-0 z-0 pointer-events-none"
+                style={{
+                    background: 'radial-gradient(circle at 50% -20%, hsl(var(--primary) / 0.08), transparent 50%)'
+                }}
+            />
+            <div className="absolute inset-0 opacity-[0.03] dark:opacity-[0.05] pointer-events-none" style={{ backgroundImage: 'radial-gradient(#000 1px, transparent 1px)', backgroundSize: '32px 32px' }} />
 
-            <div className="grid grid-cols-1 md:grid-cols-12 gap-8 md:gap-12">
-                <aside className="md:col-span-3 animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
-                    <nav className="sticky top-24">
-                        <h2 className="text-lg font-semibold font-headline mb-4 px-2">{t('docs.navigationTitle')}</h2>
-                        <ul className="space-y-1">
-                            {features.map(feature => (
-                                <li key={feature.id}>
-                                    <a href={`#${feature.id}`} className="flex items-center gap-3 px-2 py-1.5 rounded-md text-muted-foreground hover:bg-muted hover:text-primary transition-colors">
-                                        <feature.icon className="h-4 w-4" />
-                                        <span>{t(feature.title)}</span>
-                                    </a>
-                                </li>
-                            ))}
-                        </ul>
-                    </nav>
-                </aside>
+            <div className="container relative z-10 mx-auto max-w-[1600px] px-6 py-20 md:py-32">
+                <div className="flex flex-col items-center text-center mb-24 space-y-6">
+                    <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 animate-in fade-in slide-in-from-bottom-4 duration-1000">
+                        <Badge variant="outline" className="h-5 text-[9px] uppercase tracking-widest font-bold border-primary/20 text-primary bg-background">Reference Manifest</Badge>
+                        <div className="h-3 w-px bg-primary/20" />
+                        <span className="text-[10px] font-bold uppercase tracking-widest text-primary/80">Documentation Node</span>
+                    </div>
 
-                <main className="md:col-span-9 space-y-12">
-                    {features.map((feature, index) => (
-                        <Card id={feature.id} key={feature.id} className="scroll-mt-24 animate-fade-in-up transition-all hover:shadow-lg" style={{ animationDelay: `${0.3 + index * 0.1}s` }}>
-                            <CardHeader>
-                                <CardTitle className="flex items-center gap-3 text-2xl font-headline">
-                                    <feature.icon className="w-6 h-6 text-primary" />
-                                    {t(feature.title)}
-                                </CardTitle>
-                            </CardHeader>
-                            <CardContent>
-                                <p className="text-muted-foreground mb-6">{t(feature.description)}</p>
-                                <Accordion type="single" collapsible className="w-full">
-                                    <AccordionItem value="how-to-use" className="border-t">
-                                        <AccordionTrigger className="font-semibold text-left py-3 hover:no-underline">{t('docs.howToUse')}</AccordionTrigger>
-                                        <AccordionContent>
-                                            <ol className="list-decimal list-inside space-y-2 mt-2 text-muted-foreground">
-                                                {feature.steps.map((step, index) => (
-                                                    <li key={index}>{t(step)}</li>
+                    <h1 className="text-5xl md:text-7xl font-headline font-bold tracking-tighter text-foreground leading-[0.9] flex items-center gap-6">
+                        <BrainCircuit className="w-12 h-12 md:w-16 md:h-16 text-primary animate-pulse" />
+                        {t('docs.pageTitle')}
+                    </h1>
+                    
+                    <p className="text-xl text-muted-foreground max-w-3xl italic font-serif leading-relaxed opacity-80">
+                        {t('docs.pageSubtitle')}
+                    </p>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-12 gap-12 lg:gap-20">
+                    {/* Technical Navigation Sidebar */}
+                    <aside className="md:col-span-3">
+                        <nav className="sticky top-24 space-y-8">
+                            <div className="space-y-4">
+                                <div className="flex items-center gap-3 px-2">
+                                    <div className="h-1.5 w-1.5 rounded-full bg-primary/40" />
+                                    <h3 className="text-[10px] font-bold uppercase tracking-[0.3em] text-muted-foreground">Protocol Index</h3>
+                                </div>
+                                
+                                <div className="flex flex-col gap-1.5">
+                                    {features.map(feature => (
+                                        <a 
+                                            key={feature.id} 
+                                            href={`#${feature.id}`} 
+                                            className="group flex items-center gap-3 px-4 py-2.5 rounded-xl text-[11px] font-bold uppercase tracking-wider text-muted-foreground hover:bg-primary/5 hover:text-primary transition-all duration-300 border border-transparent hover:border-primary/20"
+                                        >
+                                            <feature.icon className="h-4 w-4 opacity-40 group-hover:opacity-100 transition-opacity" />
+                                            <span className="truncate">{t(feature.title)}</span>
+                                        </a>
+                                    ))}
+                                </div>
+                            </div>
+
+                            <div className="p-6 rounded-[24px] border border-dashed border-primary/20 bg-primary/[0.02] text-center space-y-3">
+                                <ShieldCheck className="h-8 w-8 text-primary/40 mx-auto" />
+                                <p className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground/60 leading-relaxed">
+                                    Verified Systematic Documentation
+                                </p>
+                            </div>
+                        </nav>
+                    </aside>
+
+                    {/* Content Manifest */}
+                    <main className="md:col-span-9 space-y-16">
+                        {features.map((feature, index) => (
+                            <div 
+                                id={feature.id} 
+                                key={feature.id} 
+                                className="scroll-mt-32 animate-in fade-in slide-in-from-bottom-8 duration-1000" 
+                                style={{ animationDelay: `${index * 100}ms` }}
+                            >
+                                <Card className="border-none shadow-2xl shadow-primary/5 bg-card overflow-hidden rounded-[32px] group">
+                                    <header className="px-8 py-10 border-b bg-muted/5 flex items-center justify-between transition-colors group-hover:bg-primary/[0.02]">
+                                        <div className="flex items-center gap-5">
+                                            <div className="h-14 w-14 rounded-2xl bg-primary/10 flex items-center justify-center text-primary shadow-inner group-hover:scale-110 transition-all duration-500">
+                                                <feature.icon className="h-7 w-7" />
+                                            </div>
+                                            <div className="space-y-1">
+                                                <h2 className="text-2xl font-bold font-headline tracking-tight">{t(feature.title)}</h2>
+                                                <Badge variant="outline" className="h-4.5 text-[8px] uppercase tracking-widest font-bold border-primary/20 text-primary">
+                                                    Protocol ID: 0{index + 1}
+                                                </Badge>
+                                            </div>
+                                        </div>
+                                    </header>
+                                    
+                                    <CardContent className="p-8 md:p-12 space-y-10">
+                                        <p className="text-base text-muted-foreground leading-relaxed italic font-serif opacity-80 border-l-2 border-primary/20 pl-6 max-w-3xl">
+                                            {t(feature.description)}
+                                        </p>
+
+                                        <Separator className="bg-border/40" />
+
+                                        <div className="space-y-6">
+                                            <div className="flex items-center gap-3">
+                                                <div className="h-1.5 w-1.5 rounded-full bg-primary animate-pulse" />
+                                                <h3 className="text-[10px] font-bold uppercase tracking-[0.3em] text-muted-foreground">{t('docs.howToUse')}</h3>
+                                            </div>
+
+                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                {feature.steps.map((step, sIdx) => (
+                                                    <div key={sIdx} className="relative group/step p-5 rounded-2xl border border-border/60 bg-muted/5 hover:border-primary/40 hover:bg-background hover:shadow-xl transition-all duration-500">
+                                                        <div className="flex items-start gap-4">
+                                                            <span className="text-[10px] font-bold bg-muted/50 text-muted-foreground w-6 h-6 rounded-lg flex items-center justify-center shrink-0 border group-hover/step:bg-primary group-hover/step:text-primary-foreground group-hover/step:border-primary transition-all">
+                                                                {sIdx + 1}
+                                                            </span>
+                                                            <p className="text-[13px] leading-relaxed font-medium text-muted-foreground group-hover/step:text-foreground transition-colors pt-0.5">
+                                                                {t(step)}
+                                                            </p>
+                                                        </div>
+                                                    </div>
                                                 ))}
-                                            </ol>
-                                        </AccordionContent>
-                                    </AccordionItem>
-                                </Accordion>
-                            </CardContent>
-                        </Card>
-                    ))}
-                </main>
+                                            </div>
+                                        </div>
+                                    </CardContent>
+
+                                    <footer className="px-8 py-4 border-t bg-muted/5 flex items-center justify-between">
+                                        <p className="text-[9px] text-muted-foreground/40 font-bold uppercase tracking-widest">
+                                            Arkan Intelligence Suite • Logic Node Stable
+                                        </p>
+                                        <div className="flex items-center gap-2 opacity-40 grayscale group-hover:grayscale-0 group-hover:opacity-100 transition-all">
+                                            <ShieldCheck className="h-4 w-4" />
+                                            <span className="text-[8px] font-bold uppercase tracking-tighter">Verified Protocol</span>
+                                        </div>
+                                    </footer>
+                                </Card>
+                            </div>
+                        ))}
+                    </main>
+                </div>
+
+                <footer className="mt-32 pt-12 border-t border-border/40 text-center space-y-4">
+                    <p className="text-[10px] text-muted-foreground/40 font-bold uppercase tracking-[0.4em]">
+                        Arkan Knowledge Base • V1.0 Stable
+                    </p>
+                </footer>
             </div>
         </div>
     );

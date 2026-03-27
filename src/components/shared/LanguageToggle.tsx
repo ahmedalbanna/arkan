@@ -15,8 +15,9 @@ export function LanguageToggle() {
       size="icon"
       onClick={() => setLocale(locale === "en" ? "ar" : "en")}
       aria-label="Toggle language"
+      className="h-9 w-9 rounded-lg hover:bg-primary/10 hover:text-primary transition-all duration-300 active:scale-90"
     >
-      <Languages className="h-[1.2rem] w-[1.2rem] transition-all" />
+      <Languages className="h-4.5 w-4.5" />
       <span className="sr-only">Toggle language</span>
     </Button>
   )

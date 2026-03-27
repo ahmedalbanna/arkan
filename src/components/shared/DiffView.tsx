@@ -6,15 +6,19 @@ import type { DiffPart } from "@/modules/projects/domain/utils/diff";
 
 export const DiffView = ({ diff }: { diff: DiffPart[] }) => {
     return (
-        <p className="whitespace-pre-wrap text-sm">
+        <div className="whitespace-pre-wrap text-[13px] leading-relaxed font-mono p-4 rounded-xl bg-muted/5 border shadow-inner">
             {diff.map((part, index) => (
-                <span key={index} className={cn({
-                    'bg-green-100 dark:bg-green-900/50 text-green-800 dark:text-green-300 rounded-sm': part.type === 'added',
-                    'bg-red-100 dark:bg-red-900/50 text-red-800 dark:text-red-300 line-through rounded-sm': part.type === 'removed',
-                })}>
+                <span key={index} className={cn(
+                    "transition-colors duration-300 rounded-sm px-0.5",
+                    {
+                        'bg-green-500/10 text-green-600 dark:text-green-400 font-bold border-b border-green-500/20': part.type === 'added',
+                        'bg-destructive/10 text-destructive/60 line-through decoration-destructive/40': part.type === 'removed',
+                        'text-muted-foreground/80': !part.type || part.type === 'unchanged'
+                    }
+                )}>
                     {part.value}
                 </span>
             ))}
-        </p>
+        </div>
     )
 }

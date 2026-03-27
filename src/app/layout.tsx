@@ -12,8 +12,8 @@ import './globals.css';
 import { AppProviders } from '@/components/shared/AppProviders';
 
 export const metadata: Metadata = {
-  title: 'Arkan - Professional Portfolio Platform',
-  description: 'Showcase your work, discover talent, and interact with a community of professionals.',
+  title: 'Arkan - Intelligent Writing & Production Suite',
+  description: 'Professional grade document architecture, research synthesis, and AI-driven production protocols.',
   icons: {
     apple: '/icons/icon-192x192.png',
   },
@@ -132,13 +132,23 @@ export default async function RootLayout({
   await handleAuthRedirects(pathname);
 
   return (
-    <html lang="en" dir="ltr" className={cn(fontBody.variable, fontHeadline.variable, fontAlmarai.variable, fontCairo.variable)} suppressHydrationWarning>
-      <body className={cn('font-body antialiased min-h-screen  flex flex-col')}>
+    <html lang="en" dir="ltr" className={cn(fontBody.variable, fontHeadline.variable, fontAlmarai.variable, fontCairo.variable, "scroll-smooth")} suppressHydrationWarning>
+      <body className={cn('font-body antialiased min-h-screen flex flex-col bg-background text-foreground selection:bg-primary/10')}>
         <AppProviders>
             <LanguageDirectionManager>
-              <Header />
-              <main className="flex-grow">{children}</main>
-              <Toaster />
+              {/* Immersive Global Environment Layer */}
+              <div className="fixed inset-0 z-0 pointer-events-none overflow-hidden">
+                <div className="absolute inset-0 opacity-[0.03] dark:opacity-[0.05]" style={{ backgroundImage: 'radial-gradient(#000 1px, transparent 1px)', backgroundSize: '32px 32px' }} />
+                <div className="absolute inset-0" style={{ background: 'radial-gradient(circle at 50% -20%, hsl(var(--primary) / 0.05), transparent 50%)' }} />
+              </div>
+
+              <div className="relative z-10 flex flex-col min-h-screen">
+                <Header />
+                <main className="flex-grow animate-in fade-in duration-700">
+                    {children}
+                </main>
+                <Toaster />
+              </div>
             </LanguageDirectionManager>
         </AppProviders>
       </body>

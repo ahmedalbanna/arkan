@@ -20,57 +20,70 @@ interface OnboardingGuideProps {
   onComplete: () => void;
 }
 
+import { Badge } from '@/components/ui/badge';
+import { Separator } from '@/components/ui/separator';
+import { cn } from '@/infrastructure/utils/cn';
+import { ShieldCheck, Rocket, Zap, Brain, Layers, Layout, Save, Terminal } from 'lucide-react';
+
 export function OnboardingGuide({ isOpen, onOpenChange, onComplete }: OnboardingGuideProps) {
   const [step, setStep] = useState(0);
 
   const steps = useMemo(() => [
     {
-      title: 'Welcome to the Arkan Builder!',
-      description: "Let's take a quick tour to see how you can use AI to build complex documents and reports.",
-      imgSrc: 'https://placehold.co/600x400.png',
-      dataAiHint: 'welcome illustration'
+      title: 'Initialize Intelligence Protocol',
+      description: "Welcome to the Arkan Document Suite. This manifest will guide you through our systematic production environment.",
+      imgSrc: 'https://placehold.co/600x400/0d1117/ffffff.png?text=PROTOCOL+INITIALIZED',
+      icon: Terminal,
+      tag: 'System Boot'
     },
     {
-      title: '1. Add Your Context',
-      description: 'Start by uploading files or pasting text into the File Manager. This context (like requirements, research, or data) is crucial for the AI to understand your project.',
-      imgSrc: 'https://placehold.co/600x400.png',
-      dataAiHint: 'upload document'
+      title: 'Contextual Ingestion',
+      description: 'Establish your source parameters. Upload high-fidelity documents or technical context into our secure RAG manager.',
+      imgSrc: 'https://placehold.co/600x400/0d1117/ffffff.png?text=INGESTION+FLOW',
+      icon: Layers,
+      tag: 'Knowledge Base'
     },
     {
-      title: '2. Structure Your Report',
-      description: 'Use the Generation Tools panel to add and organize chapters and sections. You can generate a Table of Contents with AI or build it manually.',
-      imgSrc: 'https://placehold.co/600x400.png',
-      dataAiHint: 'report structure'
+      title: 'Architectural Blueprinting',
+      description: 'Define your document hierarchy using our AI Architect. Map chapters and sections into a professional structural manifest.',
+      imgSrc: 'https://placehold.co/600x400/0d1117/ffffff.png?text=ARCHITECTURAL+MATRIX',
+      icon: Layout,
+      tag: 'Blueprint Node'
     },
     {
-      title: '3. Generate Content with AI',
-      description: "For each section, select the context you want the AI to use, adjust the controls (like tone and formality), and click 'Generate'.",
-      imgSrc: 'https://placehold.co/600x400.png',
-      dataAiHint: 'ai writing'
+      title: 'Recursive Synthesis',
+      description: "Configure technical parameters for individual sections. Derive high-fidelity content through multi-turn AI iteration.",
+      imgSrc: 'https://placehold.co/600x400/0d1117/ffffff.png?text=NEURAL+SYNTHESIS',
+      icon: Brain,
+      tag: 'AI Processing'
     },
     {
-      title: '4. Edit and Refine',
-      description: "Your generated content appears in the main editor. You can edit it directly, use the floating AI toolbar for quick actions, and see word counts.",
-      imgSrc: 'https://placehold.co/600x400.png',
-      dataAiHint: 'text editor'
+      title: 'Precision Refinement',
+      description: "Polish your generated intelligence in our high-end canvas. Utilize specialized HUDs for zoom, tone, and logic validation.",
+      imgSrc: 'https://placehold.co/600x400/0d1117/ffffff.png?text=REFINE+CANVAS',
+      icon: Zap,
+      tag: 'Quality Control'
     },
     {
-      title: '5. Export Your Document',
-      description: 'Once your report is complete, use the "Export" button to download it as a professionally formatted DOCX file.',
-      imgSrc: 'https://placehold.co/600x400.png',
-      dataAiHint: 'download document'
+      title: 'Production Export',
+      description: 'Finalize your intelligence into industry-standard formats. Export professional DOCX or PPTX manifests with a single click.',
+      imgSrc: 'https://placehold.co/600x400/0d1117/ffffff.png?text=EXPORT+MANIFEST',
+      icon: Save,
+      tag: 'Final Asset'
     },
     {
-      title: 'Your AI Credits',
-      description: "Keep an eye on your credit balance in the top right corner. Most AI generations cost credits, so manage them wisely!",
-      imgSrc: 'https://placehold.co/600x400.png',
-      dataAiHint: 'coin balance'
+      title: 'Neural Credits',
+      description: "Neural operations consume system credits. Monitor your high-level balance in the primary account HUD.",
+      imgSrc: 'https://placehold.co/600x400/0d1117/ffffff.png?text=CREDIT+QUOTA',
+      icon: ShieldCheck,
+      tag: 'Audit Trail'
     },
     {
-      title: "You're All Set!",
-      description: "You're ready to start creating. Dive in and explore the power of Arkan's AI toolkit.",
-      imgSrc: 'https://placehold.co/600x400.png',
-      dataAiHint: 'rocket launch'
+      title: "Protocol Ready",
+      description: "All systems synchronized. You are now authorized to begin systematic document production in the Arkan workspace.",
+      imgSrc: 'https://placehold.co/600x400/0d1117/ffffff.png?text=DEPLOYMENT+READY',
+      icon: Rocket,
+      tag: 'Live Ops'
     },
   ], []);
 
@@ -94,50 +107,107 @@ export function OnboardingGuide({ isOpen, onOpenChange, onComplete }: Onboarding
     return null;
   }
 
+  const StepIcon = currentStep.icon;
+
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[625px] w-[90vw] max-w-[90vw] md:w-full rounded-lg">
-        <DialogHeader>
-          <Image
-            src={currentStep.imgSrc}
-            alt={currentStep.title}
-            width={600}
-            height={400}
-            className="w-full h-auto rounded-t-lg aspect-video object-cover"
-            data-ai-hint={currentStep.dataAiHint}
-          />
-          <div className="p-6">
-            <DialogTitle className="text-2xl font-headline flex items-center gap-2">
-              {step === 0 ? <PartyPopper className="w-6 h-6 text-primary" /> : <Lightbulb className="w-6 h-6 text-primary" />}
-              {currentStep.title}
-            </DialogTitle>
-            <DialogDescription className="mt-2 text-base">
-              {currentStep.description}
-            </DialogDescription>
+      <DialogContent className="max-w-4xl p-0 overflow-hidden flex flex-col gap-0 border-none shadow-2xl rounded-[32px] bg-background">
+        <header className="px-8 py-6 border-b bg-muted/5 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="h-2 w-2 rounded-full bg-primary animate-pulse" />
+            <DialogTitle className="text-xl font-bold font-headline tracking-tight">Intelligence Induction Protocol</DialogTitle>
           </div>
-        </DialogHeader>
-        <DialogFooter className="p-6 pt-0 flex flex-col-reverse sm:flex-row sm:justify-between sm:items-center w-full gap-4">
-          <div className="flex items-center gap-2 self-center sm:self-auto">
-            {steps.map((_, i) => (
-              <div
-                key={i}
-                className={`h-2 w-2 rounded-full transition-colors ${i === step ? 'bg-primary' : 'bg-muted'}`}
-              />
-            ))}
-          </div>
-          <div className="flex gap-2 justify-between sm:justify-end w-full sm:w-auto">
-            {step > 0 && (
-              <Button variant="outline" onClick={handlePrev} className="flex-1 sm:flex-none">
-                <ArrowLeft className="me-2 h-4 w-4" />
-                Previous
-              </Button>
-            )}
-            <Button onClick={handleNext} className="flex-1 sm:flex-none">
-              {step === steps.length - 1 ? 'Finish' : 'Next'}
-              <ArrowRight className="ml-2 h-4 w-4" />
-            </Button>
-          </div>
-        </DialogFooter>
+          <Badge variant="outline" className="h-5 text-[9px] uppercase tracking-widest font-bold border-primary/20 text-primary bg-primary/5">
+            Step {step + 1} of {steps.length}
+          </Badge>
+        </header>
+
+        <div className="flex-1 flex flex-col md:flex-row min-h-0">
+            {/* Visual Manifest (Left) */}
+            <div className="md:w-1/2 p-10 bg-muted/5 border-r border-border/40 relative group overflow-hidden">
+                <div className="absolute inset-0 opacity-[0.03] dark:opacity-[0.05] pointer-events-none" style={{ backgroundImage: 'radial-gradient(#000 1px, transparent 1px)', backgroundSize: '32px 32px' }} />
+                
+                <div className="relative h-full w-full rounded-2xl overflow-hidden shadow-2xl ring-1 ring-black/5 dark:ring-white/10 group-hover:scale-[1.02] transition-transform duration-700">
+                    <Image
+                        src={currentStep.imgSrc}
+                        alt={currentStep.title}
+                        layout="fill"
+                        className="object-cover"
+                    />
+                    {/* UI Overlay */}
+                    <div className="absolute top-4 left-4">
+                        <Badge variant="secondary" className="h-5 text-[8px] font-bold uppercase tracking-widest bg-background/80 backdrop-blur-md border-none shadow-sm">
+                            {currentStep.tag}
+                        </Badge>
+                    </div>
+                </div>
+            </div>
+
+            {/* Content Logic (Right) */}
+            <div className="md:w-1/2 p-10 flex flex-col">
+                <div className="flex-1 space-y-6">
+                    <div className="h-14 w-14 rounded-2xl bg-primary/10 flex items-center justify-center text-primary shadow-inner animate-in zoom-in-50 duration-500">
+                        <StepIcon className="h-7 w-7" />
+                    </div>
+                    
+                    <div className="space-y-3">
+                        <h2 className="text-2xl font-bold font-headline tracking-tight leading-tight uppercase tracking-widest text-foreground/90">{currentStep.title}</h2>
+                        <p className="text-sm text-muted-foreground italic font-serif leading-relaxed opacity-80">
+                            {currentStep.description}
+                        </p>
+                    </div>
+                </div>
+
+                <div className="mt-auto space-y-8">
+                    <div className="flex items-center gap-1.5 px-1">
+                        {steps.map((_, i) => (
+                            <div
+                                key={i}
+                                className={cn(
+                                    "h-1 transition-all duration-500 rounded-full",
+                                    i === step ? "w-8 bg-primary" : "w-2 bg-muted/40"
+                                )}
+                            />
+                        ))}
+                    </div>
+
+                    <div className="flex gap-3">
+                        {step > 0 && (
+                            <Button 
+                                variant="ghost" 
+                                onClick={handlePrev} 
+                                className="flex-1 h-12 rounded-xl text-[10px] font-bold uppercase tracking-widest transition-all"
+                            >
+                                <ArrowLeft className="me-2 h-3.5 w-3.5" />
+                                Rollback
+                            </Button>
+                        )}
+                        <Button 
+                            onClick={handleNext} 
+                            className="flex-1 h-12 rounded-xl font-bold shadow-xl shadow-primary/20 gap-2 transition-all active:scale-95"
+                        >
+                            {step === steps.length - 1 ? (
+                                <>
+                                    <ShieldCheck className="h-4 w-4" />
+                                    Authorize Induction
+                                </>
+                            ) : (
+                                <>
+                                    Next Protocol
+                                    <ArrowRight className="ml-2 h-3.5 w-3.5" />
+                                </>
+                            )}
+                        </Button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <footer className="px-8 py-4 border-t bg-muted/5">
+            <p className="text-[9px] text-center text-muted-foreground/40 font-bold uppercase tracking-widest">
+                Arkan Induction Engine • V1.0 Stable
+            </p>
+        </footer>
       </DialogContent>
     </Dialog>
   );
