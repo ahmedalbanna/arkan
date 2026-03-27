@@ -40,32 +40,65 @@ export function CollapsibleSidePanel({
 
   return (
     <div className={cn(
-      "self-start flex bg-background border rounded-lg shadow-sm h-full",
+      "self-start flex bg-card border border-border/40 rounded-[24px] shadow-2xl shadow-primary/5 h-full overflow-hidden",
       isLeft ? "flex-row" : "flex-row-reverse",
       isMobile && "mb-16",
       className
     )}>
+      {/* Sidebar HUD */}
       <div className={cn(
-        "flex flex-col gap-2 bg-muted/10 p-2",
-        isLeft ? "border-r border-border/60" : "border-l border-border/60"
+        "flex flex-col gap-3 bg-muted/5 p-3 backdrop-blur-sm",
+        isLeft ? "border-r border-border/40 shadow-[1px_0_10px_rgba(0,0,0,0.02)]" : "border-l border-border/40 shadow-[-1px_0_10px_rgba(0,0,0,0.02)]"
       )}>
         <TooltipProvider>
-          {panels.map((panel) => (
-            <Tooltip key={panel.key} delayDuration={0}>
-              <TooltipTrigger asChild>
-                <Button variant={activeKey === panel.key ? 'secondary' : 'ghost'} size="icon" onClick={() => onActiveKeyChange(panel.key)} aria-label={panel.title} className="h-9 w-9">
-                  {panel.icon}
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent side={isLeft ? "right" : "left"}>
-                <p>{panel.title}</p>
-              </TooltipContent>
-            </Tooltip>
-          ))}
+          {panels.map((panel) => {
+            const isActive = activeKey === panel.key;
+            return (
+              <Tooltip key={panel.key} delayDuration={0}>
+                <TooltipTrigger asChild>
+                  <Button 
+                    variant="ghost" 
+                    size="icon" 
+                    onClick={() => onActiveKeyChange(panel.key)} 
+                    aria-label={panel.title} 
+                    className={cn(
+                        "h-10 w-10 rounded-xl transition-all duration-300",
+                        isActive 
+                            ? "bg-primary text-primary-foreground shadow-lg shadow-primary/20 scale-[1.05]" 
+                            : "text-muted-foreground hover:bg-primary/10 hover:text-primary"
+                    )}
+                  >
+                    {panel.icon}
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent side={isLeft ? "right" : "left"} className="bg-background/80 backdrop-blur-md border border-white/20 shadow-xl py-1.5 px-3">
+                  <p className="text-[10px] font-bold uppercase tracking-widest">{panel.title}</p>
+                </TooltipContent>
+              </Tooltip>
+            );
+          })}
         </TooltipProvider>
       </div>
-      <div className="flex-1 p-4 sm:p-5 w-px overflow-auto h-full">
-        {activePanel?.content}
+
+      {/* Content Area */}
+      <div className="flex-1 overflow-hidden h-full relative">
+        <div className="h-full w-full overflow-auto custom-scrollbar">
+            <div 
+                key={activeKey} 
+                className={cn(
+                    "p-6 md:p-8 h-full min-w-0 animate-in fade-in duration-500",
+                    isLeft ? "slide-in-from-left-2" : "slide-in-from-right-2"
+                )}
+            >
+                {activePanel?.content}
+            </div>
+        </div>
+        
+        {/* Subtle Edge Decoration */}
+        <div className={cn(
+            "absolute inset-y-0 pointer-events-none w-px opacity-20",
+            isLeft ? "right-0 bg-gradient-to-b from-transparent via-primary to-transparent" : "left-0 bg-gradient-to-b from-transparent via-primary to-transparent"
+        )} />
       </div>
     </div>
   );

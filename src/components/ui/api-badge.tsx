@@ -4,14 +4,14 @@ import { cn } from "@/infrastructure/utils/cn";
 import { cva, type VariantProps } from "class-variance-authority";
 
 const badgeVariants = cva(
-  "inline-flex items-center rounded-md border px-2 py-1 text-xs font-mono font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2",
+  "inline-flex items-center rounded-sm border px-1.5 py-0.5 text-[9px] font-mono font-bold uppercase tracking-widest transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 shadow-sm",
   {
     variants: {
       variant: {
-        GET: "bg-green-100 text-green-800 border-green-200 dark:bg-green-900/50 dark:text-green-300 dark:border-green-700",
-        POST: "bg-blue-100 text-blue-800 border-blue-200 dark:bg-blue-900/50 dark:text-blue-300 dark:border-blue-700",
-        PUT: "bg-yellow-100 text-yellow-800 border-yellow-200 dark:bg-yellow-900/50 dark:text-yellow-300 dark:border-yellow-700",
-        DELETE: "bg-red-100 text-red-800 border-red-200 dark:bg-red-900/50 dark:text-red-300 dark:border-red-700",
+        GET: "bg-green-500/10 text-green-600 border-green-500/20 dark:text-green-400",
+        POST: "bg-primary/10 text-primary border-primary/20",
+        PUT: "bg-yellow-500/10 text-yellow-600 border-yellow-500/20 dark:text-yellow-400",
+        DELETE: "bg-destructive/10 text-destructive border-destructive/20",
       },
     },
     defaultVariants: {

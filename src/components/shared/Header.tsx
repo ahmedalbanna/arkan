@@ -48,8 +48,8 @@ function NavLinks() {
               variant="ghost"
               className={cn(
                 "h-8 px-4 text-[10px] font-bold uppercase tracking-widest transition-all duration-300 rounded-lg",
-                isActive 
-                  ? "bg-background text-primary shadow-sm ring-1 ring-black/5 dark:ring-white/10" 
+                isActive
+                  ? "bg-background text-primary shadow-sm ring-1 ring-black/5 dark:ring-white/10"
                   : "text-muted-foreground hover:text-primary hover:bg-primary/5"
               )}
             >
@@ -79,8 +79,8 @@ function AuthActions() {
             size="sm"
             className={cn(
               'h-8 px-3 flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest transition-all duration-300',
-              hasNoCredits 
-                ? 'text-destructive animate-pulse hover:bg-destructive/10' 
+              hasNoCredits
+                ? 'text-destructive animate-pulse hover:bg-destructive/10'
                 : 'text-primary hover:bg-primary/10'
             )}
           >
@@ -89,9 +89,9 @@ function AuthActions() {
           </Button>
         }
       />
-      
+
       <div className="h-4 w-px bg-border/60 mx-0.5" />
-      
+
       <NotificationDropdown />
       <UserProfileDropdown />
     </div>
@@ -121,7 +121,7 @@ export function Header() {
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/80 backdrop-blur-xl supports-[backdrop-filter]:bg-background/60 transition-all duration-500">
-      <div className="flex h-16 items-center px-6 justify-between max-w-[1800px] mx-auto">
+      <div className="flex h-16 items-center px-6 justify-between mx-auto">
         <div className="flex items-center gap-4">
           <MobileNav navLinks={navLinks} />
           <Link href="/" className="flex items-center gap-3 group">

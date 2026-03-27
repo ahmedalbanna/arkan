@@ -12,7 +12,7 @@ const Slider = React.forwardRef<
   <SliderPrimitive.Root
     ref={ref}
     className={cn(
-      "relative flex touch-none select-none items-center",
+      "relative flex touch-none select-none items-center group",
       props.orientation === "vertical"
         ? "h-full flex-col"
         : "w-full",
@@ -22,18 +22,18 @@ const Slider = React.forwardRef<
   >
     <SliderPrimitive.Track
       className={cn(
-        "relative grow overflow-hidden rounded-full bg-secondary",
-        props.orientation === "vertical" ? "w-2 h-full" : "h-2 w-full"
+        "relative grow overflow-hidden rounded-full bg-muted/30 shadow-inner transition-colors group-hover:bg-muted/40",
+        props.orientation === "vertical" ? "w-1.5 h-full" : "h-1.5 w-full"
       )}
     >
       <SliderPrimitive.Range
         className={cn(
-          "absolute bg-primary",
+          "absolute bg-primary transition-all duration-300",
           props.orientation === "vertical" ? "w-full" : "h-full"
         )}
       />
     </SliderPrimitive.Track>
-    <SliderPrimitive.Thumb className="block h-5 w-5 rounded-full border-2 border-primary bg-background ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50" />
+    <SliderPrimitive.Thumb className="block h-5 w-5 rounded-full border-2 border-primary bg-background shadow-xl ring-offset-background transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 hover:scale-110 active:scale-95 cursor-grab active:cursor-grabbing" />
   </SliderPrimitive.Root>
 ))
 Slider.displayName = SliderPrimitive.Root.displayName

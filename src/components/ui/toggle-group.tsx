@@ -1,24 +1,24 @@
 "use client"
 
-import * as ToggleGroupPrimitive from "@radix-ui/react-toggle-group"; // This line is correct, the error is likely from a missing package installation.
-import { cva, type VariantProps } from "class-variance-authority";
-import * as React from "react";
+import * as ToggleGroupPrimitive from "@radix-ui/react-toggle-group"
+import { cva, type VariantProps } from "class-variance-authority"
+import * as React from "react"
 
-import { cn } from "@/infrastructure/utils/cn";
+import { cn } from "@/infrastructure/utils/cn"
 
-const toggleVariants = cva(
-  "inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors hover:bg-muted hover:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[state=on]:bg-accent data-[state=on]:text-accent-foreground",
+const toggleGroupVariants = cva(
+  "inline-flex items-center justify-center rounded-xl text-[10px] font-bold uppercase tracking-widest ring-offset-background transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 active:scale-95",
   {
     variants: {
       variant: {
-        default: "bg-transparent",
+        default: "bg-transparent hover:bg-primary/5 hover:text-primary data-[state=on]:bg-primary/10 data-[state=on]:text-primary",
         outline:
-          "border border-input bg-transparent hover:bg-accent hover:text-accent-foreground",
+          "border border-primary/20 bg-transparent hover:bg-primary/5 hover:text-primary data-[state=on]:bg-primary data-[state=on]:text-primary-foreground data-[state=on]:border-primary data-[state=on]:shadow-lg data-[state=on]:shadow-primary/20",
       },
       size: {
-        default: "h-10 px-3",
-        sm: "h-9 px-2.5",
-        lg: "h-11 px-5",
+        default: "h-10 px-4",
+        sm: "h-8 px-3 text-[9px]",
+        lg: "h-12 px-6 text-xs",
       },
     },
     defaultVariants: {
@@ -29,7 +29,7 @@ const toggleVariants = cva(
 )
 
 const ToggleGroupContext = React.createContext<
-  VariantProps<typeof toggleVariants>
+  VariantProps<typeof toggleGroupVariants>
 >({
   size: "default",
   variant: "default",
@@ -38,11 +38,14 @@ const ToggleGroupContext = React.createContext<
 const ToggleGroup = React.forwardRef<
   React.ElementRef<typeof ToggleGroupPrimitive.Root>,
   React.ComponentPropsWithoutRef<typeof ToggleGroupPrimitive.Root> &
-  VariantProps<typeof toggleVariants>
+  VariantProps<typeof toggleGroupVariants>
 >(({ className, variant, size, children, ...props }, ref) => (
   <ToggleGroupPrimitive.Root
     ref={ref}
-    className={cn("flex items-center justify-center gap-1", className)}
+    className={cn(
+        "inline-flex items-center justify-center gap-1 bg-muted/20 p-1 rounded-xl border border-border/40 backdrop-blur-sm shadow-sm", 
+        className
+    )}
     {...props}
   >
     <ToggleGroupContext.Provider value={{ variant, size }}>
@@ -56,7 +59,7 @@ ToggleGroup.displayName = ToggleGroupPrimitive.Root.displayName
 const ToggleGroupItem = React.forwardRef<
   React.ElementRef<typeof ToggleGroupPrimitive.Item>,
   React.ComponentPropsWithoutRef<typeof ToggleGroupPrimitive.Item> &
-  VariantProps<typeof toggleVariants>
+  VariantProps<typeof toggleGroupVariants>
 >(({ className, children, variant, size, ...props }, ref) => {
   const context = React.useContext(ToggleGroupContext)
 
@@ -64,10 +67,11 @@ const ToggleGroupItem = React.forwardRef<
     <ToggleGroupPrimitive.Item
       ref={ref}
       className={cn(
-        toggleVariants({
+        toggleGroupVariants({
           variant: context.variant || variant,
           size: context.size || size,
         }),
+        "rounded-lg",
         className
       )}
       {...props}
@@ -79,5 +83,4 @@ const ToggleGroupItem = React.forwardRef<
 
 ToggleGroupItem.displayName = ToggleGroupPrimitive.Item.displayName
 
-export { ToggleGroup, ToggleGroupItem, toggleVariants };
-
+export { ToggleGroup, ToggleGroupItem }

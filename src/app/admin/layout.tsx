@@ -251,7 +251,7 @@ function AdminLayoutContent({ children }: { children: ReactNode }) {
                 </header>
                 <main className="flex flex-1 flex-col gap-6 p-6 lg:p-10 bg-muted/5 relative overflow-hidden">
                     <div className="absolute inset-0 bg-[#f8fafc] dark:bg-[#0f172a] pointer-events-none opacity-[0.03]" />
-                    <div className="relative z-10 h-full max-w-[1800px] mx-auto w-full">
+                    <div className="relative z-10 h-full mx-auto w-full">
                         {children}
                     </div>
                 </main>
