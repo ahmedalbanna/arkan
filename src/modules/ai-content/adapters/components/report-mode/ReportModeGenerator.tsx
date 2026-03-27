@@ -3,8 +3,8 @@
 
 import { useLocalization } from '@/context/LocalizationContext';
 import { cn } from '@/infrastructure/utils/cn';
-import { BookOpenText, Settings, SlidersHorizontal, Languages as LanguageIcon, MessageSquare, ZoomOut, ZoomIn } from 'lucide-react';
-import React, { Suspense, lazy, useState } from 'react';
+import { BookOpenText, ZoomOut, ZoomIn, Settings } from 'lucide-react';
+import React, { Suspense, lazy } from 'react';
 import { Button } from '@/components/ui/button';
 import { CollapsibleSidePanel } from '@/components/ui/CollapsibleSidePanel';
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@/components/ui/resizable';
@@ -14,16 +14,7 @@ import { Input } from '@/components/ui/input';
 import { formatDistanceToNow } from 'date-fns';
 import { SessionActions } from '@/modules/ai-content/adapters/components/report-mode/session/SessionActions';
 import { useReportGenerator } from '@/modules/ai-content/adapters/hooks/report-mode/useReportGenerator';
-import { Slider } from '@/components/ui/slider';
-import { Label } from '@/components/ui/label';
-import { Badge } from '@/components/ui/badge';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { ToneSchema } from '@/modules/ai-content/domain/entities/ControlTypes';
-import { type Language, type Tone } from '@/modules/ai-content/domain/entities/ControlTypes';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { ProjectChat } from './chat/ProjectChat';
-import { SectionTabsPanel } from './generation-tools/SectionTabsPanel';
 import { type ProjectProperties } from '@/modules/projects/domain/entities/Project';
 
 const ReportResults = lazy(() => import('./ReportResults'));
@@ -72,6 +63,8 @@ export default function ReportModeGenerator({ initialProject }: { initialProject
         setActiveMobileView,
         activePanelKey,
         setActivePanelKey,
+        activeRightPanelKey,
+        setActiveRightPanelKey,
         showOnboarding,
         setShowOnboarding,
         handleOnboardingComplete,
@@ -79,56 +72,11 @@ export default function ReportModeGenerator({ initialProject }: { initialProject
         isStoreInitialized,
         updateProjectName,
         updateProject,
-        isSaving,
-        panels,
-        isChatOpen,
-        setIsChatOpen,
+        leftPanels,
+        rightPanels,
         zoomLevel,
         setZoomLevel,
-        activeSectionId,
     } = useReportGenerator(initialProject);
-    
-    const activeSection = activeSectionId ? project?.getSection(activeSectionId) ?? null : null;
-    const showSectionTabs = activePanelKey === 'generate';
-    const reportPanelContent = showSectionTabs ? (
-        <div className="h-full grid grid-cols-1 xl:grid-cols-[minmax(0,1fr)_360px] gap-4">
-            <ReportResults activePanelKey={activePanelKey} />
-            <SectionTabsPanel section={activeSection} className="h-full" />
-        </div>
-    ) : (
-        <ReportResults activePanelKey={activePanelKey} />
-    );
-    
-    // States removed as Popover handles its own open state or can be controlled if needed.
-    // However, keeping them if we want to synchronize with tooltips or other logic.
-    const [isControlsPanelOpen, setIsControlsPanelOpen] = useState(false);
-    const [isLanguagePanelOpen, setIsLanguagePanelOpen] = useState(false);
-    
-
-
-    const handleComplexityChange = (value: number) => {
-        if (project) {
-          updateProject(p => p.with({ complexity: value }));
-        }
-    };
-    
-    const handleFormalityChange = (value: number) => {
-        if (project) {
-          updateProject(p => p.with({ formality: value }));
-        }
-    };
-
-    const handleLanguageChange = (value: Language) => {
-        if (project) {
-          updateProject(p => p.with({ language: value }));
-        }
-    };
-    
-    const handleToneChange = (value: string) => {
-        if (project) {
-          updateProject(p => p.with({ tone: value as Tone }));
-        }
-    };
 
     const handleZoomIn = () => setZoomLevel(prev => Math.min(2, prev + 0.1));
     const handleZoomOut = () => setZoomLevel(prev => Math.max(0.5, prev - 0.1));
@@ -141,139 +89,9 @@ export default function ReportModeGenerator({ initialProject }: { initialProject
     return (
         <div className="relative flex-grow flex flex-col">
             <OnboardingGuide isOpen={showOnboarding} onOpenChange={setShowOnboarding} onComplete={handleOnboardingComplete} />
-            
-            {/* Ensure tabs don't show for missing section */}
-            {/* Global Controls Floating UI - LEFT */}
-            <div className="fixed bottom-6 left-6 z-20 hidden lg:flex items-end gap-3">
-                <Popover open={isControlsPanelOpen} onOpenChange={setIsControlsPanelOpen}>
-                    <TooltipProvider>
-                        <Tooltip>
-                            <PopoverTrigger asChild>
-                                <TooltipTrigger asChild>
-                                    <Button
-                                        size="icon"
-                                        className="h-12 w-12 rounded-full shadow-md bg-background/90 backdrop-blur-sm border border-border/60"
-                                        aria-label="Toggle global controls"
-                                    >
-                                        <SlidersHorizontal className="h-5 w-5" />
-                                    </Button>
-                                </TooltipTrigger>
-                            </PopoverTrigger>
-                            <TooltipContent side="right"><p>Complexity & Formality</p></TooltipContent>
-                        </Tooltip>
-                    </TooltipProvider>
-                    <PopoverContent side="top" align="start" className="w-64 p-4 mb-2 bg-background/90 backdrop-blur-sm border border-border/60 shadow-lg">
-                        <div className="space-y-6">
-                            {/* Formality Slider */}
-                            <div className="space-y-2">
-                                <div className="flex justify-between items-center">
-                                    <Label className="text-xs font-semibold tracking-wider uppercase">Formality</Label>
-                                    <Badge variant="secondary">{project.formality ?? 70}%</Badge>
-                                </div>
-                                <Slider
-                                    value={[project.formality ?? 70]}
-                                    onValueChange={(val) => handleFormalityChange(val[0])}
-                                    min={0}
-                                    max={100}
-                                    step={10}
-                                />
-                            </div>
-                            {/* Complexity Slider */}
-                            <div className="space-y-2">
-                            <div className="flex justify-between items-center">
-                                    <Label className="text-xs font-semibold tracking-wider uppercase">Complexity</Label>
-                                    <Badge variant="secondary">{project.complexity ?? 50}%</Badge>
-                                </div>
-                                <Slider
-                                    value={[project.complexity ?? 50]}
-                                    onValueChange={(val) => handleComplexityChange(val[0])}
-                                    min={0}
-                                    max={100}
-                                    step={10}
-                                />
-                            </div>
-                        </div>
-                    </PopoverContent>
-                </Popover>
-
-                <Popover open={isLanguagePanelOpen} onOpenChange={setIsLanguagePanelOpen}>
-                    <TooltipProvider>
-                        <Tooltip>
-                            <PopoverTrigger asChild>
-                                <TooltipTrigger asChild>
-                                    <Button
-                                        size="icon"
-                                        className="h-12 w-12 rounded-full shadow-md bg-background/90 backdrop-blur-sm border border-border/60"
-                                        aria-label="Toggle language and tone controls"
-                                    >
-                                        <LanguageIcon className="h-5 w-5" />
-                                    </Button>
-                                </TooltipTrigger>
-                            </PopoverTrigger>
-                            <TooltipContent side="right"><p>Language & Tone</p></TooltipContent>
-                        </Tooltip>
-                    </TooltipProvider>
-                    <PopoverContent side="top" align="start" className="w-64 p-4 mb-2 bg-background/90 backdrop-blur-sm border border-border/60 shadow-lg">
-                        <div className="space-y-6">
-                            <div className="space-y-2">
-                                <Label className="text-xs font-semibold tracking-wider uppercase">Language</Label>
-                                <Select value={project.language ?? 'default'} onValueChange={handleLanguageChange}>
-                                    <SelectTrigger>
-                                        <SelectValue />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        <SelectItem value="default">Default</SelectItem>
-                                        <SelectItem value="en">English</SelectItem>
-                                        <SelectItem value="ar">Arabic</SelectItem>
-                                        <SelectItem value="es">Spanish</SelectItem>
-                                        <SelectItem value="fr">French</SelectItem>
-                                        <SelectItem value="de">German</SelectItem>
-                                    </SelectContent>
-                                </Select>
-                            </div>
-                            <div className="space-y-2">
-                                <Label className="text-xs font-semibold tracking-wider uppercase">Tone</Label>
-                                <Select value={project.tone ?? 'professional'} onValueChange={handleToneChange}>
-                                    <SelectTrigger>
-                                        <SelectValue />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        {ToneSchema.options.map(tone => (
-                                            <SelectItem key={tone} value={tone}>
-                                                {tone.charAt(0).toUpperCase() + tone.slice(1)}
-                                            </SelectItem>
-                                        ))}
-                                    </SelectContent>
-                                </Select>
-                            </div>
-                        </div>
-                    </PopoverContent>
-                </Popover>
-            </div>
-            
-            {/* Chat FAB - RIGHT */}
-            <div className="fixed bottom-6 right-6 z-20 hidden lg:block">
-                <TooltipProvider>
-                    <Tooltip>
-                        <TooltipTrigger asChild>
-                            <Button
-                                size="icon"
-                                className="h-12 w-12 rounded-full shadow-md bg-background/90 backdrop-blur-sm border border-border/60"
-                                aria-label="Consult with AI Agents"
-                                onClick={() => setIsChatOpen(prev => !prev)}
-                            >
-                                <MessageSquare className="h-5 w-5" />
-                            </Button>
-                        </TooltipTrigger>
-                        <TooltipContent side="left">
-                            <p>Consult with AI Agents</p>
-                        </TooltipContent>
-                    </Tooltip>
-                </TooltipProvider>
-            </div>
 
             {/* Zoom Controls - CENTER */}
-            <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-20 hidden lg:flex items-center gap-1 border border-border/60 bg-background/90 backdrop-blur-sm p-1 rounded-lg shadow-md">
+            <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-30 hidden lg:flex items-center gap-1 border border-border/60 bg-background/90 backdrop-blur-sm p-1 rounded-lg shadow-md">
                 <TooltipProvider>
                     <Tooltip>
                         <TooltipTrigger asChild>
@@ -302,7 +120,6 @@ export default function ReportModeGenerator({ initialProject }: { initialProject
                 </TooltipProvider>
             </div>
 
-            <ProjectChat isOpen={isChatOpen} onClose={() => setIsChatOpen(false)} />
 
             <div className="flex-grow flex flex-col mx-auto px-4 py-8 w-full">
                 <div className="flex justify-between items-start mb-4 gap-4 max-w-full">
@@ -335,7 +152,7 @@ export default function ReportModeGenerator({ initialProject }: { initialProject
                                             isMobile && activeMobileView !== 'generator' && "hidden"
                                         )}>
                                             <CollapsibleSidePanel
-                                                panels={panels}
+                                                panels={leftPanels}
                                                 activeKey={activePanelKey}
                                                 onActiveKeyChange={setActivePanelKey}
                                             />
@@ -344,25 +161,52 @@ export default function ReportModeGenerator({ initialProject }: { initialProject
                                             "lg:col-span-8 xl:col-span-8 h-full",
                                             isMobile && activeMobileView !== 'result' && "hidden"
                                         )}>
-                                            {reportPanelContent}
+                                            <div className="flex flex-col gap-6 h-full">
+                                                <ReportResults activePanelKey={activePanelKey} />
+                                                <CollapsibleSidePanel
+                                                    panels={rightPanels}
+                                                    activeKey={activeRightPanelKey}
+                                                    onActiveKeyChange={setActiveRightPanelKey}
+                                                    side="right"
+                                                />
+                                            </div>
                                         </div>
                                     </div>
                                 ) : (
-                                    <ResizablePanelGroup direction="horizontal" className="h-full">
-                                        <ResizablePanel defaultSize={35} minSize={28} maxSize={45}>
-                                            <div className="h-full">
+                                    <ResizablePanelGroup direction="horizontal" className="h-full items-stretch">
+                                        {/* Left Zone - Tools */}
+                                        <ResizablePanel defaultSize={25} minSize={20} maxSize={35}>
+                                            <div className="h-full pr-2">
                                                 <CollapsibleSidePanel
-                                                    panels={panels}
+                                                    panels={leftPanels}
                                                     activeKey={activePanelKey}
                                                     onActiveKeyChange={setActivePanelKey}
                                                     className="h-full"
                                                 />
                                             </div>
                                         </ResizablePanel>
+                                        
                                         <ResizableHandle withHandle />
-                                        <ResizablePanel defaultSize={65} minSize={55}>
-                                            <div className="h-full">
-                                                {reportPanelContent}
+                                        
+                                        {/* Center Zone - Preview */}
+                                        <ResizablePanel defaultSize={50} minSize={40}>
+                                            <div className="h-full px-2">
+                                                <ReportResults activePanelKey={activePanelKey} />
+                                            </div>
+                                        </ResizablePanel>
+                                        
+                                        <ResizableHandle withHandle />
+                                        
+                                        {/* Right Zone - Context */}
+                                        <ResizablePanel defaultSize={25} minSize={20} maxSize={35}>
+                                            <div className="h-full pl-2">
+                                                <CollapsibleSidePanel
+                                                    panels={rightPanels}
+                                                    activeKey={activeRightPanelKey}
+                                                    onActiveKeyChange={setActiveRightPanelKey}
+                                                    side="right"
+                                                    className="h-full"
+                                                />
                                             </div>
                                         </ResizablePanel>
                                     </ResizablePanelGroup>

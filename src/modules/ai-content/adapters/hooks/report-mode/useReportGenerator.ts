@@ -4,13 +4,16 @@ import { useBuilderPageLogic } from '@/modules/projects/adapters/hooks/use-build
 import { useLocalization } from '@/context/LocalizationContext';
 import { useMobile } from '@/hooks/util/use-mobile';
 import React, { useState, useMemo, lazy, useEffect } from 'react';
-import { Settings, UploadCloud, LayoutTemplate, BookOpenCheck } from 'lucide-react';
+import { Settings, UploadCloud, LayoutTemplate, BookOpenCheck, SlidersHorizontal, MessageSquare, Sparkles } from 'lucide-react';
 import { useSaveProject } from '@/modules/projects/adapters/hooks/use-projects';
 // Lazy load components
 const ProjectSettingsPanel = lazy(() => import('@/modules/ai-content/adapters/components/report-mode/settings/ProjectSettingsPanel'));
 const FileManager = lazy(() => import('@/modules/ai-content/adapters/components/report-mode/file-manager'));
 const GenerationTools = lazy(() => import('@/modules/ai-content/adapters/components/report-mode/generation-tools'));
 const ApplyTemplatePanel = lazy(() => import('@/modules/ai-content/adapters/components/report-mode/templates/ApplyTemplatePanel'));
+const GlobalProjectControls = lazy(() => import('@/modules/ai-content/adapters/components/report-mode/settings/GlobalProjectControls').then(m => ({ default: m.GlobalProjectControls })));
+const SectionTabsPanel = lazy(() => import('@/modules/ai-content/adapters/components/report-mode/generation-tools/SectionTabsPanel').then(m => ({ default: m.SectionTabsPanel })));
+const ProjectChat = lazy(() => import('@/modules/ai-content/adapters/components/report-mode/chat/ProjectChat').then(m => ({ default: m.ProjectChat })));
 
 import { type ProjectProperties } from '@/modules/projects/domain/entities/Project';
 
@@ -19,6 +22,7 @@ export function useReportGenerator(initialProject?: ProjectProperties | null) {
   const isMobile = useMobile();
   const [activeMobileView, setActiveMobileView] = useState<'generator' | 'result'>('result');
   const [activePanelKey, setActivePanelKey] = useState('settings');
+  const [activeRightPanelKey, setActiveRightPanelKey] = useState('section');
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [zoomLevel, setZoomLevel] = useState(1);
   const [activeSectionId, setActiveSectionId] = useState<string | null>(null);
@@ -32,7 +36,15 @@ export function useReportGenerator(initialProject?: ProjectProperties | null) {
     };
   }, [zoomLevel]);
 
-  const panels = useMemo(() => [
+  // Auto-switch to generation tools if a section is activated
+  useEffect(() => {
+    if (activeSectionId) {
+      setActivePanelKey('generate');
+      setActiveRightPanelKey('section');
+    }
+  }, [activeSectionId]);
+
+  const leftPanels = useMemo(() => [
     {
         key: 'settings',
         title: 'Project Settings',
@@ -62,6 +74,31 @@ export function useReportGenerator(initialProject?: ProjectProperties | null) {
     },
   ], [t, activeSectionId]);
 
+  const rightPanels = useMemo(() => {
+    const activeSection = activeSectionId ? builderPageLogic.project?.getSection(activeSectionId) ?? null : null;
+    
+    return [
+      {
+          key: 'section',
+          title: 'Section Controls',
+          icon: React.createElement(Sparkles, { className: "h-5 w-5" }),
+          content: React.createElement(SectionTabsPanel, { section: activeSection }),
+      },
+      {
+          key: 'global',
+          title: 'Global Controls',
+          icon: React.createElement(SlidersHorizontal, { className: "h-5 w-5" }),
+          content: React.createElement(GlobalProjectControls),
+      },
+      {
+          key: 'chat',
+          title: 'AI Consultant',
+          icon: React.createElement(MessageSquare, { className: "h-5 w-5" }),
+          content: React.createElement(ProjectChat, { isOpen: true, onClose: () => setActiveRightPanelKey('section') }),
+      },
+    ];
+  }, [activeSectionId, builderPageLogic.project]);
+
   return {
     ...builderPageLogic,
     isMobile,
@@ -69,8 +106,11 @@ export function useReportGenerator(initialProject?: ProjectProperties | null) {
     setActiveMobileView,
     activePanelKey,
     setActivePanelKey,
+    activeRightPanelKey,
+    setActiveRightPanelKey,
     isSaving,
-    panels,
+    leftPanels,
+    rightPanels,
     t,
     locale,
     isChatOpen,
