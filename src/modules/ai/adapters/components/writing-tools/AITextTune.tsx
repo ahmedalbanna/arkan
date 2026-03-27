@@ -14,10 +14,11 @@ import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Textarea } from '@/components/ui/textarea';
 import { useTextStylistLogic } from '@/modules/ai/adapters/hooks/writing-tools/use-text-stylist-logic';
 import { markdownComponents } from '@/modules/ai-content/adapters/components/report-mode/markdown-styles';
-import { BookOpenText, Check, Copy, Edit3, Eye, Lightbulb, Loader2, Scissors, Sparkles, Wand2 } from 'lucide-react';
+import { BookOpenText, Check, Copy, Edit3, Eye, Lightbulb, Loader2, Scissors, Sparkles, Wand2, History, ArrowRightLeft, FileEdit, Scale, FileText, Bot, ChevronRight } from 'lucide-react';
 import { Controller } from 'react-hook-form';
 import ReactMarkdown from 'react-markdown';
 import { DiffView } from '@/components/shared/DiffView';
+import { cn } from '@/infrastructure/utils/cn';
 
 function ResultDetails({ result }: { result: any }) {
     if (!result) return null;
@@ -101,286 +102,258 @@ export function AITextTune() {
     } = useTextStylistLogic();
 
     return (
-        <div className="space-y-6">
-            <Card>
-                <CardContent className="p-6">
-                    <form className="space-y-4">
-                        <div className="space-y-2">
-                            <Label htmlFor="input-text" className="text-lg font-semibold">{t('writingTools.textStylist.yourTextLabel')}</Label>
-                            <Textarea
-                                id="input-text"
-                                {...form.register('text')}
-                                rows={8}
-                                placeholder="Enter your text here..."
-                                className="mt-2"
-                                disabled={isProcessing}
-                            />
-                            {form.formState.errors.text && <p className="text-sm text-destructive mt-1">{form.formState.errors.text.message}</p>}
-                        </div>
-                    </form>
-                </CardContent>
-            </Card>
+        <Card className="max-w-[1600px] mx-auto border-none shadow-2xl shadow-primary/5 bg-card overflow-hidden rounded-[32px]">
+            <header className="px-8 py-10 border-b bg-muted/5 text-center space-y-2">
+                <h2 className="text-2xl font-bold font-headline tracking-tight">Text Stylist Manifest</h2>
+                <p className="text-xs text-muted-foreground italic max-w-md mx-auto leading-relaxed">Apply recursive synthesis protocols to refine, reshape, and optimize your technical or creative copy.</p>
+            </header>
 
-            <Card>
-                <CardHeader>
-                    <CardTitle>{t('writingTools.textStylist.aiToolsTitle')}</CardTitle>
-                    <CardDescription>{t('writingTools.textStylist.aiToolsDescription')}</CardDescription>
-                </CardHeader>
-                <CardContent className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    <form onSubmit={form.handleSubmit(onSubmitRewrite)} className="space-y-4">
-                        <h3 className="font-semibold flex items-center gap-2"><Wand2 className="h-5 w-5" /> {t('writingTools.textStylist.rewriteTitle')}</h3>
-                        <div className="space-y-2">
-                            <Label htmlFor="style-select">{t('writingTools.textStylist.styleLabel')}</Label>
-                            <Controller
-                                name="style"
-                                control={form.control}
-                                render={({ field }) => (
-                                    <Select onValueChange={field.onChange} defaultValue={field.value} disabled={isProcessing}>
-                                        <SelectTrigger id="style-select">
-                                            <SelectValue placeholder={t('writingTools.textStylist.stylePlaceholder')} />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            <SelectItem value="None">{t('writingTools.textStylist.styleNone')}</SelectItem>
-                                            {styles.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}
-                                        </SelectContent>
-                                    </Select>
-                                )}
-                            />
-                        </div>
-                        <Button type="submit" disabled={isProcessing} className="w-full">
-                            {rewriteMutation.isPending ? <Loader2 className="me-2 h-4 w-4 animate-spin" /> : <Sparkles className="me-2 h-4 w-4" />}
-                            {t('writingTools.textStylist.rewriteButton')}
-                        </Button>
-                    </form>
-
-                    <form onSubmit={form.handleSubmit(onSubmitSummarize)} className="space-y-4">
-                        <h3 className="font-semibold flex items-center gap-2"><BookOpenText className="h-5 w-5" /> {t('writingTools.textStylist.summarizeTitle')}</h3>
-                        <div className="space-y-2">
-                            <div className="flex justify-between">
-                                <Label>{t('writingTools.textStylist.compressionRatioLabel')}</Label>
-                                <Badge variant="outline">{compressionRatio}%</Badge>
-                            </div>
-                            <Slider
-                                value={[compressionRatio]}
-                                onValueChange={(val) => setCompressionRatio(val[0])}
-                                min={10} max={90} step={5}
-                                disabled={isProcessing}
-                            />
-                        </div>
-                        <Button type="submit" disabled={isProcessing} className="w-full">
-                            {summarizeMutation.isPending ? <Loader2 className="me-2 h-4 w-4 animate-spin" /> : <Sparkles className="me-2 h-4 w-4" />}
-                            {t('writingTools.textStylist.summarizeButton')}
-                        </Button>
-                    </form>
-
-                    <form onSubmit={form.handleSubmit(onSubmitStyleEditor)} className="space-y-4">
-                        <h3 className="font-semibold flex items-center gap-2"><Edit3 className="h-5 w-5" /> Style Editor</h3>
-                        <div className="space-y-2">
-                            <Label htmlFor="target-audience">Target Audience (Optional)</Label>
-                            <Controller
-                                name="targetAudience"
-                                control={form.control}
-                                render={({ field }) => (
-                                    <Input
-                                        id="target-audience"
-                                        {...field}
-                                        placeholder="e.g., general public, academics"
+            <CardContent className="p-0 flex flex-col lg:flex-row min-h-[800px]">
+                {/* Protocol Setup (Left) */}
+                <div className="lg:w-[450px] border-r border-border/40 bg-muted/5 flex flex-col min-h-0">
+                    <ScrollArea className="flex-1">
+                        <div className="p-8 space-y-10">
+                            <div className="space-y-4">
+                                <Label className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground/60 ml-1">Context Payload</Label>
+                                <form className="space-y-4">
+                                    <Textarea
+                                        id="input-text"
+                                        {...form.register('text')}
+                                        rows={8}
+                                        placeholder="Enter your source text here..."
+                                        className="text-xs bg-background shadow-inner focus-visible:ring-1 resize-none p-4 leading-relaxed rounded-2xl border-dashed"
                                         disabled={isProcessing}
                                     />
-                                )}
-                            />
-                        </div>
-                        <div className="space-y-2">
-                            <Label htmlFor="tone">Tone (Optional)</Label>
-                            <Controller
-                                name="tone"
-                                control={form.control}
-                                render={({ field }) => (
-                                    <Input
-                                        id="tone"
-                                        {...field}
-                                        placeholder="e.g., professional, casual"
-                                        disabled={isProcessing}
-                                    />
-                                )}
-                            />
-                        </div>
-                        <Button type="submit" disabled={isProcessing} className="w-full">
-                            {styleEditorMutation.isPending ? <Loader2 className="me-2 h-4 w-4 animate-spin" /> : <Sparkles className="me-2 h-4 w-4" />}
-                            Improve Style
-                        </Button>
-                    </form>
-
-                    <form onSubmit={form.handleSubmit(onSubmitReadability)} className="space-y-4">
-                        <h3 className="font-semibold flex items-center gap-2"><Eye className="h-5 w-5" /> Readability Enhancer</h3>
-                        <div className="space-y-2">
-                            <Label htmlFor="target-level">Target Reading Level (Optional)</Label>
-                            <Controller
-                                name="targetLevel"
-                                control={form.control}
-                                render={({ field }) => (
-                                    <Select onValueChange={field.onChange} value={field.value} disabled={isProcessing}>
-                                        <SelectTrigger id="target-level">
-                                            <SelectValue placeholder="Select reading level" />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            <SelectItem value="elementary">Elementary</SelectItem>
-                                            <SelectItem value="middle-school">Middle School</SelectItem>
-                                            <SelectItem value="high-school">High School</SelectItem>
-                                            <SelectItem value="college">College</SelectItem>
-                                            <SelectItem value="graduate">Graduate</SelectItem>
-                                        </SelectContent>
-                                    </Select>
-                                )}
-                            />
-                        </div>
-                        <Button type="submit" disabled={isProcessing} className="w-full">
-                            {readabilityMutation.isPending ? <Loader2 className="me-2 h-4 w-4 animate-spin" /> : <Sparkles className="me-2 h-4 w-4" />}
-                            Enhance Readability
-                        </Button>
-                    </form>
-
-                    <form onSubmit={form.handleSubmit(onSubmitConciseness)} className="space-y-4">
-                        <h3 className="font-semibold flex items-center gap-2"><Scissors className="h-5 w-5" /> Conciseness Checker</h3>
-                        <div className="space-y-2">
-                            <div className="flex justify-between">
-                                <Label>Target Reduction (Optional)</Label>
-                                <Badge variant="outline">{form.watch('targetReduction') || 0}%</Badge>
+                                    {form.formState.errors.text && <p className="text-[10px] font-bold text-destructive uppercase tracking-widest px-2">{form.formState.errors.text.message}</p>}
+                                </form>
                             </div>
-                            <Controller
-                                name="targetReduction"
-                                control={form.control}
-                                render={({ field }) => (
-                                    <Slider
-                                        value={[field.value || 0]}
-                                        onValueChange={(val) => field.onChange(val[0])}
-                                        min={0} max={50} step={5}
-                                        disabled={isProcessing}
-                                    />
-                                )}
-                            />
-                        </div>
-                        <Button type="submit" disabled={isProcessing} className="w-full">
-                            {concisenessMutation.isPending ? <Loader2 className="me-2 h-4 w-4 animate-spin" /> : <Sparkles className="me-2 h-4 w-4" />}
-                            Make Concise
-                        </Button>
-                    </form>
 
-                    <form onSubmit={form.handleSubmit(onSubmitClarity)} className="space-y-4">
-                        <h3 className="font-semibold flex items-center gap-2"><Lightbulb className="h-5 w-5" /> Clarity Advisor</h3>
-                        <div className="space-y-2">
-                            <Label htmlFor="focus-areas">Focus Areas (Optional)</Label>
-                            <Controller
-                                name="focusAreas"
-                                control={form.control}
-                                render={({ field }) => (
-                                    <Input
-                                        id="focus-areas"
-                                        value={field.value?.join(', ') || ''}
-                                        onChange={(e) => {
-                                            const value = e.target.value;
-                                            field.onChange(value ? value.split(',').map(s => s.trim()).filter(s => s) : []);
-                                        }}
-                                        placeholder="e.g., sentence structure, word choice"
-                                        disabled={isProcessing}
-                                    />
-                                )}
-                            />
-                            <p className="text-xs text-muted-foreground">Separate multiple areas with commas</p>
-                        </div>
-                        <Button type="submit" disabled={isProcessing} className="w-full">
-                            {clarityMutation.isPending ? <Loader2 className="me-2 h-4 w-4 animate-spin" /> : <Sparkles className="me-2 h-4 w-4" />}
-                            Improve Clarity
-                        </Button>
-                    </form>
-                </CardContent>
-            </Card>
+                            <Separator className="bg-border/40" />
 
-            {(isProcessing || processedText || originalText) && (
-                <Card>
-                    <CardHeader>
-                        <div className="flex justify-between items-center">
-                            <div>
-                                <CardTitle>{t('writingTools.textStylist.comparisonTitle')}</CardTitle>
-                                <CardDescription>{t('writingTools.textStylist.comparisonDescription')}</CardDescription>
-                            </div>
-                            <div className="flex items-center gap-2">
-                                {diff && (
-                                    <Tabs value={activeView} onValueChange={(value) => setActiveView(value as any)}>
-                                        <TabsList>
-                                            <TabsTrigger value="side-by-side">{t('writingTools.textStylist.sideBySideTab')}</TabsTrigger>
-                                            <TabsTrigger value="diff">{t('writingTools.textStylist.diffTab')}</TabsTrigger>
-                                        </TabsList>
-                                    </Tabs>
-                                )}
-                                <Button variant="ghost" size="icon" onClick={handleCopy} disabled={!processedText}>
-                                    {isCopied ? <Check className="h-4 w-4 text-green-500" /> : <Copy className="h-4 w-4" />}
-                                </Button>
-                            </div>
-                        </div>
-                    </CardHeader>
-                    <CardContent>
-                        {activeView === 'side-by-side' ? (
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <div className="space-y-2">
-                                    <Label htmlFor="input-text">{t('writingTools.textStylist.originalTextLabel')}</Label>
-                                    <ScrollArea className="h-72 rounded-md border p-4 bg-background">
-                                        <div className="prose dark:prose-invert max-w-none text-sm">
-                                            <ReactMarkdown components={markdownComponents}>{originalText || t('writingTools.textStylist.originalTextPlaceholder')}</ReactMarkdown>
+                            <div className="space-y-6">
+                                <Label className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground/60 ml-1">Synthesis Protocols</Label>
+                                
+                                <div className="grid gap-4">
+                                    {/* Protocol: Rewrite */}
+                                    <form onSubmit={form.handleSubmit(onSubmitRewrite)} className="group space-y-4 p-5 rounded-2xl border bg-background hover:border-primary/40 transition-all duration-300">
+                                        <div className="flex items-center justify-between">
+                                            <h3 className="text-xs font-bold uppercase tracking-widest flex items-center gap-2">
+                                                <Wand2 className="h-3.5 w-3.5 text-primary" /> 
+                                                Rewrite
+                                            </h3>
+                                            <Badge variant="outline" className="h-4 text-[8px] opacity-40">Style-Swap</Badge>
                                         </div>
-                                    </ScrollArea>
-                                </div>
-                                <div className="space-y-2">
-                                    <Label htmlFor="output-text">{t('writingTools.textStylist.processedTextLabel')}</Label>
-                                    <ScrollArea className="h-72 rounded-md border p-4 bg-muted/30">
-                                        {isProcessing ? (
-                                            <div className="flex items-center justify-center h-full">
-                                                <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                                        <div className="space-y-2">
+                                            <Controller
+                                                name="style"
+                                                control={form.control}
+                                                render={({ field }) => (
+                                                    <Select onValueChange={field.onChange} defaultValue={field.value} disabled={isProcessing}>
+                                                        <SelectTrigger className="h-9 text-xs bg-muted/5 border-none shadow-inner">
+                                                            <SelectValue placeholder="Select Style" />
+                                                        </SelectTrigger>
+                                                        <SelectContent>
+                                                            <SelectItem value="None" className="text-xs">Default</SelectItem>
+                                                            {styles.map(s => <SelectItem key={s} value={s} className="text-xs">{s}</SelectItem>)}
+                                                        </SelectContent>
+                                                    </Select>
+                                                )}
+                                            />
+                                        </div>
+                                        <Button type="submit" disabled={isProcessing} size="sm" className="w-full font-bold h-9 gap-2">
+                                            {rewriteMutation.isPending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Sparkles className="h-3.5 w-3.5" />}
+                                            Run Rewrite
+                                        </Button>
+                                    </form>
+
+                                    {/* Protocol: Summarize */}
+                                    <form onSubmit={form.handleSubmit(onSubmitSummarize)} className="group space-y-4 p-5 rounded-2xl border bg-background hover:border-primary/40 transition-all duration-300">
+                                        <h3 className="text-xs font-bold uppercase tracking-widest flex items-center gap-2">
+                                            <BookOpenText className="h-3.5 w-3.5 text-primary" /> 
+                                            Summarize
+                                        </h3>
+                                        <div className="space-y-4">
+                                            <div className="flex justify-between items-center">
+                                                <Label className="text-[10px] font-bold text-muted-foreground uppercase tracking-tighter">Compression</Label>
+                                                <Badge variant="secondary" className="h-4.5 text-[9px]">{compressionRatio}%</Badge>
                                             </div>
-                                        ) : (
-                                            <>
-                                                <div className="prose dark:prose-invert max-w-none text-sm">
-                                                    {/* Try to parse structured output for smart rendering */}
-                                                    {typeof processedText === 'string' ? (
-                                                        <ReactMarkdown components={markdownComponents}>{processedText || t('writingTools.textStylist.processedTextPlaceholder')}</ReactMarkdown>
-                                                    ) : processedText && processedText.rewrittenText ? (
-                                                        <ReactMarkdown components={markdownComponents}>{processedText.rewrittenText}</ReactMarkdown>
-                                                    ) : processedText && processedText.editedText ? (
-                                                        <ReactMarkdown components={markdownComponents}>{processedText.editedText}</ReactMarkdown>
-                                                    ) : processedText && processedText.enhancedText ? (
-                                                        <ReactMarkdown components={markdownComponents}>{processedText.enhancedText}</ReactMarkdown>
-                                                    ) : processedText && processedText.conciseText ? (
-                                                        <ReactMarkdown components={markdownComponents}>{processedText.conciseText}</ReactMarkdown>
-                                                    ) : processedText && processedText.improvedText ? (
-                                                        <ReactMarkdown components={markdownComponents}>{processedText.improvedText}</ReactMarkdown>
-                                                    ) : null}
-                                                </div>
-                                                {/* Render details/metadata contextually */}
-                                                <ResultDetails result={processedText} />
-                                            </>
-                                        )}
-                                    </ScrollArea>
+                                            <Slider
+                                                value={[compressionRatio]}
+                                                onValueChange={(val) => setCompressionRatio(val[0])}
+                                                min={10} max={90} step={5}
+                                                disabled={isProcessing}
+                                            />
+                                        </div>
+                                        <Button type="submit" disabled={isProcessing} size="sm" className="w-full font-bold h-9 gap-2">
+                                            {summarizeMutation.isPending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Sparkles className="h-3.5 w-3.5" />}
+                                            Run Synthesis
+                                        </Button>
+                                    </form>
+
+                                    {/* Protocol: Style Editor */}
+                                    <form onSubmit={form.handleSubmit(onSubmitStyleEditor)} className="group space-y-4 p-5 rounded-2xl border bg-background hover:border-primary/40 transition-all duration-300">
+                                        <h3 className="text-xs font-bold uppercase tracking-widest flex items-center gap-2">
+                                            <FileEdit className="h-3.5 w-3.5 text-primary" /> 
+                                            Style Editor
+                                        </h3>
+                                        <div className="space-y-3">
+                                            <Controller
+                                                name="targetAudience"
+                                                control={form.control}
+                                                render={({ field }) => (
+                                                    <Input {...field} placeholder="Audience (e.g., Expert)" className="h-8 text-xs bg-muted/5 border-none shadow-inner" disabled={isProcessing} />
+                                                )}
+                                            />
+                                            <Controller
+                                                name="tone"
+                                                control={form.control}
+                                                render={({ field }) => (
+                                                    <Input {...field} placeholder="Tone (e.g., Academic)" className="h-8 text-xs bg-muted/5 border-none shadow-inner" disabled={isProcessing} />
+                                                )}
+                                            />
+                                        </div>
+                                        <Button type="submit" disabled={isProcessing} size="sm" className="w-full font-bold h-9 gap-2">
+                                            {styleEditorMutation.isPending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Sparkles className="h-3.5 w-3.5" />}
+                                            Tune Style
+                                        </Button>
+                                    </form>
+
+                                    {/* Protocol: Readability */}
+                                    <form onSubmit={form.handleSubmit(onSubmitReadability)} className="group space-y-4 p-5 rounded-2xl border bg-background hover:border-primary/40 transition-all duration-300">
+                                        <h3 className="text-xs font-bold uppercase tracking-widest flex items-center gap-2">
+                                            <Scale className="h-3.5 w-3.5 text-primary" /> 
+                                            Readability
+                                        </h3>
+                                        <div className="space-y-2">
+                                            <Controller
+                                                name="targetLevel"
+                                                control={form.control}
+                                                render={({ field }) => (
+                                                    <Select onValueChange={field.onChange} value={field.value} disabled={isProcessing}>
+                                                        <SelectTrigger className="h-9 text-xs bg-muted/5 border-none shadow-inner">
+                                                            <SelectValue placeholder="Reading Level" />
+                                                        </SelectTrigger>
+                                                        <SelectContent>
+                                                            <SelectItem value="elementary" className="text-xs">Elementary</SelectItem>
+                                                            <SelectItem value="middle-school" className="text-xs">Middle School</SelectItem>
+                                                            <SelectItem value="high-school" className="text-xs">High School</SelectItem>
+                                                            <SelectItem value="college" className="text-xs">College</SelectItem>
+                                                            <SelectItem value="graduate" className="text-xs">Graduate</SelectItem>
+                                                        </SelectContent>
+                                                    </Select>
+                                                )}
+                                            />
+                                        </div>
+                                        <Button type="submit" disabled={isProcessing} size="sm" className="w-full font-bold h-9 gap-2">
+                                            {readabilityMutation.isPending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Sparkles className="h-3.5 w-3.5" />}
+                                            Scale Level
+                                        </Button>
+                                    </form>
                                 </div>
                             </div>
-                        ) : (
-                            <div className="space-y-2">
-                                <Label>{t('writingTools.textStylist.changesLabel')}</Label>
-                                <ScrollArea className="h-72 rounded-md border p-4 bg-muted/30">
+                        </div>
+                    </ScrollArea>
+                </div>
+
+                {/* Derived Canvas (Right) */}
+                <div className="flex-1 flex flex-col min-h-0 bg-background relative overflow-hidden">
+                    {/* Subtle Canvas Background */}
+                    <div className="absolute inset-0 bg-[#f8fafc] dark:bg-black/20 pointer-events-none shadow-inner">
+                        <div className="absolute inset-0 opacity-[0.03] dark:opacity-[0.05]" style={{ backgroundImage: 'radial-gradient(#000 1px, transparent 1px)', backgroundSize: '24px 24px' }} />
+                    </div>
+
+                    <div className="relative flex-1 flex flex-col min-h-0 p-8 md:p-12">
+                        {(isProcessing || processedText || originalText) ? (
+                            <div className="flex flex-col h-full space-y-6 animate-in fade-in duration-700">
+                                <div className="flex justify-between items-center px-1 sticky top-0 z-10">
+                                    <div className="flex items-center gap-3">
+                                        <div className="h-2 w-2 rounded-full bg-primary animate-pulse" />
+                                        <h3 className="text-[10px] font-bold uppercase tracking-[0.3em] text-muted-foreground">Derived Intelligence Canvas</h3>
+                                    </div>
+                                    
+                                    <div className="flex items-center gap-2">
+                                        {diff && (
+                                            <div className="flex items-center gap-1 bg-muted/20 p-1 rounded-xl border border-border/40 backdrop-blur-sm">
+                                                <Button 
+                                                    variant="ghost" 
+                                                    size="sm" 
+                                                    onClick={() => setActiveView('side-by-side')}
+                                                    className={cn("h-7 px-3 text-[9px] font-bold uppercase tracking-widest transition-all", activeView === 'side-by-side' ? "bg-background text-primary shadow-sm" : "text-muted-foreground")}
+                                                >
+                                                    Comparison
+                                                </Button>
+                                                <Button 
+                                                    variant="ghost" 
+                                                    size="sm" 
+                                                    onClick={() => setActiveView('diff')}
+                                                    className={cn("h-7 px-3 text-[9px] font-bold uppercase tracking-widest transition-all", activeView === 'diff' ? "bg-background text-primary shadow-sm" : "text-muted-foreground")}
+                                                >
+                                                    Logic Diff
+                                                </Button>
+                                            </div>
+                                        )}
+                                        <Button variant="ghost" size="icon" onClick={handleCopy} disabled={!processedText} className="h-8 w-8 rounded-lg hover:bg-primary/10 hover:text-primary transition-all">
+                                            {isCopied ? <Check className="h-4 w-4 text-green-500" /> : <Copy className="h-4 w-4" />}
+                                        </Button>
+                                    </div>
+                                </div>
+
+                                <ScrollArea className="flex-1 rounded-[32px] border bg-card p-10 md:p-16 shadow-2xl relative group">
                                     {isProcessing ? (
-                                        <div className="flex items-center justify-center h-full">
-                                            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                                        <div className="flex flex-col items-center justify-center h-full space-y-4 opacity-40">
+                                            <Loader2 className="h-12 w-12 animate-spin text-primary" />
+                                            <p className="text-[10px] font-bold uppercase tracking-[0.2em]">Executing Recursive Synthesis</p>
+                                        </div>
+                                    ) : activeView === 'side-by-side' ? (
+                                        <div className="space-y-12">
+                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
+                                                <div className="space-y-4">
+                                                    <Label className="text-[9px] font-bold uppercase tracking-[0.3em] text-primary/40">Source Context</Label>
+                                                    <div className="prose dark:prose-invert max-w-none text-[14px] leading-relaxed font-serif selection:bg-primary/10 opacity-60">
+                                                        <ReactMarkdown components={markdownComponents}>{originalText || t('writingTools.textStylist.originalTextPlaceholder')}</ReactMarkdown>
+                                                    </div>
+                                                </div>
+                                                <div className="space-y-4 border-l border-border/40 pl-12">
+                                                    <Label className="text-[9px] font-bold uppercase tracking-[0.3em] text-primary/60">Derived Output</Label>
+                                                    <div className="prose dark:prose-invert max-w-none text-[15px] leading-relaxed font-serif selection:bg-primary/10">
+                                                        {typeof processedText === 'string' ? (
+                                                            <ReactMarkdown components={markdownComponents}>{processedText || t('writingTools.textStylist.processedTextPlaceholder')}</ReactMarkdown>
+                                                        ) : processedText && (processedText.rewrittenText || processedText.editedText || processedText.enhancedText || processedText.conciseText || processedText.improvedText) ? (
+                                                            <ReactMarkdown components={markdownComponents}>
+                                                                {processedText.rewrittenText || processedText.editedText || processedText.enhancedText || processedText.conciseText || processedText.improvedText}
+                                                            </ReactMarkdown>
+                                                        ) : null}
+                                                    </div>
+                                                    <ResultDetails result={processedText} />
+                                                </div>
+                                            </div>
                                         </div>
                                     ) : (
-                                        <div className="prose dark:prose-invert max-w-none text-sm whitespace-pre-wrap">
+                                        <div className="prose dark:prose-invert max-w-none text-sm whitespace-pre-wrap selection:bg-primary/10">
                                             {diff && <DiffView diff={diff} />}
                                         </div>
                                     )}
+                                    {/* Page Footer Visual */}
+                                    <div className="mt-16 pt-8 border-t border-border/40 flex justify-between items-center text-[9px] text-muted-foreground/40 font-bold uppercase tracking-widest">
+                                        <span>Arkan Intelligence Suite</span>
+                                        <span>Protocol V1.0 Stable</span>
+                                    </div>
                                 </ScrollArea>
                             </div>
+                        ) : (
+                            <div className="flex flex-col items-center justify-center h-full py-12 text-center opacity-40 space-y-4">
+                                <div className="h-20 w-20 rounded-[32px] border-2 border-dashed border-primary/40 flex items-center justify-center">
+                                    <ArrowRightLeft className="h-10 w-10 text-primary/60" />
+                                </div>
+                                <div className="space-y-1">
+                                    <h3 className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Ready for Synthesis</h3>
+                                    <p className="text-[11px] italic max-w-xs mx-auto leading-relaxed">Input context and select a protocol on the left to begin recursive styling.</p>
+                                </div>
+                            </div>
                         )}
-                    </CardContent>
-                </Card>
-            )}
-        </div>
+                    </div>
+                </div>
+            </CardContent>
+        </Card>
     );
 }

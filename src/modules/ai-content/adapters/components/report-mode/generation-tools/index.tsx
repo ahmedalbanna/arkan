@@ -34,12 +34,16 @@ import { SortableChapterItem } from "./SortableChapterItem";
 
 interface GenerationToolsProps {
   activeSectionId: string | null;
+  activeChapterId?: string | null;
   onActiveSectionChange: (sectionId: string | null) => void;
+  onActiveChapterChange?: (chapterId: string | null) => void;
 }
 
 export default function GenerationTools({
   activeSectionId,
+  activeChapterId,
   onActiveSectionChange,
+  onActiveChapterChange,
 }: GenerationToolsProps) {
   const {
     t,
@@ -70,6 +74,10 @@ export default function GenerationTools({
     onActiveSectionChange(sectionId);
   };
 
+  const handleActivateChapter = (chapterId: string) => {
+    onActiveChapterChange?.(chapterId);
+  };
+
   return (
     <>
       <BuildProjectDialog
@@ -79,39 +87,38 @@ export default function GenerationTools({
         onGenerateProject={onGenerateProject}
         isLoading={projectMutation.isPending}
       />
-      <Card className="flex flex-col h-full">
-        <CardHeader>
-          <div className="flex justify-between items-center">
-            <div>
-              <CardTitle className="font-headline">{t('builder.reportGenerator.toolsTitle')}</CardTitle>
-              <CardDescription>{t('builder.reportGenerator.toolsDesc')}</CardDescription>
-            </div>
-          </div>
-        </CardHeader>
-        <CardContent className="flex-grow flex flex-col gap-4 min-h-0">
-          <div className="flex gap-2">
-            <Button onClick={handleAddChapter} variant="default" className="w-full">
-              <PlusCircle className="me-2 h-4 w-4" /> Add Chapter
+      <div className="flex flex-col h-full space-y-6">
+        <div className="space-y-1.5 px-4 pt-4">
+          <h4 className="text-sm font-semibold tracking-tight">{t('builder.reportGenerator.toolsTitle')}</h4>
+          <p className="text-[11px] text-muted-foreground italic leading-relaxed">{t('builder.reportGenerator.toolsDesc')}</p>
+        </div>
+
+        <div className="flex-grow flex flex-col min-h-0 px-4">
+          <div className="flex gap-2 mb-6">
+            <Button onClick={handleAddChapter} variant="outline" size="sm" className="w-full font-bold h-9 border-dashed hover:border-primary/40 hover:bg-primary/5 transition-all">
+              <PlusCircle className="me-2 h-4 w-4 text-primary" /> Add Chapter
             </Button>
           </div>
           
           <div className="relative flex-grow flex flex-col min-h-0">
             {isProjectBuildMode && (
-              <div className="flex items-center gap-2 mb-2 p-2 border rounded-md bg-muted/30">
+              <div className="flex items-center gap-3 mb-4 p-3 rounded-xl border bg-primary/[0.03] border-primary/20 animate-in fade-in slide-in-from-top-2 duration-300">
                 <Checkbox
                   id="select-all-chapters"
                   checked={isAllSelected}
                   onCheckedChange={(checked: any) => toggleSelectAll(!!checked)}
                   aria-checked={isIndeterminate ? 'mixed' : isAllSelected}
+                  className="h-4 w-4"
                 />
-                <Label htmlFor="select-all-chapters" className="font-semibold text-sm">Select all sections for project build</Label>
+                <Label htmlFor="select-all-chapters" className="font-bold text-[10px] uppercase tracking-widest text-primary/80">Select all for build</Label>
               </div>
             )}
-            <ScrollArea className="flex-grow">
-              <div className="h-full pr-4 -mr-4">
+            
+            <ScrollArea className="flex-grow pr-4 -mr-4">
+              <div className="h-full pb-20">
                 <DndContext collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
                   <SortableContext items={(project?.content || []).map(c => c.id)} strategy={verticalListSortingStrategy}>
-                    <div className="w-full space-y-2">
+                    <div className="w-full space-y-3">
                       {(project?.content || []).map((item, index) => {
                         if (item instanceof Chapter) {
                           return (
@@ -125,6 +132,8 @@ export default function GenerationTools({
                               toggleSectionSelection={toggleSectionSelection}
                               activeSectionId={activeSectionId}
                               onActivateSection={handleActivateSection}
+                              onActivate={() => handleActivateChapter(item.id)}
+                              isActive={activeChapterId === item.id}
                             />
                           )
                         }
@@ -150,24 +159,27 @@ export default function GenerationTools({
                 </DndContext>
               </div>
             </ScrollArea>
-            <div className="mt-4 flex-shrink-0">
+
+            <div className="absolute bottom-4 left-0 right-0 pt-4 bg-gradient-to-t from-background via-background/95 to-transparent flex-shrink-0">
               {isProjectBuildMode ? (
                 <div className="flex gap-2">
-                  <Button onClick={exitProjectBuildMode} variant="secondary" className="w-full">
+                  <Button onClick={exitProjectBuildMode} variant="secondary" size="sm" className="flex-1 font-bold h-10 border bg-background/80 backdrop-blur-sm">
                     <XCircle className="mr-2 h-4 w-4" /> Cancel
                   </Button>
                   <Button
-                    className="w-full"
+                    size="sm"
+                    className="flex-[2] font-bold h-10 shadow-lg shadow-primary/20"
                     onClick={() => setIsBuildProjectDialogOpen(true)}
                     disabled={selectedSectionsForBuild.size === 0 || projectMutation.isPending}
                   >
                     <Building className="mr-2 h-4 w-4" />
-                    Build Project ({selectedSectionsForBuild.size} selected)
+                    Build ({selectedSectionsForBuild.size})
                   </Button>
                 </div>
               ) : canBuildProject && (
                 <Button
-                  className="w-full"
+                  size="sm"
+                  className="w-full font-bold h-10 shadow-lg shadow-primary/10"
                   onClick={enterProjectBuildMode}
                   disabled={projectMutation.isPending}
                 >
@@ -175,13 +187,10 @@ export default function GenerationTools({
                   Build Project
                 </Button>
               )}
-
+            </div>
           </div>
-
-          </div>
-
-        </CardContent>
-      </Card >
+        </div>
+      </div>
     </>
   );
 }

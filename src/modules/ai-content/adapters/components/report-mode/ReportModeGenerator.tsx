@@ -1,21 +1,22 @@
 
 'use client';
 
-import { useLocalization } from '@/context/LocalizationContext';
-import { cn } from '@/infrastructure/utils/cn';
-import { BookOpenText, ZoomOut, ZoomIn, Settings } from 'lucide-react';
-import React, { Suspense, lazy } from 'react';
-import { Button } from '@/components/ui/button';
-import { CollapsibleSidePanel } from '@/components/ui/CollapsibleSidePanel';
-import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@/components/ui/resizable';
 import { BuilderPageSkeleton } from '@/app/builder/loading';
 import { OnboardingGuide } from '@/components/onboarding/OnboardingGuide';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { CollapsibleSidePanel } from '@/components/ui/CollapsibleSidePanel';
 import { Input } from '@/components/ui/input';
-import { formatDistanceToNow } from 'date-fns';
+import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@/components/ui/resizable';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { cn } from '@/infrastructure/utils/cn';
 import { SessionActions } from '@/modules/ai-content/adapters/components/report-mode/session/SessionActions';
 import { useReportGenerator } from '@/modules/ai-content/adapters/hooks/report-mode/useReportGenerator';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { type ProjectProperties } from '@/modules/projects/domain/entities/Project';
+import { formatDistanceToNow } from 'date-fns';
+import { BookOpenText, Settings, ZoomIn, ZoomOut } from 'lucide-react';
+import { Suspense, lazy } from 'react';
+
 
 const ReportResults = lazy(() => import('./ReportResults'));
 
@@ -76,6 +77,8 @@ export default function ReportModeGenerator({ initialProject }: { initialProject
         rightPanels,
         zoomLevel,
         setZoomLevel,
+        activeChapterId,
+        setActiveChapterId,
     } = useReportGenerator(initialProject);
 
     const handleZoomIn = () => setZoomLevel(prev => Math.min(2, prev + 0.1));
@@ -87,41 +90,65 @@ export default function ReportModeGenerator({ initialProject }: { initialProject
     }
 
     return (
-        <div className="relative flex-grow flex flex-col">
+        <div className="relative flex-grow flex flex-col bg-background">
             <OnboardingGuide isOpen={showOnboarding} onOpenChange={setShowOnboarding} onComplete={handleOnboardingComplete} />
 
-            {/* Zoom Controls - CENTER */}
-            <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-30 hidden lg:flex items-center gap-1 border border-border/60 bg-background/90 backdrop-blur-sm p-1 rounded-lg shadow-md">
+
+
+            {/* Premium Zoom HUD - CENTER */}
+            <div className="fixed bottom-8 left-1/2 -translate-x-1/2 z-40 hidden lg:flex items-center gap-1 border bg-background/60 backdrop-blur-xl p-1 rounded-2xl shadow-2xl shadow-primary/10 border-white/10 ring-1 ring-black/5 dark:ring-white/10 animate-in fade-in slide-in-from-bottom-4 duration-1000">
                 <TooltipProvider>
                     <Tooltip>
                         <TooltipTrigger asChild>
-                            <Button variant="ghost" size="icon" onClick={handleZoomOut} className="h-8 w-8">
-                                <ZoomOut className="h-4 w-4" />
+                            <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={handleZoomOut}
+                                className="h-9 w-9 rounded-xl hover:bg-primary/10 hover:text-primary transition-all duration-300 active:scale-90"
+                            >
+                                <ZoomOut className="h-4.5 w-4.5" />
                             </Button>
                         </TooltipTrigger>
-                        <TooltipContent><p>Zoom Out</p></TooltipContent>
+                        <TooltipContent side="top" className="text-[10px] font-bold uppercase tracking-widest">Zoom Out</TooltipContent>
                     </Tooltip>
+
+                    <div className="h-4 w-px bg-border/40 mx-1" />
+
                     <Tooltip>
                         <TooltipTrigger asChild>
-                            <Button variant="ghost" size="sm" onClick={handleZoomReset} className="h-8 text-xs w-16">
+                            <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={handleZoomReset}
+                                className="h-9 min-w-[64px] rounded-xl text-[10px] font-bold uppercase tracking-widest hover:bg-primary/5 hover:text-primary transition-all duration-300"
+                            >
                                 {(zoomLevel * 100).toFixed(0)}%
                             </Button>
                         </TooltipTrigger>
-                        <TooltipContent><p>Reset Zoom</p></TooltipContent>
+                        <TooltipContent side="top" className="text-[10px] font-bold uppercase tracking-widest">Reset View</TooltipContent>
                     </Tooltip>
+
+                    <div className="h-4 w-px bg-border/40 mx-1" />
+
                     <Tooltip>
                         <TooltipTrigger asChild>
-                            <Button variant="ghost" size="icon" onClick={handleZoomIn} className="h-8 w-8">
-                                <ZoomIn className="h-4 w-4" />
+                            <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={handleZoomIn}
+                                className="h-9 w-9 rounded-xl hover:bg-primary/10 hover:text-primary transition-all duration-300 active:scale-90"
+                            >
+                                <ZoomIn className="h-4.5 w-4.5" />
                             </Button>
                         </TooltipTrigger>
-                        <TooltipContent><p>Zoom In</p></TooltipContent>
+                        <TooltipContent side="top" className="text-[10px] font-bold uppercase tracking-widest">Zoom In</TooltipContent>
                     </Tooltip>
                 </TooltipProvider>
             </div>
 
 
             <div className="flex-grow flex flex-col mx-auto px-4 py-8 w-full">
+                {/* Global Header Zone */}
                 <div className="flex justify-between items-start mb-4 gap-4 max-w-full">
                     <div className="flex-1 space-y-2 overflow-auto">
                         <Input
@@ -141,8 +168,9 @@ export default function ReportModeGenerator({ initialProject }: { initialProject
                         <SessionActions isSaving={false} />
                     </div>
                 </div>
+                {/* Zoom Controls - CENTER */}
                 <div className="flex flex-col flex-grow">
-                     <div className="pb-16 lg:pb-0 flex-grow">
+                    <div className="pb-16 lg:pb-0 flex-grow">
                         <Suspense fallback={<ReportSkeleton />}>
                             <div className="h-full" dir={locale === 'ar' ? 'rtl' : 'ltr'}>
                                 {isMobile ? (
@@ -185,18 +213,18 @@ export default function ReportModeGenerator({ initialProject }: { initialProject
                                                 />
                                             </div>
                                         </ResizablePanel>
-                                        
+
                                         <ResizableHandle withHandle />
-                                        
+
                                         {/* Center Zone - Preview */}
                                         <ResizablePanel defaultSize={50} minSize={40}>
                                             <div className="h-full px-2">
                                                 <ReportResults activePanelKey={activePanelKey} />
                                             </div>
                                         </ResizablePanel>
-                                        
+
                                         <ResizableHandle withHandle />
-                                        
+
                                         {/* Right Zone - Context */}
                                         <ResizablePanel defaultSize={25} minSize={20} maxSize={35}>
                                             <div className="h-full pl-2">

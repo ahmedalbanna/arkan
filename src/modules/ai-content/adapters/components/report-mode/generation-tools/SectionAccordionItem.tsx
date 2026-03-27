@@ -70,46 +70,64 @@ export function SectionAccordionItem({
             style={style}
             {...attributes}
             className={cn(
-                "bg-background border rounded-lg overflow-hidden shadow-sm transition-shadow",
-                isActive && "ring-2 ring-primary/30 shadow-md"
+                "bg-card border rounded-lg overflow-hidden transition-all duration-200",
+                isActive 
+                    ? "border-primary shadow-md ring-1 ring-primary/20 -translate-y-[1px]" 
+                    : "border-border/60 hover:border-primary/30 shadow-sm"
             )}
         >
             <div
                 className={cn(
-                    "flex flex-wrap items-center gap-2 px-4 py-3 bg-muted/10 border-b cursor-pointer",
-                    isActive && "bg-primary/5"
+                    "flex flex-wrap items-center gap-3 px-3 py-2.5 cursor-pointer",
+                    isActive ? "bg-primary/[0.03]" : "bg-background hover:bg-muted/5"
                 )}
                 onClick={handleActivate}
             >
                 {isProjectBuildMode && (
-                    <div className="flex items-center gap-2" onClick={(e) => { e.stopPropagation(); toggleSectionSelection(section.id); }}>
+                    <div className="flex items-center" onClick={(e) => { e.stopPropagation(); toggleSectionSelection(section.id); }}>
                         <Checkbox
                             checked={isSelected}
                             aria-label={`Select section ${section.title}`}
+                            className="h-3.5 w-3.5"
                         />
                     </div>
                 )}
                 <div className="flex flex-wrap items-center gap-3 flex-1 min-w-0 group">
-                    <div {...listeners} className="p-1.5 rounded-md cursor-grab touch-none -ml-2 flex items-center gap-2 text-muted-foreground transition-colors hover:bg-muted/40 shrink-0">
-                        <span className="text-[11px] w-8 text-left">{chapterIndex >= 0 ? `${chapterIndex + 1}.${sectionIndex + 1}` : `${sectionIndex + 1}`}</span>
-                        <GripVertical className="h-5 w-5" />
-                    </div>
-                    {isGenerating && <Loader2 className="h-4 w-4 animate-spin shrink-0" />}
-                    <span className="text-sm font-medium p-0 h-auto truncate break-words group-hover:text-foreground min-w-0">
+                    {listeners && (
+                        <div {...listeners} className="p-1 rounded-md cursor-grab touch-none flex items-center gap-1.5 text-muted-foreground transition-colors hover:text-primary shrink-0">
+                            <span className="text-[9px] font-bold w-6 text-left opacity-60">
+                                {chapterIndex >= 0 ? `${chapterIndex + 1}.${sectionIndex + 1}` : `${sectionIndex + 1}`}
+                            </span>
+                            <GripVertical className="h-3.5 w-3.5 opacity-40 group-hover:opacity-100" />
+                        </div>
+                    )}
+                    {isGenerating ? (
+                        <Loader2 className="h-3.5 w-3.5 animate-spin text-primary shrink-0" />
+                    ) : (
+                        <div className={cn(
+                            "h-1.5 w-1.5 rounded-full shrink-0",
+                            isActive ? "bg-primary animate-pulse" : "bg-muted-foreground/20"
+                        )} />
+                    )}
+                    <span className={cn(
+                        "text-xs font-semibold truncate flex-1 min-w-0 transition-colors",
+                        isActive ? "text-foreground" : "text-muted-foreground group-hover:text-foreground"
+                    )}>
                         {section.title}
                     </span>
                     {totalContext > 0 && (
                         <TooltipProvider>
                             <Tooltip>
                                 <TooltipTrigger asChild>
-                                    <div className="flex items-center gap-1 ml-2 rounded-full border border-primary/20 bg-primary/10 px-2 py-0.5 text-primary shrink-0">
-                                        <LinkIcon className="h-3.5 w-3.5" />
-                                        <span className="text-[11px] font-medium">{totalContext}</span>
+                                    <div className="flex items-center gap-1 ml-auto rounded-full bg-primary/10 px-1.5 py-0.5 text-primary shrink-0 ring-1 ring-primary/20">
+                                        <LinkIcon className="h-2.5 w-2.5" />
+                                        <span className="text-[9px] font-bold">{totalContext}</span>
                                     </div>
                                 </TooltipTrigger>
                                 <TooltipContent side="top">
-                                    <div className="text-xs space-y-1">
-                                        {contextNames.map(name => <p key={name}>{name}</p>)}
+                                    <div className="text-[10px] font-medium space-y-1">
+                                        <p className="border-b border-white/10 pb-1 mb-1 uppercase tracking-wider text-[9px] opacity-70">Linked Context</p>
+                                        {contextNames.map(name => <p key={name} className="truncate max-w-[150px]">{name}</p>)}
                                     </div>
                                 </TooltipContent>
                             </Tooltip>

@@ -105,6 +105,39 @@ To provide users with a real-time, context-aware AI assistant that can answer qu
 - **Implementation**: Domain-specific hooks in `src/modules/[domain]/adapters/hooks/`.
 - **Benefits**: Reduces redundant API calls, provides optimistic updates, handles background refetching. Uses centralized key factory in `src/infrastructure/api/query-keys.ts`.
 
+## UI/UX & Architecture Patterns
+
+### 1. 3-Zone Workspace Architecture (IDE Pattern)
+**Purpose**: Maximizing focus and logical flow for complex document production.
+- **Top Zone**: Horizontal bar for project identity and Session Actions (Export, Save).
+- **Left Zone**: Primary navigation and Setup Tools (Files, Templates, Chapters).
+- **Center Zone**: Primary work area (A4 preview, Editor) with a dedicated status HUD.
+- **Right Zone**: Context-sensitive AI controls, behavioral rules, and chat.
+
+### 2. Production Manifest Pattern
+**Purpose**: Standardized, high-trust model for complex multi-step operations.
+- **Implementation**: Used in Build Project, Export, Browse Library dialogs, and standalone Writing Tools.
+- **Features**: Technical header with activity pulse, data-dense body, and versioned footer.
+
+### 3. Manifest Workspace Architecture
+**Purpose**: Specialized layout for standalone intelligent tools (Summarizer, Researcher, Stylist).
+- **Setup Zone (Left)**: Technical side-panel (400-450px) for configuration protocols and logic definitions.
+- **Results Canvas (Right)**: Immersive, high-fidelity work area with radial grid textures and shadow-inner effects.
+- **Interactive HUDs**: Floating controls for view switching (e.g., Comparison vs. Logic Diff).
+
+### 4. Sidebar Dashboard Density
+**Purpose**: Maintaining professional aesthetics and readability in narrow sidebars (20-25%).
+- **Styling**: `text-[10px]` bold uppercase tracking for labels, `bg-muted/5` for input backgrounds.
+- **Hierarchy**: Priority-based tab reordering (e.g., Context -> Prompt -> Controls).
+
+### 5. Contextual HUD Pattern
+**Purpose**: Keeping secondary document utilities accessible without cluttering toolbars.
+- **Implementation**: Floating, semi-transparent glass-morphism containers (e.g., Zoom HUD, Syntax Guides).
+
+### 5. State Lifting for Zone Sync
+**Purpose**: Seamless coordination between interactive UI zones.
+- **Pattern**: Lifting active selection state (Chapter/Section) to the main page hook to automatically focus relevant sidebar panels.
+
 ## Error Handling Patterns
 
 ### 1. Centralized API Error Handling

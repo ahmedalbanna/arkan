@@ -36,7 +36,7 @@ const MarkdownEditorComponent = ({ content, onChange, editorClassName }: Markdow
     },
     editorProps: {
       attributes: {
-        class: cn('prose dark:prose-invert max-w-none focus:outline-none font-serif text-base prose-p:text-base prose-headings:font-headline prose-a:text-primary hover:prose-a:text-primary/80 prose-table:w-full prose-table:table-fixed prose-tr:border-b prose-th:text-left prose-th:p-2 prose-td:p-2', editorClassName),
+        class: cn('prose dark:prose-invert max-w-none focus:outline-none font-serif text-[15px] leading-relaxed prose-p:leading-relaxed prose-headings:font-headline prose-headings:tracking-tight prose-a:text-primary hover:prose-a:text-primary/80 prose-table:w-full prose-table:table-fixed prose-tr:border-b prose-th:text-left prose-th:p-2 prose-td:p-2 selection:bg-primary/10', editorClassName),
       },
       handlePaste: (view, event, slice): boolean => {
         const text = event.clipboardData?.getData('text/plain');

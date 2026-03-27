@@ -13,6 +13,7 @@ const GenerationTools = lazy(() => import('@/modules/ai-content/adapters/compone
 const ApplyTemplatePanel = lazy(() => import('@/modules/ai-content/adapters/components/report-mode/templates/ApplyTemplatePanel'));
 const GlobalProjectControls = lazy(() => import('@/modules/ai-content/adapters/components/report-mode/settings/GlobalProjectControls').then(m => ({ default: m.GlobalProjectControls })));
 const SectionTabsPanel = lazy(() => import('@/modules/ai-content/adapters/components/report-mode/generation-tools/SectionTabsPanel').then(m => ({ default: m.SectionTabsPanel })));
+const ChapterTabsPanel = lazy(() => import('@/modules/ai-content/adapters/components/report-mode/generation-tools/ChapterTabsPanel').then(m => ({ default: m.ChapterTabsPanel })));
 const ProjectChat = lazy(() => import('@/modules/ai-content/adapters/components/report-mode/chat/ProjectChat').then(m => ({ default: m.ProjectChat })));
 
 import { type ProjectProperties } from '@/modules/projects/domain/entities/Project';
@@ -26,6 +27,7 @@ export function useReportGenerator(initialProject?: ProjectProperties | null) {
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [zoomLevel, setZoomLevel] = useState(1);
   const [activeSectionId, setActiveSectionId] = useState<string | null>(null);
+  const [activeChapterId, setActiveChapterId] = useState<string | null>(null);
   const { isSaving } = useSaveProject();
   const builderPageLogic = useBuilderPageLogic(initialProject);
 
@@ -36,13 +38,13 @@ export function useReportGenerator(initialProject?: ProjectProperties | null) {
     };
   }, [zoomLevel]);
 
-  // Auto-switch to generation tools if a section is activated
+  // Auto-switch to generation tools if a section or chapter is activated
   useEffect(() => {
-    if (activeSectionId) {
+    if (activeSectionId || activeChapterId) {
       setActivePanelKey('generate');
       setActiveRightPanelKey('section');
     }
-  }, [activeSectionId]);
+  }, [activeSectionId, activeChapterId]);
 
   const leftPanels = useMemo(() => [
     {
@@ -69,20 +71,30 @@ export function useReportGenerator(initialProject?: ProjectProperties | null) {
         icon: React.createElement(BookOpenCheck, { className: "h-5 w-5" }),
         content: React.createElement(GenerationTools, {
           activeSectionId,
-          onActiveSectionChange: setActiveSectionId,
+          onActiveSectionChange: (id) => {
+            setActiveSectionId(id);
+            if (id) setActiveChapterId(null);
+          },
+          onActiveChapterChange: (id) => {
+            setActiveChapterId(id);
+            if (id) setActiveSectionId(null);
+          },
         }),
     },
-  ], [t, activeSectionId]);
+  ], [t, activeSectionId, activeChapterId]);
 
   const rightPanels = useMemo(() => {
     const activeSection = activeSectionId ? builderPageLogic.project?.getSection(activeSectionId) ?? null : null;
+    const activeChapter = activeChapterId ? builderPageLogic.project?.getChapter(activeChapterId) ?? null : null;
     
     return [
       {
           key: 'section',
-          title: 'Section Controls',
+          title: activeChapterId ? 'Chapter Tools' : 'Section Controls',
           icon: React.createElement(Sparkles, { className: "h-5 w-5" }),
-          content: React.createElement(SectionTabsPanel, { section: activeSection }),
+          content: activeChapterId 
+            ? React.createElement(ChapterTabsPanel, { chapter: activeChapter })
+            : React.createElement(SectionTabsPanel, { section: activeSection }),
       },
       {
           key: 'global',
@@ -97,7 +109,7 @@ export function useReportGenerator(initialProject?: ProjectProperties | null) {
           content: React.createElement(ProjectChat, { isOpen: true, onClose: () => setActiveRightPanelKey('section') }),
       },
     ];
-  }, [activeSectionId, builderPageLogic.project]);
+  }, [activeSectionId, activeChapterId, builderPageLogic.project]);
 
   return {
     ...builderPageLogic,
@@ -119,5 +131,7 @@ export function useReportGenerator(initialProject?: ProjectProperties | null) {
     setZoomLevel,
     activeSectionId,
     setActiveSectionId,
+    activeChapterId,
+    setActiveChapterId,
   };
 }

@@ -1,5 +1,3 @@
-
-
 'use client';
 
 import { Button } from '@/components/ui/button';
@@ -16,8 +14,6 @@ import {
 } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import { useBuilderStore, useExport } from '@/hooks';
-
-
 import { Download, FileText, Loader2, Presentation } from 'lucide-react';
 import { useState, useMemo } from 'react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -29,7 +25,9 @@ import { ProjectContent } from '@/modules/projects/domain/entities/Project';
 import { Section } from '@/modules/ai-content/domain/entities/Section';
 import { DocxTemplateKey, templates as docxTemplates } from '@/modules/ai-content/infrastructure/exporters/DocxStyles';
 import { PptxTemplateKey, templates as pptxTemplates } from '@/modules/templates/infrastructure/PptxStyles';
-
+import { Badge } from '@/components/ui/badge';
+import { Separator } from '@/components/ui/separator';
+import { cn } from '@/infrastructure/utils/cn';
 
 export function ExportDialog() {
   const { project } = useBuilderStore();
@@ -45,7 +43,7 @@ export function ExportDialog() {
       );
       setSelectedContent(new Set(allContentIds));
     }
-  }, [project]);
+  }, [project, isOpen]);
 
   // State for DOCX
   const [selectedDocxTemplate, setSelectedDocxTemplate] = useState<DocxTemplateKey>('modern');
@@ -91,7 +89,6 @@ export function ExportDialog() {
   async function handleExportClick(format: 'docx' | 'pptx') {
     if (!project || !hasContent || selectedContent.size === 0) return;
 
-    // Filter project content based on selection
     const selectedProjectContent: ProjectContent = (project.content || [])
       .map(item => {
         if (item instanceof Chapter) {
@@ -101,7 +98,6 @@ export function ExportDialog() {
         return selectedContent.has(item.id) ? item : null;
       })
       .filter((item): item is Chapter | Section => item !== null);
-
 
     if (format === 'docx') {
       await exportReportDocx({
@@ -127,153 +123,227 @@ export function ExportDialog() {
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
         <Button
-            variant="outline"
-            size="icon"
-            className="h-8 w-8 md:w-auto md:px-3"
+            variant="ghost"
+            size="sm"
+            className="h-8 gap-2 text-[10px] font-bold uppercase tracking-widest hover:bg-primary/10 hover:text-primary transition-all duration-300"
             disabled={!hasContent}
         >
-          <Download className="h-4 w-4" />
-          <span className="hidden md:inline ms-2">Export</span>
+          <Download className="h-3.5 w-3.5" />
+          <span className="hidden xl:inline">Export</span>
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-w-4xl h-[90vh] flex flex-col">
-        <DialogHeader>
-          <DialogTitle>Export Project</DialogTitle>
-          <DialogDescription>
-            Choose your export format and options. Select the content you wish to include.
-          </DialogDescription>
-        </DialogHeader>
+      <DialogContent className="max-w-5xl h-[90vh] p-0 overflow-hidden flex flex-col gap-0 border-none shadow-2xl">
+        <header className="px-8 py-6 border-b bg-muted/10">
+          <div className="flex flex-col gap-1">
+            <div className="flex items-center gap-2">
+              <Download className="h-5 w-5 text-primary" />
+              <DialogTitle className="text-xl font-bold font-headline tracking-tight">Production & Export Manifest</DialogTitle>
+            </div>
+            <DialogDescription className="text-xs text-muted-foreground italic max-w-2xl leading-relaxed">
+              Compile your project into professional document formats. Select the specific chapters and sections to include in the final generation.
+            </DialogDescription>
+          </div>
+        </header>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 flex-1 min-h-0">
-          {/* Content Selection */}
-          <div className="flex flex-col gap-4">
-            <h3 className="font-semibold">Select Content to Export</h3>
-            <ScrollArea className="border rounded-lg h-full">
-              <Accordion type="multiple" defaultValue={project?.content.map(c => c.id)} className="p-4">
-                {project?.content.map(item => {
-                  if (item instanceof Chapter) {
-                    const allSectionsSelected = item.sections.every(s => selectedContent.has(s.id));
-                    return (
-                      <AccordionItem value={item.id} key={item.id}>
-                        <div className="flex items-center gap-2">
-                          <Checkbox
-                            checked={allSectionsSelected}
-                            onCheckedChange={() => handleToggleChapter(item.id)}
-                            id={`chapter-${item.id}`}
-                          />
-                          <AccordionTrigger className="flex-1">
-                            <Label htmlFor={`chapter-${item.id}`} className="cursor-pointer">{item.title}</Label>
-                          </AccordionTrigger>
-                        </div>
-                        <AccordionContent className="pl-8 space-y-2 pt-2">
-                          {item.sections.map(section => (
-                            <div key={section.id} className="flex items-center gap-2">
-                              <Checkbox
-                                checked={selectedContent.has(section.id)}
-                                onCheckedChange={() => handleToggleSection(section.id)}
-                                id={`section-${section.id}`}
-                              />
-                              <Label htmlFor={`section-${section.id}`} className="text-sm font-normal cursor-pointer">{section.title}</Label>
-                            </div>
-                          ))}
-                        </AccordionContent>
-                      </AccordionItem>
-                    );
-                  }
-                  return null; // Top-level sections are not individually selectable here, handled by chapter
-                })}
-              </Accordion>
+        <div className="flex-1 min-h-0 grid grid-cols-1 md:grid-cols-12 gap-0 overflow-hidden">
+          {/* Left: Content Selection */}
+          <div className="md:col-span-5 border-r flex flex-col min-h-0 bg-muted/5">
+            <div className="px-8 py-4 border-b bg-background flex items-center justify-between">
+              <h3 className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Select Content</h3>
+              <Badge variant="secondary" className="h-5 text-[9px] px-1.5 font-bold">{selectedContent.size} Items</Badge>
+            </div>
+            <ScrollArea className="flex-1">
+              <div className="px-6 py-4">
+                <Accordion type="multiple" defaultValue={project?.content.map(c => c.id)} className="space-y-2">
+                  {project?.content.map((item, idx) => {
+                    if (item instanceof Chapter) {
+                      const allSectionsSelected = item.sections.every(s => selectedContent.has(s.id));
+                      return (
+                        <AccordionItem value={item.id} key={item.id} className="border-none">
+                          <div className="flex items-center gap-3 group">
+                            <Checkbox
+                              checked={allSectionsSelected}
+                              onCheckedChange={() => handleToggleChapter(item.id)}
+                              id={`chapter-${item.id}`}
+                              className="h-4 w-4"
+                            />
+                            <AccordionTrigger className="flex-1 py-2 hover:no-underline">
+                              <div className="flex items-center gap-2">
+                                <span className="text-[9px] font-bold text-muted-foreground/60 w-4">{idx + 1}</span>
+                                <Label htmlFor={`chapter-${item.id}`} className="text-xs font-bold uppercase tracking-wider cursor-pointer group-hover:text-primary transition-colors">{item.title}</Label>
+                              </div>
+                            </AccordionTrigger>
+                          </div>
+                          <AccordionContent className="pl-10 space-y-1.5 pt-1 pb-3">
+                            {item.sections.map((section, sIdx) => (
+                              <div key={section.id} className="flex items-center gap-3 py-1 group/item">
+                                <Checkbox
+                                  checked={selectedContent.has(section.id)}
+                                  onCheckedChange={() => handleToggleSection(section.id)}
+                                  id={`section-${section.id}`}
+                                  className="h-3.5 w-3.5"
+                                />
+                                <Label htmlFor={`section-${section.id}`} className="text-[11px] font-medium cursor-pointer text-muted-foreground group-hover/item:text-foreground transition-colors">
+                                  <span className="text-[9px] mr-1.5 opacity-40">{idx + 1}.{sIdx + 1}</span>
+                                  {section.title}
+                                </Label>
+                              </div>
+                            ))}
+                          </AccordionContent>
+                        </AccordionItem>
+                      );
+                    }
+                    return null;
+                  })}
+                </Accordion>
+              </div>
             </ScrollArea>
           </div>
 
-          {/* Export Options */}
-          <Tabs defaultValue="docx" className="w-full">
-            <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="docx"><FileText className="me-2 h-4 w-4" /> Word (.docx)</TabsTrigger>
-              <TabsTrigger value="pptx"><Presentation className="me-2 h-4 w-4" /> PowerPoint (.pptx)</TabsTrigger>
-            </TabsList>
-            
-            <TabsContent value="docx" className="pt-6">
-              <div className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="template-select">Document Theme</Label>
-                  <Select value={selectedDocxTemplate} onValueChange={(value) => setSelectedDocxTemplate(value as DocxTemplateKey)}>
-                    <SelectTrigger id="template-select">
-                      <SelectValue placeholder="Select a theme" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {Object.keys(docxTemplates).map((key) => (
-                        <SelectItem key={key} value={key}>
-                          {docxTemplates[key as DocxTemplateKey].name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <Checkbox
-                    id="page-numbers"
-                    checked={includePageNumbers}
-                    onCheckedChange={(checked) => setIncludePageNumbers(!!checked)}
-                  />
-                  <Label htmlFor="page-numbers">Include Page Numbers</Label>
-                </div>
+          {/* Right: Export Options */}
+          <div className="md:col-span-7 flex flex-col min-h-0">
+            <Tabs defaultValue="docx" className="flex-1 flex flex-col min-h-0">
+              <div className="px-8 py-4 border-b bg-background">
+                <TabsList className="h-9 rounded-lg bg-muted/30 p-1 gap-1 w-full">
+                  <TabsTrigger value="docx" className="flex-1 gap-2 text-[10px] font-bold uppercase tracking-wider data-[state=active]:bg-background data-[state=active]:text-primary transition-all">
+                    <FileText className="h-3.5 w-3.5" /> Word Document
+                  </TabsTrigger>
+                  <TabsTrigger value="pptx" className="flex-1 gap-2 text-[10px] font-bold uppercase tracking-wider data-[state=active]:bg-background data-[state=active]:text-primary transition-all">
+                    <Presentation className="h-3.5 w-3.5" /> PowerPoint
+                  </TabsTrigger>
+                </TabsList>
               </div>
-              <DialogFooter className="mt-6">
-                <Button onClick={() => handleExportClick('docx')} disabled={isExporting || selectedContent.size === 0}>
-                  {isExporting ? <Loader2 className="me-2 h-4 w-4 animate-spin" /> : <FileText className="me-2 h-4 w-4" />}
-                  Export as DOCX ({selectedContent.size} items)
-                </Button>
-              </DialogFooter>
-            </TabsContent>
-            
-            <TabsContent value="pptx" className="pt-6">
-              <div className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="pptx-template-select">Presentation Theme</Label>
-                  <Select value={selectedPptxTemplate} onValueChange={(value) => setSelectedPptxTemplate(value as PptxTemplateKey)}>
-                    <SelectTrigger id="pptx-template-select">
-                      <SelectValue placeholder="Select a theme" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {Object.keys(pptxTemplates).map((key) => (
-                        <SelectItem key={key} value={key}>
-                          {pptxTemplates[key as PptxTemplateKey].name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <Checkbox
-                    id="include-toc"
-                    checked={includeToc}
-                    onCheckedChange={(checked) => setIncludeToc(!!checked)}
-                  />
-                  <Label htmlFor="include-toc">Include Table of Contents slide</Label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <Checkbox
-                    id="is-rtl"
-                    checked={isRtl}
-                    onCheckedChange={(checked) => setIsRtl(!!checked)}
-                  />
-                  <Label htmlFor="is-rtl">Enable Right-to-Left (RTL) text direction</Label>
-                </div>
+              
+              <div className="flex-1 overflow-auto bg-[#f8fafc] dark:bg-black/20 shadow-inner">
+                <TabsContent value="docx" className="m-0 p-8 space-y-8 animate-in fade-in duration-500">
+                  <div className="space-y-6">
+                    <div className="space-y-3">
+                      <Label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Document Identity & Theme</Label>
+                      <Select value={selectedDocxTemplate} onValueChange={(value) => setSelectedDocxTemplate(value as DocxTemplateKey)}>
+                        <SelectTrigger className="h-10 text-xs bg-background shadow-sm border-primary/10">
+                          <SelectValue placeholder="Select appearance" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {Object.keys(docxTemplates).map((key) => (
+                            <SelectItem key={key} value={key} className="text-xs">
+                              {docxTemplates[key as DocxTemplateKey].name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <p className="text-[10px] text-muted-foreground italic">Themes control fonts, colors, and layout structure of the generated Word file.</p>
+                    </div>
+
+                    <Separator className="bg-border/40" />
+
+                    <div className="space-y-4">
+                      <Label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Advanced Settings</Label>
+                      <div className="flex items-center space-x-3 p-3 rounded-lg border border-dashed bg-muted/5">
+                        <Checkbox
+                          id="page-numbers"
+                          checked={includePageNumbers}
+                          onCheckedChange={(checked) => setIncludePageNumbers(!!checked)}
+                          className="h-4 w-4"
+                        />
+                        <div className="space-y-0.5">
+                          <Label htmlFor="page-numbers" className="text-xs font-bold cursor-pointer">Page Numbering</Label>
+                          <p className="text-[10px] text-muted-foreground">Include footer pagination on all pages except the cover.</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="pt-8">
+                    <Button 
+                      onClick={() => handleExportClick('docx')} 
+                      disabled={isExporting || selectedContent.size === 0}
+                      className="w-full h-12 font-bold shadow-xl shadow-primary/20 gap-3 text-sm"
+                    >
+                      {isExporting ? <Loader2 className="h-5 w-5 animate-spin" /> : <FileText className="h-5 w-5" />}
+                      Initialize Word Production
+                    </Button>
+                  </div>
+                </TabsContent>
+                
+                <TabsContent value="pptx" className="m-0 p-8 space-y-8 animate-in fade-in duration-500">
+                  <div className="space-y-6">
+                    <div className="space-y-3">
+                      <Label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Presentation Style</Label>
+                      <Select value={selectedPptxTemplate} onValueChange={(value) => setSelectedPptxTemplate(value as PptxTemplateKey)}>
+                        <SelectTrigger className="h-10 text-xs bg-background shadow-sm border-primary/10">
+                          <SelectValue placeholder="Select style" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {Object.keys(pptxTemplates).map((key) => (
+                            <SelectItem key={key} value={key} className="text-xs">
+                              {pptxTemplates[key as PptxTemplateKey].name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <Separator className="bg-border/40" />
+
+                    <div className="space-y-4">
+                      <Label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Slide Configuration</Label>
+                      <div className="grid gap-3">
+                        <div className="flex items-center space-x-3 p-3 rounded-lg border border-dashed bg-muted/5">
+                          <Checkbox
+                            id="include-toc"
+                            checked={includeToc}
+                            onCheckedChange={(checked) => setIncludeToc(!!checked)}
+                            className="h-4 w-4"
+                          />
+                          <div className="space-y-0.5">
+                            <Label htmlFor="include-toc" className="text-xs font-bold cursor-pointer">Table of Contents</Label>
+                            <p className="text-[10px] text-muted-foreground">Automatically generate a roadmap slide.</p>
+                          </div>
+                        </div>
+                        <div className="flex items-center space-x-3 p-3 rounded-lg border border-dashed bg-muted/5">
+                          <Checkbox
+                            id="is-rtl"
+                            checked={isRtl}
+                            onCheckedChange={(checked) => setIsRtl(!!checked)}
+                            className="h-4 w-4"
+                          />
+                          <div className="space-y-0.5">
+                            <Label htmlFor="is-rtl" className="text-xs font-bold cursor-pointer">RTL Direction</Label>
+                            <p className="text-[10px] text-muted-foreground">Optimize slide layout for Arabic/RTL languages.</p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="pt-8">
+                    <Button 
+                      onClick={() => handleExportClick('pptx')} 
+                      disabled={isExporting || selectedContent.size === 0}
+                      className="w-full h-12 font-bold shadow-xl shadow-primary/20 gap-3 text-sm"
+                    >
+                      {isExporting ? <Loader2 className="h-5 w-5 animate-spin" /> : <Presentation className="h-5 w-5" />}
+                      Initialize PowerPoint Production
+                    </Button>
+                  </div>
+                </TabsContent>
               </div>
-              <DialogFooter className="mt-6">
-                <Button onClick={() => handleExportClick('pptx')} disabled={isExporting || selectedContent.size === 0}>
-                  {isExporting ? <Loader2 className="me-2 h-4 w-4 animate-spin" /> : <Presentation className="me-2 h-4 w-4" />}
-                  Export as PPTX ({selectedContent.size} items)
-                </Button>
-              </DialogFooter>
-            </TabsContent>
-          </Tabs>
+            </Tabs>
+          </div>
         </div>
 
-        <DialogFooter className="md:hidden">
-            <DialogClose asChild><Button variant="ghost">Cancel</Button></DialogClose>
-        </DialogFooter>
+        <footer className="px-8 py-4 border-t bg-muted/5 flex items-center justify-between">
+          <p className="text-[10px] text-muted-foreground font-medium uppercase tracking-widest">
+            Production Engine • V1.0 Stable
+          </p>
+          <div className="flex items-center gap-2">
+            <DialogClose asChild>
+              <Button variant="ghost" size="sm" className="text-[10px] font-bold uppercase tracking-wider h-8">
+                Cancel
+              </Button>
+            </DialogClose>
+          </div>
+        </footer>
       </DialogContent>
     </Dialog>
   );

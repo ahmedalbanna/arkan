@@ -112,16 +112,130 @@ export default function AnalystAgent() {
   const canAnalyze = !isGuest && !isProcessing && (user?.uid ? project?.meta?.author === user.uid : false);
 
   return (
-    <Card className="h-full flex flex-col">
-      <CardHeader><CardTitle className="flex items-center gap-2"><BrainCircuit className="h-5 w-5 text-primary" /> {t('builder.files.analystAgentTitle')}</CardTitle><CardDescription>{t('builder.files.analystAgentDesc')}</CardDescription></CardHeader>
-      <Form {...form}><form onSubmit={form.handleSubmit(onSubmit)} className="flex-grow flex flex-col min-h-0">
-        <CardContent className="space-y-4 flex-grow flex flex-col min-h-0">
-          <FormField control={form.control} name="prompt" render={({ field }) => <FormItem><FormLabel>{t('builder.files.analystAgentPromptLabel')}</FormLabel><FormControl><Textarea placeholder={t('builder.files.analystAgentPromptPlaceholder')} {...field} rows={4} disabled={isProcessing || isGuest} /></FormControl><FormMessage /></FormItem>} />
-          <Button type="submit" disabled={!canAnalyze || isGuest}>{isProcessing ? <Loader2 className="me-2 h-4 w-4 animate-spin" /> : <Wand2 className="me-2 h-4 w-4" />}{t('builder.files.analystAgentRunButton', { creditCost: 0 })}</Button>
-          {(isProcessing || markdownResult) && <div className="space-y-2 pt-4 border-t flex-grow flex flex-col min-h-0"><div className="flex justify-between items-center"><h4 className="font-semibold text-sm">{t('builder.files.generatedReportTitle')}</h4>{analysisMutation.data && <Dialog><DialogTrigger asChild><Button variant="ghost" size="sm"><Braces className="me-2 h-4 w-4" /> {t('builder.files.viewJsonButton')}</Button></DialogTrigger><DialogContent className="max-w-3xl"><DialogHeader><DialogTitle>{t('builder.files.jsonOutputTitle')}</DialogTitle></DialogHeader><ScrollArea className="max-h-[70vh] border rounded-md bg-muted text-xs p-2"><ReactJson src={analysisMutation.data.data} theme={resolvedTheme === 'dark' ? 'monokai' : 'rjv-default'} collapsed={false} displayDataTypes={false} name={false} /></ScrollArea></DialogContent></Dialog>}</div><ScrollArea className="flex-grow border rounded-md bg-muted/50 p-4"><div className="prose dark:prose-invert max-w-none prose-sm">{isProcessing ? <div className="flex items-center justify-center h-full"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div> : markdownResult ? <ReactMarkdown components={markdownComponents}>{markdownResult}</ReactMarkdown> : <p className="text-muted-foreground text-center py-10">{t('builder.files.reportPlaceholder')}</p>}</div></ScrollArea></div>}
-        </CardContent>
-        {markdownResult && !isProcessing && <CardFooter><Button variant="secondary" onClick={handleSaveAnalysis} disabled={!markdownResult}><PlusCircle className="me-2 h-4 w-4" />{t('builder.files.saveResultButton')}</Button></CardFooter>}
-      </form></Form>
-    </Card>
+    <div className="h-full flex flex-col space-y-6">
+      <div className="space-y-1.5">
+        <h4 className="text-sm font-semibold tracking-tight flex items-center gap-2">
+          <BrainCircuit className="h-4 w-4 text-primary" />
+          {t('builder.files.analystAgentTitle')}
+        </h4>
+        <p className="text-[11px] text-muted-foreground italic leading-relaxed">
+          {t('builder.files.analystAgentDesc')}
+        </p>
+      </div>
+
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(onSubmit)} className="flex-grow flex flex-col min-h-0 space-y-6">
+          <div className="space-y-4 flex-shrink-0">
+            <FormField 
+              control={form.control} 
+              name="prompt" 
+              render={({ field }) => (
+                <FormItem className="space-y-2">
+                  <FormLabel className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+                    {t('builder.files.analystAgentPromptLabel')}
+                  </FormLabel>
+                  <FormControl>
+                    <Textarea 
+                      placeholder={t('builder.files.analystAgentPromptPlaceholder')} 
+                      {...field} 
+                      rows={4} 
+                      disabled={isProcessing || isGuest} 
+                      className="text-xs bg-muted/5 focus-visible:ring-1 resize-none p-3 leading-relaxed"
+                    />
+                  </FormControl>
+                  <FormMessage className="text-[10px]" />
+                </FormItem>
+              )} 
+            />
+            
+            <Button 
+              type="submit" 
+              disabled={!canAnalyze || isGuest} 
+              className="w-full font-bold h-10 gap-2 shadow-sm"
+            >
+              {isProcessing ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <Wand2 className="h-4 w-4" />
+              )}
+              {t('builder.files.analystAgentRunButton', { creditCost: 0 })}
+            </Button>
+          </div>
+
+          {(isProcessing || markdownResult) && (
+            <div className="flex-grow flex flex-col min-h-0 space-y-3 pt-4 border-t border-border/40">
+              <div className="flex justify-between items-center">
+                <div className="flex items-center gap-2">
+                  <Braces className="h-3.5 w-3.5 text-primary" />
+                  <h4 className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+                    {t('builder.files.generatedReportTitle')}
+                  </h4>
+                </div>
+                
+                {analysisMutation.data && (
+                  <Dialog>
+                    <DialogTrigger asChild>
+                      <Button variant="ghost" size="sm" className="h-7 text-[10px] gap-1.5 px-2">
+                        <Braces className="h-3 w-3" /> 
+                        JSON
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent className="max-w-3xl">
+                      <DialogHeader>
+                        <DialogTitle className="text-base font-bold">{t('builder.files.jsonOutputTitle')}</DialogTitle>
+                      </DialogHeader>
+                      <ScrollArea className="max-h-[60vh] border rounded-lg bg-muted/30 p-4 shadow-inner">
+                        <ReactJson 
+                          src={analysisMutation.data.data} 
+                          theme={resolvedTheme === 'dark' ? 'monokai' : 'rjv-default'} 
+                          collapsed={false} 
+                          displayDataTypes={false} 
+                          name={false}
+                          style={{ fontSize: '11px', background: 'transparent' }}
+                        />
+                      </ScrollArea>
+                    </DialogContent>
+                  </Dialog>
+                )}
+              </div>
+
+              <div className="flex-grow relative min-h-0">
+                <ScrollArea className="h-full border rounded-xl bg-muted/5 p-4 shadow-inner">
+                  <div className="prose dark:prose-invert max-w-none prose-sm text-xs leading-relaxed">
+                    {isProcessing ? (
+                      <div className="flex flex-col items-center justify-center h-full py-12 space-y-3 opacity-50">
+                        <Loader2 className="h-8 w-8 animate-spin text-primary/40" />
+                        <p className="text-[10px] uppercase tracking-widest font-bold">Analyzing Context</p>
+                      </div>
+                    ) : markdownResult ? (
+                      <ReactMarkdown components={markdownComponents}>{markdownResult}</ReactMarkdown>
+                    ) : (
+                      <div className="flex flex-col items-center justify-center h-full py-12 text-center opacity-40">
+                        <BrainCircuit className="h-10 w-10 mb-3" />
+                        <p className="text-[10px] uppercase tracking-widest font-bold">{t('builder.files.reportPlaceholder')}</p>
+                      </div>
+                    )}
+                  </div>
+                </ScrollArea>
+                
+                {markdownResult && !isProcessing && (
+                  <div className="absolute bottom-4 right-4 animate-in fade-in slide-in-from-bottom-2 duration-300">
+                    <Button 
+                      variant="secondary" 
+                      size="sm"
+                      onClick={handleSaveAnalysis} 
+                      className="shadow-lg gap-2 font-bold h-8 border bg-background/80 backdrop-blur-sm"
+                    >
+                      <PlusCircle className="h-3.5 w-3.5 text-primary" />
+                      {t('builder.files.saveResultButton')}
+                    </Button>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+        </form>
+      </Form>
+    </div>
   );
 }

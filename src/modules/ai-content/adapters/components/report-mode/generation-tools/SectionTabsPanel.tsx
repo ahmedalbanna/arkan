@@ -12,6 +12,7 @@ import { Link as LinkIcon, Loader2, SlidersHorizontal, Sparkles, StickyNote } fr
 import { SectionContextSelector } from '../section-controls/SectionContextSelector';
 import { SectionGenerationControls } from '../section-controls/SectionGenerationControls';
 import { GuidelineEditor } from '../section-controls/SectionGuidelineEditor';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 interface SectionTabsPanelProps {
   section: Section | null;
@@ -25,8 +26,16 @@ export function SectionTabsPanel({ section, className }: SectionTabsPanelProps) 
 
   if (!section) {
     return (
-      <div className={cn("flex h-full items-center justify-center rounded-lg border bg-muted/10 p-6 text-sm text-muted-foreground", className)}>
-        Select a section to edit its controls, prompt, and context.
+      <div className={cn("flex h-full flex-col items-center justify-center space-y-4 text-center p-8", className)}>
+        <div className="h-12 w-12 rounded-full bg-muted/20 flex items-center justify-center">
+          <Sparkles className="h-6 w-6 text-muted-foreground/40" />
+        </div>
+        <div className="space-y-1">
+          <h4 className="text-xs font-bold uppercase tracking-widest text-muted-foreground">No Section Active</h4>
+          <p className="text-[11px] text-muted-foreground/60 italic leading-relaxed">
+            Select a section from the chapter list to begin configuring its AI parameters.
+          </p>
+        </div>
       </div>
     );
   }
@@ -43,23 +52,28 @@ export function SectionTabsPanel({ section, className }: SectionTabsPanelProps) 
   }
 
   return (
-    <div className={cn("h-full rounded-lg border bg-background shadow-sm flex flex-col", className)}>
-      <div className="border-b px-4 py-4 bg-muted/10">
-        <div className="flex items-center justify-between gap-3">
-          <div className="min-w-0">
-            <p className="text-xs text-muted-foreground">Active Section</p>
-            <h3 className="text-sm font-semibold truncate">{section.title}</h3>
+    <div className={cn("h-full flex flex-col min-h-0", className)}>
+      <div className="px-4 pb-6 pt-2">
+        <div className="flex flex-col gap-4">
+          <div className="space-y-1 min-w-0">
+            <span className="text-[10px] font-bold uppercase tracking-widest text-primary/60">Active Context</span>
+            <h3 className="text-base font-bold font-headline truncate tracking-tight">{section.title}</h3>
           </div>
+
           <TooltipProvider>
             <Tooltip>
               <TooltipTrigger asChild>
-                <Button onClick={handleGenerateClick} disabled={!canGenerate} size="sm">
-                  {isGenerating ? <Loader2 className="me-2 h-4 w-4 animate-spin" /> : <Sparkles className="me-2 h-4 w-4" />}
+                <Button
+                  onClick={handleGenerateClick}
+                  disabled={!canGenerate}
+                  className="w-full font-bold h-10 gap-2 shadow-lg shadow-primary/20 animate-in fade-in slide-in-from-bottom-2 duration-500"
+                >
+                  {isGenerating ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
                   {t('builder.reportGenerator.generateButton')}
                 </Button>
               </TooltipTrigger>
               {!canGenerate && (
-                <TooltipContent>
+                <TooltipContent side="bottom" className="text-[10px]">
                   <p>{isAnythingGenerating ? "Another generation is in progress." : "Insufficient credits."}</p>
                 </TooltipContent>
               )}
@@ -67,56 +81,56 @@ export function SectionTabsPanel({ section, className }: SectionTabsPanelProps) 
           </TooltipProvider>
         </div>
       </div>
-      <Tabs defaultValue="controls" className="w-full flex-1 flex flex-col">
-        <div className="px-4 pt-4">
+
+      <Tabs defaultValue="context" className="w-full flex-1 flex flex-col min-h-0">
+        <div className="px-4">
           <TooltipProvider>
-            <TabsList className="grid w-full grid-cols-3 rounded-lg bg-muted/20 p-1 gap-1">
+            <TabsList className="grid w-full grid-cols-3 h-9 rounded-lg bg-muted/30 p-1 gap-1">
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <TabsTrigger value="controls" className="gap-2 text-[11px] sm:text-xs font-medium data-[state=active]:bg-background data-[state=active]:shadow-sm px-2">
-                    <SlidersHorizontal className="h-4 w-4 shrink-0" />
-                    <span className="truncate">Controls</span>
+                  <TabsTrigger value="context" className="gap-2 text-[10px] font-bold uppercase tracking-wider data-[state=active]:bg-background data-[state=active]:text-primary px-2 transition-all">
+                    <LinkIcon className="h-3.5 w-3.5 shrink-0" />
+                    <span className="truncate">Context</span>
                   </TabsTrigger>
                 </TooltipTrigger>
-                <TooltipContent><p>Controls</p></TooltipContent>
+                <TooltipContent side="bottom" className="text-[10px]"><p>Data Sources</p></TooltipContent>
               </Tooltip>
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <TabsTrigger value="prompt" className="gap-2 text-[11px] sm:text-xs font-medium data-[state=active]:bg-background data-[state=active]:shadow-sm px-2">
-                    <StickyNote className="h-4 w-4 shrink-0" />
+                  <TabsTrigger value="prompt" className="gap-2 text-[10px] font-bold uppercase tracking-wider data-[state=active]:bg-background data-[state=active]:text-primary px-2 transition-all">
+                    <StickyNote className="h-3.5 w-3.5 shrink-0" />
                     <span className="truncate">Prompt</span>
                   </TabsTrigger>
                 </TooltipTrigger>
-                <TooltipContent><p>Edit Prompt</p></TooltipContent>
+                <TooltipContent side="bottom" className="text-[10px]"><p>Guidelines</p></TooltipContent>
               </Tooltip>
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <TabsTrigger value="context" className="gap-2 text-[11px] sm:text-xs font-medium data-[state=active]:bg-background data-[state=active]:shadow-sm px-2">
-                    <LinkIcon className="h-4 w-4 shrink-0" />
-                    <span className="truncate">{t('builder.reportGenerator.tool_tab_context')}</span>
+                  <TabsTrigger value="controls" className="gap-2 text-[10px] font-bold uppercase tracking-wider data-[state=active]:bg-background data-[state=active]:text-primary px-2 transition-all">
+                    <SlidersHorizontal className="h-3.5 w-3.5 shrink-0" />
+                    <span className="truncate">Output</span>
                   </TabsTrigger>
                 </TooltipTrigger>
-                <TooltipContent><p>{t('builder.reportGenerator.tool_tab_context')}</p></TooltipContent>
+                <TooltipContent side="bottom" className="text-[10px]"><p>Parameters</p></TooltipContent>
               </Tooltip>
             </TabsList>
           </TooltipProvider>
         </div>
-        <div className="px-4 flex-1 overflow-auto">
-          <TabsContent value="controls" className="py-4">
-            <div className="rounded-lg border bg-card p-4 sm:p-5">
-              <SectionGenerationControls section={section} />
+
+        <div className="flex-1 overflow-hidden relative mt-2">
+          <ScrollArea className="h-full px-4 pr-4 -mr-4">
+            <div className="pb-20 pt-4">
+              <TabsContent value="context" className="m-0 focus-visible:ring-0">
+                 <SectionContextSelector sectionId={section.id} />
+              </TabsContent>
+              <TabsContent value="prompt" className="m-0 focus-visible:ring-0">
+                 <GuidelineEditor itemKey={section.id} />
+              </TabsContent>
+              <TabsContent value="controls" className="m-0 focus-visible:ring-0">
+                 <SectionGenerationControls section={section} />
+              </TabsContent>
             </div>
-          </TabsContent>
-          <TabsContent value="prompt" className="py-4">
-            <div className="rounded-lg border bg-card p-4 sm:p-5">
-              <GuidelineEditor itemKey={section.id} />
-            </div>
-          </TabsContent>
-          <TabsContent value="context" className="py-4">
-            <div className="rounded-lg border bg-card p-4 sm:p-5">
-              <SectionContextSelector sectionId={section.id} />
-            </div>
-          </TabsContent>
+          </ScrollArea>
         </div>
       </Tabs>
     </div>

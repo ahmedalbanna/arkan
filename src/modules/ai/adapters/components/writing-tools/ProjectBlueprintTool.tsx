@@ -1,7 +1,7 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -10,8 +10,11 @@ import { Textarea } from '@/components/ui/textarea';
 import { useLocalization } from '@/context/LocalizationContext';
 import { useProjectBlueprintLogic } from '@/modules/ai/adapters/hooks/writing-tools/use-project-blueprint-logic';
 import { markdownComponents } from '@/modules/ai-content/adapters/components/report-mode/markdown-styles';
-import { Check, Copy, Loader2, Building2, Download, FileText } from 'lucide-react';
+import { Check, Copy, Loader2, Building2, Download, Layout, Target, Zap, Clock, Sparkles } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
+import { Separator } from '@/components/ui/separator';
+import { Badge } from '@/components/ui/badge';
+import { cn } from '@/infrastructure/utils/cn';
 
 export function ProjectBlueprintTool() {
   const { t } = useLocalization();
@@ -25,234 +28,206 @@ export function ProjectBlueprintTool() {
     handleDownload,
   } = useProjectBlueprintLogic();
 
-  const { register, setValue, watch, formState: { errors } } = form;
-  const complexityValue = watch('complexity');
+  const { register, setValue, formState: { errors } } = form;
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-      {/* Input Form */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Building2 className="w-5 h-5" />
-            {t('writingTools.projectBlueprint.cardTitle')}
-          </CardTitle>
-          <CardDescription>{t('writingTools.projectBlueprint.cardDescription')}</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-            
-            {/* Project Name */}
-            <div className="space-y-2">
-              <Label htmlFor="projectName">{t('writingTools.projectBlueprint.projectNameLabel')}</Label>
-              <Input
-                id="projectName"
-                {...register('projectName')}
-                placeholder={t('writingTools.projectBlueprint.projectNamePlaceholder')}
-              />
-              {errors.projectName && (
-                <p className="text-sm text-destructive">{errors.projectName.message}</p>
-              )}
-            </div>
+    <Card className="max-w-[1600px] mx-auto border-none shadow-2xl shadow-primary/5 bg-card overflow-hidden rounded-[32px]">
+      <header className="px-8 py-10 border-b bg-muted/5 text-center space-y-2">
+        <h2 className="text-2xl font-bold font-headline tracking-tight">{t('writingTools.projectBlueprint.cardTitle')}</h2>
+        <p className="text-xs text-muted-foreground italic max-w-md mx-auto leading-relaxed">{t('writingTools.projectBlueprint.cardDescription')}</p>
+      </header>
 
-            {/* Project Type */}
-            <div className="space-y-2">
-              <Label htmlFor="projectType">{t('writingTools.projectBlueprint.projectTypeLabel')}</Label>
-              <Select onValueChange={(value) => setValue('projectType', value)}>
-                <SelectTrigger>
-                  <SelectValue placeholder={t('writingTools.projectBlueprint.projectTypePlaceholder')} />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="web-application">Web Application</SelectItem>
-                  <SelectItem value="mobile-app">Mobile App</SelectItem>
-                  <SelectItem value="e-commerce">E-commerce Platform</SelectItem>
-                  <SelectItem value="portfolio">Portfolio Website</SelectItem>
-                  <SelectItem value="blog">Blog/Content Site</SelectItem>
-                  <SelectItem value="saas">SaaS Platform</SelectItem>
-                  <SelectItem value="api">API/Backend Service</SelectItem>
-                  <SelectItem value="desktop-app">Desktop Application</SelectItem>
-                  <SelectItem value="game">Game/Interactive App</SelectItem>
-                  <SelectItem value="other">Other</SelectItem>
-                </SelectContent>
-              </Select>
-              {errors.projectType && (
-                <p className="text-sm text-destructive">{errors.projectType.message}</p>
-              )}
-            </div>
+      <CardContent className="p-0 flex flex-col lg:flex-row min-h-[850px]">
+        {/* Setup Zone (Left) */}
+        <div className="lg:w-[450px] border-r border-border/40 bg-muted/5 flex flex-col min-h-0">
+            <ScrollArea className="flex-1">
+                <div className="p-8 space-y-10">
+                    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-10">
+                        <div className="space-y-8">
+                            <div className="space-y-4">
+                                <Label className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground/60 ml-1 flex items-center gap-2">
+                                    <Layout className="h-3 w-3 text-primary" />
+                                    Core Identity
+                                </Label>
+                                <div className="grid gap-4">
+                                    <div className="space-y-2">
+                                        <Input
+                                            id="projectName"
+                                            {...register('projectName')}
+                                            placeholder="System Title / Name"
+                                            className="h-10 text-xs bg-background shadow-sm border-none ring-1 ring-border/40 focus-visible:ring-primary/40 rounded-xl"
+                                        />
+                                        {errors.projectName && <p className="text-[9px] font-bold text-destructive uppercase tracking-widest px-2">{errors.projectName.message}</p>}
+                                    </div>
+                                    <Select onValueChange={(value) => setValue('projectType', value)}>
+                                        <SelectTrigger className="h-10 text-xs bg-background shadow-sm border-none ring-1 ring-border/40 focus-visible:ring-primary/40 rounded-xl">
+                                            <SelectValue placeholder="Solution Category" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="web-application" className="text-xs">Web Application</SelectItem>
+                                            <SelectItem value="mobile-app" className="text-xs">Mobile App</SelectItem>
+                                            <SelectItem value="e-commerce" className="text-xs">E-commerce Platform</SelectItem>
+                                            <SelectItem value="saas" className="text-xs">SaaS Platform</SelectItem>
+                                            <SelectItem value="api" className="text-xs">API Service</SelectItem>
+                                            <SelectItem value="other" className="text-xs">Specialized Other</SelectItem>
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+                            </div>
 
-            {/* Project Description */}
-            <div className="space-y-2">
-              <Label htmlFor="description">{t('writingTools.projectBlueprint.descriptionLabel')}</Label>
-              <Textarea
-                id="description"
-                {...register('description')}
-                rows={4}
-                placeholder={t('writingTools.projectBlueprint.descriptionPlaceholder')}
-                className="resize-none"
-              />
-              {errors.description && (
-                <p className="text-sm text-destructive">{errors.description.message}</p>
-              )}
-            </div>
+                            <Separator className="bg-border/40" />
 
-            {/* Target Audience */}
-            <div className="space-y-2">
-              <Label htmlFor="targetAudience">{t('writingTools.projectBlueprint.targetAudienceLabel')}</Label>
-              <Textarea
-                id="targetAudience"
-                {...register('targetAudience')}
-                rows={3}
-                placeholder={t('writingTools.projectBlueprint.targetAudiencePlaceholder')}
-                className="resize-none"
-              />
-              {errors.targetAudience && (
-                <p className="text-sm text-destructive">{errors.targetAudience.message}</p>
-              )}
-            </div>
+                            <div className="space-y-4">
+                                <Label className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground/60 ml-1 flex items-center gap-2">
+                                    <Target className="h-3 w-3 text-primary" />
+                                    Mission & Objectives
+                                </Label>
+                                <div className="space-y-4">
+                                    <Textarea
+                                        id="description"
+                                        {...register('description')}
+                                        rows={3}
+                                        placeholder="Define the primary problem and solution..."
+                                        className="text-xs bg-background shadow-inner focus-visible:ring-1 resize-none p-4 leading-relaxed rounded-2xl border-dashed"
+                                    />
+                                    <Textarea
+                                        id="targetAudience"
+                                        {...register('targetAudience')}
+                                        rows={2}
+                                        placeholder="Identify key stakeholders and end-users..."
+                                        className="text-xs bg-background shadow-inner focus-visible:ring-1 resize-none p-4 leading-relaxed rounded-2xl border-dashed"
+                                    />
+                                </div>
+                            </div>
 
-            {/* Complexity */}
-            <div className="space-y-2">
-              <Label>{t('writingTools.projectBlueprint.complexityLabel')}</Label>
-              <Select onValueChange={(value) => setValue('complexity', value as any)}>
-                <SelectTrigger>
-                  <SelectValue placeholder={t('writingTools.projectBlueprint.complexityPlaceholder')} />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="Simple">Simple (Basic functionality)</SelectItem>
-                  <SelectItem value="Medium">Medium (Standard features)</SelectItem>
-                  <SelectItem value="Complex">Complex (Advanced features)</SelectItem>
-                  <SelectItem value="Enterprise">Enterprise (Full-scale system)</SelectItem>
-                </SelectContent>
-              </Select>
-              {errors.complexity && (
-                <p className="text-sm text-destructive">{errors.complexity.message}</p>
-              )}
-            </div>
+                            <Separator className="bg-border/40" />
 
-            {/* Features */}
-            <div className="space-y-2">
-              <Label htmlFor="features">{t('writingTools.projectBlueprint.featuresLabel')}</Label>
-              <Textarea
-                id="features"
-                {...register('features')}
-                rows={4}
-                placeholder={t('writingTools.projectBlueprint.featuresPlaceholder')}
-                className="resize-none"
-              />
-              {errors.features && (
-                <p className="text-sm text-destructive">{errors.features.message}</p>
-              )}
-            </div>
+                            <div className="space-y-4">
+                                <Label className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground/60 ml-1 flex items-center gap-2">
+                                    <Zap className="h-3 w-3 text-primary" />
+                                    Technical Architecture
+                                </Label>
+                                <div className="space-y-4">
+                                    <Select onValueChange={(value) => setValue('complexity', value as any)}>
+                                        <SelectTrigger className="h-10 text-xs bg-background shadow-sm border-none ring-1 ring-border/40 focus-visible:ring-primary/40 rounded-xl">
+                                            <SelectValue placeholder="Complexity Level" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="Simple" className="text-xs">Standard (MVP Focus)</SelectItem>
+                                            <SelectItem value="Medium" className="text-xs">Advanced (Full Scale)</SelectItem>
+                                            <SelectItem value="Complex" className="text-xs">High Performance</SelectItem>
+                                            <SelectItem value="Enterprise" className="text-xs">Enterprise Ecosystem</SelectItem>
+                                        </SelectContent>
+                                    </Select>
+                                    <Textarea
+                                        id="features"
+                                        {...register('features')}
+                                        rows={3}
+                                        placeholder="List critical capabilities and requirements..."
+                                        className="text-xs bg-background shadow-inner focus-visible:ring-1 resize-none p-4 leading-relaxed rounded-2xl border-dashed"
+                                    />
+                                </div>
+                            </div>
 
-            {/* Tech Stack (Optional) */}
-            <div className="space-y-2">
-              <Label htmlFor="techStack">{t('writingTools.projectBlueprint.techStackLabel')}</Label>
-              <Textarea
-                id="techStack"
-                {...register('techStack')}
-                rows={2}
-                placeholder={t('writingTools.projectBlueprint.techStackPlaceholder')}
-                className="resize-none"
-              />
-            </div>
+                            <Separator className="bg-border/40" />
 
-            {/* Budget (Optional) */}
-            <div className="space-y-2">
-              <Label htmlFor="budget">{t('writingTools.projectBlueprint.budgetLabel')}</Label>
-              <Select onValueChange={(value) => setValue('budget', value)}>
-                <SelectTrigger>
-                  <SelectValue placeholder={t('writingTools.projectBlueprint.budgetPlaceholder')} />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="under-5k">Under $5,000</SelectItem>
-                  <SelectItem value="5k-15k">$5,000 - $15,000</SelectItem>
-                  <SelectItem value="15k-50k">$15,000 - $50,000</SelectItem>
-                  <SelectItem value="50k-100k">$50,000 - $100,000</SelectItem>
-                  <SelectItem value="over-100k">Over $100,000</SelectItem>
-                  <SelectItem value="not-specified">Not Specified</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
+                            <div className="space-y-4">
+                                <Label className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground/60 ml-1 flex items-center gap-2">
+                                    <Clock className="h-3 w-3 text-primary" />
+                                    Strategic Timeline
+                                </Label>
+                                <div className="grid grid-cols-2 gap-3">
+                                    <Select onValueChange={(value) => setValue('budget', value)}>
+                                        <SelectTrigger className="h-9 text-xs bg-background ring-1 ring-border/40 border-none rounded-lg">
+                                            <SelectValue placeholder="Budget" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="under-5k" className="text-xs">Tier 1</SelectItem>
+                                            <SelectItem value="5k-15k" className="text-xs">Tier 2</SelectItem>
+                                            <SelectItem value="15k-50k" className="text-xs">Tier 3</SelectItem>
+                                            <SelectItem value="over-50k" className="text-xs">Tier 4</SelectItem>
+                                        </SelectContent>
+                                    </Select>
+                                    <Select onValueChange={(value) => setValue('timeline', value)}>
+                                        <SelectTrigger className="h-9 text-xs bg-background ring-1 ring-border/40 border-none rounded-lg">
+                                            <SelectValue placeholder="Timeline" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="1-month" className="text-xs">Agile</SelectItem>
+                                            <SelectItem value="3-months" className="text-xs">Quarterly</SelectItem>
+                                            <SelectItem value="6-months" className="text-xs">Strategic</SelectItem>
+                                            <SelectItem value="flexible" className="text-xs">Flexible</SelectItem>
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+                            </div>
+                        </div>
 
-            {/* Timeline (Optional) */}
-            <div className="space-y-2">
-              <Label htmlFor="timeline">{t('writingTools.projectBlueprint.timelineLabel')}</Label>
-              <Select onValueChange={(value) => setValue('timeline', value)}>
-                <SelectTrigger>
-                  <SelectValue placeholder={t('writingTools.projectBlueprint.timelinePlaceholder')} />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="1-month">1 Month</SelectItem>
-                  <SelectItem value="2-3-months">2-3 Months</SelectItem>
-                  <SelectItem value="3-6-months">3-6 Months</SelectItem>
-                  <SelectItem value="6-12-months">6-12 Months</SelectItem>
-                  <SelectItem value="over-1-year">Over 1 Year</SelectItem>
-                  <SelectItem value="flexible">Flexible Timeline</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            <Button 
-              type="submit" 
-              disabled={generateMutation.isPending} 
-              className="w-full"
-              size="lg"
-            >
-              {generateMutation.isPending ? (
-                <Loader2 className="me-2 h-4 w-4 animate-spin" />
-              ) : (
-                <Building2 className="me-2 h-4 w-4" />
-              )}
-              {t('writingTools.projectBlueprint.buttonText')}
-            </Button>
-          </form>
-        </CardContent>
-      </Card>
-
-      {/* Output */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex justify-between items-center">
-            <span className="flex items-center gap-2">
-              <FileText className="w-5 h-5" />
-              {t('writingTools.projectBlueprint.blueprintLabel')}
-            </span>
-            {blueprint && (
-              <div className="flex gap-2">
-                <Button variant="ghost" size="icon" onClick={handleCopy} title="Copy blueprint">
-                  {isCopied ? <Check className="h-4 w-4 text-green-500" /> : <Copy className="h-4 w-4" />}
-                </Button>
-                <Button variant="ghost" size="icon" onClick={handleDownload} title="Download blueprint">
-                  <Download className="h-4 w-4" />
-                </Button>
-              </div>
-            )}
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <ScrollArea className="h-[600px] rounded-md border p-4 bg-muted/30">
-            {generateMutation.isPending ? (
-              <div className="flex flex-col items-center justify-center h-full space-y-4">
-                <Loader2 className="h-8 w-8 animate-spin text-primary" />
-                <p className="text-sm text-muted-foreground text-center">
-                  {t('writingTools.projectBlueprint.processingMessage')}
-                </p>
-              </div>
-            ) : blueprint ? (
-              <div className="prose dark:prose-invert max-w-none text-sm">
-                <ReactMarkdown components={markdownComponents}>{blueprint}</ReactMarkdown>
-              </div>
-            ) : (
-              <div className="flex items-center justify-center h-full text-muted-foreground">
-                <div className="text-center">
-                  <Building2 className="w-12 h-12 mx-auto mb-4" />
-                  <p>{t('writingTools.projectBlueprint.emptyState')}</p>
+                        <Button type="submit" disabled={generateMutation.isPending} className="w-full h-12 font-bold shadow-xl shadow-primary/20 gap-3 rounded-xl active:scale-[0.98] transition-all">
+                            {generateMutation.isPending ? <Loader2 className="h-5 w-5 animate-spin" /> : <Building2 className="h-5 w-5" />}
+                            Initialize Blueprint
+                        </Button>
+                    </form>
                 </div>
-              </div>
-            )}
-          </ScrollArea>
-        </CardContent>
-      </Card>
-    </div>
+            </ScrollArea>
+        </div>
+
+        {/* Results Canvas (Right) */}
+        <div className="flex-1 flex flex-col min-h-0 bg-background relative overflow-hidden">
+            <div className="absolute inset-0 bg-[#f8fafc] dark:bg-black/20 pointer-events-none shadow-inner">
+                <div className="absolute inset-0 opacity-[0.03] dark:opacity-[0.05]" style={{ backgroundImage: 'radial-gradient(#000 1px, transparent 1px)', backgroundSize: '24px 24px' }} />
+            </div>
+
+            <div className="relative flex-1 flex flex-col min-h-0 p-8 md:p-12">
+                {(generateMutation.isPending || blueprint) ? (
+                    <div className="flex flex-col h-full space-y-6 animate-in fade-in duration-700">
+                        <div className="flex justify-between items-center px-1 sticky top-0 z-10">
+                            <div className="flex items-center gap-3">
+                                <div className="h-2 w-2 rounded-full bg-primary animate-pulse" />
+                                <h3 className="text-[10px] font-bold uppercase tracking-[0.3em] text-muted-foreground">Constructed Architecture Blueprint</h3>
+                            </div>
+                            
+                            <div className="flex items-center gap-2">
+                                <Button variant="ghost" size="icon" onClick={handleCopy} className="h-8 w-8 rounded-lg hover:bg-primary/10 hover:text-primary transition-all">
+                                    {isCopied ? <Check className="h-4 w-4 text-green-500" /> : <Copy className="h-4 w-4" />}
+                                </Button>
+                                <Button variant="ghost" size="icon" onClick={handleDownload} className="h-8 w-8 rounded-lg hover:bg-primary/10 hover:text-primary transition-all">
+                                    <Download className="h-4 w-4" />
+                                </Button>
+                            </div>
+                        </div>
+
+                        <ScrollArea className="flex-1 rounded-[32px] border bg-card p-10 md:p-16 shadow-2xl relative group">
+                            {generateMutation.isPending ? (
+                                <div className="flex flex-col items-center justify-center h-full space-y-4 opacity-40">
+                                    <Loader2 className="h-12 w-12 animate-spin text-primary" />
+                                    <p className="text-[10px] font-bold uppercase tracking-[0.2em]">Executing Architectural Synthesis</p>
+                                </div>
+                            ) : (
+                                <div className="prose dark:prose-invert max-w-none text-[15px] leading-relaxed font-serif selection:bg-primary/10">
+                                    <ReactMarkdown components={markdownComponents}>{blueprint}</ReactMarkdown>
+                                </div>
+                            )}
+                            <div className="mt-16 pt-8 border-t border-border/40 flex justify-between items-center text-[9px] text-muted-foreground/40 font-bold uppercase tracking-widest">
+                                <span>Arkan Architecture Engine</span>
+                                <span>CONFIDENTIAL SCHEMA</span>
+                            </div>
+                        </ScrollArea>
+                    </div>
+                ) : (
+                    <div className="flex flex-col items-center justify-center h-full py-12 text-center opacity-40 space-y-4">
+                        <div className="h-20 w-20 rounded-[32px] border-2 border-dashed border-primary/40 flex items-center justify-center">
+                            <Building2 className="h-10 w-10 text-primary/60" />
+                        </div>
+                        <div className="space-y-1">
+                            <h3 className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Architectural Canvas Ready</h3>
+                            <p className="text-[11px] italic max-w-xs mx-auto leading-relaxed">Define the solution identity and mission parameters on the left to begin synthesis.</p>
+                        </div>
+                    </div>
+                )}
+            </div>
+        </div>
+      </CardContent>
+    </Card>
   );
 }

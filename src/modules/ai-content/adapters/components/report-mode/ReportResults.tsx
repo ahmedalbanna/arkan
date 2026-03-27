@@ -18,6 +18,9 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/component
 import { formatDistanceToNow } from 'date-fns';
 import { Button } from '@/components/ui/button';
 import { FileContentViewer } from './file-manager/FileContentViewer';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { Separator } from '@/components/ui/separator';
+import { SessionActions } from './session/SessionActions';
 
 const ReportSteps = () => {
   const { t } = useLocalization();
@@ -88,7 +91,7 @@ const ReportResults = ({ activePanelKey }: ReportResultsProps) => {
   const handleContentChange = (newMarkdown: string) => {
     updateProjectFromMarkdown(newMarkdown);
   };
-  
+
   const hasContent = project?.content && project.content.length > 0;
 
   // Logic for suggestions
@@ -155,48 +158,50 @@ const ReportResults = ({ activePanelKey }: ReportResultsProps) => {
   }
 
   return (
-    <div className="h-full flex flex-col overflow-hidden rounded-lg border bg-card text-card-foreground shadow-sm">
-      <Collapsible open={isSuggestionVisible} onOpenChange={setIsSuggestionVisible} className="border-b border-border/60">
-        <CollapsibleTrigger asChild>
-            <div className="flex items-center justify-between p-5 cursor-pointer bg-muted/30 hover:bg-muted/40">
-                <div>
-                    <CardTitle className="font-headline text-base font-semibold tracking-tight">
-                      {t('builder.reportGenerator.resultsTitle')}
-                    </CardTitle>
-                    <CardDescription className="text-xs">
-                      {t('builder.reportGenerator.resultsDesc')}
-                    </CardDescription>
-                </div>
-                <Button variant="ghost" size="sm" className="shrink-0">
-                    <ChevronDown className={`h-4 w-4 transition-transform ${isSuggestionVisible ? '' : '-rotate-90'}`} />
-                    <span className="sr-only">Toggle suggestions</span>
-                </Button>
-            </div>
-        </CollapsibleTrigger>
-        <CollapsibleContent>
-            <div className="p-5 border-t border-border/60 bg-muted/20 space-y-2">
-                <div className="flex items-center gap-2 text-sm">
-                    <Lightbulb className="h-4 w-4 text-yellow-500" />
-                    <span className="font-semibold">Suggestion:</span>
-                    <span className="text-muted-foreground">{suggestion}</span>
-                </div>
-                {project?.meta.updated && (
-                    <div className="flex items-center gap-2 text-sm">
-                        <History className="h-4 w-4 text-blue-500" />
-                        <span className="font-semibold">Last operation:</span>
-                        <span className="text-muted-foreground">
-                            Project updated {formatDistanceToNow(new Date(project.meta.updated), { addSuffix: true })}
-                        </span>
-                    </div>
-                )}
-            </div>
-        </CollapsibleContent>
-      </Collapsible>
+    <div className="h-full flex flex-col overflow-hidden rounded-xl border bg-card text-card-foreground shadow-md transition-all duration-500">
+      {/* Document View Status Toolbar */}
+      <div className="flex items-center justify-between px-6 py-2.5 border-b bg-muted/10 backdrop-blur-md sticky top-0 z-10">
+        <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 text-[10px] text-muted-foreground font-bold uppercase tracking-widest bg-background/50 px-2 py-1 rounded-md border border-border/40 shadow-sm">
+            <div className="h-1.5 w-1.5 rounded-full bg-green-500 animate-pulse" />
+            Live Preview
+          </div>
+          {project?.meta.updated && (
+            <span className="text-[9px] text-muted-foreground/60 font-bold uppercase tracking-tighter">
+              Last auto-save: {formatDistanceToNow(new Date(project.meta.updated), { addSuffix: true })}
+            </span>
+          )}
+        </div>
 
-      <CardContent className="flex-grow flex flex-col p-0 bg-slate-200 dark:bg-slate-900/50 min-h-0">
-          <ScrollArea className="flex-grow">
-              <div className="py-5">
-                  {renderContent()}
+        <div className="flex items-center gap-2">
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button variant="ghost" size="sm" className="h-7 text-[10px] font-bold uppercase tracking-wider gap-2 px-2 hover:bg-primary/5 hover:text-primary">
+                  <Lightbulb className="h-3.5 w-3.5 text-yellow-500" />
+                  Writer's Guide
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent side="bottom" className="max-w-xs p-4 space-y-2">
+                <p className="font-bold text-xs uppercase tracking-widest text-primary">Intelligent Suggestion</p>
+                <p className="text-[11px] leading-relaxed italic">{suggestion}</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        </div>
+      </div>
+
+      <CardContent className="flex-grow flex flex-col p-0 relative min-h-0 overflow-hidden">
+          {/* Subtle Canvas Background */}
+          <div className="absolute inset-0 bg-[#f8fafc] dark:bg-[#0f172a] pointer-events-none">
+            <div className="absolute inset-0 opacity-[0.03] dark:opacity-[0.05]" style={{ backgroundImage: 'radial-gradient(#000 1px, transparent 1px)', backgroundSize: '24px 24px' }} />
+          </div>
+
+          <ScrollArea className="flex-grow relative">
+              <div className="py-12 px-8 flex justify-center min-h-full">
+                  <div className="w-full transition-transform duration-500 ease-in-out">
+                    {renderContent()}
+                  </div>
               </div>
           </ScrollArea>
       </CardContent>
