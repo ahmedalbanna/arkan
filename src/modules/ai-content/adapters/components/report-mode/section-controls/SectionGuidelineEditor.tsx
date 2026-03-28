@@ -7,7 +7,7 @@ import { Label } from '@/components/ui/label';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Textarea } from '@/components/ui/textarea';
 import { useGuidelineEditor } from '@/modules/ai-content/adapters/hooks/report-mode/use-guideline-editor';
-import { Trash2, Plus, StickyNote, ListChecks } from 'lucide-react';
+import { Trash2, Plus, StickyNote, ListChecks, Sparkles } from 'lucide-react';
 import { useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
@@ -70,85 +70,110 @@ export function GuidelineEditor({ itemKey, selectedSectionIds }: GuidelineEditor
   };
 
   return (
-    <div className="space-y-8">
-      <div className="space-y-1.5">
-        <h4 className="text-sm font-semibold tracking-tight">Writing Guidelines</h4>
-        <p className="text-[11px] text-muted-foreground italic leading-relaxed">Direct the AI with specific prompts and rules for this section.</p>
+    <div className="space-y-8 animate-in fade-in slide-in-from-right-4 duration-500">
+      <div className="space-y-2">
+        <h4 className="text-[11px] font-black uppercase tracking-[0.2em] text-primary flex items-center gap-2">
+            <ListChecks className="h-3 w-3" />
+            Writing Guidelines
+        </h4>
+        <p className="text-[10px] text-muted-foreground italic leading-relaxed font-medium opacity-80">
+            Orchestrate AI behavior with technical rules and logic.
+        </p>
       </div>
 
-      <div className="space-y-6">
-        <div className="space-y-3">
-          <div className="flex items-center gap-2">
-            <StickyNote className="h-3.5 w-3.5 text-primary" />
-            <Label htmlFor={`prompt-${itemKey}`} className="text-xs font-bold uppercase tracking-wider text-muted-foreground/80">Primary Instruction</Label>
+      <div className="space-y-6 relative">
+        <div className="absolute left-[-1.5rem] top-0 bottom-0 w-px bg-gradient-to-b from-primary/20 via-primary/5 to-transparent" />
+        
+        <div className="space-y-3.5">
+          <div className="flex items-center gap-2 group/label">
+            <StickyNote className="h-3.5 w-3.5 text-primary/60 group-hover/label:text-primary transition-colors" />
+            <Label htmlFor={`prompt-${itemKey}`} className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Primary Instruction</Label>
           </div>
-          <Textarea
-            id={`prompt-${itemKey}`}
-            defaultValue={prompt}
-            onBlur={(e) => {
-              const val = e.target.value;
-              if (selectedSectionIds && selectedSectionIds.length > 0) {
-                updateProject(p => {
-                  selectedSectionIds.forEach(id => {
-                    p.updateSection(id, s => s.withProps({ prompt: val }));
-                  });
-                });
-              } else {
-                setPrompt(val);
-              }
-            }}
-            rows={6}
-            className="min-h-[160px] w-full text-xs bg-muted/5 focus-visible:ring-1 leading-relaxed resize-none p-3"
-            placeholder="e.g., Explain the methodology used in this research..."
-          />
+          <div className="relative group">
+            <div className="absolute -inset-1 bg-gradient-to-r from-primary/10 to-transparent rounded-2xl blur opacity-0 group-focus-within:opacity-100 transition duration-500" />
+            <Textarea
+                id={`prompt-${itemKey}`}
+                defaultValue={prompt}
+                onBlur={(e) => {
+                const val = e.target.value;
+                if (selectedSectionIds && selectedSectionIds.length > 0) {
+                    updateProject(p => {
+                    selectedSectionIds.forEach(id => {
+                        p.updateSection(id, s => s.withProps({ prompt: val }));
+                    });
+                    });
+                } else {
+                    setPrompt(val);
+                }
+                }}
+                rows={6}
+                className="relative min-h-[180px] w-full text-[11px] bg-muted/5 border-primary/10 focus-visible:ring-primary/20 leading-relaxed resize-none p-4 rounded-xl shadow-inner font-serif italic"
+                placeholder="e.g., Explain the methodology used in this research..."
+            />
+          </div>
         </div>
 
-        <Separator className="bg-border/40" />
+        <Separator className="bg-gradient-to-r from-primary/20 via-primary/5 to-transparent h-px" />
 
-        <div className="space-y-4">
+        <div className="space-y-5">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <ListChecks className="h-3.5 w-3.5 text-primary" />
-              <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground/80">{t('builder.reportGenerator.customGuidelines')}</Label>
+              <Plus className="h-3.5 w-3.5 text-primary" />
+              <Label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Constraint Matrix</Label>
             </div>
-            <Badge variant="secondary" className="h-4.5 text-[10px] px-1.5 rounded-sm">{guidelines.length}</Badge>
+            <Badge variant="outline" className="h-5 text-[9px] font-black border-primary/20 bg-primary/5 text-primary tabular-nums px-2 rounded-full">{guidelines.length}</Badge>
           </div>
           
-          <div className="space-y-3">
-            <div className="flex gap-2">
+          <div className="space-y-4">
+            <div className="flex gap-2 group/input">
               <Input
                 value={newGuideline}
                 onChange={(e) => setNewGuideline(e.target.value)}
-                placeholder={t('builder.reportGenerator.addGuidelinePlaceholder')}
+                placeholder="Define new technical constraint..."
                 onKeyDown={(e) => { if(e.key === 'Enter') { e.preventDefault(); handleAddGuideline(); }}}
-                className="h-8 text-xs bg-background"
+                className="h-9 text-[11px] bg-muted/5 border-primary/10 focus-visible:ring-primary/20 transition-all rounded-xl"
               />
-              <Button type="button" size="sm" onClick={handleAddGuideline} className="h-8 w-8 p-0 shrink-0" title="Add guideline">
+              <Button 
+                type="button" 
+                size="icon" 
+                onClick={handleAddGuideline} 
+                className="h-9 w-9 shrink-0 rounded-xl shadow-lg shadow-primary/20 group-hover/input:scale-105 transition-transform"
+              >
                 <Plus className="h-4 w-4" />
               </Button>
             </div>
 
-            <ScrollArea className="h-48 w-full rounded-lg border bg-muted/20 shadow-inner">
-              <div className="p-2 space-y-1.5">
+            <ScrollArea className="h-56 w-full rounded-2xl border border-primary/10 bg-muted/5 shadow-inner">
+              <div className="p-3 space-y-2">
                 {guidelines.length > 0 ? (
                   guidelines.map((guideline, index) => (
-                    <div key={index} className="flex items-start justify-between text-[11px] p-2 rounded-md border bg-card gap-3 group shadow-sm">
-                      <span className="flex-1 leading-normal text-muted-foreground group-hover:text-foreground transition-colors">{guideline}</span>
+                    <div 
+                        key={index} 
+                        className="flex items-start justify-between text-[11px] p-3 rounded-xl border bg-background/60 backdrop-blur-md gap-3 group shadow-sm hover:border-primary/30 transition-all"
+                    >
+                      <div className="flex items-center gap-3 flex-1 min-w-0">
+                         <div className="h-1.5 w-1.5 rounded-full bg-primary/40 group-hover:bg-primary transition-colors shrink-0 mt-1.5" />
+                         <span className="leading-relaxed text-muted-foreground group-hover:text-foreground transition-colors">{guideline}</span>
+                      </div>
                       <Button
                         variant="ghost"
                         size="icon"
-                        className="h-6 w-6 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity"
+                        className="h-6 w-6 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity hover:bg-destructive/10 hover:text-destructive"
                         onClick={() => handleRemoveGuideline(index)}
-                        title="Remove"
                       >
-                        <Trash2 className="h-3 w-3 text-destructive" />
+                        <Trash2 className="h-3 w-3" />
                       </Button>
                     </div>
                   ))
                 ) : (
-                  <div className="flex flex-col items-center justify-center py-8 px-4 text-center space-y-2 opacity-50">
-                    <ListChecks className="h-8 w-8 text-muted-foreground/40" />
-                    <p className="text-[10px] text-muted-foreground uppercase tracking-widest">No guidelines</p>
+                  <div className="flex flex-col items-center justify-center py-12 px-4 text-center space-y-3 opacity-30">
+                    <div className="p-4 rounded-full bg-muted/20 border border-dashed border-muted-foreground/40">
+                        <ListChecks className="h-8 w-8 text-muted-foreground" />
+                    </div>
+                    <div className="space-y-1">
+                        <p className="text-[10px] text-muted-foreground font-black uppercase tracking-[0.2em]">Zero Constraints</p>
+                        <p className="text-[9px] text-muted-foreground font-medium italic">Define rules to sharpen AI logic.</p>
+                    </div>
                   </div>
                 )}
               </div>
