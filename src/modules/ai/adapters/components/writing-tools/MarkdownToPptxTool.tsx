@@ -1,23 +1,24 @@
 'use client';
 
 import { zodResolver } from '@hookform/resolvers/zod';
-import { File as FileIcon, LoaderCircle, Presentation } from 'lucide-react';
-import { useState } from 'react';
+import { Loader2, LoaderCircle, Presentation, FileText as FileIcon, Layout, Terminal, Type, Globe, ListTree, Palette, CheckCircle2, ChevronRight } from 'lucide-react';
+import React, { useState, type ComponentPropsWithoutRef } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { z } from 'zod';
-
-import { PptxStyleOptionsSchema } from '@/modules/ai/domain/schemas/template-schemas';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/util/use-toast';
-import { convertMarkdownToPdf, convertMarkdownToPptx } from '@/modules/templates/infrastructure/exporters/pptx/markdown-to-pptx-converter';
 import { templates as pptxTemplates } from '@/modules/templates/infrastructure/PptxStyles';
-import { type PptxStyleOptions } from '@/modules/ai/domain/schemas/template-schemas';
+import { apiService } from '@/infrastructure/api/ApiService';
+import { Badge } from '@/components/ui/badge';
+import { Separator } from '@/components/ui/separator';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { cn } from '@/infrastructure/utils/cn';
 
 const markdownToPptxSchema = z.object({
   markdown: z.string().min(10, 'Markdown content must be at least 10 characters long.'),
@@ -31,25 +32,12 @@ const markdownToPptxSchema = z.object({
   useCustomTheme: z.boolean().default(false),
   customThemeJson: z.string().optional(),
 }).superRefine((data, ctx) => {
-  if (data.useCustomTheme) {
-    if (!data.customThemeJson || data.customThemeJson.trim() === '') {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        path: ['customThemeJson'],
-        message: 'Custom theme JSON is required when "Use Custom Theme" is enabled.',
-      });
-      return;
-    }
-    try {
-      const theme = JSON.parse(data.customThemeJson);
-      PptxStyleOptionsSchema.parse(theme);
-    } catch (e) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        path: ['customThemeJson'],
-        message: e instanceof z.ZodError ? 'Custom theme JSON does not match the required schema.' : 'Invalid JSON format.',
-      });
-    }
+  if (data.useCustomTheme && !data.customThemeJson) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: 'Custom theme JSON is required when using a custom theme.',
+      path: ['customThemeJson'],
+    });
   }
 });
 
@@ -63,112 +51,12 @@ export function MarkdownToPptxTool() {
   const form = useForm<MarkdownToPptxFormValues>({
     resolver: zodResolver(markdownToPptxSchema),
     defaultValues: {
-      markdown: `# My Awesome Presentation: A Comprehensive Guide
-This is the cover slide. The title and subtitle are automatically formatted.
-
----
-
-# Slide 2: Basic Formatting
-This slide demonstrates various inline markdown features.
-
-- **Bolded text** for emphasis.
-- *Italicized text* for highlighting.
-- ~~Strikethrough text~~ for deletions.
-- A link to Arkan's Website.
-- Inline code like \`const x = 10;\` is also supported.
-
-> Notes:
-> This slide covers the fundamental text formatting options. Make sure to explain each one clearly.
-
----
-
-# Slide 3: Lists and Nesting
-You can create ordered and unordered lists.
-
-1. First ordered list item.
-2. Second ordered list item.
-   - Nested unordered item.
-   - Another nested item.
-      1. Deeply nested ordered item.
-3. Third ordered list item.
-
-- Unordered list item.
-- Another unordered list item.
-
----
-
-# Slide 4: Block Elements
-This slide shows how blockquotes and tables are rendered.
-
-> Here is a blockquote. It's useful for highlighting important text or quotes from sources. It can span multiple lines and will be styled distinctively.
-
-| Header 1      | Header 2      | Header 3      |
-|---------------|---------------|---------------|
-| Cell 1        | Cell 2        | Cell 3        |
-| Cell 4        | Cell 5        | Cell 6        |
-| *Formatted*   | **Content**   | \`Is Supported\`|
-
----
-
-# Slide 5: Images & Code Blocks
-An image can be placed on its own line to be centered.
-
-
-\`\`\`javascript
-// This is a javascript code block
-function helloWorld() {
-  console.log("Hello, PowerPoint!");
-  // It preserves whitespace and syntax highlighting is handled by the theme.
-}
-\`\`\`
-
----
-
- # Slide 6: Footnotes & Speaker Notes
-You can add footnotes to your text for citations or extra info.[^1] They will appear at the bottom of the slide. This is another reference.[^2]
-
-[^1]: This is the first footnote. It provides more detail.
-[^2]: This is the second footnote, demonstrating multiple references.
-
-
-> Speaker Notes:
-> Remember to explain what footnotes are and how they are useful in academic or detailed presentations.
-> This is a multi- line speaker note.
-
----
-
-# Slide 7: PlantUML Diagrams
-You can embed PlantUML diagrams directly into your markdown.
-
-\`\`\`plantuml
-@startuml
-!theme plain
-skinparam linetype ortho
-
-actor User
-participant "Web App" as App
-participant "API Server" as API
-database "Database" as DB
-
-User -> App: Clicks "Login"
-App -> API: POST /api/login
-API -> DB: Verify credentials
-DB --> API: User data
-API --> App: Auth Token
-App --> User: Displays dashboard
-@enduml
-\`\`\`
-
----
-
-# Slide 8: Content Overflow
-This slide demonstrates how a very long paragraph will gracefully break across multiple slides, ensuring that the content remains readable and well-formatted. The layout engine automatically detects when the content exceeds the available space on a single slide and creates a new slide to continue the text. This process is seamless and preserves the context by repeating the slide title on the overflow slides. This is particularly useful for detailed explanations, long narratives, or extensive notes that cannot be condensed into a few bullet points. The system tries to break the text at a natural point, like between words, to maintain readability. This ensures that even large blocks of text are presented in a professional and easy-to-digest manner without manual intervention. This paragraph will continue to demonstrate this feature by being intentionally long. The layout engine automatically detects when the content exceeds the available space on a single slide and creates a new slide to continue the text. This process is seamless and preserves the context by repeating the slide title on the overflow slides. This is particularly useful for detailed explanations, long narratives, or extensive notes that cannot be condensed into a few bullet points. The system tries to break the text at a natural point, like between words, to maintain readability. This ensures that even large blocks of text are presented in a professional and easy-to-digest manner without manual intervention.`,
+      markdown: '# Project Vision\n\n- Key Objective 1\n- Key Objective 2\n\n---\n\n# Market Logic\n\n- Data Point A\n- Data Point B',
       fileName: 'presentation',
       template: 'modern',
       isRtl: false,
       includeToc: false,
       useCustomTheme: false,
-      customThemeJson: JSON.stringify(pptxTemplates.modern.styles, null, 2),
     },
   });
 
@@ -177,38 +65,27 @@ This slide demonstrates how a very long paragraph will gracefully break across m
   const onSubmit = async (data: MarkdownToPptxFormValues) => {
     setIsConverting(true);
     try {
-      let themeStyles: PptxStyleOptions;
-
-      if (data.useCustomTheme && data.customThemeJson) {
-        try {
-          themeStyles = JSON.parse(data.customThemeJson);
-        } catch (e) {
-          toast({
-            title: 'Invalid Custom Theme JSON',
-            description: 'The provided JSON for the custom theme could not be parsed.',
-            variant: 'destructive',
-          });
-          setIsConverting(false);
-          return;
-        }
-      } else {
-        themeStyles = pptxTemplates[data.template].styles;
-      }
-
-      await convertMarkdownToPptx(data.markdown, data.fileName, {
-        styles: themeStyles,
-        title: data.fileName,
+      const options = {
+        template: data.template,
         isRtl: data.isRtl,
         includeToc: data.includeToc,
+        customTheme: data.useCustomTheme ? JSON.parse(data.customThemeJson || '{}') : undefined,
+      };
+
+      const blob = await apiService<{ markdown: string; fileName: string; options: any }, Blob>({
+        endpoint: '/api/export/pptx',
+        method: 'POST',
+        data: { markdown: data.markdown, fileName: data.fileName, options },
+        responseType: 'blob',
       });
-      toast({
-        title: 'Conversion Successful',
-        description: `Your file ${data.fileName}.pptx has been downloaded.`,
-      });
+
+      const { saveAs } = await import('file-saver');
+      saveAs(blob, `${data.fileName}.pptx`);
+      toast({ title: 'Export Successful', description: `Your presentation ${data.fileName}.pptx has been downloaded.` });
     } catch (error) {
       console.error('Failed to convert markdown to pptx:', error);
       toast({
-        title: 'Conversion Failed',
+        title: 'Export Failed',
         description: error instanceof Error ? error.message : String(error),
         variant: 'destructive',
       });
@@ -219,171 +96,194 @@ This slide demonstrates how a very long paragraph will gracefully break across m
 
   const handleExportPdf = async () => {
     const data = form.getValues();
-    const result = markdownToPptxSchema.safeParse(data);
-    if (!result.success) {
-      form.trigger();
-      toast({
-        title: 'Validation Error',
-        description: 'Please fix the errors before exporting.',
-        variant: 'destructive',
-      });
-      return;
-    }
-
     setIsExportingPdf(true);
     try {
-      let themeStyles: PptxStyleOptions;
+      const options = {
+        template: data.template,
+        isRtl: data.isRtl,
+        includeToc: data.includeToc,
+        customTheme: data.useCustomTheme ? JSON.parse(data.customThemeJson || '{}') : undefined,
+      };
 
-      if (data.useCustomTheme && data.customThemeJson) {
-        try {
-          themeStyles = JSON.parse(data.customThemeJson);
-        } catch (e) {
-          toast({
-            title: 'Invalid Custom Theme JSON',
-            description: 'The provided JSON for the custom theme could not be parsed.',
-            variant: 'destructive',
-          });
-          setIsExportingPdf(false);
-          return;
-        }
-      } else {
-        themeStyles = pptxTemplates[data.template].styles;
-      }
+      const blob = await apiService<{ markdown: string; fileName: string; options: any }, Blob>({
+        endpoint: '/api/export/pptx?pdf=true',
+        method: 'POST',
+        data: { markdown: data.markdown, fileName: data.fileName, options },
+        responseType: 'blob',
+      });
 
-      await convertMarkdownToPdf(data.markdown, data.fileName, { styles: themeStyles, title: data.fileName, isRtl: data.isRtl });
-      toast({ title: 'Export Successful', description: `Your file ${data.fileName}.pdf has been downloaded.` });
+      const { saveAs } = await import('file-saver');
+      saveAs(blob, `${data.fileName}.pdf`);
+      toast({ title: 'Export Successful', description: `Your presentation ${data.fileName}.pdf has been downloaded.` });
     } catch (error) {
-      console.error('Failed to convert markdown to pdf:', error);
-      toast({ title: 'Export Failed', description: error instanceof Error ? error.message : String(error), variant: 'destructive' });
+      console.error('Failed to export pptx to pdf:', error);
+      toast({
+        title: 'Export Failed',
+        description: error instanceof Error ? error.message : String(error),
+        variant: 'destructive',
+      });
     } finally {
       setIsExportingPdf(false);
     }
   };
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Markdown to PowerPoint Converter</CardTitle>
-        <CardDescription className="[&>code]:font-mono [&>code]:font-bold [&>code]:bg-gray-200 [&>code]:px-1 [&>code]:py-0.5 [&>code]:rounded">
-          Easily convert your markdown documents into styled .pptx presentations. Use `---`, a top-level heading (`#`), or <code className="whitespace-nowrap">&lt;!-- slide-break --&gt;</code> to separate slides.
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-          <div className="space-y-2">
-            <Label htmlFor="markdown-input">Markdown Content</Label>
-            <Textarea
-              id="markdown-input"
-              {...form.register('markdown')}
-              placeholder="Enter your markdown here..."
-              className="min-h-[300px] font-mono"
-              disabled={isConverting}
-            />
-            {form.formState.errors.markdown && (
-              <p className="text-sm text-destructive">{form.formState.errors.markdown.message}</p>
-            )}
-          </div>
+    <Card className="max-w-[1600px] mx-auto border-none shadow-2xl shadow-primary/5 bg-card overflow-hidden rounded-[32px]">
+      <header className="px-8 py-10 border-b bg-muted/5 text-center space-y-2">
+        <h2 className="text-2xl font-bold font-headline tracking-tight">Presentation Production Manifest</h2>
+        <p className="text-xs text-muted-foreground italic max-w-md mx-auto leading-relaxed">Execute visual compilation protocols to derive high-fidelity PPTX presentations from markdown logic.</p>
+      </header>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="fileName-input">File Name</Label>
-              <Input
-                id="fileName-input"
-                {...form.register('fileName')}
-                placeholder="e.g., my-presentation"
-                disabled={isConverting}
-              />
-              {form.formState.errors.fileName && (
-                <p className="text-sm text-destructive">{form.formState.errors.fileName.message}</p>
-              )}
+      <CardContent className="p-0 flex flex-col lg:flex-row min-h-[850px]">
+        {/* Setup Zone (Left) */}
+        <div className="lg:w-[450px] border-r border-border/40 bg-muted/5 flex flex-col min-h-0">
+            <ScrollArea className="flex-1">
+                <div className="p-8 space-y-10">
+                    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-10">
+                        <div className="space-y-8">
+                            <div className="space-y-4">
+                                <Label className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground/60 ml-1 flex items-center gap-2">
+                                    <Layout className="h-3 w-3 text-primary" />
+                                    Identity & Format
+                                </Label>
+                                <div className="grid gap-4">
+                                    <div className="space-y-2">
+                                        <Input
+                                            id="fileName-input"
+                                            {...form.register('fileName')}
+                                            placeholder="Production File Name"
+                                            className="h-10 text-xs bg-background shadow-sm border-none ring-1 ring-border/40 focus-visible:ring-primary/40 rounded-xl"
+                                            disabled={isConverting}
+                                        />
+                                        {form.formState.errors.fileName && <p className="text-[9px] font-bold text-destructive uppercase tracking-widest px-2">{form.formState.errors.fileName.message}</p>}
+                                    </div>
+                                    <Select
+                                        onValueChange={(value: 'modern' | 'dark' | 'professional') => form.setValue('template', value)}
+                                        defaultValue={form.getValues('template')}
+                                        disabled={isConverting || useCustomTheme}
+                                    >
+                                        <SelectTrigger id="template-select" className="h-10 text-xs bg-background shadow-sm border-none ring-1 ring-border/40 focus-visible:ring-primary/40 rounded-xl">
+                                            <SelectValue placeholder="Visual Template" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            {Object.keys(pptxTemplates).map((key) => (
+                                                <SelectItem value={key} key={key} className="text-xs font-bold uppercase tracking-wider">
+                                                    {pptxTemplates[key as keyof typeof pptxTemplates].name}
+                                                </SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+                            </div>
+
+                            <Separator className="bg-border/40" />
+
+                            <div className="space-y-4">
+                                <Label className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground/60 ml-1 flex items-center gap-2">
+                                    <Terminal className="h-3 w-3 text-primary" />
+                                    Visual Protocol
+                                </Label>
+                                <div className="space-y-3">
+                                    <div className="flex items-center justify-between p-3 rounded-xl border border-border/40 bg-background shadow-sm group hover:border-primary/40 transition-colors">
+                                        <div className="flex items-center gap-3">
+                                            <Globe className="h-3.5 w-3.5 text-muted-foreground group-hover:text-primary" />
+                                            <Label htmlFor="isRtl" className="text-[11px] font-bold uppercase tracking-tighter cursor-pointer">RTL Alignment</Label>
+                                        </div>
+                                        <Controller name="isRtl" control={form.control} render={({ field }) => <Checkbox id="isRtl" checked={field.value} onCheckedChange={field.onChange} disabled={isConverting} className="h-4 w-4" />} />
+                                    </div>
+
+                                    <div className="flex items-center justify-between p-3 rounded-xl border border-border/40 bg-background shadow-sm group hover:border-primary/40 transition-colors">
+                                        <div className="flex items-center gap-3">
+                                            <ListTree className="h-3.5 w-3.5 text-muted-foreground group-hover:text-primary" />
+                                            <Label htmlFor="includeToc" className="text-[11px] font-bold uppercase tracking-tighter cursor-pointer">Auto Roadmap</Label>
+                                        </div>
+                                        <Controller name="includeToc" control={form.control} render={({ field }) => <Checkbox id="includeToc" checked={field.value} onCheckedChange={field.onChange} disabled={isConverting} className="h-4 w-4" />} />
+                                    </div>
+
+                                    <div className="flex items-center justify-between p-3 rounded-xl border border-border/40 bg-background shadow-sm group hover:border-primary/40 transition-colors">
+                                        <div className="flex items-center gap-3">
+                                            <Palette className="h-3.5 w-3.5 text-muted-foreground group-hover:text-primary" />
+                                            <Label htmlFor="useCustomTheme" className="text-[11px] font-bold uppercase tracking-tighter cursor-pointer">Custom Schema</Label>
+                                        </div>
+                                        <Controller name="useCustomTheme" control={form.control} render={({ field }) => <Checkbox id="useCustomTheme" checked={field.value} onCheckedChange={field.onChange} disabled={isConverting} className="h-4 w-4" />} />
+                                    </div>
+
+                                    {useCustomTheme && (
+                                        <div className="p-4 rounded-2xl border bg-muted/5 space-y-3 animate-in fade-in zoom-in-95 duration-300">
+                                            <Label htmlFor="customThemeJson" className="text-[9px] font-bold uppercase text-muted-foreground ml-1">Theme JSON</Label>
+                                            <Textarea
+                                                id="customThemeJson"
+                                                {...form.register('customThemeJson')}
+                                                rows={6}
+                                                placeholder="Paste PptxStyleOptions JSON..."
+                                                className="text-xs bg-background shadow-inner focus-visible:ring-1 resize-none p-3 leading-relaxed rounded-xl border-dashed font-mono"
+                                                disabled={isConverting || isExportingPdf}
+                                            />
+                                            {form.formState.errors.customThemeJson && <p className="text-[9px] font-bold text-destructive uppercase tracking-widest">{form.formState.errors.customThemeJson.message}</p>}
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="space-y-3">
+                            <Button type="submit" disabled={isConverting || isExportingPdf} className="w-full h-12 font-bold shadow-xl shadow-primary/20 gap-3 rounded-xl active:scale-[0.98] transition-all">
+                                {isConverting ? <LoaderCircle className="h-5 w-5 animate-spin" /> : <Presentation className="h-5 w-5" />}
+                                Initialize PPTX Production
+                            </Button>
+                            <Button type="button" onClick={handleExportPdf} disabled={isConverting || isExportingPdf} className="w-full h-10 font-bold border-primary/20 hover:bg-primary/5 hover:text-primary rounded-xl gap-2 transition-all" variant="outline">
+                                {isExportingPdf ? <LoaderCircle className="h-4 w-4 animate-spin" /> : <FileIcon className="h-4 w-4" />}
+                                Export logic as PDF
+                            </Button>
+                        </div>
+                    </form>
+                </div>
+            </ScrollArea>
+        </div>
+
+        {/* Results Canvas (Right) */}
+        <div className="flex-1 flex flex-col min-h-0 bg-background relative overflow-hidden">
+            <div className="absolute inset-0 bg-[#f8fafc] dark:bg-black/20 pointer-events-none shadow-inner">
+                <div className="absolute inset-0 opacity-[0.03] dark:opacity-[0.05]" style={{ backgroundImage: 'radial-gradient(#000 1px, transparent 1px)', backgroundSize: '24px 24px' }} />
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="template-select">Presentation Template</Label>
-              <Select
-                onValueChange={(value: 'modern' | 'dark' | 'professional') => form.setValue('template', value)}
-                defaultValue={form.getValues('template')}
-                disabled={isConverting || useCustomTheme}
-              >
-                <SelectTrigger id="template-select">
-                  <SelectValue placeholder="Select a template" />
-                </SelectTrigger>
-                <SelectContent>
-                  {Object.keys(pptxTemplates).map((key) => (
-                    <SelectItem value={key} key={key}>
-                      {pptxTemplates[key as keyof typeof pptxTemplates].name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+
+            <div className="relative flex-1 flex flex-col min-h-0 p-8 md:p-12">
+                <div className="flex flex-col h-full space-y-6">
+                    <div className="flex justify-between items-center px-1 sticky top-0 z-10">
+                        <div className="flex items-center gap-3">
+                            <div className="h-2 w-2 rounded-full bg-primary animate-pulse" />
+                            <h3 className="text-[10px] font-bold uppercase tracking-[0.3em] text-muted-foreground">Source Logic Manifest</h3>
+                        </div>
+                    </div>
+
+                    <div className="flex-1 relative group">
+                        <ScrollArea className="h-full rounded-[32px] border bg-[#0d1117] p-10 md:p-12 shadow-2xl relative overflow-hidden">
+                            {isConverting || isExportingPdf ? (
+                                <div className="flex flex-col items-center justify-center h-full space-y-4 opacity-40">
+                                    <Loader2 className="h-12 w-12 animate-spin text-primary" />
+                                    <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-white">Executing Visual Compilation</p>
+                                </div>
+                            ) : (
+                                <>
+                                    <Textarea 
+                                        id="markdown-input" 
+                                        {...form.register('markdown')} 
+                                        className="h-full w-full bg-transparent border-none focus-visible:ring-0 resize-none text-[13px] font-mono leading-relaxed text-blue-100/90 selection:bg-primary/30 min-h-[600px]" 
+                                        placeholder="Enter source markdown here..."
+                                        dir="ltr"
+                                    />
+                                    <div className="mt-16 pt-8 border-t border-white/10 flex justify-between items-center text-[9px] text-white/20 font-bold uppercase tracking-widest">
+                                        <span>Arkan Visualization Engine</span>
+                                        <span>SCHEMA VERIFIED</span>
+                                    </div>
+                                </>
+                            )}
+                            <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-[#0d1117] to-transparent pointer-events-none opacity-60" />
+                        </ScrollArea>
+                    </div>
+                </div>
             </div>
-          </div>
-
-          <div className="flex items-center space-x-2">
-            <Controller
-              name="isRtl"
-              control={form.control}
-              render={({ field }) => (
-                <Checkbox
-                  id="isRtl"
-                  checked={field.value}
-                  onCheckedChange={field.onChange}
-                  disabled={isConverting}
-                />
-              )}
-            />
-            <Label htmlFor="isRtl" className="cursor-pointer">Enable Right-to-Left (RTL) text direction (for Arabic, Hebrew, etc.)</Label>
-          </div>
-
-          <div className="flex items-center space-x-2">
-            <Controller
-              name="includeToc"
-              control={form.control}
-              render={({ field }) => (
-                <Checkbox
-                  id="includeToc"
-                  checked={field.value}
-                  onCheckedChange={field.onChange}
-                  disabled={isConverting}
-                />
-              )}
-            />
-            <Label htmlFor="includeToc" className="cursor-pointer">Include Table of Contents slide</Label>
-          </div>
-
-          <div className="flex items-center space-x-2">
-            <Controller
-              name="useCustomTheme"
-              control={form.control}
-              render={({ field }) => (
-                <Checkbox
-                  id="useCustomTheme"
-                  checked={field.value}
-                  onCheckedChange={field.onChange}
-                  disabled={isConverting}
-                />
-              )}
-            />
-            <Label htmlFor="useCustomTheme" className="cursor-pointer">Use Custom Theme (JSON)</Label>
-          </div>
-
-          {useCustomTheme &&
-            <div className="space-y-2">
-              <Label htmlFor="customThemeJson">Custom Theme JSON</Label>
-              <Textarea id="customThemeJson" {...form.register('customThemeJson')} placeholder="Paste your PptxStyleOptions JSON here..." className="min-h-[150px] font-mono" disabled={isConverting || isExportingPdf} />
-              {form.formState.errors.customThemeJson && <p className="text-sm text-destructive">{form.formState.errors.customThemeJson.message}</p>}
-            </div>}
-
-          <div className="flex flex-col md:flex-row gap-4">
-            <Button type="submit" disabled={isConverting || isExportingPdf} className="w-full">
-              {isConverting ? <LoaderCircle className="me-2 h-4 w-4 animate-spin" /> : <Presentation className="me-2 h-4 w-4" />}
-              {isConverting ? 'Converting...' : 'Convert and Download .pptx'}
-            </Button>
-            <Button type="button" onClick={handleExportPdf} disabled={isConverting || isExportingPdf} className="w-full" variant="secondary">
-              {isExportingPdf ? <LoaderCircle className="me-2 h-4 w-4 animate-spin" /> : <FileIcon className="me-2 h-4 w-4" />}
-              {isExportingPdf ? 'Exporting...' : 'Export as PDF'}
-            </Button>
-          </div>
-        </form>
+        </div>
       </CardContent>
     </Card>
   );
