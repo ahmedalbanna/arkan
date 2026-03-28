@@ -14,15 +14,18 @@ interface GenerationUIState {
   guidelineState: Record<string, GuidelineState>;
   isBulkGenerating: boolean;
   abortRequested: boolean;
+  bulkTotal: number;
+  bulkProgress: number;
   abortControllers: Record<string, AbortController>;
   clipboard: Partial<SectionProperties> | null;
   initializeGuidelines: (key: string, defaultGuidelines: any[]) => void;
   handleGuidelineToggle: (key: string, index: number, checked: boolean) => void;
   addCustomGuideline: (key: string, guideline: string) => void;
   removeCustomGuideline: (key: string, index: number) => void;
-  startBulk: () => void;
+  startBulk: (total: number) => void;
   stopBulk: () => void;
   requestAbort: () => void;
+  incrementProgress: () => void;
   registerAbortController: (key: string, controller: AbortController) => void;
   removeAbortController: (key: string) => void;
   cancelGeneration: (key: string) => void;
@@ -34,6 +37,8 @@ export const useGenerationUIStore = create<GenerationUIState>((set, get) => ({
   guidelineState: {},
   isBulkGenerating: false,
   abortRequested: false,
+  bulkTotal: 0,
+  bulkProgress: 0,
   abortControllers: {},
   clipboard: null,
 
@@ -100,16 +105,20 @@ export const useGenerationUIStore = create<GenerationUIState>((set, get) => ({
     });
   },
 
-  startBulk: () => {
-    set({ isBulkGenerating: true, abortRequested: false });
+  startBulk: (total) => {
+    set({ isBulkGenerating: true, abortRequested: false, bulkTotal: total, bulkProgress: 0 });
   },
 
   stopBulk: () => {
-    set({ isBulkGenerating: false, abortRequested: false });
+    set({ isBulkGenerating: false, abortRequested: false, bulkTotal: 0, bulkProgress: 0 });
   },
 
   requestAbort: () => {
     set({ abortRequested: true });
+  },
+
+  incrementProgress: () => {
+    set(state => ({ bulkProgress: Math.min(state.bulkTotal, state.bulkProgress + 1) }));
   },
 
   registerAbortController: (key, controller) => {

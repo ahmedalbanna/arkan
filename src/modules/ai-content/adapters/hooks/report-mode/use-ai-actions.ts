@@ -242,8 +242,8 @@ export function useAiActions({ editor: initialEditor }: AiActionsProps = {}) {
       if (!user) throw new Error('User not found.');
       if (selectedSectionIds.size === 0) throw new Error('No sections were selected for generation.');
 
-      const { startBulk, stopBulk } = useGenerationUIStore.getState();
-      startBulk();
+      const { startBulk, stopBulk, incrementProgress } = useGenerationUIStore.getState();
+      startBulk(selectedSectionIds.size);
 
       try {
         for (const sectionId of selectedSectionIds) {
@@ -253,6 +253,7 @@ export function useAiActions({ editor: initialEditor }: AiActionsProps = {}) {
             break;
           }
           await generateSectionMutation.mutateAsync(sectionId);
+          incrementProgress();
         }
       } finally {
         stopBulk();

@@ -1,6 +1,7 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
+import { Progress } from '@/components/ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { useLocalization } from '@/context/LocalizationContext';
@@ -26,7 +27,7 @@ export function SectionTabsPanel({ section, selectedSectionIds = [], className }
   const { t } = useLocalization();
   const { toast } = useToast();
   const { userProfile, project, updateProject } = useBuilderStore();
-  const { isBulkGenerating, requestAbort, abortRequested, cancelGeneration, clipboard, copySettings } = useGenerationUIStore();
+  const { isBulkGenerating, requestAbort, abortRequested, cancelGeneration, clipboard, copySettings, bulkTotal, bulkProgress } = useGenerationUIStore();
   const { generateSectionMutation, generateChapterMutation, generateProjectMutation } = useAiActions();
 
   if (!section) {
@@ -165,6 +166,16 @@ export function SectionTabsPanel({ section, selectedSectionIds = [], className }
                </TooltipProvider>
             </div>
           </div>
+
+          {isBulkGenerating && (
+            <div className="space-y-2 animate-in fade-in slide-in-from-top-2 duration-500">
+              <div className="flex justify-between items-end px-1">
+                <span className="text-[10px] font-bold uppercase tracking-widest text-primary/70">Building Project</span>
+                <span className="text-[10px] font-mono font-bold text-muted-foreground">{bulkProgress} / {bulkTotal}</span>
+              </div>
+              <Progress value={(bulkProgress / bulkTotal) * 100} className="h-1.5" />
+            </div>
+          )}
 
           <TooltipProvider>
             <Tooltip>
