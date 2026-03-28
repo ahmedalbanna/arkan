@@ -100,7 +100,7 @@ export default function ReportModeGenerator({ initialProject }: { initialProject
             <header className="h-16 border-b border-border/40 bg-background/40 backdrop-blur-2xl sticky top-0 z-50 px-8 flex items-center justify-between transition-all duration-700 ease-in-out group/header overflow-hidden">
                 {/* Animated Grid Overlay */}
                 <div className="absolute inset-0 opacity-[0.02] pointer-events-none" style={{ backgroundImage: 'radial-gradient(circle at 2px 2px, hsl(var(--primary)) 1px, transparent 0)', backgroundSize: '32px 32px' }} />
-                
+
                 <div className="flex items-center gap-6 relative z-10">
                     <div className="relative group/logo">
                         <div className="absolute -inset-1.5 bg-primary/20 rounded-xl blur opacity-0 group-hover/logo:opacity-100 transition duration-500" />
@@ -108,7 +108,7 @@ export default function ReportModeGenerator({ initialProject }: { initialProject
                             <BookOpenText className="h-5 w-5 text-primary-foreground" />
                         </div>
                     </div>
-                    
+
                     <div className="flex flex-col min-w-0">
                         <div className="flex items-center gap-3">
                             <div className="relative group/input">
@@ -230,7 +230,12 @@ export default function ReportModeGenerator({ initialProject }: { initialProject
                             ) : (
                                 <ResizablePanelGroup direction="horizontal" className="h-full items-stretch">
                                     {/* Left Zone - Setup Tools */}
-                                    <ResizablePanel defaultSize={22} minSize={18} maxSize={35}>
+                                    <ResizablePanel
+                                        defaultSize={activePanelKey ? 22 : 6}
+                                        minSize={activePanelKey ? 18 : 6}
+                                        maxSize={activePanelKey ? 35 : 6}
+                                        className="transition-all duration-500 ease-in-out"
+                                    >
                                         <div className="h-full pr-3 flex flex-col min-h-0">
                                             <CollapsibleSidePanel
                                                 panels={leftPanels}
@@ -253,7 +258,12 @@ export default function ReportModeGenerator({ initialProject }: { initialProject
                                     <ResizableHandle withHandle className="bg-transparent hover:bg-primary/10 transition-colors w-1.5" />
 
                                     {/* Right Zone - AI Context */}
-                                    <ResizablePanel defaultSize={22} minSize={18} maxSize={35}>
+                                    <ResizablePanel
+                                        defaultSize={activeRightPanelKey ? 22 : 6}
+                                        minSize={activeRightPanelKey ? 18 : 6}
+                                        maxSize={activeRightPanelKey ? 35 : 6}
+                                        className="transition-all duration-500 ease-in-out"
+                                    >
                                         <div className="h-full pl-3 flex flex-col min-h-0">
                                             <CollapsibleSidePanel
                                                 panels={rightPanels}

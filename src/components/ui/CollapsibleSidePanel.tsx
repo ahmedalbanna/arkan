@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { useMobile } from '@/hooks';
 import { cn } from '@/infrastructure/utils/cn';
+import { AnimatePresence, motion } from 'framer-motion';
 import { type ReactElement, type ReactNode } from 'react';
 
 export interface PanelItem {
@@ -65,7 +66,7 @@ export function CollapsibleSidePanel({
                   <Button 
                     variant="ghost" 
                     size="icon" 
-                    onClick={() => onActiveKeyChange(panel.key)} 
+                    onClick={() => onActiveKeyChange(isActive ? '' : panel.key)} 
                     aria-label={panel.title} 
                     className={cn(
                         "h-11 w-11 rounded-[14px] transition-all duration-500 relative group/icon",
@@ -92,25 +93,38 @@ export function CollapsibleSidePanel({
       </div>
 
       {/* Content Area - Intelligence Feed */}
-      <div className="flex-1 overflow-hidden relative">
-        <div className="h-full w-full overflow-auto custom-scrollbar bg-radial-gradient from-primary/[0.02] to-transparent">
-            <div 
-                key={activeKey} 
-                className={cn(
-                    "p-8 md:p-10 min-w-0 animate-in fade-in duration-300",
-                    isLeft ? "slide-in-from-left-4" : "slide-in-from-right-4"
-                )}
-            >
-                {activePanel?.content}
+      <AnimatePresence mode="wait">
+        {activeKey && (
+          <motion.div 
+            key="content-area"
+            initial={{ width: 0, opacity: 0 }}
+            animate={{ width: 'auto', opacity: 1 }}
+            exit={{ width: 0, opacity: 0 }}
+            transition={{ duration: 0.5, ease: [0.4, 0, 0.2, 1] }}
+            className="flex-1 overflow-hidden relative border-none"
+          >
+            <div className="h-full w-full min-w-[300px] overflow-auto custom-scrollbar bg-radial-gradient from-primary/[0.02] to-transparent">
+                <motion.div 
+                    key={activeKey} 
+                    initial={{ opacity: 0, x: isLeft ? -20 : 20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ duration: 0.3, delay: 0.2 }}
+                    className={cn(
+                        "p-8 md:p-10 min-w-0",
+                    )}
+                >
+                    {activePanel?.content}
+                </motion.div>
             </div>
-        </div>
-        
-        {/* Subtle Content Edge Decoration */}
-        <div className={cn(
-            "absolute inset-y-0 pointer-events-none w-px opacity-10",
-            isLeft ? "right-0 bg-gradient-to-b from-transparent via-primary to-transparent" : "left-0 bg-gradient-to-b from-transparent via-primary to-transparent"
-        )} />
-      </div>
+            
+            {/* Subtle Content Edge Decoration */}
+            <div className={cn(
+                "absolute inset-y-0 pointer-events-none w-px opacity-10",
+                isLeft ? "right-0 bg-gradient-to-b from-transparent via-primary to-transparent" : "left-0 bg-gradient-to-b from-transparent via-primary to-transparent"
+            )} />
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
