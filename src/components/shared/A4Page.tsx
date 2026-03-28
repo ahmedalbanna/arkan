@@ -15,10 +15,10 @@ export const A4Page = ({ children, title, className, viewMode = 'single' }: A4Pa
     return (
         <div
             className={cn(
-                "relative group bg-background p-12 md:p-16 mx-auto flex flex-col transition-all duration-300",
-                viewMode !== 'carousel' && 'shadow-[0_0_50px_-12px_rgba(0,0,0,0.15)] hover:shadow-[0_0_60px_-12px_rgba(0,0,0,0.25)] my-8 rounded-sm',
+                "relative group bg-background p-16 md:p-20 mx-auto flex flex-col transition-all duration-500 ease-out",
+                viewMode !== 'carousel' && 'shadow-[0_0_80px_-20px_rgba(0,0,0,0.15),0_0_40px_-10px_rgba(0,0,0,0.05)] hover:shadow-[0_0_100px_-20px_rgba(0,0,0,0.2),0_0_50px_-10px_rgba(var(--primary),0.05)] my-12 rounded-sm',
                 viewMode === 'single' && 'w-full max-w-[210mm] min-h-[297mm] box-border border border-border/40 dark:border-border/20',
-                viewMode === 'continuous' && 'w-full max-w-4xl shadow-none border-none rounded-none p-0 md:p-0',
+                viewMode === 'continuous' && 'w-full max-w-5xl shadow-none border-none rounded-none p-0 md:p-0',
                 viewMode === 'carousel' && 'w-full h-full shadow-2xl box-border border border-border/40 dark:border-border/20',
                 className
             )}
@@ -27,24 +27,52 @@ export const A4Page = ({ children, title, className, viewMode = 'single' }: A4Pa
                 transformOrigin: 'top center',
             }}
         >
+            {/* Technical Crop Marks */}
+            <div className="absolute top-4 left-4 w-8 h-px bg-primary/10" />
+            <div className="absolute top-4 left-4 w-px h-8 bg-primary/10" />
+            <div className="absolute top-4 right-4 w-8 h-px bg-primary/10" />
+            <div className="absolute top-4 right-4 w-px h-8 bg-primary/10" />
+            <div className="absolute bottom-4 left-4 w-8 h-px bg-primary/10" />
+            <div className="absolute bottom-4 left-4 w-px h-8 bg-primary/10" />
+            <div className="absolute bottom-4 right-4 w-8 h-px bg-primary/10" />
+            <div className="absolute bottom-4 right-4 w-px h-8 bg-primary/10" />
+
+            {/* Premium Lighting Gradient */}
+            <div className="absolute inset-0 pointer-events-none bg-gradient-to-br from-white/[0.02] via-transparent to-black/[0.01] dark:from-white/[0.01] dark:to-transparent" />
+            
             {/* Page Edge Decoration */}
-            <div className="absolute inset-0 pointer-events-none border-[0.5px] border-black/5 dark:border-white/5 rounded-sm" />
+            <div className="absolute inset-0 pointer-events-none border-[0.5px] border-black/5 dark:border-white/5 rounded-sm ring-1 ring-black/[0.02] dark:ring-white/[0.02]" />
             
             {title && (
-                <div className="relative mb-10 group/title">
-                    <h2 className="text-3xl font-bold font-headline text-foreground tracking-tight">{title}</h2>
-                    <div className="h-1 w-12 bg-primary mt-3 rounded-full group-hover:w-24 transition-all duration-500" />
+                <div className="relative mb-12 group/title">
+                    <div className="flex items-center gap-3 mb-2 opacity-40 group-hover/title:opacity-100 transition-opacity duration-500">
+                        <div className="h-px w-6 bg-primary/40" />
+                        <span className="text-[9px] font-black uppercase tracking-[0.3em] text-primary">Manifest Section</span>
+                    </div>
+                    <h2 className="text-4xl font-black font-headline text-foreground tracking-tighter leading-none mb-4">{title}</h2>
+                    <div className="h-1.5 w-16 bg-gradient-to-r from-primary via-primary/60 to-transparent rounded-full group-hover:w-32 transition-all duration-700 ease-in-out" />
                 </div>
             )}
             
-            <div className="prose dark:prose-invert max-w-none text-[15px] leading-relaxed flex-grow font-serif selection:bg-primary/10">
+            <div className="prose dark:prose-invert max-w-none text-[16px] leading-[1.75] flex-grow font-serif selection:bg-primary/20 prose-p:mb-6 prose-headings:font-black prose-headings:tracking-tighter prose-headings:text-foreground prose-strong:text-foreground prose-blockquote:border-primary/40 prose-blockquote:bg-primary/[0.02] prose-blockquote:px-6 prose-blockquote:py-1 prose-blockquote:rounded-r-xl">
                 {children}
             </div>
 
-            {/* Subtle Page Footer */}
-            <div className="mt-12 pt-6 border-t border-border/40 flex justify-between items-center text-[10px] text-muted-foreground font-medium uppercase tracking-widest opacity-40 group-hover:opacity-100 transition-opacity">
-                <span>Arkan Intelligent Writer</span>
-                <span>Page 1</span>
+            {/* High-Fidelity Page Footer */}
+            <div className="mt-16 pt-8 border-t border-border/40 flex justify-between items-end text-[9px] text-muted-foreground font-black uppercase tracking-[0.2em] group-hover:text-primary transition-colors duration-500">
+                <div className="flex flex-col gap-1">
+                    <div className="flex items-center gap-2">
+                        <div className="h-1.5 w-1.5 rounded-full bg-primary animate-pulse" />
+                        <span>Arkan Intelligent Synthesis Engine</span>
+                    </div>
+                    <span className="opacity-40 font-bold ml-3.5 tracking-widest">Document Artifact v1.0</span>
+                </div>
+                <div className="flex items-center gap-4">
+                    <span className="opacity-40 font-bold">A4 Production Standard</span>
+                    <div className="px-2 py-1 bg-muted/20 border rounded-md min-w-[40px] text-center tabular-nums">
+                        Page 01
+                    </div>
+                </div>
             </div>
         </div>
     );
