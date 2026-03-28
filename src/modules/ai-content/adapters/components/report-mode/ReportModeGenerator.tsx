@@ -96,33 +96,46 @@ export default function ReportModeGenerator({ initialProject }: { initialProject
         <div className="relative flex-grow flex flex-col bg-background min-h-screen overflow-hidden">
             <OnboardingGuide isOpen={showOnboarding} onOpenChange={setShowOnboarding} onComplete={handleOnboardingComplete} />
             <Suspense fallback={<BuilderPageSkeleton />}>
-            {/* Premium Sticky Global Header */}
-            <header className="h-16 border-b bg-background/80 backdrop-blur-xl sticky top-0 z-50 px-6 flex items-center justify-between transition-all duration-500">
-                <div className="flex items-center gap-4">
-                    <div className="h-9 w-9 rounded-xl bg-primary flex items-center justify-center shadow-lg shadow-primary/20 animate-in zoom-in-50 duration-700">
-                        <BookOpenText className="h-5 w-5 text-primary-foreground" />
+            {/* High-Fidelity Command Bridge */}
+            <header className="h-16 border-b border-border/40 bg-background/40 backdrop-blur-2xl sticky top-0 z-50 px-8 flex items-center justify-between transition-all duration-700 ease-in-out group/header overflow-hidden">
+                {/* Animated Grid Overlay */}
+                <div className="absolute inset-0 opacity-[0.02] pointer-events-none" style={{ backgroundImage: 'radial-gradient(circle at 2px 2px, hsl(var(--primary)) 1px, transparent 0)', backgroundSize: '32px 32px' }} />
+                
+                <div className="flex items-center gap-6 relative z-10">
+                    <div className="relative group/logo">
+                        <div className="absolute -inset-1.5 bg-primary/20 rounded-xl blur opacity-0 group-hover/logo:opacity-100 transition duration-500" />
+                        <div className="relative h-10 w-10 rounded-xl bg-primary flex items-center justify-center shadow-xl shadow-primary/20 animate-in zoom-in-50 duration-700 border border-primary/20">
+                            <BookOpenText className="h-5 w-5 text-primary-foreground" />
+                        </div>
                     </div>
+                    
                     <div className="flex flex-col min-w-0">
-                        <div className="flex items-center gap-2">
-                            <Input
-                                className="text-lg font-headline font-bold tracking-tight text-foreground border-0 focus-visible:ring-0 focus-visible:ring-offset-0 p-0 h-auto bg-transparent truncate max-w-[200px] lg:max-w-[400px]"
-                                value={project?.name || ''}
-                                onChange={(e) => updateProjectName(e.target.value)}
-                                onBlur={() => updateProject(p => p)}
-                                placeholder={'UNTITLED PROJECT'}
-                            />
-                            <Badge variant="outline" className="h-5 text-[9px] uppercase tracking-widest font-bold border-primary/20 text-primary bg-primary/5 hidden sm:flex">
-                                Pro Node
+                        <div className="flex items-center gap-3">
+                            <div className="relative group/input">
+                                <Input
+                                    className="text-lg font-black tracking-tighter text-foreground border-0 focus-visible:ring-0 focus-visible:ring-offset-0 p-0 h-auto bg-transparent truncate max-w-[200px] lg:max-w-[400px] transition-all duration-300"
+                                    value={project?.name || ''}
+                                    onChange={(e) => updateProjectName(e.target.value)}
+                                    onBlur={() => updateProject(p => p)}
+                                    placeholder={'UNTITLED_MANIFEST'}
+                                />
+                                <div className="absolute bottom-0 left-0 w-0 h-px bg-primary/40 group-focus-within/input:w-full transition-all duration-500" />
+                            </div>
+                            <Badge variant="outline" className="h-5 text-[9px] font-black uppercase tracking-[0.2em] border-primary/20 text-primary bg-primary/5 ring-1 ring-primary/10">
+                                Pro Node_v1.0
                             </Badge>
                         </div>
-                        <p className="text-[9px] text-muted-foreground font-bold uppercase tracking-[0.2em] leading-none opacity-40">
-                            Arkan Intelligent Document Suite
-                        </p>
+                        <div className="flex items-center gap-2 mt-1.5 opacity-40 group-hover/header:opacity-100 transition-opacity duration-500">
+                            <div className="h-1 w-1 rounded-full bg-primary animate-pulse shadow-[0_0_5px_rgba(var(--primary),0.8)]" />
+                            <p className="text-[8px] font-black uppercase tracking-[0.3em] text-muted-foreground leading-none">
+                                Intelligence Workspace Synthesis
+                            </p>
+                        </div>
                     </div>
                 </div>
 
-                <div className="flex items-center gap-3">
-                    <SessionActions isSaving={false} />
+                <div className="flex items-center gap-4 relative z-10">
+                    <SessionActions isSaving={saveProjectMutation.isPending} />
                 </div>
             </header>
 

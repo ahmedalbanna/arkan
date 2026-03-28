@@ -120,34 +120,45 @@ export function Header() {
   }, []);
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b bg-background/80 backdrop-blur-xl supports-[backdrop-filter]:bg-background/60 transition-all duration-500">
-      <div className="flex h-16 items-center px-6 justify-between mx-auto">
+    <header className="sticky top-0 z-50 w-full border-b bg-background/60 backdrop-blur-2xl transition-all duration-700 ease-in-out group/header">
+      <div className="flex h-16 items-center px-6 justify-between mx-auto relative overflow-hidden">
+        {/* Animated Intelligence Grid Background */}
+        <div className="absolute inset-0 z-[-1] opacity-[0.03] pointer-events-none" style={{ backgroundImage: 'radial-gradient(circle at 2px 2px, hsl(var(--primary)) 1px, transparent 0)', backgroundSize: '24px 24px' }} />
+        <div className="absolute left-0 bottom-0 w-full h-px bg-gradient-to-r from-transparent via-primary/20 to-transparent opacity-0 group-hover/header:opacity-100 transition-opacity duration-1000" />
+
         <div className="flex items-center gap-4">
           <MobileNav navLinks={navLinks} />
-          <Link href="/" className="flex items-center gap-3 group">
-            <div className="h-9 w-9 rounded-xl bg-primary flex items-center justify-center shadow-lg shadow-primary/20 group-hover:scale-110 transition-transform duration-500">
-              <BookOpenText className="h-5 w-5 text-primary-foreground" />
+          <Link href="/" className="flex items-center gap-4 group/logo">
+            <div className="relative">
+                <div className="absolute -inset-1 bg-primary/20 rounded-xl blur opacity-0 group-hover/logo:opacity-100 transition duration-500" />
+                <div className="relative h-10 w-10 rounded-xl bg-primary flex items-center justify-center shadow-xl shadow-primary/20 group-hover:scale-105 transition-all duration-500 border border-primary/20 overflow-hidden">
+                    <BookOpenText className="h-5 w-5 text-primary-foreground relative z-10" />
+                    <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent opacity-0 group-hover/logo:opacity-100 transition-opacity" />
+                </div>
             </div>
             <div className="flex flex-col">
-              <span className="font-headline text-lg font-bold tracking-tight text-foreground leading-none">
+              <span className="font-headline text-[1.1rem] font-black tracking-tighter text-foreground leading-none">
                 {isClient ? t('header.title') : <Skeleton className="h-5 w-24" />}
               </span>
-              <span className="text-[9px] font-bold uppercase tracking-[0.2em] text-primary/60 mt-1 leading-none">
-                AI Intelligence
-              </span>
+              <div className="flex items-center gap-1.5 mt-1.5">
+                 <div className="h-1 w-1 rounded-full bg-primary animate-pulse shadow-[0_0_5px_rgba(var(--primary),0.8)]" />
+                 <span className="text-[8px] font-black uppercase tracking-[0.3em] text-primary/60 leading-none">
+                    Synthesis Core v1.0
+                 </span>
+              </div>
             </div>
           </Link>
         </div>
 
         {isClient && <NavLinks />}
 
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-5">
           <div className="flex items-center gap-2">
             {isClient ? (
               isLoading ? (
-                <div className="flex items-center gap-2">
-                  <Skeleton className="h-9 w-24 rounded-xl" />
-                  <Skeleton className="h-9 w-9 rounded-full" />
+                <div className="flex items-center gap-3">
+                  <Skeleton className="h-9 w-28 rounded-xl" />
+                  <Skeleton className="h-10 w-10 rounded-full" />
                 </div>
               ) : user ? (
                 <AuthActions />
@@ -155,17 +166,18 @@ export function Header() {
                 <GuestActions />
               )
             ) : (
-              <div className="flex items-center gap-2">
-                <Skeleton className="h-9 w-24 rounded-xl" />
-                <Skeleton className="h-9 w-9 rounded-full" />
+              <div className="flex items-center gap-3">
+                <Skeleton className="h-9 w-28 rounded-xl" />
+                <Skeleton className="h-10 w-10 rounded-full" />
               </div>
             )}
           </div>
 
-          <div className="h-6 w-px bg-border/40 hidden md:block" />
+          <div className="h-5 w-px bg-primary/10 hidden md:block" />
 
-          <div className="hidden md:flex items-center gap-1.5 bg-muted/20 p-1 rounded-xl border border-border/40 shadow-inner">
+          <div className="hidden md:flex items-center gap-1.5 bg-muted/5 p-1 rounded-xl border border-primary/10 shadow-inner backdrop-blur-md">
             <ThemeToggle />
+            <div className="h-3 w-px bg-primary/10 mx-0.5" />
             <LanguageToggle />
           </div>
         </div>
