@@ -40,16 +40,22 @@ export function CollapsibleSidePanel({
 
   return (
     <div className={cn(
-      "self-start flex bg-card border border-border/40 rounded-[24px] shadow-2xl shadow-primary/5 h-full overflow-hidden",
+      "flex bg-background/40 backdrop-blur-xl border border-primary/10 rounded-[28px] shadow-[0_8px_40px_rgba(0,0,0,0.04)] overflow-hidden transition-all duration-500",
       isLeft ? "flex-row" : "flex-row-reverse",
       isMobile && "mb-16",
       className
     )}>
-      {/* Sidebar HUD */}
+      {/* Sidebar HUD - Technical Control Bar */}
       <div className={cn(
-        "flex flex-col gap-3 bg-muted/5 p-3 backdrop-blur-sm",
-        isLeft ? "border-r border-border/40 shadow-[1px_0_10px_rgba(0,0,0,0.02)]" : "border-l border-border/40 shadow-[-1px_0_10px_rgba(0,0,0,0.02)]"
+        "flex flex-col gap-4 bg-muted/5 p-3.5 relative",
+        isLeft ? "border-r border-primary/5 shadow-[2px_0_15px_rgba(0,0,0,0.02)]" : "border-l border-primary/5 shadow-[-2px_0_15px_rgba(0,0,0,0.02)]"
       )}>
+        {/* Vertical Depth Accent */}
+        <div className={cn(
+            "absolute inset-y-0 w-0.5 bg-gradient-to-b from-transparent via-primary/20 to-transparent opacity-40",
+            isLeft ? "right-0" : "left-0"
+        )} />
+
         <TooltipProvider>
           {panels.map((panel) => {
             const isActive = activeKey === panel.key;
@@ -62,17 +68,22 @@ export function CollapsibleSidePanel({
                     onClick={() => onActiveKeyChange(panel.key)} 
                     aria-label={panel.title} 
                     className={cn(
-                        "h-10 w-10 rounded-xl transition-all duration-300",
+                        "h-11 w-11 rounded-[14px] transition-all duration-500 relative group/icon",
                         isActive 
-                            ? "bg-primary text-primary-foreground shadow-lg shadow-primary/20 scale-[1.05]" 
-                            : "text-muted-foreground hover:bg-primary/10 hover:text-primary"
+                            ? "bg-primary text-primary-foreground shadow-[0_0_20px_rgba(var(--primary),0.4)] scale-[1.05] ring-2 ring-white/20" 
+                            : "text-muted-foreground hover:bg-primary/10 hover:text-primary hover:scale-110"
                     )}
                   >
-                    {panel.icon}
+                    <div className="relative z-10 transition-transform duration-500 group-hover/icon:scale-110">
+                        {panel.icon}
+                    </div>
+                    {isActive && (
+                        <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent rounded-[14px] opacity-40" />
+                    )}
                   </Button>
                 </TooltipTrigger>
-                <TooltipContent side={isLeft ? "right" : "left"} className="bg-background/80 backdrop-blur-md border border-white/20 shadow-xl py-1.5 px-3">
-                  <p className="text-[10px] font-bold uppercase tracking-widest">{panel.title}</p>
+                <TooltipContent side={isLeft ? "right" : "left"} className="bg-background/95 backdrop-blur-xl border border-primary/20 shadow-2xl py-2 px-4 rounded-xl">
+                  <p className="text-[9px] font-black uppercase tracking-[0.2em] text-primary">{panel.title}</p>
                 </TooltipContent>
               </Tooltip>
             );
@@ -80,23 +91,23 @@ export function CollapsibleSidePanel({
         </TooltipProvider>
       </div>
 
-      {/* Content Area */}
-      <div className="flex-1 overflow-hidden h-full relative">
-        <div className="h-full w-full overflow-auto custom-scrollbar">
+      {/* Content Area - Intelligence Feed */}
+      <div className="flex-1 overflow-hidden relative">
+        <div className="h-full w-full overflow-auto custom-scrollbar bg-radial-gradient from-primary/[0.02] to-transparent">
             <div 
                 key={activeKey} 
                 className={cn(
-                    "p-6 md:p-8 h-full min-w-0 animate-in fade-in duration-500",
-                    isLeft ? "slide-in-from-left-2" : "slide-in-from-right-2"
+                    "p-8 md:p-10 min-w-0 animate-in fade-in duration-300",
+                    isLeft ? "slide-in-from-left-4" : "slide-in-from-right-4"
                 )}
             >
                 {activePanel?.content}
             </div>
         </div>
         
-        {/* Subtle Edge Decoration */}
+        {/* Subtle Content Edge Decoration */}
         <div className={cn(
-            "absolute inset-y-0 pointer-events-none w-px opacity-20",
+            "absolute inset-y-0 pointer-events-none w-px opacity-10",
             isLeft ? "right-0 bg-gradient-to-b from-transparent via-primary to-transparent" : "left-0 bg-gradient-to-b from-transparent via-primary to-transparent"
         )} />
       </div>

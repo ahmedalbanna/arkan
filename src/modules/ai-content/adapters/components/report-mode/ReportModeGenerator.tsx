@@ -231,12 +231,12 @@ export default function ReportModeGenerator({ initialProject }: { initialProject
                                 <ResizablePanelGroup direction="horizontal" className="h-full items-stretch">
                                     {/* Left Zone - Setup Tools */}
                                     <ResizablePanel defaultSize={22} minSize={18} maxSize={35}>
-                                        <div className="h-full pr-3">
+                                        <div className="h-full pr-3 flex flex-col min-h-0">
                                             <CollapsibleSidePanel
                                                 panels={leftPanels}
                                                 activeKey={activePanelKey}
                                                 onActiveKeyChange={setActivePanelKey}
-                                                className="h-full border-none shadow-none bg-transparent"
+                                                className="flex-1 min-h-0"
                                             />
                                         </div>
                                     </ResizablePanel>
@@ -245,7 +245,7 @@ export default function ReportModeGenerator({ initialProject }: { initialProject
 
                                     {/* Center Zone - Document Canvas */}
                                     <ResizablePanel defaultSize={56} minSize={40}>
-                                        <div className="h-full px-3">
+                                        <div className="h-full px-3 flex flex-col min-h-0">
                                             <ReportResults activePanelKey={activePanelKey} />
                                         </div>
                                     </ResizablePanel>
@@ -254,13 +254,13 @@ export default function ReportModeGenerator({ initialProject }: { initialProject
 
                                     {/* Right Zone - AI Context */}
                                     <ResizablePanel defaultSize={22} minSize={18} maxSize={35}>
-                                        <div className="h-full pl-3">
+                                        <div className="h-full pl-3 flex flex-col min-h-0">
                                             <CollapsibleSidePanel
                                                 panels={rightPanels}
                                                 activeKey={activeRightPanelKey}
                                                 onActiveKeyChange={setActiveRightPanelKey}
                                                 side="right"
-                                                className="h-full border-none shadow-none bg-transparent"
+                                                className="flex-1 min-h-0"
                                             />
                                         </div>
                                     </ResizablePanel>
