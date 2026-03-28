@@ -12,6 +12,8 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/comp
 import { cn } from '@/infrastructure/utils/cn';
 import { SessionActions } from '@/modules/ai-content/adapters/components/report-mode/session/SessionActions';
 import { useReportGenerator } from '@/modules/ai-content/adapters/hooks/report-mode/useReportGenerator';
+import { useKeyboardShortcuts } from '@/modules/ai-content/adapters/hooks/report-mode/useKeyboardShortcuts';
+import { useSaveProject } from '@/modules/projects/adapters/hooks/use-projects';
 import { type ProjectProperties } from '@/modules/projects/domain/entities/Project';
 import { BookOpenText, Settings, ZoomIn, ZoomOut } from 'lucide-react';
 import { Suspense, lazy } from 'react';
@@ -72,6 +74,19 @@ export default function ReportModeGenerator({ initialProject }: { initialProject
     const handleZoomIn = () => setZoomLevel(prev => Math.min(2, prev + 0.1));
     const handleZoomOut = () => setZoomLevel(prev => Math.max(0.5, prev - 0.1));
     const handleZoomReset = () => setZoomLevel(1);
+
+    const { saveProjectMutation } = useSaveProject();
+
+    useKeyboardShortcuts({
+        onSave: () => {
+            if (project) {
+                saveProjectMutation.mutate(project.toStateObject());
+            }
+        },
+        onZoomIn: handleZoomIn,
+        onZoomOut: handleZoomOut,
+        onZoomReset: handleZoomReset,
+    });
 
     if (!isStoreInitialized || !project) {
         return <BuilderPageSkeleton />;

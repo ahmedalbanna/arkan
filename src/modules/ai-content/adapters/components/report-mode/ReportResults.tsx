@@ -12,7 +12,7 @@ import { useLocalization } from '@/context/LocalizationContext';
 import { useBuilderStore } from '@/hooks';
 import MarkdownEditor from './MarkdownEditor';
 import { CoverPage } from '@/components/shared/CoverPage';
-import { BookOpenCheck, Brush, LayoutList, Bot, FileVideo, FileText, ChevronDown, Lightbulb, History } from 'lucide-react';
+import { BookOpenCheck, Brush, LayoutList, Bot, FileVideo, FileText, ChevronDown, Lightbulb, History, Maximize2, Minimize2 } from 'lucide-react';
 import { TableOfContentForm } from './TableOfContentForm';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { formatDistanceToNow } from 'date-fns';
@@ -21,6 +21,7 @@ import { FileContentViewer } from './file-manager/FileContentViewer';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Separator } from '@/components/ui/separator';
 import { SessionActions } from './session/SessionActions';
+import { cn } from '@/infrastructure/utils/cn';
 
 const ReportSteps = () => {
   const { t } = useLocalization();
@@ -87,6 +88,34 @@ const ReportResults = ({ activePanelKey }: ReportResultsProps) => {
   const updateProjectFromMarkdown = useBuilderStore(state => state.updateProjectFromMarkdown);
   const selectedFileId = useBuilderStore(state => state.selectedFileId);
   const [isSuggestionVisible, setIsSuggestionVisible] = useState(true);
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  const containerRef = React.useRef<HTMLDivElement>(null);
+
+  const toggleFullscreen = () => {
+    if (!containerRef.current) return;
+
+    if (!document.fullscreenElement) {
+      containerRef.current.requestFullscreen().then(() => {
+        setIsFullscreen(true);
+      }).catch(err => {
+        console.error(`Error attempting to enable full-screen mode: ${err.message}`);
+      });
+    } else {
+      document.exitFullscreen();
+      setIsFullscreen(false);
+    }
+  };
+
+  React.useEffect(() => {
+    const handleFullscreenChange = () => {
+      setIsFullscreen(!!document.fullscreenElement);
+    };
+
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
+    return () => {
+      document.removeEventListener('fullscreenchange', handleFullscreenChange);
+    };
+  }, []);
 
   const handleContentChange = (newMarkdown: string) => {
     updateProjectFromMarkdown(newMarkdown);
@@ -158,7 +187,10 @@ const ReportResults = ({ activePanelKey }: ReportResultsProps) => {
   }
 
   return (
-    <div className="h-full flex flex-col overflow-hidden rounded-xl border bg-card text-card-foreground shadow-md transition-all duration-500">
+    <div ref={containerRef} className={cn(
+        "h-full flex flex-col overflow-hidden rounded-xl border bg-card text-card-foreground shadow-md transition-all duration-500",
+        isFullscreen && "fixed inset-0 z-[100] rounded-none border-none"
+    )}>
       {/* Document View Status Toolbar */}
       <div className="flex items-center justify-between px-6 py-2.5 border-b bg-muted/10 backdrop-blur-md sticky top-0 z-10">
         <div className="flex items-center gap-3">
@@ -175,6 +207,22 @@ const ReportResults = ({ activePanelKey }: ReportResultsProps) => {
 
         <div className="flex items-center gap-2">
           <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-7 w-7 hover:bg-primary/5 hover:text-primary"
+                  onClick={toggleFullscreen}
+                >
+                  {isFullscreen ? <Minimize2 className="h-3.5 w-3.5" /> : <Maximize2 className="h-3.5 w-3.5" />}
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent side="bottom" className="text-[10px] font-bold uppercase tracking-widest">
+                {isFullscreen ? "Exit Fullscreen" : "Enter Fullscreen"}
+              </TooltipContent>
+            </Tooltip>
+
             <Tooltip>
               <TooltipTrigger asChild>
                 <Button variant="ghost" size="sm" className="h-7 text-[10px] font-bold uppercase tracking-wider gap-2 px-2 hover:bg-primary/5 hover:text-primary">
