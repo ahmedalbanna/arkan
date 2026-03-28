@@ -8,7 +8,8 @@ import { useBuilderStore } from '@/hooks';
 import { useAiActions } from '@/modules/ai-content/adapters/hooks/report-mode/use-ai-actions';
 import { Section } from '@/modules/ai-content/domain/entities/Section';
 import { cn } from '@/infrastructure/utils/cn';
-import { Link as LinkIcon, Loader2, SlidersHorizontal, Sparkles, StickyNote } from 'lucide-react';
+import { Link as LinkIcon, Loader2, SlidersHorizontal, Sparkles, StickyNote, Square } from 'lucide-react';
+import { useGenerationUIStore } from '@/modules/ai-content/adapters/state/useGenerationUIStore';
 import { SectionContextSelector } from '../section-controls/SectionContextSelector';
 import { SectionGenerationControls } from '../section-controls/SectionGenerationControls';
 import { GuidelineEditor } from '../section-controls/SectionGuidelineEditor';
@@ -23,6 +24,7 @@ interface SectionTabsPanelProps {
 export function SectionTabsPanel({ section, selectedSectionIds = [], className }: SectionTabsPanelProps) {
   const { t } = useLocalization();
   const { userProfile, project } = useBuilderStore();
+  const { isBulkGenerating, requestAbort, abortRequested } = useGenerationUIStore();
   const { generateSectionMutation, generateChapterMutation, generateProjectMutation } = useAiActions();
 
   if (!section) {
@@ -53,6 +55,11 @@ export function SectionTabsPanel({ section, selectedSectionIds = [], className }
   const canGenerate = hasCredits && !isAnythingGenerating;
 
   function handleGenerateClick() {
+    if (isBulkGenerating) {
+      requestAbort();
+      return;
+    }
+
     if (!canGenerate || !project) return;
     
     if (isBulkGeneration) {
@@ -83,17 +90,32 @@ export function SectionTabsPanel({ section, selectedSectionIds = [], className }
               <TooltipTrigger asChild>
                 <Button
                   onClick={handleGenerateClick}
-                  disabled={!canGenerate}
-                  className="w-full font-bold h-10 gap-2 shadow-lg shadow-primary/20 animate-in fade-in slide-in-from-bottom-2 duration-500"
+                  disabled={!canGenerate && !isBulkGenerating}
+                  variant={isBulkGenerating ? "destructive" : "default"}
+                  className={cn(
+                    "w-full font-bold h-10 gap-2 shadow-lg animate-in fade-in slide-in-from-bottom-2 duration-500",
+                    !isBulkGenerating && "shadow-primary/20"
+                  )}
                 >
-                  {isGenerating ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
-                  {isBulkGeneration 
-                    ? `Generate ${selectedSectionIds.length} Sections` 
-                    : t('builder.reportGenerator.generateButton')}
+                  {isBulkGenerating ? (
+                    <>
+                      <Square className="h-3.5 w-3.5 fill-current" />
+                      {abortRequested ? "Stopping..." : "Stop Generation"}
+                    </>
+                  ) : (
+                    <>
+                      {isGenerating ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
+                      {isBulkGeneration 
+                        ? `Generate ${selectedSectionIds.length} Sections` 
+                        : t('builder.reportGenerator.generateButton')}
+                    </>
+                  )}
                 </Button>
               </TooltipTrigger>
               <TooltipContent side="bottom" className="text-[10px]">
-                {!canGenerate ? (
+                {isBulkGenerating ? (
+                  <p>Cancel the remaining sections in this batch.</p>
+                ) : !canGenerate ? (
                   <p>{isAnythingGenerating ? "Another generation is in progress." : "Insufficient credits."}</p>
                 ) : (
                   <p>Cost: {creditCost} {creditCost === 1 ? 'Credit' : 'Credits'}</p>

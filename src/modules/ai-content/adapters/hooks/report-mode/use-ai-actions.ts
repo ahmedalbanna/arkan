@@ -19,6 +19,7 @@ import { Section } from '@/modules/ai-content/domain/entities/Section';
 import { type ExternalContextType } from '@/modules/ai-content/domain/entities/ControlTypes';
 import { parseMarkdownToContent } from '@/modules/projects/infrastructure/io/markdown-parser';
 import { useEditorStore } from '@/modules/ai-content/adapters/state/use-editor-store';
+import { useGenerationUIStore } from '@/modules/ai-content/adapters/state/useGenerationUIStore';
 import { projectKeys } from '@/infrastructure/api/query-keys';
 import { runAuthenticatedResultCall } from '@/infrastructure/api/authenticated-client-call';
 
@@ -233,11 +234,26 @@ export function useAiActions({ editor: initialEditor }: AiActionsProps = {}) {
       if (!user) throw new Error('User not found.');
       if (selectedSectionIds.size === 0) throw new Error('No sections were selected for generation.');
 
-      for (const sectionId of selectedSectionIds) {
-        await generateSectionMutation.mutateAsync(sectionId);
+      const { startBulk, stopBulk } = useGenerationUIStore.getState();
+      startBulk();
+
+      try {
+        for (const sectionId of selectedSectionIds) {
+          if (useGenerationUIStore.getState().abortRequested) {
+            toast({ title: 'Generation Stopped', description: 'Bulk generation was canceled by user.' });
+            break;
+          }
+          await generateSectionMutation.mutateAsync(sectionId);
+        }
+      } finally {
+        stopBulk();
       }
     },
-    onSuccess: () => toast({ title: 'Project Build Complete', description: 'All selected sections have been successfully generated.' }),
+    onSuccess: () => {
+        if (!useGenerationUIStore.getState().abortRequested) {
+            toast({ title: 'Project Build Complete', description: 'All selected sections have been successfully generated.' });
+        }
+    },
     onError: (error: Error) => toast({ title: 'Project Build Failed', description: error.message, variant: 'destructive' }),
   });
 

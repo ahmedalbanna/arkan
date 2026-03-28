@@ -12,23 +12,23 @@ type GuidelineState = {
 };
 
 interface GenerationUIState {
-
   guidelineState: Record<string, GuidelineState>;
+  isBulkGenerating: boolean;
+  abortRequested: boolean;
   initializeGuidelines: (key: string, defaultGuidelines: any[]) => void;
-
   handleGuidelineToggle: (key: string, index: number, checked: boolean) => void;
   addCustomGuideline: (key: string, guideline: string) => void;
   removeCustomGuideline: (key: string, index: number) => void;
+  startBulk: () => void;
+  stopBulk: () => void;
+  requestAbort: () => void;
   resetAll: () => void;
 }
 
-
-
 export const useGenerationUIStore = create<GenerationUIState>((set, get) => ({
-
   guidelineState: {},
-
-
+  isBulkGenerating: false,
+  abortRequested: false,
 
   initializeGuidelines: (key, defaultGuidelines) => {
     if (!get().guidelineState[key]) {
@@ -93,9 +93,23 @@ export const useGenerationUIStore = create<GenerationUIState>((set, get) => ({
     });
   },
 
+  startBulk: () => {
+    set({ isBulkGenerating: true, abortRequested: false });
+  },
+
+  stopBulk: () => {
+    set({ isBulkGenerating: false, abortRequested: false });
+  },
+
+  requestAbort: () => {
+    set({ abortRequested: true });
+  },
+
   resetAll: () => {
     set({
       guidelineState: {},
+      isBulkGenerating: false,
+      abortRequested: false,
     });
   },
 }));
