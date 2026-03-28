@@ -17,9 +17,10 @@ import { useToast } from '@/hooks/util/use-toast';
 
 interface SectionContextSelectorProps {
   sectionId: string;
+  selectedSectionIds?: string[];
 }
 
-export function SectionContextSelector({ sectionId }: SectionContextSelectorProps) {
+export function SectionContextSelector({ sectionId, selectedSectionIds }: SectionContextSelectorProps) {
   const {
     t,
     reportSections,
@@ -140,7 +141,15 @@ export function SectionContextSelector({ sectionId }: SectionContextSelectorProp
                       <Checkbox
                         id={`context-sec-${sectionId}-${option.id}`}
                         checked={!!currentSelection.sections?.[option.id]}
-                        onCheckedChange={(checked) => handleContextChange(sectionId, 'sections', option.id, checked ? 'context' : false)}
+                        onCheckedChange={(checked) => {
+                          if (selectedSectionIds && selectedSectionIds.length > 0) {
+                            selectedSectionIds.forEach(id => {
+                              handleContextChange(id, 'sections', option.id, checked ? 'context' : false);
+                            });
+                          } else {
+                            handleContextChange(sectionId, 'sections', option.id, checked ? 'context' : false);
+                          }
+                        }}
                         className="h-3.5 w-3.5"
                       />
                       <span className="truncate flex-1 group-hover:text-primary transition-colors" title={option.label}>{option.label}</span>
@@ -170,7 +179,15 @@ export function SectionContextSelector({ sectionId }: SectionContextSelectorProp
                         <Checkbox
                           id={`context-file-${sectionId}-${option.id}`}
                           checked={!!currentSelection.externalContext?.[option.id]}
-                          onCheckedChange={(checked) => handleContextChange(sectionId, 'externalContext', option.id, checked ? 'context' : false)}
+                          onCheckedChange={(checked) => {
+                            if (selectedSectionIds && selectedSectionIds.length > 0) {
+                              selectedSectionIds.forEach(id => {
+                                handleContextChange(id, 'externalContext', option.id, checked ? 'context' : false);
+                              });
+                            } else {
+                              handleContextChange(sectionId, 'externalContext', option.id, checked ? 'context' : false);
+                            }
+                          }}
                           className="h-3.5 w-3.5"
                         />
                         <span className="truncate group-hover:text-primary transition-colors" title={option.label}>{option.label}</span>

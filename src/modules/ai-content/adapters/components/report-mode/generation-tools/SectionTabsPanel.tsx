@@ -16,10 +16,11 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 
 interface SectionTabsPanelProps {
   section: Section | null;
+  selectedSectionIds?: string[];
   className?: string;
 }
 
-export function SectionTabsPanel({ section, className }: SectionTabsPanelProps) {
+export function SectionTabsPanel({ section, selectedSectionIds = [], className }: SectionTabsPanelProps) {
   const { t } = useLocalization();
   const { userProfile } = useBuilderStore();
   const { generateSectionMutation, generateChapterMutation, generateProjectMutation } = useAiActions();
@@ -56,8 +57,12 @@ export function SectionTabsPanel({ section, className }: SectionTabsPanelProps) 
       <div className="px-4 pb-6 pt-2">
         <div className="flex flex-col gap-4">
           <div className="space-y-1 min-w-0">
-            <span className="text-[10px] font-bold uppercase tracking-widest text-primary/60">Active Context</span>
-            <h3 className="text-base font-bold font-headline truncate tracking-tight">{section.title}</h3>
+            <span className="text-[10px] font-bold uppercase tracking-widest text-primary/60">
+              {selectedSectionIds.length > 1 ? `Editing ${selectedSectionIds.length} Sections` : 'Active Context'}
+            </span>
+            <h3 className="text-base font-bold font-headline truncate tracking-tight">
+              {selectedSectionIds.length > 1 ? 'Bulk Configuration' : section.title}
+            </h3>
           </div>
 
           <TooltipProvider>
@@ -121,13 +126,22 @@ export function SectionTabsPanel({ section, className }: SectionTabsPanelProps) 
           <ScrollArea className="h-full px-4 pr-4 -mr-4">
             <div className="pb-20 pt-4">
               <TabsContent value="context" className="m-0 focus-visible:ring-0">
-                 <SectionContextSelector sectionId={section.id} />
+                 <SectionContextSelector 
+                    sectionId={section.id} 
+                    selectedSectionIds={selectedSectionIds.length > 1 ? selectedSectionIds : undefined} 
+                 />
               </TabsContent>
               <TabsContent value="prompt" className="m-0 focus-visible:ring-0">
-                 <GuidelineEditor itemKey={section.id} />
+                 <GuidelineEditor 
+                    itemKey={section.id} 
+                    selectedSectionIds={selectedSectionIds.length > 1 ? selectedSectionIds : undefined} 
+                 />
               </TabsContent>
               <TabsContent value="controls" className="m-0 focus-visible:ring-0">
-                 <SectionGenerationControls section={section} />
+                 <SectionGenerationControls 
+                    section={section} 
+                    selectedSectionIds={selectedSectionIds.length > 1 ? selectedSectionIds : undefined} 
+                 />
               </TabsContent>
             </div>
           </ScrollArea>

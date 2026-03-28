@@ -26,10 +26,12 @@ export function useReportGenerator(initialProject?: ProjectProperties | null) {
   const [activeRightPanelKey, setActiveRightPanelKey] = useState('section');
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [zoomLevel, setZoomLevel] = useState(1);
-  const [activeSectionId, setActiveSectionId] = useState<string | null>(null);
+  const [selectedSectionIds, setSelectedSectionIds] = useState<string[]>([]);
   const [activeChapterId, setActiveChapterId] = useState<string | null>(null);
   const { isSaving } = useSaveProject();
   const builderPageLogic = useBuilderPageLogic(initialProject);
+
+  const activeSectionId = selectedSectionIds.length > 0 ? selectedSectionIds[0] : null;
 
   useEffect(() => {
     document.documentElement.style.setProperty('--zoom-scale', String(zoomLevel));
@@ -40,11 +42,27 @@ export function useReportGenerator(initialProject?: ProjectProperties | null) {
 
   // Auto-switch to generation tools if a section or chapter is activated
   useEffect(() => {
-    if (activeSectionId || activeChapterId) {
+    if (selectedSectionIds.length > 0 || activeChapterId) {
       setActivePanelKey('generate');
       setActiveRightPanelKey('section');
     }
-  }, [activeSectionId, activeChapterId]);
+  }, [selectedSectionIds, activeChapterId]);
+
+  const handleActiveSectionChange = (id: string | null, multiSelect?: boolean) => {
+    if (multiSelect && id) {
+      setSelectedSectionIds(prev => {
+        if (prev.includes(id)) {
+          return prev.filter(sid => sid !== id);
+        } else {
+          return [...prev, id];
+        }
+      });
+      setActiveChapterId(null);
+    } else {
+      setSelectedSectionIds(id ? [id] : []);
+      if (id) setActiveChapterId(null);
+    }
+  };
 
   const leftPanels = useMemo(() => [
     {
@@ -70,18 +88,16 @@ export function useReportGenerator(initialProject?: ProjectProperties | null) {
         title: t('builder.reportGenerator.toolsTitle'),
         icon: React.createElement(BookOpenCheck, { className: "h-5 w-5" }),
         content: React.createElement(GenerationTools, {
-          activeSectionId,
-          onActiveSectionChange: (id) => {
-            setActiveSectionId(id);
-            if (id) setActiveChapterId(null);
-          },
+          selectedSectionIds,
+          onActiveSectionChange: handleActiveSectionChange,
           onActiveChapterChange: (id) => {
             setActiveChapterId(id);
-            if (id) setActiveSectionId(null);
+            if (id) setSelectedSectionIds([]);
           },
+          activeChapterId,
         }),
     },
-  ], [t, activeSectionId, activeChapterId]);
+  ], [t, selectedSectionIds, activeChapterId]);
 
   const rightPanels = useMemo(() => {
     const activeSection = activeSectionId ? builderPageLogic.project?.getSection(activeSectionId) ?? null : null;
@@ -90,11 +106,14 @@ export function useReportGenerator(initialProject?: ProjectProperties | null) {
     return [
       {
           key: 'section',
-          title: activeChapterId ? 'Chapter Tools' : 'Section Controls',
+          title: activeChapterId ? 'Chapter Tools' : selectedSectionIds.length > 1 ? 'Bulk Editor' : 'Section Controls',
           icon: React.createElement(Sparkles, { className: "h-5 w-5" }),
           content: activeChapterId 
             ? React.createElement(ChapterTabsPanel, { chapter: activeChapter })
-            : React.createElement(SectionTabsPanel, { section: activeSection }),
+            : React.createElement(SectionTabsPanel, { 
+                section: activeSection,
+                selectedSectionIds: selectedSectionIds.length > 1 ? selectedSectionIds : undefined 
+              }),
       },
       {
           key: 'global',
@@ -109,7 +128,7 @@ export function useReportGenerator(initialProject?: ProjectProperties | null) {
           content: React.createElement(ProjectChat, { isOpen: true, onClose: () => setActiveRightPanelKey('section') }),
       },
     ];
-  }, [activeSectionId, activeChapterId, builderPageLogic.project]);
+  }, [activeSectionId, activeChapterId, selectedSectionIds, builderPageLogic.project]);
 
   return {
     ...builderPageLogic,
@@ -129,8 +148,8 @@ export function useReportGenerator(initialProject?: ProjectProperties | null) {
     setIsChatOpen,
     zoomLevel,
     setZoomLevel,
-    activeSectionId,
-    setActiveSectionId,
+    selectedSectionIds,
+    handleActiveSectionChange,
     activeChapterId,
     setActiveChapterId,
   };

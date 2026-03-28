@@ -33,14 +33,14 @@ import { SectionAccordionItem } from "./SectionAccordionItem";
 import { SortableChapterItem } from "./SortableChapterItem";
 
 interface GenerationToolsProps {
-  activeSectionId: string | null;
+  selectedSectionIds: string[];
   activeChapterId?: string | null;
-  onActiveSectionChange: (sectionId: string | null) => void;
+  onActiveSectionChange: (sectionId: string | null, multiSelect?: boolean) => void;
   onActiveChapterChange?: (chapterId: string | null) => void;
 }
 
 export default function GenerationTools({
-  activeSectionId,
+  selectedSectionIds,
   activeChapterId,
   onActiveSectionChange,
   onActiveChapterChange,
@@ -70,8 +70,8 @@ export default function GenerationTools({
 
   const canBuildProject = project && project.content.length > 0;
 
-  const handleActivateSection = (sectionId: string) => {
-    onActiveSectionChange(sectionId);
+  const handleActivateSection = (sectionId: string, multiSelect?: boolean) => {
+    onActiveSectionChange(sectionId, multiSelect);
   };
 
   const handleActivateChapter = (chapterId: string) => {
@@ -130,10 +130,11 @@ export default function GenerationTools({
                               selectedSectionsForBuild={selectedSectionsForBuild}
                               toggleChapterSelection={toggleChapterSelection}
                               toggleSectionSelection={toggleSectionSelection}
-                              activeSectionId={activeSectionId}
+                              activeSectionId={selectedSectionIds.length > 0 ? selectedSectionIds[0] : null}
                               onActivateSection={handleActivateSection}
                               onActivate={() => handleActivateChapter(item.id)}
                               isActive={activeChapterId === item.id}
+                              selectedSectionIds={selectedSectionIds}
                             />
                           )
                         }
@@ -147,7 +148,7 @@ export default function GenerationTools({
                               isProjectBuildMode={isProjectBuildMode}
                               isSelected={selectedSectionsForBuild.has(item.id)}
                               toggleSectionSelection={toggleSectionSelection}
-                              isActive={activeSectionId === item.id}
+                              isActive={selectedSectionIds.includes(item.id)}
                               onActivate={handleActivateSection}
                             />
                           );

@@ -12,11 +12,15 @@ import { useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 
+import { useBuilderStore } from '@/hooks';
+
 interface GuidelineEditorProps {
   itemKey: string;
+  selectedSectionIds?: string[];
 }
 
-export function GuidelineEditor({ itemKey }: GuidelineEditorProps) {
+export function GuidelineEditor({ itemKey, selectedSectionIds }: GuidelineEditorProps) {
+  const { updateProject } = useBuilderStore();
   const {
     t,
     section,
@@ -32,15 +36,37 @@ export function GuidelineEditor({ itemKey }: GuidelineEditorProps) {
 
   const handleAddGuideline = () => {
     if (newGuideline.trim()) {
-      setGuidelines([...guidelines, newGuideline.trim()]);
+      const g = newGuideline.trim();
+      if (selectedSectionIds && selectedSectionIds.length > 0) {
+        updateProject(p => {
+          selectedSectionIds.forEach(id => {
+            p.updateSection(id, s => s.withProps({
+              guidelines: [...(s.guidelines || []), g]
+            }));
+          });
+        });
+      } else {
+        setGuidelines([...guidelines, g]);
+      }
       setNewGuideline('');
     }
   };
 
   const handleRemoveGuideline = (index: number) => {
-    const updatedGuidelines = [...guidelines];
-    updatedGuidelines.splice(index, 1);
-    setGuidelines(updatedGuidelines);
+    if (selectedSectionIds && selectedSectionIds.length > 0) {
+      const gToRemove = guidelines[index];
+      updateProject(p => {
+        selectedSectionIds.forEach(id => {
+          p.updateSection(id, s => s.withProps({
+            guidelines: (s.guidelines || []).filter(g => g !== gToRemove)
+          }));
+        });
+      });
+    } else {
+      const updatedGuidelines = [...guidelines];
+      updatedGuidelines.splice(index, 1);
+      setGuidelines(updatedGuidelines);
+    }
   };
 
   return (
@@ -59,7 +85,18 @@ export function GuidelineEditor({ itemKey }: GuidelineEditorProps) {
           <Textarea
             id={`prompt-${itemKey}`}
             defaultValue={prompt}
-            onBlur={(e) => setPrompt(e.target.value)}
+            onBlur={(e) => {
+              const val = e.target.value;
+              if (selectedSectionIds && selectedSectionIds.length > 0) {
+                updateProject(p => {
+                  selectedSectionIds.forEach(id => {
+                    p.updateSection(id, s => s.withProps({ prompt: val }));
+                  });
+                });
+              } else {
+                setPrompt(val);
+              }
+            }}
             rows={6}
             className="min-h-[160px] w-full text-xs bg-muted/5 focus-visible:ring-1 leading-relaxed resize-none p-3"
             placeholder="e.g., Explain the methodology used in this research..."

@@ -38,10 +38,12 @@ const toneOptions = ToneSchema.options.map(tone => ({
 
 interface SectionGenerationControlsProps {
     section: Section;
+    selectedSectionIds?: string[];
 }
 
 export function SectionGenerationControls({
     section,
+    selectedSectionIds,
 }: SectionGenerationControlsProps) {
     const { t } = useLocalization();
     const { updateProject } = useBuilderStore();
@@ -53,11 +55,27 @@ export function SectionGenerationControls({
     }
 
     const handleControlChange = <K extends keyof GenerationControlState>(field: K, value: GenerationControlState[K]) => {
-        updateProject(p => p.updateSection(section.id, s => s.withProps({ controls: { ...s.controls, [field]: value } })));
+        if (selectedSectionIds && selectedSectionIds.length > 0) {
+            updateProject(p => {
+                selectedSectionIds.forEach(id => {
+                    p.updateSection(id, s => s.withProps({ controls: { ...s.controls, [field]: value } }));
+                });
+            });
+        } else {
+            updateProject(p => p.updateSection(section.id, s => s.withProps({ controls: { ...s.controls, [field]: value } })));
+        }
     };
 
     const onOutputStyleChange = (style: keyof GenerationControlState['outputStyle'], checked: boolean) => {
-        updateProject(project => project.updateSection(section.id, currentSection => currentSection.withProps({ controls: { ...currentSection.controls, outputStyle: { ...currentSection.controls.outputStyle, [style]: checked } } })));
+        if (selectedSectionIds && selectedSectionIds.length > 0) {
+            updateProject(p => {
+                selectedSectionIds.forEach(id => {
+                    p.updateSection(id, currentSection => currentSection.withProps({ controls: { ...currentSection.controls, outputStyle: { ...currentSection.controls.outputStyle, [style]: checked } } }));
+                });
+            });
+        } else {
+            updateProject(project => project.updateSection(section.id, currentSection => currentSection.withProps({ controls: { ...currentSection.controls, outputStyle: { ...currentSection.controls.outputStyle, [style]: checked } } })));
+        }
     };
 
     const handleToneChange = (value: string) => {

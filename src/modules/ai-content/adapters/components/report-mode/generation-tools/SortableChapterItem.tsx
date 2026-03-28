@@ -24,7 +24,8 @@ interface SortableChapterItemProps {
   toggleChapterSelection: (chapterId: string, select: boolean) => void;
   toggleSectionSelection: (sectionId: string) => void;
   activeSectionId: string | null;
-  onActivateSection: (sectionId: string) => void;
+  selectedSectionIds?: string[];
+  onActivateSection: (sectionId: string, multiSelect?: boolean) => void;
   onActivate?: () => void;
   isActive?: boolean;
 }
@@ -37,6 +38,7 @@ export function SortableChapterItem({
   toggleChapterSelection,
   toggleSectionSelection,
   activeSectionId,
+  selectedSectionIds = [],
   onActivateSection,
   onActivate,
   isActive,
@@ -151,7 +153,7 @@ export function SortableChapterItem({
                       isProjectBuildMode={isProjectBuildMode}
                       isSelected={selectedSectionsForBuild.has(section.id)}
                       toggleSectionSelection={toggleSectionSelection}
-                      isActive={activeSectionId === section.id}
+                      isActive={selectedSectionIds.includes(section.id)}
                       onActivate={onActivateSection}
                     />
                   ))}

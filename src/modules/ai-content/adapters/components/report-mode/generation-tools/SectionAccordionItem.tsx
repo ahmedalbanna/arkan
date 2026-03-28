@@ -19,7 +19,7 @@ interface SectionAccordionItemProps {
     isProjectBuildMode: boolean;
     isSelected: boolean;
     isActive: boolean;
-    onActivate: (sectionId: string) => void;
+    onActivate: (sectionId: string, multiSelect?: boolean) => void;
     toggleSectionSelection: (sectionId: string) => void;
 }
 
@@ -62,7 +62,9 @@ export function SectionAccordionItem({
     const contextNames = getContextNames(project, section);
     const totalContext = contextNames.length;
 
-    const handleActivate = () => onActivate(section.id);
+    const handleActivate = (e: React.MouseEvent) => {
+        onActivate(section.id, e.shiftKey || e.metaKey || e.ctrlKey);
+    };
 
     return (
         <div
@@ -78,7 +80,7 @@ export function SectionAccordionItem({
         >
             <div
                 className={cn(
-                    "flex flex-wrap items-center gap-3 px-3 py-2.5 cursor-pointer",
+                    "flex flex-wrap items-center gap-3 px-3 py-2.5 cursor-pointer select-none",
                     isActive ? "bg-primary/[0.03]" : "bg-background hover:bg-muted/5"
                 )}
                 onClick={handleActivate}
