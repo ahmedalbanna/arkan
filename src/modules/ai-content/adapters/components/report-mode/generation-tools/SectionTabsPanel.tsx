@@ -16,6 +16,7 @@ import { SectionContextSelector } from '../section-controls/SectionContextSelect
 import { SectionGenerationControls } from '../section-controls/SectionGenerationControls';
 import { GuidelineEditor } from '../section-controls/SectionGuidelineEditor';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import React from 'react';
 
 interface SectionTabsPanelProps {
   section: Section | null;
@@ -27,8 +28,25 @@ export function SectionTabsPanel({ section, selectedSectionIds = [], className }
   const { t } = useLocalization();
   const { toast } = useToast();
   const { userProfile, project, updateProject } = useBuilderStore();
-  const { isBulkGenerating, requestAbort, abortRequested, cancelGeneration, clipboard, copySettings, bulkTotal, bulkProgress } = useGenerationUIStore();
+  const { isBulkGenerating, requestAbort, abortRequested, cancelGeneration, clipboard, copySettings, bulkTotal, bulkProgress, bulkStartTime } = useGenerationUIStore();
   const { generateSectionMutation, generateChapterMutation, generateProjectMutation } = useAiActions();
+
+  const estimatedRemaining = React.useMemo(() => {
+    if (!isBulkGenerating || !bulkStartTime || bulkProgress === 0) return null;
+
+    const elapsed = Date.now() - bulkStartTime;
+    const avgTimePerSection = elapsed / bulkProgress;
+    const remainingSections = bulkTotal - bulkProgress;
+    const remainingMs = avgTimePerSection * remainingSections;
+
+    if (remainingMs <= 0) return null;
+
+    const minutes = Math.floor(remainingMs / 60000);
+    const seconds = Math.floor((remainingMs % 60000) / 1000);
+
+    if (minutes > 0) return `~${minutes}m ${seconds}s left`;
+    return `~${seconds}s left`;
+  }, [isBulkGenerating, bulkStartTime, bulkProgress, bulkTotal]);
 
   if (!section) {
     return (
@@ -48,10 +66,10 @@ export function SectionTabsPanel({ section, selectedSectionIds = [], className }
 
   const activeSection = section;
   const isBulkGeneration = selectedSectionIds.length > 1;
-  const isGenerating = isBulkGeneration 
-    ? generateProjectMutation.isPending 
+  const isGenerating = isBulkGeneration
+    ? generateProjectMutation.isPending
     : (generateSectionMutation?.isPending && generateSectionMutation.variables === activeSection.id);
-    
+
   const isAnythingGenerating = generateSectionMutation?.isPending || generateChapterMutation.isPending || generateProjectMutation.isPending;
   const creditCost = isBulkGeneration ? selectedSectionIds.length : 1;
   const hasCredits = (userProfile?.credits ?? 0) >= creditCost;
@@ -74,7 +92,7 @@ export function SectionTabsPanel({ section, selectedSectionIds = [], className }
     if (!clipboard || !updateProject) return;
 
     const targetIds = selectedSectionIds.length > 0 ? selectedSectionIds : [activeSection.id];
-    
+
     updateProject(p => {
       targetIds.forEach(id => {
         p.updateSection(id, s => s.withProps({
@@ -104,11 +122,11 @@ export function SectionTabsPanel({ section, selectedSectionIds = [], className }
     }
 
     if (!canGenerate || !project) return;
-    
+
     if (isBulkGeneration) {
-      generateProjectMutation.mutate({ 
-        project, 
-        selectedSectionIds: new Set(selectedSectionIds) 
+      generateProjectMutation.mutate({
+        project,
+        selectedSectionIds: new Set(selectedSectionIds)
       });
     } else {
       generateSectionMutation.mutate(activeSection.id);
@@ -133,9 +151,9 @@ export function SectionTabsPanel({ section, selectedSectionIds = [], className }
                <TooltipProvider>
                   <Tooltip>
                     <TooltipTrigger asChild>
-                      <Button 
-                        variant="ghost" 
-                        size="icon" 
+                      <Button
+                        variant="ghost"
+                        size="icon"
                         className="h-7 w-7 text-muted-foreground hover:text-primary hover:bg-primary/5"
                         onClick={handleCopySettings}
                       >
@@ -149,9 +167,9 @@ export function SectionTabsPanel({ section, selectedSectionIds = [], className }
 
                   <Tooltip>
                     <TooltipTrigger asChild>
-                      <Button 
-                        variant="ghost" 
-                        size="icon" 
+                      <Button
+                        variant="ghost"
+                        size="icon"
                         className="h-7 w-7 text-muted-foreground hover:text-primary hover:bg-primary/5"
                         onClick={handlePasteSettings}
                         disabled={!clipboard}
@@ -170,7 +188,12 @@ export function SectionTabsPanel({ section, selectedSectionIds = [], className }
           {isBulkGenerating && (
             <div className="space-y-2 animate-in fade-in slide-in-from-top-2 duration-500">
               <div className="flex justify-between items-end px-1">
-                <span className="text-[10px] font-bold uppercase tracking-widest text-primary/70">Building Project</span>
+                <div className="flex flex-col gap-0.5">
+                  <span className="text-[10px] font-bold uppercase tracking-widest text-primary/70 leading-none">Building Project</span>
+                  {estimatedRemaining && (
+                    <span className="text-[9px] font-medium text-muted-foreground/80 leading-none">{estimatedRemaining}</span>
+                  )}
+                </div>
                 <span className="text-[10px] font-mono font-bold text-muted-foreground">{bulkProgress} / {bulkTotal}</span>
               </div>
               <Progress value={(bulkProgress / bulkTotal) * 100} className="h-1.5" />
@@ -202,8 +225,8 @@ export function SectionTabsPanel({ section, selectedSectionIds = [], className }
                   ) : (
                     <>
                       <Sparkles className="h-4 w-4" />
-                      {isBulkGeneration 
-                        ? `Generate ${selectedSectionIds.length} Sections` 
+                      {isBulkGeneration
+                        ? `Generate ${selectedSectionIds.length} Sections`
                         : t('builder.reportGenerator.generateButton')}
                     </>
                   )}
@@ -264,21 +287,21 @@ export function SectionTabsPanel({ section, selectedSectionIds = [], className }
           <ScrollArea className="h-full px-4 pr-4 -mr-4">
             <div className="pb-20 pt-4">
               <TabsContent value="context" className="m-0 focus-visible:ring-0">
-                 <SectionContextSelector 
-                    sectionId={section.id} 
-                    selectedSectionIds={selectedSectionIds.length > 1 ? selectedSectionIds : undefined} 
+                 <SectionContextSelector
+                    sectionId={section.id}
+                    selectedSectionIds={selectedSectionIds.length > 1 ? selectedSectionIds : undefined}
                  />
               </TabsContent>
               <TabsContent value="prompt" className="m-0 focus-visible:ring-0">
-                 <GuidelineEditor 
-                    itemKey={section.id} 
-                    selectedSectionIds={selectedSectionIds.length > 1 ? selectedSectionIds : undefined} 
+                 <GuidelineEditor
+                    itemKey={section.id}
+                    selectedSectionIds={selectedSectionIds.length > 1 ? selectedSectionIds : undefined}
                  />
               </TabsContent>
               <TabsContent value="controls" className="m-0 focus-visible:ring-0">
-                 <SectionGenerationControls 
-                    section={section} 
-                    selectedSectionIds={selectedSectionIds.length > 1 ? selectedSectionIds : undefined} 
+                 <SectionGenerationControls
+                    section={section}
+                    selectedSectionIds={selectedSectionIds.length > 1 ? selectedSectionIds : undefined}
                  />
               </TabsContent>
             </div>

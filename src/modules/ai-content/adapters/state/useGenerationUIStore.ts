@@ -16,6 +16,7 @@ interface GenerationUIState {
   abortRequested: boolean;
   bulkTotal: number;
   bulkProgress: number;
+  bulkStartTime: number | null;
   abortControllers: Record<string, AbortController>;
   clipboard: Partial<SectionProperties> | null;
   initializeGuidelines: (key: string, defaultGuidelines: any[]) => void;
@@ -39,6 +40,7 @@ export const useGenerationUIStore = create<GenerationUIState>((set, get) => ({
   abortRequested: false,
   bulkTotal: 0,
   bulkProgress: 0,
+  bulkStartTime: null,
   abortControllers: {},
   clipboard: null,
 
@@ -106,11 +108,11 @@ export const useGenerationUIStore = create<GenerationUIState>((set, get) => ({
   },
 
   startBulk: (total) => {
-    set({ isBulkGenerating: true, abortRequested: false, bulkTotal: total, bulkProgress: 0 });
+    set({ isBulkGenerating: true, abortRequested: false, bulkTotal: total, bulkProgress: 0, bulkStartTime: Date.now() });
   },
 
   stopBulk: () => {
-    set({ isBulkGenerating: false, abortRequested: false, bulkTotal: 0, bulkProgress: 0 });
+    set({ isBulkGenerating: false, abortRequested: false, bulkTotal: 0, bulkProgress: 0, bulkStartTime: null });
   },
 
   requestAbort: () => {
