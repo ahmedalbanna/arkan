@@ -15,6 +15,7 @@ interface GenerationUIState {
   guidelineState: Record<string, GuidelineState>;
   isBulkGenerating: boolean;
   abortRequested: boolean;
+  abortControllers: Record<string, AbortController>;
   initializeGuidelines: (key: string, defaultGuidelines: any[]) => void;
   handleGuidelineToggle: (key: string, index: number, checked: boolean) => void;
   addCustomGuideline: (key: string, guideline: string) => void;
@@ -22,6 +23,9 @@ interface GenerationUIState {
   startBulk: () => void;
   stopBulk: () => void;
   requestAbort: () => void;
+  registerAbortController: (key: string, controller: AbortController) => void;
+  removeAbortController: (key: string) => void;
+  cancelGeneration: (key: string) => void;
   resetAll: () => void;
 }
 
@@ -29,6 +33,7 @@ export const useGenerationUIStore = create<GenerationUIState>((set, get) => ({
   guidelineState: {},
   isBulkGenerating: false,
   abortRequested: false,
+  abortControllers: {},
 
   initializeGuidelines: (key, defaultGuidelines) => {
     if (!get().guidelineState[key]) {
@@ -105,11 +110,35 @@ export const useGenerationUIStore = create<GenerationUIState>((set, get) => ({
     set({ abortRequested: true });
   },
 
+  registerAbortController: (key, controller) => {
+    set(state => ({
+        abortControllers: { ...state.abortControllers, [key]: controller }
+    }));
+  },
+
+  removeAbortController: (key) => {
+    set(state => {
+        const newControllers = { ...state.abortControllers };
+        delete newControllers[key];
+        return { abortControllers: newControllers };
+    });
+  },
+
+  cancelGeneration: (key) => {
+    const controller = get().abortControllers[key];
+    if (controller) {
+        controller.abort();
+        get().removeAbortController(key);
+    }
+  },
+
   resetAll: () => {
+    Object.values(get().abortControllers).forEach(c => c.abort());
     set({
       guidelineState: {},
       isBulkGenerating: false,
       abortRequested: false,
+      abortControllers: {},
     });
   },
 }));

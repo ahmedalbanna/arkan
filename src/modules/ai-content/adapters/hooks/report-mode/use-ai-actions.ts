@@ -154,6 +154,9 @@ export function useAiActions({ editor: initialEditor }: AiActionsProps = {}) {
       const section = currentProject.getSection(sectionId);
       if (!section) throw new Error('Section not found.');
 
+      const controller = new AbortController();
+      useGenerationUIStore.getState().registerAbortController(sectionId, controller);
+
       const body = {
         projectId: currentProject.id,
         flow: 'generate-section',
@@ -165,10 +168,14 @@ export function useAiActions({ editor: initialEditor }: AiActionsProps = {}) {
         instructionText: container.resolve(PromptBuilder).buildSectionPrompt(section, currentProject),
       };
 
-      const client = container.resolve(ReportApiClient);
-      const result = await client.generateReportSectionApi(body);
-      if (result.isFailure) throw result.error;
-      return result.getValue();
+      try {
+        const client = container.resolve(ReportApiClient);
+        const result = await client.generateReportSectionApi(body, controller.signal);
+        if (result.isFailure) throw result.error;
+        return result.getValue();
+      } finally {
+        useGenerationUIStore.getState().removeAbortController(sectionId);
+      }
     },
     onSuccess: (data, sectionId) => {
       updateProject((currentProject) => currentProject.updateSection(sectionId, (section) => section.withProps({ content: data.content })));
@@ -179,6 +186,7 @@ export function useAiActions({ editor: initialEditor }: AiActionsProps = {}) {
       toast({ title: 'Generation In Progress', description: 'The AI is generating your content. It will appear automatically when ready.' });
     },
     onError: (error: any) => {
+      if (error.name === 'AbortError') return;
       toast({ title: 'Section Generation Error', description: error.message || 'Failed to generate section', variant: 'destructive' });
     },
   });
@@ -240,6 +248,7 @@ export function useAiActions({ editor: initialEditor }: AiActionsProps = {}) {
       try {
         for (const sectionId of selectedSectionIds) {
           if (useGenerationUIStore.getState().abortRequested) {
+            useGenerationUIStore.getState().cancelGeneration(sectionId);
             toast({ title: 'Generation Stopped', description: 'Bulk generation was canceled by user.' });
             break;
           }

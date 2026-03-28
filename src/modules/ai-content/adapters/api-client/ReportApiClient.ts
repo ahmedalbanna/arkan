@@ -28,12 +28,13 @@ const toApiError = (error: unknown): ApiError => {
 
 @injectable()
 export class ReportApiClient {
-  async generateReportSectionApi(body: unknown): Promise<Result<GeneratedReportSectionResponse, ApiError>> {
+  async generateReportSectionApi(body: unknown, signal?: AbortSignal): Promise<Result<GeneratedReportSectionResponse, ApiError>> {
     try {
       const response = await apiService<unknown, GeneratedReportSectionResponse>({
         endpoint: '/api/generate/section',
         method: 'POST',
         data: body,
+        signal,
       });
       return Result.ok(response);
     } catch (error: unknown) {

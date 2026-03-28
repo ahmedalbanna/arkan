@@ -20,6 +20,7 @@ interface ApiServiceOptions<T> {
   headers?: Record<string, string>;
   isFormData?: boolean;
   responseType?: 'json' | 'blob' | 'text';
+  signal?: AbortSignal;
 }
 
 /**
@@ -41,6 +42,7 @@ export async function apiService<TRequest = any, TResponse = any>(
     headers = {},
     isFormData = false,
     responseType = 'json',
+    signal,
   } = options;
 
   let authToken = directToken;
@@ -48,6 +50,7 @@ export async function apiService<TRequest = any, TResponse = any>(
   const config: RequestInit = {
     method,
     headers: { ...headers },
+    signal,
   };
 
   if (authToken) {

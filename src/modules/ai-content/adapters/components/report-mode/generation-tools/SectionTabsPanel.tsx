@@ -24,7 +24,7 @@ interface SectionTabsPanelProps {
 export function SectionTabsPanel({ section, selectedSectionIds = [], className }: SectionTabsPanelProps) {
   const { t } = useLocalization();
   const { userProfile, project } = useBuilderStore();
-  const { isBulkGenerating, requestAbort, abortRequested } = useGenerationUIStore();
+  const { isBulkGenerating, requestAbort, abortRequested, cancelGeneration } = useGenerationUIStore();
   const { generateSectionMutation, generateChapterMutation, generateProjectMutation } = useAiActions();
 
   if (!section) {
@@ -60,6 +60,11 @@ export function SectionTabsPanel({ section, selectedSectionIds = [], className }
       return;
     }
 
+    if (isGenerating && !isBulkGeneration) {
+      cancelGeneration(activeSection.id);
+      return;
+    }
+
     if (!canGenerate || !project) return;
     
     if (isBulkGeneration) {
@@ -90,11 +95,11 @@ export function SectionTabsPanel({ section, selectedSectionIds = [], className }
               <TooltipTrigger asChild>
                 <Button
                   onClick={handleGenerateClick}
-                  disabled={!canGenerate && !isBulkGenerating}
-                  variant={isBulkGenerating ? "destructive" : "default"}
+                  disabled={!canGenerate && !isBulkGenerating && !isGenerating}
+                  variant={(isBulkGenerating || (isGenerating && !isBulkGeneration)) ? "destructive" : "default"}
                   className={cn(
                     "w-full font-bold h-10 gap-2 shadow-lg animate-in fade-in slide-in-from-bottom-2 duration-500",
-                    !isBulkGenerating && "shadow-primary/20"
+                    !(isBulkGenerating || (isGenerating && !isBulkGeneration)) && "shadow-primary/20"
                   )}
                 >
                   {isBulkGenerating ? (
@@ -102,9 +107,14 @@ export function SectionTabsPanel({ section, selectedSectionIds = [], className }
                       <Square className="h-3.5 w-3.5 fill-current" />
                       {abortRequested ? "Stopping..." : "Stop Generation"}
                     </>
+                  ) : isGenerating ? (
+                    <>
+                      <Square className="h-3.5 w-3.5 fill-current" />
+                      Stop Generation
+                    </>
                   ) : (
                     <>
-                      {isGenerating ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
+                      <Sparkles className="h-4 w-4" />
                       {isBulkGeneration 
                         ? `Generate ${selectedSectionIds.length} Sections` 
                         : t('builder.reportGenerator.generateButton')}
@@ -115,6 +125,8 @@ export function SectionTabsPanel({ section, selectedSectionIds = [], className }
               <TooltipContent side="bottom" className="text-[10px]">
                 {isBulkGenerating ? (
                   <p>Cancel the remaining sections in this batch.</p>
+                ) : isGenerating ? (
+                  <p>Stop the current section generation.</p>
                 ) : !canGenerate ? (
                   <p>{isAnythingGenerating ? "Another generation is in progress." : "Insufficient credits."}</p>
                 ) : (
