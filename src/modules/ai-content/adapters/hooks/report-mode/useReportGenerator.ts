@@ -4,7 +4,7 @@ import { useBuilderPageLogic } from '@/modules/projects/adapters/hooks/use-build
 import { useLocalization } from '@/context/LocalizationContext';
 import { useMobile } from '@/hooks/util/use-mobile';
 import React, { useState, useMemo, lazy, useEffect } from 'react';
-import { Settings, UploadCloud, LayoutTemplate, BookOpenCheck, SlidersHorizontal, MessageSquare, Sparkles } from 'lucide-react';
+import { Settings, UploadCloud, LayoutTemplate, BookOpenCheck, SlidersHorizontal, MessageSquare, Sparkles, History as HistoryIcon } from 'lucide-react';
 import { useSaveProject } from '@/modules/projects/adapters/hooks/use-projects';
 // Lazy load components
 const ProjectSettingsPanel = lazy(() => import('@/modules/ai-content/adapters/components/report-mode/settings/ProjectSettingsPanel'));
@@ -15,6 +15,7 @@ const GlobalProjectControls = lazy(() => import('@/modules/ai-content/adapters/c
 const SectionTabsPanel = lazy(() => import('@/modules/ai-content/adapters/components/report-mode/generation-tools/SectionTabsPanel').then(m => ({ default: m.SectionTabsPanel })));
 const ChapterTabsPanel = lazy(() => import('@/modules/ai-content/adapters/components/report-mode/generation-tools/ChapterTabsPanel').then(m => ({ default: m.ChapterTabsPanel })));
 const ProjectChat = lazy(() => import('@/modules/ai-content/adapters/components/report-mode/chat/ProjectChat').then(m => ({ default: m.ProjectChat })));
+const SnapshotHistoryPanel = lazy(() => import('@/modules/projects/adapters/components/SnapshotHistoryPanel'));
 
 import { type ProjectProperties } from '@/modules/projects/domain/entities/Project';
 
@@ -126,6 +127,12 @@ export function useReportGenerator(initialProject?: ProjectProperties | null) {
           title: 'AI Consultant',
           icon: React.createElement(MessageSquare, { className: "h-5 w-5" }),
           content: React.createElement(ProjectChat, { isOpen: true, onClose: () => setActiveRightPanelKey('section') }),
+      },
+      {
+          key: 'snapshots',
+          title: 'Snapshots',
+          icon: React.createElement(HistoryIcon, { className: "h-5 w-5" }),
+          content: React.createElement(SnapshotHistoryPanel),
       },
     ];
   }, [activeSectionId, activeChapterId, selectedSectionIds, builderPageLogic.project]);

@@ -20,6 +20,7 @@ interface BuilderState {
     isStoreInitialized: boolean;
     version: number; // To track project updates
     selectedFileId: string | null;
+    comparisonSnapshotId: string | null;
 
     initializeStore: () => void;
     setUserProfile: (userProfile: User | null) => void; // Action to set the user profile
@@ -31,6 +32,7 @@ interface BuilderState {
     newSession: () => void;
     applyTableOfContents: (tocMarkdown: string) => void;
     selectFile: (fileId: string | null) => void;
+    setComparisonSnapshotId: (snapshotId: string | null) => void;
 }
 
 const createNewTemporaryProject = (): Project => new Project({});
@@ -42,6 +44,7 @@ const useBuilderStore = create<BuilderState>((set, get) => ({
     isStoreInitialized: false,
     version: 0,
     selectedFileId: null,
+    comparisonSnapshotId: null,
 
     initializeStore: () => {
         if (get().isStoreInitialized) return;
@@ -65,6 +68,7 @@ const useBuilderStore = create<BuilderState>((set, get) => ({
     },
 
     selectFile: (fileId) => set({ selectedFileId: fileId }),
+    setComparisonSnapshotId: (snapshotId: string | null) => set({ comparisonSnapshotId: snapshotId }),
 
     setUserProfile: (userProfile) => set({ userProfile }),
 

@@ -3,6 +3,9 @@ import { GetProjectsUseCase } from "../../application/use-cases/GetProjectsUseCa
 import { SaveProjectUseCase } from "../../application/use-cases/SaveProjectUseCase";
 import { GetProjectByIdUseCase } from "../../application/use-cases/GetProjectByIdUseCase";
 import { DeleteProjectUseCase } from "../../application/use-cases/DeleteProjectUseCase";
+import { CreateSnapshotUseCase } from "../../application/use-cases/CreateSnapshotUseCase";
+import { GetSnapshotsUseCase } from "../../application/use-cases/GetSnapshotsUseCase";
+import { DeleteSnapshotUseCase } from "../../application/use-cases/DeleteSnapshotUseCase";
 
 @injectable()
 export class ProjectController {
@@ -14,7 +17,13 @@ export class ProjectController {
         @inject(delay(() => GetProjectByIdUseCase))
         private getProjectByIdUseCase: GetProjectByIdUseCase,
         @inject(delay(() => DeleteProjectUseCase))
-        private deleteProjectUseCase: DeleteProjectUseCase
+        private deleteProjectUseCase: DeleteProjectUseCase,
+        @inject(delay(() => CreateSnapshotUseCase))
+        private createSnapshotUseCase: CreateSnapshotUseCase,
+        @inject(delay(() => GetSnapshotsUseCase))
+        private getSnapshotsUseCase: GetSnapshotsUseCase,
+        @inject(delay(() => DeleteSnapshotUseCase))
+        private deleteSnapshotUseCase: DeleteSnapshotUseCase
     ) {}
 
     async getProjects(userId: string) {
@@ -31,5 +40,17 @@ export class ProjectController {
 
     async deleteProject(projectId: string) {
         return this.deleteProjectUseCase.execute(projectId);
+    }
+
+    async createSnapshot(projectId: string, name: string, snapshotData: any) {
+        return this.createSnapshotUseCase.execute(projectId, name, snapshotData);
+    }
+
+    async getSnapshots(projectId: string) {
+        return this.getSnapshotsUseCase.execute(projectId);
+    }
+
+    async deleteSnapshot(snapshotId: string) {
+        return this.deleteSnapshotUseCase.execute(snapshotId);
     }
 }

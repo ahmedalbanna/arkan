@@ -460,6 +460,12 @@ FIREBASE_ADMIN_PRIVATE_KEY=
 - **Secure File Serving**: The dynamic route `src/app/api/storage/[...path]/route.ts` serves local files. It MUST include path traversal protection (`relativePath.includes('..')`) and use `mime-types` for correct `Content-Type` headers.
 - **Isolated Modules and Decorators**: In classes using `tsyringe` decorators (like `@injectable()`), always import domain interfaces using `import type` (e.g., `import { type IUserRepository } ...`). This prevents "type referenced in a decorated signature" errors when `isolatedModules` and `emitDecoratorMetadata` are enabled.
 
+- **Intelligence Suite Aesthetics (IDE Pattern)**:
+    - **Typography Matrix**: Use high-density technical labels (`text-[10px]` or `text-[11px]`, `font-black`, `uppercase`, `tracking-[0.15em]` to `[0.3em]`) for UI controls and metadata. Contrast this with a premium serif stack (`text-[16px]`, `leading-[1.75]`) for AI-generated prose.
+    - **Glassmorphism & Depth**: Utilize `bg-background/40`, `backdrop-blur-2xl`, and `border-primary/10` for panels. For deep immersion, use multi-layered shadows (e.g., `shadow-[0_0_80px_-20px_...]`) on primary document canvases.
+    - **Technical Decorations**: Integrate "architectural" elements like radial dot grids (`radial-gradient`), technical crop marks, and animated pulse indicators for live AI states.
+    - **Fluid Sidebar Layouts**: Avoid `self-start` or fixed `h-full` on side panels intended for `ResizablePanel` containers. Use `flex-1 min-h-0` on both the side panel and its host container to ensure fluid, integrated scroll management.
+    - **Editor/Preview Parity**: When styling document previews (like `A4Page`), ensure the Tiptap `MarkdownEditor` prose classes exactly mirror the preview styles to prevent visual shifting during the edit-to-preview transition.
 
 ### Security Patterns
 - **Rate Limiting**: For single-instance SQLite deployments, use the in-memory `rate-limiter.ts` utility. For serverless or multi-instance environments, migrate this utility to use an external store like Redis.

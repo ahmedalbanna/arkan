@@ -1,8 +1,9 @@
 import { injectable } from "tsyringe";
 import { db } from "@/infrastructure/db";
-import { projects } from "@/infrastructure/db/schema";
+import { projects, projectSnapshots } from "@/infrastructure/db/schema";
 import { IProjectRepository } from "../../domain/repositories/IProjectRepository";
 import { Project, ProjectProperties } from "../../domain/entities/Project";
+import { ProjectSnapshot, ProjectSnapshotProperties } from "../../domain/entities/ProjectSnapshot";
 import { Result } from "@/infrastructure/utils/result";
 import { ProjectError } from "../../domain/errors/ProjectErrors";
 import { eq, desc, and } from "drizzle-orm";
@@ -60,6 +61,59 @@ export class SQLiteProjectRepository implements IProjectRepository {
   async delete(id: string): Promise<Result<void, ProjectError>> {
     try {
       await db.delete(projects).where(eq(projects.id, id));
+      return Result.ok();
+    } catch (error: any) {
+      return Result.fail(ProjectError.deleteError(error.message));
+    }
+  }
+
+  async saveSnapshot(snapshot: ProjectSnapshot): Promise<Result<ProjectSnapshot, ProjectError>> {
+    try {
+      const persistenceData = {
+        id: snapshot.id,
+        projectId: snapshot.projectId,
+        name: snapshot.name,
+        snapshotData: JSON.stringify(snapshot.snapshotData),
+        created: snapshot.created,
+      };
+
+      await db.insert(projectSnapshots).values(persistenceData).onConflictDoUpdate({
+        target: projectSnapshots.id,
+        set: persistenceData,
+      });
+
+      return Result.ok(snapshot);
+    } catch (error: any) {
+      Telemetry.logFailure('SQLiteProjectRepo:saveSnapshot', error);
+      return Result.fail(ProjectError.saveError(error.message));
+    }
+  }
+
+  async getSnapshots(projectId: string): Promise<Result<ProjectSnapshot[], ProjectError>> {
+    try {
+      const results = await db.query.projectSnapshots.findMany({
+        where: eq(projectSnapshots.projectId, projectId),
+        orderBy: [desc(projectSnapshots.created)],
+      });
+
+      const snapshots = results.map((res) => new ProjectSnapshot({
+        id: res.id,
+        projectId: res.projectId,
+        name: res.name,
+        snapshotData: JSON.parse(res.snapshotData),
+        created: res.created,
+      }));
+
+      return Result.ok(snapshots);
+    } catch (error: any) {
+      Telemetry.logFailure('SQLiteProjectRepo:getSnapshots', error);
+      return Result.fail(ProjectError.internal(error.message));
+    }
+  }
+
+  async deleteSnapshot(id: string): Promise<Result<void, ProjectError>> {
+    try {
+      await db.delete(projectSnapshots).where(eq(projectSnapshots.id, id));
       return Result.ok();
     } catch (error: any) {
       return Result.fail(ProjectError.deleteError(error.message));

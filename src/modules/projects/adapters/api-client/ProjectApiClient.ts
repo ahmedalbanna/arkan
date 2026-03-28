@@ -1,6 +1,7 @@
 import { injectable } from 'tsyringe';
 import { apiService, ApiError } from '@/infrastructure/api/ApiService';
 import { type ProjectProperties } from '../../domain/entities/Project';
+import { type ProjectSnapshotProperties } from '../../domain/entities/ProjectSnapshot';
 import { Result } from '@/infrastructure/utils/result';
 
 const toApiError = (error: unknown): ApiError => {
@@ -49,6 +50,42 @@ export class ProjectApiClient {
         try {
             const response = await apiService<never, { message: string }>({
                 endpoint: `/api/projects/${id}`,
+                method: 'DELETE'
+            });
+            return Result.ok(response);
+        } catch (error: unknown) {
+            return Result.fail(toApiError(error));
+        }
+    }
+
+    async fetchSnapshots(projectId: string): Promise<Result<ProjectSnapshotProperties[], ApiError>> {
+        try {
+            const data = await apiService<never, ProjectSnapshotProperties[]>({
+                endpoint: `/api/projects/${projectId}/snapshots`
+            });
+            return Result.ok(data);
+        } catch (error: unknown) {
+            return Result.fail(toApiError(error));
+        }
+    }
+
+    async createSnapshot(projectId: string, name: string, snapshotData: ProjectProperties): Promise<Result<ProjectSnapshotProperties, ApiError>> {
+        try {
+            const response = await apiService<{ name: string; snapshotData: ProjectProperties }, ProjectSnapshotProperties>({
+                endpoint: `/api/projects/${projectId}/snapshots`,
+                method: 'POST',
+                data: { name, snapshotData }
+            });
+            return Result.ok(response);
+        } catch (error: unknown) {
+            return Result.fail(toApiError(error));
+        }
+    }
+
+    async deleteSnapshot(snapshotId: string): Promise<Result<{ success: boolean }, ApiError>> {
+        try {
+            const response = await apiService<never, { success: boolean }>({
+                endpoint: `/api/snapshots/${snapshotId}`,
                 method: 'DELETE'
             });
             return Result.ok(response);

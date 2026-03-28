@@ -225,3 +225,11 @@ export const securityAuditLogs = sqliteTable('security_audit_logs', {
   timestamp: text('timestamp').notNull(),
   ip: text('ip'),
 });
+
+export const projectSnapshots = sqliteTable('project_snapshots', {
+  id: text('id').primaryKey(),
+  projectId: text('project_id').notNull(),
+  name: text('name').notNull(),
+  snapshotData: text('snapshot_data').notNull(), // JSON string of ProjectProperties
+  created: text('created_at').notNull(),
+});
