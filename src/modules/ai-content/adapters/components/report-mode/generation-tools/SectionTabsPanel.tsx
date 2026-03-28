@@ -22,7 +22,7 @@ interface SectionTabsPanelProps {
 
 export function SectionTabsPanel({ section, selectedSectionIds = [], className }: SectionTabsPanelProps) {
   const { t } = useLocalization();
-  const { userProfile } = useBuilderStore();
+  const { userProfile, project } = useBuilderStore();
   const { generateSectionMutation, generateChapterMutation, generateProjectMutation } = useAiActions();
 
   if (!section) {
@@ -42,14 +42,27 @@ export function SectionTabsPanel({ section, selectedSectionIds = [], className }
   }
 
   const activeSection = section;
-  const isGenerating = generateSectionMutation?.isPending && generateSectionMutation.variables === activeSection.id;
+  const isBulkGeneration = selectedSectionIds.length > 1;
+  const isGenerating = isBulkGeneration 
+    ? generateProjectMutation.isPending 
+    : (generateSectionMutation?.isPending && generateSectionMutation.variables === activeSection.id);
+    
   const isAnythingGenerating = generateSectionMutation?.isPending || generateChapterMutation.isPending || generateProjectMutation.isPending;
-  const hasCredits = (userProfile?.credits ?? 0) >= 1;
+  const creditCost = isBulkGeneration ? selectedSectionIds.length : 1;
+  const hasCredits = (userProfile?.credits ?? 0) >= creditCost;
   const canGenerate = hasCredits && !isAnythingGenerating;
 
   function handleGenerateClick() {
-    if (!canGenerate) return;
-    generateSectionMutation.mutate(activeSection.id);
+    if (!canGenerate || !project) return;
+    
+    if (isBulkGeneration) {
+      generateProjectMutation.mutate({ 
+        project, 
+        selectedSectionIds: new Set(selectedSectionIds) 
+      });
+    } else {
+      generateSectionMutation.mutate(activeSection.id);
+    }
   }
 
   return (
@@ -74,14 +87,18 @@ export function SectionTabsPanel({ section, selectedSectionIds = [], className }
                   className="w-full font-bold h-10 gap-2 shadow-lg shadow-primary/20 animate-in fade-in slide-in-from-bottom-2 duration-500"
                 >
                   {isGenerating ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
-                  {t('builder.reportGenerator.generateButton')}
+                  {isBulkGeneration 
+                    ? `Generate ${selectedSectionIds.length} Sections` 
+                    : t('builder.reportGenerator.generateButton')}
                 </Button>
               </TooltipTrigger>
-              {!canGenerate && (
-                <TooltipContent side="bottom" className="text-[10px]">
+              <TooltipContent side="bottom" className="text-[10px]">
+                {!canGenerate ? (
                   <p>{isAnythingGenerating ? "Another generation is in progress." : "Insufficient credits."}</p>
-                </TooltipContent>
-              )}
+                ) : (
+                  <p>Cost: {creditCost} {creditCost === 1 ? 'Credit' : 'Credits'}</p>
+                )}
+              </TooltipContent>
             </Tooltip>
           </TooltipProvider>
         </div>
