@@ -10,6 +10,7 @@ import { UserTable } from './UserTable';
 import { UserTableSkeleton } from './UserTableSkeleton';
 import { useUserManagementConsole } from '@/modules/admin/adapters/hooks/use-user-management-console';
 import { User } from '@/modules/users/domain/entities/User';
+import { Badge } from '@/components/ui/badge';
 
 export default function UserManagementConsole() {
   const { t } = useLocalization();
@@ -37,7 +38,7 @@ export default function UserManagementConsole() {
         </div>
         <CreateUserDialog />
       </header>
-      
+
       <CardContent className="p-8 md:p-10">
         {isLoading ? (
             <UserTableSkeleton />
@@ -52,7 +53,7 @@ export default function UserManagementConsole() {
                 <div className="rounded-2xl border bg-background overflow-hidden shadow-sm shadow-black/[0.02]">
                     <UserTable users={allUsers as User[]} />
                 </div>
-                
+
                 {hasNextPage && (
                     <div className="flex items-center justify-center">
                         <Button
@@ -69,7 +70,7 @@ export default function UserManagementConsole() {
             </div>
         )}
       </CardContent>
-      
+
       <footer className="px-8 py-4 border-t bg-muted/5 flex items-center justify-between">
           <p className="text-[9px] text-muted-foreground font-medium uppercase tracking-widest">
               Arkan User Directory • Auth Node V1.0

@@ -13,7 +13,7 @@ import { useAuth } from '@/context/AuthContext';
 import { userKeys } from '@/infrastructure/api/query-keys';
 import { useLocalization } from '@/context/LocalizationContext';
 import { User } from '@/modules/users/domain/entities/User';
-import { GiftCreditsDialog } from '@/modules/users/adapters/components/payments/GiftCreditsDialog';
+import { GiftCreditsDialog } from '@/modules/users/adapters/components/admin/GiftCreditsDialog';
 import { AdminNotificationDialog } from './AdminNotificationDialog';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { useSendPasswordReset } from '@/hooks';
@@ -35,9 +35,9 @@ export function UserTableRow({ user: targetUser }: UserTableRowProps) {
       return result.getValue();
     },
     onSuccess: (_, variables) => {
-      toast({ 
-        title: variables.isDisabled ? 'User Locked' : 'User Restored', 
-        description: `The user account has been ${variables.isDisabled ? 'disabled' : 'enabled'}.` 
+      toast({
+        title: variables.isDisabled ? 'User Locked' : 'User Restored',
+        description: `The user account has been ${variables.isDisabled ? 'disabled' : 'enabled'}.`
       });
       queryClient.invalidateQueries({ queryKey: userKeys.all() });
     },
@@ -68,9 +68,9 @@ export function UserTableRow({ user: targetUser }: UserTableRowProps) {
       <TableCell>{targetUser.credits}</TableCell>
       <TableCell>{targetUser.getFormattedDate()}</TableCell>
       <TableCell className="text-right flex items-center justify-end gap-1">
-        <Button 
-          variant="ghost" 
-          size="icon" 
+        <Button
+          variant="ghost"
+          size="icon"
           onClick={() => toggleLockdownMutation.mutate({ userId: targetUser.id, isDisabled: !targetUser.isDisabled })}
           disabled={toggleLockdownMutation.isPending}
           className={targetUser.isDisabled ? "text-destructive" : "text-muted-foreground"}
