@@ -3,8 +3,7 @@
 'use client';
 
 import { create } from 'zustand';
-
-
+import { type SectionProperties } from '@/modules/ai-content/domain/entities/Section';
 
 type GuidelineState = {
   checked: Record<number, boolean>;
@@ -16,6 +15,7 @@ interface GenerationUIState {
   isBulkGenerating: boolean;
   abortRequested: boolean;
   abortControllers: Record<string, AbortController>;
+  clipboard: Partial<SectionProperties> | null;
   initializeGuidelines: (key: string, defaultGuidelines: any[]) => void;
   handleGuidelineToggle: (key: string, index: number, checked: boolean) => void;
   addCustomGuideline: (key: string, guideline: string) => void;
@@ -26,6 +26,7 @@ interface GenerationUIState {
   registerAbortController: (key: string, controller: AbortController) => void;
   removeAbortController: (key: string) => void;
   cancelGeneration: (key: string) => void;
+  copySettings: (settings: Partial<SectionProperties>) => void;
   resetAll: () => void;
 }
 
@@ -34,6 +35,7 @@ export const useGenerationUIStore = create<GenerationUIState>((set, get) => ({
   isBulkGenerating: false,
   abortRequested: false,
   abortControllers: {},
+  clipboard: null,
 
   initializeGuidelines: (key, defaultGuidelines) => {
     if (!get().guidelineState[key]) {
@@ -132,6 +134,10 @@ export const useGenerationUIStore = create<GenerationUIState>((set, get) => ({
     }
   },
 
+  copySettings: (settings) => {
+    set({ clipboard: settings });
+  },
+
   resetAll: () => {
     Object.values(get().abortControllers).forEach(c => c.abort());
     set({
@@ -139,6 +145,7 @@ export const useGenerationUIStore = create<GenerationUIState>((set, get) => ({
       isBulkGenerating: false,
       abortRequested: false,
       abortControllers: {},
+      clipboard: null,
     });
   },
 }));

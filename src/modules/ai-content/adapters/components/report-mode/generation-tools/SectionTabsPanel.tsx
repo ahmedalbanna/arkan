@@ -8,8 +8,9 @@ import { useBuilderStore } from '@/hooks';
 import { useAiActions } from '@/modules/ai-content/adapters/hooks/report-mode/use-ai-actions';
 import { Section } from '@/modules/ai-content/domain/entities/Section';
 import { cn } from '@/infrastructure/utils/cn';
-import { Link as LinkIcon, Loader2, SlidersHorizontal, Sparkles, StickyNote, Square } from 'lucide-react';
+import { Link as LinkIcon, Loader2, SlidersHorizontal, Sparkles, StickyNote, Square, Copy, ClipboardPaste } from 'lucide-react';
 import { useGenerationUIStore } from '@/modules/ai-content/adapters/state/useGenerationUIStore';
+import { useToast } from '@/hooks/util/use-toast';
 import { SectionContextSelector } from '../section-controls/SectionContextSelector';
 import { SectionGenerationControls } from '../section-controls/SectionGenerationControls';
 import { GuidelineEditor } from '../section-controls/SectionGuidelineEditor';
@@ -23,8 +24,9 @@ interface SectionTabsPanelProps {
 
 export function SectionTabsPanel({ section, selectedSectionIds = [], className }: SectionTabsPanelProps) {
   const { t } = useLocalization();
-  const { userProfile, project } = useBuilderStore();
-  const { isBulkGenerating, requestAbort, abortRequested, cancelGeneration } = useGenerationUIStore();
+  const { toast } = useToast();
+  const { userProfile, project, updateProject } = useBuilderStore();
+  const { isBulkGenerating, requestAbort, abortRequested, cancelGeneration, clipboard, copySettings } = useGenerationUIStore();
   const { generateSectionMutation, generateChapterMutation, generateProjectMutation } = useAiActions();
 
   if (!section) {
@@ -54,6 +56,41 @@ export function SectionTabsPanel({ section, selectedSectionIds = [], className }
   const hasCredits = (userProfile?.credits ?? 0) >= creditCost;
   const canGenerate = hasCredits && !isAnythingGenerating;
 
+  function handleCopySettings() {
+    copySettings({
+      prompt: activeSection.prompt,
+      controls: { ...activeSection.controls },
+      guidelines: [...activeSection.guidelines],
+      context: activeSection.context ? { ...activeSection.context } : undefined,
+    });
+    toast({
+      title: "Settings Copied",
+      description: `Configuration for "${activeSection.title}" saved to clipboard.`
+    });
+  }
+
+  function handlePasteSettings() {
+    if (!clipboard || !updateProject) return;
+
+    const targetIds = selectedSectionIds.length > 0 ? selectedSectionIds : [activeSection.id];
+    
+    updateProject(p => {
+      targetIds.forEach(id => {
+        p.updateSection(id, s => s.withProps({
+          prompt: clipboard.prompt,
+          controls: { ...clipboard.controls },
+          guidelines: [...(clipboard.guidelines || [])],
+          context: clipboard.context ? { ...clipboard.context } : undefined,
+        }));
+      });
+    });
+
+    toast({
+      title: "Settings Pasted",
+      description: `Applied configuration to ${targetIds.length} ${targetIds.length === 1 ? 'section' : 'sections'}.`
+    });
+  }
+
   function handleGenerateClick() {
     if (isBulkGenerating) {
       requestAbort();
@@ -81,13 +118,52 @@ export function SectionTabsPanel({ section, selectedSectionIds = [], className }
     <div className={cn("h-full flex flex-col min-h-0", className)}>
       <div className="px-4 pb-6 pt-2">
         <div className="flex flex-col gap-4">
-          <div className="space-y-1 min-w-0">
-            <span className="text-[10px] font-bold uppercase tracking-widest text-primary/60">
-              {selectedSectionIds.length > 1 ? `Editing ${selectedSectionIds.length} Sections` : 'Active Context'}
-            </span>
-            <h3 className="text-base font-bold font-headline truncate tracking-tight">
-              {selectedSectionIds.length > 1 ? 'Bulk Configuration' : section.title}
-            </h3>
+          <div className="flex items-center justify-between gap-2">
+            <div className="space-y-1 min-w-0">
+              <span className="text-[10px] font-bold uppercase tracking-widest text-primary/60">
+                {selectedSectionIds.length > 1 ? `Editing ${selectedSectionIds.length} Sections` : 'Active Context'}
+              </span>
+              <h3 className="text-base font-bold font-headline truncate tracking-tight">
+                {selectedSectionIds.length > 1 ? 'Bulk Configuration' : section.title}
+              </h3>
+            </div>
+
+            <div className="flex items-center gap-1.5 shrink-0">
+               <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button 
+                        variant="ghost" 
+                        size="icon" 
+                        className="h-7 w-7 text-muted-foreground hover:text-primary hover:bg-primary/5"
+                        onClick={handleCopySettings}
+                      >
+                        <Copy className="h-3.5 w-3.5" />
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent side="bottom" className="text-[10px] font-bold uppercase tracking-widest">
+                      Copy Settings
+                    </TooltipContent>
+                  </Tooltip>
+
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button 
+                        variant="ghost" 
+                        size="icon" 
+                        className="h-7 w-7 text-muted-foreground hover:text-primary hover:bg-primary/5"
+                        onClick={handlePasteSettings}
+                        disabled={!clipboard}
+                      >
+                        <ClipboardPaste className="h-3.5 w-3.5" />
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent side="bottom" className="text-[10px] font-bold uppercase tracking-widest">
+                      Paste Settings
+                    </TooltipContent>
+                  </Tooltip>
+               </TooltipProvider>
+            </div>
           </div>
 
           <TooltipProvider>
