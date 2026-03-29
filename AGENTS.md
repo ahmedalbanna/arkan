@@ -463,6 +463,22 @@ FIREBASE_ADMIN_PRIVATE_KEY=
 - **Local File Storage Transition**: Replaced Firebase Cloud Storage with a local filesystem-based solution. The `LocalFileStorageService` saves files to `storage/uploads/` and returns relative API URLs (`/api/storage/uploads/...`).
 - **Secure File Serving**: The dynamic route `src/app/api/storage/[...path]/route.ts` serves local files. It MUST include path traversal protection (`relativePath.includes('..')`) and use `mime-types` for correct `Content-Type` headers.
 - **Isolated Modules and Decorators**: In classes using `tsyringe` decorators (like `@injectable()`), always import domain interfaces using `import type` (e.g., `import { type IUserRepository } ...`). This prevents "type referenced in a decorated signature" errors when `isolatedModules` and `emitDecoratorMetadata` are enabled.
+- **Fullscreen IDE Layouts**: When building fullscreen IDE-style pages (like the Builder), set the root container height to `h-[calc(100vh-64px)]` to account for the sticky global Header. This prevents double scrollbars and ensures the workspace fills the viewport perfectly.
+- **Intelligence Suite Aesthetics**: Achieve a premium "tool" feel by using a technical typography stack for metadata and labels: `text-[10px]`, `font-black`, `uppercase`, and `tracking-[0.2em]`.
+- **Panel Resilience**: To maintain usability during `ResizablePanel` operations, ensure sidebar content areas have a `min-width` constraint (e.g., `min-w-[320px]`) and use `flex-1 min-h-0` on internal containers to isolate nested scrollable areas (like Chapter lists or AI Chat).
+- **WYSIWYG Alignment**: When nesting a text editor inside a physical page preview (like `A4Page`), remove internal container paddings from the editor so the prose aligns perfectly with the preview margins, creating a seamless "What You See Is What You Get" transition.
+- **Tactile Desktop Feedback**: In desktop-only workspaces, prioritize subtle layout transitions like `hover:translate-x-0.5` over simple color changes to provide a more responsive and premium tactile feel.
+- **3-Zone Workspace Architecture**: When building complex editing interfaces, follow the "IDE Pattern":
+    - **Top Zone**: Horizontal bar for project-wide identity and Session Actions (Export, Save, New).
+    - **Left Zone**: Primary navigation and Setup Tools (Files, Templates, Chapter list).
+    - **Center Zone**: The primary focus/document preview (A4 canvas, Editor).
+    - **Right Zone**: Context-sensitive AI controls and properties (Section parameters, Guidelines, Chat).
+- **State Lifting for UI Zones**: When orchestrating multiple interactive zones, lift the active tab/panel state to the main page hook (e.g., `useReportGenerator`). This allows one zone (like the Chapter list) to automatically trigger updates or focus changes in another (like the Right Sidebar's active tab).
+- **Collapsible Sidebar Hierarchy**: Manage large project trees by implementing animated collapsible chapters (using `Framer Motion`'s `AnimatePresence`). This allows users to focus on specific sections while maintaining high-level structural awareness without sidebar clutter.
+- **Contextual HUD Pattern**: For document-specific utility controls (like Zoom or Page Navigation), use a semi-transparent floating HUD (`backdrop-blur-xl`, `bg-background/60`) at the bottom-center. This keeps the primary toolbars clean and ensures actions are always within reach of the focus area.
+- **Dialog-to-Sidebar Migration**: For item-level AI actions (like Chapter Tools or Section Context), prefer native sidebar tabs over modal dialogs. This "Contextual Sidebar" pattern maintains the user's flow and provides a faster, more integrated editing experience.
+- **Action Bar Segmentation**: When building high-density action bars (like session controls), group related buttons (e.g., File Ops vs. Persistence) and separate them with subtle vertical dividers. This improves visual scanning and reduces cognitive load.
+- **Dynamic Action Highlighting**: Use conditional styling to emphasize primary actions when they are most relevant (e.g., highlighting the "Save" button only when unsaved changes exist). This provides intuitive guidance without needing explicit alerts.
 
 - **Intelligence Suite Aesthetics (IDE Pattern)**:
     - **Typography Matrix**: Use high-density technical labels (`text-[10px]` or `text-[11px]`, `font-black`, `uppercase`, `tracking-[0.15em]` to `[0.3em]`) for UI controls and metadata. Contrast this with a premium serif stack (`text-[16px]`, `leading-[1.75]`) for AI-generated prose.

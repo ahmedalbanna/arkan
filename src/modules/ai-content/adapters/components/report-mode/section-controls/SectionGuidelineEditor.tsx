@@ -70,24 +70,24 @@ export function GuidelineEditor({ itemKey, selectedSectionIds }: GuidelineEditor
   };
 
   return (
-    <div className="space-y-5 animate-in fade-in slide-in-from-right-4 duration-500">
-      <div className="space-y-1.5">
-        <h4 className="text-[11px] font-black uppercase tracking-[0.2em] text-primary flex items-center gap-2">
+    <div className="space-y-6 pt-2">
+      <div className="space-y-1">
+        <h4 className="text-[10px] font-black uppercase tracking-[0.3em] text-primary/70 flex items-center gap-2">
             <ListChecks className="h-3 w-3" />
-            Writing Guidelines
+            Architectural Guidelines
         </h4>
-        <p className="text-[10px] text-muted-foreground italic leading-relaxed font-medium opacity-80">
-            Orchestrate AI behavior with technical rules and logic.
+        <p className="text-[9px] text-muted-foreground italic font-medium opacity-60 uppercase tracking-wider">
+            Define AI behavioral logic and technical constraints.
         </p>
       </div>
 
-      <div className="space-y-5 relative">
-        <div className="absolute left-[-1rem] top-0 bottom-0 w-px bg-gradient-to-b from-primary/20 via-primary/5 to-transparent" />
+      <div className="space-y-6 relative">
+        <div className="absolute left-[-1.25rem] top-0 bottom-0 w-px bg-gradient-to-b from-primary/30 via-primary/5 to-transparent" />
         
         <div className="space-y-3">
           <div className="flex items-center gap-2 group/label">
-            <StickyNote className="h-3.5 w-3.5 text-primary/60 group-hover/label:text-primary transition-colors" />
-            <Label htmlFor={`prompt-${itemKey}`} className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground">Primary Instruction</Label>
+            <StickyNote className="h-3 w-3 text-primary/40 group-hover/label:text-primary transition-colors" />
+            <Label htmlFor={`prompt-${itemKey}`} className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/60">Primary Vector</Label>
           </div>
           <div className="relative group">
             <div className="absolute -inset-1 bg-gradient-to-r from-primary/10 to-transparent rounded-2xl blur opacity-0 group-focus-within:opacity-100 transition duration-500" />
@@ -107,7 +107,7 @@ export function GuidelineEditor({ itemKey, selectedSectionIds }: GuidelineEditor
                 }
                 }}
                 rows={5}
-                className="relative min-h-[140px] w-full text-[11px] bg-muted/5 border-primary/10 focus-visible:ring-primary/20 leading-relaxed resize-none p-3 rounded-xl shadow-inner font-serif italic"
+                className="relative min-h-[120px] w-full text-[11px] bg-muted/5 border-primary/10 focus-visible:ring-primary/20 leading-relaxed resize-none p-3 rounded-xl shadow-inner font-serif italic"
                 placeholder="e.g., Explain the methodology used in this research..."
             />
           </div>

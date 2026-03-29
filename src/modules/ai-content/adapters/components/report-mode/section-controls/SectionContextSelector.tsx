@@ -82,19 +82,19 @@ export function SectionContextSelector({ sectionId, selectedSectionIds }: Sectio
   })), [externalContext]);
 
   return (
-    <div className="space-y-5 animate-in fade-in slide-in-from-right-4 duration-500">
-      <div className="space-y-1.5">
-        <h4 className="text-[11px] font-black uppercase tracking-[0.2em] text-primary flex items-center gap-2">
+    <div className="space-y-6 pt-2">
+      <div className="space-y-1">
+        <h4 className="text-[10px] font-black uppercase tracking-[0.3em] text-primary/70 flex items-center gap-2">
             <Share2 className="h-3 w-3" />
             Context Orchestrator
         </h4>
-        <p className="text-[10px] text-muted-foreground italic leading-relaxed font-medium opacity-80">
-            Link structural components and external knowledge for synthesis.
+        <p className="text-[9px] text-muted-foreground italic font-medium opacity-60 uppercase tracking-wider">
+            Define relational vectors and source data mapping.
         </p>
       </div>
 
-      <div className="space-y-5 relative">
-        <div className="absolute left-[-1rem] top-0 bottom-0 w-px bg-gradient-to-b from-primary/20 via-primary/5 to-transparent" />
+      <div className="space-y-6 relative">
+        <div className="absolute left-[-1.25rem] top-0 bottom-0 w-px bg-gradient-to-b from-primary/30 via-primary/5 to-transparent" />
 
         {otherSections.length > 0 && (
           <div className="relative group/copy">
@@ -133,17 +133,17 @@ export function SectionContextSelector({ sectionId, selectedSectionIds }: Sectio
           </div>
         )}
 
-        <div className="space-y-4">
+        <div className="space-y-5">
           <div className="rounded-2xl border border-primary/10 bg-muted/5 overflow-hidden flex flex-col shadow-sm group/sections">
-            <div className="flex items-center justify-between px-4 py-2.5 bg-primary/[0.04] border-b border-primary/10">
-              <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.2em] text-primary">
-                <Folder className="h-3.5 w-3.5" />
-                Linked Sections
+            <div className="flex items-center justify-between px-4 py-2 bg-primary/[0.04] border-b border-primary/10">
+              <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.2em] text-primary/70">
+                <Folder className="h-3 w-3" />
+                Relational Nodes
               </div>
               <Badge variant="outline" className="h-5 text-[9px] font-black border-primary/20 bg-primary/10 text-primary tabular-nums px-2 rounded-full shadow-inner">{sectionOptions.length}</Badge>
             </div>
-            <ScrollArea className="h-40">
-              <div className="p-1.5 space-y-1">
+            <ScrollArea className="h-36">
+              <div className="p-1 space-y-0.5">
                 {sectionOptions.length > 0 ? (
                   sectionOptions.map((option) => (
                     <label key={`section-${option.id}`} className={cn(
@@ -178,15 +178,15 @@ export function SectionContextSelector({ sectionId, selectedSectionIds }: Sectio
           </div>
 
           <div className="rounded-2xl border border-primary/10 bg-muted/5 overflow-hidden flex flex-col shadow-sm group/files">
-            <div className="flex items-center justify-between px-4 py-2.5 bg-primary/[0.04] border-b border-primary/10">
-              <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.2em] text-primary">
-                <FileText className="h-3.5 w-3.5" />
-                Linked Knowledge Base
+            <div className="flex items-center justify-between px-4 py-2 bg-primary/[0.04] border-b border-primary/10">
+              <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.2em] text-primary/70">
+                <FileText className="h-3 w-3" />
+                Knowledge Base
               </div>
               <Badge variant="outline" className="h-5 text-[9px] font-black border-primary/20 bg-primary/10 text-primary tabular-nums px-2 rounded-full shadow-inner">{fileOptions.length}</Badge>
             </div>
-            <ScrollArea className="h-40">
-              <div className="p-1.5 space-y-1">
+            <ScrollArea className="h-36">
+              <div className="p-1 space-y-0.5">
                 {fileOptions.length > 0 ? (
                   fileOptions.map((option) => (
                     <div key={`file-${option.id}`} className={cn(

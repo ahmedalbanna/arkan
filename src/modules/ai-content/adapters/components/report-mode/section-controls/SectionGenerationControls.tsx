@@ -93,19 +93,19 @@ export function SectionGenerationControls({
     const instructionPreview = section.buildActionPrompt();
 
     return (
-        <div className="space-y-5 animate-in fade-in slide-in-from-right-4 duration-500">
-            <div className="space-y-1.5">
-                <h4 className="text-[11px] font-black uppercase tracking-[0.2em] text-primary flex items-center gap-2">
+        <div className="space-y-6 pt-2">
+            <div className="space-y-1">
+                <h4 className="text-[10px] font-black uppercase tracking-[0.3em] text-primary/70 flex items-center gap-2">
                     <Settings2 className="h-3 w-3" />
                     Generation Parameters
                 </h4>
-                <p className="text-[10px] text-muted-foreground italic leading-relaxed font-medium opacity-80">
+                <p className="text-[9px] text-muted-foreground italic font-medium opacity-60 uppercase tracking-wider">
                     Optimize intelligence parameters for high-fidelity output.
                 </p>
             </div>
 
-            <div className="space-y-5 relative">
-                <div className="absolute left-[-1rem] top-0 bottom-0 w-px bg-gradient-to-b from-primary/20 via-primary/5 to-transparent" />
+            <div className="space-y-6 relative">
+                <div className="absolute left-[-1.25rem] top-0 bottom-0 w-px bg-gradient-to-b from-primary/30 via-primary/5 to-transparent" />
 
                 <div className="space-y-3.5">
                     <div className="flex justify-between items-center group/label">

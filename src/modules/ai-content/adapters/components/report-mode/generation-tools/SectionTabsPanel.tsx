@@ -285,20 +285,20 @@ export function SectionTabsPanel({ section, selectedSectionIds = [], className }
 
         <div className="flex-1 overflow-hidden relative mt-1">
           <ScrollArea className="h-full px-4 pr-4 -mr-4">
-            <div className="pb-24 pt-4">
-              <TabsContent value="context" className="m-0 focus-visible:ring-0">
+            <div className="pb-24 pt-1">
+              <TabsContent value="context" className="m-0 focus-visible:ring-0 animate-in fade-in slide-in-from-right-2 duration-300">
                  <SectionContextSelector
                     sectionId={section.id}
                     selectedSectionIds={selectedSectionIds.length > 1 ? selectedSectionIds : undefined}
                  />
               </TabsContent>
-              <TabsContent value="prompt" className="m-0 focus-visible:ring-0">
+              <TabsContent value="prompt" className="m-0 focus-visible:ring-0 animate-in fade-in slide-in-from-right-2 duration-300">
                  <GuidelineEditor
                     itemKey={section.id}
                     selectedSectionIds={selectedSectionIds.length > 1 ? selectedSectionIds : undefined}
                  />
               </TabsContent>
-              <TabsContent value="controls" className="m-0 focus-visible:ring-0">
+              <TabsContent value="controls" className="m-0 focus-visible:ring-0 animate-in fade-in slide-in-from-right-2 duration-300">
                  <SectionGenerationControls
                     section={section}
                     selectedSectionIds={selectedSectionIds.length > 1 ? selectedSectionIds : undefined}
