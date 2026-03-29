@@ -10,7 +10,7 @@ export function useWritingTool<TData = unknown, TVariables = any>(
   endpointOrToolName: string,
   options?: Omit<UseMutationOptions<TData, Error, TVariables>, 'mutationFn'>,
 ) {
-  const { refetchUser } = useAuth();
+  const { refetchUser, updateUsage } = useAuth();
 
   return useMutation<TData, Error, TVariables>({
     mutationFn: async (data: TVariables) => {
@@ -21,8 +21,16 @@ export function useWritingTool<TData = unknown, TVariables = any>(
       if (result.isFailure) throw result.error;
       return result.getValue();
     },
-    onSuccess: (data, variables, context) => {
+    onSuccess: (data: any, variables, context) => {
       refetchUser();
+      if (data?.usageMetadata) {
+        updateUsage({
+          remainingFreeGenerations: data.usageMetadata.remaining,
+          totalLimit: data.usageMetadata.remaining + data.usageMetadata.count, // approximated
+          tier: 'guest', // will be refined by AuthContext refresh
+          resetAt: data.usageMetadata.resetAt
+        } as any);
+      }
       if (options?.onSuccess) {
         // @ts-expect-error - Type mismatch with TanStack Query callback signature
         options.onSuccess(data, variables, context);

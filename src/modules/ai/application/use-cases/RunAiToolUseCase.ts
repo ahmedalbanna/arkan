@@ -53,14 +53,27 @@ export class RunAiToolUseCase {
             }
         }
 
-        // 2. Pre-deduct credits for registered users
+        // 2. Pre-deduct credits or check free tier for registered users
         let creditsDeducted = false;
+        let isFreeTierRegistered = false;
+
         if (!isGuest && creditCost > 0) {
             const deductResult = await this.deductCreditsUseCase.execute(userId, creditCost);
+            
             if (deductResult.isFailure) {
-                return Result.fail(AiError.internal(`Credit deduction failed: ${deductResult.error?.message}`));
+                // Check if they can use the free registered tier (10 generations/day)
+                if (isFreeForGuests) {
+                    const limiterResult = await rateLimiter.check('registered-free-tier', userId, 10, 24 * 60 * 60 * 1000);
+                    if (!limiterResult.allowed) {
+                        return Result.fail(AiError.unauthorized("Daily free tier limit exceeded (10 generations/day). Please top up your credits."));
+                    }
+                    isFreeTierRegistered = true;
+                } else {
+                    return Result.fail(AiError.internal(`Insufficient credits and tool is not free tier compatible.`));
+                }
+            } else {
+                creditsDeducted = true;
             }
-            creditsDeducted = true;
         }
 
         // 3. Run the AI Flow
@@ -83,10 +96,20 @@ export class RunAiToolUseCase {
                 userId: userId,
                 input: input,
                 output: result,
-                creditCost: isGuest ? 0 : creditCost
+                creditCost: (isGuest || isFreeTierRegistered) ? 0 : creditCost
             });
 
-            return Result.ok(result);
+            // 5. Wrap response with usage metadata
+            const usage = isGuest 
+                ? await rateLimiter.getStats('guest-writing-tools', ip || 'unknown', 5, 24 * 60 * 60 * 1000)
+                : isFreeTierRegistered 
+                    ? await rateLimiter.getStats('registered-free-tier', userId, 10, 24 * 60 * 60 * 1000)
+                    : null;
+
+            return Result.ok({
+                ...(result as any),
+                usageMetadata: usage
+            } as any);
         } catch (error: any) {
             // Refund credits on unexpected error
             if (creditsDeducted) {

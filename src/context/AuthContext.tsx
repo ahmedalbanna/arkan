@@ -9,12 +9,21 @@ import { createContext, ReactNode, useCallback, useContext, useEffect, useState 
 import { useBuilderStore } from '@/hooks';
 import { apiService } from '@/infrastructure/api/ApiService';
 
+interface AuthUsage {
+  remainingFreeGenerations: number;
+  totalLimit: number;
+  tier: 'guest' | 'free' | 'premium';
+  resetAt: number;
+}
+
 interface AuthContextType {
   user: any | null;
   userProfile: User | null;
   isLoading: boolean;
   isGuest: boolean;
+  usage: AuthUsage | null;
   refetchUser: () => void;
+  updateUsage: (usage: AuthUsage) => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -23,8 +32,21 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<any | null>(null);
   const [authIsLoading, setAuthIsLoading] = useState(true);
   const [isGuest, setIsGuest] = useState(false);
+  const [usage, setUsage] = useState<AuthUsage | null>(null);
   const queryClient = useQueryClient();
   const { setUserProfile: setStoreUserProfile } = useBuilderStore();
+
+  const fetchUsage = useCallback(async () => {
+    try {
+      const response = await apiService<undefined, AuthUsage>({
+        endpoint: '/api/stats/usage',
+        method: 'GET'
+      });
+      setUsage(response);
+    } catch (error) {
+      console.error('Failed to fetch usage stats:', error);
+    }
+  }, []);
 
   const fetchMe = useCallback(async () => {
     try {
@@ -43,24 +65,29 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         setUser(response.user);
         setStoreUserProfile(userInstance);
         setIsGuest(false);
+        fetchUsage();
         return userInstance;
       } else {
         setUser(null);
         setStoreUserProfile(null);
         const cookieService = container.resolve<ICookieService>(ICookieServiceToken);
-        setIsGuest(cookieService.hasGuestCookie());
+        const guestActive = cookieService.hasGuestCookie();
+        setIsGuest(guestActive);
+        if (guestActive) fetchUsage();
         return null;
       }
     } catch (error) {
       setUser(null);
       setStoreUserProfile(null);
       const cookieService = container.resolve<ICookieService>(ICookieServiceToken);
-      setIsGuest(cookieService.hasGuestCookie());
+      const guestActive = cookieService.hasGuestCookie();
+      setIsGuest(guestActive);
+      if (guestActive) fetchUsage();
       return null;
     } finally {
       setAuthIsLoading(false);
     }
-  }, [setStoreUserProfile]);
+  }, [setStoreUserProfile, fetchUsage]);
 
   useEffect(() => {
     fetchMe();
@@ -83,12 +110,18 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   }, [user, queryClient, fetchMe]);
 
+  const updateUsage = useCallback((newUsage: AuthUsage) => {
+    setUsage(newUsage);
+  }, []);
+
   const value = {
     user: user ? { uid: user.id, email: user.email, displayName: user.name } as any : null,
     userProfile: userProfile ?? null,
     isLoading: authIsLoading,
     isGuest,
+    usage,
     refetchUser,
+    updateUsage,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
