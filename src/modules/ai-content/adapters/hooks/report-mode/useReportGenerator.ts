@@ -91,7 +91,14 @@ export function useReportGenerator(initialProject?: ProjectProperties | null) {
           onActiveSectionChange: handleActiveSectionChange,
           onActiveChapterChange: (id) => {
             setActiveChapterId(id);
-            if (id) setSelectedSectionIds([]);
+            if (id) {
+              const chapter = builderPageLogic.project?.getChapter(id);
+              if (chapter) {
+                setSelectedSectionIds(chapter.sections.map(s => s.id));
+              } else {
+                setSelectedSectionIds([]);
+              }
+            }
           },
           activeChapterId,
         }),

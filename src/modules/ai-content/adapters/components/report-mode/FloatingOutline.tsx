@@ -21,7 +21,8 @@ import {
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { cn } from '@/infrastructure/utils/cn';
-import { GripVertical, ChevronRight, ChevronDown } from 'lucide-react';
+import { GripVertical, ChevronRight, ChevronDown, Search, X } from 'lucide-react';
+import { Input } from '@/components/ui/input';
 import { Project } from '@/modules/projects/domain/entities/Project';
 import { Chapter } from '@/modules/ai-content/domain/entities/Chapter';
 import { Section } from '@/modules/ai-content/domain/entities/Section';
@@ -154,6 +155,8 @@ export const FloatingOutline = ({
   onMoveItem
 }: FloatingOutlineProps) => {
   const [expandedChapters, setExpandedChapters] = React.useState<Set<string>>(new Set());
+  const [searchQuery, setSearchQuery] = React.useState('');
+  
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
@@ -168,6 +171,22 @@ export const FloatingOutline = ({
     });
   };
 
+  const handleItemClick = (id: string, isChapter: boolean) => {
+    if (isChapter) {
+        onActiveChapterChange(id);
+    } else {
+        onActiveSectionChange(id);
+    }
+
+    // Scroll to the element
+    setTimeout(() => {
+        const element = document.getElementById(`item-${id}`);
+        if (element) {
+            element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+    }, 100);
+  };
+
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
     if (over && active.id !== over.id) {
@@ -177,16 +196,31 @@ export const FloatingOutline = ({
 
   if (!project) return null;
 
+  const filteredChapters = useMemo(() => {
+    if (!searchQuery.trim()) return project.chapters as readonly Chapter[];
+
+    const query = searchQuery.toLowerCase();
+    return (project.chapters as readonly Chapter[]).filter(chapter => {
+        const chapterMatches = chapter.title.toLowerCase().includes(query);
+        const sectionsMatch = chapter.sections.some(s => s.title.toLowerCase().includes(query));
+        return chapterMatches || sectionsMatch;
+    });
+  }, [project.chapters, searchQuery]);
+
   const allSortableIds = useMemo(() => {
     const ids: string[] = [];
-    (project.chapters as readonly Chapter[]).forEach(c => {
+    filteredChapters.forEach(c => {
       ids.push(c.id);
-      if (expandedChapters.has(c.id)) {
-        (c.sections as Section[]).forEach(s => ids.push(s.id));
+      if (expandedChapters.has(c.id) || searchQuery.trim()) {
+        c.sections.forEach(s => {
+            if (!searchQuery.trim() || s.title.toLowerCase().includes(searchQuery.toLowerCase()) || c.title.toLowerCase().includes(searchQuery.toLowerCase())) {
+                ids.push(s.id);
+            }
+        });
       }
     });
     return ids;
-  }, [project.chapters, expandedChapters]);
+  }, [filteredChapters, expandedChapters, searchQuery]);
 
   return (
     <AnimatePresence>
@@ -198,14 +232,35 @@ export const FloatingOutline = ({
           className="absolute top-4 left-4 z-50 w-72 max-h-[calc(100%-2rem)] overflow-hidden flex flex-col bg-background/60 backdrop-blur-2xl border border-primary/10 rounded-2xl shadow-[0_8px_40px_rgba(0,0,0,0.1)] transition-all duration-500"
         >
           {/* Header */}
-          <div className="px-4 py-3 border-b border-primary/10 flex items-center justify-between bg-primary/[0.03]">
-            <div className="flex items-center gap-2">
-              <div className="h-1.5 w-1.5 rounded-full bg-primary animate-pulse shadow-[0_0_8px_rgba(var(--primary),0.6)]" />
-              <h3 className="text-[11px] font-black uppercase tracking-[0.2em] text-primary">Document Outline</h3>
+          <div className="px-4 py-3 border-b border-primary/10 space-y-3 bg-primary/[0.03]">
+            <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                <div className="h-1.5 w-1.5 rounded-full bg-primary animate-pulse shadow-[0_0_8px_rgba(var(--primary),0.6)]" />
+                <h3 className="text-[11px] font-black uppercase tracking-[0.2em] text-primary">Document Outline</h3>
+                </div>
+                <span className="text-[9px] font-bold text-muted-foreground/40 uppercase tracking-widest">
+                    {project.sections.length} Units
+                </span>
             </div>
-            <span className="text-[9px] font-bold text-muted-foreground/40 uppercase tracking-widest">
-                {project.sections.length} Units
-            </span>
+
+            {/* Search HUD */}
+            <div className="relative group/search">
+                <Input 
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    placeholder="Search outline..."
+                    className="h-8 pl-8 pr-8 text-[10px] bg-muted/5 border-primary/10 focus-visible:ring-primary/20 rounded-xl transition-all"
+                />
+                <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3 w-3 text-muted-foreground/40 group-focus-within/search:text-primary transition-colors" />
+                {searchQuery && (
+                    <button 
+                        onClick={() => setSearchQuery('')}
+                        className="absolute right-2.5 top-1/2 -translate-y-1/2 hover:text-primary transition-colors"
+                    >
+                        <X className="h-3 w-3" />
+                    </button>
+                )}
+            </div>
           </div>
 
           {/* Outline List */}
@@ -219,7 +274,7 @@ export const FloatingOutline = ({
                 items={allSortableIds}
                 strategy={verticalListSortingStrategy}
               >
-                {(project.chapters as readonly Chapter[]).map((chapter, cIdx) => (
+                {filteredChapters.map((chapter, cIdx) => (
                   <SortableItem
                     key={chapter.id}
                     id={chapter.id}
@@ -227,12 +282,14 @@ export const FloatingOutline = ({
                     title={chapter.title}
                     isActive={activeChapterId === chapter.id}
                     isChapter={true}
-                    isExpanded={expandedChapters.has(chapter.id)}
+                    isExpanded={expandedChapters.has(chapter.id) || !!searchQuery.trim()}
                     hasContent={chapter.sections.some((s: Section) => !!s.content)}
-                    onActivate={() => onActiveChapterChange(chapter.id)}
+                    onActivate={() => handleItemClick(chapter.id, true)}
                     onToggleExpand={() => toggleChapter(chapter.id)}
                   >
-                    {(chapter.sections as Section[]).map((section, sIdx) => (
+                    {(chapter.sections as Section[])
+                      .filter(s => !searchQuery.trim() || s.title.toLowerCase().includes(searchQuery.toLowerCase()) || chapter.title.toLowerCase().includes(searchQuery.toLowerCase()))
+                      .map((section, sIdx) => (
                       <SortableItem
                         key={section.id}
                         id={section.id}
@@ -240,7 +297,7 @@ export const FloatingOutline = ({
                         title={section.title}
                         isActive={selectedSectionIds.includes(section.id)}
                         hasContent={!!section.content}
-                        onActivate={() => onActiveSectionChange(section.id)}
+                        onActivate={() => handleItemClick(section.id, false)}
                       />
                     ))}
                   </SortableItem>

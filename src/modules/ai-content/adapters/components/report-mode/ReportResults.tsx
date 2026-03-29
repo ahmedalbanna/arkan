@@ -15,6 +15,8 @@ import { DiffView } from '@/components/shared/DiffView';
 import { computeDiff } from '@/modules/projects/domain/utils/diff';
 import { useSnapshots } from '@/modules/projects/adapters/hooks/useSnapshots';
 import { Project } from '@/modules/projects/domain/entities/Project';
+import { Chapter } from '@/modules/ai-content/domain/entities/Chapter';
+import { Section } from '@/modules/ai-content/domain/entities/Section';
 import { Badge } from '@/components/ui/badge';
 import { X, GitCompare } from 'lucide-react';
 import { CoverPage } from '@/components/shared/CoverPage';
@@ -245,14 +247,56 @@ const ReportResults = ({
         }
         case 'generate':
         default:
-             if (hasContent) {
+             if (hasContent && project) {
                  return (
                     <A4Page>
-                        <MarkdownEditor
-                            key={version} // Re-mount editor when version changes
-                            content={project?.fullMarkdownContent || ''}
-                            onChange={handleContentChange}
-                        />
+                        <div className="space-y-12 pb-32">
+                            {project.content.map((item, index) => {
+                                if (item instanceof Chapter) {
+                                    return (
+                                        <div key={item.id} id={`item-${item.id}`} className="space-y-8 scroll-mt-24">
+                                            <div className="border-b border-primary/10 pb-4">
+                                                <h2 className="text-2xl font-black font-headline uppercase tracking-tight text-primary flex items-center gap-3">
+                                                    <span className="text-xs opacity-40 tabular-nums">0{index + 1}</span>
+                                                    {item.title}
+                                                </h2>
+                                            </div>
+                                            <div className="space-y-8 pl-4 border-l-2 border-primary/5 ml-2">
+                                                {item.sections.map((section, sIndex) => (
+                                                    <div key={section.id} id={`item-${section.id}`} className="space-y-4 scroll-mt-24">
+                                                        <h3 className="text-lg font-bold font-headline flex items-center gap-2">
+                                                            <span className="text-[10px] opacity-40 tabular-nums">{index + 1}.{sIndex + 1}</span>
+                                                            {section.title}
+                                                        </h3>
+                                                        <MarkdownEditor
+                                                            content={section.content}
+                                                            onChange={(val) => updateProject(p => p.updateSectionContent(section.id, val))}
+                                                        />
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    );
+                                }
+
+                                if (item instanceof Section) {
+                                    return (
+                                        <div key={item.id} id={`item-${item.id}`} className="space-y-4 scroll-mt-24">
+                                            <h3 className="text-lg font-bold font-headline flex items-center gap-2">
+                                                <span className="text-[10px] opacity-40 tabular-nums">{index + 1}</span>
+                                                {item.title}
+                                            </h3>
+                                            <MarkdownEditor
+                                                content={item.content}
+                                                onChange={(val) => updateProject(p => p.updateSectionContent(item.id, val))}
+                                            />
+                                        </div>
+                                    );
+                                }
+
+                                return null;
+                            })}
+                        </div>
                     </A4Page>
                  )
              }
