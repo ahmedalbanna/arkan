@@ -99,7 +99,11 @@ export class RunAiToolUseCase {
                 creditCost: (isGuest || isFreeTierRegistered) ? 0 : creditCost
             });
 
-            // 5. Wrap response with usage metadata
+            // 5. Wrap response with usage metadata (only if result is an object)
+            if (typeof result === 'string') {
+                return Result.ok(result as any);
+            }
+
             const usage = isGuest 
                 ? await rateLimiter.getStats('guest-writing-tools', ip || 'unknown', 5, 24 * 60 * 60 * 1000)
                 : isFreeTierRegistered 

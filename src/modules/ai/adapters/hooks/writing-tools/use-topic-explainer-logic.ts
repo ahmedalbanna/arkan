@@ -31,7 +31,7 @@ export function useTopicExplainerLogic() {
     });
   };
 
-  const results = mutation.data as { explanation: string } | undefined;
+  const results = mutation.data as string | undefined;
 
   return {
     t,

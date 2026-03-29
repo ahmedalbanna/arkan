@@ -26,8 +26,8 @@ export function useAssignmentsSolverLogic() {
   const { toast } = useToast();
 
   const solveMutation = useWritingTool('solve-assignments', {
-    onSuccess: (data: any) => {
-      setSolvedAssignments(data.solutions);
+    onSuccess: (data: string) => {
+      setSolvedAssignments(data);
       toast({ title: t('writingTools.assignmentsSolver.successToast') });
     },
     onError: (error) => {

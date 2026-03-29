@@ -35,7 +35,7 @@ export function useHumanizerLogic() {
   };
 
   const originalText = form.watch('text');
-  const processedText = (mutation.data as { humanizedText: string } | null)?.humanizedText || '';
+  const processedText = (mutation.data as string) || '';
 
   const handleCopy = () => {
     if (!processedText) return;

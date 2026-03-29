@@ -76,7 +76,7 @@ export function useGrammarCheckerLogic() {
   };
 
   const handleCopy = () => {
-    const correctedText = (mutation.data as GrammarCheckOutput)?.correctedText;
+    const correctedText = (mutation.data as string);
     if (!correctedText) return;
     navigator.clipboard.writeText(correctedText).then(() => {
       setIsCopied(true);
@@ -96,9 +96,8 @@ export function useGrammarCheckerLogic() {
   };
 
   const filteredCorrections = useMemo(() => {
-    if (!results?.corrections) return [];
-    return results.corrections.filter(c => filterTypes.includes(c.type as CorrectionType));
-  }, [results, filterTypes]);
+    return [];
+  }, [filterTypes]);
 
   return {
     t,

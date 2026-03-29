@@ -80,7 +80,7 @@ export function useSentenceStructureCheckerLogic() {
     mutation.mutate(data);
   };
 
-  const results = mutation.data as SentenceStructureCheckOutput | null;
+  const results = mutation.data as string | null;
 
   return {
     form,

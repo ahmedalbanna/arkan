@@ -41,19 +41,13 @@ const summarizeDocumentFlow = ai.defineFlow(
   },
   async input => {
     const result = await prompt(input);
-    if (!result) {
-      throw new Error('Failed to summarize document.');
-    }
     
-    // Wrap the plain text in the expected output structure
-    const output: SummarizeDocumentOutput = {
-      summary: result.text || result.output || ''
-    };
+    const text = result.text || result.output || '';
     
-    if (!output.summary || output.summary.trim().length === 0) {
+    if (!text || text.trim().length === 0) {
       throw new Error('Model returned empty summary');
     }
     
-    return output;
+    return text.trim();
   }
 );

@@ -33,20 +33,11 @@ export function useTextStylistLogic() {
   const [activeView, setActiveView] = useState<'side-by-side' | 'diff'>('side-by-side');
   const { toast } = useToast();
 
-  const handleSuccess = (data: any, variables: any) => {
+  const handleSuccess = (data: string, variables: any) => {
     const original = variables.text;
-    let resultText = '';
-    
-    // Determine the result text based on the returned data structure
-    if (data.rewrittenText) resultText = data.rewrittenText;
-    else if (data.summarizedText) resultText = data.summarizedText;
-    else if (data.editedText) resultText = data.editedText;
-    else if (data.enhancedText) resultText = data.enhancedText;
-    else if (data.conciseText) resultText = data.conciseText;
-    else if (data.improvedText) resultText = data.improvedText;
-    else resultText = JSON.stringify(data, null, 2);
+    const resultText = data || '';
 
-    setProcessedText(data); // Store the whole object
+    setProcessedText(data); 
     setDiff(computeDiff(original, resultText));
     toast({ title: 'Processing Complete!' });
   };
@@ -105,13 +96,7 @@ export function useTextStylistLogic() {
 
   const handleCopy = () => {
     if (!processedText) return;
-    let textToCopy = '';
-    if (typeof processedText === 'string') textToCopy = processedText;
-    else if (processedText.rewrittenText) textToCopy = processedText.rewrittenText;
-    else if (processedText.editedText) textToCopy = processedText.editedText;
-    else if (processedText.enhancedText) textToCopy = processedText.enhancedText;
-    else if (processedText.conciseText) textToCopy = processedText.conciseText;
-    else if (processedText.improvedText) textToCopy = processedText.improvedText;
+    const textToCopy = processedText;
     
     navigator.clipboard.writeText(textToCopy).then(() => {
       setIsCopied(true);

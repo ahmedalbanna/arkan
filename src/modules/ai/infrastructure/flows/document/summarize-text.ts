@@ -5,7 +5,7 @@
  * @fileOverview An AI agent for summarizing text.
  */
 
-import { ai } from '@/modules/ai/infrastructure/services/Genkit';
+import { ai, MODEL_BY_TASK } from '@/modules/ai/infrastructure/services/Genkit';
 import { SummarizeInputSchema, SummarizeLength, SummarizeOutputSchema, type SummarizeInput, type SummarizeOutput } from '@/modules/ai/domain/schemas';
 import { RECOMMENDED_TEMPERATURES } from '@/modules/ai/domain/utils/json-output-validator';
 import z from 'zod';
@@ -19,24 +19,22 @@ const lengthDescriptions: Record<SummarizeLength, string> = {
 const summarizePrompt = ai.definePrompt({
     name: 'summarizeTextPrompt',
     input: { schema: z.object({ text: z.string(), instruction: z.string() }) },
-    // No output schema - model returns plain text
     model: 'ollama/gemma:2b',
     config: {
         temperature: RECOMMENDED_TEMPERATURES.PRECISE,
     },
     prompt: `You are a professional text summarizer.
 
-Output ONLY the summary text. Do NOT wrap it in JSON or any other format.
-
 **Task:**
 - Read the text below carefully
 - Create a summary that is {{{instruction}}}
-- Output ONLY the summary text
 
 **Text to Summarize:**
 ---
 {{{text}}}
----`,
+---
+
+Output ONLY the summary text. Do NOT include any preamble, filler, or JSON wrapping.`,
 });
 
 const summarizeTextFlow = ai.defineFlow({
@@ -49,20 +47,12 @@ const summarizeTextFlow = ai.defineFlow({
     try {
         const result = await summarizePrompt({ ...input, instruction });
 
-        if (!result) {
-            throw new Error("No output received from the model.");
-        }
-
-        // Wrap the plain text in the expected output structure
-        const output: SummarizeOutput = {
-            summary: result.text || result.output || ''
-        };
-
-        if (!output.summary || output.summary.trim().length === 0) {
+        const text = result.text || result.output || "";
+        if (!text || text.trim().length === 0) {
             throw new Error('Model returned empty summary');
         }
 
-        return output;
+        return text.trim();
     } catch (error) {
         console.error('Error in summarizeTextFlow:', error);
         throw new Error(`Failed to summarize text: ${error instanceof Error ? error.message : 'Unknown error'}`);

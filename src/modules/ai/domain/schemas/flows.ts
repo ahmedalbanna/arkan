@@ -36,18 +36,14 @@ export const ParaphraseInputSchema = BaseTextInputSchema.extend({
     mode: ParaphraseModeSchema.describe('The desired style of the paraphrased text.'),
     instruction: z.string().optional(), // Added for runtime prompt construction
 }).merge(BaseControlsSchema);
-export const ParaphraseOutputSchema = z.object({
-    paraphrasedText: z.string().describe('The rewritten text, with original markdown formatting preserved.'),
-});
+export const ParaphraseOutputSchema = z.string().describe('The rewritten text, with original markdown formatting preserved.');
 export type ParaphraseInput = z.infer<typeof ParaphraseInputSchema>;
 export type ParaphraseOutput = z.infer<typeof ParaphraseOutputSchema>;
 
 export const SummarizeInputSchema = BaseTextInputSchema.extend({
     length: SummarizeLengthSchema.describe('The desired length of the summary.'),
 }).merge(BaseControlsSchema);
-export const SummarizeOutputSchema = z.object({
-    summary: z.string().describe('The generated summary of the original text.'),
-});
+export const SummarizeOutputSchema = z.string().describe('The generated summary of the original text.');
 export type SummarizeInput = z.infer<typeof SummarizeInputSchema>;
 export type SummarizeOutput = z.infer<typeof SummarizeOutputSchema>;
 
@@ -93,7 +89,7 @@ export const SolveAssignmentsInputSchema = BaseTextInputSchema.extend({
 export type SolveAssignmentsInput = z.infer<typeof SolveAssignmentsInputSchema>;
 
 export const SolveAssignmentsOutputSchema = z.object({
-    solutions: z.string().describe('The comprehensive solutions to all identified questions and problems in markdown format.'),
+    text: z.string().describe('The comprehensive solutions to all identified questions and problems in markdown format.'),
 });
 export type SolveAssignmentsOutput = z.infer<typeof SolveAssignmentsOutputSchema>;
 
@@ -112,7 +108,7 @@ export const GenerateProjectBlueprintInputSchema = z.object({
 export type GenerateProjectBlueprintInput = z.infer<typeof GenerateProjectBlueprintInputSchema>;
 
 export const GenerateProjectBlueprintOutputSchema = z.object({
-    blueprint: z.string().describe('Comprehensive project blueprint in markdown format with architecture, features, timeline, and implementation details.'),
+    text: z.string().describe('Comprehensive project blueprint in markdown format with architecture, features, timeline, and implementation details.'),
 });
 export type GenerateProjectBlueprintOutput = z.infer<typeof GenerateProjectBlueprintOutputSchema>;
 
@@ -227,20 +223,7 @@ export const SentenceStructureIssueSchema = z.object({
 });
 export type SentenceStructureIssue = z.infer<typeof SentenceStructureIssueSchema>;
 
-export const SentenceStructureCheckOutputSchema = z.object({
-    statistics: z.object({
-        sentenceCount: z.number().describe('Total number of sentences.'),
-        averageSentenceLength: z.number().describe('Average number of words per sentence.'),
-        shortestSentence: z.number().describe('Length of the shortest sentence in words.'),
-        longestSentence: z.number().describe('Length of the longest sentence in words.'),
-    }).describe('Basic statistics about the text.'),
-    varietyAssessment: z.object({
-        lengthVariety: SentenceVarietySchema.describe('Assessment of sentence length variation.'),
-        structureVariety: SentenceVarietySchema.describe('Assessment of sentence structure variation (simple, compound, complex).'),
-    }).describe('Analysis of sentence variety.'),
-    issues: z.array(SentenceStructureIssueSchema).describe('An array of identified issues with specific sentences.'),
-    overallAssessment: z.string().describe('A brief, overall assessment of the sentence structure.'),
-});
+export const SentenceStructureCheckOutputSchema = z.string().describe('A brief, overall assessment of the sentence structure and suggestions for improvement.');
 export type SentenceStructureCheckOutput = z.infer<typeof SentenceStructureCheckOutputSchema>;
 
 // detect-ai-content.ts
@@ -382,9 +365,7 @@ export const IdeaGenerationInputSchema = z
     .merge(BaseControlsSchema);
 export type IdeaGenerationInput = z.infer<typeof IdeaGenerationInputSchema>;
 
-export const IdeaGenerationOutputSchema = z.object({
-    markdown: z.string().describe('A markdown formatted string of generated ideas, each with a title and description.'),
-});
+export const IdeaGenerationOutputSchema = z.string().describe('A markdown formatted string of generated ideas, each with a title and description.');
 export type IdeaGenerationOutput = z.infer<typeof IdeaGenerationOutputSchema>;
 
 
@@ -477,11 +458,7 @@ export const GenerateTextInputSchema = BaseTextInputSchema.extend({
 }).merge(BaseControlsSchema);
 export type GenerateTextInput = z.infer<typeof GenerateTextInputSchema>;
 
-export const GenerateTextOutputSchema = z.object({
-    generatedText: z
-        .string()
-        .describe('The generated text.'),
-});
+export const GenerateTextOutputSchema = z.string().describe('The generated text.');
 export type GenerateTextOutput = z.infer<typeof GenerateTextOutputSchema>;
 
 
@@ -497,16 +474,7 @@ export const GrammarCheckInputSchema = BaseTextInputSchema.extend({
 }).merge(BaseControlsSchema);
 export type GrammarCheckInput = z.infer<typeof GrammarCheckInputSchema>;
 
-export const GrammarCheckOutputSchema = z.object({
-    correctedText: z.string().describe("The full text with all corrections applied, preserving original markdown."),
-    corrections: z.array(CorrectionSchema).describe("A list of the specific corrections made."),
-    statistics: z.object({
-        total: z.number().describe("Total number of corrections made."),
-        grammar: z.number().describe("Number of grammar corrections."),
-        spelling: z.number().describe("Number of spelling corrections."),
-        punctuation: z.number().describe("Number of punctuation corrections."),
-    }).optional().describe("Summary statistics of corrections by type."),
-});
+export const GrammarCheckOutputSchema = z.string().describe("The full text with all corrections applied, preserving original markdown.");
 export type GrammarCheckOutput = z.infer<typeof GrammarCheckOutputSchema>;
 
 
@@ -515,9 +483,7 @@ export const HumanizeTextInputSchema = BaseTextInputSchema.extend({
 }).merge(BaseControlsSchema);
 export type HumanizeTextInput = z.infer<typeof HumanizeTextInputSchema>;
 
-export const HumanizeTextOutputSchema = z.object({
-    humanizedText: z.string().describe('The rewritten text, which sounds more natural and less robotic.'),
-});
+export const HumanizeTextOutputSchema = z.string().describe('The rewritten text, which sounds more natural and less robotic.');
 export type HumanizeTextOutput = z.infer<typeof HumanizeTextOutputSchema>;
 
 
@@ -543,7 +509,7 @@ export const ImproveMarkdownInputSchema = z
 export type ImproveMarkdownInput = z.infer<typeof ImproveMarkdownInputSchema>;
 
 export const ImproveMarkdownOutputSchema = z.object({
-    improvedMarkdown: z.string().describe('The improved and reformatted Markdown content.'),
+    text: z.string().describe('The improved and reformatted Markdown content.'),
 });
 export type ImproveMarkdownOutput = z.infer<typeof ImproveMarkdownOutputSchema>;
 
@@ -560,7 +526,7 @@ export const ManipulateTextInputSchema = z
 export type ManipulateTextInput = z.infer<typeof ManipulateTextInputSchema>;
 
 export const ManipulateTextOutputSchema = z.object({
-    manipulatedText: z.string().describe('The resulting text after applying the command.'),
+    text: z.string().describe('The resulting text after applying the command.'),
 });
 export type ManipulateTextOutput = z.infer<typeof ManipulateTextOutputSchema>;
 
@@ -592,9 +558,7 @@ export const RewriteDocumentInputSchema = z.object({
 });
 export type RewriteDocumentInput = z.infer<typeof RewriteDocumentInputSchema>;
 
-export const RewriteDocumentOutputSchema = z.object({
-    markdown: z.string().describe('The rewritten content, formatted as clean, well-structured markdown.'),
-});
+export const RewriteDocumentOutputSchema = z.string().describe('The rewritten content, formatted as clean, well-structured markdown.');
 export type RewriteDocumentOutput = z.infer<typeof RewriteDocumentOutputSchema>;
 
 
@@ -604,9 +568,7 @@ export const RewriteToMarkdownInputSchema = z.object({
 });
 export type RewriteToMarkdownInput = z.infer<typeof RewriteToMarkdownInputSchema>;
 
-export const RewriteToMarkdownOutputSchema = z.object({
-    markdown: z.string().describe('The rewritten content, formatted as clean, well-structured markdown.'),
-});
+export const RewriteToMarkdownOutputSchema = z.string().describe('The rewritten content, formatted as clean, well-structured markdown.');
 export type RewriteToMarkdownOutput = z.infer<typeof RewriteToMarkdownOutputSchema>;
 
 
@@ -620,9 +582,7 @@ export const SummarizeDocumentInputSchema = z.object({
 });
 export type SummarizeDocumentInput = z.infer<typeof SummarizeDocumentInputSchema>;
 
-export const SummarizeDocumentOutputSchema = z.object({
-    summary: z.string().describe('A concise summary of the document.'),
-});
+export const SummarizeDocumentOutputSchema = z.string().describe('A concise summary of the document.');
 export type SummarizeDocumentOutput = z.infer<typeof SummarizeDocumentOutputSchema>;
 
 
@@ -635,7 +595,7 @@ export const SummarizeProjectInputSchema = z.object({
 export type SummarizeProjectInput = z.infer<typeof SummarizeProjectInputSchema>;
 
 export const SummarizeProjectOutputSchema = z.object({
-    summary: z.string().describe('A concise summary of the project.'),
+    text: z.string().describe('A concise summary of the project.'),
     technologies: z.array(z.string()).describe('A list of technologies, frameworks, and libraries identified in the project description.'),
     progress: z.string().describe('Details on the summarization progress'),
 });
@@ -650,9 +610,7 @@ export const RewriteTextInputSchema = BaseTextInputSchema.extend({
 export type RewriteTextInput = z.infer<typeof RewriteTextInputSchema>;
 
 
-export const RewriteTextOutputSchema = z.object({
-    rewrittenText: z.string().describe('The text rewritten in the specified style.'),
-});
+export const RewriteTextOutputSchema = z.string().describe('The text rewritten in the specified style.');
 export type RewriteTextOutput = z.infer<typeof RewriteTextOutputSchema>;
 
 export const SummarizeTextWithRatioInputSchema = BaseTextInputSchema.extend({
@@ -660,9 +618,7 @@ export const SummarizeTextWithRatioInputSchema = BaseTextInputSchema.extend({
 });
 export type SummarizeTextWithRatioInput = z.infer<typeof SummarizeTextWithRatioInputSchema>;
 
-export const SummarizeTextWithRatioOutputSchema = z.object({
-    summarizedText: z.string().describe('The generated summary of the original text.'),
-});
+export const SummarizeTextWithRatioOutputSchema = z.string().describe('The generated summary of the original text.');
 export type SummarizeTextWithRatioOutput = z.infer<typeof SummarizeTextWithRatioOutputSchema>;
 
 // Style Editor
@@ -672,7 +628,7 @@ export const StyleEditorInputSchema = BaseTextInputSchema.extend({
 export type StyleEditorInput = z.infer<typeof StyleEditorInputSchema>;
 
 export const StyleEditorOutputSchema = z.object({
-    editedText: z.string().describe('The text with improved style, maintaining the original meaning.'),
+    text: z.string().describe('The text with improved style, maintaining the original meaning.'),
     improvements: z.array(z.string()).optional().describe('A list of style improvements made to the text.'),
 });
 export type StyleEditorOutput = z.infer<typeof StyleEditorOutputSchema>;
@@ -685,7 +641,7 @@ export const ReadabilityEnhancerInputSchema = BaseTextInputSchema.extend({
 export type ReadabilityEnhancerInput = z.infer<typeof ReadabilityEnhancerInputSchema>;
 
 export const ReadabilityEnhancerOutputSchema = z.object({
-    enhancedText: z.string().describe('The text enhanced for better readability.'),
+    text: z.string().describe('The text enhanced for better readability.'),
     readabilityScore: z.number().min(0).max(100).optional().describe('A readability score (0-100) for the enhanced text.'),
     improvements: z.array(z.string()).optional().describe('A list of readability improvements made.'),
 });
@@ -704,7 +660,7 @@ export const ConcisenessCheckerInputSchema = BaseTextInputSchema.extend({
 export type ConcisenessCheckerInput = z.infer<typeof ConcisenessCheckerInputSchema>;
 
 export const ConcisenessCheckerOutputSchema = z.object({
-    conciseText: z.string().describe('The text made more concise while preserving meaning.'),
+    text: z.string().describe('The text made more concise while preserving meaning.'),
     originalWordCount: z.number().optional().describe('The original word count.'),
     newWordCount: z.number().optional().describe('The new word count after making it concise.'),
     reductionPercentage: z.number().optional().describe('The percentage reduction in word count.'),
@@ -723,7 +679,7 @@ export const ClarityAdvisorInputSchema = BaseTextInputSchema.extend({
 export type ClarityAdvisorInput = z.infer<typeof ClarityAdvisorInputSchema>;
 
 export const ClarityAdvisorOutputSchema = z.object({
-    improvedText: z.string().describe('The text improved for clarity.'),
+    text: z.string().describe('The text improved for clarity.'),
     clarityScore: z.number().min(0).max(100).optional().describe('A clarity score (0-100) for the improved text.'),
     suggestions: z.array(z.object({
         issue: z.string().describe('The clarity issue identified.'),
@@ -739,9 +695,7 @@ export const TopicExplainerInputSchema = BaseTopicInputSchema.extend({
 });
 export type TopicExplainerInput = z.infer<typeof TopicExplainerInputSchema>;
 
-export const TopicExplainerOutputSchema = z.object({
-    explanation: z.string().describe('A simple, easy-to-understand explanation of the topic, formatted as markdown.'),
-});
+export const TopicExplainerOutputSchema = z.string().describe('A simple, easy-to-understand explanation of the topic, formatted as markdown.');
 export type TopicExplainerOutput = z.infer<typeof TopicExplainerOutputSchema>;
 
 // translate-text.ts
@@ -751,9 +705,7 @@ export const TranslateTextInputSchema = BaseTextInputSchema.extend({
     .merge(BaseControlsSchema);
 export type TranslateTextInput = z.infer<typeof TranslateTextInputSchema>;
 
-export const TranslateTextOutputSchema = z.object({
-    translatedText: z.string().describe('The resulting translated text, with original markdown formatting preserved.'),
-});
+export const TranslateTextOutputSchema = z.string().describe('The resulting translated text, with original markdown formatting preserved.');
 export type TranslateTextOutput = z.infer<typeof TranslateTextOutputSchema>;
 
 
@@ -776,9 +728,7 @@ export const WriteDocumentInputSchema = z
     .merge(BaseControlsSchema);
 export type WriteDocumentInput = z.infer<typeof WriteDocumentInputSchema>;
 
-export const WriteDocumentOutputSchema = z.object({
-    document: z.string().describe('The fully generated document content, formatted as markdown.'),
-});
+export const WriteDocumentOutputSchema = z.string().describe('The fully generated document content, formatted as markdown.');
 export type WriteDocumentOutput = z.infer<typeof WriteDocumentOutputSchema>;
 
 // evaluate-report.ts
@@ -836,7 +786,7 @@ export type GenerateUIDescriptionInput = z.infer<typeof GenerateUIDescriptionInp
 
 
 export const GenerateUIDescriptionOutputSchema = z.object({
-    uiDescription: z.string().describe('The generated UI/UX workflow description in markdown format.'),
+    text: z.string().describe('The generated UI/UX workflow description in markdown format.'),
 });
 export type GenerateUIDescriptionOutput = z.infer<typeof GenerateUIDescriptionOutputSchema>;
 

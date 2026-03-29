@@ -5,7 +5,7 @@
  * @fileOverview An AI agent for paraphrasing text in different styles.
  */
 
-import { ai } from '@/modules/ai/infrastructure/services/Genkit';
+import { ai, MODEL_BY_TASK } from '@/modules/ai/infrastructure/services/Genkit';
 import { ParaphraseInputSchema, ParaphraseOutputSchema, type ParaphraseInput, type ParaphraseMode, type ParaphraseOutput } from '@/modules/ai/domain/schemas';
 
 const styleDescriptions: Record<ParaphraseMode, string> = {
@@ -19,10 +19,8 @@ const styleDescriptions: Record<ParaphraseMode, string> = {
 const paraphrasePrompt = ai.definePrompt({
     name: 'paraphraseTextPrompt',
     input: { schema: ParaphraseInputSchema },
-    output: { schema: ParaphraseOutputSchema },
     model: 'ollama/gemma:2b',
     prompt: `You are an expert editor. Your task is to paraphrase the given text based on the selected mode. You must perfectly preserve all markdown formatting.
-Your output must be a valid JSON object that adheres to the defined schema.
 
 **Mode**: {{{mode}}}
 **Instruction**: {{{instruction}}}
@@ -32,7 +30,7 @@ Your output must be a valid JSON object that adheres to the defined schema.
 {{{text}}}
 ---
 
-**Paraphrased Text:`,
+Output ONLY the paraphrased text. Do NOT include any preamble, filler, or JSON wrapping.`,
 });
 
 const paraphraseTextFlow = ai.defineFlow({
@@ -41,12 +39,14 @@ const paraphraseTextFlow = ai.defineFlow({
     outputSchema: ParaphraseOutputSchema,
 }, async (input) => {
     const instruction = styleDescriptions[input.mode] || styleDescriptions.standard;
-    const { output } = await paraphrasePrompt({ text: input.text, mode: input.mode, instruction } as any);
-    if (!output) {
+    const result = await paraphrasePrompt({ text: input.text, mode: input.mode, instruction } as any);
+    
+    const text = (result.text || result.output || "").replace(/---/g, '').trim();
+    if (!text) {
         throw new Error("Failed to paraphrase text.");
     }
-    output.paraphrasedText = output.paraphrasedText.replace(/---/g, '').trim();
-    return output;
+    
+    return text;
 });
 
 export async function paraphraseText(input: ParaphraseInput): Promise<ParaphraseOutput> {

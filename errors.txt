@@ -1,24 +1,19 @@
-API Route Error: { message: 'Invalid tool: translate-text' }
- POST /api/writing-tools/translate-text 400 in 1758ms
+Queue or flow execution failed for generate-ideas Error [GenkitError]: INVALID_ARGUMENT: Schema validation failed. Parse Errors:
 
----
-
-Queue or flow execution failed for write-document Error [GenkitError]: INVALID_ARGUMENT: Schema validation failed. Parse Errors:
-
-- (root): must have required property 'document'
+- (root): must have required property 'markdown'
 
 Provided data:
 
 {
   "type": "object",
   "properties": {
-    "document": {
+    "markdown": {
       "type": "string",
-      "description": "The fully generated document content, formatted as markdown."
+      "description": "A markdown formatted string of generated ideas, each with a title and description."
     }
   },
   "required": [
-    "document"
+    "markdown"
   ],
   "additionalProperties": true,
   "$schema": "http://json-schema.org/draft-07/schema#"
@@ -29,46 +24,46 @@ Required JSON schema:
 {
   "type": "object",
   "properties": {
-    "document": {
+    "markdown": {
       "type": "string",
-      "description": "The fully generated document content, formatted as markdown."
+      "description": "A markdown formatted string of generated ideas, each with a title and description."
     }
   },
   "required": [
-    "document"
+    "markdown"
   ],
   "additionalProperties": true,
   "$schema": "http://json-schema.org/draft-07/schema#"
 }
-    at async (src/modules/ai/infrastructure/flows/writing/write-document.ts:94:22)
+    at async (src/modules/ai/infrastructure/flows/generation/generate-ideas.ts:52:22)
     at async ModelQueue.processNext (src/modules/ai/infrastructure/services/model-request-queue.ts:123:22)
-  92 |     promptToUse = defaultWriteDocumentPrompt;
-  93 |   }
-> 94 |   const { output } = await promptToUse(input);
+  50 |   outputSchema: IdeaGenerationOutputSchema,
+  51 | }, async (input) => {
+> 52 |   const { output } = await generateIdeasPrompt(input);
      |                      ^
-  95 |   if (!output) {
-  96 |     throw new Error("Document generation failed.");
-  97 |   } {
+  53 |   if (!output) {
+  54 |     throw new Error('Idea generation failed to produce an output.');
+  55 |   } {
   source: undefined,
   status: 'INVALID_ARGUMENT',
   detail: [Object],
   code: 400,
   originalMessage: 'Schema validation failed. Parse Errors:\n' +
     '\n' +
-    "- (root): must have required property 'document'\n" +
+    "- (root): must have required property 'markdown'\n" +
     '\n' +
     'Provided data:\n' +
     '\n' +
     '{\n' +
     '  "type": "object",\n' +
     '  "properties": {\n' +
-    '    "document": {\n' +
+    '    "markdown": {\n' +
     '      "type": "string",\n' +
-    '      "description": "The fully generated document content, formatted as markdown."\n' +
+    '      "description": "A markdown formatted string of generated ideas, each with a title and description."\n' +
     '    }\n' +
     '  },\n' +
     '  "required": [\n' +
-    '    "document"\n' +
+    '    "markdown"\n' +
     '  ],\n' +
     '  "additionalProperties": true,\n' +
     '  "$schema": "http://json-schema.org/draft-07/schema#"\n' +
@@ -79,41 +74,41 @@ Required JSON schema:
     '{\n' +
     '  "type": "object",\n' +
     '  "properties": {\n' +
-    '    "document": {\n' +
+    '    "markdown": {\n' +
     '      "type": "string",\n' +
-    '      "description": "The fully generated document content, formatted as markdown."\n' +
+    '      "description": "A markdown formatted string of generated ideas, each with a title and description."\n' +
     '    }\n' +
     '  },\n' +
     '  "required": [\n' +
-    '    "document"\n' +
+    '    "markdown"\n' +
     '  ],\n' +
     '  "additionalProperties": true,\n' +
     '  "$schema": "http://json-schema.org/draft-07/schema#"\n' +
     '}',
   ignoreFailedSpan: true,
-  traceId: '933185a6b9bada1f41b7c2d6b90bb482'
+  traceId: '08aedd39e81ab896b41f30a92cdf2ee1'
 }
 API Route Error: AiError {
   type: 'GENERATION_FAILED',
   message: 'INVALID_ARGUMENT: Schema validation failed. Parse Errors:\n' +
     '\n' +
-    "- (root): must have required property 'document'\n" +
+    "- (root): must have required property 'markdown'\n" +
     '\n' +
     'Provided data:\n' +
     '\n' +
     '{\n' +
     '  "type": "object",\n' +
     '  "properties": {\n' +
-    '    "document": {\n' +
+    '    "markdown": {\n' +
     '      "type": "string",\n' +
-    '      "description": "The fully generated document content, formatted as markdown."\n' +
+    '      "description": "A markdown formatted string of generated ideas, each with a title and description."\n' +
     '    },\n' +
     '    "required": [\n' +
-    '      "document"\n' +
+    '      "markdown"\n' +
     '    ],\n' +
-    '    "additionalProperties": true,\n' +
-    '    "$schema": "http://json-schema.org/draft-07/schema#"\n' +
-    '  }\n' +
+    '    "additionalProperties": true\n' +
+    '  },\n' +
+    '  "$schema": "http://json-schema.org/draft-07/schema#"\n' +
     '}\n' +
     '\n' +
     'Required JSON schema:\n' +
@@ -121,51 +116,17 @@ API Route Error: AiError {
     '{\n' +
     '  "type": "object",\n' +
     '  "properties": {\n' +
-    '    "document": {\n' +
+    '    "markdown": {\n' +
     '      "type": "string",\n' +
-    '      "description": "The fully generated document content, formatted as markdown."\n' +
+    '      "description": "A markdown formatted string of generated ideas, each with a title and description."\n' +
     '    }\n' +
     '  },\n' +
     '  "required": [\n' +
-    '    "document"\n' +
+    '    "markdown"\n' +
     '  ],\n' +
     '  "additionalProperties": true,\n' +
     '  "$schema": "http://json-schema.org/draft-07/schema#"\n' +
     '}',
   details: undefined
 }
- POST /api/writing-tools/write-document 500 in 50481ms
-
- ---
-
-
-  ○ Compiling /writing-tools/idea-generator ...
- ✓ Compiled /writing-tools/idea-generator in 3.2s
- GET /writing-tools/idea-generator 200 in 3366ms
-Queue or flow execution failed for generate-ideas Error [GenkitError]: INVALID_ARGUMENT: Must supply a `model` to `generate()` calls.
-    at async (src/modules/ai/infrastructure/flows/generation/generate-ideas.ts:50:22)
-    at async ModelQueue.processNext (src/modules/ai/infrastructure/services/model-request-queue.ts:123:22)
-  48 |   outputSchema: IdeaGenerationOutputSchema,
-  49 | }, async (input) => {
-> 50 |   const { output } = await generateIdeasPrompt(input);
-     |                      ^
-  51 |   if (!output) {
-  52 |     throw new Error('Idea generation failed to produce an output.');
-  53 |   } {
-  source: undefined,
-  status: 'INVALID_ARGUMENT',
-  detail: undefined,
-  code: 400,
-  originalMessage: 'Must supply a `model` to `generate()` calls.',
-  ignoreFailedSpan: true,
-  traceId: '0f55741c8062d58773a0b7f9c0d8d866'
-}
-API Route Error: AiError {
-  type: 'GENERATION_FAILED',
-  message: 'INVALID_ARGUMENT: Must supply a `model` to `generate()` calls.',
-  details: undefined
-}
- POST /api/writing-tools/generate-ideas 500 in 605ms
-
- ---
- 
+ POST /api/writing-tools/generate-ideas 500 in 84141ms

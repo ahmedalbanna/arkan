@@ -5,23 +5,21 @@
  * @fileOverview An AI agent for writing a full document from a topic.
  */
 
-import { ai } from '@/modules/ai/infrastructure/services/Genkit';
+import { ai, MODEL_BY_TASK } from '@/modules/ai/infrastructure/services/Genkit';
 import { WriteDocumentInputSchema, WriteDocumentOutputSchema, type WriteDocumentInput, type WriteDocumentOutput } from '@/modules/ai/domain/schemas';
+
 
 const universitySubjectMaterialPrompt = ai.definePrompt({
   name: 'universitySubjectMaterialPrompt',
   input: { schema: WriteDocumentInputSchema },
-  output: { schema: WriteDocumentOutputSchema },
   model: 'ollama/gemma:2b',
   prompt: `You are an expert university lecturer with a talent for making complex topics simple and engaging for students. Your task is to create educational material for the given university-level subject.
-Your output must be a valid JSON object that adheres to the defined schema.
 
 **Your Process:**
 1.  **Deconstruct the Request:** Fully understand the topic and any specific instructions.
 2.  **Structure for Learning:** Create a logical flow that introduces concepts, provides clear explanations, defines key terms, and uses examples or analogies to aid understanding.
 3.  **Generate Content:** Write the full document. Ensure it is accurate, easy to follow, and suitable for a university student audience. Include sections for "Key Terms and Definitions" and a "Summary" at the end where appropriate.
 4.  **Format as Markdown:** Use clear and consistent Markdown for headings, lists, bold text, etc., to ensure readability.
-5.  **Return Only the Document:** Your final output must be only the complete markdown content of the document, inside the correct JSON structure.
 
 **Topic:** {{{topic}}}
 **Document Type:** {{{documentType}}}
@@ -41,16 +39,15 @@ You MUST structure your document according to the following headings. Ensure eac
 {{/each}}
 ---
 {{/if}}
-`,
+
+Output ONLY the document markdown. Do NOT include any preamble, filler, or JSON wrapping.`,
 });
 
 const defaultWriteDocumentPrompt = ai.definePrompt({
   name: 'defaultWriteDocumentPrompt',
   input: { schema: WriteDocumentInputSchema },
-  output: { schema: WriteDocumentOutputSchema },
   model: 'ollama/gemma:2b',
   prompt: `You are an expert writer and researcher. Your task is to generate a complete, well-structured, and comprehensive document based on the user's request.
-Your output must be a valid JSON object that adheres to the defined schema.
 
 **Topic:** {{{topic}}}
 **Document Type:** {{{documentType}}}
@@ -76,8 +73,8 @@ You MUST structure your document according to the following headings. Ensure eac
 2.  **Outline the Structure:** Create a logical outline for the document. If a Table of Contents is provided, you MUST use it as the primary structure. Otherwise, create your own logical structure.
 3.  **Generate Content:** Write the full document, ensuring it is coherent, well-researched (if applicable), and adheres to the requested format and tone.
 4.  **Format as Markdown:** Use clear and consistent Markdown formatting for headings, lists, bold text, etc., to ensure readability.
-5.  **Return Only the Document:** Your final output must be only the complete markdown content of the document, inside the correct JSON structure.
-`,
+
+Output ONLY the document markdown. Do NOT include any preamble, filler, or JSON wrapping.`,
 });
 
 const writeDocumentFlow = ai.defineFlow({
@@ -91,11 +88,12 @@ const writeDocumentFlow = ai.defineFlow({
   } else {
     promptToUse = defaultWriteDocumentPrompt;
   }
-  const { output } = await promptToUse(input);
-  if (!output) {
+  const result = await promptToUse(input);
+  const text = result.text || result.output || "";
+  if (!text) {
     throw new Error("Document generation failed.");
   }
-  return output;
+  return text.trim();
 });
 
 export async function writeDocument(input: WriteDocumentInput): Promise<WriteDocumentOutput> {

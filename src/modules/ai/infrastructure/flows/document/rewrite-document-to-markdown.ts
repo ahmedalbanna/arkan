@@ -43,18 +43,12 @@ const rewriteDocumentFlow = ai.defineFlow(
   },
   async (input) => {
     const result = await generateMarkdownPrompt(input);
-    if (!result) {
-      throw new Error('Failed to rewrite document to markdown.');
-    }
     
-    // Wrap the plain text in the expected output structure
-    const output: RewriteDocumentOutput = {
-      markdown: result.text || result.output || ''
-    };
+    const text = result.text || result.output || '';
     
-    if (!output.markdown || output.markdown.trim().length === 0) {
+    if (!text || text.trim().length === 0) {
       throw new Error('Model returned empty markdown');
     }
     
-    return output;
+    return text.trim();
   });

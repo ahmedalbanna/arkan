@@ -28,8 +28,8 @@ export function useSummarizerLogic() {
   const { toast } = useToast();
 
   const summarizeMutation = useWritingTool('summarize', {
-    onSuccess: (data: any) => {
-      setSummarizedText(data.summary);
+    onSuccess: (data: string) => {
+      setSummarizedText(data);
       toast({ title: t('writingTools.summarizer.successToast') });
     },
     onError: (error) => {

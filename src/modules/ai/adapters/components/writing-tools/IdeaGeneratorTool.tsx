@@ -30,8 +30,8 @@ export function IdeaGeneratorTool() {
   const [isCopied, setIsCopied] = React.useState(false);
 
   const handleCopy = async () => {
-    if (results?.markdown) {
-      await navigator.clipboard.writeText(results.markdown);
+    if (results) {
+      await navigator.clipboard.writeText(results);
       setIsCopied(true);
       setTimeout(() => setIsCopied(false), 2000);
     }
@@ -160,7 +160,7 @@ export function IdeaGeneratorTool() {
                                 </div>
                             ) : (
                                 <div className="prose dark:prose-invert max-w-none text-[15px] leading-relaxed font-serif selection:bg-primary/10">
-                                    <ReactMarkdown components={markdownComponents}>{results?.markdown || ''}</ReactMarkdown>
+                                    <ReactMarkdown components={markdownComponents}>{results || ''}</ReactMarkdown>
                                 </div>
                             )}
                             {/* Page Footer Visual */}

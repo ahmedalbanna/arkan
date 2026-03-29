@@ -29,8 +29,8 @@ export function TopicExplainerTool() {
   const [isCopied, setIsCopied] = React.useState(false);
 
   const handleCopy = async () => {
-    if (results?.explanation) {
-      await navigator.clipboard.writeText(results.explanation);
+    if (results) {
+      await navigator.clipboard.writeText(results);
       setIsCopied(true);
       setTimeout(() => setIsCopied(false), 2000);
     }
@@ -100,7 +100,7 @@ export function TopicExplainerTool() {
                             </div>
 
                             <div className="flex items-center gap-2">
-                                <Button variant="ghost" size="icon" onClick={handleCopy} disabled={!results?.explanation} className="h-8 w-8 rounded-lg hover:bg-primary/10 hover:text-primary transition-all">
+                                <Button variant="ghost" size="icon" onClick={handleCopy} disabled={!results} className="h-8 w-8 rounded-lg hover:bg-primary/10 hover:text-primary transition-all">
                                     {isCopied ? <CheckCircle2 className="h-4 w-4 text-green-500" /> : <Copy className="h-4 w-4" />}
                                 </Button>
                             </div>
@@ -112,9 +112,9 @@ export function TopicExplainerTool() {
                                     <Loader2 className="h-12 w-12 animate-spin text-primary" />
                                     <p className="text-[10px] font-bold uppercase tracking-[0.2em]">{t('writingTools.topicExplainer.analyzing')}</p>
                                 </div>
-                            ) : results?.explanation && (
+                            ) : results && (
                                 <div className="prose dark:prose-invert max-w-none text-[15px] leading-relaxed font-serif selection:bg-primary/10">
-                                    <ReactMarkdown components={markdownComponents}>{results.explanation}</ReactMarkdown>
+                                    <ReactMarkdown components={markdownComponents}>{results}</ReactMarkdown>
                                 </div>
                             )}
                             {/* Page Footer Visual */}

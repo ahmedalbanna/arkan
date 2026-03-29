@@ -80,8 +80,15 @@ export const BaseTextSchema = z.object({
   text: z.string().min(1, 'Text cannot be empty').transform((s) => s.trim()),
 });
 
+/**
+ * Base schema for flows that return a single string of text as output.
+ */
+export const BaseTextOutputSchema = z.object({
+  text: z.string().describe('The generated text response.'),
+});
 
 // Common combined generation schema (external context + generation controls)
 export const BaseGenerationSchema = BaseExternalContextSchema.merge(BaseControlsSchema);
 
 export type BaseContextFile = z.infer<typeof BaseContextFileSchema>;
+export type BaseTextOutput = z.infer<typeof BaseTextOutputSchema>;

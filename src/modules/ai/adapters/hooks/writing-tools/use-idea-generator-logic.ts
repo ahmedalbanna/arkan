@@ -43,7 +43,7 @@ export function useIdeaGeneratorLogic() {
     mutation.mutate(data);
   };
 
-  const results = mutation.data as IdeaGenerationOutput | null;
+  const results = mutation.data as string | null;
 
   return {
     t,

@@ -76,6 +76,7 @@ export class WritingToolRegistry {
         'clarity-advisor': { flow: clarityAdvisor, schema: ClarityAdvisorInputSchema, creditCost: 1, isFreeForGuests: true },
         'topic-explainer': { flow: topicExplainer, schema: TopicExplainerInputSchema, creditCost: 1, isFreeForGuests: true },
         'translator': { flow: translateText, schema: TranslateTextInputSchema, creditCost: 1, isFreeForGuests: true },
+        'translate-text': { flow: translateText, schema: TranslateTextInputSchema, creditCost: 1, isFreeForGuests: true },
         'write-document': { flow: writeDocument, schema: WriteDocumentInputSchema, creditCost: 2 },
         'ai-researcher': { flow: aiResearcher, schema: AIResearcherInputSchema, creditCost: 3 },
         'bias-checker': { flow: biasCheckText, schema: BiasCheckInputSchema, creditCost: 1, isFreeForGuests: true },

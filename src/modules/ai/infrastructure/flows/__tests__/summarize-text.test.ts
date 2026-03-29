@@ -45,7 +45,7 @@ describe('summarizeText Flow', () => {
     }));
 
     // Verify the result
-    expect(result.summary).toBe(mockSummary);
+    expect(result).toBe(mockSummary);
   });
 
   it('should call the summarization prompt with "long" instruction', async () => {

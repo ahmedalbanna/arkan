@@ -84,7 +84,7 @@ export function useParaphraserLogic() {
   };
 
   const originalText = form.watch('text');
-  const paraphrasedText = (paraphraseMutation.data as { paraphrasedText: string } | null)?.paraphrasedText || '';
+  const paraphrasedText = (paraphraseMutation.data as string) || '';
 
   const handleCopy = () => {
     if (!paraphrasedText) return;

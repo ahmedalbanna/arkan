@@ -43,20 +43,13 @@ Output ONLY the generated text. Do NOT wrap it in JSON or any other format.
       try {
         const result = await promptTemplate(flowInput);
         
-        if (!result) {
-          throw new Error('No output received from the model.');
-        }
+        const text = result.text || result.output || '';
 
-        // Wrap the plain text in the expected output structure
-        const output: GenerateTextOutput = {
-          generatedText: result.text || result.output || ''
-        };
-
-        if (!output.generatedText || output.generatedText.trim().length === 0) {
+        if (!text || text.trim().length === 0) {
           throw new Error('Model returned empty text');
         }
 
-        return output;
+        return text.trim();
       } catch (error) {
         console.error('Error in generateTextFlow:', error);
         throw new Error(`Text generation failed: ${error instanceof Error ? error.message : 'Unknown error'}`);

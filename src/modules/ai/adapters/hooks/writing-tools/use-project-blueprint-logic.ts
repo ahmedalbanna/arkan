@@ -30,8 +30,8 @@ export function useProjectBlueprintLogic() {
   const { toast } = useToast();
 
   const generateMutation = useWritingTool('generate-project-blueprint', {
-    onSuccess: (data: any) => {
-        setBlueprint(data.blueprint);
+    onSuccess: (data: string) => {
+        setBlueprint(data);
         toast({ title: t('writingTools.projectBlueprint.successToast') });
     },
     onError: (error) => {

@@ -18,6 +18,8 @@ function getVarietyColor(variety: 'low' | 'medium' | 'high') {
 
 import { cn } from '@/infrastructure/utils/cn';
 import { ArrowRight, CheckCircle2, FileText, Workflow } from 'lucide-react';
+import ReactMarkdown from 'react-markdown';
+import { markdownComponents } from '@/modules/ai-content/adapters/components/report-mode/markdown-styles';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Label } from '@/components/ui/label';
 
@@ -145,90 +147,9 @@ export function SentenceStructureCheckerTool() {
                                         </div>
                                     ) : results && (
                                         <div className="space-y-12">
-                                            {/* Statistics Matrix */}
-                                            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                                                <div className="p-5 rounded-2xl border bg-background shadow-sm flex flex-col items-center text-center space-y-1">
-                                                    <span className="text-2xl font-black font-headline tracking-tighter text-foreground">{results.statistics.sentenceCount}</span>
-                                                    <span className="text-[8px] font-bold uppercase tracking-widest text-muted-foreground opacity-60">Total Nodes</span>
-                                                </div>
-                                                <div className="p-5 rounded-2xl border bg-background shadow-sm flex flex-col items-center text-center space-y-1">
-                                                    <span className="text-2xl font-black font-headline tracking-tighter text-primary">{results.statistics.averageSentenceLength.toFixed(1)}</span>
-                                                    <span className="text-[8px] font-bold uppercase tracking-widest text-primary/60">Avg. Length</span>
-                                                </div>
-                                                <div className="p-5 rounded-2xl border bg-background shadow-sm flex flex-col items-center text-center space-y-1">
-                                                    <span className="text-2xl font-black font-headline tracking-tighter text-foreground">{results.statistics.shortestSentence}</span>
-                                                    <span className="text-[8px] font-bold uppercase tracking-widest text-muted-foreground opacity-60">Min Width</span>
-                                                </div>
-                                                <div className="p-5 rounded-2xl border bg-background shadow-sm flex flex-col items-center text-center space-y-1">
-                                                    <span className="text-2xl font-black font-headline tracking-tighter text-foreground">{results.statistics.longestSentence}</span>
-                                                    <span className="text-[8px] font-bold uppercase tracking-widest text-muted-foreground opacity-60">Max Width</span>
-                                                </div>
-                                            </div>
-
-                                            {/* Assessment HUD */}
-                                            <div className="p-8 rounded-[40px] bg-muted/5 border border-border/40 shadow-inner relative group/hud">
-                                                <div className="space-y-6">
-                                                    <div className="flex items-center gap-3">
-                                                        <div className="h-1.5 w-1.5 rounded-full bg-primary/40" />
-                                                        <h4 className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Architectural Assessment</h4>
-                                                    </div>
-                                                    <p className="text-sm leading-relaxed italic font-serif text-muted-foreground/80 pr-12">
-                                                        "{results.overallAssessment}"
-                                                    </p>
-
-                                                    <div className="flex flex-wrap gap-6 pt-4 border-t border-border/40">
-                                                        <div className="flex items-center gap-2.5">
-                                                            <BarChart2 className={cn("h-4.5 w-4.5", getVarietyColor(results.varietyAssessment.lengthVariety))} />
-                                                            <div className="flex flex-col">
-                                                                <span className="text-[8px] font-bold uppercase text-muted-foreground opacity-40">Length Variety</span>
-                                                                <span className="text-[10px] font-black uppercase tracking-widest">{results.varietyAssessment.lengthVariety}</span>
-                                                            </div>
-                                                        </div>
-                                                        <div className="flex items-center gap-2.5">
-                                                            <BarChart2 className={cn("h-4.5 w-4.5", getVarietyColor(results.varietyAssessment.structureVariety))} />
-                                                            <div className="flex flex-col">
-                                                                <span className="text-[8px] font-bold uppercase text-muted-foreground opacity-40">Structure Variety</span>
-                                                                <span className="text-[10px] font-black uppercase tracking-widest">{results.varietyAssessment.structureVariety}</span>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-
-                                            <div className="space-y-6">
-                                                <div className="flex items-center justify-between px-1">
-                                                    <div className="flex items-center gap-3">
-                                                        <div className="h-1.5 w-1.5 rounded-full bg-primary/40" />
-                                                        <h4 className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Syntactic Flag Nodes</h4>
-                                                    </div>
-                                                    <Badge variant="outline" className="h-5 text-[9px] font-bold border-border/60">{results.issues.length} Issues Identified</Badge>
-                                                </div>
-
-                                                <div className="grid gap-4">
-                                                    {results.issues.length > 0 ? results.issues.map((issue: SentenceStructureIssue, index: number) => (
-                                                        <div key={index} className="group relative flex flex-col p-6 rounded-2xl border border-border/40 bg-background hover:border-primary/40 hover:shadow-xl transition-all duration-500">
-                                                            <div className="flex justify-between items-start mb-4">
-                                                                <p className="text-sm font-bold tracking-tight text-foreground/90 italic flex-1 min-w-0 pr-4">"{issue.sentence}"</p>
-                                                                <Badge variant="destructive" className="h-4.5 text-[8px] uppercase tracking-tighter px-1.5 rounded-sm font-bold border-none shrink-0">
-                                                                    {issue.issue}
-                                                                </Badge>
-                                                            </div>
-                                                            <div className="flex items-start gap-3 pt-4 border-t border-border/40">
-                                                                <ArrowRight className="h-3.5 w-3.5 text-primary/60 mt-0.5 shrink-0" />
-                                                                <div className="space-y-1">
-                                                                    <span className="text-[9px] font-bold uppercase tracking-widest text-primary/60">Architectural suggestion:</span>
-                                                                    <p className="text-[11px] font-bold text-green-600 bg-green-500/5 px-2 py-1 rounded-md border border-green-500/10 leading-relaxed">
-                                                                        {issue.suggestion}
-                                                                    </p>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    )) : (
-                                                        <div className="text-center py-16 px-8 border-2 border-dashed rounded-[32px] bg-muted/10 opacity-40">
-                                                            <CheckCircle2 className="h-10 w-10 mx-auto mb-3 text-green-500" />
-                                                            <p className="text-[11px] font-bold uppercase tracking-widest">Syntactic Architecture Optimal</p>
-                                                        </div>
-                                                    )}
+                                            <div className="rounded-[32px] border bg-card p-10 shadow-2xl relative group">
+                                                <div className="prose dark:prose-invert max-w-none text-[15px] leading-relaxed font-serif selection:bg-primary/10">
+                                                    <ReactMarkdown components={markdownComponents}>{results}</ReactMarkdown>
                                                 </div>
                                             </div>
                                         </div>

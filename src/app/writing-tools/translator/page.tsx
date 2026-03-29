@@ -46,8 +46,8 @@ function TranslatorTool() {
   const [isCopied, setIsCopied] = useState(false);
 
   const mutation = useWritingTool('translate-text', {
-    onSuccess: (data: any) => {
-      setTranslatedText(data.text);
+    onSuccess: (data: string) => {
+      setTranslatedText(data);
       toast({ title: 'Translation Successful' });
     },
     onError: (error) => {

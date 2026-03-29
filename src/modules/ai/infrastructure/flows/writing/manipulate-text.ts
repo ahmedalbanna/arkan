@@ -6,7 +6,7 @@
  * - manipulateText
  */
 
-import { ai } from '@/modules/ai/infrastructure/services/Genkit';
+import { ai, MODEL_BY_TASK } from '@/modules/ai/infrastructure/services/Genkit';
 import {
   ManipulateTextInputSchema,
   ManipulateTextOutputSchema,
@@ -17,10 +17,8 @@ import {
 const prompt = ai.definePrompt({
   name: 'manipulateTextPrompt',
   input: { schema: ManipulateTextInputSchema },
-  output: { schema: ManipulateTextOutputSchema },
   model: 'ollama/gemma:2b',
   prompt: `You are an expert editor. A user has provided a piece of text and a command for how to change it. Your task is to follow the command and return the rewritten text.
-Your output must be a valid JSON object that adheres to the defined schema.
 
 Command: {{{command}}}
 
@@ -28,7 +26,8 @@ Original Text:
 ---
 {{{textToManipulate}}}
 ---
-`,
+
+Output ONLY the manipulated text. Do NOT include any preamble, filler, or JSON wrapping.`,
   config: {
     temperature: 0.5,
   }
@@ -41,8 +40,10 @@ const manipulateTextFlow = ai.defineFlow(
     outputSchema: ManipulateTextOutputSchema,
   },
   async ({ textToManipulate, command }) => {
-    const { output } = await prompt({textToManipulate, command });
-    return output!;
+    const result = await prompt({textToManipulate, command });
+    const text = result.text || result.output || "";
+    if (!text) throw new Error("Failed to manipulate text.");
+    return text.trim();
   }
 );
 

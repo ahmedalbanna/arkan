@@ -184,90 +184,16 @@ export function GrammarCheckerTool() {
                                         <p className="text-[10px] font-bold uppercase tracking-[0.2em]">{t('writingTools.grammarChecker.analyzing')}</p>
                                     </div>
                                 ) : results && (
-                                    <div className="space-y-10">
-                                        {/* Correction Matrix */}
-                                        {results.statistics && (
-                                            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                                                <div className="p-5 rounded-2xl border bg-background shadow-sm flex flex-col items-center text-center space-y-1">
-                                                    <span className="text-3xl font-black font-headline tracking-tighter text-foreground">{results.statistics.total}</span>
-                                                    <span className="text-[8px] font-bold uppercase tracking-widest text-muted-foreground opacity-60">Audit Total</span>
-                                                </div>
-                                                <div className="p-5 rounded-2xl border bg-blue-500/[0.03] border-blue-500/20 shadow-sm flex flex-col items-center text-center space-y-1">
-                                                    <span className="text-3xl font-black font-headline tracking-tighter text-blue-600">{results.statistics.grammar}</span>
-                                                    <span className="text-[8px] font-bold uppercase tracking-widest text-blue-600/60">Grammar</span>
-                                                </div>
-                                                <div className="p-5 rounded-2xl border bg-orange-500/[0.03] border-orange-500/20 shadow-sm flex flex-col items-center text-center space-y-1">
-                                                    <span className="text-3xl font-black font-headline tracking-tighter text-orange-600">{results.statistics.spelling}</span>
-                                                    <span className="text-[8px] font-bold uppercase tracking-widest text-orange-600/60">Spelling</span>
-                                                </div>
-                                                <div className="p-5 rounded-2xl border bg-purple-500/[0.03] border-purple-500/20 shadow-sm flex flex-col items-center text-center space-y-1">
-                                                    <span className="text-3xl font-black font-headline tracking-tighter text-purple-600">{results.statistics.punctuation}</span>
-                                                    <span className="text-[8px] font-bold uppercase tracking-widest text-purple-600/60">Syntax</span>
-                                                </div>
-                                            </div>
-                                        )}
-
-                                        <div className="grid grid-cols-1 xl:grid-cols-2 gap-8 items-start">
-                                            {/* Corrected Content */}
-                                            <div className="space-y-4">
-                                                <div className="flex items-center justify-between px-1">
-                                                    <Label className="text-[9px] font-bold uppercase tracking-[0.3em] text-primary/60">{t('writingTools.grammarChecker.correctedLabel')}</Label>
-                                                    <Button variant="ghost" size="icon" onClick={handleCopy} className="h-7 w-7 rounded-lg hover:bg-primary/10">
-                                                        {isCopied ? <Check className="h-3.5 w-3.5 text-green-500" /> : <Copy className="h-3.5 w-3.5" />}
-                                                    </Button>
-                                                </div>
-                                                <div className="rounded-[32px] border bg-card p-10 shadow-2xl relative group min-h-[400px]">
-                                                    <div className="prose dark:prose-invert max-w-none text-[14px] leading-relaxed font-serif selection:bg-primary/10">
-                                                        <ReactMarkdown components={markdownComponents}>{results.correctedText}</ReactMarkdown>
-                                                    </div>
-                                                </div>
-                                            </div>
-
-                                            {/* Logic Stream */}
-                                            <div className="space-y-4">
-                                                <div className="flex items-center justify-between px-1">
-                                                    <Label className="text-[9px] font-bold uppercase tracking-[0.3em] text-primary/60">{t('writingTools.grammarChecker.changesLabel')}</Label>
-                                                    <div className="flex items-center gap-3">
-                                                        {(['grammar', 'spelling', 'punctuation'] as CorrectionType[]).map((type) => (
-                                                            <button
-                                                                key={type}
-                                                                onClick={() => toggleFilter(type)}
-                                                                className={cn(
-                                                                    "h-5 px-2 rounded-full border text-[8px] font-black uppercase tracking-tighter transition-all",
-                                                                    filterTypes.includes(type) ? getTypeColor(type) : "opacity-30 border-muted grayscale"
-                                                                )}
-                                                            >
-                                                                {getTypeLabel(type)}
-                                                            </button>
-                                                        ))}
-                                                    </div>
-                                                </div>
-
-                                                <div className="space-y-3">
-                                                    {filteredCorrections.length > 0 ? filteredCorrections.map((correction: any, idx: number) => (
-                                                        <div key={idx} className="group relative flex flex-col p-5 rounded-2xl border border-border/40 bg-background hover:border-primary/40 hover:shadow-xl transition-all duration-500">
-                                                            <div className="flex justify-between items-start mb-3">
-                                                                <Badge variant="outline" className={cn("h-4 text-[7px] uppercase font-black border-none", getTypeColor(correction.type))}>
-                                                                    {getTypeLabel(correction.type)} Node
-                                                                </Badge>
-                                                                <span className="text-[8px] font-bold text-muted-foreground/40">OP_ID: {idx + 1}</span>
-                                                            </div>
-                                                            <div className="flex items-center gap-3 mb-3">
-                                                                <span className="line-through text-[11px] text-destructive/60 font-medium decoration-destructive/30">{correction.original}</span>
-                                                                <ArrowRight className="h-3 w-3 text-muted-foreground/40" />
-                                                                <span className="text-[11px] text-green-600 font-bold bg-green-500/5 px-1.5 py-0.5 rounded-md border border-green-500/10">{correction.corrected}</span>
-                                                            </div>
-                                                            <p className="text-[10px] text-muted-foreground italic leading-relaxed pl-1 border-l-2 border-primary/10">
-                                                                {correction.explanation}
-                                                            </p>
-                                                        </div>
-                                                    )) : (
-                                                        <div className="text-center py-12 px-6 border-2 border-dashed rounded-3xl bg-muted/10 opacity-40">
-                                                            <CheckCircle2 className="h-8 w-8 mx-auto mb-3 text-green-500" />
-                                                            <p className="text-[10px] font-bold uppercase tracking-widest">Syntax Integrity Optimal</p>
-                                                        </div>
-                                                    )}
-                                                </div>
+                                    <div className="space-y-4">
+                                        <div className="flex items-center justify-between px-1">
+                                            <Label className="text-[9px] font-bold uppercase tracking-[0.3em] text-primary/60">{t('writingTools.grammarChecker.correctedLabel')}</Label>
+                                            <Button variant="ghost" size="icon" onClick={handleCopy} className="h-7 w-7 rounded-lg hover:bg-primary/10">
+                                                {isCopied ? <Check className="h-3.5 w-3.5 text-green-500" /> : <Copy className="h-3.5 w-3.5" />}
+                                            </Button>
+                                        </div>
+                                        <div className="rounded-[32px] border bg-card p-10 shadow-2xl relative group min-h-[400px]">
+                                            <div className="prose dark:prose-invert max-w-none text-[14px] leading-relaxed font-serif selection:bg-primary/10">
+                                                <ReactMarkdown components={markdownComponents}>{results}</ReactMarkdown>
                                             </div>
                                         </div>
                                     </div>
