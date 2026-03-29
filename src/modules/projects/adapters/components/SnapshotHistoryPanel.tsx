@@ -39,20 +39,20 @@ export default function SnapshotHistoryPanel() {
     );
 
     return (
-        <div className="flex flex-col h-full bg-background/40 backdrop-blur-md">
+        <div className="flex flex-col h-full bg-background/40 backdrop-blur-md pt-2 animate-in fade-in slide-in-from-right-2 duration-300">
             {/* Header Section */}
-            <div className="p-6 border-b border-primary/10">
+            <div className="px-4 pb-4 border-b border-primary/10">
                 <div className="flex items-center justify-between mb-6">
                     <div className="flex items-center gap-3">
                         <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center border border-primary/20">
                             <History className="h-4 w-4 text-primary" />
                         </div>
-                        <div>
-                            <h3 className="text-[11px] font-black uppercase tracking-[0.2em] text-foreground">Snapshot History</h3>
-                            <p className="text-[9px] font-medium text-muted-foreground uppercase tracking-widest mt-0.5">Manifest Version Control</p>
+                        <div className="space-y-0.5">
+                            <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-primary/70">Snapshot History</h3>
+                            <p className="text-[9px] text-muted-foreground italic font-medium opacity-60 uppercase tracking-wider">Manifest Version Control</p>
                         </div>
                     </div>
-                    <Badge variant="outline" className="text-[9px] font-black border-primary/20 text-primary">
+                    <Badge variant="outline" className="h-5 text-[9px] font-black border-primary/20 bg-primary/5 text-primary tabular-nums px-2 rounded-full shadow-inner">
                         {snapshots.length} SAVED
                     </Badge>
                 </div>
@@ -63,13 +63,13 @@ export default function SnapshotHistoryPanel() {
                             placeholder="SNAPSHOT_LABEL..."
                             value={snapshotName}
                             onChange={(e) => setSnapshotName(e.target.value)}
-                            className="bg-muted/5 border-primary/10 text-[11px] font-mono tracking-wider h-10 pr-10 focus-visible:ring-primary/20 uppercase"
+                            className="bg-muted/5 border-primary/10 text-[11px] font-mono tracking-wider h-10 pr-10 focus-visible:ring-primary/20 uppercase rounded-xl shadow-inner transition-all"
                             onKeyDown={(e) => e.key === 'Enter' && handleCreateSnapshot()}
                         />
                         <Button 
                             size="icon"
                             variant="ghost"
-                            className="absolute right-1 top-1 h-8 w-8 text-primary hover:bg-primary/10"
+                            className="absolute right-1 top-1 h-8 w-8 text-primary hover:bg-background rounded-lg transition-all"
                             onClick={handleCreateSnapshot}
                             disabled={!snapshotName.trim() || isCreating}
                         >
@@ -82,12 +82,12 @@ export default function SnapshotHistoryPanel() {
                     </div>
 
                     <div className="relative">
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground/50" />
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3 w-3 text-muted-foreground/40" />
                         <Input
                             placeholder="FILTER_HISTORY..."
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
-                            className="pl-9 bg-transparent border-primary/5 text-[10px] font-mono h-8 focus-visible:ring-0 uppercase tracking-widest"
+                            className="pl-9 bg-transparent border-primary/5 text-[9px] font-mono h-7 focus-visible:ring-0 uppercase tracking-[0.2em] rounded-lg"
                         />
                     </div>
                 </div>
@@ -95,7 +95,8 @@ export default function SnapshotHistoryPanel() {
 
             {/* List Section */}
             <ScrollArea className="flex-1">
-                <div className="p-4 space-y-3">
+                <div className="p-4 space-y-3 relative">
+                    <div className="absolute left-[-1.25rem] top-0 bottom-0 w-px bg-gradient-to-b from-primary/30 via-primary/5 to-transparent" />
                     <AnimatePresence mode="popLayout">
                         {filteredSnapshots.map((snapshot: any) => (
                             <motion.div
@@ -105,32 +106,32 @@ export default function SnapshotHistoryPanel() {
                                 animate={{ opacity: 1, y: 0 }}
                                 exit={{ opacity: 0, scale: 0.95 }}
                                 className={cn(
-                                    "group relative p-4 rounded-xl border transition-all duration-300",
+                                    "group relative p-3 rounded-xl border transition-all duration-300 hover:translate-x-0.5 shadow-sm",
                                     comparisonSnapshotId === snapshot.id 
-                                        ? "bg-primary/5 border-primary/30 shadow-[0_0_20px_rgba(var(--primary),0.1)]" 
-                                        : "bg-muted/5 border-primary/5 hover:border-primary/20 hover:bg-muted/10"
+                                        ? "bg-primary/[0.03] border-primary/30 shadow-[0_0_20px_rgba(var(--primary),0.08)] ring-1 ring-primary/10" 
+                                        : "bg-card/50 border-border/40 hover:border-primary/20 hover:bg-muted/5"
                                 )}
                             >
-                                <div className="flex flex-col gap-3">
+                                <div className="flex flex-col gap-2.5">
                                     <div className="flex items-start justify-between">
                                         <div className="min-w-0">
-                                            <h4 className="text-[11px] font-black uppercase tracking-wider text-foreground truncate group-hover:text-primary transition-colors">
+                                            <h4 className="text-[12px] font-bold tracking-tight text-foreground truncate group-hover:text-primary transition-colors">
                                                 {snapshot.name}
                                             </h4>
-                                            <p className="text-[9px] font-medium text-muted-foreground uppercase tracking-[0.15em] mt-1">
+                                            <p className="text-[9px] font-black text-muted-foreground/60 uppercase tracking-[0.2em] mt-0.5">
                                                 {formatDistanceToNow(new Date(snapshot.created), { addSuffix: true })}
                                             </p>
                                         </div>
                                         {comparisonSnapshotId === snapshot.id && (
-                                            <Badge variant="default" className="text-[8px] font-black h-4 px-1.5 animate-pulse">COMPARING</Badge>
+                                            <Badge variant="default" className="text-[8px] font-black h-4 px-1.5 animate-pulse bg-primary/20 text-primary border-primary/20 shadow-inner">COMPARING</Badge>
                                         )}
                                     </div>
 
-                                    <div className="flex items-center gap-2 pt-2 opacity-0 group-hover:opacity-100 transition-all transform translate-y-1 group-hover:translate-y-0">
+                                    <div className="flex items-center gap-1.5 pt-1.5 opacity-0 group-hover:opacity-100 transition-all transform translate-y-1 group-hover:translate-y-0">
                                         <Button
                                             size="sm"
                                             variant="outline"
-                                            className="h-7 text-[9px] font-black uppercase tracking-widest flex-1 border-primary/10 hover:bg-primary/10 hover:text-primary transition-all"
+                                            className="h-7 text-[9px] font-black uppercase tracking-[0.2em] flex-1 border-primary/10 hover:bg-primary/10 hover:text-primary transition-all rounded-lg"
                                             onClick={() => setComparisonSnapshotId(comparisonSnapshotId === snapshot.id ? null : snapshot.id)}
                                         >
                                             <GitCompare className="h-3 w-3 mr-1.5" />
@@ -140,7 +141,7 @@ export default function SnapshotHistoryPanel() {
                                         <Button
                                             size="sm"
                                             variant="outline"
-                                            className="h-7 text-[9px] font-black uppercase tracking-widest border-primary/10 hover:bg-primary/10 hover:text-primary px-3"
+                                            className="h-7 text-[9px] font-black uppercase tracking-[0.2em] border-primary/10 hover:bg-primary/10 hover:text-primary px-2.5 rounded-lg"
                                             onClick={() => handleRestore(snapshot)}
                                         >
                                             <RotateCcw className="h-3 w-3" />
@@ -149,7 +150,7 @@ export default function SnapshotHistoryPanel() {
                                         <Button
                                             size="sm"
                                             variant="outline"
-                                            className="h-7 text-[9px] font-black uppercase tracking-widest border-destructive/10 hover:bg-destructive/10 hover:text-destructive px-3"
+                                            className="h-7 text-[9px] font-black uppercase tracking-[0.2em] border-destructive/10 hover:bg-destructive/10 hover:text-destructive px-2.5 rounded-lg"
                                             onClick={() => deleteSnapshot(snapshot.id)}
                                         >
                                             <Trash2 className="h-3 w-3" />
@@ -158,8 +159,8 @@ export default function SnapshotHistoryPanel() {
                                 </div>
                                 
                                 {/* Technical Decoration */}
-                                <div className="absolute top-2 right-2 opacity-[0.05] group-hover:opacity-10 transition-opacity">
-                                    <Camera className="h-8 w-8" />
+                                <div className="absolute top-2 right-2 opacity-[0.03] group-hover:opacity-[0.08] transition-opacity">
+                                    <Camera className="h-7 w-7" />
                                 </div>
                             </motion.div>
                         ))}

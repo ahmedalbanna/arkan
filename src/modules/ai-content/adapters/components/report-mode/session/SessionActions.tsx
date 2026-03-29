@@ -61,7 +61,7 @@ export function SessionActions({ isSaving }: SessionActionsProps) {
 
     return (
         <TooltipProvider>
-            <div className="flex items-center gap-2 p-1.5 bg-background/40 border border-primary/10 rounded-2xl backdrop-blur-2xl shadow-[0_4px_20px_rgba(0,0,0,0.05)] group/actions transition-all duration-500 hover:border-primary/20">
+            <div className="flex items-center gap-1.5 p-1.5 bg-background/40 border border-primary/10 rounded-2xl backdrop-blur-2xl shadow-[0_4px_20px_rgba(0,0,0,0.05)] group/actions transition-all duration-500 hover:border-primary/20">
                 <input
                     type="file"
                     ref={fileInputRef}
@@ -70,14 +70,14 @@ export function SessionActions({ isSaving }: SessionActionsProps) {
                     className="hidden"
                 />
 
-                <div className="flex items-center gap-1.5 px-1">
+                <div className="flex items-center gap-1 px-1">
                     <Tooltip>
                         <TooltipTrigger asChild>
                             <Button
                                 variant="ghost"
                                 size="sm"
                                 onClick={() => newSession()}
-                                className="h-8 gap-2 text-[10px] font-black uppercase tracking-[0.15em] hover:bg-primary/10 hover:text-primary transition-all duration-300 rounded-xl"
+                                className="h-8 w-8 xl:w-auto xl:px-3 gap-2 text-[10px] font-black uppercase tracking-[0.15em] hover:bg-primary/10 hover:text-primary transition-all duration-300 rounded-xl"
                             >
                                 <PlusCircle className="h-3.5 w-3.5" />
                                 <span className="hidden xl:inline">New</span>
@@ -94,7 +94,7 @@ export function SessionActions({ isSaving }: SessionActionsProps) {
                                 variant="ghost"
                                 size="sm"
                                 onClick={handleUploadClick}
-                                className="h-8 gap-2 text-[10px] font-black uppercase tracking-[0.15em] hover:bg-primary/10 hover:text-primary transition-all duration-300 rounded-xl"
+                                className="h-8 w-8 xl:w-auto xl:px-3 gap-2 text-[10px] font-black uppercase tracking-[0.15em] hover:bg-primary/10 hover:text-primary transition-all duration-300 rounded-xl"
                             >
                                 <Upload className="h-3.5 w-3.5" />
                                 <span className="hidden xl:inline">Import</span>
@@ -104,9 +104,9 @@ export function SessionActions({ isSaving }: SessionActionsProps) {
                     </Tooltip>
                 </div>
 
-                <div className="h-4 w-px bg-primary/10 mx-1 opacity-40" />
+                <div className="h-4 w-px bg-primary/10 mx-0.5 opacity-40" />
 
-                <div className="flex items-center gap-1.5 px-1">
+                <div className="flex items-center gap-1 px-1">
                     <Tooltip>
                         <TooltipTrigger asChild>
                             <Button
@@ -142,10 +142,10 @@ export function SessionActions({ isSaving }: SessionActionsProps) {
                                 size="sm"
                                 onClick={handleDownload}
                                 disabled={!hasContent}
-                                className="h-8 gap-2 text-[10px] font-black uppercase tracking-[0.15em] hover:bg-primary/10 hover:text-primary transition-all duration-300 rounded-xl"
+                                className="h-8 w-8 xl:w-auto xl:px-3 gap-2 text-[10px] font-black uppercase tracking-[0.15em] hover:bg-primary/10 hover:text-primary transition-all duration-300 rounded-xl"
                             >
                                 <Download className="h-3.5 w-3.5" />
-                                <span className="hidden xl:inline">Snapshot</span>
+                                <span className="hidden xl:inline">Source</span>
                             </Button>
                         </TooltipTrigger>
                         <TooltipContent side="bottom" className="text-[9px] font-black uppercase tracking-[0.2em] bg-background/95 backdrop-blur-md border-primary/20">Export Technical JSON</TooltipContent>

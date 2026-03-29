@@ -40,14 +40,23 @@ export function GenerateTocDialog({ isOpen, onOpenChange, onApply }: GenerateToc
 
     return (
         <Dialog open={isOpen} onOpenChange={onOpenChange}>
-            <DialogContent className="max-w-4xl h-[85vh] p-0 overflow-hidden flex flex-col gap-0 border-none shadow-2xl">
-                <header className="px-8 py-6 border-b bg-muted/10">
-                    <div className="flex flex-col gap-1">
-                        <div className="flex items-center gap-2">
-                            <Sparkles className="h-5 w-5 text-primary" />
-                            <DialogTitle className="text-xl font-bold font-headline tracking-tight">Document Architecture Manifest</DialogTitle>
+            <DialogContent className="max-w-4xl h-[85vh] p-0 overflow-hidden flex flex-col gap-0 border-primary/10 shadow-2xl rounded-[28px]">
+                <header className="px-8 py-6 border-b border-border/40 bg-background/40 backdrop-blur-2xl relative overflow-hidden group">
+                    <div className="absolute inset-0 bg-radial-gradient from-primary/5 to-transparent opacity-50" />
+                    <div className="flex flex-col gap-1 relative z-10">
+                        <div className="flex items-center gap-3">
+                            <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center border border-primary/20">
+                                <Sparkles className="h-5 w-5 text-primary" />
+                            </div>
+                            <div className="space-y-0.5">
+                                <DialogTitle className="text-[18px] font-bold font-headline tracking-tight">Document Architecture Manifest</DialogTitle>
+                                <div className="flex items-center gap-2">
+                                    <div className="h-1.5 w-1.5 rounded-full bg-primary animate-pulse" />
+                                    <p className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/60">Architectural Engine Engaged</p>
+                                </div>
+                            </div>
                         </div>
-                        <DialogDescription className="text-xs text-muted-foreground italic max-w-2xl leading-relaxed">
+                        <DialogDescription className="text-[11px] text-muted-foreground italic max-w-2xl leading-relaxed mt-2 pl-13">
                             The AI Architect will analyze your project parameters to derive a high-coherence Table of Contents. You can refine the suggested structure before final application.
                         </DialogDescription>
                     </div>
@@ -55,67 +64,68 @@ export function GenerateTocDialog({ isOpen, onOpenChange, onApply }: GenerateToc
 
                 <div className="flex-1 overflow-hidden relative min-h-0 bg-background flex flex-col">
                     <ScrollArea className="h-full">
-                        <div className="p-8 space-y-8">
-                            <div className="grid gap-8 md:grid-cols-2">
+                        <div className="p-8 space-y-8 relative">
+                            <div className="absolute left-4 top-0 bottom-0 w-px bg-gradient-to-b from-primary/20 via-primary/5 to-transparent" />
+                            <div className="grid gap-8 md:grid-cols-2 relative z-10">
                                 <div className="space-y-6">
-                                    <div className="space-y-2">
-                                        <Label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Source Parameters</Label>
-                                        <Card className="border-border/40 bg-muted/5 shadow-none">
-                                            <CardContent className="p-4 space-y-3">
+                                    <div className="space-y-3">
+                                        <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/60">Source Parameters</Label>
+                                        <div className="rounded-2xl border border-primary/10 bg-muted/5 shadow-inner overflow-hidden">
+                                            <div className="p-4 space-y-3">
                                                 <div className="space-y-1">
-                                                    <p className="text-[10px] font-bold text-primary/60 uppercase">Project Title</p>
-                                                    <p className="text-xs font-semibold truncate">{project?.name}</p>
+                                                    <p className="text-[9px] font-black text-primary/60 uppercase tracking-widest">Project Title</p>
+                                                    <p className="text-[13px] font-bold tracking-tight truncate">{project?.name}</p>
                                                 </div>
-                                                <Separator className="bg-border/40" />
+                                                <Separator className="bg-primary/5" />
                                                 <div className="space-y-1">
-                                                    <p className="text-[10px] font-bold text-primary/60 uppercase">Base Description</p>
-                                                    <p className="text-[11px] text-muted-foreground line-clamp-4 leading-relaxed italic">{project?.projectDescription || "No description provided."}</p>
+                                                    <p className="text-[9px] font-black text-primary/60 uppercase tracking-widest">Base Description</p>
+                                                    <p className="text-[11px] text-muted-foreground line-clamp-4 leading-relaxed italic font-serif">{project?.projectDescription || "No description provided."}</p>
                                                 </div>
-                                            </CardContent>
-                                        </Card>
+                                            </div>
+                                        </div>
                                     </div>
 
-                                    <form id="toc-form" onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                                    <form id="toc-form" onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
                                         <div className="space-y-2">
-                                            <Label htmlFor="additional-instructions" className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Architectural Constraints</Label>
+                                            <Label htmlFor="additional-instructions" className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/60">Architectural Constraints</Label>
                                             <Textarea
                                                 id="additional-instructions"
                                                 {...form.register('additionalInstructions')}
                                                 rows={4}
                                                 placeholder="e.g., 'Target exactly 6 chapters with a heavy focus on technical implementation details.'"
                                                 disabled={mutation.isPending}
-                                                className="text-xs bg-muted/5 focus-visible:ring-1 resize-none p-3 leading-relaxed"
+                                                className="relative min-h-[100px] text-[11px] bg-muted/5 border-primary/10 focus-visible:ring-primary/20 rounded-xl shadow-inner transition-all resize-none p-3 leading-relaxed font-serif italic"
                                             />
                                         </div>
-                                        <Button type="submit" disabled={mutation.isPending} className="w-full font-bold h-10 gap-2 shadow-md">
-                                            {mutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
+                                        <Button type="submit" disabled={mutation.isPending} className="w-full h-9 text-[10px] font-black uppercase tracking-[0.2em] gap-2 shadow-lg shadow-primary/20 rounded-xl transition-all">
+                                            {mutation.isPending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Sparkles className="h-3.5 w-3.5" />}
                                             Analyze & Architect
                                         </Button>
                                     </form>
                                 </div>
 
                                 <div className="space-y-4 flex flex-col min-h-0">
-                                    <Label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Suggested Hierarchy</Label>
+                                    <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/60">Suggested Hierarchy</Label>
                                     <div className="flex-1 min-h-[350px] relative group">
-                                        <ScrollArea className="absolute inset-0 rounded-xl border bg-[#f8fafc] dark:bg-black/20 p-6 shadow-inner">
+                                        <ScrollArea className="absolute inset-0 rounded-2xl border border-primary/10 bg-muted/5 p-6 shadow-inner">
                                             {mutation.isPending ? (
                                                 <div className="flex flex-col items-center justify-center h-full py-12 space-y-3 opacity-50">
-                                                    <Loader2 className="h-8 w-8 animate-spin text-primary/40" />
-                                                    <p className="text-[10px] uppercase tracking-widest font-bold">Compiling Logic</p>
+                                                    <Loader2 className="h-7 w-7 animate-spin text-primary/40" />
+                                                    <p className="text-[9px] uppercase tracking-[0.2em] font-black">Compiling Logic</p>
                                                 </div>
                                             ) : results ? (
                                                 <div className="space-y-6 animate-in fade-in duration-500">
                                                     {results.tableOfContents.map((chapter, idx) => (
-                                                        <div key={idx} className="space-y-2.5">
+                                                        <div key={idx} className="space-y-3">
                                                             <div className="flex items-center gap-3">
-                                                                <span className="text-[10px] font-bold bg-primary/10 text-primary w-5 h-5 rounded flex items-center justify-center shrink-0">{idx + 1}</span>
-                                                                <h4 className="text-xs font-bold uppercase tracking-wide text-foreground">{chapter.title}</h4>
+                                                                <span className="text-[10px] font-black bg-primary/10 text-primary w-6 h-6 rounded-lg border border-primary/10 flex items-center justify-center shrink-0 shadow-inner">{idx + 1}</span>
+                                                                <h4 className="text-[12px] font-black uppercase tracking-[0.1em] text-foreground">{chapter.title}</h4>
                                                             </div>
-                                                            <div className="pl-8 space-y-1.5 border-l-2 border-muted/30 ml-2.5">
+                                                            <div className="pl-9 space-y-2 border-l border-primary/10 ml-3">
                                                                 {chapter.sections.map((section, sIdx) => (
                                                                     <div key={sIdx} className="flex items-center gap-2 group/item">
-                                                                        <div className="h-1 w-1 rounded-full bg-muted-foreground/30 group-hover/item:bg-primary transition-colors" />
-                                                                        <span className="text-[11px] text-muted-foreground leading-tight group-hover/item:text-foreground transition-colors">{section}</span>
+                                                                        <div className="h-1 w-1 rounded-full bg-primary/20 group-hover/item:bg-primary transition-colors" />
+                                                                        <span className="text-[11px] text-muted-foreground/80 leading-tight group-hover/item:text-foreground transition-colors font-medium">{section}</span>
                                                                     </div>
                                                                 ))}
                                                             </div>
@@ -124,8 +134,8 @@ export function GenerateTocDialog({ isOpen, onOpenChange, onApply }: GenerateToc
                                                 </div>
                                             ) : (
                                                 <div className="flex flex-col items-center justify-center h-full py-12 text-center opacity-40">
-                                                    <ListTree className="h-10 w-10 mb-3" />
-                                                    <p className="text-[10px] uppercase tracking-widest font-bold">Architecture Pending</p>
+                                                    <ListTree className="h-8 w-8 mb-2 stroke-[1.5]" />
+                                                    <p className="text-[9px] uppercase tracking-[0.2em] font-black">Architecture Pending</p>
                                                 </div>
                                             )}
                                         </ScrollArea>
@@ -136,13 +146,13 @@ export function GenerateTocDialog({ isOpen, onOpenChange, onApply }: GenerateToc
                     </ScrollArea>
                 </div>
 
-                <footer className="px-8 py-4 border-t bg-muted/5 flex items-center justify-between">
-                    <p className="text-[10px] text-muted-foreground font-medium uppercase tracking-widest">
+                <footer className="px-8 py-4 border-t border-border/40 bg-muted/5 flex items-center justify-between">
+                    <p className="text-[9px] text-muted-foreground font-black uppercase tracking-[0.2em] opacity-60">
                         AI Architect • V1.0 Stable
                     </p>
                     <div className="flex items-center gap-3">
                         <DialogClose asChild>
-                            <Button variant="ghost" size="sm" className="text-[10px] font-bold uppercase tracking-wider h-9">
+                            <Button variant="ghost" size="sm" className="text-[9px] font-black uppercase tracking-[0.2em] h-8 px-4 rounded-lg transition-all hover:bg-destructive/5 hover:text-destructive">
                                 Discard
                             </Button>
                         </DialogClose>
@@ -150,7 +160,7 @@ export function GenerateTocDialog({ isOpen, onOpenChange, onApply }: GenerateToc
                             <Button 
                                 type="button" 
                                 onClick={handleApplyAndClose}
-                                className="font-bold h-9 px-6 shadow-lg shadow-primary/20 gap-2"
+                                className="h-8 px-6 text-[9px] font-black uppercase tracking-[0.2em] shadow-lg shadow-primary/20 gap-2 rounded-lg transition-all hover:scale-105"
                             >
                                 <CheckCircle2 className="h-3.5 w-3.5" />
                                 Apply Blueprint
