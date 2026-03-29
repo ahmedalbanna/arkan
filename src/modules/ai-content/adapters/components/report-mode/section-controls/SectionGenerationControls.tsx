@@ -93,8 +93,8 @@ export function SectionGenerationControls({
     const instructionPreview = section.buildActionPrompt();
 
     return (
-        <div className="space-y-8 animate-in fade-in slide-in-from-right-4 duration-500">
-            <div className="space-y-2">
+        <div className="space-y-5 animate-in fade-in slide-in-from-right-4 duration-500">
+            <div className="space-y-1.5">
                 <h4 className="text-[11px] font-black uppercase tracking-[0.2em] text-primary flex items-center gap-2">
                     <Settings2 className="h-3 w-3" />
                     Generation Parameters
@@ -104,17 +104,17 @@ export function SectionGenerationControls({
                 </p>
             </div>
 
-            <div className="space-y-8 relative">
-                <div className="absolute left-[-1.5rem] top-0 bottom-0 w-px bg-gradient-to-b from-primary/20 via-primary/5 to-transparent" />
+            <div className="space-y-5 relative">
+                <div className="absolute left-[-1rem] top-0 bottom-0 w-px bg-gradient-to-b from-primary/20 via-primary/5 to-transparent" />
 
-                <div className="space-y-4">
+                <div className="space-y-3.5">
                     <div className="flex justify-between items-center group/label">
-                        <Label htmlFor={`formality-${section.id}`} className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground group-hover/label:text-primary transition-colors">
+                        <Label htmlFor={`formality-${section.id}`} className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground group-hover/label:text-primary transition-colors">
                             Cognitive Formality
                         </Label>
                         <div className="flex items-center gap-2">
                              <div className="h-1.5 w-1.5 rounded-full bg-primary animate-pulse shadow-[0_0_8px_rgba(var(--primary),0.6)]" />
-                             <Badge variant="outline" className="h-5 text-[9px] font-black border-primary/20 bg-primary/5 text-primary tabular-nums ring-1 ring-primary/10">
+                             <Badge variant="outline" className="h-5 text-[9px] font-black border-primary/20 bg-primary/5 text-primary tabular-nums ring-1 ring-primary/10 shadow-inner">
                                 {controls.formality}%
                             </Badge>
                         </div>
@@ -125,7 +125,7 @@ export function SectionGenerationControls({
                         onValueChange={(val) => handleControlChange('formality', val[0])}
                         max={100}
                         step={1}
-                        className="py-2"
+                        className="py-1.5"
                     />
                     <div className="flex justify-between text-[8px] font-black text-muted-foreground/50 uppercase tracking-[0.2em]">
                         <span>Informal</span>
@@ -134,9 +134,9 @@ export function SectionGenerationControls({
                     </div>
                 </div>
 
-                <div className="grid gap-6 grid-cols-2">
-                    <div className="space-y-2.5">
-                        <Label htmlFor={`tone-${section.id}`} className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+                <div className="grid gap-4 grid-cols-2">
+                    <div className="space-y-2">
+                        <Label htmlFor={`tone-${section.id}`} className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground">
                             Intelligence Tone
                         </Label>
                         {isCustomTone ? (
@@ -168,8 +168,8 @@ export function SectionGenerationControls({
                         )}
                     </div>
 
-                    <div className="space-y-2.5">
-                        <Label htmlFor={`wordCount-${section.id}`} className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+                    <div className="space-y-2">
+                        <Label htmlFor={`wordCount-${section.id}`} className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground">
                             Volume Target
                         </Label>
                         <div className="relative">
@@ -189,12 +189,12 @@ export function SectionGenerationControls({
 
             <Separator className="bg-gradient-to-r from-primary/20 via-primary/5 to-transparent h-px" />
 
-            <div className="space-y-5">
+            <div className="space-y-4">
                 <div className="flex items-center gap-2 group/header">
                     <div className="h-4 w-1 bg-primary rounded-full group-hover:h-6 transition-all duration-300" />
                     <div className="space-y-0.5">
                         <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/80">Structure Matrix</Label>
-                        <p className="text-[9px] text-muted-foreground font-bold uppercase tracking-widest opacity-60">Architectural Elements</p>
+                        <p className="text-[9px] text-muted-foreground font-black uppercase tracking-[0.2em] opacity-60">Architectural Elements</p>
                     </div>
                 </div>
 
@@ -203,7 +203,7 @@ export function SectionGenerationControls({
                         <label
                             key={String(key)}
                             className={cn(
-                                "flex items-center gap-3 rounded-xl border px-3 py-2.5 transition-all duration-300 cursor-pointer group shadow-sm",
+                                "flex items-center gap-3 rounded-xl border px-3 py-2 transition-all duration-300 cursor-pointer group shadow-sm",
                                 controls.outputStyle[key]
                                     ? "bg-primary/[0.04] border-primary/30 ring-1 ring-primary/10"
                                     : "bg-muted/5 border-border/60 hover:border-primary/20 hover:bg-muted/10"
@@ -216,7 +216,7 @@ export function SectionGenerationControls({
                                 className="h-4 w-4 rounded-md border-primary/20 data-[state=checked]:bg-primary"
                             />
                             <span className={cn(
-                                "text-[10px] font-bold uppercase tracking-widest transition-colors",
+                                "text-[10px] font-black uppercase tracking-[0.2em] transition-colors",
                                 controls.outputStyle[key] ? "text-primary" : "text-muted-foreground group-hover:text-primary"
                             )}>
                                 {String(key).replace(/([A-Z])/g, ' $1')}

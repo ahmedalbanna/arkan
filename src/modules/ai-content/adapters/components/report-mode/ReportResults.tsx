@@ -315,9 +315,9 @@ const ReportResults = ({ activePanelKey }: ReportResultsProps) => {
             <div className="absolute inset-0 opacity-[0.03] dark:opacity-[0.05]" style={{ backgroundImage: 'radial-gradient(#000 1px, transparent 1px)', backgroundSize: '24px 24px' }} />
           </div>
 
-          <ScrollArea className="flex-grow relative">
+          <ScrollArea className="flex-grow relative scroll-smooth">
               <div className="py-12 px-8 flex justify-center min-h-full">
-                  <div className="w-full transition-transform duration-500 ease-in-out">
+                  <div className="w-full max-w-5xl transition-all duration-500 ease-in-out origin-top">
                     {renderContent()}
                   </div>
               </div>

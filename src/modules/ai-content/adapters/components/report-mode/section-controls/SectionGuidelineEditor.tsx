@@ -70,8 +70,8 @@ export function GuidelineEditor({ itemKey, selectedSectionIds }: GuidelineEditor
   };
 
   return (
-    <div className="space-y-8 animate-in fade-in slide-in-from-right-4 duration-500">
-      <div className="space-y-2">
+    <div className="space-y-5 animate-in fade-in slide-in-from-right-4 duration-500">
+      <div className="space-y-1.5">
         <h4 className="text-[11px] font-black uppercase tracking-[0.2em] text-primary flex items-center gap-2">
             <ListChecks className="h-3 w-3" />
             Writing Guidelines
@@ -81,13 +81,13 @@ export function GuidelineEditor({ itemKey, selectedSectionIds }: GuidelineEditor
         </p>
       </div>
 
-      <div className="space-y-6 relative">
-        <div className="absolute left-[-1.5rem] top-0 bottom-0 w-px bg-gradient-to-b from-primary/20 via-primary/5 to-transparent" />
+      <div className="space-y-5 relative">
+        <div className="absolute left-[-1rem] top-0 bottom-0 w-px bg-gradient-to-b from-primary/20 via-primary/5 to-transparent" />
         
-        <div className="space-y-3.5">
+        <div className="space-y-3">
           <div className="flex items-center gap-2 group/label">
             <StickyNote className="h-3.5 w-3.5 text-primary/60 group-hover/label:text-primary transition-colors" />
-            <Label htmlFor={`prompt-${itemKey}`} className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Primary Instruction</Label>
+            <Label htmlFor={`prompt-${itemKey}`} className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground">Primary Instruction</Label>
           </div>
           <div className="relative group">
             <div className="absolute -inset-1 bg-gradient-to-r from-primary/10 to-transparent rounded-2xl blur opacity-0 group-focus-within:opacity-100 transition duration-500" />
@@ -106,8 +106,8 @@ export function GuidelineEditor({ itemKey, selectedSectionIds }: GuidelineEditor
                     setPrompt(val);
                 }
                 }}
-                rows={6}
-                className="relative min-h-[180px] w-full text-[11px] bg-muted/5 border-primary/10 focus-visible:ring-primary/20 leading-relaxed resize-none p-4 rounded-xl shadow-inner font-serif italic"
+                rows={5}
+                className="relative min-h-[140px] w-full text-[11px] bg-muted/5 border-primary/10 focus-visible:ring-primary/20 leading-relaxed resize-none p-3 rounded-xl shadow-inner font-serif italic"
                 placeholder="e.g., Explain the methodology used in this research..."
             />
           </div>
@@ -115,16 +115,16 @@ export function GuidelineEditor({ itemKey, selectedSectionIds }: GuidelineEditor
 
         <Separator className="bg-gradient-to-r from-primary/20 via-primary/5 to-transparent h-px" />
 
-        <div className="space-y-5">
+        <div className="space-y-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <Plus className="h-3.5 w-3.5 text-primary" />
-              <Label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Constraint Matrix</Label>
+              <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground">Constraint Matrix</Label>
             </div>
-            <Badge variant="outline" className="h-5 text-[9px] font-black border-primary/20 bg-primary/5 text-primary tabular-nums px-2 rounded-full">{guidelines.length}</Badge>
+            <Badge variant="outline" className="h-5 text-[9px] font-black border-primary/20 bg-primary/5 text-primary tabular-nums px-2 rounded-full shadow-inner">{guidelines.length}</Badge>
           </div>
           
-          <div className="space-y-4">
+          <div className="space-y-3">
             <div className="flex gap-2 group/input">
               <Input
                 value={newGuideline}
@@ -143,8 +143,8 @@ export function GuidelineEditor({ itemKey, selectedSectionIds }: GuidelineEditor
               </Button>
             </div>
 
-            <ScrollArea className="h-56 w-full rounded-2xl border border-primary/10 bg-muted/5 shadow-inner">
-              <div className="p-3 space-y-2">
+            <ScrollArea className="h-48 w-full rounded-2xl border border-primary/10 bg-muted/5 shadow-inner">
+              <div className="p-2 space-y-1.5">
                 {guidelines.length > 0 ? (
                   guidelines.map((guideline, index) => (
                     <div 

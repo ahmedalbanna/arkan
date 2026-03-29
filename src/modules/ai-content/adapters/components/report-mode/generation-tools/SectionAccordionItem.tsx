@@ -72,15 +72,15 @@ export function SectionAccordionItem({
             style={style}
             {...attributes}
             className={cn(
-                "group/item relative rounded-xl border transition-all duration-300 ease-out",
+                "group/item relative rounded-xl border transition-all duration-300 ease-out hover:translate-x-0.5",
                 isActive 
-                    ? "border-primary/40 bg-primary/[0.03] shadow-[0_0_20px_rgba(var(--primary),0.08)] ring-1 ring-primary/20 -translate-y-[1px]" 
+                    ? "border-primary/30 bg-primary/[0.03] shadow-[0_0_20px_rgba(var(--primary),0.08)] ring-1 ring-primary/20 -translate-y-[0.5px]" 
                     : "border-border/40 bg-card/50 hover:border-primary/20 hover:bg-muted/5 shadow-sm"
             )}
         >
             <div
                 className={cn(
-                    "flex items-center gap-3 px-3 py-2.5 cursor-pointer select-none",
+                    "flex items-center gap-3 px-3 py-1.5 cursor-pointer select-none",
                 )}
                 onClick={handleActivate}
             >
@@ -101,7 +101,7 @@ export function SectionAccordionItem({
                             className="flex items-center gap-1.5 text-muted-foreground/40 transition-colors hover:text-primary shrink-0 cursor-grab active:cursor-grabbing"
                             onClick={(e) => e.stopPropagation()}
                         >
-                            <span className="text-[9px] font-bold w-6 text-center tabular-nums opacity-60">
+                            <span className="text-[9px] font-black uppercase tracking-[0.2em] w-6 text-center tabular-nums opacity-60">
                                 {chapterIndex >= 0 ? `${chapterIndex + 1}.${sectionIndex + 1}` : `${sectionIndex + 1}`}
                             </span>
                             <GripVertical className="h-3.5 w-3.5 opacity-50 group-hover/item:opacity-100 transition-opacity" />
@@ -146,7 +146,7 @@ export function SectionAccordionItem({
                                     </TooltipTrigger>
                                     <TooltipContent side="top" className="border-primary/20 bg-background/95 backdrop-blur-md">
                                         <div className="text-[10px] font-medium space-y-1.5 p-1">
-                                            <p className="border-b border-primary/10 pb-1 mb-1.5 uppercase tracking-widest text-[8px] font-bold text-primary">Linked Context</p>
+                                            <p className="border-b border-primary/10 pb-1 mb-1.5 uppercase tracking-[0.2em] text-[8px] font-black text-primary">Linked Context</p>
                                             {contextNames.map((name, i) => (
                                                 <div key={name + i} className="flex items-center gap-2 max-w-[180px]">
                                                     <div className="h-1 w-1 rounded-full bg-primary/40" />

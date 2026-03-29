@@ -96,7 +96,7 @@ const MarkdownEditorComponent = ({ content, onChange, editorClassName }: Markdow
         </BubbleMenu>
       )}
       <div
-        className="rounded-b-lg p-4 min-h-[200px] h-full relative transition-colors duration-300"
+        className="rounded-b-lg p-0 min-h-[200px] h-full relative transition-colors duration-300"
         onClick={handleWrapperClick}
       >
         <EditorContent editor={editor} className="h-full" />

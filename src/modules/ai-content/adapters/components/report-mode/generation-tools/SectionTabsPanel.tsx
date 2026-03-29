@@ -135,32 +135,32 @@ export function SectionTabsPanel({ section, selectedSectionIds = [], className }
 
   return (
     <div className={cn("h-full flex flex-col min-h-0", className)}>
-      <div className="px-4 pb-6 pt-2">
-        <div className="flex flex-col gap-4">
+      <div className="px-4 pb-4 pt-2">
+        <div className="flex flex-col gap-3">
           <div className="flex items-center justify-between gap-2">
-            <div className="space-y-1 min-w-0">
-              <span className="text-[10px] font-bold uppercase tracking-widest text-primary/60">
+            <div className="space-y-0.5 min-w-0">
+              <span className="text-[10px] font-black uppercase tracking-[0.2em] text-primary/60">
                 {selectedSectionIds.length > 1 ? `Editing ${selectedSectionIds.length} Sections` : 'Active Context'}
               </span>
-              <h3 className="text-base font-bold font-headline truncate tracking-tight">
+              <h3 className="text-[15px] font-bold font-headline truncate tracking-tight">
                 {selectedSectionIds.length > 1 ? 'Bulk Configuration' : section.title}
               </h3>
             </div>
 
-            <div className="flex items-center gap-1.5 shrink-0">
+            <div className="flex items-center gap-1 p-1 rounded-xl bg-muted/10 shrink-0">
                <TooltipProvider>
                   <Tooltip>
                     <TooltipTrigger asChild>
                       <Button
                         variant="ghost"
                         size="icon"
-                        className="h-7 w-7 text-muted-foreground hover:text-primary hover:bg-primary/5"
+                        className="h-7 w-7 text-muted-foreground hover:text-primary hover:bg-background/80 transition-all rounded-lg"
                         onClick={handleCopySettings}
                       >
                         <Copy className="h-3.5 w-3.5" />
                       </Button>
                     </TooltipTrigger>
-                    <TooltipContent side="bottom" className="text-[10px] font-bold uppercase tracking-widest">
+                    <TooltipContent side="bottom" className="text-[10px] font-black uppercase tracking-[0.2em]">
                       Copy Settings
                     </TooltipContent>
                   </Tooltip>
@@ -170,14 +170,14 @@ export function SectionTabsPanel({ section, selectedSectionIds = [], className }
                       <Button
                         variant="ghost"
                         size="icon"
-                        className="h-7 w-7 text-muted-foreground hover:text-primary hover:bg-primary/5"
+                        className="h-7 w-7 text-muted-foreground hover:text-primary hover:bg-background/80 transition-all rounded-lg"
                         onClick={handlePasteSettings}
                         disabled={!clipboard}
                       >
                         <ClipboardPaste className="h-3.5 w-3.5" />
                       </Button>
                     </TooltipTrigger>
-                    <TooltipContent side="bottom" className="text-[10px] font-bold uppercase tracking-widest">
+                    <TooltipContent side="bottom" className="text-[10px] font-black uppercase tracking-[0.2em]">
                       Paste Settings
                     </TooltipContent>
                   </Tooltip>
@@ -251,41 +251,41 @@ export function SectionTabsPanel({ section, selectedSectionIds = [], className }
       <Tabs defaultValue="context" className="w-full flex-1 flex flex-col min-h-0">
         <div className="px-4">
           <TooltipProvider>
-            <TabsList className="grid w-full grid-cols-3 h-9 rounded-lg bg-muted/30 p-1 gap-1">
+            <TabsList className="grid w-full grid-cols-3 h-8 rounded-xl bg-muted/20 p-1 gap-1 border border-primary/5">
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <TabsTrigger value="context" className="gap-2 text-[10px] font-bold uppercase tracking-wider data-[state=active]:bg-background data-[state=active]:text-primary px-2 transition-all">
-                    <LinkIcon className="h-3.5 w-3.5 shrink-0" />
+                  <TabsTrigger value="context" className="gap-2 text-[9px] font-black uppercase tracking-[0.15em] data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:shadow-sm px-2 transition-all rounded-lg">
+                    <LinkIcon className="h-3 w-3 shrink-0" />
                     <span className="truncate">Context</span>
                   </TabsTrigger>
                 </TooltipTrigger>
-                <TooltipContent side="bottom" className="text-[10px]"><p>Data Sources</p></TooltipContent>
+                <TooltipContent side="bottom" className="text-[10px] font-black uppercase tracking-[0.2em]"><p>Data Sources</p></TooltipContent>
               </Tooltip>
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <TabsTrigger value="prompt" className="gap-2 text-[10px] font-bold uppercase tracking-wider data-[state=active]:bg-background data-[state=active]:text-primary px-2 transition-all">
-                    <StickyNote className="h-3.5 w-3.5 shrink-0" />
+                  <TabsTrigger value="prompt" className="gap-2 text-[9px] font-black uppercase tracking-[0.15em] data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:shadow-sm px-2 transition-all rounded-lg">
+                    <StickyNote className="h-3 w-3 shrink-0" />
                     <span className="truncate">Prompt</span>
                   </TabsTrigger>
                 </TooltipTrigger>
-                <TooltipContent side="bottom" className="text-[10px]"><p>Guidelines</p></TooltipContent>
+                <TooltipContent side="bottom" className="text-[10px] font-black uppercase tracking-[0.2em]"><p>Guidelines</p></TooltipContent>
               </Tooltip>
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <TabsTrigger value="controls" className="gap-2 text-[10px] font-bold uppercase tracking-wider data-[state=active]:bg-background data-[state=active]:text-primary px-2 transition-all">
-                    <SlidersHorizontal className="h-3.5 w-3.5 shrink-0" />
+                  <TabsTrigger value="controls" className="gap-2 text-[9px] font-black uppercase tracking-[0.15em] data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:shadow-sm px-2 transition-all rounded-lg">
+                    <SlidersHorizontal className="h-3 w-3 shrink-0" />
                     <span className="truncate">Output</span>
                   </TabsTrigger>
                 </TooltipTrigger>
-                <TooltipContent side="bottom" className="text-[10px]"><p>Parameters</p></TooltipContent>
+                <TooltipContent side="bottom" className="text-[10px] font-black uppercase tracking-[0.2em]"><p>Parameters</p></TooltipContent>
               </Tooltip>
             </TabsList>
           </TooltipProvider>
         </div>
 
-        <div className="flex-1 overflow-hidden relative mt-2">
+        <div className="flex-1 overflow-hidden relative mt-1">
           <ScrollArea className="h-full px-4 pr-4 -mr-4">
-            <div className="pb-20 pt-4">
+            <div className="pb-24 pt-4">
               <TabsContent value="context" className="m-0 focus-visible:ring-0">
                  <SectionContextSelector
                     sectionId={section.id}

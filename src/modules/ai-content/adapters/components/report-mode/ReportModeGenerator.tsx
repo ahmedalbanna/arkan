@@ -23,35 +23,9 @@ const ReportResults = lazy(() => import('./ReportResults'));
 
 
 
-function BottomNavBar({ activeView, setActiveView }: { activeView: 'generator' | 'result', setActiveView: (view: 'generator' | 'result') => void }) {
-    return (
-        <div className="fixed bottom-0 left-0 right-0 h-16 bg-background border-t p-2 flex items-center justify-around z-50 lg:hidden">
-            <Button
-                variant={activeView === 'generator' ? 'secondary' : 'ghost'}
-                className={cn("flex flex-col items-center h-full w-full", activeView === 'generator' && "text-primary")}
-                onClick={() => setActiveView('generator')}
-            >
-                <Settings className="h-5 w-5 mb-1" />
-                <span className="text-xs">Setup</span>
-            </Button>
-            <Button
-                variant={activeView === 'result' ? 'secondary' : 'ghost'}
-                className={cn("flex flex-col items-center h-full w-full", activeView === 'result' && "text-primary")}
-                onClick={() => setActiveView('result')}
-            >
-                <BookOpenText className="h-5 w-5 mb-1" />
-                <span className="text-xs">Document</span>
-            </Button>
-        </div>
-    );
-}
-
 export default function ReportModeGenerator({ initialProject }: { initialProject?: ProjectProperties | null }) {
     const {
         locale,
-        isMobile,
-        activeMobileView,
-        setActiveMobileView,
         activePanelKey,
         setActivePanelKey,
         activeRightPanelKey,
@@ -68,7 +42,6 @@ export default function ReportModeGenerator({ initialProject }: { initialProject
         zoomLevel,
         setZoomLevel,
         activeChapterId,
-        setActiveChapterId,
     } = useReportGenerator(initialProject);
 
     const handleZoomIn = () => setZoomLevel(prev => Math.min(2, prev + 0.1));
@@ -93,11 +66,11 @@ export default function ReportModeGenerator({ initialProject }: { initialProject
     }
 
     return (
-        <div className="relative flex-grow flex flex-col bg-background min-h-screen overflow-hidden">
+        <div className="relative flex-grow flex flex-col bg-background h-[calc(100vh-64px)] overflow-hidden">
             <OnboardingGuide isOpen={showOnboarding} onOpenChange={setShowOnboarding} onComplete={handleOnboardingComplete} />
             <Suspense fallback={<BuilderPageSkeleton />}>
             {/* High-Fidelity Command Bridge */}
-            <header className="h-16 border-b border-border/40 bg-background/40 backdrop-blur-2xl sticky top-0 z-50 px-8 flex items-center justify-between transition-all duration-700 ease-in-out group/header">
+            <header className="h-16 border-b border-border/40 bg-background/40 backdrop-blur-2xl shrink-0 z-50 px-8 flex items-center justify-between transition-all duration-700 ease-in-out group/header">
                 {/* Animated Grid Overlay */}
                 <div className="absolute inset-0 opacity-[0.02] pointer-events-none" style={{ backgroundImage: 'radial-gradient(circle at 2px 2px, hsl(var(--primary)) 1px, transparent 0)', backgroundSize: '32px 32px' }} />
 
@@ -200,85 +173,54 @@ export default function ReportModeGenerator({ initialProject }: { initialProject
                 <div className="relative z-10 flex-1 flex flex-col p-6 mx-auto w-full h-full">
 
                         <div className="h-full" dir={locale === 'ar' ? 'rtl' : 'ltr'}>
-                            {isMobile ? (
-                                <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start h-full">
-                                    <div className={cn(
-                                        "lg:col-span-4 xl:col-span-4 h-full",
-                                        isMobile && activeMobileView !== 'generator' && "hidden"
-                                    )}>
+                            <ResizablePanelGroup direction="horizontal" className="h-full items-stretch">
+                                {/* Left Zone - Setup Tools */}
+                                <ResizablePanel
+                                    defaultSize={activePanelKey ? 22 : 6}
+                                    minSize={activePanelKey ? 18 : 6}
+                                    maxSize={activePanelKey ? 35 : 6}
+                                    className="transition-all duration-500 ease-in-out"
+                                >
+                                    <div className="h-full pr-3 flex flex-col min-h-0">
                                         <CollapsibleSidePanel
                                             panels={leftPanels}
                                             activeKey={activePanelKey}
                                             onActiveKeyChange={setActivePanelKey}
+                                            className="flex-1 min-h-0"
                                         />
                                     </div>
-                                    <div className={cn(
-                                        "lg:col-span-8 xl:col-span-8 h-full",
-                                        isMobile && activeMobileView !== 'result' && "hidden"
-                                    )}>
-                                        <div className="flex flex-col gap-6 h-full">
-                                            <ReportResults activePanelKey={activePanelKey} />
-                                            <CollapsibleSidePanel
-                                                panels={rightPanels}
-                                                activeKey={activeRightPanelKey}
-                                                onActiveKeyChange={setActiveRightPanelKey}
-                                                side="right"
-                                            />
-                                        </div>
+                                </ResizablePanel>
+
+                                <ResizableHandle withHandle className="bg-transparent hover:bg-primary/10 transition-colors w-1.5" />
+
+                                {/* Center Zone - Document Canvas */}
+                                <ResizablePanel defaultSize={56} minSize={40}>
+                                    <div className="h-full px-3 flex flex-col min-h-0">
+                                        <ReportResults activePanelKey={activePanelKey} />
                                     </div>
-                                </div>
-                            ) : (
-                                <ResizablePanelGroup direction="horizontal" className="h-full items-stretch">
-                                    {/* Left Zone - Setup Tools */}
-                                    <ResizablePanel
-                                        defaultSize={activePanelKey ? 22 : 6}
-                                        minSize={activePanelKey ? 18 : 6}
-                                        maxSize={activePanelKey ? 35 : 6}
-                                        className="transition-all duration-500 ease-in-out"
-                                    >
-                                        <div className="h-full pr-3 flex flex-col min-h-0">
-                                            <CollapsibleSidePanel
-                                                panels={leftPanels}
-                                                activeKey={activePanelKey}
-                                                onActiveKeyChange={setActivePanelKey}
-                                                className="flex-1 min-h-0"
-                                            />
-                                        </div>
-                                    </ResizablePanel>
+                                </ResizablePanel>
 
-                                    <ResizableHandle withHandle className="bg-transparent hover:bg-primary/10 transition-colors w-1.5" />
+                                <ResizableHandle withHandle className="bg-transparent hover:bg-primary/10 transition-colors w-1.5" />
 
-                                    {/* Center Zone - Document Canvas */}
-                                    <ResizablePanel defaultSize={56} minSize={40}>
-                                        <div className="h-full px-3 flex flex-col min-h-0">
-                                            <ReportResults activePanelKey={activePanelKey} />
-                                        </div>
-                                    </ResizablePanel>
-
-                                    <ResizableHandle withHandle className="bg-transparent hover:bg-primary/10 transition-colors w-1.5" />
-
-                                    {/* Right Zone - AI Context */}
-                                    <ResizablePanel
-                                        defaultSize={activeRightPanelKey ? 22 : 6}
-                                        minSize={activeRightPanelKey ? 18 : 6}
-                                        maxSize={activeRightPanelKey ? 35 : 6}
-                                        className="transition-all duration-500 ease-in-out"
-                                    >
-                                        <div className="h-full pl-3 flex flex-col min-h-0">
-                                            <CollapsibleSidePanel
-                                                panels={rightPanels}
-                                                activeKey={activeRightPanelKey}
-                                                onActiveKeyChange={setActiveRightPanelKey}
-                                                side="right"
-                                                className="flex-1 min-h-0"
-                                            />
-                                        </div>
-                                    </ResizablePanel>
-                                </ResizablePanelGroup>
-                            )}
+                                {/* Right Zone - AI Context */}
+                                <ResizablePanel
+                                    defaultSize={activeRightPanelKey ? 22 : 6}
+                                    minSize={activeRightPanelKey ? 18 : 6}
+                                    maxSize={activeRightPanelKey ? 35 : 6}
+                                    className="transition-all duration-500 ease-in-out"
+                                >
+                                    <div className="h-full pl-3 flex flex-col min-h-0">
+                                        <CollapsibleSidePanel
+                                            panels={rightPanels}
+                                            activeKey={activeRightPanelKey}
+                                            onActiveKeyChange={setActiveRightPanelKey}
+                                            side="right"
+                                            className="flex-1 min-h-0"
+                                        />
+                                    </div>
+                                </ResizablePanel>
+                            </ResizablePanelGroup>
                         </div>
-
-                    {isMobile && <BottomNavBar activeView={activeMobileView} setActiveView={setActiveMobileView} />}
                 </div>
                 </main>
             </Suspense>

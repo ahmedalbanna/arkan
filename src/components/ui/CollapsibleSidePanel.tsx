@@ -3,7 +3,6 @@
 
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { useMobile } from '@/hooks';
 import { cn } from '@/infrastructure/utils/cn';
 import { AnimatePresence, motion } from 'framer-motion';
 import { type ReactElement, type ReactNode } from 'react';
@@ -30,7 +29,6 @@ export function CollapsibleSidePanel({
   className,
   side = 'left',
 }: CollapsibleSidePanelProps) {
-  const isMobile = useMobile();
   const activePanel = panels.find((p) => p.key === activeKey);
 
   if (!panels || panels.length === 0) {
@@ -41,9 +39,8 @@ export function CollapsibleSidePanel({
 
   return (
     <div className={cn(
-      "flex bg-background/40 backdrop-blur-xl border border-primary/10 rounded-[28px] shadow-[0_8px_40px_rgba(0,0,0,0.04)] overflow-hidden transition-all duration-500",
+      "flex h-full bg-background/40 backdrop-blur-xl border border-primary/10 rounded-[28px] shadow-[0_8px_40px_rgba(0,0,0,0.04)] overflow-hidden transition-all duration-500",
       isLeft ? "flex-row" : "flex-row-reverse",
-      isMobile && "mb-16",
       className
     )}>
       {/* Sidebar HUD - Technical Control Bar */}
@@ -103,14 +100,14 @@ export function CollapsibleSidePanel({
             transition={{ duration: 0.5, ease: [0.4, 0, 0.2, 1] }}
             className="flex-1 overflow-hidden relative border-none"
           >
-            <div className="h-full w-full min-w-[300px] overflow-auto custom-scrollbar bg-radial-gradient from-primary/[0.02] to-transparent">
+            <div className="h-full w-full min-w-[320px] overflow-auto custom-scrollbar bg-radial-gradient from-primary/[0.02] to-transparent">
                 <motion.div 
                     key={activeKey} 
                     initial={{ opacity: 0, x: isLeft ? -20 : 20 }}
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ duration: 0.3, delay: 0.2 }}
                     className={cn(
-                        "p-8 md:p-10 min-w-0",
+                        "p-6 md:p-8 min-w-0 flex flex-col min-h-full",
                     )}
                 >
                     {activePanel?.content}

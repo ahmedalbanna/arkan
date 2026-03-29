@@ -59,11 +59,11 @@ export function ChapterTabsPanel({ chapter, className, onClose }: ChapterTabsPan
 
   return (
     <div className={cn("h-full flex flex-col min-h-0", className)}>
-      <div className="px-4 pb-6 pt-2">
-        <div className="flex flex-col gap-4">
-          <div className="space-y-1 min-w-0">
-            <span className="text-[10px] font-bold uppercase tracking-widest text-primary/60">Chapter Intelligence</span>
-            <h3 className="text-base font-bold font-headline truncate tracking-tight">{chapter.title}</h3>
+      <div className="px-4 pb-4 pt-2">
+        <div className="flex flex-col gap-3">
+          <div className="space-y-0.5 min-w-0">
+            <span className="text-[10px] font-black uppercase tracking-[0.2em] text-primary/60">Chapter Intelligence</span>
+            <h3 className="text-[15px] font-bold font-headline truncate tracking-tight">{chapter.title}</h3>
           </div>
 
           <Form {...form}>
@@ -96,32 +96,32 @@ export function ChapterTabsPanel({ chapter, className, onClose }: ChapterTabsPan
       <Tabs defaultValue="actions" className="w-full flex-1 flex flex-col min-h-0">
         <div className="px-4">
           <TooltipProvider>
-            <TabsList className="grid w-full grid-cols-2 h-9 rounded-lg bg-muted/30 p-1 gap-1">
+            <TabsList className="grid w-full grid-cols-2 h-8 rounded-xl bg-muted/20 p-1 gap-1 border border-primary/5">
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <TabsTrigger value="actions" className="gap-2 text-[10px] font-bold uppercase tracking-wider data-[state=active]:bg-background data-[state=active]:text-primary px-2 transition-all">
-                    <Edit className="h-3.5 w-3.5 shrink-0" />
+                  <TabsTrigger value="actions" className="gap-2 text-[9px] font-black uppercase tracking-[0.15em] data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:shadow-sm px-2 transition-all rounded-lg">
+                    <Edit className="h-3 w-3 shrink-0" />
                     <span className="truncate">Actions</span>
                   </TabsTrigger>
                 </TooltipTrigger>
-                <TooltipContent side="bottom" className="text-[10px]"><p>Manipulation Tools</p></TooltipContent>
+                <TooltipContent side="bottom" className="text-[10px] font-black uppercase tracking-[0.2em]"><p>Manipulation Tools</p></TooltipContent>
               </Tooltip>
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <TabsTrigger value="context" className="gap-2 text-[10px] font-bold uppercase tracking-wider data-[state=active]:bg-background data-[state=active]:text-primary px-2 transition-all">
-                    <LinkIcon className="h-3.5 w-3.5 shrink-0" />
+                  <TabsTrigger value="context" className="gap-2 text-[9px] font-black uppercase tracking-[0.15em] data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:shadow-sm px-2 transition-all rounded-lg">
+                    <LinkIcon className="h-3 w-3 shrink-0" />
                     <span className="truncate">Context</span>
                   </TabsTrigger>
                 </TooltipTrigger>
-                <TooltipContent side="bottom" className="text-[10px]"><p>Data Sources</p></TooltipContent>
+                <TooltipContent side="bottom" className="text-[10px] font-black uppercase tracking-[0.2em]"><p>Data Sources</p></TooltipContent>
               </Tooltip>
             </TabsList>
           </TooltipProvider>
         </div>
 
-        <div className="flex-1 overflow-hidden relative mt-2">
+        <div className="flex-1 overflow-hidden relative mt-1">
           <ScrollArea className="h-full px-4 pr-4 -mr-4">
-            <div className="pb-20 pt-4">
+            <div className="pb-24 pt-4">
               <TabsContent value="actions" className="m-0 focus-visible:ring-0 space-y-8">
                 <div className="space-y-6">
                   <div className="space-y-3">

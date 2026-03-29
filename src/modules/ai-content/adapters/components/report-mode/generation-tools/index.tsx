@@ -93,7 +93,7 @@ export default function GenerationTools({
         isLoading={projectMutation.isPending}
       />
       <div className="flex flex-col h-full overflow-hidden bg-background/50">
-        <header className="space-y-4 px-6 pt-6 pb-4 border-b border-border/40 relative overflow-hidden group">
+        <header className="space-y-4 px-6 pt-6 pb-4 border-b border-border/40 relative overflow-hidden group bg-background/40 backdrop-blur-2xl">
           <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-20 transition-opacity duration-700">
             <Layers className="h-16 w-16" />
           </div>

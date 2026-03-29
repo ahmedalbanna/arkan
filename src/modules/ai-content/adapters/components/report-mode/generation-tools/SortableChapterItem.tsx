@@ -78,14 +78,14 @@ export function SortableChapterItem({
   return (
     <div ref={setNodeRef} style={style} {...attributes} className="group/chapter-container">
       <div className={cn(
-        "relative bg-card/40 border rounded-2xl shadow-sm overflow-hidden transition-all duration-300",
+        "relative bg-card/40 border rounded-2xl shadow-sm overflow-hidden transition-all duration-300 hover:translate-x-0.5",
         isActive 
-            ? "border-primary/40 bg-primary/[0.02] shadow-[0_4px_20px_rgba(0,0,0,0.04)] ring-1 ring-primary/10" 
+            ? "border-primary/30 bg-primary/[0.02] shadow-[0_4px_20px_rgba(0,0,0,0.04)] ring-1 ring-primary/10" 
             : "border-border/60 hover:border-primary/20 hover:shadow-md"
       )}>
         <div 
           className={cn(
-            "flex items-center px-4 py-3.5 cursor-pointer border-b transition-colors",
+            "flex items-center px-4 py-2.5 cursor-pointer border-b transition-colors",
             isActive ? "bg-primary/[0.04] border-primary/10" : "bg-muted/10 hover:bg-muted/20 border-border/40"
           )}
           onClick={() => onActivate?.()}
@@ -110,19 +110,19 @@ export function SortableChapterItem({
                     className="p-1.5 rounded-lg cursor-grab touch-none -ml-2 flex items-center gap-2 text-muted-foreground/40 transition-all hover:bg-background/80 hover:text-primary active:cursor-grabbing" 
                     onClick={(e) => e.stopPropagation()}
                 >
-                  <span className="text-[10px] w-4 text-center font-black tabular-nums">{index + 1}</span>
+                  <span className="text-[10px] w-4 text-center font-black uppercase tracking-[0.2em] tabular-nums">{index + 1}</span>
                   <GripVertical className="h-4 w-4 opacity-40 group-hover:opacity-100" />
                 </div>
               )}
               
               <div className="flex flex-col flex-1 min-w-0 text-left">
                 <span className={cn(
-                    "text-[11px] font-black uppercase tracking-[0.15em] transition-colors duration-300",
+                    "text-[11px] font-black uppercase tracking-[0.2em] transition-colors duration-300",
                     isActive ? "text-primary" : "text-muted-foreground/80 group-hover:text-primary"
                 )}>
                     {chapter.title || 'UNTITLED CHAPTER'}
                 </span>
-                <span className="text-[9px] font-bold text-muted-foreground/40 uppercase tracking-widest mt-0.5">
+                <span className="text-[9px] font-bold text-muted-foreground/30 uppercase tracking-[0.2em] mt-0.5">
                     {sectionsInChapter.length} Sections Integrated
                 </span>
               </div>

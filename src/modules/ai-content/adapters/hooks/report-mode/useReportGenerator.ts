@@ -2,7 +2,6 @@
 
 import { useBuilderPageLogic } from '@/modules/projects/adapters/hooks/use-builder-page';
 import { useLocalization } from '@/context/LocalizationContext';
-import { useMobile } from '@/hooks/util/use-mobile';
 import React, { useState, useMemo, lazy, useEffect } from 'react';
 import { Settings, UploadCloud, LayoutTemplate, BookOpenCheck, SlidersHorizontal, MessageSquare, Sparkles, History as HistoryIcon } from 'lucide-react';
 import { useSaveProject } from '@/modules/projects/adapters/hooks/use-projects';
@@ -21,8 +20,6 @@ import { type ProjectProperties } from '@/modules/projects/domain/entities/Proje
 
 export function useReportGenerator(initialProject?: ProjectProperties | null) {
   const { t, locale } = useLocalization();
-  const isMobile = useMobile();
-  const [activeMobileView, setActiveMobileView] = useState<'generator' | 'result'>('result');
   const [activePanelKey, setActivePanelKey] = useState('settings');
   const [activeRightPanelKey, setActiveRightPanelKey] = useState('section');
   const [isChatOpen, setIsChatOpen] = useState(false);
@@ -139,9 +136,6 @@ export function useReportGenerator(initialProject?: ProjectProperties | null) {
 
   return {
     ...builderPageLogic,
-    isMobile,
-    activeMobileView,
-    setActiveMobileView,
     activePanelKey,
     setActivePanelKey,
     activeRightPanelKey,
