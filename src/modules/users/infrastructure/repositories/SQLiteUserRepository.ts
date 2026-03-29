@@ -60,12 +60,13 @@ export class SQLiteUserRepository implements IUserRepository {
 
     async deductCredits(id: string, amount: number): Promise<Result<number, UserError>> {
         try {
-            return await db.transaction(async (tx) => {
-                const user = await tx.query.users.findFirst({
-                    where: eq(users.id, id),
-                });
+            // better-sqlite3 transactions are synchronous in Drizzle
+            return db.transaction((tx) => {
+                const user = tx.select().from(users).where(eq(users.id, id)).get();
 
-                if (!user) throw new Error("User not found");
+                if (!user) {
+                    return Result.fail(UserError.notFound("User not found"));
+                }
 
                 let currentCredits = user.credits ?? 0;
                 const lastUpdate = user.lastDailyCreditUpdate ? new Date(user.lastDailyCreditUpdate).getTime() : 0;
@@ -82,14 +83,14 @@ export class SQLiteUserRepository implements IUserRepository {
                 }
 
                 if (currentCredits < amount) {
-                    return Result.fail(UserError.validation("Insufficient credits. Please purchase more credits to continue.")) as any;
+                    return Result.fail(UserError.validation("Insufficient credits. Please purchase more credits to continue."));
                 }
 
                 const newBalance = currentCredits - amount;
                 updates.credits = newBalance;
                 updates.updatedAt = new Date().toISOString();
 
-                await tx.update(users).set(updates).where(eq(users.id, id));
+                tx.update(users).set(updates).where(eq(users.id, id)).run();
                 return Result.ok(newBalance);
             });
         } catch (error: any) {

@@ -97,7 +97,7 @@ export default function ReportModeGenerator({ initialProject }: { initialProject
             <OnboardingGuide isOpen={showOnboarding} onOpenChange={setShowOnboarding} onComplete={handleOnboardingComplete} />
             <Suspense fallback={<BuilderPageSkeleton />}>
             {/* High-Fidelity Command Bridge */}
-            <header className="h-16 border-b border-border/40 bg-background/40 backdrop-blur-2xl sticky top-0 z-50 px-8 flex items-center justify-between transition-all duration-700 ease-in-out group/header overflow-hidden">
+            <header className="h-16 border-b border-border/40 bg-background/40 backdrop-blur-2xl sticky top-0 z-50 px-8 flex items-center justify-between transition-all duration-700 ease-in-out group/header">
                 {/* Animated Grid Overlay */}
                 <div className="absolute inset-0 opacity-[0.02] pointer-events-none" style={{ backgroundImage: 'radial-gradient(circle at 2px 2px, hsl(var(--primary)) 1px, transparent 0)', backgroundSize: '32px 32px' }} />
 

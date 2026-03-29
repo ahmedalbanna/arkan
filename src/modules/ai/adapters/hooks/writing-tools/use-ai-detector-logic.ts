@@ -25,7 +25,7 @@ export function useAIDetectorLogic() {
   const { user, refetchUser } = useAuth();
   const { toast } = useToast();
 
-  const mutation = useWritingTool('/api/writing-tools/ai-detector');
+  const mutation = useWritingTool('ai-detector');
 
   const form = useForm<DetectorFormValues>({
     resolver: zodResolver(detectorSchema),

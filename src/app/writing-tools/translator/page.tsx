@@ -45,7 +45,7 @@ function TranslatorTool() {
   const [originalText, setOriginalText] = useState('');
   const [isCopied, setIsCopied] = useState(false);
 
-  const mutation = useWritingTool('/api/writing-tools/translate-text', {
+  const mutation = useWritingTool('translate-text', {
     onSuccess: (data: any) => {
       setTranslatedText(data.text);
       toast({ title: 'Translation Successful' });

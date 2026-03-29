@@ -159,7 +159,6 @@ export function useAiActions({ editor: initialEditor }: AiActionsProps = {}) {
 
       const body = {
         projectId: currentProject.id,
-        flow: 'generate-section',
         sectionToGenerate: section.id as SectionName,
         prompt: section.buildActionPrompt(),
         otherSections: mapSectionContextToRecord(section, currentProject),

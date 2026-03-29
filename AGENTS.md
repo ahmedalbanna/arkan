@@ -189,6 +189,7 @@ Each module in `src/modules/` follows the same four-layer structure:
 - Avoid `any` — use `unknown` and narrow with type guards
 - **Direct Domain Imports**: Avoid using monolithic `types.ts` re-export files. Components and hooks should import domain entities (e.g., `User`, `Project`, `Section`) directly from their respective module directories to ensure proper encapsulation and avoid circular dependencies.
 - **Entity Consolidation**: Keep domain entities and their corresponding `Properties` interfaces in the same file (e.g., `Project.ts`) to reduce file fragmentation and simplify the type system.
+- **Clean Schema Design**: AI input schemas should only contain model-relevant parameters. Avoid redundant metadata fields like `flow: z.literal(...)` as the `WritingToolRegistry` and API layer handle tool identification explicitly via `toolName`.
 
 ### React / Next.js
 
@@ -508,6 +509,9 @@ FIREBASE_ADMIN_PRIVATE_KEY=
 - **Type Mismatch Cleanup**: After removing properties from shared utilities (like `firebaseUser` from `apiService`), perform a project-wide search to remove stale property passing in components and hooks to avoid "Property does not exist on type" errors.
 - **Defensive UI Data Handling**: Always wrap external data formatting (e.g., `new Date(createdAt)` or `formatDistanceToNow`) in defensive checks or `try-catch` blocks. This prevents runtime crashes (like `Invalid time value`) if the backend returns malformed data or if a hook is temporarily using a placeholder.
 - **Admin UI Guards**: When adding administrative features to shared/global components (like the Notification Dropdown or Header), always wrap them in explicit role checks (e.g., `userProfile?.role === 'admin'`) to ensure they are hidden from standard users.
+- **SQLite Transaction Pattern**: In `better-sqlite3`, transactions are synchronous. When using Drizzle's `db.transaction()`, use synchronous methods (`.get()`, `.run()`, `.all()`) inside the block. Avoid `await` for inner queries to ensure consistent transaction behavior and prevent "transaction already in progress" errors.
+- **Global Singleton Pattern**: Long-lived services (SQLite, Genkit) must use the Global Singleton pattern (`globalThis`) in non-production environments. This prevents multiple connections and `SIGINT` listener accumulation (`MaxListenersExceededWarning`) during Next.js hot reloads.
+- **Writing Tool Standardization**: Always call `useWritingTool` with a raw **tool name** (e.g., `'summarize'`) instead of a full API path. Ensure the tool name exactly matches a key in `WritingToolRegistry.ts`.
 - **Relational Indexing**: For high-growth tables like generation logs or notifications, proactively add indices to columns used in filters or cron-job queries (e.g., `status`, `userId`, `scheduledFor`) within the Drizzle schema to maintain performance over time.
 - **Removal of src/lib**: The `src/lib` directory has been completely removed. All contents have been moved to `src/infrastructure/` (generic) or `src/modules/*/` (domain-specific). Do not create new files in `src/lib`.
 - **Relocated Schemas**: Zod schemas for validation now live in `src/modules/*/domain/schemas/`.

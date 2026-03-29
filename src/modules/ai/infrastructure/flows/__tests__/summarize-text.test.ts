@@ -27,7 +27,6 @@ describe('summarizeText Flow', () => {
 
   it('should call the summarization prompt with "short" instruction', async () => {
     const mockInput: SummarizeInput = {
-      flow: 'summarize',
       text: 'This is a long text that needs to be summarized into a short paragraph.',
       length: 'short',
     };
@@ -51,7 +50,6 @@ describe('summarizeText Flow', () => {
 
   it('should call the summarization prompt with "long" instruction', async () => {
     const mockInput: SummarizeInput = {
-      flow: 'summarize',
       text: 'This is another long text that needs a long summary.',
       length: 'long',
     };
@@ -67,7 +65,6 @@ describe('summarizeText Flow', () => {
 
   it('should throw an error for empty input text', async () => {
     const mockInput = {
-      flow: 'summarize',
       text: '', // Invalid empty text
       length: 'short',
     };
@@ -78,7 +75,6 @@ describe('summarizeText Flow', () => {
   
   it('should throw an error for invalid length enum', async () => {
     const mockInput = {
-      flow: 'summarize',
       text: 'Some valid text here.',
       length: 'invalid-size', // Invalid enum value
     };
@@ -90,7 +86,6 @@ describe('summarizeText Flow', () => {
 
   it('should throw an error if the model returns an empty or whitespace summary', async () => {
     const mockInput: SummarizeInput = {
-      flow: 'summarize',
       text: 'Some valid text.',
       length: 'medium',
     };
@@ -101,7 +96,6 @@ describe('summarizeText Flow', () => {
   
   it('should throw an error if the model returns no output at all', async () => {
     const mockInput: SummarizeInput = {
-      flow: 'summarize',
       text: 'Some valid text.',
       length: 'medium',
     };

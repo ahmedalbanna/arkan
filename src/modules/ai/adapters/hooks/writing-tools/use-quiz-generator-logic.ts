@@ -15,7 +15,7 @@ export function useQuizGeneratorLogic() {
   const [generatedQuiz, setGeneratedQuiz] = useState<z.infer<typeof QuizQuestionSchema>[]>([]);
   const [showAnswers, setShowAnswers] = useState(false);
 
-  const mutation = useWritingTool('/api/writing-tools/quiz-generator', {
+  const mutation = useWritingTool('quiz-generator', {
     onSuccess: (data: any) => {
       setGeneratedQuiz(data.questions);
       setShowAnswers(false);

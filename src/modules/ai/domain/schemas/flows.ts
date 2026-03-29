@@ -33,7 +33,6 @@ import {
 // ============================================================================
 
 export const ParaphraseInputSchema = BaseTextInputSchema.extend({
-    flow: z.literal('paraphrase'),
     mode: ParaphraseModeSchema.describe('The desired style of the paraphrased text.'),
     instruction: z.string().optional(), // Added for runtime prompt construction
 }).merge(BaseControlsSchema);
@@ -44,7 +43,6 @@ export type ParaphraseInput = z.infer<typeof ParaphraseInputSchema>;
 export type ParaphraseOutput = z.infer<typeof ParaphraseOutputSchema>;
 
 export const SummarizeInputSchema = BaseTextInputSchema.extend({
-    flow: z.literal('summarize'),
     length: SummarizeLengthSchema.describe('The desired length of the summary.'),
 }).merge(BaseControlsSchema);
 export const SummarizeOutputSchema = z.object({
@@ -55,7 +53,6 @@ export type SummarizeOutput = z.infer<typeof SummarizeOutputSchema>;
 
 // ai-proofread-document.ts
 export const AiProofreadDocumentInputSchema = z.object({
-    flow: z.literal('ai-proofread-document'),
     documentText: z
         .string()
         .describe('The text content of the document to be proofread.'),
@@ -77,7 +74,6 @@ export type AiProofreadDocumentOutput = z.infer<typeof AiProofreadDocumentOutput
 
 // ai-researcher.ts
 export const AIResearcherInputSchema = BaseTopicInputSchema.extend({
-    flow: z.literal('ai-researcher'),
     depth: ResearchDepthSchema.optional().describe('The depth of research to conduct.'),
 });
 export type AIResearcherInput = z.infer<typeof AIResearcherInputSchema>;
@@ -93,7 +89,6 @@ export type AIResearcherOutput = z.infer<typeof AIResearcherOutputSchema>;
 
 // solve-assignments.ts
 export const SolveAssignmentsInputSchema = BaseTextInputSchema.extend({
-    flow: z.literal('solve-assignments'),
 });
 export type SolveAssignmentsInput = z.infer<typeof SolveAssignmentsInputSchema>;
 
@@ -104,7 +99,6 @@ export type SolveAssignmentsOutput = z.infer<typeof SolveAssignmentsOutputSchema
 
 // generate-project-blueprint.ts
 export const GenerateProjectBlueprintInputSchema = z.object({
-    flow: z.literal('generate-project-blueprint'),
     projectName: z.string().describe('The name of the project/application to be developed.'),
     projectType: z.string().describe('Type of project (e.g., Web Application, Mobile App, E-commerce, Blog, Portfolio).'),
     description: z.string().describe('Detailed description of the project requirements and vision.'),
@@ -124,7 +118,6 @@ export type GenerateProjectBlueprintOutput = z.infer<typeof GenerateProjectBluep
 
 // literature-review-generator.ts
 export const LiteratureReviewInputSchema = BaseTopicInputSchema.extend({
-    flow: z.literal('literature-review'),
     focusAreas: z.array(z.string()).optional().describe('Specific areas or themes to focus on in the review.'),
     numberOfSources: z.number().int().min(5).max(50).optional().describe('Desired number of sources to include (default: 10).'),
     timeRange: z.string().optional().describe('Time range for sources (e.g., "last 5 years", "2020-2024").'),
@@ -148,7 +141,6 @@ export type LiteratureReviewOutput = z.infer<typeof LiteratureReviewOutputSchema
 // question-answering.ts
 export const QuestionAnsweringInputSchema = z
     .object({
-        flow: z.literal('question-answering'),
         question: z.string().describe('The question to answer.'),
         context: z
             .string()
@@ -173,7 +165,6 @@ export type QuestionAnsweringOutput = z.infer<typeof QuestionAnsweringOutputSche
 
 // fact-retrieval.ts
 export const FactRetrievalInputSchema = z.object({
-    flow: z.literal('fact-retrieval'),
     factQuery: z.string().describe('The specific fact or information to retrieve (e.g., "population of Japan", "date of first moon landing").'),
     useWebSearch: z.boolean().optional().default(true).describe('Whether to search the web for the fact.'),
     requireSource: z.boolean().optional().default(true).describe('Whether to require a source for the fact.'),
@@ -192,7 +183,6 @@ export type FactRetrievalOutput = z.infer<typeof FactRetrievalOutputSchema>;
 
 // analyze-context.ts
 export const AnalyzeContextInputSchema = BasePromptSchema.extend({
-    flow: z.literal('analyze-context'),
     contextFiles: z.array(BaseContextFileSchema).describe(
         'An array of context files (text, images, PDFs as data URIs) to be analyzed.'
     ),
@@ -207,7 +197,6 @@ export type AnalyzeContextOutput = z.infer<typeof AnalyzeContextOutputSchema>;
 
 // bias-checker.ts
 export const BiasCheckInputSchema = BaseTextInputSchema.extend({
-    flow: z.literal('bias-checker'),
 }).merge(BaseControlsSchema);
 export type BiasCheckInput = z.infer<typeof BiasCheckInputSchema>;
 
@@ -228,7 +217,6 @@ export type BiasCheckOutput = z.infer<typeof BiasCheckOutputSchema>;
 
 // sentence-structure-checker.ts
 export const SentenceStructureCheckInputSchema = BaseTextInputSchema.extend({
-    flow: z.literal('sentence-structure-checker'),
 }).merge(BaseControlsSchema);
 export type SentenceStructureCheckInput = z.infer<typeof SentenceStructureCheckInputSchema>;
 
@@ -257,7 +245,6 @@ export type SentenceStructureCheckOutput = z.infer<typeof SentenceStructureCheck
 
 // detect-ai-content.ts
 export const DetectAIInputSchema = BaseTextInputSchema.extend({
-    flow: z.literal('detect-ai-content'),
 }).merge(BaseControlsSchema);
 export type DetectAIInput = z.infer<typeof DetectAIInputSchema>;
 
@@ -277,7 +264,6 @@ export const ClaimSchema = z.object({
 });
 
 export const FactCheckInputSchema = BaseTextInputSchema.extend({
-    flow: z.literal('fact-checker'),
 });
 export type FactCheckInput = z.infer<typeof FactCheckInputSchema>;
 
@@ -289,7 +275,6 @@ export type FactCheckOutput = z.infer<typeof FactCheckOutputSchema>;
 
 // generate-agent-config.ts
 export const GenerateAgentConfigInputSchema = BasePromptSchema.extend({
-    flow: z.literal('generate-agent-config'),
     includeJsonOutput: z.boolean().optional().describe(
         "Whether to include a sample JSON output structure in the agent's prompt."
     ),
@@ -312,7 +297,6 @@ export type GenerateAgentConfigInput = z.infer<typeof GenerateAgentConfigInputSc
 
 // generate-citation.ts
 export const GenerateCitationInputSchema = z.object({
-    flow: z.literal('generate-citation'),
     sourceText: z.string().describe('The source material to generate a citation for. This can be a URL, a block of text from an article, or a book title and author.'),
     style: CitationStyleSchema.describe('The citation style to use (e.g., APA, MLA).'),
 });
@@ -327,7 +311,6 @@ export type GenerateCitationOutput = z.infer<typeof GenerateCitationOutputSchema
 // generate-diagrams.ts
 export const GenerateDiagramInputSchema = z
     .object({
-        flow: z.literal('generate-diagram'),
         diagramToGenerate: DiagramTypeSchema.describe('The type of diagram to generate.'),
         otherSections: z
             .record(SectionNameSchema, z.string())
@@ -349,7 +332,6 @@ export type GenerateDiagramOutput = z.infer<typeof GenerateDiagramOutputSchema>;
 
 // generate-plantuml.ts
 export const GeneratePlantUMLInputSchema = z.object({
-    flow: z.literal('generate-plantuml'),
     description: z.string().describe("A detailed text description of the diagram to be generated."),
     diagramType: DiagramTypeSchema.describe("The type of PlantUML diagram to generate."),
 });
@@ -362,7 +344,6 @@ export type GeneratePlantUMLOutput = z.infer<typeof GeneratePlantUMLOutputSchema
 
 // generate-image.ts
 export const GenerateImageInputSchema = BasePromptSchema.extend({
-    flow: z.literal('generate-image'),
 });
 export type GenerateImageInput = z.infer<typeof GenerateImageInputSchema>;
 
@@ -374,7 +355,6 @@ export type GenerateImageOutput = z.infer<typeof GenerateImageOutputSchema>;
 // generate-ideas.ts
 export const IdeaGenerationInputSchema = z
     .object({
-        flow: z.literal('generate-ideas'),
         specialization: z
             .string()
             .describe(
@@ -436,7 +416,6 @@ export const QuizQuestionSchema = z.discriminatedUnion('type', [
 ]);
 
 export const GenerateQuizInputSchema = BaseTextInputSchema.extend({
-    flow: z.literal('generate-quiz'),
     numQuestions: z.number().int().min(1).max(20).describe('The number of questions to generate.'),
     questionType: QuestionTypeSchema.describe('The type of questions to generate.'),
 });
@@ -450,7 +429,6 @@ export type GenerateQuizOutput = z.infer<typeof GenerateQuizOutputSchema>;
 // generate-report-section.ts
 export const GenerateSectionInputSchema = z
     .object({
-        flow: z.literal('generate-section'),
         sectionToGenerate: SectionNameSchema,
         prompt: z.string().min(10, 'Prompt must be at least 10 characters.'),
         otherSections: z
@@ -483,7 +461,6 @@ const SectionInstructionSchema = z.object({
 });
 
 export const GenerateChapterInputSchema = z.object({
-    flow: z.literal('generate-chapter'),
     chapterTitle: z.string().describe("The main title of the chapter to be generated."),
     sectionInstructions: z.array(SectionInstructionSchema).describe("An ordered array of instructions for each section within the chapter."),
 });
@@ -497,7 +474,6 @@ export type GenerateChapterOutput = z.infer<typeof GenerateChapterOutputSchema>;
 
 // generate-text.ts
 export const GenerateTextInputSchema = BaseTextInputSchema.extend({
-    flow: z.literal('generate-text'),
 }).merge(BaseControlsSchema);
 export type GenerateTextInput = z.infer<typeof GenerateTextInputSchema>;
 
@@ -518,7 +494,6 @@ export const CorrectionSchema = z.object({
 });
 
 export const GrammarCheckInputSchema = BaseTextInputSchema.extend({
-    flow: z.literal('grammar-checker'),
 }).merge(BaseControlsSchema);
 export type GrammarCheckInput = z.infer<typeof GrammarCheckInputSchema>;
 
@@ -537,7 +512,6 @@ export type GrammarCheckOutput = z.infer<typeof GrammarCheckOutputSchema>;
 
 // humanize-text.ts
 export const HumanizeTextInputSchema = BaseTextInputSchema.extend({
-    flow: z.literal('humanize-text'),
 }).merge(BaseControlsSchema);
 export type HumanizeTextInput = z.infer<typeof HumanizeTextInputSchema>;
 
@@ -549,7 +523,6 @@ export type HumanizeTextOutput = z.infer<typeof HumanizeTextOutputSchema>;
 
 // image-to-text.ts
 export const ImageToTextInputSchema = z.object({
-    flow: z.literal('image-to-text'),
     imageDataUri: z.string().describe("An image file encoded as a data URI that must include a MIME type and use Base64 encoding. Expected format: 'data:image/...;base64,<encoded_data>'."),
 });
 export type ImageToTextInput = z.infer<typeof ImageToTextInputSchema>;
@@ -563,7 +536,6 @@ export type ImageToTextOutput = z.infer<typeof ImageToTextOutputSchema>;
 // improve-report-markdown.ts
 export const ImproveMarkdownInputSchema = z
     .object({
-        flow: z.literal('improve-report-markdown'),
         markdownContent: z.string().min(20, 'Markdown content is too short.'),
         userPrompt: z.string().min(10, 'Instructions for the AI must be at least 10 characters.'),
     })
@@ -579,7 +551,6 @@ export type ImproveMarkdownOutput = z.infer<typeof ImproveMarkdownOutputSchema>;
 // manipulate-text.ts
 export const ManipulateTextInputSchema = z
     .object({
-        flow: z.literal('manipulate-text'),
         textToManipulate: z.string().describe('The original text to be modified.'),
         command: z.string().describe(
             'The instruction for how to modify the text (e.g., "summarize", "expand on this topic", "rewrite this to be more formal").',
@@ -605,7 +576,6 @@ export const MatchedSourceSchema = z.object({
 });
 
 export const PlagiarismCheckInputSchema = BaseTextInputSchema.extend({
-    flow: z.literal('plagiarism-checker'),
 }).merge(BaseControlsSchema);
 export type PlagiarismCheckInput = z.infer<typeof PlagiarismCheckInputSchema>;
 
@@ -618,7 +588,6 @@ export type PlagiarismCheckOutput = z.infer<typeof PlagiarismCheckOutputSchema>;
 
 // rewrite-document-to-markdown.ts
 export const RewriteDocumentInputSchema = z.object({
-    flow: z.literal('rewrite-document-to-markdown'),
     pdfDataUri: z.string().describe("A PDF file encoded as a data URI that must include a MIME type and use Base64 encoding. Expected format: 'data:application/pdf;base64,<encoded_data>'."),
 });
 export type RewriteDocumentInput = z.infer<typeof RewriteDocumentInputSchema>;
@@ -631,7 +600,6 @@ export type RewriteDocumentOutput = z.infer<typeof RewriteDocumentOutputSchema>;
 
 // rewrite-to-markdown.ts
 export const RewriteToMarkdownInputSchema = z.object({
-    flow: z.literal('rewrite-to-markdown'),
     rawText: z.string().describe('The raw, unstructured text extracted from a document.'),
 });
 export type RewriteToMarkdownInput = z.infer<typeof RewriteToMarkdownInputSchema>;
@@ -644,7 +612,6 @@ export type RewriteToMarkdownOutput = z.infer<typeof RewriteToMarkdownOutputSche
 
 // summarize-document.ts
 export const SummarizeDocumentInputSchema = z.object({
-    flow: z.literal('summarize-document'),
     documentDataUri: z
         .string()
         .describe(
@@ -661,7 +628,6 @@ export type SummarizeDocumentOutput = z.infer<typeof SummarizeDocumentOutputSche
 
 // summarize-project.ts
 export const SummarizeProjectInputSchema = z.object({
-    flow: z.literal('summarize-project'),
     projectDescription: z
         .string()
         .describe('The detailed description of the project that needs to be summarized.'),
@@ -678,7 +644,6 @@ export type SummarizeProjectOutput = z.infer<typeof SummarizeProjectOutputSchema
 
 // text-stylist.ts
 export const RewriteTextInputSchema = BaseTextInputSchema.extend({
-    flow: z.literal('rewrite-text'),
     style: z.string().describe('The target style for the rewritten text (e.g., Formal, Creative, Simple).'),
 })
     .merge(BaseControlsSchema);
@@ -691,7 +656,6 @@ export const RewriteTextOutputSchema = z.object({
 export type RewriteTextOutput = z.infer<typeof RewriteTextOutputSchema>;
 
 export const SummarizeTextWithRatioInputSchema = BaseTextInputSchema.extend({
-    flow: z.literal('summarize-with-ratio'),
     ratio: z.number().min(10).max(90).describe('The desired compression ratio (10% - 90%). 10% is a very short summary, 90% is almost the original length.'),
 });
 export type SummarizeTextWithRatioInput = z.infer<typeof SummarizeTextWithRatioInputSchema>;
@@ -703,7 +667,6 @@ export type SummarizeTextWithRatioOutput = z.infer<typeof SummarizeTextWithRatio
 
 // Style Editor
 export const StyleEditorInputSchema = BaseTextInputSchema.extend({
-    flow: z.literal('style-editor'),
 })
     .merge(BaseControlsSchema);
 export type StyleEditorInput = z.infer<typeof StyleEditorInputSchema>;
@@ -716,7 +679,6 @@ export type StyleEditorOutput = z.infer<typeof StyleEditorOutputSchema>;
 
 // Readability Enhancer
 export const ReadabilityEnhancerInputSchema = BaseTextInputSchema.extend({
-    flow: z.literal('readability-enhancer'),
     targetLevel: TargetReadingLevelSchema.optional().describe('The target reading level.'),
 })
     .merge(BaseControlsSchema);
@@ -731,7 +693,6 @@ export type ReadabilityEnhancerOutput = z.infer<typeof ReadabilityEnhancerOutput
 
 // Conciseness Checker
 export const ConcisenessCheckerInputSchema = BaseTextInputSchema.extend({
-    flow: z.literal('conciseness-checker'),
     targetReduction: z
         .number()
         .min(0)
@@ -753,7 +714,6 @@ export type ConcisenessCheckerOutput = z.infer<typeof ConcisenessCheckerOutputSc
 
 // Clarity Advisor
 export const ClarityAdvisorInputSchema = BaseTextInputSchema.extend({
-    flow: z.literal('clarity-advisor'),
     focusAreas: z
         .array(z.string())
         .optional()
@@ -776,7 +736,6 @@ export type ClarityAdvisorOutput = z.infer<typeof ClarityAdvisorOutputSchema>;
 
 // topic-explainer.ts
 export const TopicExplainerInputSchema = BaseTopicInputSchema.extend({
-    flow: z.literal('topic-explainer'),
 });
 export type TopicExplainerInput = z.infer<typeof TopicExplainerInputSchema>;
 
@@ -787,7 +746,6 @@ export type TopicExplainerOutput = z.infer<typeof TopicExplainerOutputSchema>;
 
 // translate-text.ts
 export const TranslateTextInputSchema = BaseTextInputSchema.extend({
-    flow: z.literal('translate-text'),
     targetLang: TargetLanaguage.describe('The target language (e.g., "English", "Arabic").'),
 })
     .merge(BaseControlsSchema);
@@ -802,7 +760,6 @@ export type TranslateTextOutput = z.infer<typeof TranslateTextOutputSchema>;
 // write-document.ts
 export const WriteDocumentInputSchema = z
     .object({
-        flow: z.literal('write-document'),
         topic: z.string().describe('The topic or title of the document to be written.'),
         documentType: z
             .string()
@@ -826,7 +783,6 @@ export type WriteDocumentOutput = z.infer<typeof WriteDocumentOutputSchema>;
 
 // evaluate-report.ts
 export const EvaluateReportInputSchema = z.object({
-    flow: z.literal('evaluate-report'),
     reportSections: z.record(SectionNameSchema, z.string()).describe("A map of all generated report sections."),
     diagrams: z.record(DiagramTypeSchema, z.string()).optional().describe("A map of all generated PlantUML diagrams.").nullable(),
     acceptanceCriteria: z.array(z.string()).describe("A list of acceptance criteria to evaluate the report against.").nullable().optional(),
@@ -856,7 +812,6 @@ export type EvaluateReportOutput = z.infer<typeof EvaluateReportOutputSchema>;
 
 // generate-toc.ts
 export const GenerateTocInputSchema = z.object({
-    flow: z.literal('generate-toc'),
     projectDescription: z.string().min(10, 'Project idea must be at least 10 characters.'),
 });
 export type GenerateTocInput = z.infer<typeof GenerateTocInputSchema>;
@@ -874,7 +829,6 @@ export type GenerateTocOutput = z.infer<typeof GenerateTocOutputSchema>;
 
 // generate-ui-description.ts
 export const GenerateUIDescriptionInputSchema = z.object({
-    flow: z.literal('generate-ui-description'),
     projectFeatures: z.string().min(20, 'Please provide more details about the project features.'),
     designType: DesignTypeSchema,
 });
@@ -892,7 +846,6 @@ export type GenerateUIDescriptionOutput = z.infer<typeof GenerateUIDescriptionOu
 
 // 1. Research Paper - ورقة بحثية
 export const ResearchPaperInputSchema = z.object({
-    flow: z.literal('research-paper'),
     topic: z.string().min(5).describe('البحث موضوع'),
     researchQuestion: z.string().min(10).describe('السؤال البحثي الرئيسي'),
     methodology: ResearchMethodologySchema.describe('المنهجية البحثية'),
@@ -920,7 +873,6 @@ export type ResearchPaperOutput = z.infer<typeof ResearchPaperOutputSchema>;
 
 // 2. Analytical Essay - مقال تحليلي
 export const AnalyticalEssayInputSchema = z.object({
-    flow: z.literal('analytical-essay'),
     topic: z.string().min(5).describe('الموضوع المراد تحليله'),
     mainArgument: z.string().min(20).describe('الحجة الرئيسية'),
     keyComponents: z.array(z.string()).min(2).max(8).describe('المكونات الأساسية للتحليل'),
@@ -945,7 +897,6 @@ export type AnalyticalEssayOutput = z.infer<typeof AnalyticalEssayOutputSchema>;
 
 // 3. Argumentative Essay - مقال جدلي
 export const ArgumentativeEssayInputSchema = z.object({
-    flow: z.literal('argumentative-essay'),
     topic: z.string().min(5).describe('الموضوع الجدلي'),
     position: z.string().min(20).describe('الموقف الذي تدافع عنه'),
     mainArguments: z.array(z.string()).min(3).max(6).describe('الحجج الرئيسية'),
@@ -975,7 +926,6 @@ export type ArgumentativeEssayOutput = z.infer<typeof ArgumentativeEssayOutputSc
 // 4. Literature Review - مراجعة أدبيات (already exists as LiteratureReviewInputSchema)
 // We'll create a more comprehensive version
 export const ComprehensiveLiteratureReviewInputSchema = z.object({
-    flow: z.literal('comprehensive-literature-review'),
     topic: z.string().min(5).describe('موضوع المراجعة الأدبية'),
     researchQuestions: z.array(z.string()).min(1).max(5).describe('الأسئلة البحثية'),
     keywords: z.array(z.string()).min(3).max(15),
@@ -1002,7 +952,6 @@ export type ComprehensiveLiteratureReviewOutput = z.infer<typeof ComprehensiveLi
 
 // 5. Case Study - دراسة حالة
 export const CaseStudyInputSchema = z.object({
-    flow: z.literal('case-study'),
     caseTitle: z.string().min(5).describe('عنوان الحالة'),
     background: z.string().min(50).describe('خلفية الحالة'),
     problem: z.string().min(30).describe('المشكلة أو التحدي'),
@@ -1030,7 +979,6 @@ export type CaseStudyOutput = z.infer<typeof CaseStudyOutputSchema>;
 
 // 6. Lab Report - تقرير مختبر
 export const LabReportInputSchema = z.object({
-    flow: z.literal('lab-report'),
     experimentTitle: z.string().min(5).describe('عنوان التجربة'),
     objective: z.string().min(20).describe('الهدف من التجربة'),
     hypothesis: z.string().min(20).describe('الفرضية'),
@@ -1057,7 +1005,6 @@ export type LabReportOutput = z.infer<typeof LabReportOutputSchema>;
 
 // 7. Research Proposal - مقترح بحثي
 export const ResearchProposalInputSchema = z.object({
-    flow: z.literal('research-proposal'),
     researchTitle: z.string().min(10).describe('عنوان البحث المقترح'),
     researchProblem: z.string().min(50).describe('مشكلة البحث'),
     researchQuestions: z.array(z.string()).min(1).max(5),
@@ -1088,7 +1035,6 @@ export type ResearchProposalOutput = z.infer<typeof ResearchProposalOutputSchema
 
 // 8. Thesis Statement - أطروحة مركزية
 export const ThesisStatementInputSchema = z.object({
-    flow: z.literal('thesis-statement'),
     topic: z.string().min(5).describe('الموضوع'),
     position: z.string().min(20).describe('الموقف أو الرأي'),
     mainPoints: z.array(z.string()).min(2).max(4).describe('النقاط الرئيسية'),
@@ -1107,7 +1053,6 @@ export type ThesisStatementOutput = z.infer<typeof ThesisStatementOutputSchema>;
 
 // 9. Dissertation Chapter - فصل أطروحة
 export const DissertationChapterInputSchema = z.object({
-    flow: z.literal('dissertation-chapter'),
     chapterType: AcademicSectionSchema.describe('نوع الفصل'),
     researchTopic: z.string().min(10).describe('موضوع البحث'),
     chapterTitle: z.string().min(5).describe('عنوان الفصل'),
@@ -1138,7 +1083,6 @@ export type DissertationChapterOutput = z.infer<typeof DissertationChapterOutput
 
 // 10. Term Paper - بحث فصلي
 export const TermPaperInputSchema = z.object({
-    flow: z.literal('term-paper'),
     courseName: z.string().min(3).describe('اسم المقرر'),
     topic: z.string().min(5).describe('موضوع البحث'),
     thesisStatement: z.string().min(20).describe('الأطروحة المركزية'),
@@ -1166,7 +1110,6 @@ export type TermPaperOutput = z.infer<typeof TermPaperOutputSchema>;
 
 // 11. Critical Analysis - تحليل نقدي
 export const CriticalAnalysisInputSchema = z.object({
-    flow: z.literal('critical-analysis'),
     workTitle: z.string().min(3).describe('عنوان العمل المراد تحليله'),
     workType: z.enum(['book', 'article', 'research-paper', 'theory', 'artwork', 'film']),
     author: z.string().min(2).describe('المؤلف'),
@@ -1192,7 +1135,6 @@ export type CriticalAnalysisOutput = z.infer<typeof CriticalAnalysisOutputSchema
 
 // 12. Book Review - مراجعة كتاب
 export const BookReviewInputSchema = z.object({
-    flow: z.literal('book-review'),
     bookTitle: z.string().min(2).describe('عنوان الكتاب'),
     author: z.string().min(2).describe('المؤلف'),
     publicationYear: z.number().min(1900).max(2030),
@@ -1220,7 +1162,6 @@ export type BookReviewOutput = z.infer<typeof BookReviewOutputSchema>;
 
 // 13. Article Summary - ملخص مقال
 export const ArticleSummaryInputSchema = z.object({
-    flow: z.literal('article-summary'),
     articleTitle: z.string().min(3).describe('عنوان المقال'),
     author: z.string().min(2).describe('المؤلف'),
     articleText: z.string().min(100).optional().describe('نص المقال (إذا كان متوفراً)'),
@@ -1245,7 +1186,6 @@ export type ArticleSummaryOutput = z.infer<typeof ArticleSummaryOutputSchema>;
 
 // 14. Annotated Bibliography - ببليوغرافيا مشروحة
 export const AnnotatedBibliographyInputSchema = z.object({
-    flow: z.literal('annotated-bibliography'),
     researchTopic: z.string().min(5).describe('موضوع البحث'),
     sources: z.array(z.object({
         title: z.string(),
@@ -1273,7 +1213,6 @@ export type AnnotatedBibliographyOutput = z.infer<typeof AnnotatedBibliographyOu
 
 // 15. Position Paper - ورقة موقف
 export const PositionPaperInputSchema = z.object({
-    flow: z.literal('position-paper'),
     issue: z.string().min(10).describe('القضية أو الموضوع'),
     organizationOrEntity: z.string().min(2).describe('الجهة أو المنظمة'),
     position: z.string().min(30).describe('الموقف الرسمي'),
@@ -1302,7 +1241,6 @@ export type PositionPaperOutput = z.infer<typeof PositionPaperOutputSchema>;
 
 // 16. Reflection Paper - ورقة تأملية
 export const ReflectionPaperInputSchema = z.object({
-    flow: z.literal('reflection-paper'),
     experience: z.string().min(50).describe('التجربة أو الموضوع المراد التأمل فيه'),
     courseOrContext: z.string().optional().describe('المقرر أو السياق'),
     keyLearnings: z.array(z.string()).min(2).max(8).describe('التعلمات الرئيسية'),
@@ -1327,7 +1265,6 @@ export type ReflectionPaperOutput = z.infer<typeof ReflectionPaperOutputSchema>;
 
 // 17. Technical Report - تقرير فني
 export const TechnicalReportInputSchema = z.object({
-    flow: z.literal('technical-report'),
     projectTitle: z.string().min(5).describe('عنوان المشروع'),
     projectType: z.enum(['software', 'hardware', 'engineering', 'research', 'analysis']),
     objective: z.string().min(30).describe('الهدف'),

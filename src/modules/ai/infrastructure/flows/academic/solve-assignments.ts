@@ -52,7 +52,7 @@ Please format your response as markdown with the following structure:
         }
     });
 
-    const { output } = await solvePrompt({flow: "solve-assignments", text });
+    const { output } = await solvePrompt({text });
     if (!output) {
         throw new Error("Failed to solve assignments.");
     }

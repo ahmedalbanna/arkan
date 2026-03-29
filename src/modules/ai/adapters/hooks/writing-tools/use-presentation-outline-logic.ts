@@ -25,7 +25,7 @@ export function usePresentationOutlineLogic() {
   const { toast } = useToast();
   const [isCopied, setIsCopied] = useState(false);
 
-  const mutation = useWritingTool('/api/writing-tools/generate-presentation-outline');
+  const mutation = useWritingTool('generate-presentation-outline');
 
   const form = useForm<OutlineFormValues>({
     resolver: zodResolver(outlineSchema),

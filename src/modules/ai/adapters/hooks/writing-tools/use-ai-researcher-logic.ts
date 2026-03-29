@@ -176,18 +176,18 @@ export function useAIResearcherLogic() {
   const reportRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
 
-  const getApiEndpoint = (mode: ResearchMode) => {
+  const getToolName = (mode: ResearchMode) => {
     switch (mode) {
       case 'ai-researcher':
-        return '/api/writing-tools/ai-researcher';
+        return 'ai-researcher';
       case 'literature-review':
-        return '/api/writing-tools/literature-review';
+        return 'literature-review';
       case 'question-answering':
-        return '/api/writing-tools/question-answering';
+        return 'question-answering';
       case 'fact-retrieval':
-        return '/api/writing-tools/fact-retrieval';
+        return 'fact-retrieval';
       default:
-        return '/api/writing-tools/ai-researcher';
+        return 'ai-researcher';
     }
   };
 
@@ -206,7 +206,7 @@ export function useAIResearcherLogic() {
     }
   };
 
-  const mutation = useWritingTool(getApiEndpoint(researchMode), {
+  const mutation = useWritingTool(getToolName(researchMode), {
     onError: (error) => {
       toast({ title: t('writingTools.aiResearcher.toastResearchFailed'), description: error.message, variant: 'destructive' });
     }

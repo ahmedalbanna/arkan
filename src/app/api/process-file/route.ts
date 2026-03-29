@@ -37,9 +37,9 @@ export const POST = withAuth(async ({ request, user }) => {
         let input: any;
 
         if (file.type === 'application/pdf') {
-            input = { flow: 'rewrite-document-to-markdown', pdfDataUri: dataUri };
+            input = { pdfDataUri: dataUri };
         } else if (file.type.startsWith('image/')) {
-            input = { flow: 'image-to-text', imageDataUri: dataUri };
+            input = { imageDataUri: dataUri };
         } else {
             const content = Buffer.from(fileArrayBuffer).toString('utf-8');
             input = { content };

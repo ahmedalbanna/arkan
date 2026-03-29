@@ -47,7 +47,7 @@ Output ONLY the translated text with markdown preserved. Do NOT wrap it in JSON 
       }
     });
 
-    const result = await prompt({flow: "translate-text", text, targetLang });
+    const result = await prompt({text, targetLang });
     if (!result) {
       return { translatedText: '' };
     }

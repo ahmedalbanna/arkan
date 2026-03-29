@@ -57,7 +57,9 @@ export default function LectureGeneratorPage() {
     const input: CreateLectureUnitInput = { ...formData, subTopics };
 
     try {
-      const data = await apiService<CreateLectureUnitInput, CreateLectureUnitOutput>({ endpoint: '/api/actions/create-lecture-unit', method: 'POST', data: input });
+      const result = await apiService<CreateLectureUnitInput, any>({ endpoint: '/api/writing-tools/lecture-generator', method: 'POST', data: input });
+      if (result.isFailure) throw result.error;
+      const data = result.getValue();
       setResult(data);
       toast({ title: 'Generation Successful', description: 'Your lecture and practical session have been created.' });
     } catch (error) {

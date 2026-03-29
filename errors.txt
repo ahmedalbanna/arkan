@@ -1,20 +1,2 @@
-## Error Type
-Runtime Error
-
-## Error Message
-Rendered fewer hooks than expected. This may be caused by an accidental early return statement.
-
-
-    at ReportModeGenerator (src/modules/ai-content/adapters/components/report-mode/ReportModeGenerator.tsx:249:45)
-    at GeneratePage (src/app/builder/page.tsx:39:7)
-
-## Code Frame
-  247 |                                     <ResizablePanel defaultSize={56} minSize={40}>
-  248 |                                         <div className="h-full px-3 flex flex-col min-h-0">
-> 249 |                                             <ReportResults activePanelKey={activePanelKey} />
-      |                                             ^
-  250 |                                         </div>
-  251 |                                     </ResizablePanel>
-  252 |
-
-Next.js version: 15.5.9 (Turbopack)
+API Route Error: { message: 'Invalid tool: project-blueprint' }
+ POST /api/writing-tools/project-blueprint 400 in 1639ms

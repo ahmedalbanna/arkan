@@ -54,7 +54,7 @@ export { generateIdeas } from './generation/generate-ideas';
 export { generateProjectBlueprint } from './generation/generate-project-blueprint';
 export { generateReportSection } from './generation/generate-report-section';
 export * from './generation/generate-report-section-rag';
-export * from './generation/generate-session-plan';
+export { generateSessionPlan } from './generation/generate-session-plan';
 export { generateUiDescription } from './generation/generate-ui-description';
 export * from './generation/graduation-project-generator';
 export * from './generation/presentation-content-creator';

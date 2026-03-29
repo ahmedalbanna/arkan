@@ -39,7 +39,6 @@ Provide detailed, actionable recommendations based on industry best practices an
     });
 
     const { output } = await blueprintPrompt({
-        flow: "generate-project-blueprint",
         projectName,
         projectType,
         description,

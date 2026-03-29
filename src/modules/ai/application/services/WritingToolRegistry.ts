@@ -7,7 +7,8 @@ import {
     generateUiDescription, grammarCheck, generateLiteratureReview, 
     manipulateText, plagiarismCheck, answerQuestion, 
     sentenceStructureCheck, solveAssignments, textStyleTune, 
-    topicExplainer, translateText, writeDocument, aiResearcher 
+    topicExplainer, translateText, writeDocument, aiResearcher,
+    biasCheckText, generateSessionPlan, createLectureUnit, generateTheoreticalLecture
 } from "@/modules/ai/infrastructure/flows";
 import { 
     ParaphraseInputSchema, SummarizeInputSchema, HumanizeTextInputSchema, 
@@ -23,7 +24,8 @@ import {
     QuestionAnsweringInputSchema, SentenceStructureCheckInputSchema, 
     SolveAssignmentsInputSchema, StyleEditorInputSchema as TextStylistInputSchema, 
     TopicExplainerInputSchema, TranslateTextInputSchema, 
-    WriteDocumentInputSchema, AIResearcherInputSchema
+    WriteDocumentInputSchema, AIResearcherInputSchema,
+    BiasCheckInputSchema, GenerateSessionPlanInputSchema, CreateLectureUnitInputSchema, GenerateTheoreticalLectureInputSchema
 } from "@/modules/ai/domain/schemas";
 
 export interface ToolConfig {
@@ -66,7 +68,11 @@ export class WritingToolRegistry {
         'topic-explainer': { flow: topicExplainer, schema: TopicExplainerInputSchema, creditCost: 1 },
         'translator': { flow: translateText, schema: TranslateTextInputSchema, creditCost: 1 },
         'write-document': { flow: writeDocument, schema: WriteDocumentInputSchema, creditCost: 2 },
-        'ai-researcher': { flow: aiResearcher, schema: AIResearcherInputSchema, creditCost: 3 }
+        'ai-researcher': { flow: aiResearcher, schema: AIResearcherInputSchema, creditCost: 3 },
+        'bias-checker': { flow: biasCheckText, schema: BiasCheckInputSchema, creditCost: 1 },
+        'generate-session-plan': { flow: generateSessionPlan, schema: GenerateSessionPlanInputSchema, creditCost: 2 },
+        'lecture-generator': { flow: createLectureUnit, schema: CreateLectureUnitInputSchema, creditCost: 3 },
+        'theoretical-lecture': { flow: generateTheoreticalLecture, schema: GenerateTheoreticalLectureInputSchema, creditCost: 2 }
     };
 
     getTool(name: string): ToolConfig | undefined {

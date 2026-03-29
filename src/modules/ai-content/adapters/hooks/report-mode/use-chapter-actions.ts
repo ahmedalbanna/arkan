@@ -66,7 +66,7 @@ export function useChapterActions(chapter: Chapter | null, onOpenChange?: (open:
     },
   });
 
-  const mutation = useWritingTool('/api/writing-tools/text-stylist', {
+  const mutation = useWritingTool('text-stylist', {
     onSuccess: (data: any, variables) => {
       const resultText = data.rewrittenText || data.editedText || data.enhancedText || data.conciseText || data.improvedText || JSON.stringify(data, null, 2);
       const original = (variables as any).text;

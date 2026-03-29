@@ -12,7 +12,15 @@ import { ollama } from 'genkitx-ollama';
  * Server: http://185.190.140.93:11434
  */
 
-export const ai = genkit({
+/**
+ * Global Singleton Pattern for Genkit
+ * Prevents multiple instances and SIGINT listener accumulation during Next.js hot reloads.
+ */
+const globalForAi = globalThis as unknown as {
+  ai: ReturnType<typeof genkit> | undefined;
+};
+
+export const ai = globalForAi.ai ?? genkit({
   plugins: [
     ollama({
       models: [
@@ -33,6 +41,10 @@ export const ai = genkit({
     }),
   ],
 });
+
+if (process.env.NODE_ENV !== 'production') {
+  globalForAi.ai = ai;
+}
 
 /**
  * Model Selection Guide by Task Category

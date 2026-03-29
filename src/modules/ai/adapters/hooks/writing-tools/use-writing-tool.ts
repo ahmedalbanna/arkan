@@ -7,7 +7,7 @@ import { useMutation, type UseMutationOptions } from '@tanstack/react-query';
 import { container } from '@/infrastructure/di/container';
 
 export function useWritingTool<TData = unknown, TVariables = any>(
-  endpoint: string,
+  endpointOrToolName: string,
   options?: Omit<UseMutationOptions<TData, Error, TVariables>, 'mutationFn'>,
 ) {
   const { refetchUser } = useAuth();
@@ -15,7 +15,9 @@ export function useWritingTool<TData = unknown, TVariables = any>(
   return useMutation<TData, Error, TVariables>({
     mutationFn: async (data: TVariables) => {
       const client = container.resolve(WritingToolsApiClient);
-      const result = await client.writingToolApi<TVariables, TData>(endpoint, data);
+      // Strip '/api/writing-tools/' prefix if present to get the tool name
+      const toolName = endpointOrToolName.replace(/^\/api\/writing-tools\//, '');
+      const result = await client.writingToolApi<TVariables, TData>(toolName, data);
       if (result.isFailure) throw result.error;
       return result.getValue();
     },

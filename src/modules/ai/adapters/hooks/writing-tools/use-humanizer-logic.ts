@@ -19,7 +19,7 @@ export function useHumanizerLogic() {
   const [isCopied, setIsCopied] = useState(false);
   const { toast } = useToast();
 
-  const mutation = useWritingTool('/api/writing-tools/humanize');
+  const mutation = useWritingTool('humanize');
 
   const form = useForm<HumanizerFormValues>({
     resolver: zodResolver(humanizerSchema),
