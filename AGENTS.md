@@ -162,12 +162,13 @@ Each module in `src/modules/` follows the same four-layer structure:
 - Define input/output Zod schemas in `src/modules/ai/domain/schemas/`.
 - **Literal Type Enforcement**: When a flow output schema uses `z.enum`, the implementation must return strings with `as const` (e.g., `status: 'success' as const`) to satisfy strict TypeScript checking.
 - **Unified Tool Schemas**: Tool-specific schemas and their inferred types should be centralized in `src/modules/ai/infrastructure/tools/schemas.ts` to prevent circular dependencies and "File is not a module" errors.
+- **Plain Text vs. Structured JSON**: For writing tools (Paraphraser, Summarizer, etc.), the project prefers returning **raw Markdown strings** rather than JSON objects. This simplifies frontend rendering and improves reliability with smaller models.
 - Use the pattern: define prompt → define flow → export async wrapper function.
 - Always handle errors with try/catch and return `Result<T, AiError>` objects.
 - Use `MODEL_BY_TASK` constants from `@/modules/ai/infrastructure/services/Genkit` for consistent model selection:
-  - `GEMMA_2B` — fast text generation, conversion tasks
-  - `PHI3_MINI` — structured output, reports, analysis
-  - `LLAMA3_8B` — complex academic/research tasks
+  - `GEMMA_2B` — preferred for fast text generation and writing tools returning plain text.
+  - `PHI3_MINI` — use only when complex structured output (JSON) is strictly required.
+  - `LLAMA3_8B` — complex academic/research tasks.
 
 ### State Management
 
@@ -221,7 +222,7 @@ Each module in `src/modules/` follows the same four-layer structure:
 - Place API routes under `src/app/api/<domain>/route.ts`
 - Extract business logic into use cases in `src/modules/<domain>/application/use-cases/`
 - Always validate request bodies server-side with Zod
-- Return consistent JSON responses; use appropriate HTTP status codes
+- Return consistent JSON responses by using the `handle*Result` helpers (e.g., `handleAiResult`, `handleUserResult`) from `@/infrastructure/api/api-utils`. This ensures a unified error structure, correct HTTP status codes, and automatic telemetry logging.
 
 ---
 
@@ -326,10 +327,17 @@ FIREBASE_ADMIN_PRIVATE_KEY=
 - Do not use `new` to instantiate services — always resolve via `container.resolve()`
 - All Genkit flow files must declare `'use server'` at the top
 - Server-only DI registrations must be inside the `typeof window === 'undefined'` guard in `container.ts`
+- **Hook Order Safety**: Never return early from a React component if there are hooks (useState, useEffect, etc.) defined below that return. This causes "Rendered fewer hooks than expected" errors. Always call all hooks at the top level before any conditional logic.
+- **Keyboard Shortcut Pattern**: For IDE-style interfaces, centralize shortcut logic in a module-specific hook (e.g., `src/modules/*/adapters/hooks/useKeyboardShortcuts.ts`). This hook should handle platform-specific modifiers (Cmd vs Ctrl) and prevent default browser behavior for common shortcuts like `Cmd+S`.
+- **Subagent Delegation**: Even for localized UI enhancements or hook implementations, strictly follow the delegation policy. Use the **Next.js 15 AI Development Assistant** for hook logic and **shadcn/ui Component Builder Assistant** for extending toolbar components. This ensures consistency with the latest framework patterns.
+- **Fullscreen Transitions**: When implementing fullscreen modes for document previews, use a `ref` on the root container and manage the `isFullscreen` state via `fullscreenchange` event listeners. Apply `fixed inset-0 z-[100]` classes conditionally to ensure the preview occupies the entire viewport above all other UI layers.
+- **Centralized State Management for Multi-Zone Layouts**: For complex IDE-style pages, centralize visibility and interaction states (e.g., `isOutlineVisible`, `activeChapterId`, `zoomLevel`) in a single domain hook or store. This ensures synchronization across disparate UI zones like floating HUDs, sidebars, and the primary canvas, and allows global keyboard shortcuts to trigger UI changes consistently.
+- **Large Refactor Strategy**: For massive component rewrites or structural UI changes, prefer using `create_file` with `overwrite: true` instead of stacking multiple `find_and_replace_code` calls. This drastically reduces "No matches found" errors and syntax mismatches in complex JSX blocks.
 - Keep domain entities, shared types, and any server-reachable modules free of client-only dependencies (for example drag-and-drop or React UI libraries); they can crash API routes at runtime when imported transitively
 - When adding new TanStack Query data fetches, always add a key factory to `src/lib/query-keys.ts`
 - Credits are deducted server-side only — never trust client-side credit values
 - RTL/LTR layout changes must be tested in both Arabic and English
+- **String Spreading Bug**: In use cases or controllers, never use the spread operator (`...`) on a variable that might be a string (e.g., `return { ...result, metadata }`). Spreading a string results in an object with numeric keys (`{ "0": "h", "1": "e" ... }`). Always check `typeof result === 'string'` before attempting to merge with metadata.
 
 ## Notes
 
@@ -355,8 +363,25 @@ FIREBASE_ADMIN_PRIVATE_KEY=
 - When extracting shared types out of an infrastructure module, do not automatically widen a domain service interface to the most specific concrete option type. If multiple infrastructure implementations hang off the same service contract (for example DOCX and PPTX exporters), keep the domain boundary generic and adapt/cast to the concrete option types inside each infrastructure implementation.
 - If you convert an infrastructure type file into a compatibility shim that re-exports moved types, remove the old local duplicate declarations in the same edit. Leaving both the imported re-exports and the original interfaces in place causes TypeScript import/export declaration conflicts that are easy to miss until typecheck.
 - The `grep` tool's `path_glob` matches full paths and is not a reliable place for shell-style alternation, brace expansion, or other shell-ish shortcuts. When checking multiple explicit files, prefer a broader glob or separate searches; otherwise a "no matches" result can be misleading.
+- **Directory Exploration**: Use `expand_folder` to reliably discover files in a directory. Avoid relying on `grep` with a `path_glob` for exploratory listing, as it may fail to return matches if the path structure is slightly different than expected.
 - When multiple routes share the same direct infrastructure access pattern (for example cache stats, cache-hit checks, or retrieval helpers), first extract that shared capability into repository/use-case/controller methods and then migrate the routes as a batch. This reduces duplicated edits and keeps response-shape preservation easier.
-- When standardizing frontend API-client contracts in this repo, treat it as a full slice migration: normalize the client return shape (for example `Result<T, ApiError>`), then update every hook/context consumer in that slice to use the same authenticated-call helper and query-key factory. Partial migrations leave mixed raw-return/Result-return patterns that are easy to misuse.
+- When standardizing API-client or internal repository contracts (e.g., migrating to the Result Object Pattern), treat it as a full slice migration across all layers:
+    1.  **Domain**: Define module-specific Errors (e.g., `AdminError`) and update Repository Interfaces.
+    2.  **Infrastructure**: Update Repository implementations and add a `handle{Module}Result` helper to `api-utils.ts`.
+    3.  **Application**: Refactor Use Cases and Controllers to propagate the Result objects.
+    4.  **API/Frontend**: Update route handlers and logic hooks to consume the new Result shape.
+- Partial migrations leave mixed raw-return/Result-return patterns that are easy to misuse and break type safety.
+- **Database Migration Insights (NoSQL to SQL)**:
+    - When migrating from NoSQL (Firestore) to SQLite (Drizzle), use `text` columns for JSON fields (arrays, nested objects) and handle serialization/deserialization explicitly in the repository layer to maintain domain entity compatibility.
+    - After changing the database provider, immediately update the DI container (`src/infrastructure/di/container.ts`) and run `npm run typecheck` to catch method signature or argument order mismatches.
+    - **Repository Interface Verification**: Before implementing new repositories during a technology switch, always cross-reference the exact method signatures in the Domain Repository Interfaces (`src/modules/*/domain/repositories/*.ts`). SQL and NoSQL repository implementations often differ in argument order or data mapping, and catching these early saves time during the typecheck/fix cycle.
+    - **API Client Synchronization**: When updating domain interfaces (e.g., adding dashboard metrics), remember to update the corresponding interface in the `api-client` adapter. Unlike a direct repository change, the frontend often relies on these client-side interface definitions, and missing them causes `tsc` failures in components.
+- **Intelligence Suite Aesthetics (IDE Pattern)**:
+    - **Typography Matrix**: Use high-density technical labels (`text-[10px]` or `text-[11px]`, `font-black`, `uppercase`, `tracking-[0.15em]` to `[0.3em]`) for UI controls and metadata. Contrast this with a premium serif stack (`text-[16px]`, `leading-[1.75]`) for AI-generated prose.
+    - **Glassmorphism & Depth**: Utilize `bg-background/40`, `backdrop-blur-2xl`, and `border-primary/10` for panels. For deep immersion, use multi-layered shadows (e.g., `shadow-[0_0_80px_-20px_...]`) on primary document canvases.
+    - **3-Zone Workspace Architecture**: When building complex editing interfaces, follow the "IDE Pattern": Top Zone (Session Actions), Left Zone (Files/Setup), Center Zone (Document Canvas), Right Zone (AI Tools/Properties).
+    - **Contextual HUD Pattern**: For document-specific utility controls (like Zoom or Page Navigation), use a semi-transparent floating glassmorphism HUD (`backdrop-blur-xl`, `bg-background/60`) at the bottom-center. This keeps primary toolbars clean.
+    - **Collapsible Sidebar Hierarchy**: Manage large project trees by implementing animated collapsible chapters (using `Framer Motion`'s `AnimatePresence`). This allows users to focus on specific sections without sidebar clutter.
 - When tightening TanStack Query key design, avoid placeholder scopes like shared detail keys if the data is actually user-scoped. Update invalidation/removal call sites in the same pass so cache behavior stays coherent.
 - For Jest in this repo, React hook/context tests may need environment support beyond the default config: ensure the `@/` alias is mapped, JSX in `.tsx` tests is transformed correctly, `.next/` is ignored to avoid haste collisions, and `reflect-metadata` is loaded before code that imports `tsyringe`.
 - When a hook/unit test pulls in a heavy domain entity with ESM-only or parser-heavy transitive imports, prefer mocking that entity/module at the test boundary rather than widening Jest transforms to chase unrelated runtime dependencies.
@@ -483,9 +508,19 @@ FIREBASE_ADMIN_PRIVATE_KEY=
 - **Dynamic Action Highlighting**: Use conditional styling to emphasize primary actions when they are most relevant (e.g., highlighting the "Save" button only when unsaved changes exist). This provides intuitive guidance without needing explicit alerts.
 - **Manifest Design Pattern**: For complex multi-step processes (Export, Build, Library, TOC Architect, RAG Ingestion), use a "Manifest" dialog layout: a technical header with a pulse icon, a clear data hierarchy in the body (often split into 2 columns), and a professional footer with versioning. This establishes a "Production Grade" feel for critical operations.
 - **Immersive Branding**: Integrate brand identity through specialized containers (e.g., logo HUDs), animated status pulses, and glass-morphism effects. Avoid standard "Website" styles in favor of "Intelligence Suite" aesthetics.
+- **Unified Markdown Editing**: When editing multi-entity projects (Chapters, Sections), use a single `MarkdownEditor` instance for the entire project instead of fragmented per-section editors. This provides a smoother, professional writing experience. Use `project.fullMarkdownContent` for serialization and `updateProjectFromMarkdown` for deserialization.
+- **Smart Editor Synchronization**: In Tiptap-based editors, only update content from props (`setContent`) when the change is external (e.g., `!editor.isFocused`). This prevents cursor jumping and race conditions during active typing while keeping the store in sync.
+- **Hybrid Preview/Edit Pattern**: Maintain a structural `MarkdownViewer` map for "Preview Mode" while using a unified editor for "Edit Mode". This balances the need for a hierarchical review with the flexibility of a cohesive document editor.
+- **Clean Component Integration**: Ensure shared components like `MarkdownViewer` support optional flags (e.g., `noScroll`) to integrate seamlessly into high-fidelity canvas layouts like `A4Page` without redundant scrollbars or UI clutter.
+- **Collapsible Resizable Panels**: When a side panel's content is toggled off, dynamically adjust the `ResizablePanel` props (`minSize`, `maxSize`, `defaultSize`) to a minimum value (e.g., 4%) to shrink the panel to its icon HUD. Apply `transition-all duration-500` to the panel to ensure the layout shift is smooth and matches the "Intelligence Suite" aesthetic.
+- **Sidebar Toggle Pattern**: In HUD components like `CollapsibleSidePanel`, the `onActiveKeyChange` handler should support toggling (e.g., `onActiveKeyChange(isActive ? '' : panel.key)`). This allows users to hide the content area and reclaim canvas space by clicking the active icon again.
 - **Readonly Property Mismatch**: When defining domain entities vs state properties, ensure `readonly` modifiers match exactly (e.g., `readonly string[]` vs `string[]`) to avoid `tsc` assignment errors during store updates or entity instantiation.
 - **Explicit Entity Casting in UI**: When utilizing domain getters that return specialized types (like `readonly Chapter[]`), use explicit casting in the UI component to satisfy `tsc` if the base interface is more generic.
 - **Centralized State Management for Multi-Zone Layouts**: For complex IDE-style pages, centralize visibility and interaction states (e.g., `isOutlineVisible`, `activeChapterId`) in a single domain hook. This ensures synchronization across disparate UI zones like floating HUDs, sidebars, and the primary canvas.
+
+- **Collapsible Resizable Panels**: When a side panel's content is toggled off, dynamically adjust the `ResizablePanel` props (`minSize`, `maxSize`, `defaultSize`) to a minimum value (e.g., 4%) to shrink the panel to its icon HUD. Apply `transition-all duration-500` to the panel to ensure the layout shift is smooth and matches the "Intelligence Suite" aesthetic.
+
+- **Sidebar Toggle Pattern**: In HUD components like `CollapsibleSidePanel`, the `onActiveKeyChange` handler should support toggling (e.g., `onActiveKeyChange(isActive ? '' : panel.key)`). This allows users to hide the content area and reclaim canvas space by clicking the active icon again.
 
 - **Intelligence Suite Aesthetics (IDE Pattern)**:
     - **Typography Matrix**: Use high-density technical labels (`text-[10px]` or `text-[11px]`, `font-black`, `uppercase`, `tracking-[0.15em]` to `[0.3em]`) for UI controls and metadata. Contrast this with a premium serif stack (`text-[16px]`, `leading-[1.75]`) for AI-generated prose.
@@ -553,6 +588,7 @@ FIREBASE_ADMIN_PRIVATE_KEY=
 - **Relocated Exporters**: Heavy infrastructure exporters (PPTX, PDF) now live in `src/modules/templates/infrastructure/exporters/` or similar module-specific infrastructure paths.
 - **Relocated Editor Logic**: Tiptap extensions and editor controllers now live in `src/modules/ai-content/infrastructure/editor/`.
 - **Standardized API Service**: Always use `apiService` from `@/infrastructure/api/ApiService` for client-server communication. Ensure all methods return a `Result` object for consistent error handling.
+- **Unified Result Handling**: Every Next.js route handler should follow the pattern: `const result = await controller.method(); return handle{Module}Result(result);`. This ensures a unified error structure, correct HTTP status codes, and automatic telemetry logging.
 - **Next.js 15 Compatibility**: Always wrap components using `useSearchParams` in a `<Suspense>` boundary to avoid build-time errors and hydration mismatches.
 - **Tailwind Content Updates**: When creating new module component directories, ensure they are added to the `content` array in `tailwind.config.ts`.
 - **Import Aliases**: Always prefer absolute path aliases (`@/modules/...`, `@/infrastructure/...`) over deep relative paths (`../../../`) to maintain stability during architectural changes.
