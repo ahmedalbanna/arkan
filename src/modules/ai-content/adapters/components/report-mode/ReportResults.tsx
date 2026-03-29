@@ -18,7 +18,8 @@ import { Project } from '@/modules/projects/domain/entities/Project';
 import { Badge } from '@/components/ui/badge';
 import { X, GitCompare } from 'lucide-react';
 import { CoverPage } from '@/components/shared/CoverPage';
-import { BookOpenCheck, Brush, LayoutList, Bot, FileVideo, FileText, ChevronDown, Lightbulb, History, Maximize2, Minimize2 } from 'lucide-react';
+import { BookOpenCheck, Brush, LayoutList, Bot, FileVideo, FileText, ChevronDown, Lightbulb, History, Maximize2, Minimize2, ListTree } from 'lucide-react';
+import { FloatingOutline } from './FloatingOutline';
 import { TableOfContentForm } from './TableOfContentForm';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { formatDistanceToNow } from 'date-fns';
@@ -85,11 +86,26 @@ const ReportSteps = () => {
 
 interface ReportResultsProps {
     activePanelKey: string;
+    activeChapterId: string | null;
+    setActiveChapterId: (id: string | null) => void;
+    selectedSectionIds: string[];
+    handleActiveSectionChange: (id: string | null, multiSelect?: boolean) => void;
+    isOutlineVisible: boolean;
+    setIsOutlineVisible: (visible: boolean) => void;
 }
 
-const ReportResults = ({ activePanelKey }: ReportResultsProps) => {
+const ReportResults = ({ 
+    activePanelKey,
+    activeChapterId,
+    setActiveChapterId,
+    selectedSectionIds,
+    handleActiveSectionChange,
+    isOutlineVisible,
+    setIsOutlineVisible
+}: ReportResultsProps) => {
   const { t } = useLocalization();
   const project = useBuilderStore(state => state.project);
+  const updateProject = useBuilderStore(state => state.updateProject);
   const version = useBuilderStore(state => state.version);
   const updateProjectFromMarkdown = useBuilderStore(state => state.updateProjectFromMarkdown);
   const selectedFileId = useBuilderStore(state => state.selectedFileId);
@@ -282,6 +298,25 @@ const ReportResults = ({ activePanelKey }: ReportResultsProps) => {
                 <Button
                   variant="ghost"
                   size="icon"
+                  className={cn(
+                    "h-7 w-7 transition-all duration-300",
+                    isOutlineVisible ? "bg-primary/10 text-primary" : "hover:bg-primary/5 hover:text-primary"
+                  )}
+                  onClick={() => setIsOutlineVisible(!isOutlineVisible)}
+                >
+                  <ListTree className="h-3.5 w-3.5" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent side="bottom" className="text-[10px] font-bold uppercase tracking-widest">
+                Toggle Document Outline
+              </TooltipContent>
+            </Tooltip>
+
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
                   className="h-7 w-7 hover:bg-primary/5 hover:text-primary"
                   onClick={toggleFullscreen}
                 >
@@ -314,6 +349,16 @@ const ReportResults = ({ activePanelKey }: ReportResultsProps) => {
           <div className="absolute inset-0 bg-[#f8fafc] dark:bg-[#0f172a] pointer-events-none">
             <div className="absolute inset-0 opacity-[0.03] dark:opacity-[0.05]" style={{ backgroundImage: 'radial-gradient(#000 1px, transparent 1px)', backgroundSize: '24px 24px' }} />
           </div>
+
+          <FloatingOutline 
+            isVisible={isOutlineVisible}
+            project={project}
+            activeChapterId={activeChapterId}
+            selectedSectionIds={selectedSectionIds}
+            onActiveChapterChange={setActiveChapterId}
+            onActiveSectionChange={handleActiveSectionChange}
+            onMoveItem={(activeId, overId) => updateProject(p => p.moveContentItem(activeId, overId))}
+          />
 
           <ScrollArea className="flex-grow relative scroll-smooth">
               <div className="py-12 px-8 flex justify-center min-h-full">

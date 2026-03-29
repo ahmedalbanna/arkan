@@ -42,6 +42,11 @@ export default function ReportModeGenerator({ initialProject }: { initialProject
         zoomLevel,
         setZoomLevel,
         activeChapterId,
+        setActiveChapterId,
+        selectedSectionIds,
+        handleActiveSectionChange,
+        isOutlineVisible,
+        setIsOutlineVisible,
     } = useReportGenerator(initialProject);
 
     const handleZoomIn = () => setZoomLevel(prev => Math.min(2, prev + 0.1));
@@ -196,7 +201,15 @@ export default function ReportModeGenerator({ initialProject }: { initialProject
                                 {/* Center Zone - Document Canvas */}
                                 <ResizablePanel defaultSize={56} minSize={40}>
                                     <div className="h-full px-3 flex flex-col min-h-0">
-                                        <ReportResults activePanelKey={activePanelKey} />
+                                        <ReportResults 
+                                            activePanelKey={activePanelKey} 
+                                            activeChapterId={activeChapterId}
+                                            setActiveChapterId={setActiveChapterId}
+                                            selectedSectionIds={selectedSectionIds}
+                                            handleActiveSectionChange={handleActiveSectionChange}
+                                            isOutlineVisible={isOutlineVisible}
+                                            setIsOutlineVisible={setIsOutlineVisible}
+                                        />
                                     </div>
                                 </ResizablePanel>
 

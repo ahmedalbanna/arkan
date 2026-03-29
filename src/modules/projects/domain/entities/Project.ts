@@ -28,7 +28,7 @@ export interface ProjectProperties {
   supervisor?: string;
   course?: string;
   educationalLevel?: string;
-  teamMembers?: string[];
+  teamMembers?: readonly string[];
   logoUrl?: string;
   universityLogoUrl?: string;
   content?: (Chapter | Section | ChapterProperties | SectionProperties)[];
