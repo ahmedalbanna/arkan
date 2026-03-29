@@ -112,26 +112,27 @@ export default function AnalystAgent() {
   const canAnalyze = !isGuest && !isProcessing && (user?.uid ? project?.meta?.author === user.uid : false);
 
   return (
-    <div className="h-full flex flex-col space-y-6">
-      <div className="space-y-1.5">
-        <h4 className="text-sm font-semibold tracking-tight flex items-center gap-2">
-          <BrainCircuit className="h-4 w-4 text-primary" />
+    <div className="h-full flex flex-col space-y-6 pt-2">
+      <div className="space-y-1">
+        <h4 className="text-[10px] font-black uppercase tracking-[0.3em] text-primary/70 flex items-center gap-2">
+          <BrainCircuit className="h-3 w-3" />
           {t('builder.files.analystAgentTitle')}
         </h4>
-        <p className="text-[11px] text-muted-foreground italic leading-relaxed">
+        <p className="text-[9px] text-muted-foreground italic font-medium opacity-60 uppercase tracking-wider">
           {t('builder.files.analystAgentDesc')}
         </p>
       </div>
 
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="flex-grow flex flex-col min-h-0 space-y-6">
+        <form onSubmit={form.handleSubmit(onSubmit)} className="flex-grow flex flex-col min-h-0 space-y-6 relative">
+          <div className="absolute left-[-1.25rem] top-0 bottom-0 w-px bg-gradient-to-b from-primary/30 via-primary/5 to-transparent" />
           <div className="space-y-4 flex-shrink-0">
             <FormField 
               control={form.control} 
               name="prompt" 
               render={({ field }) => (
-                <FormItem className="space-y-2">
-                  <FormLabel className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+                <FormItem className="space-y-1.5">
+                  <FormLabel className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/60">
                     {t('builder.files.analystAgentPromptLabel')}
                   </FormLabel>
                   <FormControl>
@@ -140,7 +141,7 @@ export default function AnalystAgent() {
                       {...field} 
                       rows={4} 
                       disabled={isProcessing || isGuest} 
-                      className="text-xs bg-muted/5 focus-visible:ring-1 resize-none p-3 leading-relaxed"
+                      className="min-h-[80px] text-[11px] bg-muted/5 border-primary/10 focus-visible:ring-primary/20 rounded-xl shadow-inner transition-all resize-none p-3 leading-relaxed font-serif italic"
                     />
                   </FormControl>
                   <FormMessage className="text-[10px]" />
@@ -151,12 +152,12 @@ export default function AnalystAgent() {
             <Button 
               type="submit" 
               disabled={!canAnalyze || isGuest} 
-              className="w-full font-bold h-10 gap-2 shadow-sm"
+              className="w-full h-9 text-[10px] font-black uppercase tracking-[0.2em] gap-2 shadow-lg shadow-primary/20 rounded-xl transition-all"
             >
               {isProcessing ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
+                <Loader2 className="h-3.5 w-3.5 animate-spin" />
               ) : (
-                <Wand2 className="h-4 w-4" />
+                <Wand2 className="h-3.5 w-3.5" />
               )}
               {t('builder.files.analystAgentRunButton', { creditCost: 0 })}
             </Button>
@@ -166,8 +167,8 @@ export default function AnalystAgent() {
             <div className="flex-grow flex flex-col min-h-0 space-y-3 pt-4 border-t border-border/40">
               <div className="flex justify-between items-center">
                 <div className="flex items-center gap-2">
-                  <Braces className="h-3.5 w-3.5 text-primary" />
-                  <h4 className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+                  <Braces className="h-3 w-3 text-primary/60" />
+                  <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/80">
                     {t('builder.files.generatedReportTitle')}
                   </h4>
                 </div>
@@ -175,16 +176,16 @@ export default function AnalystAgent() {
                 {analysisMutation.data && (
                   <Dialog>
                     <DialogTrigger asChild>
-                      <Button variant="ghost" size="sm" className="h-7 text-[10px] gap-1.5 px-2">
+                      <Button variant="ghost" size="sm" className="h-7 text-[9px] font-black uppercase tracking-[0.2em] gap-1.5 px-2 rounded-lg hover:bg-primary/5 transition-all">
                         <Braces className="h-3 w-3" /> 
                         JSON
                       </Button>
                     </DialogTrigger>
-                    <DialogContent className="max-w-3xl">
+                    <DialogContent className="max-w-3xl border-primary/10 rounded-2xl">
                       <DialogHeader>
-                        <DialogTitle className="text-base font-bold">{t('builder.files.jsonOutputTitle')}</DialogTitle>
+                        <DialogTitle className="text-[15px] font-bold font-headline">{t('builder.files.jsonOutputTitle')}</DialogTitle>
                       </DialogHeader>
-                      <ScrollArea className="max-h-[60vh] border rounded-lg bg-muted/30 p-4 shadow-inner">
+                      <ScrollArea className="max-h-[60vh] border border-primary/5 rounded-xl bg-muted/20 p-4 shadow-inner">
                         <ReactJson 
                           src={analysisMutation.data.data} 
                           theme={resolvedTheme === 'dark' ? 'monokai' : 'rjv-default'} 
@@ -200,33 +201,33 @@ export default function AnalystAgent() {
               </div>
 
               <div className="flex-grow relative min-h-0">
-                <ScrollArea className="h-full border rounded-xl bg-muted/5 p-4 shadow-inner">
-                  <div className="prose dark:prose-invert max-w-none prose-sm text-xs leading-relaxed">
+                <ScrollArea className="h-full border border-primary/10 rounded-xl bg-muted/5 p-3 shadow-inner">
+                  <div className="prose dark:prose-invert max-w-none prose-sm text-[11px] leading-relaxed font-medium">
                     {isProcessing ? (
-                      <div className="flex flex-col items-center justify-center h-full py-12 space-y-3 opacity-50">
-                        <Loader2 className="h-8 w-8 animate-spin text-primary/40" />
-                        <p className="text-[10px] uppercase tracking-widest font-bold">Analyzing Context</p>
+                      <div className="flex flex-col items-center justify-center h-full py-8 space-y-3 opacity-50">
+                        <Loader2 className="h-7 w-7 animate-spin text-primary/40" />
+                        <p className="text-[9px] uppercase tracking-[0.2em] font-black">Analyzing Context</p>
                       </div>
                     ) : markdownResult ? (
                       <ReactMarkdown components={markdownComponents}>{markdownResult}</ReactMarkdown>
                     ) : (
-                      <div className="flex flex-col items-center justify-center h-full py-12 text-center opacity-40">
-                        <BrainCircuit className="h-10 w-10 mb-3" />
-                        <p className="text-[10px] uppercase tracking-widest font-bold">{t('builder.files.reportPlaceholder')}</p>
+                      <div className="flex flex-col items-center justify-center h-full py-8 text-center opacity-40">
+                        <BrainCircuit className="h-8 w-8 mb-2" />
+                        <p className="text-[9px] uppercase tracking-[0.2em] font-black">{t('builder.files.reportPlaceholder')}</p>
                       </div>
                     )}
                   </div>
                 </ScrollArea>
                 
                 {markdownResult && !isProcessing && (
-                  <div className="absolute bottom-4 right-4 animate-in fade-in slide-in-from-bottom-2 duration-300">
+                  <div className="absolute bottom-3 right-3 animate-in fade-in slide-in-from-bottom-2 duration-300">
                     <Button 
                       variant="secondary" 
                       size="sm"
                       onClick={handleSaveAnalysis} 
-                      className="shadow-lg gap-2 font-bold h-8 border bg-background/80 backdrop-blur-sm"
+                      className="shadow-xl gap-2 text-[9px] font-black uppercase tracking-[0.2em] h-7 border border-primary/10 bg-background/80 backdrop-blur-md rounded-lg hover:scale-105 transition-all"
                     >
-                      <PlusCircle className="h-3.5 w-3.5 text-primary" />
+                      <PlusCircle className="h-3 w-3 text-primary" />
                       {t('builder.files.saveResultButton')}
                     </Button>
                   </div>
