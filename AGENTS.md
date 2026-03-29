@@ -479,6 +479,8 @@ FIREBASE_ADMIN_PRIVATE_KEY=
 - **Dialog-to-Sidebar Migration**: For item-level AI actions (like Chapter Tools or Section Context), prefer native sidebar tabs over modal dialogs. This "Contextual Sidebar" pattern maintains the user's flow and provides a faster, more integrated editing experience.
 - **Action Bar Segmentation**: When building high-density action bars (like session controls), group related buttons (e.g., File Ops vs. Persistence) and separate them with subtle vertical dividers. This improves visual scanning and reduces cognitive load.
 - **Dynamic Action Highlighting**: Use conditional styling to emphasize primary actions when they are most relevant (e.g., highlighting the "Save" button only when unsaved changes exist). This provides intuitive guidance without needing explicit alerts.
+- **Manifest Design Pattern**: For complex multi-step processes (Export, Build, Library, TOC Architect, RAG Ingestion), use a "Manifest" dialog layout: a technical header with a pulse icon, a clear data hierarchy in the body (often split into 2 columns), and a professional footer with versioning. This establishes a "Production Grade" feel for critical operations.
+- **Immersive Branding**: Integrate brand identity through specialized containers (e.g., logo HUDs), animated status pulses, and glass-morphism effects. Avoid standard "Website" styles in favor of "Intelligence Suite" aesthetics.
 
 - **Intelligence Suite Aesthetics (IDE Pattern)**:
     - **Typography Matrix**: Use high-density technical labels (`text-[10px]` or `text-[11px]`, `font-black`, `uppercase`, `tracking-[0.15em]` to `[0.3em]`) for UI controls and metadata. Contrast this with a premium serif stack (`text-[16px]`, `leading-[1.75]`) for AI-generated prose.

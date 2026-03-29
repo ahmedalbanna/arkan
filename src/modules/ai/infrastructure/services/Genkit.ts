@@ -25,7 +25,7 @@ export const ai = globalForAi.ai ?? genkit({
     ollama({
       models: [
         {
-          name: 'gemma2:2b',
+          name: 'gemma:2b',
           type: 'generate',
         },
         {
@@ -37,7 +37,7 @@ export const ai = globalForAi.ai ?? genkit({
           type: 'generate',
         },
       ],
-      serverAddress: "http://185.190.140.93:11434",
+      serverAddress: "http://localhost:11434",
     }),
   ],
 });
@@ -89,16 +89,16 @@ export const MODEL_BY_TASK = {
  * Optimized Model Parameters for Small Models
  */
 export const DEFAULT_MODEL_CONFIG = {
-    // Highly deterministic for writing tools to prevent babbling/filler
-    DETERMINISTIC: {
-        temperature: 0.1,
-        topP: 0.9,
-        maxOutputTokens: 2048,
-    },
-    // More creative for brainstorming/idea generation
-    CREATIVE: {
-        temperature: 0.7,
-        topP: 0.95,
-        maxOutputTokens: 2048,
-    }
+  // Highly deterministic for writing tools to prevent babbling/filler
+  DETERMINISTIC: {
+    temperature: 0.1,
+    topP: 0.9,
+    maxOutputTokens: 2048,
+  },
+  // More creative for brainstorming/idea generation
+  CREATIVE: {
+    temperature: 0.7,
+    topP: 0.95,
+    maxOutputTokens: 2048,
+  }
 };
