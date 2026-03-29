@@ -12,18 +12,26 @@ interface MarkdownViewerProps {
   className?: string;
 }
 
-export const MarkdownViewer = ({ content, className }: MarkdownViewerProps) => {
+export const MarkdownViewer = ({ content, className, noScroll = false }: MarkdownViewerProps & { noScroll?: boolean }) => {
+  const contentNode = (
+    <div className="p-1">
+      <ReactMarkdown
+        className={cn('prose dark:prose-invert max-w-none text-[15px] leading-relaxed font-serif selection:bg-primary/10', className)}
+        components={markdownComponents}
+        remarkPlugins={[remarkGfm]}
+      >
+        {content}
+      </ReactMarkdown>
+    </div>
+  );
+
+  if (noScroll) {
+    return contentNode;
+  }
+
   return (
     <ScrollArea className="h-full relative group">
-      <div className="p-1">
-        <ReactMarkdown
-          className={cn('prose dark:prose-invert max-w-none text-[15px] leading-relaxed font-serif selection:bg-primary/10', className)}
-          components={markdownComponents}
-          remarkPlugins={[remarkGfm]}
-        >
-          {content}
-        </ReactMarkdown>
-      </div>
+      {contentNode}
       {/* Subtle bottom fade */}
       <div className="absolute inset-x-0 bottom-0 h-8 bg-gradient-to-t from-background/40 to-transparent pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity" />
     </ScrollArea>

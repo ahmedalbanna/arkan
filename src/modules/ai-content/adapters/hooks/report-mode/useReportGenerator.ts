@@ -27,6 +27,7 @@ export function useReportGenerator(initialProject?: ProjectProperties | null) {
   const [selectedSectionIds, setSelectedSectionIds] = useState<string[]>([]);
   const [activeChapterId, setActiveChapterId] = useState<string | null>(null);
   const [isOutlineVisible, setIsOutlineVisible] = useState(false);
+  const [viewMode, setViewMode] = useState<'edit' | 'preview'>('edit');
   const { isSaving } = useSaveProject();
   const builderPageLogic = useBuilderPageLogic(initialProject);
 
@@ -164,5 +165,7 @@ export function useReportGenerator(initialProject?: ProjectProperties | null) {
     setActiveChapterId,
     isOutlineVisible,
     setIsOutlineVisible,
+    viewMode,
+    setViewMode,
   };
 }

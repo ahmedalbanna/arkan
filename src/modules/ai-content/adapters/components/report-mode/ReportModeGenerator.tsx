@@ -48,6 +48,8 @@ export default function ReportModeGenerator({ initialProject }: { initialProject
         handleActiveSectionChange,
         isOutlineVisible,
         setIsOutlineVisible,
+        viewMode,
+        setViewMode,
     } = useReportGenerator(initialProject);
 
     const handleZoomIn = () => setZoomLevel(prev => Math.min(2, prev + 0.1));
@@ -210,6 +212,8 @@ export default function ReportModeGenerator({ initialProject }: { initialProject
                                             handleActiveSectionChange={handleActiveSectionChange}
                                             isOutlineVisible={isOutlineVisible}
                                             setIsOutlineVisible={setIsOutlineVisible}
+                                            viewMode={viewMode}
+                                            setViewMode={setViewMode}
                                         />
                                     </div>
                                 </ResizablePanel>

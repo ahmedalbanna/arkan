@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import { A4Page } from '@/components/shared/A4Page';
+import { MarkdownViewer } from '@/components/shared/MarkdownViewer';
 import {
   CardContent,
   CardDescription,
@@ -20,7 +21,7 @@ import { Section } from '@/modules/ai-content/domain/entities/Section';
 import { Badge } from '@/components/ui/badge';
 import { X, GitCompare } from 'lucide-react';
 import { CoverPage } from '@/components/shared/CoverPage';
-import { BookOpenCheck, Brush, LayoutList, Bot, FileVideo, FileText, ChevronDown, Lightbulb, History, Maximize2, Minimize2, ListTree } from 'lucide-react';
+import { BookOpenCheck, Brush, LayoutList, Bot, FileVideo, FileText, ChevronDown, Lightbulb, History, Maximize2, Minimize2, ListTree, Eye, PenLine } from 'lucide-react';
 import { FloatingOutline } from './FloatingOutline';
 import { TableOfContentForm } from './TableOfContentForm';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
@@ -94,6 +95,8 @@ interface ReportResultsProps {
     handleActiveSectionChange: (id: string | null, multiSelect?: boolean) => void;
     isOutlineVisible: boolean;
     setIsOutlineVisible: (visible: boolean) => void;
+    viewMode: 'edit' | 'preview';
+    setViewMode: (mode: 'edit' | 'preview') => void;
 }
 
 const ReportResults = ({
@@ -103,7 +106,9 @@ const ReportResults = ({
     selectedSectionIds,
     handleActiveSectionChange,
     isOutlineVisible,
-    setIsOutlineVisible
+    setIsOutlineVisible,
+    viewMode,
+    setViewMode
 }: ReportResultsProps) => {
   const { t } = useLocalization();
   const project = useBuilderStore(state => state.project);
@@ -252,52 +257,56 @@ const ReportResults = ({
              if (hasContent && project) {
                  return (
                     <A4Page>
-                        <div className="space-y-12 pb-32">
-                            {project.content.map((item, index) => {
-                                if (item instanceof Chapter) {
-                                    return (
-                                        <div key={item.id} id={`item-${item.id}`} className="space-y-8 scroll-mt-24">
-                                            <div className="border-b border-primary/10 pb-4">
-                                                <h2 className="text-2xl font-black font-headline uppercase tracking-tight text-primary flex items-center gap-3">
-                                                    <span className="text-xs opacity-40 tabular-nums">0{index + 1}</span>
-                                                    {item.title}
-                                                </h2>
-                                            </div>
-                                            <div className="space-y-8 pl-4 border-l-2 border-primary/5 ml-2">
-                                                {item.sections.map((section, sIndex) => (
-                                                    <div key={section.id} id={`item-${section.id}`} className="space-y-4 scroll-mt-24">
-                                                        <h3 className="text-lg font-bold font-headline flex items-center gap-2">
-                                                            <span className="text-[10px] opacity-40 tabular-nums">{index + 1}.{sIndex + 1}</span>
-                                                            {section.title}
-                                                        </h3>
-                                                        <MarkdownEditor
-                                                            content={section.content}
-                                                            onChange={(val) => updateProject(p => p.updateSectionContent(section.id, val))}
-                                                        />
+                        <div className="pb-32">
+                            {viewMode === 'edit' ? (
+                                <MarkdownEditor
+                                    content={project.fullMarkdownContent}
+                                    onChange={(val) => updateProjectFromMarkdown(val)}
+                                    onDebouncedChange={(val) => updateProjectFromMarkdown(val)}
+                                />
+                            ) : (
+                                <div className="space-y-12">
+                                    {project.content.map((item, index) => {
+                                        if (item instanceof Chapter) {
+                                            return (
+                                                <div key={item.id} id={`item-${item.id}`} className="space-y-8 scroll-mt-24">
+                                                    <div className="border-b border-primary/10 pb-4">
+                                                        <h2 className="text-2xl font-black font-headline uppercase tracking-tight text-primary flex items-center gap-3">
+                                                            <span className="text-xs opacity-40 tabular-nums">0{index + 1}</span>
+                                                            {item.title}
+                                                        </h2>
                                                     </div>
-                                                ))}
-                                            </div>
-                                        </div>
-                                    );
-                                }
+                                                    <div className="space-y-8 pl-4 border-l-2 border-primary/5 ml-2">
+                                                        {item.sections.map((section, sIndex) => (
+                                                            <div key={section.id} id={`item-${section.id}`} className="space-y-4 scroll-mt-24">
+                                                                <h3 className="text-lg font-bold font-headline flex items-center gap-2">
+                                                                    <span className="text-[10px] opacity-40 tabular-nums">{index + 1}.{sIndex + 1}</span>
+                                                                    {section.title}
+                                                                </h3>
+                                                                <MarkdownViewer content={section.content} noScroll />
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                </div>
+                                            );
+                                        }
 
-                                if (item instanceof Section) {
-                                    return (
-                                        <div key={item.id} id={`item-${item.id}`} className="space-y-4 scroll-mt-24">
-                                            <h3 className="text-lg font-bold font-headline flex items-center gap-2">
-                                                <span className="text-[10px] opacity-40 tabular-nums">{index + 1}</span>
-                                                {item.title}
-                                            </h3>
-                                            <MarkdownEditor
-                                                content={item.content}
-                                                onChange={(val) => updateProject(p => p.updateSectionContent(item.id, val))}
-                                            />
-                                        </div>
-                                    );
-                                }
+                                        if (item instanceof Section) {
+                                            return (
+                                                <div key={item.id} id={`item-${item.id}`} className="space-y-4 scroll-mt-24">
+                                                    <h3 className="text-lg font-bold font-headline flex items-center gap-2">
+                                                        <span className="text-[10px] opacity-40 tabular-nums">{index + 1}</span>
+                                                        {item.title}
+                                                    </h3>
+                                                    <MarkdownViewer content={item.content} noScroll />
+                                                </div>
+                                            );
+                                        }
 
-                                return null;
-                            })}
+                                        return null;
+                                    })}
+                                </div>
+                            )}
                         </div>
                     </A4Page>
                  )
@@ -339,6 +348,25 @@ const ReportResults = ({
 
         <div className="flex items-center gap-2">
           <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className={cn(
+                    "h-7 w-7 transition-all duration-300",
+                    viewMode === 'edit' ? "bg-primary/10 text-primary" : "hover:bg-primary/5 hover:text-primary"
+                  )}
+                  onClick={() => setViewMode(viewMode === 'edit' ? 'preview' : 'edit')}
+                >
+                  {viewMode === 'edit' ? <Eye className="h-3.5 w-3.5" /> : <PenLine className="h-3.5 w-3.5" />}
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent side="bottom" className="text-[10px] font-bold uppercase tracking-widest">
+                {viewMode === 'edit' ? "Switch to Preview" : "Switch to Edit"}
+              </TooltipContent>
+            </Tooltip>
+
             <Tooltip>
               <TooltipTrigger asChild>
                 <Button
