@@ -1,8 +1,10 @@
 
-import { handleApiError, createApiResponse, withAuth } from '@/infrastructure/api/api-utils';
+import { handleApiError, withAuth, handleAiResult } from '@/infrastructure/api/api-utils';
 import { z } from 'zod';
 import { container } from '@/infrastructure/di/container';
 import { AiController } from '@/modules/ai/adapters/controllers/AiController';
+import { AiError } from '@/modules/ai/domain/errors/AiErrors';
+import { Result } from '@/infrastructure/utils/result';
 
 const agentSchema = z.object({
     id: z.string().min(3).regex(/^[a-z0-9-]+$/, "ID must be lowercase alphanumeric with hyphens"),
@@ -23,9 +25,9 @@ export const GET = withAuth(async ({ request }) => {
         const enabledOnly = searchParams.get('enabledOnly') !== 'false';
 
         const controller = container.resolve(AiController);
-        const agents = await controller.getAgents({ category, enabledOnly });
+        const result = await controller.getAgents({ category, enabledOnly });
 
-        return createApiResponse(agents, 200);
+        return handleAiResult(result);
     } catch (error) {
         return handleApiError(error);
     }
@@ -43,13 +45,13 @@ export const POST = withAuth(async ({ request }) => {
         const controller = container.resolve(AiController);
         
         // Check if exists
-        const existing = await controller.getAgentById(id);
-        if (existing) {
-            return handleApiError({ message: 'Agent with this ID already exists.' }, 409);
+        const existingResult = await controller.getAgentById(id);
+        if (existingResult.isSuccess && existingResult.getValue()) {
+            return handleAiResult(Result.fail(AiError.conflict('Agent with this ID already exists.')));
         }
 
-        const savedAgent = await controller.saveAgent(id, agentData);
-        return createApiResponse(savedAgent, 201);
+        const result = await controller.saveAgent(id, agentData);
+        return handleAiResult(result);
     } catch (error) {
         return handleApiError(error);
     }

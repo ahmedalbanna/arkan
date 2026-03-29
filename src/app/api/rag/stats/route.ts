@@ -2,7 +2,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { container } from '@/infrastructure/di/container';
 import { RagController } from '@/modules/rag/adapters/controllers/RagController';
-import { handleRagResult } from '@/infrastructure/api/api-utils';
+import { handleRagResult, handleApiError } from '@/infrastructure/api/api-utils';
 
 export async function GET(_request: NextRequest) {
   try {
@@ -39,9 +39,6 @@ export async function GET(_request: NextRequest) {
     });
 
   } catch (error) {
-    console.error('Error fetching RAG stats:', error);
-    return NextResponse.json({ 
-        error: error instanceof Error ? error.message : 'Failed to fetch statistics' 
-    }, { status: 500 });
+    return handleApiError(error);
   }
 }

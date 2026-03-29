@@ -2,8 +2,7 @@
 'use server';
 
 import { z } from 'zod';
-import { generateImage } from '@/modules/ai/infrastructure/flows/media/generate-image';
-import { withAuth, handleApiError, createApiResponse } from '@/infrastructure/api/api-utils';
+import { withAuth, handleApiError, handleAiResult } from '@/infrastructure/api/api-utils';
 import { container } from '@/infrastructure/di/container';
 import { AiController } from '@/modules/ai/adapters/controllers/AiController';
 
@@ -21,13 +20,13 @@ export const POST = withAuth(async ({ request, user }) => {
     }
 
     const controller = container.resolve(AiController);
-    const result = await controller.runTool<typeof validation.data, Awaited<ReturnType<typeof generateImage>>>({
+    const result = await controller.runTool<any, any>({
         userId: user.id,
         toolName: 'generate-image',
         input: validation.data,
     });
 
-    return createApiResponse(result, 200);
+    return handleAiResult(result);
   } catch (error) {
     return handleApiError(error);
   }

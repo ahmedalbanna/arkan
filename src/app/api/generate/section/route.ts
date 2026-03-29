@@ -2,10 +2,8 @@
 'use server';
 
 import { z } from 'zod';
-import { generateReportSection } from '@/modules/ai/infrastructure/flows/generation/generate-report-section';
-import { withAuth, handleApiError, createApiResponse } from '@/infrastructure/api/api-utils';
+import { withAuth, handleApiError, handleAiResult } from '@/infrastructure/api/api-utils';
 import { GenerateSectionInputSchema } from '@/modules/ai/domain/schemas';
-import { ai } from '@/modules/ai/infrastructure/services/Genkit';
 import { container } from '@/infrastructure/di/container';
 import { AiController } from '@/modules/ai/adapters/controllers/AiController';
 
@@ -23,24 +21,17 @@ export const POST = withAuth(async ({ request, user }) => {
     }
 
     const { projectId: _, ...agentInput } = validation.data;
-    const creditCost = 1;
 
     // Use the controller to run the tool, which handles credit deduction and logging
     const controller = container.resolve(AiController);
     
-    const result = await controller.runTool({
+    const result = await controller.runTool<any, { content: string }>({
         userId: user.id,
         toolName: 'generate-section',
         input: agentInput,
     });
 
-    const sectionResult = result as { content?: string } | null;
-    const content = sectionResult?.content;
-    if (!content) {
-      throw new Error('AI generation returned empty content.');
-    }
-
-    return createApiResponse({ content }, 200);
+    return handleAiResult(result);
 
   } catch (error) {
     return handleApiError(error);

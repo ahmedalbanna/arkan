@@ -4,6 +4,7 @@ export enum AiErrorType {
   VALIDATION_FAILED = "VALIDATION_FAILED",
   UNAUTHORIZED = "UNAUTHORIZED",
   DATABASE_ERROR = "DATABASE_ERROR",
+  CONFLICT = "CONFLICT",
   INTERNAL = "INTERNAL"
 }
 
@@ -28,6 +29,10 @@ export class AiError {
 
   public static unauthorized(message: string = "Unauthorized access"): AiError {
     return new AiError(AiErrorType.UNAUTHORIZED, message);
+  }
+
+  public static conflict(message: string = "Resource already exists"): AiError {
+    return new AiError(AiErrorType.CONFLICT, message);
   }
 
   public static databaseError(message: string = "Database operation failed", details?: any): AiError {

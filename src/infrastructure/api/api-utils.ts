@@ -13,6 +13,7 @@ import { BillingError, BillingErrorType } from '@/modules/billing/domain/errors/
 import { RagError, RagErrorType } from '@/modules/rag/domain/errors/RagErrors';
 import { TemplateError, TemplateErrorType } from '@/modules/templates/domain/errors/TemplateErrors';
 import { AIContentError, AIContentErrorType } from '@/modules/ai-content/domain/errors/AIContentErrors';
+import { AiError, AiErrorType } from '@/modules/ai/domain/errors/AiErrors';
 
 
 interface ApiHandlerOptions {
@@ -326,13 +327,16 @@ export const handleRagResult = <T>(result: Result<T, RagError>) => {
     case RagErrorType.VECTOR_STORE_ERROR:
       status = 500;
       break;
+    case RagErrorType.INTERNAL:
+      status = 500;
+      break;
   }
 
   if (status >= 500) {
     Telemetry.logFailure('RagAPI', error);
   }
 
-  return NextResponse.json({ message: error.message, details: error.details }, { status });
+  return NextResponse.json({ message: error.message, details: error.details, type: error.type }, { status });
 };
 
 /**
@@ -412,4 +416,46 @@ export const handleUserResult = <T>(result: Result<T, UserError>) => {
   }
 
   return NextResponse.json({ message: error.message, details: error.details }, { status });
+};
+
+/**
+ * Standardized handler for AI Module Result objects in API routes.
+ */
+export const handleAiResult = <T>(result: Result<T, AiError>) => {
+  if (result.isSuccess) {
+    return createApiResponse(result.getValue(), 200);
+  }
+
+  const error = result.error!;
+  let status = 500;
+
+  switch (error.type) {
+    case AiErrorType.NOT_FOUND:
+      status = 404;
+      break;
+    case AiErrorType.VALIDATION_FAILED:
+      status = 400;
+      break;
+    case AiErrorType.UNAUTHORIZED:
+      status = 401;
+      break;
+    case AiErrorType.CONFLICT:
+      status = 409;
+      break;
+    case AiErrorType.GENERATION_FAILED:
+      status = 500;
+      break;
+    case AiErrorType.DATABASE_ERROR:
+      status = 500;
+      break;
+    case AiErrorType.INTERNAL:
+      status = 500;
+      break;
+  }
+
+  if (status >= 500) {
+    Telemetry.logFailure('AiAPI', error);
+  }
+
+  return NextResponse.json({ message: error.message, details: error.details, type: error.type }, { status });
 };

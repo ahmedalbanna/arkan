@@ -1,4 +1,1 @@
-adding any final
-keyboard shortcuts/interactions?
-focus on the Center Document Preview and
-its toolbar?
+Standardize the API Controller responses across all remaining modules to ensure a unified JSON structure. Standardize the Frontend Error Toasts to automatically parse these new error types.
