@@ -180,31 +180,33 @@ export default function ProjectSettingsPanel() {
   ];
 
   return (
-    <div className="h-full flex flex-col space-y-6">
-      <div className="space-y-1.5">
-        <h4 className="text-sm font-semibold tracking-tight">Project Metadata</h4>
-        <p className="text-[11px] text-muted-foreground italic leading-relaxed">
-          Configure the official details for your document. This updates the cover page automatically.
+    <div className="h-full flex flex-col space-y-6 pt-2 animate-in fade-in slide-in-from-right-2 duration-300">
+      <div className="space-y-1">
+        <h4 className="text-[10px] font-black uppercase tracking-[0.3em] text-primary/70">Project Identity</h4>
+        <p className="text-[9px] text-muted-foreground italic font-medium opacity-60 uppercase tracking-wider">
+          Configure the core structural vectors for your document.
         </p>
       </div>
 
       <Form {...form}>
         <form className="flex-grow flex flex-col min-h-0">
           <ScrollArea className="flex-grow pr-4 -mr-4">
-            <div className="space-y-6 pb-20">
-              <div className="space-y-4">
+            <div className="space-y-6 pb-24 relative">
+              <div className="absolute left-[-1.25rem] top-0 bottom-0 w-px bg-gradient-to-b from-primary/30 via-primary/5 to-transparent" />
+              
+              <div className="space-y-5">
                 <FormField 
                   control={form.control} 
                   name="name" 
                   render={({ field }) => (
                     <FormItem className="space-y-1.5">
-                      <FormLabel className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Project Title</FormLabel>
+                      <FormLabel className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/60">Core Title</FormLabel>
                       <FormControl>
                         <Input 
                           {...field} 
                           onBlur={handleBlur} 
                           placeholder="Enter project title..."
-                          className="h-9 text-xs bg-muted/5 focus-visible:ring-1"
+                          className="h-9 text-[11px] bg-muted/5 border-primary/10 focus-visible:ring-primary/20 rounded-xl shadow-inner transition-all"
                         />
                       </FormControl>
                       <FormMessage className="text-[10px]" />
@@ -217,13 +219,13 @@ export default function ProjectSettingsPanel() {
                   name="projectDescription" 
                   render={({ field }) => (
                     <FormItem className="space-y-1.5">
-                      <FormLabel className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Short Description</FormLabel>
+                      <FormLabel className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/60">Executive Abstract</FormLabel>
                       <FormControl>
                         <Textarea 
                           {...field} 
                           rows={3} 
                           onBlur={handleBlur} 
-                          className="min-h-[100px] text-xs bg-muted/5 focus-visible:ring-1 resize-none p-3 leading-relaxed" 
+                          className="min-h-[80px] text-[11px] bg-muted/5 border-primary/10 focus-visible:ring-primary/20 rounded-xl shadow-inner transition-all resize-none p-3 leading-relaxed font-serif italic" 
                           placeholder="Briefly describe your project's scope..."
                         />
                       </FormControl>
@@ -233,11 +235,10 @@ export default function ProjectSettingsPanel() {
                 />
               </div>
 
-              <div className="space-y-4">
-                <div className="flex items-center gap-2">
-                  <div className="h-px flex-1 bg-border/40" />
-                  <span className="text-[9px] font-bold uppercase tracking-[0.2em] text-muted-foreground/50">Academic Details</span>
-                  <div className="h-px flex-1 bg-border/40" />
+              <div className="space-y-5">
+                <div className="flex items-center gap-3 group/header">
+                    <div className="h-4 w-1 bg-primary/40 rounded-full group-hover:h-6 transition-all duration-300" />
+                    <span className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/80">Academic Matrix</span>
                 </div>
 
                 <div className="grid gap-4">
@@ -246,7 +247,7 @@ export default function ProjectSettingsPanel() {
                     name="projectType"
                     render={({ field }) => (
                       <FormItem className="space-y-1.5">
-                        <FormLabel className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Document Type</FormLabel>
+                        <FormLabel className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/60">Structural Type</FormLabel>
                         <FormControl>
                           <CustomSelect
                             value={field.value || ''}
@@ -256,7 +257,7 @@ export default function ProjectSettingsPanel() {
                             }}
                             options={documentTypeOptions}
                             placeholder="Select type..."
-                            className="h-9 text-xs bg-background"
+                            className="h-9 text-[11px] bg-muted/5 border-primary/10 focus:ring-primary/20 rounded-xl"
                           />
                         </FormControl>
                         <FormMessage />
@@ -269,7 +270,7 @@ export default function ProjectSettingsPanel() {
                       name="specialization"
                       render={({ field }) => (
                           <FormItem className="space-y-1.5">
-                              <FormLabel className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Field of Study</FormLabel>
+                              <FormLabel className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/60">Domain Specialization</FormLabel>
                               <FormControl>
                                   <CustomSelect
                                       value={field.value || ''}
@@ -278,8 +279,8 @@ export default function ProjectSettingsPanel() {
                                           handleBlur();
                                       }}
                                       options={specializationOptions}
-                                      placeholder="Select specialization..."
-                                      className="h-9 text-xs bg-background"
+                                      placeholder="Select domain..."
+                                      className="h-9 text-[11px] bg-muted/5 border-primary/10 focus:ring-primary/20 rounded-xl"
                                   />
                               </FormControl>
                               <FormMessage />
@@ -292,7 +293,7 @@ export default function ProjectSettingsPanel() {
                       name="educationalLevel"
                       render={({ field }) => (
                           <FormItem className="space-y-1.5">
-                              <FormLabel className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Academic Level</FormLabel>
+                              <FormLabel className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/60">Academic Stature</FormLabel>
                               <FormControl>
                                   <CustomSelect
                                       value={field.value || ''}
@@ -302,7 +303,7 @@ export default function ProjectSettingsPanel() {
                                       }}
                                       options={educationalLevelOptions}
                                       placeholder="Select level..."
-                                      className="h-9 text-xs bg-background"
+                                      className="h-9 text-[11px] bg-muted/5 border-primary/10 focus:ring-primary/20 rounded-xl"
                                   />
                               </FormControl>
                               <FormMessage />
@@ -315,7 +316,7 @@ export default function ProjectSettingsPanel() {
                       name="university"
                       render={({ field }) => (
                           <FormItem className="space-y-1.5">
-                              <FormLabel className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Institution</FormLabel>
+                              <FormLabel className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/60">Core Institution</FormLabel>
                               <FormControl>
                                   <CustomSelect
                                       value={field.value || ''}
@@ -324,8 +325,8 @@ export default function ProjectSettingsPanel() {
                                           handleBlur();
                                       }}
                                       options={universityOptions}
-                                      placeholder="Select university..."
-                                      className="h-9 text-xs bg-background"
+                                      placeholder="Select institution..."
+                                      className="h-9 text-[11px] bg-muted/5 border-primary/10 focus:ring-primary/20 rounded-xl"
                                   />
                               </FormControl>
                               <FormMessage />
@@ -338,7 +339,7 @@ export default function ProjectSettingsPanel() {
                     name="citationStyle"
                     render={({ field }) => (
                       <FormItem className="space-y-1.5">
-                        <FormLabel className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Citation Format</FormLabel>
+                        <FormLabel className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/60">Citation Standard</FormLabel>
                         <FormControl>
                           <CustomSelect
                             value={field.value || ''}
@@ -347,8 +348,8 @@ export default function ProjectSettingsPanel() {
                               handleBlur();
                             }}
                             options={citationStyleOptions}
-                            placeholder="Select style..."
-                            className="h-9 text-xs bg-background"
+                            placeholder="Select standard..."
+                            className="h-9 text-[11px] bg-muted/5 border-primary/10 focus:ring-primary/20 rounded-xl"
                           />
                         </FormControl>
                         <FormMessage />

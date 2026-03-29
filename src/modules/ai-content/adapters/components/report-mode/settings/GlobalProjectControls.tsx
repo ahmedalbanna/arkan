@@ -28,14 +28,14 @@ function TagInput({ label, value, onChange, placeholder }: { label: string; valu
         onChange(value.filter((_, i) => i !== index));
     };
     return (
-        <div className="space-y-2">
-            <Label className="text-xs font-semibold tracking-wider uppercase">{label}</Label>
-            <div className="flex flex-wrap gap-2 rounded-lg border border-border/60 bg-muted/20 p-2 min-h-[44px]">
+        <div className="space-y-3">
+            <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/60">{label}</Label>
+            <div className="flex flex-wrap gap-1.5 rounded-xl border border-primary/10 bg-muted/5 p-2 min-h-[40px] shadow-inner transition-all focus-within:border-primary/20">
                 {value.map((item, index) => (
-                    <Badge key={index} variant="secondary" className="flex items-center gap-1 px-2 py-1 text-[10px]">
+                    <Badge key={index} variant="secondary" className="flex items-center gap-1 px-2 py-0.5 text-[9px] font-bold bg-background/60 border-primary/5 text-muted-foreground hover:text-primary transition-colors">
                         {item}
-                        <button onClick={() => handleRemove(index)} className="rounded-full hover:bg-muted-foreground/20">
-                            <X className="h-3 w-3" />
+                        <button onClick={() => handleRemove(index)} className="rounded-full hover:bg-primary/10 p-0.5">
+                            <X className="h-2.5 w-2.5" />
                         </button>
                     </Badge>
                 ))}
@@ -44,7 +44,7 @@ function TagInput({ label, value, onChange, placeholder }: { label: string; valu
                     onChange={(e) => setInputValue(e.target.value)}
                     onKeyDown={handleKeyDown}
                     placeholder={placeholder}
-                    className="flex-1 border-none focus-visible:ring-0 focus-visible:ring-offset-0 p-0 h-auto text-xs"
+                    className="flex-1 border-none focus-visible:ring-0 focus-visible:ring-offset-0 p-0 px-1 h-6 text-[11px] bg-transparent font-medium"
                 />
             </div>
         </div>
@@ -81,77 +81,115 @@ export function GlobalProjectControls() {
     const handleConstraintsChange = (constraints: string[]) => updateProject(p => p.with({ constraints }));
 
     return (
-        <ScrollArea className="h-full pr-4 -mr-4">
-            <Card className="border-0 shadow-none bg-transparent">
-                <CardHeader className="px-0 pt-0">
-                    <CardTitle className="text-lg font-headline">Global AI Settings</CardTitle>
-                    <CardDescription>Adjust the overall tone, complexity, and behavioral rules for your project.</CardDescription>
-                </CardHeader>
-                <CardContent className="px-0 space-y-6 pb-20">
-                    <div className="space-y-4">
-                        <div className="space-y-2">
-                            <div className="flex justify-between items-center"><Label className="text-xs font-semibold tracking-wider uppercase">Formality</Label><Badge variant="secondary">{project.formality ?? 70}%</Badge></div>
-                            <Slider value={[project.formality ?? 70]} onValueChange={(val) => handleFormalityChange(val[0])} min={0} max={100} step={10} />
-                            <p className="text-[10px] text-muted-foreground italic">Higher values result in more formal, academic language.</p>
+        <div className="h-full flex flex-col pt-2 animate-in fade-in slide-in-from-right-2 duration-300">
+            <div className="space-y-1 mb-6">
+                <h4 className="text-[10px] font-black uppercase tracking-[0.3em] text-primary/70">Cognitive Parameters</h4>
+                <p className="text-[9px] text-muted-foreground italic font-medium opacity-60 uppercase tracking-wider">
+                    Fine-tune the neural logic and behavioral vectors for the entire project.
+                </p>
+            </div>
+
+            <ScrollArea className="flex-1 pr-4 -mr-4">
+                <div className="space-y-6 pb-24 relative">
+                    <div className="absolute left-[-1.25rem] top-0 bottom-0 w-px bg-gradient-to-b from-primary/30 via-primary/5 to-transparent" />
+                    
+                    <div className="space-y-5">
+                        <div className="space-y-3.5">
+                            <div className="flex justify-between items-center group/label">
+                                <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/60 group-hover/label:text-primary transition-colors">Cognitive Formality</Label>
+                                <div className="flex items-center gap-2">
+                                    <div className="h-1.5 w-1.5 rounded-full bg-primary animate-pulse shadow-[0_0_8px_rgba(var(--primary),0.6)]" />
+                                    <Badge variant="outline" className="h-5 text-[9px] font-black border-primary/20 bg-primary/5 text-primary tabular-nums ring-1 ring-primary/10 shadow-inner">
+                                        {project.formality ?? 70}%
+                                    </Badge>
+                                </div>
+                            </div>
+                            <Slider value={[project.formality ?? 70]} onValueChange={(val) => handleFormalityChange(val[0])} min={0} max={100} step={10} className="py-1.5" />
+                            <p className="text-[9px] text-muted-foreground italic font-medium opacity-60">Determines the academic weight and linguistic elevation.</p>
                         </div>
-                        <div className="space-y-2">
-                            <div className="flex justify-between items-center"><Label className="text-xs font-semibold tracking-wider uppercase">Complexity</Label><Badge variant="secondary">{project.complexity ?? 50}%</Badge></div>
-                            <Slider value={[project.complexity ?? 50]} onValueChange={(val) => handleComplexityChange(val[0])} min={0} max={100} step={10} />
-                            <p className="text-[10px] text-muted-foreground italic">Higher values use more sophisticated vocabulary and sentence structures.</p>
+
+                        <div className="space-y-3.5">
+                            <div className="flex justify-between items-center group/label">
+                                <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/60 group-hover/label:text-primary transition-colors">Syntactic Complexity</Label>
+                                <div className="flex items-center gap-2">
+                                    <div className="h-1.5 w-1.5 rounded-full bg-primary animate-pulse shadow-[0_0_8px_rgba(var(--primary),0.6)]" />
+                                    <Badge variant="outline" className="h-5 text-[9px] font-black border-primary/20 bg-primary/5 text-primary tabular-nums ring-1 ring-primary/10 shadow-inner">
+                                        {project.complexity ?? 50}%
+                                    </Badge>
+                                </div>
+                            </div>
+                            <Slider value={[project.complexity ?? 50]} onValueChange={(val) => handleComplexityChange(val[0])} min={0} max={100} step={10} className="py-1.5" />
+                            <p className="text-[9px] text-muted-foreground italic font-medium opacity-60">Scales the depth of vocabulary and structural density.</p>
                         </div>
                     </div>
-                    <Separator />
-                    <div className="space-y-4">
+
+                    <Separator className="bg-gradient-to-r from-primary/20 via-primary/5 to-transparent h-px" />
+
+                    <div className="grid gap-4 grid-cols-2">
                         <div className="space-y-2">
-                            <Label className="text-xs font-semibold tracking-wider uppercase">Language</Label>
+                            <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/60">Language Vector</Label>
                             <Select value={project.language ?? 'default'} onValueChange={handleLanguageChange}>
-                                <SelectTrigger className="w-full"><SelectValue placeholder="Select Language" /></SelectTrigger>
+                                <SelectTrigger className="h-9 text-[11px] bg-muted/5 border-primary/10 focus:ring-primary/20 rounded-xl">
+                                    <SelectValue placeholder="Select Language" />
+                                </SelectTrigger>
                                 <SelectContent>
-                                    <SelectItem value="default">Default (System Language)</SelectItem>
-                                    <SelectItem value="en">English</SelectItem>
-                                    <SelectItem value="ar">Arabic</SelectItem>
-                                    <SelectItem value="es">Spanish</SelectItem>
-                                    <SelectItem value="fr">French</SelectItem>
-                                    <SelectItem value="de">German</SelectItem>
+                                    <SelectItem value="default" className="text-[11px]">System Default</SelectItem>
+                                    <SelectItem value="en" className="text-[11px]">English (Academic)</SelectItem>
+                                    <SelectItem value="ar" className="text-[11px]">Arabic (Standard)</SelectItem>
+                                    <SelectItem value="es" className="text-[11px]">Spanish</SelectItem>
+                                    <SelectItem value="fr" className="text-[11px]">French</SelectItem>
+                                    <SelectItem value="de" className="text-[11px]">German</SelectItem>
                                 </SelectContent>
                             </Select>
                         </div>
                         <div className="space-y-2">
-                            <Label className="text-xs font-semibold tracking-wider uppercase">Tone of Voice</Label>
+                            <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/60">Intelligence Tone</Label>
                             <Select value={project.tone ?? 'professional'} onValueChange={handleToneChange}>
-                                <SelectTrigger className="w-full"><SelectValue placeholder="Select Tone" /></SelectTrigger>
+                                <SelectTrigger className="h-9 text-[11px] bg-muted/5 border-primary/10 focus:ring-primary/20 rounded-xl">
+                                    <SelectValue placeholder="Select Tone" />
+                                </SelectTrigger>
                                 <SelectContent>
                                     {ToneSchema.options.map(tone => (
-                                        <SelectItem key={tone} value={tone}>{tone.charAt(0).toUpperCase() + tone.slice(1)}</SelectItem>
+                                        <SelectItem key={tone} value={tone} className="text-[11px]">{tone.charAt(0).toUpperCase() + tone.slice(1)}</SelectItem>
                                     ))}
                                 </SelectContent>
                             </Select>
                         </div>
                     </div>
-                    <Separator />
+
+                    <Separator className="bg-gradient-to-r from-primary/20 via-primary/5 to-transparent h-px" />
+
                     <div className="space-y-4">
-                        <Label className="text-xs font-semibold tracking-wider uppercase">Behaviors & Personas</Label>
-                        <div className="space-y-3">
+                        <div className="flex items-center gap-2 group/header">
+                            <div className="h-4 w-1 bg-primary/40 rounded-full group-hover:h-6 transition-all duration-300" />
+                            <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/80">Behavioral Personas</Label>
+                        </div>
+                        <div className="space-y-2.5">
                             {project.behaviors?.map((item, index) => (
-                                <div key={index} className="space-y-2 p-3 rounded-lg border border-border/60 bg-muted/10 relative group">
-                                    <Button variant="ghost" size="icon" className="h-6 w-6 absolute top-1 right-1 opacity-0 group-hover:opacity-100 transition-opacity" onClick={() => removeBehavior(index)}><X className="h-3 w-3 text-destructive" /></Button>
-                                    <Input value={item.name} onChange={(e) => handleBehaviorUpdate(index, { name: e.target.value })} placeholder="e.g., Act as an expert researcher" className="text-xs h-8 bg-background" />
-                                    <ToggleGroup type="single" value={item.type} onValueChange={(value) => { if (value) handleBehaviorUpdate(index, { type: value as 'persona' | 'behavior' }) }} className="justify-start scale-90 -ml-2">
-                                        <ToggleGroupItem value="persona" className="text-[10px] px-2 h-7">Persona</ToggleGroupItem>
-                                        <ToggleGroupItem value="behavior" className="text-[10px] px-2 h-7">Behavior</ToggleGroupItem>
+                                <div key={index} className="space-y-2 p-2.5 rounded-xl border border-primary/10 bg-muted/5 relative group transition-all hover:border-primary/20">
+                                    <Button variant="ghost" size="icon" className="h-6 w-6 absolute top-1 right-1 opacity-0 group-hover:opacity-100 transition-opacity hover:bg-destructive/10 hover:text-destructive" onClick={() => removeBehavior(index)}><X className="h-3 w-3" /></Button>
+                                    <Input value={item.name} onChange={(e) => handleBehaviorUpdate(index, { name: e.target.value })} placeholder="e.g., Act as an expert researcher" className="text-[11px] h-8 bg-background/60 border-primary/5 rounded-lg focus-visible:ring-primary/10 shadow-inner" />
+                                    <ToggleGroup type="single" value={item.type} onValueChange={(value) => { if (value) handleBehaviorUpdate(index, { type: value as 'persona' | 'behavior' }) }} className="justify-start">
+                                        <ToggleGroupItem value="persona" className="text-[9px] px-2 h-6 font-black uppercase tracking-wider rounded-md">Persona</ToggleGroupItem>
+                                        <ToggleGroupItem value="behavior" className="text-[9px] px-2 h-6 font-black uppercase tracking-wider rounded-md">Behavior</ToggleGroupItem>
                                     </ToggleGroup>
                                 </div>
                             ))}
-                            <Button variant="outline" size="sm" className="w-full text-xs gap-1 h-8" onClick={addBehavior}><Plus className="h-3 w-3" /> Add Behavior</Button>
+                            <Button variant="outline" size="sm" className="w-full text-[10px] font-black uppercase tracking-[0.2em] gap-2 h-8 rounded-xl border-dashed border-primary/20 hover:bg-primary/5 hover:border-primary/40 transition-all" onClick={addBehavior}>
+                                <Plus className="h-3 w-3" /> 
+                                Initialize Behavior
+                            </Button>
                         </div>
                     </div>
-                    <Separator />
+
+                    <Separator className="bg-gradient-to-r from-primary/20 via-primary/5 to-transparent h-px" />
+
                     <div className="space-y-6">
-                        <TagInput label="Mandatory Rules" placeholder="e.g., Always use metric units" value={project.rules || []} onChange={handleRulesChange} />
-                        <TagInput label="Constraints / Avoid" placeholder="e.g., Avoid passive voice" value={project.constraints || []} onChange={handleConstraintsChange} />
+                        <TagInput label="Mandatory Neural Rules" placeholder="e.g., Always use metric units..." value={project.rules || []} onChange={handleRulesChange} />
+                        <TagInput label="Constraints / Avoidance" placeholder="e.g., Avoid passive voice..." value={project.constraints || []} onChange={handleConstraintsChange} />
                     </div>
-                </CardContent>
-            </Card>
-        </ScrollArea>
+                </div>
+            </ScrollArea>
+        </div>
     );
 }
