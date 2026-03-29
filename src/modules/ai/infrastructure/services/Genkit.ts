@@ -84,3 +84,21 @@ export const MODEL_BY_TASK = {
   // 🎓 Academic & Research: Complex reasoning, high quality (use with RAG)
   ACADEMIC: OLLAMA_MODELS.LLAMA3_8B,
 } as const;
+
+/**
+ * Optimized Model Parameters for Small Models
+ */
+export const DEFAULT_MODEL_CONFIG = {
+    // Highly deterministic for writing tools to prevent babbling/filler
+    DETERMINISTIC: {
+        temperature: 0.1,
+        topP: 0.9,
+        maxOutputTokens: 2048,
+    },
+    // More creative for brainstorming/idea generation
+    CREATIVE: {
+        temperature: 0.7,
+        topP: 0.95,
+        maxOutputTokens: 2048,
+    }
+};

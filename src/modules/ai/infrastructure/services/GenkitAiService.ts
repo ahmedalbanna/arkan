@@ -24,20 +24,62 @@ export class GenkitAiService implements IAiService {
         }
     }
 
+    /**
+     * Post-processes AI output to remove common conversational prefixes from small models.
+     */
+    private cleanAiOutput(text: string): string {
+        if (!text) return text;
+        
+        // List of common conversational prefixes used by small models like Gemma/Phi
+        const patterns = [
+            /^Sure,? (here is|here's) the [^:]+:?\s*/i,
+            /^Sure,? here (is|'s) [^:]+:?\s*/i,
+            /^Certainly!? [^:]+:?\s*/i,
+            /^As requested,? [^:]+:?\s*/i,
+            /^I have [^:]+ below:?\s*/i,
+            /^The following is [^:]+:?\s*/i,
+            /^Ok,? (here is|here's) [^:]+:?\s*/i,
+            /^Below is the [^:]+:?\s*/i,
+            /^Sure,? I can [^:]+:?\s*/i,
+        ];
+
+        let cleaned = text.trim();
+        // Run multiple passes to catch nested filler
+        for (let i = 0; i < 2; i++) {
+            for (const pattern of patterns) {
+                cleaned = cleaned.replace(pattern, '');
+            }
+            cleaned = cleaned.trim();
+        }
+        return cleaned;
+    }
+
     async runFlow<TInput, TOutput>(flow: any, input: TInput, flowName?: string): Promise<Result<TOutput, AiError>> {
         try {
+            let result: any;
             if (!flowName) {
-                const data = await flow(input);
-                return Result.ok(data);
+                result = await flow(input);
+            } else {
+                const model = selectModel({ flowName });
+                result = await executeWithQueue(
+                    generateRequestId(),
+                    model,
+                    flowName,
+                    () => flow(input)
+                );
             }
-            
-            const model = selectModel({ flowName });
-            const result = await executeWithQueue(
-                generateRequestId(),
-                model,
-                flowName,
-                () => flow(input)
-            );
+
+            // Post-process string outputs to remove conversational filler
+            if (result && typeof result === 'object') {
+                for (const key in result) {
+                    if (typeof result[key] === 'string') {
+                        result[key] = this.cleanAiOutput(result[key]);
+                    }
+                }
+            } else if (typeof result === 'string') {
+                result = this.cleanAiOutput(result);
+            }
+
             return Result.ok(result as TOutput);
         } catch (error: any) {
             console.warn(`Queue or flow execution failed for ${flowName || 'unnamed flow'}`, error);

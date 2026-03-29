@@ -242,9 +242,11 @@ Proofread Document:`,
 ---
 {{{text}}}
 ---
+
+[STRICT: Output ONLY the JSON analysis result. Do not include greetings, explanations, or any conversational filler.]
 `,
         config: {
-            temperature: 0.3, // Slightly higher temp for more nuanced analysis
+            temperature: 0.1,
         }
     }),
 
@@ -266,7 +268,12 @@ Proofread Document:`,
 ---
 {{{text}}}
 ---
+
+[STRICT: Output ONLY the JSON analysis result. No conversational filler or introductory text.]
 `,
+        config: {
+            temperature: 0.1,
+        }
     }),
 
     factRetrieval: ai.definePrompt({
@@ -729,7 +736,12 @@ Original Text:
 {{{text}}}
 ---
 
+[STRICT: Output ONLY the paraphrased text. Do not include greetings, explanations, or any conversational filler. Start immediately with the paraphrased content.]
+
 **Paraphrased Text:**`,
+        config: {
+            temperature: 0.1,
+        }
     }),
 
     plagiarism: ai.definePrompt({
@@ -934,9 +946,11 @@ Please format your response as markdown with the following structure:
     {{{text}}}
     ---
 
+    [STRICT: Output ONLY the summarized text. No conversational filler, no introductions like "Here is the summary", no concluding remarks. Start immediately with the summary content.]
+
     **Summary:`,
         config: {
-            temperature: 0.5,
+            temperature: 0.1,
         }
     }),
 
@@ -954,6 +968,7 @@ Please format your response as markdown with the following structure:
 - Structure the explanation logically with headings and bullet points for clarity.
 - Keep the tone engaging and approachable.
 - The output should be formatted in Markdown.
+- [STRICT: Output ONLY the explanation. Do not include introductory text, greetings, or "Sure! I can explain that". Start immediately with the title or first paragraph.]
 
 **Topic to Explain:**
 ---
@@ -961,7 +976,7 @@ Please format your response as markdown with the following structure:
 ---
 `,
         config: {
-            temperature: 0.6,
+            temperature: 0.3,
             maxOutputTokens: 4096,
         },
     }),
