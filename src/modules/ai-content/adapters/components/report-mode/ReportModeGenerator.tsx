@@ -44,6 +44,7 @@ export default function ReportModeGenerator({ initialProject }: { initialProject
         activeChapterId,
         setActiveChapterId,
         selectedSectionIds,
+        setSelectedSectionIds,
         handleActiveSectionChange,
         isOutlineVisible,
         setIsOutlineVisible,
@@ -204,15 +205,7 @@ export default function ReportModeGenerator({ initialProject }: { initialProject
                                         <ReportResults 
                                             activePanelKey={activePanelKey} 
                                             activeChapterId={activeChapterId}
-                                            setActiveChapterId={(id) => {
-                                                setActiveChapterId(id);
-                                                if (id) {
-                                                    const chapter = project?.getChapter(id);
-                                                    if (chapter) {
-                                                        setSelectedSectionIds(chapter.sections.map(s => s.id));
-                                                    }
-                                                }
-                                            }}
+                                            setActiveChapterId={setActiveChapterId}
                                             selectedSectionIds={selectedSectionIds}
                                             handleActiveSectionChange={handleActiveSectionChange}
                                             isOutlineVisible={isOutlineVisible}

@@ -158,6 +158,7 @@ export function useReportGenerator(initialProject?: ProjectProperties | null) {
     zoomLevel,
     setZoomLevel,
     selectedSectionIds,
+    setSelectedSectionIds,
     handleActiveSectionChange,
     activeChapterId,
     setActiveChapterId,

@@ -9,7 +9,7 @@ import {
 } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useLocalization } from '@/context/LocalizationContext';
-import { useBuilderStore } from '@/hooks';
+import { toast, useBuilderStore } from '@/hooks';
 import MarkdownEditor from './MarkdownEditor';
 import { DiffView } from '@/components/shared/DiffView';
 import { computeDiff } from '@/modules/projects/domain/utils/diff';
@@ -96,7 +96,7 @@ interface ReportResultsProps {
     setIsOutlineVisible: (visible: boolean) => void;
 }
 
-const ReportResults = ({ 
+const ReportResults = ({
     activePanelKey,
     activeChapterId,
     setActiveChapterId,
@@ -108,6 +108,8 @@ const ReportResults = ({
   const { t } = useLocalization();
   const project = useBuilderStore(state => state.project);
   const updateProject = useBuilderStore(state => state.updateProject);
+  const undo = useBuilderStore(state => state.undo);
+  const [outlineClipboard, setOutlineClipboard] = useState<{ type: 'chapter' | 'section', data: any } | null>(null);
   const version = useBuilderStore(state => state.version);
   const updateProjectFromMarkdown = useBuilderStore(state => state.updateProjectFromMarkdown);
   const selectedFileId = useBuilderStore(state => state.selectedFileId);
@@ -119,7 +121,7 @@ const ReportResults = ({
   const containerRef = React.useRef<HTMLDivElement>(null);
 
   const comparisonSnapshot = snapshots.find((s: any) => s.id === comparisonSnapshotId);
-  
+
   const toggleFullscreen = () => {
     if (!containerRef.current) return;
 
@@ -182,9 +184,9 @@ const ReportResults = ({
                             </p>
                         </div>
                     </div>
-                    <Button 
-                        variant="outline" 
-                        size="sm" 
+                    <Button
+                        variant="outline"
+                        size="sm"
                         onClick={() => setComparisonSnapshotId(null)}
                         className="h-9 px-4 text-[11px] font-black uppercase tracking-widest border-primary/10 hover:bg-primary/10 hover:text-primary transition-all rounded-xl"
                     >
@@ -192,7 +194,7 @@ const ReportResults = ({
                         Exit Comparison
                     </Button>
                 </div>
-                
+
                 <ScrollArea className="flex-1">
                     <div className="p-12 max-w-5xl mx-auto">
                         <div className="mb-8 flex items-center gap-2">
@@ -206,7 +208,7 @@ const ReportResults = ({
                         <DiffView diff={diff} />
                     </div>
                 </ScrollArea>
-                
+
                 <div className="p-4 border-t border-primary/5 bg-muted/5 flex items-center justify-between opacity-50">
                     <span className="text-[9px] font-black uppercase tracking-[0.3em]">Technical_Diff_Engine_v1.0</span>
                     <span className="text-[9px] font-mono">LCS_ALGORITHM_STABLE</span>
@@ -394,7 +396,7 @@ const ReportResults = ({
             <div className="absolute inset-0 opacity-[0.03] dark:opacity-[0.05]" style={{ backgroundImage: 'radial-gradient(#000 1px, transparent 1px)', backgroundSize: '24px 24px' }} />
           </div>
 
-          <FloatingOutline 
+          <FloatingOutline
             isVisible={isOutlineVisible}
             project={project}
             activeChapterId={activeChapterId}
@@ -402,6 +404,101 @@ const ReportResults = ({
             onActiveChapterChange={setActiveChapterId}
             onActiveSectionChange={handleActiveSectionChange}
             onMoveItem={(activeId, overId) => updateProject(p => p.moveContentItem(activeId, overId))}
+            onUpdateTitle={(id, newTitle, isChapter) => {
+                if (isChapter) {
+                    updateProject(p => p.updateChapter(id, c => c.with({ title: newTitle })));
+                } else {
+                    updateProject(p => p.updateSection(id, s => s.withProps({ title: newTitle })));
+                }
+            }}
+            onDeleteItem={(id, isChapter) => {
+                if (isChapter) {
+                    updateProject(p => p.removeChapter(id));
+                } else {
+                    const sectionInfo = project?.findSection(id);
+                    if (sectionInfo) {
+                        updateProject(p => p.updateChapter(sectionInfo.chapter.id, c => c.removeSection(id)));
+                    }
+                }
+            }}
+            onAddChapter={() => {
+                updateProject(p => p.addChapter("New Chapter"));
+            }}
+            onAddSection={(chapterId) => {
+                updateProject(p => p.addSectionToChapter(chapterId, "New Section"));
+            }}
+            onDuplicateItem={(id, isChapter) => {
+                updateProject(p => isChapter ? p.duplicateChapter(id) : p.duplicateSection(id));
+            }}
+            onUndo={() => undo()}
+            onCopyItem={(id, isChapter) => {
+                if (isChapter) {
+                    const chapter = project?.getChapter(id);
+                    if (chapter) setOutlineClipboard({ type: 'chapter', data: chapter.toStateObject ? chapter.toStateObject() : chapter });
+                } else {
+                    const info = project?.findSection(id);
+                    if (info) setOutlineClipboard({ type: 'section', data: info.section.toStateObject ? info.section.toStateObject() : info.section });
+                }
+                toast({ title: 'Copied', description: 'Item copied to outline clipboard.' });
+            }}
+            onPasteItem={(targetId, targetIsChapter) => {
+                if (!outlineClipboard) return;
+
+                updateProject(p => {
+                    const { v4: uuidv4 } = require('uuid');
+
+                    // CASE 1: Pasting a CHAPTER
+                    if (outlineClipboard.type === 'chapter') {
+                        const newChapterProps = {
+                            ...outlineClipboard.data,
+                            id: uuidv4(),
+                            title: `${outlineClipboard.data.title} (Copy)`
+                        };
+                        if (newChapterProps.sections) {
+                            newChapterProps.sections = newChapterProps.sections.map((s: any) => ({ ...s, id: uuidv4() }));
+                        }
+                        const newChapter = new Chapter(newChapterProps);
+
+                        // Find insertion index
+                        let insertionIndex = -1;
+                        if (targetIsChapter) {
+                            insertionIndex = p.content.findIndex(c => c.id === targetId);
+                        } else {
+                            const info = p.findSection(targetId);
+                            if (info) insertionIndex = p.content.findIndex(c => c.id === info.chapter.id);
+                        }
+
+                        if (insertionIndex !== -1) {
+                            const newContent = [...p.content];
+                            newContent.splice(insertionIndex + 1, 0, newChapter);
+                            return p.with({ content: newContent });
+                        }
+                    }
+
+                    // CASE 2: Pasting a SECTION
+                    else if (outlineClipboard.type === 'section') {
+                        const newSectionProps = {
+                            ...outlineClipboard.data,
+                            id: uuidv4(),
+                            title: `${outlineClipboard.data.title} (Copy)`
+                        };
+                        const newSection = new Section(newSectionProps);
+
+                        if (targetIsChapter) {
+                            // Paste as first section of the chapter
+                            return p.updateChapter(targetId, c => c.addSection(newSection, 0));
+                        } else {
+                            // Paste below the target section
+                            const info = p.findSection(targetId);
+                            if (info) {
+                                return p.updateChapter(info.chapter.id, c => c.addSection(newSection, info.sectionIndex + 1));
+                            }
+                        }
+                    }
+                    return p;
+                });
+                toast({ title: 'Pasted', description: `Successfully pasted ${outlineClipboard.type}.` });
+            }}
           />
 
           <ScrollArea className="flex-grow relative scroll-smooth">

@@ -268,6 +268,36 @@ export class Project {
     return this.with({ content: this.content.filter(c => c.id !== id) });
   }
 
+  public duplicateChapter(id: string): Project {
+    const chapter = this.getChapter(id);
+    if (!chapter) return this;
+
+    const newChapter = chapter.with({
+        id: uuidv4(),
+        title: `${chapter.title} (Copy)`,
+        sections: chapter.sections.map(s => s.withProps({ id: uuidv4() }))
+    });
+
+    const index = this.content.findIndex(c => c.id === id);
+    const newContent = [...this.content];
+    newContent.splice(index + 1, 0, newChapter);
+
+    return this.with({ content: newContent });
+  }
+
+  public duplicateSection(id: string): Project {
+    const info = this.findSection(id);
+    if (!info) return this;
+
+    const { chapter, section } = info;
+    const newSection = section.withProps({
+        id: uuidv4(),
+        title: `${section.title} (Copy)`
+    });
+
+    return this.updateChapter(chapter.id, c => c.addSection(newSection, info.sectionIndex + 1));
+  }
+
   public moveContentItem(activeId: string, overId: string): Project {
     const oldIndex = this.content.findIndex(item => item.id === activeId);
     const newIndex = this.content.findIndex(item => item.id === overId);

@@ -21,11 +21,13 @@ interface BuilderState {
     version: number; // To track project updates
     selectedFileId: string | null;
     comparisonSnapshotId: string | null;
+    historyStack: ProjectProperties[];
 
     initializeStore: () => void;
     setUserProfile: (userProfile: User | null) => void; // Action to set the user profile
     setHasUnsavedChanges: (hasChanges: boolean) => void;
     updateProject: (updater: (project: Project) => void | Project) => void;
+    undo: () => void;
     updateProjectFromMarkdown: (markdown: string) => void;
     loadProject: (projectData: ProjectProperties) => void;
     loadProjectFromFile: (file: File) => Promise<void>;
@@ -36,6 +38,7 @@ interface BuilderState {
 }
 
 const createNewTemporaryProject = (): Project => new Project({});
+const MAX_HISTORY_SIZE = 50;
 
 const useBuilderStore = create<BuilderState>((set, get) => ({
     project: null,
@@ -45,6 +48,7 @@ const useBuilderStore = create<BuilderState>((set, get) => ({
     version: 0,
     selectedFileId: null,
     comparisonSnapshotId: null,
+    historyStack: [],
 
     initializeStore: () => {
         if (get().isStoreInitialized) return;
@@ -75,8 +79,15 @@ const useBuilderStore = create<BuilderState>((set, get) => ({
     setHasUnsavedChanges: (hasChanges) => set({ hasUnsavedChanges: hasChanges }),
 
     updateProject: (updater) => {
+        const currentProject = get().project;
+        const currentHistory = get().historyStack;
+
         set(state => {
             if (!state.project) return {};
+            
+            // Push to history before updating
+            const newHistory = [...currentHistory, state.project.toStateObject()].slice(-MAX_HISTORY_SIZE);
+
             const newProject = new Project(state.project.toStateObject());
             const result = updater(newProject);
             const finalProject = result instanceof Project ? result : newProject;
@@ -87,10 +98,32 @@ const useBuilderStore = create<BuilderState>((set, get) => ({
 
             return { 
                 project: finalProject, 
+                historyStack: newHistory,
                 hasUnsavedChanges: true,
                 version: state.version + 1 
             };
         });
+    },
+
+    undo: () => {
+        const history = get().historyStack;
+        if (history.length === 0) return;
+
+        const previousState = history[history.length - 1];
+        const newHistory = history.slice(0, -1);
+
+        const restoredProject = new Project(previousState);
+        const service = container.resolve(LocalProjectService);
+        service.saveProject(restoredProject.toStateObject());
+
+        set({ 
+            project: restoredProject, 
+            historyStack: newHistory,
+            hasUnsavedChanges: true,
+            version: get().version + 1 
+        });
+
+        toast({ title: 'Undo Successful', description: 'Reverted to previous state.' });
     },
 
     updateProjectFromMarkdown: (markdown: string) => {
