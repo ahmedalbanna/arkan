@@ -3,12 +3,12 @@ import { act, renderHook, waitFor } from '@testing-library/react';
 
 jest.mock('@/context/AuthContext', () => ({ useAuth: jest.fn() }));
 jest.mock('@/infrastructure/api/authenticated-client-call', () => ({ runAuthenticatedResultCall: jest.fn() }));
-jest.mock('@/lib/utils/cache', () => ({ getFromCache: jest.fn(), saveToCache: jest.fn() }));
+jest.mock('@/infrastructure/cache/BrowserCache', () => ({ getFromCache: jest.fn(), saveToCache: jest.fn() }));
 jest.mock('@/hooks/util/use-toast', () => ({ toast: jest.fn() }));
 
 const { useAuth } = jest.requireMock('@/context/AuthContext') as { useAuth: jest.Mock };
 const { runAuthenticatedResultCall } = jest.requireMock('@/infrastructure/api/authenticated-client-call') as { runAuthenticatedResultCall: jest.Mock };
-const { getFromCache, saveToCache } = jest.requireMock('@/lib/utils/cache') as { getFromCache: jest.Mock; saveToCache: jest.Mock };
+const { getFromCache, saveToCache } = jest.requireMock('@/infrastructure/cache/BrowserCache') as { getFromCache: jest.Mock; saveToCache: jest.Mock };
 
 const { useAgentManager } = require('../use-agent-store') as typeof import('../use-agent-store');
 

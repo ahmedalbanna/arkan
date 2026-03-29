@@ -205,7 +205,7 @@ Each module in `src/modules/` follows the same four-layer structure:
 ### Styling
 
 - Use Tailwind CSS utility classes exclusively — no CSS files or inline styles for new code
-- Use the `cn()` utility from `@/lib/utils/cn` for conditional class merging (wraps `clsx` + `tailwind-merge`)
+- Use the `cn()` utility from `@/infrastructure/utils/cn` for conditional class merging (wraps `clsx` + `tailwind-merge`)
 - Follow shadcn/ui patterns for component variants using `class-variance-authority` (CVA)
 - RTL/LTR support is managed by `LanguageDirectionManager` — use logical CSS properties where possible
 
@@ -265,7 +265,7 @@ Each module in `src/modules/` follows the same four-layer structure:
 - AI flow tests: `src/ai/flows/__tests__/`
 - Hook tests: `src/hooks/core/__tests__/`
 - RAG tests: `src/modules/rag/infrastructure/__tests__/`
-- Use `jest.config.js` aliases — import from `@/lib/`, `@/ai/`, `@/components/`, `@/hooks/`
+- Use `jest.config.js` aliases — import from `@/infrastructure/`, `@/modules/`, `@/components/`, `@/hooks/`
 - Mocking: use `jest-fetch-mock` for fetch; mock Firebase with manual mocks
 - Run type checking before tests: `npm run typecheck && npm test`
 

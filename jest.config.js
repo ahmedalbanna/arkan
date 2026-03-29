@@ -4,7 +4,8 @@ module.exports = {
   moduleNameMapper: {
     // Handle module aliases from tsconfig.json
     // Add other aliases as needed from your tsconfig.json
-    '^@/lib/(.*)$': '<rootDir>/src/lib/$1',
+    '^@/infrastructure/(.*)$': '<rootDir>/src/infrastructure/$1',
+    '^@/modules/(.*)$': '<rootDir>/src/modules/$1',
     '^@/ai/(.*)$': '<rootDir>/src/ai/$1',
     '^@/components/(.*)$': '<rootDir>/src/components/$1',
     '^@/hooks/(.*)$': '<rootDir>/src/hooks/$1',
