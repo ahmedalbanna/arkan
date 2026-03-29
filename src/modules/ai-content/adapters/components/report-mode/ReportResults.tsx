@@ -530,7 +530,7 @@ const ReportResults = ({
           />
 
           <ScrollArea className="flex-grow relative scroll-smooth">
-              <div className="py-12 px-8 flex justify-center min-h-full">
+          <div className="py-12 px-8 flex justify-center h-screen">
                   <div className="w-full max-w-5xl transition-all duration-500 ease-in-out origin-top">
                     {renderContent()}
                   </div>

@@ -1,132 +1,30 @@
-Queue or flow execution failed for generate-ideas Error [GenkitError]: INVALID_ARGUMENT: Schema validation failed. Parse Errors:
+## Error Type
+Runtime ReferenceError
 
-- (root): must have required property 'markdown'
+## Error Message
+setSelectedSectionIds is not defined
 
-Provided data:
 
-{
-  "type": "object",
-  "properties": {
-    "markdown": {
-      "type": "string",
-      "description": "A markdown formatted string of generated ideas, each with a title and description."
-    }
-  },
-  "required": [
-    "markdown"
-  ],
-  "additionalProperties": true,
-  "$schema": "http://json-schema.org/draft-07/schema#"
-}
+    at setActiveChapterId (src/modules/ai-content/adapters/components/report-mode/ReportModeGenerator.tsx:212:57)
+    at handleItemClick (src/modules/ai-content/adapters/components/report-mode/FloatingOutline.tsx:273:9)
+    at onActivate (src/modules/ai-content/adapters/components/report-mode/FloatingOutline.tsx:384:39)
+    at onClick (src/modules/ai-content/adapters/components/report-mode/FloatingOutline.tsx:149:13)
+    at div (<anonymous>:null:null)
+    at SortableItem (src/modules/ai-content/adapters/components/report-mode/FloatingOutline.tsx:141:9)
+    at eval (src/modules/ai-content/adapters/components/report-mode/FloatingOutline.tsx:320:7)
+    at Array.map (<anonymous>:null:null)
+    at FloatingOutline (src/modules/ai-content/adapters/components/report-mode/FloatingOutline.tsx:320:7)
+    at ReportResults (src/modules/ai-content/adapters/components/report-mode/ReportResults.tsx:268:61)
+    at ReportModeGenerator (src/modules/ai-content/adapters/components/report-mode/ReportModeGenerator.tsx:204:41)
+    at GeneratePage (src/app/builder/page.tsx:39:7)
 
-Required JSON schema:
+## Code Frame
+  210 |                                                     const chapter = project?.getChapter(id);
+  211 |                                                     if (chapter) {
+> 212 |                                                         setSelectedSectionIds(chapter.sections.map(s => s.id));
+      |                                                         ^
+  213 |                                                     }
+  214 |                                                 }
+  215 |                                             }}
 
-{
-  "type": "object",
-  "properties": {
-    "markdown": {
-      "type": "string",
-      "description": "A markdown formatted string of generated ideas, each with a title and description."
-    }
-  },
-  "required": [
-    "markdown"
-  ],
-  "additionalProperties": true,
-  "$schema": "http://json-schema.org/draft-07/schema#"
-}
-    at async (src/modules/ai/infrastructure/flows/generation/generate-ideas.ts:52:22)
-    at async ModelQueue.processNext (src/modules/ai/infrastructure/services/model-request-queue.ts:123:22)
-  50 |   outputSchema: IdeaGenerationOutputSchema,
-  51 | }, async (input) => {
-> 52 |   const { output } = await generateIdeasPrompt(input);
-     |                      ^
-  53 |   if (!output) {
-  54 |     throw new Error('Idea generation failed to produce an output.');
-  55 |   } {
-  source: undefined,
-  status: 'INVALID_ARGUMENT',
-  detail: [Object],
-  code: 400,
-  originalMessage: 'Schema validation failed. Parse Errors:\n' +
-    '\n' +
-    "- (root): must have required property 'markdown'\n" +
-    '\n' +
-    'Provided data:\n' +
-    '\n' +
-    '{\n' +
-    '  "type": "object",\n' +
-    '  "properties": {\n' +
-    '    "markdown": {\n' +
-    '      "type": "string",\n' +
-    '      "description": "A markdown formatted string of generated ideas, each with a title and description."\n' +
-    '    }\n' +
-    '  },\n' +
-    '  "required": [\n' +
-    '    "markdown"\n' +
-    '  ],\n' +
-    '  "additionalProperties": true,\n' +
-    '  "$schema": "http://json-schema.org/draft-07/schema#"\n' +
-    '}\n' +
-    '\n' +
-    'Required JSON schema:\n' +
-    '\n' +
-    '{\n' +
-    '  "type": "object",\n' +
-    '  "properties": {\n' +
-    '    "markdown": {\n' +
-    '      "type": "string",\n' +
-    '      "description": "A markdown formatted string of generated ideas, each with a title and description."\n' +
-    '    }\n' +
-    '  },\n' +
-    '  "required": [\n' +
-    '    "markdown"\n' +
-    '  ],\n' +
-    '  "additionalProperties": true,\n' +
-    '  "$schema": "http://json-schema.org/draft-07/schema#"\n' +
-    '}',
-  ignoreFailedSpan: true,
-  traceId: '08aedd39e81ab896b41f30a92cdf2ee1'
-}
-API Route Error: AiError {
-  type: 'GENERATION_FAILED',
-  message: 'INVALID_ARGUMENT: Schema validation failed. Parse Errors:\n' +
-    '\n' +
-    "- (root): must have required property 'markdown'\n" +
-    '\n' +
-    'Provided data:\n' +
-    '\n' +
-    '{\n' +
-    '  "type": "object",\n' +
-    '  "properties": {\n' +
-    '    "markdown": {\n' +
-    '      "type": "string",\n' +
-    '      "description": "A markdown formatted string of generated ideas, each with a title and description."\n' +
-    '    },\n' +
-    '    "required": [\n' +
-    '      "markdown"\n' +
-    '    ],\n' +
-    '    "additionalProperties": true\n' +
-    '  },\n' +
-    '  "$schema": "http://json-schema.org/draft-07/schema#"\n' +
-    '}\n' +
-    '\n' +
-    'Required JSON schema:\n' +
-    '\n' +
-    '{\n' +
-    '  "type": "object",\n' +
-    '  "properties": {\n' +
-    '    "markdown": {\n' +
-    '      "type": "string",\n' +
-    '      "description": "A markdown formatted string of generated ideas, each with a title and description."\n' +
-    '    }\n' +
-    '  },\n' +
-    '  "required": [\n' +
-    '    "markdown"\n' +
-    '  ],\n' +
-    '  "additionalProperties": true,\n' +
-    '  "$schema": "http://json-schema.org/draft-07/schema#"\n' +
-    '}',
-  details: undefined
-}
- POST /api/writing-tools/generate-ideas 500 in 84141ms
+Next.js version: 15.5.9 (Turbopack)
