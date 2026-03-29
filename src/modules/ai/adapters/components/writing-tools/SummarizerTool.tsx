@@ -16,6 +16,8 @@ import { Controller } from 'react-hook-form';
 import ReactMarkdown from 'react-markdown';
 import { cn } from '@/infrastructure/utils/cn';
 import { Badge } from '@/components/ui/badge';
+import { GuestAccessBanner } from '@/components/shared/GuestAccessBanner';
+import { GuestTierBadge } from '@/components/shared/GuestTierBadge';
 
 export function SummarizerTool() {
   const { t } = useLocalization();
@@ -34,9 +36,11 @@ export function SummarizerTool() {
 
   return (
     <Card className="max-w-4xl mx-auto border-none shadow-2xl shadow-primary/5 bg-card overflow-hidden rounded-[32px]">
-      <header className="px-8 py-10 border-b bg-muted/5 text-center space-y-2">
+      <header className="px-8 py-10 border-b bg-muted/5 text-center space-y-2 relative">
+        <GuestTierBadge className="absolute top-6 right-8 hidden md:flex" />
         <h2 className="text-2xl font-bold font-headline tracking-tight">{t('writingTools.summarizer.cardTitle')}</h2>
         <p className="text-xs text-muted-foreground italic max-w-md mx-auto leading-relaxed">{t('writingTools.summarizer.cardDescription')}</p>
+        <GuestTierBadge className="flex md:hidden justify-center pt-2" />
       </header>
 
       <CardContent className="p-8 md:p-12 space-y-10">

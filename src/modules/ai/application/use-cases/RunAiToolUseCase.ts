@@ -8,11 +8,13 @@ import { DeductCreditsUseCase } from "@/modules/users/application/use-cases/Dedu
 import { WritingToolRegistry } from "../services/WritingToolRegistry";
 import { Result } from "@/infrastructure/utils/result";
 import { AiError } from "../../domain/errors/AiErrors";
+import { rateLimiter } from "@/infrastructure/security/rate-limiter";
 
 export interface RunAiToolInput<TInput> {
     userId: string;
     toolName: string;
     input: TInput;
+    ip?: string;
 }
 
 @injectable()
@@ -28,7 +30,7 @@ export class RunAiToolUseCase {
     ) {}
 
     async execute<TInput, TOutput>(params: RunAiToolInput<TInput>): Promise<Result<TOutput, AiError>> {
-        const { userId, toolName, input } = params;
+        const { userId, toolName, input, ip } = params;
 
         const config = this.writingToolRegistry.getTool(toolName);
         if (!config) {
@@ -39,8 +41,16 @@ export class RunAiToolUseCase {
 
         // 1. Handle guest access
         const isGuest = userId === 'guest';
-        if (isGuest && !isFreeForGuests) {
-            return Result.fail(AiError.unauthorized(`The ${toolName} tool requires a registered account.`));
+        if (isGuest) {
+            if (!isFreeForGuests) {
+                return Result.fail(AiError.unauthorized(`The ${toolName} tool requires a registered account.`));
+            }
+
+            // Apply daily limit for guests (5 requests per 24h)
+            const limiterResult = await rateLimiter.check('guest-writing-tools', ip || 'unknown', 5, 24 * 60 * 60 * 1000);
+            if (!limiterResult.allowed) {
+                return Result.fail(AiError.unauthorized("Guest daily limit exceeded (5 requests/day). Please sign up for unlimited access."));
+            }
         }
 
         // 2. Pre-deduct credits for registered users

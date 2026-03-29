@@ -1,3 +1,4 @@
+import { GuestTierBadge } from '@/components/shared/GuestTierBadge';
 
 'use client';
 
@@ -37,9 +38,9 @@ export function ParaphraserTool() {
 
     return (
         <Card className="max-w-[1600px] mx-auto border-none shadow-2xl shadow-primary/5 bg-card overflow-hidden rounded-[32px]">
-            <header className="px-8 py-10 border-b bg-muted/5 text-center space-y-2">
+            <header className="px-8 py-10 border-b bg-muted/5 text-center space-y-2 relative"><GuestTierBadge className="absolute top-6 right-8 hidden md:flex" />
                 <h2 className="text-2xl font-bold font-headline tracking-tight">{t('writingTools.paraphraser.cardTitle')}</h2>
-                <p className="text-xs text-muted-foreground italic max-w-md mx-auto leading-relaxed">{t('writingTools.paraphraser.cardDescription')}</p>
+                <p className="text-xs text-muted-foreground italic max-w-md mx-auto leading-relaxed">{t('writingTools.paraphraser.cardDescription')}</p><GuestTierBadge className="flex md:hidden justify-center pt-2" />
             </header>
 
             <CardContent className="p-0 flex flex-col lg:flex-row min-h-[800px]">
@@ -98,7 +99,7 @@ export function ParaphraserTool() {
                                                     <h4 className="text-sm font-bold uppercase tracking-widest mb-2">{isDragActive ? "Drop Content Now" : "Upload Document"}</h4>
                                                     <p className="text-[11px] text-muted-foreground italic max-w-xs mx-auto leading-relaxed">
                                                         {isUploading ? t('writingTools.paraphraser.processingFile') : t('writingTools.paraphraser.dropzoneHint')}
-                                                    </p>
+                                                    </p><GuestTierBadge className="flex md:hidden justify-center pt-2" />
                                                     <Badge variant="outline" className="mt-6 h-5 text-[8px] uppercase tracking-tighter border-border/60">{t('writingTools.paraphraser.supportedFiles')}</Badge>
                                                 </div>
                                             </div>
@@ -133,7 +134,7 @@ export function ParaphraserTool() {
                                     </div>
                                 </div>
 
-                                {form.formState.errors.text && <p className="text-[9px] font-bold text-destructive uppercase tracking-widest text-center">{form.formState.errors.text.message}</p>}
+                                {form.formState.errors.text && <p className="text-[9px] font-bold text-destructive uppercase tracking-widest text-center">{form.formState.errors.text.message}</p><GuestTierBadge className="flex md:hidden justify-center pt-2" />}
 
                                 <Button type="submit" disabled={paraphraseMutation.isPending || isUploading} className="w-full h-12 font-bold shadow-xl shadow-primary/20 gap-3 rounded-xl active:scale-[0.98] transition-all">
                                     {paraphraseMutation.isPending ? <Loader2 className="h-5 w-5 animate-spin" /> : <Sparkles className="h-5 w-5" />}
@@ -144,7 +145,7 @@ export function ParaphraserTool() {
                             <div className="p-4 rounded-2xl border bg-muted/10 border-dashed text-center space-y-2">
                                 <p className="text-[10px] text-muted-foreground italic leading-relaxed">
                                     Refinement protocols preserve the original intent while optimizing stylistic and linguistic structures.
-                                </p>
+                                </p><GuestTierBadge className="flex md:hidden justify-center pt-2" />
                             </div>
                         </div>
                     </ScrollArea>
@@ -177,7 +178,7 @@ export function ParaphraserTool() {
                                     {paraphraseMutation.isPending ? (
                                         <div className="flex flex-col items-center justify-center h-full space-y-4 opacity-40">
                                             <Loader2 className="h-12 w-12 animate-spin text-primary" />
-                                            <p className="text-[10px] font-bold uppercase tracking-[0.2em]">Executing Refinement Synthesis</p>
+                                            <p className="text-[10px] font-bold uppercase tracking-[0.2em]">Executing Refinement Synthesis</p><GuestTierBadge className="flex md:hidden justify-center pt-2" />
                                         </div>
                                     ) : (
                                         <div className="space-y-12">
@@ -219,7 +220,7 @@ export function ParaphraserTool() {
                                 </div>
                                 <div className="space-y-1">
                                     <h3 className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Refinement Canvas Ready</h3>
-                                    <p className="text-[11px] italic max-w-xs mx-auto leading-relaxed">Provide the source payload on the left to begin stylistic refinement.</p>
+                                    <p className="text-[11px] italic max-w-xs mx-auto leading-relaxed">Provide the source payload on the left to begin stylistic refinement.</p><GuestTierBadge className="flex md:hidden justify-center pt-2" />
                                 </div>
                             </div>
                         )}

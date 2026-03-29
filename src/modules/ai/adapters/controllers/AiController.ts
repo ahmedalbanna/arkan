@@ -37,7 +37,7 @@ export class AiController {
         return this.writingToolRegistry.getTool(name);
     }
 
-    async runTool<TInput, TOutput>(params: { userId: string, toolName: string, input: TInput }) {
+    async runTool<TInput, TOutput>(params: { userId: string, toolName: string, input: TInput, ip?: string }) {
         return this.runAiToolUseCase.execute<TInput, TOutput>(params);
     }
 
