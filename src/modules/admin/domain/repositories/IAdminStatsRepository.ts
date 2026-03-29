@@ -35,8 +35,11 @@ export interface DashboardStats {
     }[];
 }
 
+import { Result } from "@/infrastructure/utils/result";
+import { AdminError } from "../errors/AdminErrors";
+
 export interface IAdminStatsRepository {
-    getDashboardStats(): Promise<DashboardStats>;
+    getDashboardStats(): Promise<Result<DashboardStats, AdminError>>;
 }
 
 export const IAdminStatsRepositoryToken = Symbol("IAdminStatsRepository");

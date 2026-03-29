@@ -1,4 +1,7 @@
 import { delay, inject, injectable } from "tsyringe";
+import { Result } from "@/infrastructure/utils/result";
+import { AdminError } from "../../domain/errors/AdminErrors";
+import { AiError } from "../../../ai/domain/errors/AiErrors";
 import { GetDashboardStatsUseCase } from "../../application/use-cases/GetDashboardStatsUseCase";
 import { GetFeaturesUseCase } from "../../application/use-cases/GetFeaturesUseCase";
 import { UpdateFeatureUseCase } from "../../application/use-cases/UpdateFeatureUseCase";
@@ -23,27 +26,27 @@ export class AdminController {
         private getGenerationLogsUseCase: GetGenerationLogsUseCase
     ) {}
 
-    async getDashboardStats() {
+    async getDashboardStats(): Promise<Result<any, AdminError>> {
         return this.getDashboardStatsUseCase.execute();
     }
 
-    async getFeatures() {
+    async getFeatures(): Promise<Result<any, AdminError>> {
         return this.getFeaturesUseCase.execute();
     }
 
-    async updateFeature(id: string, data: any) {
+    async updateFeature(id: string, data: any): Promise<Result<any, AdminError>> {
         return this.updateFeatureUseCase.execute(id, data);
     }
 
-    async getSettings() {
+    async getSettings(): Promise<Result<any, AdminError>> {
         return this.getSettingsUseCase.execute();
     }
 
-    async updateSettings(data: any) {
+    async updateSettings(data: any): Promise<Result<any, AdminError>> {
         return this.updateSettingsUseCase.execute(data);
     }
 
-    async getGenerationLogs(options: { limit: number; agentId?: string; userId?: string; lastVisibleId?: string }) {
+    async getGenerationLogs(options: { limit: number; agentId?: string; userId?: string; lastVisibleId?: string }): Promise<Result<any, AiError>> {
         return this.getGenerationLogsUseCase.execute(options);
     }
 }

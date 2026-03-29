@@ -2,6 +2,8 @@
 import { inject, injectable } from "tsyringe";
 import type { IAdminStatsRepository, DashboardStats } from "../../domain/repositories/IAdminStatsRepository";
 import { IAdminStatsRepositoryToken } from "../../domain/repositories/IAdminStatsRepository";
+import { Result } from "@/infrastructure/utils/result";
+import { AdminError } from "../../domain/errors/AdminErrors";
 
 @injectable()
 export class GetDashboardStatsUseCase {
@@ -10,7 +12,7 @@ export class GetDashboardStatsUseCase {
         private adminStatsRepository: IAdminStatsRepository
     ) {}
 
-    async execute(): Promise<DashboardStats> {
+    async execute(): Promise<Result<DashboardStats, AdminError>> {
         return this.adminStatsRepository.getDashboardStats();
     }
 }

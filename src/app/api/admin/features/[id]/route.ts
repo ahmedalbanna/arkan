@@ -1,6 +1,6 @@
 
 import { z } from 'zod';
-import { handleApiError, withAuth, createApiResponse } from '@/infrastructure/api/api-utils';
+import { handleApiError, withAuth, handleAdminResult } from '@/infrastructure/api/api-utils';
 import { container } from '@/infrastructure/di/container';
 import { AdminController } from '@/modules/admin/adapters/controllers/AdminController';
 
@@ -23,9 +23,9 @@ export const PUT = withAuth(async ({ request, params }) => {
     }
 
     const controller = container.resolve(AdminController);
-    const updatedFeature = await controller.updateFeature(id, validation.data);
+    const result = await controller.updateFeature(id, validation.data);
 
-    return createApiResponse(updatedFeature, 200);
+    return handleAdminResult(result);
   } catch (error) {
     return handleApiError(error);
   }

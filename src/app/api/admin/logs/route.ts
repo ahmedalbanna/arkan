@@ -1,6 +1,6 @@
 
 import { z } from 'zod';
-import { withAuth, handleApiError, createApiResponse } from '@/infrastructure/api/api-utils';
+import { withAuth, handleApiError, handleAiResult } from '@/infrastructure/api/api-utils';
 import { container } from '@/infrastructure/di/container';
 import { AdminController } from '@/modules/admin/adapters/controllers/AdminController';
 
@@ -23,7 +23,7 @@ export const GET = withAuth(async ({ request }) => {
         const controller = container.resolve(AdminController);
         const result = await controller.getGenerationLogs(queryValidation.data);
 
-        return createApiResponse(result, 200);
+        return handleAiResult(result);
 
     } catch (error) {
         return handleApiError(error);

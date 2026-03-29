@@ -1,7 +1,7 @@
 'use server';
 
 import { z } from 'zod';
-import { withAuth, handleApiError, createApiResponse } from '@/infrastructure/api/api-utils';
+import { withAuth, handleApiError, handleAdminResult } from '@/infrastructure/api/api-utils';
 import { container } from '@/infrastructure/di/container';
 import { AdminController } from '@/modules/admin/adapters/controllers/AdminController';
 
@@ -48,8 +48,8 @@ const settingsSchema = z.object({
 export async function GET() {
     try {
         const controller = container.resolve(AdminController);
-        const settings = await controller.getSettings();
-        return createApiResponse(settings, 200);
+        const result = await controller.getSettings();
+        return handleAdminResult(result);
     } catch (error) {
         return handleApiError(error);
     }
@@ -65,9 +65,9 @@ export const PUT = withAuth(async ({ request }) => {
         }
 
         const controller = container.resolve(AdminController);
-        const updated = await controller.updateSettings(validation.data);
+        const result = await controller.updateSettings(validation.data);
 
-        return createApiResponse(updated, 200);
+        return handleAdminResult(result);
     } catch (error) {
         return handleApiError(error);
     }

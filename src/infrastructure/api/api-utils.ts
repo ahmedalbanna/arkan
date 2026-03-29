@@ -14,6 +14,7 @@ import { RagError, RagErrorType } from '@/modules/rag/domain/errors/RagErrors';
 import { TemplateError, TemplateErrorType } from '@/modules/templates/domain/errors/TemplateErrors';
 import { AIContentError, AIContentErrorType } from '@/modules/ai-content/domain/errors/AIContentErrors';
 import { AiError, AiErrorType } from '@/modules/ai/domain/errors/AiErrors';
+import { AdminError, AdminErrorType } from '@/modules/admin/domain/errors/AdminErrors';
 
 
 interface ApiHandlerOptions {
@@ -455,6 +456,39 @@ export const handleAiResult = <T>(result: Result<T, AiError>) => {
 
   if (status >= 500) {
     Telemetry.logFailure('AiAPI', error);
+  }
+
+  return NextResponse.json({ message: error.message, details: error.details, type: error.type }, { status });
+};
+
+/**
+ * Standardized handler for Admin Module Result objects in API routes.
+ */
+export const handleAdminResult = <T>(result: Result<T, AdminError>) => {
+  if (result.isSuccess) {
+    return createApiResponse(result.getValue(), 200);
+  }
+
+  const error = result.error!;
+  let status = 500;
+
+  switch (error.type) {
+    case AdminErrorType.NOT_FOUND:
+      status = 404;
+      break;
+    case AdminErrorType.VALIDATION:
+      status = 400;
+      break;
+    case AdminErrorType.DATABASE_ERROR:
+      status = 500;
+      break;
+    case AdminErrorType.INTERNAL:
+      status = 500;
+      break;
+  }
+
+  if (status >= 500) {
+    Telemetry.logFailure('AdminAPI', error);
   }
 
   return NextResponse.json({ message: error.message, details: error.details, type: error.type }, { status });

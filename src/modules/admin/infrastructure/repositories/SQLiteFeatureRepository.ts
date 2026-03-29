@@ -4,31 +4,44 @@ import { features } from "@/infrastructure/db/schema";
 import { IFeatureRepository } from "../../domain/repositories/IFeatureRepository";
 import { Feature } from "../../domain/entities/Feature";
 import { eq } from "drizzle-orm";
+import { Result } from "@/infrastructure/utils/result";
+import { AdminError } from "../../domain/errors/AdminErrors";
 
 @injectable()
 export class SQLiteFeatureRepository implements IFeatureRepository {
-    async getAll(): Promise<Feature[]> {
-        const results = await db.query.features.findMany();
-        return results.map(this.toDomain);
+    async getAll(): Promise<Result<Feature[], AdminError>> {
+        try {
+            const results = await db.query.features.findMany();
+            return Result.ok(results.map(this.toDomain));
+        } catch (error: any) {
+            return Result.fail(AdminError.databaseError(error.message));
+        }
     }
 
-    async getById(id: string): Promise<Feature | null> {
-        const result = await db.query.features.findFirst({
-            where: eq(features.id, id),
-        });
-        return result ? this.toDomain(result) : null;
+    async getById(id: string): Promise<Result<Feature, AdminError>> {
+        try {
+            const result = await db.query.features.findFirst({
+                where: eq(features.id, id),
+            });
+            if (!result) return Result.fail(AdminError.notFound(`Feature ${id} not found`));
+            return Result.ok(this.toDomain(result));
+        } catch (error: any) {
+            return Result.fail(AdminError.databaseError(error.message));
+        }
     }
 
-    async update(id: string, data: Partial<Feature>): Promise<Feature> {
-        const updatedAt = new Date().toISOString();
-        const persistenceData = this.toPersistencePartial({ ...data, updatedAt });
-        await db.update(features)
-            .set(persistenceData)
-            .where(eq(features.id, id));
-        
-        const updated = await this.getById(id);
-        if (!updated) throw new Error(`Feature ${id} not found after update`);
-        return updated;
+    async update(id: string, data: Partial<Feature>): Promise<Result<Feature, AdminError>> {
+        try {
+            const updatedAt = new Date().toISOString();
+            const persistenceData = this.toPersistencePartial({ ...data, updatedAt });
+            await db.update(features)
+                .set(persistenceData)
+                .where(eq(features.id, id));
+            
+            return this.getById(id);
+        } catch (error: any) {
+            return Result.fail(AdminError.databaseError(error.message));
+        }
     }
 
     private toDomain(result: any): Feature {

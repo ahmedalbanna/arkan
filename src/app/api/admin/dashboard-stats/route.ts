@@ -1,13 +1,13 @@
 
-import { withAuth, handleApiError, createApiResponse } from '@/infrastructure/api/api-utils';
+import { withAuth, handleApiError, handleAdminResult } from '@/infrastructure/api/api-utils';
 import { container } from '@/infrastructure/di/container';
 import { AdminController } from '@/modules/admin/adapters/controllers/AdminController';
 
 export const GET = withAuth(async () => {
     try {
         const controller = container.resolve(AdminController);
-        const stats = await controller.getDashboardStats();
-        return createApiResponse(stats, 200);
+        const result = await controller.getDashboardStats();
+        return handleAdminResult(result);
     } catch (error) {
         return handleApiError(error);
     }
