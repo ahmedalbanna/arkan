@@ -1,31 +1,34 @@
 import { injectable } from "tsyringe";
-import { 
-    paraphraseText, summarizeText, humanizeText, detectAiContent, factCheckText, 
-    retrieveFact, generateChapterContent, generateImage, generateReportSection, 
-    imageToText, rewriteDocumentToMarkdown, generateCitation, generateIdeas, 
-    generatePlantUML, generateProjectBlueprint, generateQuiz, generateToc, 
-    generateUiDescription, grammarCheck, generateLiteratureReview, 
-    manipulateText, plagiarismCheck, answerQuestion, 
-    sentenceStructureCheck, solveAssignments, textStyleTune, 
+import {
+    paraphraseText, summarizeText, humanizeText, detectAiContent, factCheckText,
+    retrieveFact, generateChapterContent, generateImage, generateReportSection,
+    imageToText, rewriteDocumentToMarkdown, generateCitation, generateIdeas,
+    generatePlantUML, generateProjectBlueprint, generateQuiz, generateToc,
+    generateUiDescription, grammarCheck, generateLiteratureReview,
+    manipulateText, plagiarismCheck, answerQuestion,
+    sentenceStructureCheck, solveAssignments, textStyleTune,
     topicExplainer, translateText, writeDocument, aiResearcher,
-    biasCheckText, generateSessionPlan, createLectureUnit, generateTheoreticalLecture
+    biasCheckText, generateSessionPlan, createLectureUnit, generateTheoreticalLecture,
+    rewriteText, summarizeTextWithRatio, readabilityEnhancer, concisenessChecker, clarityAdvisor
 } from "@/modules/ai/infrastructure/flows";
-import { 
-    ParaphraseInputSchema, SummarizeInputSchema, HumanizeTextInputSchema, 
-    DetectAIInputSchema, FactCheckInputSchema, FactRetrievalInputSchema, 
-    GenerateChapterInputSchema, GenerateImageInputSchema, 
-    GenerateSectionInputSchema, ImageToTextInputSchema, 
-    RewriteToMarkdownInputSchema, GenerateCitationInputSchema, 
-    IdeaGenerationInputSchema, GeneratePlantUMLInputSchema, 
-    GenerateProjectBlueprintInputSchema, GenerateQuizInputSchema, 
-    GenerateTocInputSchema, GenerateUIDescriptionInputSchema, 
-    GrammarCheckInputSchema, LiteratureReviewInputSchema, 
-    ManipulateTextInputSchema, PlagiarismCheckInputSchema, 
-    QuestionAnsweringInputSchema, SentenceStructureCheckInputSchema, 
-    SolveAssignmentsInputSchema, StyleEditorInputSchema as TextStylistInputSchema, 
-    TopicExplainerInputSchema, TranslateTextInputSchema, 
+import {
+    ParaphraseInputSchema, SummarizeInputSchema, HumanizeTextInputSchema,
+    DetectAIInputSchema, FactCheckInputSchema, FactRetrievalInputSchema,
+    GenerateChapterInputSchema, GenerateImageInputSchema,
+    GenerateSectionInputSchema, ImageToTextInputSchema,
+    RewriteToMarkdownInputSchema, GenerateCitationInputSchema,
+    IdeaGenerationInputSchema, GeneratePlantUMLInputSchema,
+    GenerateProjectBlueprintInputSchema, GenerateQuizInputSchema,
+    GenerateTocInputSchema, GenerateUIDescriptionInputSchema,
+    GrammarCheckInputSchema, LiteratureReviewInputSchema,
+    ManipulateTextInputSchema, PlagiarismCheckInputSchema,
+    QuestionAnsweringInputSchema, SentenceStructureCheckInputSchema,
+    SolveAssignmentsInputSchema, StyleEditorInputSchema as TextStylistInputSchema,
+    TopicExplainerInputSchema, TranslateTextInputSchema,
     WriteDocumentInputSchema, AIResearcherInputSchema,
-    BiasCheckInputSchema, GenerateSessionPlanInputSchema, CreateLectureUnitInputSchema, GenerateTheoreticalLectureInputSchema
+    BiasCheckInputSchema, GenerateSessionPlanInputSchema, CreateLectureUnitInputSchema, GenerateTheoreticalLectureInputSchema,
+    RewriteTextInputSchema, SummarizeTextWithRatioInputSchema, ReadabilityEnhancerInputSchema,
+    ConcisenessCheckerInputSchema, ClarityAdvisorInputSchema
 } from "@/modules/ai/domain/schemas";
 
 export interface ToolConfig {
@@ -66,6 +69,11 @@ export class WritingToolRegistry {
         'solve-assignments': { flow: solveAssignments, schema: SolveAssignmentsInputSchema, creditCost: 2 },
         'summarizer': { flow: summarizeText, schema: SummarizeInputSchema, creditCost: 1, isFreeForGuests: true },
         'text-stylist': { flow: textStyleTune, schema: TextStylistInputSchema, creditCost: 1, isFreeForGuests: true },
+        'rewrite-text': { flow: rewriteText, schema: RewriteTextInputSchema, creditCost: 1, isFreeForGuests: true },
+        'summarize-ratio': { flow: summarizeTextWithRatio, schema: SummarizeTextWithRatioInputSchema, creditCost: 1, isFreeForGuests: true },
+        'readability-enhancer': { flow: readabilityEnhancer, schema: ReadabilityEnhancerInputSchema, creditCost: 1, isFreeForGuests: true },
+        'conciseness-checker': { flow: concisenessChecker, schema: ConcisenessCheckerInputSchema, creditCost: 1, isFreeForGuests: true },
+        'clarity-advisor': { flow: clarityAdvisor, schema: ClarityAdvisorInputSchema, creditCost: 1, isFreeForGuests: true },
         'topic-explainer': { flow: topicExplainer, schema: TopicExplainerInputSchema, creditCost: 1, isFreeForGuests: true },
         'translator': { flow: translateText, schema: TranslateTextInputSchema, creditCost: 1, isFreeForGuests: true },
         'write-document': { flow: writeDocument, schema: WriteDocumentInputSchema, creditCost: 2 },

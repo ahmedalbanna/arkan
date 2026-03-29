@@ -190,6 +190,9 @@ Each module in `src/modules/` follows the same four-layer structure:
 - **Direct Domain Imports**: Avoid using monolithic `types.ts` re-export files. Components and hooks should import domain entities (e.g., `User`, `Project`, `Section`) directly from their respective module directories to ensure proper encapsulation and avoid circular dependencies.
 - **Entity Consolidation**: Keep domain entities and their corresponding `Properties` interfaces in the same file (e.g., `Project.ts`) to reduce file fragmentation and simplify the type system.
 - **Clean Schema Design**: AI input schemas should only contain model-relevant parameters. Avoid redundant metadata fields like `flow: z.literal(...)` as the `WritingToolRegistry` and API layer handle tool identification explicitly via `toolName`.
+- **Guest Access Pattern**: Guest users are supported via a `__guest` session cookie. Tools in the `WritingToolRegistry` can be marked with `isFreeForGuests: true` to allow access without registration.
+- **Usage Limits**: A daily limit is enforced for free access (5 for guests, 10 for free registered users). This is tracked via IP/UserID using the `RateLimiter` singleton.
+- **Real-time Usage Feedback**: AI responses include a `usageMetadata` field. The `useWritingTool` hook automatically detects this and updates the global `AuthContext` usage state to provide immediate UI feedback.
 
 ### React / Next.js
 
@@ -512,6 +515,8 @@ FIREBASE_ADMIN_PRIVATE_KEY=
 - **SQLite Transaction Pattern**: In `better-sqlite3`, transactions are synchronous. When using Drizzle's `db.transaction()`, use synchronous methods (`.get()`, `.run()`, `.all()`) inside the block. Avoid `await` for inner queries to ensure consistent transaction behavior and prevent "transaction already in progress" errors.
 - **Global Singleton Pattern**: Long-lived services (SQLite, Genkit) must use the Global Singleton pattern (`globalThis`) in non-production environments. This prevents multiple connections and `SIGINT` listener accumulation (`MaxListenersExceededWarning`) during Next.js hot reloads.
 - **Writing Tool Standardization**: Always call `useWritingTool` with a raw **tool name** (e.g., `'summarize'`) instead of a full API path. Ensure the tool name exactly matches a key in `WritingToolRegistry.ts`.
+- **Atomic Credit Handling**: Credits are pre-deducted before AI flow execution to prevent balance manipulation. A refund logic must be implemented in the Use Case layer to restore credits if the AI flow fails.
+- **Conversational Filler Removal**: Small models (Gemma/Phi) are prone to adding prefixes like "Sure! Here is...". The `GenkitAiService` implements an automatic `cleanAiOutput` post-processing layer to strip these before the result reaches the UI.
 - **Relational Indexing**: For high-growth tables like generation logs or notifications, proactively add indices to columns used in filters or cron-job queries (e.g., `status`, `userId`, `scheduledFor`) within the Drizzle schema to maintain performance over time.
 - **Removal of src/lib**: The `src/lib` directory has been completely removed. All contents have been moved to `src/infrastructure/` (generic) or `src/modules/*/` (domain-specific). Do not create new files in `src/lib`.
 - **Relocated Schemas**: Zod schemas for validation now live in `src/modules/*/domain/schemas/`.

@@ -8,6 +8,7 @@ interface CustomSelectProps {
   onChange: (value: string) => void;
   options: { value: string; label: string }[];
   placeholder: string;
+  className?: string;
 }
 
 export function CustomSelect({
@@ -15,6 +16,7 @@ export function CustomSelect({
   onChange,
   options = [],
   placeholder,
+  className,
 }: CustomSelectProps) {
   return (
     <Combobox

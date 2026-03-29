@@ -234,7 +234,7 @@ export function GrammarCheckerTool() {
                                                                 onClick={() => toggleFilter(type)}
                                                                 className={cn(
                                                                     "h-5 px-2 rounded-full border text-[8px] font-black uppercase tracking-tighter transition-all",
-                                                                    filterTypes.has(type) ? getTypeColor(type) : "opacity-30 border-muted grayscale"
+                                                                    filterTypes.includes(type) ? getTypeColor(type) : "opacity-30 border-muted grayscale"
                                                                 )}
                                                             >
                                                                 {getTypeLabel(type)}
@@ -244,7 +244,7 @@ export function GrammarCheckerTool() {
                                                 </div>
 
                                                 <div className="space-y-3">
-                                                    {filteredCorrections.length > 0 ? filteredCorrections.map((correction, idx) => (
+                                                    {filteredCorrections.length > 0 ? filteredCorrections.map((correction: any, idx: number) => (
                                                         <div key={idx} className="group relative flex flex-col p-5 rounded-2xl border border-border/40 bg-background hover:border-primary/40 hover:shadow-xl transition-all duration-500">
                                                             <div className="flex justify-between items-start mb-3">
                                                                 <Badge variant="outline" className={cn("h-4 text-[7px] uppercase font-black border-none", getTypeColor(correction.type))}>

@@ -9,8 +9,12 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { useImageToSvgLogic } from '@/modules/ai/adapters/hooks/writing-tools/use-image-to-svg-logic';
-import { Check, Copy, Download, Image as ImageIcon, Loader2, Sparkles, UploadCloud } from 'lucide-react';
+import { Check, Copy, Download, Image as ImageIcon, Loader2, Sparkles, UploadCloud, Zap, Layout, CheckCircle2, ImageUp } from 'lucide-react';
 import Image from 'next/image';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Separator } from '@/components/ui/separator';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { cn } from '@/infrastructure/utils/cn';
 
 export function ImageToSvgTool() {
   const {

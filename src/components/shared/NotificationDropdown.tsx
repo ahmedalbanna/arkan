@@ -28,6 +28,7 @@ import {
 import { ScrollArea } from '@/components/ui/scroll-area';
 import type { Notification } from '@/modules/users/domain/entities/Notification';
 import { formatDistanceToNow } from 'date-fns';
+import { cn } from '@/infrastructure/utils/cn';
 
 function NotificationIcon({ icon }: { icon: Notification['icon'] }) {
   switch (icon) {

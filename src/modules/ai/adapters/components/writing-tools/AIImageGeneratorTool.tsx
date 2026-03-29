@@ -1,5 +1,6 @@
 'use client';
 
+import React, { type ComponentPropsWithoutRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -12,7 +13,6 @@ import Image from 'next/image';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { cn } from '@/infrastructure/utils/cn';
-import React from 'react';
 
 export function AIImageGeneratorTool() {
   const {

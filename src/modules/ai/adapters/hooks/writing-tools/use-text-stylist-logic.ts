@@ -23,27 +23,6 @@ const formSchema = z.object({
 
 type FormValues = z.infer<typeof formSchema>;
 
-// Helper for mocked mutations
-const createMockMutation = (onSuccessCallback: (data: any, variables: any) => void) => {
-    return useMutation({
-        mutationFn: async (variables: any) => {
-            await new Promise(resolve => setTimeout(resolve, 500)); // Simulate network delay
-            // This is where you return the hardcoded data
-            if (variables.style) return { rewrittenText: `This is a hardcoded rewritten text in a '${variables.style}' style.` };
-            if (variables.ratio) return { summarizedText: `This is a hardcoded summary compressed to about ${variables.ratio}% of the original.` };
-            if (variables.targetAudience || variables.tone) return { editedText: 'This is a sample of improved style, tailored for the specified audience and tone.', improvements: ['Improved sentence flow', 'Adjusted vocabulary'] };
-            if (variables.targetLevel) return { enhancedText: 'This text is now easier to read, with simpler sentences and clearer words.', readabilityScore: 85, improvements: ['Simplified complex sentences'] };
-            if (variables.targetReduction !== undefined) return { conciseText: 'This is the concise version of your text.', originalWordCount: variables.text.split(' ').length, newWordCount: Math.floor(variables.text.split(' ').length * 0.8), reductionPercentage: 20 };
-            if (variables.focusAreas) return { improvedText: 'This text has been analyzed for clarity based on your focus areas.', clarityScore: 92, suggestions: [{ issue: 'Vague phrasing', suggestion: 'Use more specific language' }] };
-            return { message: "Mocked response" };
-        },
-        onSuccess: (data, variables) => onSuccessCallback(data, variables),
-        onError: (error, variables, context) => {
-            // Your existing error handling
-        }
-    });
-};
-
 export function useTextStylistLogic() {
   const { t } = useLocalization();
   const [originalText, setOriginalText] = useState('');
@@ -72,12 +51,12 @@ export function useTextStylistLogic() {
     toast({ title: 'Processing Complete!' });
   };
   
-  const rewriteMutation = createMockMutation(handleSuccess);
-  const summarizeMutation = createMockMutation(handleSuccess);
-  const styleEditorMutation = createMockMutation(handleSuccess);
-  const readabilityMutation = createMockMutation(handleSuccess);
-  const concisenessMutation = createMockMutation(handleSuccess);
-  const clarityMutation = createMockMutation(handleSuccess);
+  const rewriteMutation = useWritingTool('rewrite-text', { onSuccess: handleSuccess });
+  const summarizeMutation = useWritingTool('summarize-ratio', { onSuccess: handleSuccess });
+  const styleEditorMutation = useWritingTool('text-stylist', { onSuccess: handleSuccess });
+  const readabilityMutation = useWritingTool('readability-enhancer', { onSuccess: handleSuccess });
+  const concisenessMutation = useWritingTool('conciseness-checker', { onSuccess: handleSuccess });
+  const clarityMutation = useWritingTool('clarity-advisor', { onSuccess: handleSuccess });
 
   const isProcessing = rewriteMutation.isPending || summarizeMutation.isPending || 
     styleEditorMutation.isPending || readabilityMutation.isPending || 

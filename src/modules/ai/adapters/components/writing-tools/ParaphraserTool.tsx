@@ -134,7 +134,7 @@ export function ParaphraserTool() {
                                     </div>
                                 </div>
 
-                                {form.formState.errors.text && <p className="text-[9px] font-bold text-destructive uppercase tracking-widest text-center">{form.formState.errors.text.message}</p><GuestTierBadge className="flex md:hidden justify-center pt-2" />}
+                                {form.formState.errors.text && <p className="text-[9px] font-bold text-destructive uppercase tracking-widest text-center">{form.formState.errors.text.message}</p>}
 
                                 <Button type="submit" disabled={paraphraseMutation.isPending || isUploading} className="w-full h-12 font-bold shadow-xl shadow-primary/20 gap-3 rounded-xl active:scale-[0.98] transition-all">
                                     {paraphraseMutation.isPending ? <Loader2 className="h-5 w-5 animate-spin" /> : <Sparkles className="h-5 w-5" />}
@@ -145,7 +145,7 @@ export function ParaphraserTool() {
                             <div className="p-4 rounded-2xl border bg-muted/10 border-dashed text-center space-y-2">
                                 <p className="text-[10px] text-muted-foreground italic leading-relaxed">
                                     Refinement protocols preserve the original intent while optimizing stylistic and linguistic structures.
-                                </p><GuestTierBadge className="flex md:hidden justify-center pt-2" />
+                                </p>
                             </div>
                         </div>
                     </ScrollArea>

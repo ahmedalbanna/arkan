@@ -1,12 +1,12 @@
 
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useMemo } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useWritingTool, useToast } from '@/hooks';
-import type { GrammarCheckOutput } from '@/modules/ai/domain/schemas';
+import type { CorrectionType, GrammarCheckOutput } from '@/modules/ai/domain/schemas';
 import { useDropzone } from 'react-dropzone';
 import { useAuth } from '@/context/AuthContext';
 import { DocumentProcessingApiClient } from '@/modules/ai-content/adapters/api-client/DocumentProcessingApiClient';
@@ -87,6 +87,19 @@ export function useGrammarCheckerLogic() {
 
   const results = mutation.data as GrammarCheckOutput | null;
 
+  const [filterTypes, setFilterTypes] = useState<CorrectionType[]>(['grammar', 'spelling', 'punctuation']);
+
+  const toggleFilter = (type: CorrectionType) => {
+    setFilterTypes(prev =>
+      prev.includes(type) ? prev.filter(t => t !== type) : [...prev, type]
+    );
+  };
+
+  const filteredCorrections = useMemo(() => {
+    if (!results?.corrections) return [];
+    return results.corrections.filter(c => filterTypes.includes(c.type as CorrectionType));
+  }, [results, filterTypes]);
+
   return {
     t,
     form,
@@ -99,5 +112,8 @@ export function useGrammarCheckerLogic() {
     results,
     isCopied,
     handleCopy,
+    filterTypes,
+    toggleFilter,
+    filteredCorrections,
   };
 }

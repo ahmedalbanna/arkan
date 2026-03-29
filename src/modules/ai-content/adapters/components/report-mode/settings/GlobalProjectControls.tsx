@@ -15,7 +15,7 @@ import { X, Plus } from 'lucide-react';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import { ScrollArea } from '@/components/ui/scroll-area';
 
-function TagInput({ label, value, onChange, placeholder }: { label: string; value: string[]; onChange: (value: string[]) => void; placeholder: string }) {
+function TagInput({ label, value, onChange, placeholder }: { label: string; value: readonly string[]; onChange: (value: string[]) => void; placeholder: string }) {
     const [inputValue, setInputValue] = useState('');
     const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
         if (e.key === 'Enter' && inputValue.trim()) {

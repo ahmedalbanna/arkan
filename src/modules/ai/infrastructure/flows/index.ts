@@ -16,7 +16,10 @@ export { humanizeText } from './writing/humanize-text';
 export { manipulateText } from './writing/manipulate-text';
 export { paraphraseText } from './writing/paraphrase-text';
 export * from './writing/professional-document-writer';
-export { textStyleTune } from './writing/text-stylist';
+export {
+    textStyleTune, rewriteText, summarizeTextWithRatio,
+    readabilityEnhancer, concisenessChecker, clarityAdvisor
+} from './writing/text-stylist';
 export { translateText } from './writing/translate-text';
 export { writeDocument } from './writing/write-document';
 
