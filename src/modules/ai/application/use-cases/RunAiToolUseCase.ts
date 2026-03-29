@@ -23,6 +23,7 @@ export class RunAiToolUseCase {
         @inject(IGenerationLogRepositoryToken)
         private generationLogRepository: IGenerationLogRepository,
         @inject(DeductCreditsUseCase) private deductCreditsUseCase: DeductCreditsUseCase,
+        @inject(WritingToolRegistry)
         private writingToolRegistry: WritingToolRegistry
     ) {}
 
@@ -34,34 +35,54 @@ export class RunAiToolUseCase {
             return Result.fail(AiError.notFound(`Tool ${toolName} not found in registry.`));
         }
 
-        const { flow, creditCost } = config;
+        const { flow, creditCost, isFreeForGuests } = config;
 
-        // 1. Run the AI Flow
-        const aiResult = await this.aiService.runFlow<TInput, TOutput>(flow, input, toolName);
-        if (aiResult.isFailure) {
-            return aiResult;
+        // 1. Handle guest access
+        const isGuest = userId === 'guest';
+        if (isGuest && !isFreeForGuests) {
+            return Result.fail(AiError.unauthorized(`The ${toolName} tool requires a registered account.`));
         }
 
-        const result = aiResult.getValue();
-
-        // 2. Deduct credits
-        const deductResult = await this.deductCreditsUseCase.execute(userId, creditCost);
-        if (deductResult.isFailure) {
-            // If credit deduction fails, we still return the AI result but maybe log the error?
-            // Actually, in a strict system we should have checked credits first.
-            // For now, we propagate the error if we want to enforce credit rules.
-            return Result.fail(AiError.internal(`Credit deduction failed: ${deductResult.error?.message}`));
+        // 2. Pre-deduct credits for registered users
+        let creditsDeducted = false;
+        if (!isGuest && creditCost > 0) {
+            const deductResult = await this.deductCreditsUseCase.execute(userId, creditCost);
+            if (deductResult.isFailure) {
+                return Result.fail(AiError.internal(`Credit deduction failed: ${deductResult.error?.message}`));
+            }
+            creditsDeducted = true;
         }
 
-        // 3. Log the generation
-        await this.generationLogRepository.log({
-            agentId: toolName,
-            userId: userId,
-            input: input,
-            output: result,
-            creditCost: creditCost
-        });
+        // 3. Run the AI Flow
+        try {
+            const aiResult = await this.aiService.runFlow<TInput, TOutput>(flow, input, toolName);
+            
+            if (aiResult.isFailure) {
+                // Refund credits if AI flow fails
+                if (creditsDeducted) {
+                    await this.deductCreditsUseCase.execute(userId, -creditCost);
+                }
+                return aiResult;
+            }
 
-        return Result.ok(result);
+            const result = aiResult.getValue();
+
+            // 4. Log the generation
+            await this.generationLogRepository.log({
+                agentId: toolName,
+                userId: userId,
+                input: input,
+                output: result,
+                creditCost: isGuest ? 0 : creditCost
+            });
+
+            return Result.ok(result);
+        } catch (error: any) {
+            // Refund credits on unexpected error
+            if (creditsDeducted) {
+                await this.deductCreditsUseCase.execute(userId, -creditCost);
+            }
+            return Result.fail(AiError.internal(error.message));
+        }
     }
 }

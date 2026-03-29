@@ -52,6 +52,16 @@ export const withAuth = (handler: ApiHandler, options: ApiHandlerOptions = {}) =
       }
 
       if (!token) {
+        // Support guest access via __guest cookie
+        const isGuest = request.cookies.get('__guest')?.value === 'true';
+        if (isGuest) {
+          return handler({ 
+            request, 
+            user: { id: 'guest', name: 'Guest User', email: 'guest@arkan.ai', role: 'user', credits: 0 } as any, 
+            token: 'guest-token', 
+            params: await params 
+          });
+        }
         return handleApiError({ message: 'Unauthorized: Missing token' }, 401);
       }
 
@@ -112,7 +122,13 @@ export const handleApiError = (error: any, defaultStatus = 500) => {
     return NextResponse.json({ message: firebaseError.message, code: firebaseError.code }, { status });
   }
 
-  // 3. Handle custom thrown errors (e.g., from our own logic)
+  // 3. Handle AiError types
+  if (error.type === 'UNAUTHORIZED') return NextResponse.json({ message: error.message }, { status: 401 });
+  if (error.type === 'NOT_FOUND') return NextResponse.json({ message: error.message }, { status: 404 });
+  if (error.type === 'VALIDATION_FAILED') return NextResponse.json({ message: error.message }, { status: 400 });
+  if (error.type === 'GENERATION_FAILED') return NextResponse.json({ message: error.message }, { status: 500 });
+
+  // 4. Handle custom thrown errors (e.g., from our own logic)
   if (error.status && error.message) {
     return NextResponse.json({ message: error.message }, { status: error.status });
   }

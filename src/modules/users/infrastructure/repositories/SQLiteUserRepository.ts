@@ -60,6 +60,10 @@ export class SQLiteUserRepository implements IUserRepository {
 
     async deductCredits(id: string, amount: number): Promise<Result<number, UserError>> {
         try {
+            if (id === 'guest') {
+                return Result.ok(0);
+            }
+
             // better-sqlite3 transactions are synchronous in Drizzle
             return db.transaction((tx) => {
                 const user = tx.select().from(users).where(eq(users.id, id)).get();
