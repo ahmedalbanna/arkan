@@ -1,27 +1,27 @@
 import { Section, type SectionProperties } from './Section';
 
 export interface ChapterProperties {
-  id: string;
-  title: string;
-  sections?: (Section | SectionProperties)[];
+  readonly id: string;
+  readonly title: string;
+  readonly sections?: readonly SectionProperties[];
 }
 
 export class Chapter {
   public readonly id: string;
   public readonly title: string;
-  public readonly sections: Section[];
+  public readonly sections: readonly Section[];
 
   constructor(props: ChapterProperties) {
     this.id = props.id;
     this.title = props.title || 'Untitled Chapter';
-    this.sections = (props.sections || []).map(s => s instanceof Section ? s : new Section(s));
+    this.sections = (props.sections || []).map(s => s instanceof Section ? s : new Section(s as SectionProperties));
   }
 
-  public with(props: Partial<ChapterProperties>): Chapter {
+  public withProps(props: Partial<ChapterProperties>): Chapter {
     return new Chapter({
       id: this.id,
       title: props.title ?? this.title,
-      sections: props.sections ? props.sections.map(s => s instanceof Section ? s : new Section(s)) : [...this.sections],
+      sections: props.sections ? props.sections.map(s => s instanceof Section ? s.toProperties() : s) : this.sections.map(s => s.toProperties()),
     });
   }
 
@@ -36,11 +36,19 @@ export class Chapter {
     } else {
         newSections.push(section);
     }
-    return this.with({ sections: newSections });
+    return new Chapter({
+        id: this.id,
+        title: this.title,
+        sections: newSections.map(s => s.toProperties())
+    });
   }
 
   public removeSection(id: string): Chapter {
-    return this.with({ sections: this.sections.filter(s => s.id !== id) });
+    return new Chapter({
+        id: this.id,
+        title: this.title,
+        sections: this.sections.filter(s => s.id !== id).map(s => s.toProperties())
+    });
   }
 
   public updateSection(id: string, updater: (s: Section) => Section): Chapter {
@@ -48,18 +56,22 @@ export class Chapter {
     if (idx === -1) return this;
     const newSections = [...this.sections];
     newSections[idx] = updater(newSections[idx]);
-    return this.with({ sections: newSections });
+    return new Chapter({
+        id: this.id,
+        title: this.title,
+        sections: newSections.map(s => s.toProperties())
+    });
   }
 
-  public toStateObject(): ChapterProperties {
+  public toProperties(): ChapterProperties {
     return {
       id: this.id,
       title: this.title,
-      sections: this.sections.map(s => s.toStateObject())
+      sections: this.sections.map(s => s.toProperties())
     };
   }
 
   public toJSON(): ChapterProperties {
-    return this.toStateObject();
+    return this.toProperties();
   }
 }

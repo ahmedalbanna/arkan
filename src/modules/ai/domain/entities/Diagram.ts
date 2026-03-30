@@ -13,9 +13,9 @@ export interface DiagramProperties {
  * It encapsulates the data and logic for a diagram generated from PlantUML.
  */
 export class Diagram {
-    public plantUmlCode: string;
-    public imageUrl: string;
-    public explanation?: string;
+    public readonly plantUmlCode: string;
+    public readonly imageUrl: string;
+    public readonly explanation?: string;
 
     constructor(props: DiagramProperties) {
         this.plantUmlCode = props.plantUmlCode;
@@ -23,32 +23,22 @@ export class Diagram {
         this.explanation = props.explanation;
     }
 
-    /**
-     * Updates the PlantUML code for the diagram.
-     * @param newCode The new PlantUML code.
-     */
-    public updateCode(newCode: string): void {
-        this.plantUmlCode = newCode;
-        // The image URL will become outdated. It should be updated by a separate process.
+    public withProps(props: Partial<DiagramProperties>): Diagram {
+        return new Diagram({
+            ...this.toProperties(),
+            ...props,
+        });
     }
 
-    /**
-     * Updates the explanation for the diagram.
-     * @param newExplanation The new explanation text.
-     */
-    public setExplanation(newExplanation: string): void {
-        this.explanation = newExplanation;
-    }
-
-    /**
-     * Converts the Diagram instance to a plain object for serialization.
-     * @returns A plain object representing the diagram's state.
-     */
-    public toStateObject(): DiagramProperties {
+    public toProperties(): DiagramProperties {
         return {
             plantUmlCode: this.plantUmlCode,
             imageUrl: this.imageUrl,
             explanation: this.explanation,
         };
+    }
+
+    public toStateObject(): DiagramProperties {
+        return this.toProperties();
     }
 }

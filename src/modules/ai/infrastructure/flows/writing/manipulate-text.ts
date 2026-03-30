@@ -39,7 +39,7 @@ const manipulateTextFlow = ai.defineFlow(
     inputSchema: ManipulateTextInputSchema,
     outputSchema: ManipulateTextOutputSchema,
   },
-  async ({ textToManipulate, command }) => {
+  async ({ textToManipulate, command }: any) => {
     const result = await prompt({textToManipulate, command });
     const text = result.text || result.output || "";
     if (!text) throw new Error("Failed to manipulate text.");

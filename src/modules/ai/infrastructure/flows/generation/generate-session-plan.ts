@@ -61,8 +61,9 @@ const generateSessionPlanFlow = ai.defineFlow(
     name: 'generateSessionPlanFlow',
     inputSchema: GenerateSessionPlanInputSchema,
     outputSchema: GenerateSessionPlanOutputSchema
-  }, async (input) => {
-    const { output } = await withRetry(() => generateSessionPlanPrompt(input));
+  }, async (input: any) => {
+    const result = await withRetry(() => generateSessionPlanPrompt(input)) as any;
+    const output = result.output;
     if (!output) {
       throw new Error("Session plan generation failed.");
     }

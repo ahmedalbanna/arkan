@@ -251,7 +251,7 @@ export function SectionTabsPanel({ section, selectedSectionIds = [], className }
       <Tabs defaultValue="context" className="w-full flex-1 flex flex-col min-h-0">
         <div className="px-4">
           <TooltipProvider>
-            <TabsList className="grid w-full grid-cols-3 h-8 rounded-xl bg-muted/20 p-1 gap-1 border border-primary/5">
+            <TabsList className="grid w-full grid-cols-3 h-8 rounded-xl bg-muted/20 p-1 gap-1 border border-primary/5 h-auto">
               <Tooltip>
                 <TooltipTrigger asChild>
                   <TabsTrigger value="context" className="gap-2 text-[9px] font-black uppercase tracking-[0.15em] data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:shadow-sm px-2 transition-all rounded-lg">
@@ -285,7 +285,7 @@ export function SectionTabsPanel({ section, selectedSectionIds = [], className }
 
         <div className="flex-1 overflow-hidden relative mt-1">
           <ScrollArea className="h-full px-4 pr-4 -mr-4">
-            <div className="pb-24 pt-1">
+            <div className="pb-24 pt-4">
               <TabsContent value="context" className="m-0 focus-visible:ring-0 animate-in fade-in slide-in-from-right-2 duration-300">
                  <SectionContextSelector
                     sectionId={section.id}

@@ -11,6 +11,7 @@ import {
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useLocalization } from '@/context/LocalizationContext';
 import { toast, useBuilderStore } from '@/hooks';
+import { v4 as uuidv4 } from 'uuid';
 import MarkdownEditor from './MarkdownEditor';
 import { DiffView } from '@/components/shared/DiffView';
 import { computeDiff } from '@/modules/projects/domain/utils/diff';
@@ -434,7 +435,7 @@ const ReportResults = ({
             onMoveItem={(activeId, overId) => updateProject(p => p.moveContentItem(activeId, overId))}
             onUpdateTitle={(id, newTitle, isChapter) => {
                 if (isChapter) {
-                    updateProject(p => p.updateChapter(id, c => c.with({ title: newTitle })));
+                    updateProject(p => p.updateChapter(id, c => c.withProps({ title: newTitle })));
                 } else {
                     updateProject(p => p.updateSection(id, s => s.withProps({ title: newTitle })));
                 }
@@ -450,22 +451,22 @@ const ReportResults = ({
                 }
             }}
             onAddChapter={() => {
-                updateProject(p => p.addChapter("New Chapter"));
+                updateProject(p => p.addChapter(uuidv4(), "New Chapter"));
             }}
             onAddSection={(chapterId) => {
-                updateProject(p => p.addSectionToChapter(chapterId, "New Section"));
+                updateProject(p => p.addSectionToChapter(chapterId, uuidv4(), "New Section"));
             }}
             onDuplicateItem={(id, isChapter) => {
-                updateProject(p => isChapter ? p.duplicateChapter(id) : p.duplicateSection(id));
+                updateProject(p => isChapter ? p.duplicateChapter(id, uuidv4) : p.duplicateSection(id, uuidv4));
             }}
             onUndo={() => undo()}
             onCopyItem={(id, isChapter) => {
                 if (isChapter) {
                     const chapter = project?.getChapter(id);
-                    if (chapter) setOutlineClipboard({ type: 'chapter', data: chapter.toStateObject ? chapter.toStateObject() : chapter });
+                    if (chapter) setOutlineClipboard({ type: 'chapter', data: chapter.toProperties() });
                 } else {
                     const info = project?.findSection(id);
-                    if (info) setOutlineClipboard({ type: 'section', data: info.section.toStateObject ? info.section.toStateObject() : info.section });
+                    if (info) setOutlineClipboard({ type: 'section', data: info.section.toProperties() });
                 }
                 toast({ title: 'Copied', description: 'Item copied to outline clipboard.' });
             }}
@@ -499,7 +500,7 @@ const ReportResults = ({
                         if (insertionIndex !== -1) {
                             const newContent = [...p.content];
                             newContent.splice(insertionIndex + 1, 0, newChapter);
-                            return p.with({ content: newContent });
+                            return p.withProps({ content: newContent });
                         }
                     }
 

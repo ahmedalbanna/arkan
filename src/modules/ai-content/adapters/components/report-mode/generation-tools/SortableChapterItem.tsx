@@ -14,6 +14,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { SectionAccordionItem } from './SectionAccordionItem';
 import { useBuilderStore } from "@/hooks";
 import { cn } from '@/infrastructure/utils/cn';
+import { v4 as uuidv4 } from 'uuid';
 import { motion, AnimatePresence } from 'framer-motion';
 
 interface SortableChapterItemProps {
@@ -72,7 +73,7 @@ export function SortableChapterItem({
   }, [sectionsInChapter, selectedSectionsForBuild, isAllSectionsSelected]);
 
   const handleAddSection = (chapterId: string) => {
-    updateProject(p => p.addSectionToChapter(chapterId, 'Untitled Section'));
+    updateProject(p => p.addSectionToChapter(chapterId, uuidv4(), 'Untitled Section'));
   }
 
   return (

@@ -82,7 +82,7 @@ export default function ProjectSettingsPanel() {
       } else {
         updatePayload.teamMembers = [];
       }
-      return p.with(updatePayload);
+      return p.withProps(updatePayload);
     });
   };
   

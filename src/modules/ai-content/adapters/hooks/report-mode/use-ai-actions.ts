@@ -225,7 +225,7 @@ export function useAiActions({ editor: initialEditor }: AiActionsProps = {}) {
         const parsedContent = parseMarkdownToContent(data.content, currentProject.content);
         const newChapter = parsedContent[0];
         if (newChapter instanceof Chapter) {
-          return currentProject.updateChapter(data.chapterId, (chapter) => chapter.with({ sections: [...newChapter.sections] }));
+          return currentProject.updateChapter(data.chapterId, (chapter) => chapter.withProps({ sections: newChapter.sections.map(s => s.toProperties()) }));
         }
         return currentProject;
       });

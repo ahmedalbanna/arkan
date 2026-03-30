@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { defaultControls } from './ControlTypes';
+import { defaultControls, type GenerationControlState } from './ControlTypes';
 
 export const SectionStatusSchema = z.enum(['pending', 'in_progress', 'completed', 'failed']);
 export type SectionStatus = z.infer<typeof SectionStatusSchema>;
@@ -13,11 +13,8 @@ export const SectionContextSchema = z.object({
 });
 export type SectionContext = z.infer<typeof SectionContextSchema>;
 
-export const SectionControlsSchema = z.record(z.string(), z.any());
-export type SectionControls = z.infer<typeof SectionControlsSchema>;
-
 export const SectionPropertiesSchema = z.object({
-  id: z.string().optional(),
+  id: z.string(),
   title: z.string(),
   type: SectionTypeSchema.optional(),
   content: z.string().optional(),
@@ -26,7 +23,7 @@ export const SectionPropertiesSchema = z.object({
   aiOutput: z.any().optional(),
   lastUpdated: z.string().optional(),
   with: z.array(z.string()).optional(),
-  controls: SectionControlsSchema.optional(),
+  controls: z.any().optional(), // Use any for raw data, cast to GenerationControlState in class
   prompt: z.string().optional(),
   rules: z.array(z.string()).optional(),
   guidelines: z.array(z.string()).optional(),
@@ -35,30 +32,35 @@ export const SectionPropertiesSchema = z.object({
   context: SectionContextSchema.optional(),
 });
 
-export interface SectionProperties extends z.infer<typeof SectionPropertiesSchema> {}
+export interface SectionProperties extends Omit<z.infer<typeof SectionPropertiesSchema>, 'with' | 'rules' | 'guidelines' | 'constraints' | 'behaviors'> {
+    readonly id: string;
+    readonly title: string;
+    readonly with?: readonly string[];
+    readonly rules?: readonly string[];
+    readonly guidelines?: readonly string[];
+    readonly constraints?: readonly string[];
+    readonly behaviors?: readonly string[];
+}
 
 export class Section {
   public readonly id: string;
   public readonly title: string;
   public readonly type: SectionType;
-  public content: string;
-  public status: SectionStatus;
-  public progress: number;
-  public aiOutput: any;
-  public lastUpdated: string;
-  public with: string[];
-  public controls: SectionControls;
-  public prompt: string;
-  public rules: string[];
-  public guidelines: string[];
-  public constraints: string[];
-  public behaviors: string[];
-  public context?: SectionContext;
+  public readonly content: string;
+  public readonly status: SectionStatus;
+  public readonly progress: number;
+  public readonly aiOutput: any;
+  public readonly lastUpdated: string;
+  public readonly with: readonly string[];
+  public readonly controls: GenerationControlState;
+  public readonly prompt: string;
+  public readonly rules: readonly string[];
+  public readonly guidelines: readonly string[];
+  public readonly constraints: readonly string[];
+  public readonly behaviors: readonly string[];
+  public readonly context?: SectionContext;
 
   constructor(props: SectionProperties) {
-    if (!props.id) {
-        throw new Error("Section must have an id.");
-    }
     this.id = props.id;
     this.title = props.title;
     this.type = props.type || 'report';
@@ -87,13 +89,13 @@ export class Section {
       progress: props.progress ?? this.progress,
       aiOutput: props.aiOutput ?? this.aiOutput,
       lastUpdated: props.lastUpdated ?? this.lastUpdated,
-      with: props.with ?? this.with,
+      with: props.with ? [...props.with] : [...this.with],
       controls: props.controls ?? this.controls,
       prompt: props.prompt ?? this.prompt,
-      rules: props.rules ?? this.rules,
-      guidelines: props.guidelines ?? this.guidelines,
-      constraints: props.constraints ?? this.constraints,
-      behaviors: props.behaviors ?? this.behaviors,
+      rules: props.rules ? [...props.rules] : [...this.rules],
+      guidelines: props.guidelines ? [...props.guidelines] : [...this.guidelines],
+      constraints: props.constraints ? [...props.constraints] : [...this.constraints],
+      behaviors: props.behaviors ? [...props.behaviors] : [...this.behaviors],
       context: props.context ?? this.context,
     });
   }
@@ -115,10 +117,6 @@ export class Section {
     return promptLines || `Generate content for section: ${this.title}`;
   }
 
-  public toStateObject(): SectionProperties {
-    return this.toProperties();
-  }
-
   public toProperties(): SectionProperties {
     return {
       id: this.id,
@@ -129,14 +127,18 @@ export class Section {
       progress: this.progress,
       aiOutput: this.aiOutput,
       lastUpdated: this.lastUpdated,
-      with: this.with,
-      controls: this.controls,
+      with: [...this.with],
+      controls: { ...this.controls },
       prompt: this.prompt,
-      rules: this.rules,
-      guidelines: this.guidelines,
-      constraints: this.constraints,
-      behaviors: this.behaviors,
-      context: this.context,
+      rules: [...this.rules],
+      guidelines: [...this.guidelines],
+      constraints: [...this.constraints],
+      behaviors: [...this.behaviors],
+      context: this.context ? { ...this.context } : undefined,
     };
+  }
+
+  public toJSON(): SectionProperties {
+    return this.toProperties();
   }
 }

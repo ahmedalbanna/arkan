@@ -19,7 +19,7 @@ export const checkGrammarTool = ai.defineTool(
         inputSchema: CheckGrammarToolInputSchema,
         outputSchema: CheckGrammarToolOutputSchema,
     },
-    async (input) => ({ issues: [], correctedText: input.text, summary: 'No issues found.' })
+    async (input: any) => ({ issues: [], correctedText: input.text, summary: 'No issues found.' })
 );
 
 export const analyzeToneTool = ai.defineTool(
@@ -29,7 +29,7 @@ export const analyzeToneTool = ai.defineTool(
         inputSchema: AnalyzeToneToolInputSchema,
         outputSchema: AnalyzeToneToolOutputSchema,
     },
-    async (input) => ({ tone: 'neutral', confidence: 0.9, characteristics: [] })
+    async (input: any) => ({ tone: 'neutral', confidence: 0.9, characteristics: [] })
 );
 
 export const checkReadabilityTool = ai.defineTool(
@@ -39,7 +39,7 @@ export const checkReadabilityTool = ai.defineTool(
         inputSchema: CheckReadabilityToolInputSchema,
         outputSchema: CheckReadabilityToolOutputSchema,
     },
-    async (input) => ({ score: 70, level: 'college', suggestions: [] })
+    async (input: any) => ({ score: 70, level: 'college', suggestions: [] })
 );
 
 export const improveWordChoiceTool = ai.defineTool(
@@ -49,7 +49,7 @@ export const improveWordChoiceTool = ai.defineTool(
         inputSchema: ImproveWordChoiceToolInputSchema,
         outputSchema: ImproveWordChoiceToolOutputSchema,
     },
-    async (input) => {
+    async (input: any) => {
         const focus = input.focus || 'formal';
         const instructions = styleInstructions[focus as keyof typeof styleInstructions] || styleInstructions.formal;
         return { suggestions: [] };

@@ -39,7 +39,7 @@ const topicExplainerFlow = ai.defineFlow({
     name: 'topicExplainerFlow',
     inputSchema: TopicExplainerInputSchema,
     outputSchema: TopicExplainerOutputSchema
-}, async (input) => {
+}, async (input: any) => {
     const { output } = await topicExplainerPrompt(input);
     if (!output) {
         throw new Error("Failed to explain topic.");

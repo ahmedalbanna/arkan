@@ -41,7 +41,7 @@ export const presentationContentCreator = ai.defineFlow(
         inputSchema: PresentationInputSchema,
         outputSchema: PresentationContentSchema,
     },
-    async (input) => {
+    async (input: any) => {
         const {
             projectPath,
             projectName,
@@ -124,7 +124,7 @@ Project Details:
 - Project Type: ${projectStructure.projectType}
 - Total Files: ${projectStructure.totalFiles}
 - Main Components: ${projectStructure.mainDirectories.length}
-- Tech Stack: ${Object.keys(dependencies.categories).flatMap(cat => dependencies.categories[cat as keyof typeof dependencies.categories]).slice(0, 8).join(', ')}
+- Tech Stack: ${Object.keys(dependencies.categories).flatMap((cat: any) => (dependencies.categories as any)[cat]).slice(0, 8).join(', ')}
 
 ${metrics ? `
 Metrics to Highlight:
@@ -146,7 +146,7 @@ ${diagram.diagram}
 
 ${keyPoints ? `
 Key Points to Emphasize:
-${keyPoints.map(p => `- ${p}`).join('\n')}
+${keyPoints.map((p: any) => `- ${p}`).join('\n')}
 ` : ''}
 
 For each slide, provide:

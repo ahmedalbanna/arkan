@@ -1,4 +1,3 @@
-import { v4 as uuidv4 } from 'uuid';
 import { Chapter, type ChapterProperties } from '@/modules/ai-content/domain/entities/Chapter';
 import { Section, type SectionProperties } from '@/modules/ai-content/domain/entities/Section';
 import { ExternalContext, type ExternalContextProperties } from '@/modules/ai-content/domain/entities/ExternalContext';
@@ -136,7 +135,7 @@ export class Project {
     this.citationStyle = props.citationStyle || 'APA7';
   }
 
-  public with(props: Partial<ProjectProperties>): Project {
+  public withProps(props: Partial<ProjectProperties>): Project {
     const currentProps = this.toStateObject();
     const newProps: ProjectProperties = {
       ...currentProps,
@@ -244,22 +243,22 @@ export class Project {
         toc += `   ${chapterIndex + 1}.${sectionIndex + 1}. ${section.title}\n`;
       });
     });
-    return this.with({ tableOfContentsMarkdown: toc });
+    return this.withProps({ tableOfContentsMarkdown: toc });
   }
 
   public updateProjectFromMarkdown(markdown: string, parser: (markdown: string, existing: ProjectContent) => ProjectContent): Project {
     const newContent = parser(markdown, this.content);
-    return this.with({ content: [...newContent] });
+    return this.withProps({ content: [...newContent] });
   }
 
-  public addChapter(title: string = "Untitled Chapter"): Project {
-    const newChapter = new Chapter({ id: uuidv4(), title, sections: [] });
-    return this.with({ content: [...this.content, newChapter] });
+  public addChapter(id: string, title: string = "Untitled Chapter"): Project {
+    const newChapter = new Chapter({ id, title, sections: [] });
+    return this.withProps({ content: [...this.content, newChapter] });
   }
 
-  public addSectionToChapter(chapterId: string, sectionTitle: string, content?: string): Project {
+  public addSectionToChapter(chapterId: string, sectionId: string, sectionTitle: string, content?: string): Project {
     return this.updateChapter(chapterId, (chapter) =>
-        chapter.addSection(new Section({ id: uuidv4(), title: sectionTitle, type: 'report', content, lastUpdated: new Date().toISOString(), controls: { ...defaultControls } }))
+        chapter.addSection(new Section({ id: sectionId, title: sectionTitle, type: 'report', content, lastUpdated: new Date().toISOString(), controls: { ...defaultControls } }))
     );
   }
 
@@ -271,37 +270,37 @@ export class Project {
     const originalChapter = newContent[idx] as Chapter;
     newContent[idx] = updater(originalChapter);
 
-    return this.with({ content: newContent });
+    return this.withProps({ content: newContent });
   }
 
   public removeChapter(id: string): Project {
-    return this.with({ content: this.content.filter(c => c.id !== id) });
+    return this.withProps({ content: this.content.filter(c => c.id !== id) });
   }
 
-  public duplicateChapter(id: string): Project {
+  public duplicateChapter(id: string, idGenerator: () => string): Project {
     const chapter = this.getChapter(id);
     if (!chapter) return this;
 
-    const newChapter = chapter.with({
-        id: uuidv4(),
+    const newChapter = chapter.withProps({
+        id: idGenerator(),
         title: `${chapter.title} (Copy)`,
-        sections: chapter.sections.map(s => s.withProps({ id: uuidv4() }))
+        sections: chapter.sections.map(s => s.withProps({ id: idGenerator() }).toProperties())
     });
 
     const index = this.content.findIndex(c => c.id === id);
     const newContent = [...this.content];
     newContent.splice(index + 1, 0, newChapter);
 
-    return this.with({ content: newContent });
+    return this.withProps({ content: newContent });
   }
 
-  public duplicateSection(id: string): Project {
+  public duplicateSection(id: string, idGenerator: () => string): Project {
     const info = this.findSection(id);
     if (!info) return this;
 
     const { chapter, section } = info;
     const newSection = section.withProps({
-        id: uuidv4(),
+        id: idGenerator(),
         title: `${section.title} (Copy)`
     });
 
@@ -314,7 +313,7 @@ export class Project {
     
     if (oldIndex !== -1 && newIndex !== -1) {
       const newContent = arrayMove([...this.content], oldIndex, newIndex);
-      return this.with({ content: newContent });
+      return this.withProps({ content: newContent });
     }
     return this;
   }
@@ -336,40 +335,40 @@ export class Project {
           return currentSection;
         });
         if (originalSections !== updatedSections) {
-          return item.with({ sections: updatedSections });
+          return item.withProps({ sections: updatedSections.map(s => s.toProperties()) });
         }
       }
       return item;
     });
 
-    return sectionFound ? this.with({ content: newContent }) : this;
+    return sectionFound ? this.withProps({ content: newContent }) : this;
   }
 
   public updateSectionContent(sectionId: string, newMarkdown: string): Project {
     return this.updateSection(sectionId, updatedSection => updatedSection.withProps({ content: newMarkdown }));
   }
 
-  public addExternalContext(ctx: Omit<ExternalContextProperties, 'id'>): Project {
-    const newCtx = new ExternalContext({ ...ctx, id: uuidv4() });
-    return this.with({ externalContext: [...this.externalContext.map(ec => ec.toStateObject()), newCtx.toStateObject()] });
+  public addExternalContext(ctx: Omit<ExternalContextProperties, 'id'>, id: string): Project {
+    const newCtx = new ExternalContext({ ...ctx, id });
+    return this.withProps({ externalContext: [...this.externalContext.map(ec => ec.toProperties()), newCtx.toProperties()] });
   }
 
   public removeExternalContext(index: number): Project {
     const newContext = [...this.externalContext];
     newContext.splice(index, 1);
-    return this.with({ externalContext: newContext.map(ec => ec.toStateObject()) });
+    return this.withProps({ externalContext: newContext.map(ec => ec.toProperties()) });
   }
 
   public updateExternalContextType(index: number, type: any): Project {
     const newContext = [...this.externalContext];
     const item = newContext[index];
     if (item) {
-      newContext[index] = item.with({ type });
+      newContext[index] = item.withProps({ type });
     }
-    return this.with({ externalContext: newContext.map(ec => ec.toStateObject()) });
+    return this.withProps({ externalContext: newContext.map(ec => ec.toProperties()) });
   }
 
-  public parseAndSetContentFromToc(tocText: string): ProjectContent {
+  public parseAndSetContentFromToc(tocText: string, idGenerator: () => string): ProjectContent {
     const lines = tocText.split('\n').filter(line => line.trim() !== '');
     const newContent: Chapter[] = [];
     let currentChapter: Chapter | null = null;
@@ -383,11 +382,11 @@ export class Project {
                 newContent.push(currentChapter);
             }
             const title = line.replace(/^#\s*/, '').replace(/^\d+\.\s*/, '').trim();
-            currentChapter = new Chapter({ id: uuidv4(), title, sections: [] });
+            currentChapter = new Chapter({ id: idGenerator(), title, sections: [] });
         } else if (currentChapter) {
             const title = line.replace(/^\s*-\s*/, '').replace(/^\d+\.\d+\.?\s*/, '').trim();
             if (title) {
-                const newSection = new Section({ id: uuidv4(), title, type: 'report', controls: { ...defaultControls } });
+                const newSection = new Section({ id: idGenerator(), title, type: 'report', controls: { ...defaultControls } });
                 currentChapter = currentChapter.addSection(newSection);
             }
         }
@@ -406,7 +405,7 @@ export class Project {
 
   // --- Serialization ---
   
-  public toStateObject(): ProjectProperties {
+  public toProperties(): ProjectProperties {
     return {
       id: this.id,
       name: this.name,
@@ -422,8 +421,8 @@ export class Project {
       logoUrl: this.logoUrl,
       universityLogoUrl: this.universityLogoUrl,
       tableOfContentsMarkdown: this.tableOfContentsMarkdown,
-      content: this.content.map(c => c.toStateObject()),
-      externalContext: this.externalContext.map(ec => ec.toStateObject()),
+      content: this.content.map(c => c.toProperties()),
+      externalContext: this.externalContext.map(ec => ec.toProperties()),
       meta: this.meta,
       activeSectionId: this.activeSectionId,
       // Add new fields
@@ -438,7 +437,11 @@ export class Project {
     };
   }
 
+  public toStateObject(): ProjectProperties {
+    return this.toProperties();
+  }
+
   public toJSON(): ProjectProperties {
-      return this.toStateObject();
+      return this.toProperties();
   }
 }

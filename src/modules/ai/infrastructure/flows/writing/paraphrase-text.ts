@@ -37,8 +37,9 @@ const paraphraseTextFlow = ai.defineFlow({
     name: 'paraphraseTextFlow',
     inputSchema: ParaphraseInputSchema,
     outputSchema: ParaphraseOutputSchema,
-}, async (input) => {
-    const instruction = styleDescriptions[input.mode] || styleDescriptions.standard;
+}, async (input: any) => {
+    const mode = (input.mode || 'standard') as ParaphraseMode;
+    const instruction = styleDescriptions[mode] || styleDescriptions.standard;
     const result = await paraphrasePrompt({ text: input.text, mode: input.mode, instruction } as any);
     
     const text = (result.text || result.output || "").replace(/---/g, '').trim();

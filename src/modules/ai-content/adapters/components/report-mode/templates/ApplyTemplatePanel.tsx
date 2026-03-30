@@ -13,6 +13,7 @@ import { useLocalization } from '@/context/LocalizationContext';
 import { MarkdownViewer } from '@/components/shared/MarkdownViewer';
 import { Label } from '@/components/ui/label';
 import { useBuilderStore } from '@/hooks';
+import { v4 as uuidv4 } from 'uuid';
 import { ReportTemplateProperties } from '@/modules/templates/domain/entities/ReportTemplate';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/infrastructure/utils/cn';
@@ -134,8 +135,8 @@ export default function ApplyTemplatePanel() {
               ).join('\n\n');
               if (tocMarkdown) {
                   updateProject(p => {
-                      const newContent = p.parseAndSetContentFromToc(tocMarkdown);
-                      return p.with({ content: [...newContent] });
+                      const newContent = p.parseAndSetContentFromToc(tocMarkdown, uuidv4);
+                      return p.withProps({ content: [...newContent] });
                   });
               }
               

@@ -9,6 +9,7 @@ import type { AIResearcherOutput, LiteratureReviewOutput, QuestionAnsweringOutpu
 import { useLocalization } from '@/context/LocalizationContext';
 import { useMemo, useRef, useState, useEffect } from 'react';
 import { useBuilderStore } from '@/modules/projects/adapters/state/useBuilderStore';
+import { v4 as uuidv4 } from 'uuid';
 
 export type ResearchMode = 'ai-researcher' | 'literature-review' | 'question-answering' | 'fact-retrieval';
 
@@ -141,7 +142,7 @@ export function useAddToProjectDialogLogic(researchMarkdown: string, researchTit
             fileName: fileName,
             content: researchMarkdown,
             type: 'context'
-        }));
+        }, uuidv4()));
         toast({
             title: t('writingTools.aiResearcher.toastContextAddedTitle'),
             description: t('writingTools.aiResearcher.toastContextAddedDesc', { researchTitle }),

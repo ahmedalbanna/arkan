@@ -15,7 +15,7 @@ export const runAgentFlow = ai.defineFlow(
     inputSchema: RunAgentInputSchema,
     outputSchema: z.string(),
   },
-  async ({ systemPrompt, userPrompt }) => {
+  async ({ systemPrompt, userPrompt }: any) => {
     const llmResponse = await ai.generate({
 
       prompt: userPrompt,

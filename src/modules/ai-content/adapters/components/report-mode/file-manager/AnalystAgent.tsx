@@ -9,6 +9,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { useAuth } from '@/context/AuthContext';
 import { useLocalization } from '@/context/LocalizationContext';
 import { toast, useBuilderStore } from '@/hooks';
+import { v4 as uuidv4 } from 'uuid';
 import { markdownComponents } from '@/modules/ai-content/adapters/components/report-mode/markdown-styles';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation } from '@tanstack/react-query';
@@ -104,7 +105,7 @@ export default function AnalystAgent() {
   function handleSaveAnalysis() {
     if (!markdownResult || !form.getValues('prompt')) return;
     const fileName = form.getValues('prompt').toLowerCase().replace(/\s+/g, '_').replace(/[^a-z0-9_]/g, '').slice(0, 50) + '.md';
-    updateProject((p) => { p.addExternalContext({ fileName, content: markdownResult, type: 'context' }); });
+    updateProject((p) => { p.addExternalContext({ fileName, content: markdownResult, type: 'context' }, uuidv4()); });
     toast({ title: t('builder.files.toasts.analysisSaved'), description: t('builder.files.toasts.analysisSavedDesc').replace('{fileName}', fileName) });
   }
 

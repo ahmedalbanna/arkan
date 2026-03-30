@@ -31,8 +31,11 @@ export const PUT = withAuth(async ({ request, params }) => {
         return handleAIContentResult(checkResult);
     }
 
-    const result = await controller.saveSection({ id: sectionId, ...validation.data });
-    return handleAIContentResult(result);
+    if (checkResult.isSuccess) {
+        const result = await controller.saveSection({ ...checkResult.getValue(), ...validation.data, id: sectionId } as any);
+        return handleAIContentResult(result);
+    }
+    return handleAIContentResult(checkResult);
   } catch (error) {
     return handleApiError(error);
   }

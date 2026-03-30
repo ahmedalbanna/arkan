@@ -53,7 +53,7 @@ export const projectDocumentationGenerator = ai.defineFlow(
         inputSchema: ProjectDocumentationInputSchema,
         outputSchema: ProjectDocumentationOutputSchema,
     },
-    async (input) => {
+    async (input: any) => {
         const {
             projectPath,
             includeREADME,

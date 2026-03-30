@@ -5,7 +5,7 @@ import { ISectionRepositoryToken } from "../../domain/repositories/ISectionRepos
 
 import { Result } from "@/infrastructure/utils/result";
 import { AIContentError } from "../../domain/errors/AIContentErrors";
-import { SectionDefinition } from "../../domain/repositories/ISectionRepository";
+import { SectionProperties } from "../../domain/entities/Section";
 
 @injectable()
 export class GetSectionsUseCase {
@@ -14,7 +14,7 @@ export class GetSectionsUseCase {
         private sectionRepository: ISectionRepository
     ) {}
 
-    async execute(): Promise<Result<SectionDefinition[], AIContentError>> {
+    async execute(): Promise<Result<SectionProperties[], AIContentError>> {
         return this.sectionRepository.getAll();
     }
 }

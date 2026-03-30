@@ -27,7 +27,7 @@ export class Agent {
     public readonly description: string;
     public readonly category: string;
     public readonly prompt: string;
-    public readonly guidelines: string[];
+    public readonly guidelines: readonly string[];
     public readonly isEnabled: boolean;
     public readonly author: string;
     public readonly version: string;
@@ -52,7 +52,14 @@ export class Agent {
         return this.isEnabled;
     }
 
-    public toStateObject(): AgentProperties {
+    public withProps(props: Partial<AgentProperties>): Agent {
+        return new Agent({
+            ...this.toProperties(),
+            ...props,
+        });
+    }
+
+    public toProperties(): AgentProperties {
         return {
             id: this.id,
             name: this.name,
@@ -66,5 +73,9 @@ export class Agent {
             createdAt: this.createdAt,
             updatedAt: this.updatedAt,
         };
+    }
+
+    public toStateObject(): AgentProperties {
+        return this.toProperties();
     }
 }

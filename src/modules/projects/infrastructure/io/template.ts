@@ -19,7 +19,7 @@ export function applyReportTemplate(project: Project, template: ReportTemplatePr
     const newContent = template.content.map(chapterData => {
       const sections = (chapterData.sections || []).map(sectionInfo => {
         // sectionInfo from the template is the source of truth
-        return new Section({ id: uuidv4(), ...sectionInfo });
+        return new Section({ ...sectionInfo, id: uuidv4() });
       });
       return new Chapter({ id: uuidv4(), title: chapterData.title, sections: sections });
     });
@@ -35,5 +35,5 @@ export function applyReportTemplate(project: Project, template: ReportTemplatePr
     if (template.course) projectUpdates.course = template.course;
     if (template.educationalLevel) projectUpdates.educationalLevel = template.educationalLevel;
 
-    return project.with(projectUpdates);
+    return project.withProps(projectUpdates);
 }

@@ -61,7 +61,7 @@ export function useBuilderPageLogic(initialProject?: ProjectProperties | null) {
   };
 
   const updateProjectName = useCallback((name: string) => {
-    updateProject((currentProject) => currentProject.with({ name }));
+    updateProject((currentProject) => currentProject.withProps({ name }));
   }, [updateProject]);
 
   return {

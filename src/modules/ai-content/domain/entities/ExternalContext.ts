@@ -1,16 +1,15 @@
 
-import { v4 as uuidv4 } from 'uuid';
 import { ExternalContextType } from './ControlTypes';
 
 export interface ExternalContextProperties {
-    id?: string;
-    fileName: string;
-    content: string; // Could be raw text or a data URI
-    type: ExternalContextType;
-    metadata?: Record<string, any>; // Flexible metadata
+    readonly id: string;
+    readonly fileName: string;
+    readonly content: string; // Could be raw text or a data URI
+    readonly type: ExternalContextType;
+    readonly metadata?: Readonly<Record<string, any>>; // Flexible metadata
 }
 
-export class ExternalContext implements ExternalContextProperties {
+export class ExternalContext {
     public readonly id: string;
     public readonly fileName: string;
     public readonly content: string;
@@ -18,21 +17,21 @@ export class ExternalContext implements ExternalContextProperties {
     public readonly metadata: Readonly<Record<string, any>>;
 
     constructor(props: ExternalContextProperties) {
-        this.id = props.id || uuidv4();
+        this.id = props.id;
         this.fileName = props.fileName;
         this.content = props.content;
         this.type = props.type;
         this.metadata = props.metadata || {};
     }
 
-    public with(props: Partial<ExternalContextProperties>): ExternalContext {
+    public withProps(props: Partial<ExternalContextProperties>): ExternalContext {
         return new ExternalContext({
-            ...this.toStateObject(),
+            ...this.toProperties(),
             ...props,
         });
     }
 
-    public toStateObject(): ExternalContextProperties {
+    public toProperties(): ExternalContextProperties {
         return {
             id: this.id,
             fileName: this.fileName,
@@ -42,7 +41,11 @@ export class ExternalContext implements ExternalContextProperties {
         };
     }
 
+    public toStateObject(): ExternalContextProperties {
+        return this.toProperties();
+    }
+
     public toJSON(): ExternalContextProperties {
-        return this.toStateObject();
+        return this.toProperties();
     }
 }

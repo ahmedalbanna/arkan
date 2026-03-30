@@ -41,8 +41,9 @@ const summarizeTextFlow = ai.defineFlow({
     name: 'summarizeTextFlow',
     inputSchema: SummarizeInputSchema,
     outputSchema: SummarizeOutputSchema
-}, async (input) => {
-    const instruction = lengthDescriptions[input.length] || lengthDescriptions.medium;
+}, async (input: any) => {
+    const lengthKey = (input.length || 'medium') as SummarizeLength;
+    const instruction = lengthDescriptions[lengthKey] || lengthDescriptions.medium;
     
     try {
         const result = await summarizePrompt({ ...input, instruction });

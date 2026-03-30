@@ -1,20 +1,12 @@
 
-export interface SectionDefinition {
-    id: string;
-    title: string;
-    type: 'report' | 'diagram' | 'presentation';
-    prompt?: string;
-    guidelines?: string[];
-    model?: string;
-}
-
 import { Result } from "@/infrastructure/utils/result";
 import { AIContentError } from "../errors/AIContentErrors";
+import { SectionProperties } from "../entities/Section";
 
 export interface ISectionRepository {
-    getAll(): Promise<Result<SectionDefinition[], AIContentError>>;
-    getById(id: string): Promise<Result<SectionDefinition, AIContentError>>;
-    save(section: SectionDefinition): Promise<Result<SectionDefinition, AIContentError>>;
+    getAll(): Promise<Result<SectionProperties[], AIContentError>>;
+    getById(id: string): Promise<Result<SectionProperties, AIContentError>>;
+    save(section: SectionProperties): Promise<Result<SectionProperties, AIContentError>>;
     delete(id: string): Promise<Result<void, AIContentError>>;
 }
 

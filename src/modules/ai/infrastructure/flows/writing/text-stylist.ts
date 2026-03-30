@@ -188,7 +188,7 @@ export async function concisenessChecker(input: ConcisenessCheckerInput): Promis
     ? `Target Reduction: Aim to reduce the text by approximately ${input.targetReduction}% while preserving all essential meaning. `
     : 'Aim to make the text more concise while preserving all essential meaning. ';
 
-  const originalWordCount = input.text.split(/\s+/).filter(word => word.length > 0).length;
+  const originalWordCount = input.text.split(/\s+/).filter((word: any) => word.length > 0).length;
 
   const { output } = await ai.generate({
     model: MODEL_BY_TASK.STRUCTURED,
@@ -220,7 +220,7 @@ Return ONLY: {"text": "concise content here", "improvements": ["removed repetiti
   }
 
   const conciseText = output.text.trim();
-  const newWordCount = conciseText.split(/\s+/).filter(word => word.length > 0).length;
+  const newWordCount = conciseText.split(/\s+/).filter((word: any) => word.length > 0).length;
   const reductionPercentage = originalWordCount > 0
     ? Math.round(((originalWordCount - newWordCount) / originalWordCount) * 100)
     : 0;

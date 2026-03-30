@@ -76,7 +76,7 @@ const questionAnsweringFlow = ai.defineFlow({
   name: 'questionAnsweringFlow',
   inputSchema: QuestionAnsweringInputSchema,
   outputSchema: QuestionAnsweringOutputSchema,
-}, async (input) => {
+}, async (input: any) => {
   try {
     const result = await questionAnsweringPrompt(input);
     if (!result) {

@@ -43,7 +43,7 @@ export const technicalSpecificationWriter = ai.defineFlow(
         inputSchema: TechnicalSpecInputSchema,
         outputSchema: TechnicalSpecificationSchema,
     },
-    async (input) => {
+    async (input: any) => {
         const {
             projectPath,
             projectName,

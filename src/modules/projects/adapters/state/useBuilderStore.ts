@@ -181,8 +181,8 @@ const useBuilderStore = create<BuilderState>((set, get) => ({
     applyTableOfContents: (tocMarkdown: string) => {
         get().updateProject(p => {
           if (!p) return p;
-          const newContent = p.parseAndSetContentFromToc(tocMarkdown);
-          return p.with({ content: [...newContent] });
+          const newContent = p.parseAndSetContentFromToc(tocMarkdown, uuidv4);
+          return p.withProps({ content: [...newContent] });
         });
     
         toast({

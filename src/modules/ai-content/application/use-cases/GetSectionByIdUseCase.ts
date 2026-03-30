@@ -1,10 +1,11 @@
 
 import { inject, injectable } from "tsyringe";
-import type { ISectionRepository, SectionDefinition } from "../../domain/repositories/ISectionRepository";
+import type { ISectionRepository } from "../../domain/repositories/ISectionRepository";
 import { ISectionRepositoryToken } from "../../domain/repositories/ISectionRepository";
 
 import { Result } from "@/infrastructure/utils/result";
 import { AIContentError } from "../../domain/errors/AIContentErrors";
+import { SectionProperties } from "../../domain/entities/Section";
 
 @injectable()
 export class GetSectionByIdUseCase {
@@ -13,7 +14,7 @@ export class GetSectionByIdUseCase {
         private sectionRepository: ISectionRepository
     ) {}
 
-    async execute(id: string): Promise<Result<SectionDefinition, AIContentError>> {
+    async execute(id: string): Promise<Result<SectionProperties, AIContentError>> {
         return this.sectionRepository.getById(id);
     }
 }

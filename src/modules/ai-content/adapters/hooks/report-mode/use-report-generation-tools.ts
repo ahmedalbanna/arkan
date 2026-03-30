@@ -4,6 +4,7 @@
 import { useLocalization } from '@/context/LocalizationContext';
 import { toast, useBuilderStore } from '@/hooks';
 import { useMemo, useState, useCallback } from 'react';
+import { v4 as uuidv4 } from 'uuid';
 import type { DragEndEvent } from '@dnd-kit/core';
 import { useAiActions } from './use-ai-actions';
 import { applyReportTemplate } from '@/modules/projects/infrastructure/io/template';
@@ -61,7 +62,7 @@ export function useReportGenerationTools() {
     }, [project]);
 
     const handleAddChapter = useCallback(() => {
-        updateProject(p => p.addChapter());
+        updateProject(p => p.addChapter(uuidv4()));
         toast({ title: "Chapter Created", description: `A new untitled chapter has been added.` });
     }, [updateProject]);
 
@@ -78,7 +79,7 @@ export function useReportGenerationTools() {
     const chaptersToBuild = useMemo(() => {
         if (!project) return [];
         return project.chapters
-          .map(c => c.with({ sections: c.sections.filter(s => selectedSectionsForBuild.has(s.id))}))
+          .map(c => c.withProps({ sections: c.sections.filter(s => selectedSectionsForBuild.has(s.id)).map(s => s.toProperties())}))
           .filter(c => c.sections.length > 0);
     }, [project, selectedSectionsForBuild]);
 

@@ -49,15 +49,15 @@ export function useExport() {
         isRtl: false,
       };
 
-      const selectedContentPlain = selectedContent.map((item) => item.toStateObject());
+      const selectedContentPlain = selectedContent.map((item) => item.toProperties());
       const blob = await apiService<
-        { project: ReturnType<Project['toStateObject']>; selectedContent: unknown[]; options: Omit<ConversionOptions, 'coverPageMarkdown'> },
+        { project: ReturnType<Project['toProperties']>; selectedContent: unknown[]; options: Omit<ConversionOptions, 'coverPageMarkdown'> },
         Blob
       >({
         endpoint: '/api/export/docx',
         method: 'POST',
         data: {
-          project: project.toStateObject(),
+          project: project.toProperties(),
           selectedContent: selectedContentPlain,
           options: apiOptions,
         },

@@ -70,7 +70,7 @@ const factRetrievalFlow = ai.defineFlow({
     name: 'factRetrievalFlow',
     inputSchema: FactRetrievalInputSchema,
     outputSchema: FactRetrievalOutputSchema,
-}, async (input) => {
+}, async (input: any) => {
     try {
         const result = await factRetrievalPrompt(input);
         if (!result) {

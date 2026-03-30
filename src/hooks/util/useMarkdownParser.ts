@@ -12,6 +12,7 @@ import { Section } from '@/modules/ai-content/domain/entities/Section';
 import { type ProjectContent } from '@/modules/projects/domain/entities/Project';
 import { type SectionProperties } from '@/modules/ai-content/domain/entities/Section';
 import { getNodeText } from '@/modules/templates/infrastructure/exporters/pptx/ast-utils';
+import { v4 as uuidv4 } from 'uuid';
 
 /**
  * Parses a markdown string and converts it into a structured array of Chapter and Section objects.
@@ -77,7 +78,7 @@ export function parseMarkdownToContent(markdown: string, existingContent: Projec
         flushChapter();
         const existingChapter = findExistingItem(title, existingContent, Chapter);
         currentChapter = new Chapter({ 
-          id: existingChapter?.id, 
+          id: existingChapter?.id || uuidv4(), 
           title: title, 
           sections: [] // CRITICAL FIX: Always start with empty sections
         });
@@ -87,12 +88,12 @@ export function parseMarkdownToContent(markdown: string, existingContent: Projec
         flushSection();
         const existingSection = findExistingItem(title, existingContent, Section);
         currentSection = new Section({
-            id: existingSection?.id,
+            id: existingSection?.id || uuidv4(),
             title: title,
             type: existingSection?.type || 'report',
-            content: existingSection?.content,
+            content: existingSection?.content || '',
             controls: existingSection?.controls,
-            prompt: existingSection?.prompt,
+            prompt: existingSection?.prompt || '',
             rules: existingSection?.rules ? [...existingSection.rules] : [],
             guidelines: existingSection?.guidelines ? [...existingSection.guidelines] : [],
             constraints: existingSection?.constraints ? [...existingSection.constraints] : [],
@@ -109,7 +110,7 @@ export function parseMarkdownToContent(markdown: string, existingContent: Projec
                     flushSection();
                     const existingSection = findExistingItem(sectionTitle, existingContent, Section);
                     currentSection = new Section({
-                        id: existingSection?.id,
+                        id: existingSection?.id || uuidv4(),
                         title: sectionTitle,
                         type: 'report',
                         // Carry over other properties from existing if needed

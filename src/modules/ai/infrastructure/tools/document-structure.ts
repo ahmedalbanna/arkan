@@ -20,7 +20,7 @@ export const analyzeDocumentStructureTool = ai.defineTool(
         inputSchema: AnalyzeDocumentStructureToolInputSchema,
         outputSchema: AnalyzeDocumentStructureToolOutputSchema,
     },
-    async (input) => {
+    async (input: any) => {
         const type = input.documentType || 'general';
         const prompt = contextPrompts[type as keyof typeof contextPrompts] || contextPrompts.general;
         return { sections: [], missingElements: [] };
@@ -34,7 +34,7 @@ export const checkLogicalFlowTool = ai.defineTool(
         inputSchema: CheckLogicalFlowToolInputSchema,
         outputSchema: CheckLogicalFlowToolOutputSchema,
     },
-    async (input) => ({ flowScore: 0.9, transitions: [], suggestions: [] })
+    async (input: any) => ({ flowScore: 0.9, transitions: [], suggestions: [] })
 );
 
 export const analyzeArgumentStructureTool = ai.defineTool(
@@ -44,7 +44,7 @@ export const analyzeArgumentStructureTool = ai.defineTool(
         inputSchema: AnalyzeArgumentStructureToolInputSchema,
         outputSchema: AnalyzeArgumentStructureToolOutputSchema,
     },
-    async (input) => ({ claims: [], weakPoints: [] })
+    async (input: any) => ({ claims: [], weakPoints: [] })
 );
 
 export const documentStructureTools = {

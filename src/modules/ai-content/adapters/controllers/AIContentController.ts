@@ -4,6 +4,9 @@ import { GetSectionsUseCase } from "../../application/use-cases/GetSectionsUseCa
 import { SaveSectionUseCase } from "../../application/use-cases/SaveSectionUseCase";
 import { GetSectionByIdUseCase } from "../../application/use-cases/GetSectionByIdUseCase";
 import { DeleteSectionUseCase } from "../../application/use-cases/DeleteSectionUseCase";
+import { Result } from "@/infrastructure/utils/result";
+import { AIContentError } from "../../domain/errors/AIContentErrors";
+import { SectionProperties } from "../../domain/entities/Section";
 
 @injectable()
 export class AIContentController {
@@ -18,19 +21,19 @@ export class AIContentController {
         private deleteSectionUseCase: DeleteSectionUseCase
     ) {}
 
-    async getSections() {
+    async getSections(): Promise<Result<SectionProperties[], AIContentError>> {
         return this.getSectionsUseCase.execute();
     }
 
-    async getSectionById(id: string) {
+    async getSectionById(id: string): Promise<Result<SectionProperties, AIContentError>> {
         return this.getSectionByIdUseCase.execute(id);
     }
 
-    async saveSection(section: any) {
+    async saveSection(section: SectionProperties): Promise<Result<SectionProperties, AIContentError>> {
         return this.saveSectionUseCase.execute(section);
     }
 
-    async deleteSection(id: string) {
+    async deleteSection(id: string): Promise<Result<void, AIContentError>> {
         return this.deleteSectionUseCase.execute(id);
     }
 }

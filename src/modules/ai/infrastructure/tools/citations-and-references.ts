@@ -20,7 +20,7 @@ export const validateCitationsTool = ai.defineTool(
         inputSchema: ValidateCitationsToolInputSchema,
         outputSchema: ValidateCitationsToolOutputSchema,
     },
-    async (input) => {
+    async (input: any) => {
         const style = (input.citationStyle || input.style || 'APA') as string;
         const instructions = (styleInstructions as any)[style] || styleInstructions.APA;
         return { citations: [] };
@@ -34,7 +34,7 @@ export const checkReferencesTool = ai.defineTool(
         inputSchema: CheckReferencesToolInputSchema,
         outputSchema: CheckReferencesToolOutputSchema,
     },
-    async (input) => {
+    async (input: any) => {
         const style = (input.citationStyle || input.style || 'APA') as string;
         return { references: [] };
     }
@@ -47,7 +47,7 @@ export const matchCitationsToReferencesTool = ai.defineTool(
         inputSchema: MatchCitationsToReferencesToolInputSchema,
         outputSchema: MatchCitationsToReferencesToolOutputSchema,
     },
-    async (input) => ({ matches: [] })
+    async (input: any) => ({ matches: [] })
 );
 
 export const citationsAndReferencesTools = {

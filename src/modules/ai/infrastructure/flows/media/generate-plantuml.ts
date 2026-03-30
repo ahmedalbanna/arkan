@@ -101,11 +101,12 @@ const generatePlantUMLFlow = ai.defineFlow({
   name: 'generatePlantUMLFlow',
   inputSchema: GeneratePlantUMLInputSchema,
   outputSchema: GeneratePlantUMLOutputSchema
-}, async (input) => {
+}, async (input: any) => {
   const { description, diagramType } = input;
+  const type = (diagramType || 'useCase') as DiagramType;
 
   // Select the appropriate prompt configuration based on the diagram type
-  const config = diagramPromptConfig[diagramType];
+  const config = diagramPromptConfig[type];
 
   if (!config) {
     throw new Error(`Unsupported diagram type: ${diagramType}`);

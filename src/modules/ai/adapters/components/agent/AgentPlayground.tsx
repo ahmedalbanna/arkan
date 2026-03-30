@@ -48,9 +48,8 @@ function AgentPlayground({ agent }: AgentPlaygroundProps) {
   }, [agent, form]);
 
   const mutation = useMutation({
-    // @ts-expect-error - Genkit Action type vs MutationFunction type mismatch
-    mutationFn: runAgentFlow,
-    onSuccess: (data) => {
+    mutationFn: (input: { systemPrompt: string; userPrompt: string; token: string }) => runAgentFlow(input),
+    onSuccess: (data: any) => {
       if (agent) {
         setResponse(agent.id, agent.id, { response: data, prompt: form.getValues('userPrompt') });
       }

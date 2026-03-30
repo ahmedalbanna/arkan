@@ -35,7 +35,7 @@ const imageToTextFlow = ai.defineFlow(
     inputSchema: ImageToTextInputSchema,
     outputSchema: ImageToTextOutputSchema,
   },
-  async (input) => {
+  async (input: any) => {
     const { output } = await extractTextPrompt(input);
     if (!output) {
       throw new Error("Text extraction failed.");

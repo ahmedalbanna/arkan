@@ -21,7 +21,7 @@ const translateTextFlow = ai.defineFlow(
     inputSchema: TranslateTextInputSchema,
     outputSchema: TranslateTextOutputSchema,
   },
-  async ({ text, targetLang }) => {
+  async ({ text, targetLang }: any) => {
     const prompt = ai.definePrompt({
       name: 'translateTextPrompt',
       input: { schema: TranslateTextInputSchema },

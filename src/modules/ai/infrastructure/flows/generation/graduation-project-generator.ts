@@ -34,7 +34,7 @@ export const graduationProjectGenerator = ai.defineFlow(
         inputSchema: GraduationProjectInputSchema,
         outputSchema: GraduationProjectDocumentationSchema,
     },
-    async (input) => {
+    async (input: any) => {
         console.log(`\n${'='.repeat(60)}`);
         console.log(`🎓 GRADUATION PROJECT DOCUMENTATION GENERATOR`);
         console.log(`${'='.repeat(60)}`);
@@ -245,7 +245,7 @@ export const graduationProjectGenerator = ai.defineFlow(
                     methods: ['Interviews', 'Surveys', 'Observation'],
                     stakeholders: ['End users', 'Administrators', 'Managers'],
                 },
-                functionalRequirements: input.functionalRequirements.map((req, idx) => ({
+                functionalRequirements: input.functionalRequirements.map((req: any, idx: any) => ({
                     id: `FR-${String(idx + 1).padStart(2, '0')}`,
                     title: req,
                     description: req,
@@ -346,7 +346,7 @@ export const graduationProjectGenerator = ai.defineFlow(
                     software: [...input.programmingLanguages, ...input.frameworks],
                     configuration: 'Standard development setup',
                 },
-                implementationDetails: input.keyFeatures.map((feature) => ({
+                implementationDetails: input.keyFeatures.map((feature: any) => ({
                     module: feature,
                     description: `Implementation of ${feature}`,
                     keyFeatures: [feature],
@@ -434,13 +434,13 @@ export const graduationProjectGenerator = ai.defineFlow(
 
             resultsContent = {
                 introduction: 'This chapter presents the project results.',
-                functionalResults: input.keyFeatures.map((feature) => ({
+                functionalResults: input.keyFeatures.map((feature: any) => ({
                     feature,
                     description: `${feature} was successfully implemented`,
                     screenshots: `See Figure 9.X for ${feature}`,
                     validation: 'Validated through testing',
                 })),
-                requirementsValidation: (systemAnalysisContent?.functionalRequirements || []).map((req) => ({
+                requirementsValidation: (systemAnalysisContent?.functionalRequirements || []).map((req: any) => ({
                     requirementId: req.id,
                     description: req.description,
                     status: 'fully_met' as const,
@@ -467,7 +467,7 @@ export const graduationProjectGenerator = ai.defineFlow(
             discussionContent = {
                 introduction: 'This chapter discusses the results and their implications.',
                 findingsInterpretation: discussionGenerated.text.substring(0, 1000),
-                objectivesAchievement: input.objectives.map((obj) => ({
+                objectivesAchievement: input.objectives.map((obj: any) => ({
                     objective: obj,
                     achievement: 'Successfully achieved',
                     evidence: 'Results demonstrate achievement',

@@ -39,7 +39,7 @@ Output ONLY the generated text. Do NOT wrap it in JSON or any other format.
       inputSchema: GenerateTextInputSchema,
       outputSchema: GenerateTextOutputSchema,
     },
-    async (flowInput) => {
+    async (flowInput: any) => {
       try {
         const result = await promptTemplate(flowInput);
         

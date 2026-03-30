@@ -21,7 +21,7 @@ export const projectConsultantFlow = ai.defineFlow({
   name: 'projectConsultantFlow',
   inputSchema: ConsultantInputSchema,
   outputSchema: ConsultantOutputSchema,
-}, async ({ projectContext, userMessage, history }) => {
+}, async ({ projectContext, userMessage, history }: any) => {
     
     const systemPrompt = `You are an expert project management and technical writing consultant named 'Arkan Consultant'. Your goal is to help the user improve their project document.
 

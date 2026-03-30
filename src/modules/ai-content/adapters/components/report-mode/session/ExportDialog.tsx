@@ -93,7 +93,7 @@ export function ExportDialog() {
       .map(item => {
         if (item instanceof Chapter) {
           const selectedSections = item.sections.filter(s => selectedContent.has(s.id));
-          return selectedSections.length > 0 ? item.with({ sections: selectedSections }) : null;
+          return selectedSections.length > 0 ? item.withProps({ sections: selectedSections.map(s => s.toProperties()) }) : null;
         }
         return selectedContent.has(item.id) ? item : null;
       })

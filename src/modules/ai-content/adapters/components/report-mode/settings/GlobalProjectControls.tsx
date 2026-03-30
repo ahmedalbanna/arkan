@@ -55,30 +55,30 @@ export function GlobalProjectControls() {
     const { project, updateProject } = useBuilderStore();
     if (!project) return null;
 
-    const handleComplexityChange = (value: number) => updateProject(p => p.with({ complexity: value }));
-    const handleFormalityChange = (value: number) => updateProject(p => p.with({ formality: value }));
-    const handleLanguageChange = (value: Language) => updateProject(p => p.with({ language: value }));
-    const handleToneChange = (value: string) => updateProject(p => p.with({ tone: value as Tone }));
+    const handleComplexityChange = (value: number) => updateProject(p => p.withProps({ complexity: value }));
+    const handleFormalityChange = (value: number) => updateProject(p => p.withProps({ formality: value }));
+    const handleLanguageChange = (value: Language) => updateProject(p => p.withProps({ language: value }));
+    const handleToneChange = (value: string) => updateProject(p => p.withProps({ tone: value as Tone }));
 
     const handleBehaviorUpdate = (index: number, updates: { name?: string; type?: 'persona' | 'behavior' }) => {
         const behaviors = project.behaviors ? [...project.behaviors] : [];
         behaviors[index] = { ...behaviors[index], ...updates };
-        updateProject(p => p.with({ behaviors }));
+        updateProject(p => p.withProps({ behaviors }));
     };
 
     const addBehavior = () => {
         const behaviors = project.behaviors ? [...project.behaviors] : [];
         behaviors.push({ name: '', type: 'behavior' });
-        updateProject(p => p.with({ behaviors }));
+        updateProject(p => p.withProps({ behaviors }));
     };
 
     const removeBehavior = (index: number) => {
         const behaviors = project.behaviors?.filter((_, i) => i !== index);
-        updateProject(p => p.with({ behaviors }));
+        updateProject(p => p.withProps({ behaviors }));
     };
 
-    const handleRulesChange = (rules: string[]) => updateProject(p => p.with({ rules }));
-    const handleConstraintsChange = (constraints: string[]) => updateProject(p => p.with({ constraints }));
+    const handleRulesChange = (rules: string[]) => updateProject(p => p.withProps({ rules }));
+    const handleConstraintsChange = (constraints: string[]) => updateProject(p => p.withProps({ constraints }));
 
     return (
         <div className="h-full flex flex-col pt-2 animate-in fade-in slide-in-from-right-2 duration-300">

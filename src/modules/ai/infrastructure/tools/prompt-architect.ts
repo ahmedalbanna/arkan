@@ -214,7 +214,7 @@ export const advancedPromptArchitectTool = ai.defineTool(
         inputSchema: ProjectDataSchema,
         outputSchema: GeneratedPromptSchema,
     },
-    async (input) => {
+    async (input: any) => {
         // Use the generatePrompt function to create the prompt
         return generatePrompt(input);
     }

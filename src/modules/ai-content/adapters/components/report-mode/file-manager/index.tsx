@@ -9,6 +9,7 @@ import {
 } from "@/components/ui/dialog";
 import { useLocalization } from "@/context/LocalizationContext";
 import { useBuilderStore, useToast } from '@/hooks';
+import { v4 as uuidv4 } from 'uuid';
 import { type ExternalContextType } from '@/modules/ai-content/domain/entities/ControlTypes';
 import { cn } from "@/infrastructure/utils/cn";
 import { AtomIcon, FileText, ImageIcon, Loader2, Plus, UploadCloud, X } from 'lucide-react';
@@ -70,7 +71,7 @@ export default function UploadManager() {
             };
             reader.onload = () => {
                 const content = reader.result as string;
-                updateProject(p => p.addExternalContext({ fileName: file.name, content, type: 'context' }));
+                updateProject(p => p.addExternalContext({ fileName: file.name, content, type: 'context' }, uuidv4()));
                 toast({ title: t('builder.files.toasts.fileAdded'), description: t('builder.files.toasts.fileAddedDesc', { fileName: file.name }) });
             };
 
@@ -112,7 +113,7 @@ export default function UploadManager() {
             fileName: `${textFileName.trim()}.md`,
             content: textInput,
             type: 'context',
-        }));
+        }, uuidv4()));
         toast({ title: t('builder.files.toasts.contextAddedToastTitle'), description: t('builder.files.toasts.contextAddedToastDesc', { fileName: `${textFileName.trim()}.md` }) });
         setTextInput('');
         setTextFileName('');
