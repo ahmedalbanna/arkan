@@ -1,16 +1,12 @@
-export type NotificationIcon = 'credit-card' | 'bot' | 'file-text' | 'user-plus' | 'default';
 
-export interface NotificationProperties {
-  id: string;
-  title: string;
-  description: string;
-  icon: NotificationIcon;
-  isRead: boolean;
-  createdAt: string;
-  link?: string;
-}
+import { 
+    type NotificationPropertiesType as NotificationProperties 
+} from "../schemas/NotificationSchema";
 
-export class Notification {
+export type NotificationIcon = 'credit-card' | 'bot' | 'file-text' | 'user-plus' | 'default' | 'gem';
+export type { NotificationProperties };
+
+export class Notification implements NotificationProperties {
   public readonly id: string;
   public readonly title: string;
   public readonly description: string;
@@ -23,7 +19,7 @@ export class Notification {
     this.id = props.id;
     this.title = props.title;
     this.description = props.description;
-    this.icon = props.icon || 'default';
+    this.icon = (props.icon as NotificationIcon) || 'default';
     this.isRead = !!props.isRead;
     this.createdAt = props.createdAt || new Date().toISOString();
     this.link = props.link;
@@ -42,6 +38,13 @@ export class Notification {
       createdAt: this.createdAt,
       link: this.link,
     };
+  }
+
+  /**
+   * Compatibility alias for serialization.
+   */
+  public toJSON(): NotificationProperties {
+    return this.toProperties();
   }
 
   /**

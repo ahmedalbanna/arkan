@@ -1,32 +1,13 @@
+
 import { format } from "date-fns";
+import { 
+    type UserProfileType as UserProfile,
+    type UserPropertiesType as UserProperties,
+    type SecuritySettingsType as SecuritySettings
+} from "../schemas/UserSchema";
 
 export type UserRole = 'admin' | 'user';
-
-export interface SecuritySettings {
-    enableLoginAlerts: boolean;
-}
-
-export interface UserProfile {
-    id: string;
-    name: string;
-    email: string;
-    credits?: number;
-    role: UserRole;
-    createdAt: string;
-    updatedAt: string;
-    bio?: string;
-    profilePictureUrl?: string;
-    hasCompletedOnboarding?: boolean;
-    apiKeys?: Record<string, string>;
-    lastDailyCreditUpdate?: string;
-    securitySettings?: SecuritySettings;
-    isDisabled?: boolean;
-    isTwoFactorEnabled?: boolean;
-    twoFactorSecret?: string;
-    tokenVersion?: number;
-}
-
-export type UserProperties = Partial<UserProfile> & { id?: string };
+export type { UserProfile, UserProperties, SecuritySettings };
 
 export class User {
     public id: string;
@@ -50,7 +31,7 @@ export class User {
         this.id = props.id || '';
         this.name = props.name || 'Unknown User';
         this.email = props.email || '';
-        this.role = props.role || 'user';
+        this.role = (props.role as UserRole) || 'user';
         this.credits = props.credits;
         this.createdAt = props.createdAt || '';
         this.updatedAt = props.updatedAt || '';
@@ -59,7 +40,7 @@ export class User {
         this.hasCompletedOnboarding = props.hasCompletedOnboarding;
         this.apiKeys = props.apiKeys;
         this.lastDailyCreditUpdate = props.lastDailyCreditUpdate;
-        this.securitySettings = props.securitySettings || { enableLoginAlerts: true };
+        this.securitySettings = (props.securitySettings as SecuritySettings) || { enableLoginAlerts: true };
         this.isDisabled = !!props.isDisabled;
         this.isTwoFactorEnabled = !!props.isTwoFactorEnabled;
         this.tokenVersion = props.tokenVersion || 1;
