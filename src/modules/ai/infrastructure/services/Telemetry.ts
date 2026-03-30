@@ -2,22 +2,80 @@
  * Simple Telemetry service for tracking system events and failures.
  * In production, this would integrate with Sentry, Logtail, or Google Cloud Logging.
  */
-export class Telemetry {
-  public static logFailure(context: string, error: any): void {
-    const timestamp = new Date().toISOString();
-    const errorDetails = error instanceof Error ? error.stack || error.message : JSON.stringify(error);
-    
-    // Log to console for development
-    console.error(`[TELEMETRY FAILURE] [${timestamp}] [${context}]:`, errorDetails);
+import { performanceMonitor } from "./model-performance-monitor";
 
-    // TODO: In production, send to external monitoring service
-    // Example: Sentry.captureException(error, { extra: { context } });
+export interface TelemetryEvent {
+  name: string;
+  properties?: Record<string, any>;
+  timestamp: string;
+  level: 'info' | 'warn' | 'error';
+}
+
+export class Telemetry {
+  private static events: TelemetryEvent[] = [];
+  private static MAX_BUFFER = 100;
+
+  public static logFailure(context: string, error: any, extra?: Record<string, any>): void {
+    const timestamp = new Date().toISOString();
+    const message = error instanceof Error ? error.message : String(error);
+    const stack = error instanceof Error ? error.stack : undefined;
+    
+    const event: TelemetryEvent = {
+      name: `FAILURE_${context}`,
+      level: 'error',
+      timestamp,
+      properties: {
+        message,
+        stack,
+        ...extra,
+        ...(typeof window === 'undefined' ? performanceMonitor.getActiveRequestCounts() : {})
+      }
+    };
+
+    this.recordEvent(event);
+    console.error(`[TELEMETRY ERROR] [${timestamp}] [${context}]:`, message, extra || '');
   }
 
-  public static logEvent(name: string, properties?: Record<string, any>): void {
+  public static logEvent(name: string, properties?: Record<string, any>, level: 'info' | 'warn' | 'error' = 'info'): void {
     const timestamp = new Date().toISOString();
-    console.log(`[TELEMETRY EVENT] [${timestamp}] [${name}]:`, properties);
+    const event: TelemetryEvent = {
+      name,
+      level,
+      timestamp,
+      properties: {
+        ...properties,
+        ...(typeof window === 'undefined' ? performanceMonitor.getActiveRequestCounts() : {})
+      }
+    };
+
+    this.recordEvent(event);
+    if (level === 'error') {
+      console.error(`[TELEMETRY ${level.toUpperCase()}] [${timestamp}] [${name}]:`, properties);
+    } else {
+      console.log(`[TELEMETRY ${level.toUpperCase()}] [${timestamp}] [${name}]:`, properties);
+    }
+  }
+
+  private static recordEvent(event: TelemetryEvent): void {
+    this.events.push(event);
+    if (this.events.length > this.MAX_BUFFER) {
+      this.events.shift();
+    }
+  }
+
+  public static getRecentEvents(): TelemetryEvent[] {
+    return [...this.events];
+  }
+
+  public static generateHealthSummary(): Record<string, any> {
+    const recent = this.events.slice(-20);
+    const errors = recent.filter(e => e.level === 'error').length;
     
-    // Example: Mixpanel.track(name, properties);
+    return {
+      status: errors > 5 ? 'unhealthy' : errors > 0 ? 'degraded' : 'healthy',
+      recentErrorCount: errors,
+      activeRequests: performanceMonitor.getActiveRequestCounts(),
+      uptime: process.uptime()
+    };
   }
 }

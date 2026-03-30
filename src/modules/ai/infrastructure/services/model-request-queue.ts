@@ -5,9 +5,15 @@
  * Prevents memory overload by controlling concurrent requests per model.
  */
 
-import { OLLAMA_MODELS } from './Genkit';
+import { OLLAMA_MODELS } from '../../domain/constants/AiModels';
 import { getMaxConcurrentRequests } from './model-selector';
 import { performanceMonitor } from './model-performance-monitor';
+
+/**
+ * Default request timeout in milliseconds (60 seconds)
+ * Prevents queue deadlocks if a model hangs during loading or generation.
+ */
+export const DEFAULT_REQUEST_TIMEOUT = Number(process.env.AI_REQUEST_TIMEOUT) || 60000;
 
 /**
  * Request priority levels
@@ -82,7 +88,7 @@ class ModelQueue {
         resolve,
         reject,
         queuedAt: Date.now(),
-        timeout,
+        timeout: timeout || DEFAULT_REQUEST_TIMEOUT,
       };
 
       // Insert based on priority
@@ -120,7 +126,14 @@ class ModelQueue {
       }
 
       performanceMonitor.startRequest(request.id, this.model, request.flowName);
-      const result = await request.operation();
+      
+      // Execute with timeout wrapper
+      const executionPromise = request.operation();
+      const timeoutPromise = new Promise((_, reject) => {
+        setTimeout(() => reject(new Error(`Execution timeout: ${request.model} failed to respond within ${request.timeout}ms`)), request.timeout);
+      });
+
+      const result = await Promise.race([executionPromise, timeoutPromise]);
       performanceMonitor.endRequest(request.id, true);
       
       request.resolve(result);

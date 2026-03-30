@@ -10,6 +10,7 @@ import { INotificationServiceToken } from "@/modules/users/domain/services/INoti
 import { IGenerationLogRepositoryToken } from "@/modules/ai/domain/repositories/IGenerationLogRepository";
 import { IAgentRepositoryToken } from "@/modules/ai/domain/repositories/IAgentRepository";
 import { IAiServiceToken } from "@/modules/ai/domain/services/IAiService";
+import { IRetrievalServiceToken } from "@/modules/ai/domain/services/IRetrievalService";
 import { IEmailServiceToken } from "@/modules/users/domain/services/IEmailService";
 import { IAdminStatsRepositoryToken } from "@/modules/admin/domain/repositories/IAdminStatsRepository";
 import { IFeatureRepositoryToken } from "@/modules/admin/domain/repositories/IFeatureRepository";
@@ -132,6 +133,7 @@ if (typeof window === 'undefined') {
   container.register(ITransactionRepositoryToken, { useClass: SQLiteTransactionRepository }, { lifecycle: Lifecycle.Singleton });
   container.register(IFileStorageServiceToken, { useClass: LocalFileStorageService }, { lifecycle: Lifecycle.Singleton });
   container.register(IRagRepositoryToken, { useClass: DefaultRagRepository }, { lifecycle: Lifecycle.Singleton });
+  container.register(IRetrievalServiceToken, { useClass: DefaultRagRepository }, { lifecycle: Lifecycle.Singleton });
   container.register(IIndexedDocumentRepositoryToken, { useClass: SQLiteIndexedDocumentRepository }, { lifecycle: Lifecycle.Singleton });
   container.register(ITemplateRepositoryToken, { useClass: SQLiteTemplateRepository }, { lifecycle: Lifecycle.Singleton });
   container.register(ISectionRepositoryToken, { useClass: SQLiteSectionRepository }, { lifecycle: Lifecycle.Singleton });

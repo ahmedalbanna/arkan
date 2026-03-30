@@ -1,4 +1,8 @@
-import { injectable } from "tsyringe";
+if (typeof window !== 'undefined') {
+    throw new Error('GenkitAiService cannot be imported in the browser. It depends on server-only Genkit infrastructure.');
+}
+
+import { injectable, inject } from "tsyringe";
 import { IAiService } from "../../domain/services/IAiService";
 import { ai } from "./Genkit";
 import { executeWithQueue } from "./model-request-queue";
@@ -9,9 +13,15 @@ import { Result } from "@/infrastructure/utils/result";
 import { AiError } from "../../domain/errors/AiErrors";
 import { generateChapterContentWithRAG } from "../flows/generation/generate-chapter-content-rag";
 import { generateReportSectionWithRAG } from "../flows/generation/generate-report-section-rag";
+import { IRetrievalServiceToken } from "../../domain/services/IRetrievalService";
+import type { IRetrievalService, RetrievalOptions, RetrievalResult } from "../../domain/services/IRetrievalService";
 
 @injectable()
 export class GenkitAiService implements IAiService {
+    constructor(
+        @inject(IRetrievalServiceToken) private retrievalService: IRetrievalService
+    ) {}
+
     async generateText(prompt: string, options?: any): Promise<Result<string, AiError>> {
         try {
             const result = await ai.generate({
@@ -55,52 +65,60 @@ export class GenkitAiService implements IAiService {
     }
 
     async runFlow<TInput, TOutput>(flow: any, input: TInput, flowName?: string): Promise<Result<TOutput, AiError>> {
-        try {
-            let result: any;
-            if (!flowName) {
-                result = await flow(input);
-            } else {
-                const model = selectModel({ flowName });
-                result = await executeWithQueue(
-                    generateRequestId(),
-                    model,
-                    flowName,
-                    () => flow(input)
-                );
-            }
+        const primaryModel = flowName ? selectModel({ flowName }) : null;
+        const modelsToTry = primaryModel 
+            ? [primaryModel, "ollama/phi3:mini-4k", "ollama/gemma:2b"] 
+            : [null]; // null means direct execution without queue manager model selection
+        
+        // Remove duplicates while preserving order
+        const uniqueModels = Array.from(new Set(modelsToTry));
+        let lastError: any;
 
-            // Post-process string outputs to remove conversational filler
-            if (result && typeof result === 'object') {
-                for (const key in result) {
-                    if (typeof result[key] === 'string') {
-                        result[key] = this.cleanAiOutput(result[key]);
-                    }
-                }
-            } else if (typeof result === 'string') {
-                result = this.cleanAiOutput(result);
-            }
-
-            return Result.ok(result as TOutput);
-        } catch (error: any) {
-            console.warn(`Queue or flow execution failed for ${flowName || 'unnamed flow'}`, error);
+        for (const model of uniqueModels) {
             try {
-                const result = await flow(input);
-                return Result.ok(result);
-            } catch (fallbackError: any) {
-                return Result.fail(AiError.generationFailed(fallbackError.message));
+                let result: any;
+                if (!model) {
+                    result = await flow(input);
+                } else {
+                    result = await executeWithQueue(
+                        generateRequestId(),
+                        model,
+                        flowName,
+                        () => flow(input)
+                    );
+                }
+
+                // Post-process string outputs to remove conversational filler
+                if (result && typeof result === 'object') {
+                    for (const key in result) {
+                        if (typeof result[key] === 'string') {
+                            result[key] = this.cleanAiOutput(result[key]);
+                        }
+                    }
+                } else if (typeof result === 'string') {
+                    result = this.cleanAiOutput(result);
+                }
+
+                return Result.ok(result as TOutput);
+            } catch (error: any) {
+                lastError = error;
+                console.warn(`Flow execution failed for model ${model || 'default'} in ${flowName || 'unnamed flow'}. Error: ${error.message}`);
+                
+                // If it's a validation error or user error, don't retry with other models
+                if (error.message?.includes('validation') || error.status === 400) {
+                    break;
+                }
+                
+                // Continue to next model in the tiered fallback list
+                continue;
             }
         }
+
+        return Result.fail(AiError.generationFailed(lastError?.message || 'Flow execution failed after all fallback attempts'));
     }
 
-    async retrieveContext(query: string, options?: any): Promise<Result<{ context: string; sources: any[] }, AiError>> {
-        try {
-            // Dynamic import to avoid circular dependencies with RAG module
-            const { retrieveContext } = require('@/modules/rag/infrastructure/retrieval');
-            const result = await retrieveContext(query, options);
-            return Result.ok(result);
-        } catch (error: any) {
-            return Result.fail(AiError.internal(error.message));
-        }
+    async retrieveContext(query: string, options?: RetrievalOptions): Promise<Result<RetrievalResult, AiError>> {
+        return this.retrievalService.retrieveContext(query, options);
     }
 
     async generateChapterWithRAG(input: any): Promise<Result<any, AiError>> {

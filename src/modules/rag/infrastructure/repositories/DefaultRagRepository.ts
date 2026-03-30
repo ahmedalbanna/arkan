@@ -11,8 +11,11 @@ import { getVectorStore } from "@/modules/rag/infrastructure/vector-store";
 import { Result } from "@/infrastructure/utils/result";
 import { RagError } from "../../domain/errors/RagErrors";
 
+import { IRetrievalService, RetrievalOptions, RetrievalResult } from "@/modules/ai/domain/services/IRetrievalService";
+import { AiError } from "@/modules/ai/domain/errors/AiErrors";
+
 @injectable()
-export class DefaultRagRepository implements IRagRepository {
+export class DefaultRagRepository implements IRagRepository, IRetrievalService {
     async indexDocument(content: string, options?: RagIndexingOptions): Promise<Result<RagIndexingResult, RagError>> {
         try {
             const result = await indexDocument(content, options);
@@ -33,7 +36,7 @@ export class DefaultRagRepository implements IRagRepository {
         }
     }
 
-    async retrieveContext(query: string, options?: RagRetrievalOptions): Promise<Result<RagRetrievalResult, RagError>> {
+    async retrieveContext(query: string, options?: any): Promise<Result<any, any>> {
         try {
             const result = await retrieveContext(query, options);
             return Result.ok({

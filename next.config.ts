@@ -84,8 +84,30 @@ const nextConfig: NextConfig = {
   },
   turbopack: {
     resolveAlias: {
-      // async_hooks is a Node.js built-in — stub it out in the browser bundle
+      // Node.js built-ins used by Genkit/Express/Ollama — stub them out in the browser bundle
       async_hooks: { browser: path.resolve('./src/infrastructure/stubs/async-hooks-stub.js') },
+      fs: { browser: path.resolve('./src/infrastructure/stubs/async-hooks-stub.js') },
+      net: { browser: path.resolve('./src/infrastructure/stubs/async-hooks-stub.js') },
+      perf_hooks: { browser: path.resolve('./src/infrastructure/stubs/async-hooks-stub.js') },
+      os: { browser: path.resolve('./src/infrastructure/stubs/async-hooks-stub.js') },
+      path: { browser: path.resolve('./src/infrastructure/stubs/async-hooks-stub.js') },
+      crypto: { browser: path.resolve('./src/infrastructure/stubs/async-hooks-stub.js') },
+      buffer: { browser: path.resolve('./src/infrastructure/stubs/async-hooks-stub.js') },
+      stream: { browser: path.resolve('./src/infrastructure/stubs/async-hooks-stub.js') },
+      util: { browser: path.resolve('./src/infrastructure/stubs/async-hooks-stub.js') },
+      url: { browser: path.resolve('./src/infrastructure/stubs/async-hooks-stub.js') },
+      events: { browser: path.resolve('./src/infrastructure/stubs/async-hooks-stub.js') },
+      'node:fs': { browser: path.resolve('./src/infrastructure/stubs/async-hooks-stub.js') },
+      'node:net': { browser: path.resolve('./src/infrastructure/stubs/async-hooks-stub.js') },
+      'node:perf_hooks': { browser: path.resolve('./src/infrastructure/stubs/async-hooks-stub.js') },
+      'node:os': { browser: path.resolve('./src/infrastructure/stubs/async-hooks-stub.js') },
+      'node:path': { browser: path.resolve('./src/infrastructure/stubs/async-hooks-stub.js') },
+      'node:crypto': { browser: path.resolve('./src/infrastructure/stubs/async-hooks-stub.js') },
+      'node:buffer': { browser: path.resolve('./src/infrastructure/stubs/async-hooks-stub.js') },
+      'node:stream': { browser: path.resolve('./src/infrastructure/stubs/async-hooks-stub.js') },
+      'node:util': { browser: path.resolve('./src/infrastructure/stubs/async-hooks-stub.js') },
+      'node:url': { browser: path.resolve('./src/infrastructure/stubs/async-hooks-stub.js') },
+      'node:events': { browser: path.resolve('./src/infrastructure/stubs/async-hooks-stub.js') },
     },
   },
   experimental: {

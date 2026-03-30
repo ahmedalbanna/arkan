@@ -163,9 +163,12 @@ Each module in `src/modules/` follows the same four-layer structure:
 - **Literal Type Enforcement**: When a flow output schema uses `z.enum`, the implementation must return strings with `as const` (e.g., `status: 'success' as const`) to satisfy strict TypeScript checking.
 - **Unified Tool Schemas**: Tool-specific schemas and their inferred types should be centralized in `src/modules/ai/infrastructure/tools/schemas.ts` to prevent circular dependencies and "File is not a module" errors.
 - **Plain Text vs. Structured JSON**: For writing tools (Paraphraser, Summarizer, etc.), the project prefers returning **raw Markdown strings** rather than JSON objects. This simplifies frontend rendering and improves reliability with smaller models.
+- **Tiered Model Fallback**: To handle 8GB RAM constraints, implement tiered fallback logic (e.g., Llama 3 8B → Phi-3 Mini → Gemma 2B) in the use case or service layer. This ensures system availability when larger models timeout or fail to load.
+- **Token-Aware Context Truncation**: Always estimate prompt and context size before generation. For RAG flows, truncate retrieved context (e.g., to 2k tokens for Phi-3's 4k window) to prevent silent overflow and truncation of system instructions.
+- **JSON Self-Healing**: For tools requiring structured output, implement a "JSON repair" layer (regex/string manipulation) to fix common small-model errors like trailing commas, unclosed brackets, or markdown wrapping before parsing.
 - Use the pattern: define prompt → define flow → export async wrapper function.
 - Always handle errors with try/catch and return `Result<T, AiError>` objects.
-- Use `MODEL_BY_TASK` constants from `@/modules/ai/infrastructure/services/Genkit` for consistent model selection:
+- Use `MODEL_BY_TASK` constants from `@/modules/ai/domain/constants/AiModels` for consistent model selection:
   - `GEMMA_2B` — preferred for fast text generation and writing tools returning plain text.
   - `PHI3_MINI` — use only when complex structured output (JSON) is strictly required.
   - `LLAMA3_8B` — complex academic/research tasks.
@@ -326,6 +329,8 @@ FIREBASE_ADMIN_PRIVATE_KEY=
 - Do not import `firebase-admin` or any server-only module in client components or hooks
 - Do not use `new` to instantiate services — always resolve via `container.resolve()`
 - All Genkit flow files must declare `'use server'` at the top
+- **Client-Server SDK Decoupling**: AI model names and task constants (`AiModels.ts`) must be located in a dependency-free domain folder. Importing them from server-only SDK entry points (like `Genkit.ts`) pulls heavy Node.js dependencies into the browser bundle, causing Turbopack errors.
+- **Node.js Built-in Stubs**: When using libraries that transitively depend on Node.js built-ins (e.g., `perf_hooks`, `net`), ensure they are stubbed in `next.config.ts` using `turbopack.resolveAlias` for the browser bundle.
 - Server-only DI registrations must be inside the `typeof window === 'undefined'` guard in `container.ts`
 - **Hook Order Safety**: Never return early from a React component if there are hooks (useState, useEffect, etc.) defined below that return. This causes "Rendered fewer hooks than expected" errors. Always call all hooks at the top level before any conditional logic.
 - **Keyboard Shortcut Pattern**: For IDE-style interfaces, centralize shortcut logic in a module-specific hook (e.g., `src/modules/*/adapters/hooks/useKeyboardShortcuts.ts`). This hook should handle platform-specific modifiers (Cmd vs Ctrl) and prevent default browser behavior for common shortcuts like `Cmd+S`.

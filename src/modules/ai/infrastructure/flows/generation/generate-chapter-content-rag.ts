@@ -12,6 +12,7 @@ import { ai } from '@/modules/ai/infrastructure/services/Genkit';
 import { GenerateChapterInputSchema, GenerateChapterOutputSchema, type GenerateChapterInput, type GenerateChapterOutput } from '@/modules/ai/domain/schemas';
 import { container } from '@/infrastructure/di/container';
 import { IAiServiceToken } from '@/modules/ai/domain/services/IAiService';
+import { TokenManager, MODEL_CONTEXT_LIMITS } from '@/modules/ai/domain/utils/TokenManager';
 
 export interface GenerateChapterWithRAGInput extends GenerateChapterInput {
   projectId?: string;
@@ -44,8 +45,14 @@ export async function generateChapterContentWithRAG(input: GenerateChapterWithRA
         includeTypes: ['reference', 'context', 'user_upload'],
       });
       
-      ragContext = retrieval.context;
-      console.log(`[RAG] Retrieved ${retrieval.sources.length} relevant chunks for chapter`);
+      // 1a. Truncate context based on model context limits to avoid crashes
+      const modelLimit = MODEL_CONTEXT_LIMITS.PHI3_MINI; // Default model limit
+      const maxContextTokens = Math.floor(modelLimit * 0.6); // Reserve 40% for prompt + completion
+      
+      ragContext = TokenManager.truncateRagContext(retrieval.context, maxContextTokens);
+      const truncated = ragContext.length < retrieval.context.length;
+
+      console.log(`[RAG] Retrieved ${retrieval.sources.length} chunks. ${truncated ? 'Truncated context for safety.' : 'Context within limits.'}`);
     } catch (error) {
       console.error('[RAG] Error retrieving context for chapter:', error);
       // Continue without RAG context on error

@@ -13,6 +13,7 @@ import { GenerateSectionInputSchema, GenerateSectionOutputSchema, type GenerateS
 import { container } from '@/infrastructure/di/container';
 import { IAiServiceToken } from '@/modules/ai/domain/services/IAiService';
 import { validateJsonOutput, getJsonPromptInstructions, RECOMMENDED_TEMPERATURES } from '@/modules/ai/domain/utils/json-output-validator';
+import { TokenManager, MODEL_CONTEXT_LIMITS } from '@/modules/ai/domain/utils/TokenManager';
 
 export interface GenerateSectionWithRAGInput extends GenerateSectionInput {
   projectId?: string;
@@ -41,8 +42,14 @@ export async function generateReportSectionWithRAG(input: GenerateSectionWithRAG
         includeTypes: ['reference', 'context', 'user_upload'],
       });
       
-      ragContext = retrieval.context;
-      console.log(`[RAG] Retrieved ${retrieval.sources.length} relevant chunks`);
+      // 1a. Truncate context based on model context limits to avoid crashes
+      const modelLimit = MODEL_CONTEXT_LIMITS.PHI3_MINI; // Default model limit
+      const maxContextTokens = Math.floor(modelLimit * 0.5); // Reserve 50% for prompt (which is large here) + completion
+      
+      ragContext = TokenManager.truncateRagContext(retrieval.context, maxContextTokens);
+      const truncated = ragContext.length < retrieval.context.length;
+
+      console.log(`[RAG] Retrieved ${retrieval.sources.length} chunks. ${truncated ? 'Truncated context for safety.' : 'Context within limits.'}`);
     } catch (error) {
       console.error('[RAG] Error retrieving context:', error);
       // Continue without RAG context on error

@@ -52,20 +52,50 @@ export function validateJsonOutput<T>(options: ValidateJsonOutputOptions<T>): Va
         console.warn(`[${flowName}] Schema validation failed:`, parsed.error.message);
     }
 
-    // Attempt recovery by extracting JSON from a string
+    /**
+     * Minimalist JSON Repair for LLM outputs
+     * Fixes: Trailing commas, unclosed brackets, Markdown wrapping
+     */
+    const repairJson = (str: string): string => {
+        let cleaned = str.trim();
+        // Remove markdown backticks if present
+        cleaned = cleaned.replace(/^```json\s*/i, '').replace(/\s*```$/i, '');
+        // Extract content between first { and last }
+        const start = cleaned.indexOf('{');
+        const end = cleaned.lastIndexOf('}');
+        if (start !== -1 && end !== -1) {
+            cleaned = cleaned.substring(start, end + 1);
+        }
+        
+        // Remove trailing commas before closing braces/brackets
+        cleaned = cleaned.replace(/,\s*([\]}])/g, '$1');
+        
+        // Attempt to close unclosed brackets if string ends abruptly
+        const openBraces = (cleaned.match(/{/g) || []).length;
+        const closeBraces = (cleaned.match(/}/g) || []).length;
+        if (openBraces > closeBraces) {
+            cleaned += '}'.repeat(openBraces - closeBraces);
+        }
+        
+        return cleaned;
+    };
+
+    // Attempt recovery by extracting and repairing JSON from a string
     if (attemptRecovery && typeof output === 'string') {
         try {
             const jsonMatch = output.match(/```json\n?([\s\S]*?)\n?```/) || output.match(/({[\s\S]*})/);
-            if (jsonMatch) {
-                const extracted = JSON.parse(jsonMatch[1] || jsonMatch[0]);
-                const reparsed = schema.safeParse(extracted);
-                if (reparsed.success) {
-                    if (enableLogging) console.log(`[${flowName}] Recovered JSON from string.`);
-                    return { success: true, data: reparsed.data };
-                }
+            const rawJson = jsonMatch ? (jsonMatch[1] || jsonMatch[0]) : output;
+            
+            const repaired = repairJson(rawJson);
+            const extracted = JSON.parse(repaired);
+            const reparsed = schema.safeParse(extracted);
+            
+            if (reparsed.success) {
+                if (enableLogging) console.log(`[${flowName}] Recovered and repaired JSON from string.`);
+                return { success: true, data: reparsed.data };
             }
-        } catch {
-            // continue to fallback
+        } catch (e) {
+            if (enableLogging) console.warn(`[${flowName}] JSON recovery failed:`, e instanceof Error ? e.message : String(e));
         }
     }
 

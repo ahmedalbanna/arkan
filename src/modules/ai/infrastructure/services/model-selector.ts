@@ -8,7 +8,7 @@
  * - Resource availability
  */
 
-import { OLLAMA_MODELS, MODEL_BY_TASK } from './Genkit';
+import { OLLAMA_MODELS, MODEL_BY_TASK } from '../../domain/constants/AiModels';
 import { getModelForFlow } from './model-mapping';
 
 /**
