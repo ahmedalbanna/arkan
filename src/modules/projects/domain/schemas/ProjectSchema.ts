@@ -4,7 +4,6 @@ import { z } from 'zod';
 // Schema for metadata, ensuring author and updated fields are strings
 const MetaSchema = z.object({
   author: z.string().min(1, 'Author is required'),
-  title: z.string().default('Untitled Project'),
   updated: z.string().datetime('Invalid date format'),
   created: z.string().datetime('Invalid date format').optional(),
   tags: z.array(z.string()).default([]),
@@ -35,6 +34,7 @@ const ContentItemSchema = z.discriminatedUnion('itemType', [
 // The main schema for a Project
 export const ProjectSchema = z.object({
   id: z.string().optional(), // ID is optional as it might be generated on creation
+  name: z.string().min(1, 'Project name is required').default('Untitled Project'),
   meta: MetaSchema,
   content: z.array(ContentItemSchema).default([]),
 });

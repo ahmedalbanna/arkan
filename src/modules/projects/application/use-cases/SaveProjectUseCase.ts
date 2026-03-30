@@ -31,8 +31,15 @@ export class SaveProjectUseCase {
       };
     };
 
-    const normalizedProject: ProjectProperties = {
+    const normalizedProject = {
       ...projectData,
+      name: projectData.name || 'Untitled Project',
+      meta: {
+        author: projectData.meta?.author || userId,
+        updated: projectData.meta?.updated || new Date().toISOString(),
+        created: projectData.meta?.created || new Date().toISOString(),
+        tags: projectData.meta?.tags || [],
+      },
       content: Array.isArray(projectData.content)
         ? projectData.content.map(normalizeContentItem)
         : [],
@@ -50,18 +57,7 @@ export class SaveProjectUseCase {
 
     const validatedData = validationResult.data as ProjectProperties;
 
-    // 2. Ensure author is set correctly
-    const dataToSave: ProjectProperties = {
-      ...validatedData,
-      id: validatedData.id || projectData.id, // safeParse might strip id if not in schema properly
-      meta: {
-        ...validatedData.meta,
-        author: userId,
-        updated: new Date().toISOString()
-      }
-    };
-
-    // 3. Persist
-    return this.projectRepository.save(dataToSave);
+    // 2. Persist
+    return this.projectRepository.save(validatedData);
   }
 }

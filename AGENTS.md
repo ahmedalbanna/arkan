@@ -167,6 +167,7 @@ Each module in `src/modules/` follows the same four-layer structure:
 - **Token-Aware Context Truncation**: Always estimate prompt and context size before generation. For RAG flows, truncate retrieved context (e.g., to 2k tokens for Phi-3's 4k window) to prevent silent overflow and truncation of system instructions.
 - **JSON Self-Healing**: For tools requiring structured output, implement a "JSON repair" layer (regex/string manipulation) to fix common small-model errors like trailing commas, unclosed brackets, or markdown wrapping before parsing.
 - Use the pattern: define prompt → define flow → export async wrapper function.
+- **Explicit Flow Input Typing**: In `ai.defineFlow(...)` callbacks, always type the `input` parameter with the schema-inferred type (for example `async (input: GenerateQuizInput) => { ... }`). Under strict TypeScript settings these callbacks do not reliably infer input types, and leaving them untyped creates repetitive `implicit any` errors across many flow files.
 - Always handle errors with try/catch and return `Result<T, AiError>` objects.
 - **Result Type Narrowing**: When consuming `Result<T, E>` objects, always narrow the type using `isSuccess` or `isFailure` before accessing data.
 - **Result Object API**: Use `.getValue()` to access the success value of a `Result` object. Directly accessing `.value` or `._value` will cause TypeScript or runtime errors as the internal value is private.
@@ -228,6 +229,7 @@ Each module in `src/modules/` follows the same four-layer structure:
 - Extract business logic into use cases in `src/modules/<domain>/application/use-cases/`
 - Always validate request bodies server-side with Zod
 - Return consistent JSON responses by using the `handle*Result` helpers (e.g., `handleAiResult`, `handleUserResult`) from `@/infrastructure/api/api-utils`. This ensures a unified error structure, correct HTTP status codes, and automatic telemetry logging.
+- **Centralized Entity Serialization**: If a module returns domain entities from controllers/use cases, teach the shared `handle*Result` helper to serialize both single entities and arrays via `.toStateObject()` / `.toJSON()` rather than manually calling `Response.json(...)` in each route. This keeps route handlers thin and prevents mixed response shapes within the same domain.
 
 ---
 
@@ -350,6 +352,7 @@ FIREBASE_ADMIN_PRIVATE_KEY=
 - **String Spreading Bug**: In use cases or controllers, never use the spread operator (`...`) on a variable that might be a string (e.g., `return { ...result, metadata }`). Spreading a string results in an object with numeric keys (`{ "0": "h", "1": "e" ... }`). Always check `typeof result === 'string'` before attempting to merge with metadata.
 - **Discriminator Field Collisions**: Do not reuse a business/domain field like `type` as a Zod discriminated-union key if the entity already uses that field for another meaning (for example section content category vs. content-item kind). Use a dedicated discriminator such as `itemType` or `kind` to avoid save/validation failures.
 - **Schema/Entity Contract Sweep**: When changing domain serialization (`toProperties`, `withProps`, readonly fields, discriminator keys), sweep API validators, repository mappings, seed data, and client payload producers in the same pass. Partial updates tend to surface later as save-route validation errors rather than obvious type errors.
+- **Plan-Mode Tool Discipline**: Before calling plan-only tools like `exit_plan_mode`, verify the latest system reminder still indicates PLAN mode. After an approval/transition or any long multi-step exchange, re-check the current mode instead of assuming it is unchanged.
 
 ## Notes
 
@@ -402,6 +405,7 @@ FIREBASE_ADMIN_PRIVATE_KEY=
 - For small authenticated client-side mutations that do not yet justify a dedicated API client abstraction, prefer `apiService({ firebaseUser, ... })` over hand-written `getIdToken()` + `fetch(...)` logic. It keeps auth/header/error handling consistent and makes later migrations easier.
 - In Jest, make mocks match the exact import path used by the module under test. If the hook imports `../../core/useBuilderStore`, mocking a different alias or relative path will not intercept the dependency and can lead to confusing failures.
 - When `find_and_replace_code` reports multiple matches inside the same file, stop retrying the same short snippet. Reopen or expand the file and anchor the replacement with adjacent unique context such as the surrounding method signature or neighboring lines.
+- In clusters of similar UI files (for example adjacent report-mode panels), do not keep guessing replacement strings after the first "No matches found" error. Reopen the exact file and copy the current on-disk snippet before editing again; these components often differ by small class-name or icon changes that make repeated guessed replacements wasteful.
 - During typing cleanups, start with low-risk replacements that reuse existing domain contracts: controller/use-case method parameters, `Pick<...>` payload shapes, domain union types, and `catch (error: unknown)` narrowing. Save deeper generic/infrastructure typing work for a later pass.
 - When moving a raw `fetch(...)` path onto the shared `apiService`, verify the shared service actually supports the response shape you need first (for example `blob` or `text`). Extend the central service/options once, then migrate consumers; otherwise you create avoidable typecheck fallout in every caller.
 - When converting an API client from raw returns to `Result<T, ApiError>`, immediately sweep all helper hooks that call it indirectly (especially shared file-upload logic in writing-tool hooks). These indirect consumers are easy to miss and show up later as repetitive type errors.

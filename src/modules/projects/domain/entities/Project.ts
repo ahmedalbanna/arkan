@@ -18,7 +18,7 @@ export type ProjectContent = readonly (Chapter | Section)[];
 
 export interface ProjectProperties {
   id: string;
-  name?: string;
+  name: string;
   description?: string;
   projectDescription?: string;
   projectType?: string;

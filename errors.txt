@@ -1,3 +1,2 @@
- When Save Project!!
- POST /api/projects 400 in 358ms
-Validation failed: content.0.type: Invalid discriminator value. Expected 'chapter' | 'section'
+[TELEMETRY ERROR] [2026-03-30T05:20:57.267Z] [SQLiteProjectRepo:save]: NOT NULL constraint failed: projects.name
+ POST /api/projects 400 in 335ms
