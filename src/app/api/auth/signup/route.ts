@@ -47,13 +47,13 @@ export async function POST(req: Request) {
                 userId,
                 ip: headersList.get('x-forwarded-for') || '127.0.0.1',
                 userAgent: headersList.get('user-agent') || 'unknown',
-                fingerprint: fingerprint || null
+                fingerprint: fingerprint || undefined
             });
         }
 
         // 3. Register Fingerprint if provided
         if (fingerprint && fingerprintData && userId) {
-            await controller.registerFingerprint(userId, fingerprint, fingerprintData);
+            await controller.registerFingerprint({ userId, fingerprint, metadata: fingerprintData });
         }
         
         // Auto-login after signup

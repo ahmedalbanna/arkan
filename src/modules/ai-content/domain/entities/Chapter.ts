@@ -3,6 +3,7 @@ import { Section, type SectionProperties } from './Section';
 export interface ChapterProperties {
   readonly id: string;
   readonly title: string;
+  readonly itemType?: 'chapter';
   readonly sections?: readonly SectionProperties[];
 }
 
@@ -67,6 +68,7 @@ export class Chapter {
     return {
       id: this.id,
       title: this.title,
+      itemType: 'chapter',
       sections: this.sections.map(s => s.toProperties())
     };
   }

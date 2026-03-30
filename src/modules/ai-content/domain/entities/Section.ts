@@ -35,6 +35,7 @@ export const SectionPropertiesSchema = z.object({
 export interface SectionProperties extends Omit<z.infer<typeof SectionPropertiesSchema>, 'with' | 'rules' | 'guidelines' | 'constraints' | 'behaviors'> {
     readonly id: string;
     readonly title: string;
+    readonly itemType?: 'section';
     readonly with?: readonly string[];
     readonly rules?: readonly string[];
     readonly guidelines?: readonly string[];
@@ -121,6 +122,7 @@ export class Section {
     return {
       id: this.id,
       title: this.title,
+      itemType: 'section',
       type: this.type,
       content: this.content,
       status: this.status,

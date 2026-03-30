@@ -3,7 +3,7 @@ import { createApiResponse, handleApiError, withAuth } from '@/infrastructure/ap
 import { container } from '@/infrastructure/di/container';
 import { TemplateController } from '@/modules/templates/adapters/controllers/TemplateController';
 import { templates as defaultTemplates } from '@/modules/ai-content/infrastructure/exporters/DocxStyles';
-import { createDocxTemplateSchema } from '@/modules/users/domain/schemas/UserSchemas';
+import { createDocxTemplateSchema } from '@/modules/users/domain/schemas/index';
 
 import { handleTemplateResult } from '@/infrastructure/api/api-utils';
 

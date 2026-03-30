@@ -15,8 +15,31 @@ export class SaveProjectUseCase {
   ) {}
 
   async execute(projectData: ProjectProperties, userId: string): Promise<Result<Project, ProjectError>> {
+    const normalizeContentItem = (item: any): any => {
+      if (!item) return item;
+      const itemType = item.itemType || item.type || (item.sections ? 'chapter' : 'section');
+      if (itemType === 'chapter') {
+        return {
+          ...item,
+          itemType: 'chapter',
+          sections: Array.isArray(item.sections) ? item.sections.map(normalizeContentItem) : [],
+        };
+      }
+      return {
+        ...item,
+        itemType: 'section',
+      };
+    };
+
+    const normalizedProject: ProjectProperties = {
+      ...projectData,
+      content: Array.isArray(projectData.content)
+        ? projectData.content.map(normalizeContentItem)
+        : [],
+    };
+
     // 1. Validate data against schema
-    const validationResult = ProjectSchema.safeParse(projectData);
+    const validationResult = ProjectSchema.safeParse(normalizedProject);
     
     if (!validationResult.success) {
       const errorMessages = validationResult.error.errors

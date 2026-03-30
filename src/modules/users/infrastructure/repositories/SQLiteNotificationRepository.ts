@@ -13,20 +13,23 @@ export class SQLiteNotificationRepository {
         try {
             const id = uuidv4();
             const createdAt = new Date().toISOString();
-            const notificationData = {
+            const persistenceData = {
                 id,
                 userId,
                 title: data.title,
                 description: data.description,
-                icon: data.icon || 'default',
+                type: (data.icon || 'default') as any,
                 link: data.link || null,
                 isRead: false,
                 createdAt,
             };
             
-            await db.insert(notifications).values(notificationData);
+            await db.insert(notifications).values(persistenceData);
             
-            return Result.ok(new Notification(notificationData));
+            return Result.ok(new Notification({
+                ...persistenceData,
+                icon: persistenceData.type
+            }));
         } catch (error: any) {
             return Result.fail(UserError.internal(error.message));
         }
@@ -44,7 +47,7 @@ export class SQLiteNotificationRepository {
                 id: n.id,
                 title: n.title,
                 description: n.description,
-                icon: n.icon as any || 'default',
+                icon: n.type as any || 'default',
                 isRead: !!n.isRead,
                 createdAt: n.createdAt,
                 link: n.link || undefined

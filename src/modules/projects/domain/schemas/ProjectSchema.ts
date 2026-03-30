@@ -15,19 +15,19 @@ const SectionSchema = z.object({
   id: z.string().min(1),
   title: z.string().default('Untitled Section'),
   content: z.string().default(''),
-  type: z.literal('section'),
+  itemType: z.literal('section'),
 });
 
 // Schema for a Chapter, which can contain sections
 const ChapterSchema = z.object({
   id: z.string().min(1),
   title: z.string().default('Untitled Chapter'),
-  type: z.literal('chapter'),
+  itemType: z.literal('chapter'),
   sections: z.array(SectionSchema).default([]),
 });
 
 // A discriminated union to handle both Chapters and Sections in the content array
-const ContentItemSchema = z.discriminatedUnion('type', [
+const ContentItemSchema = z.discriminatedUnion('itemType', [
   ChapterSchema,
   SectionSchema,
 ]);

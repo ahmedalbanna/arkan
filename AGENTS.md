@@ -348,6 +348,8 @@ FIREBASE_ADMIN_PRIVATE_KEY=
 - Credits are deducted server-side only — never trust client-side credit values
 - RTL/LTR layout changes must be tested in both Arabic and English
 - **String Spreading Bug**: In use cases or controllers, never use the spread operator (`...`) on a variable that might be a string (e.g., `return { ...result, metadata }`). Spreading a string results in an object with numeric keys (`{ "0": "h", "1": "e" ... }`). Always check `typeof result === 'string'` before attempting to merge with metadata.
+- **Discriminator Field Collisions**: Do not reuse a business/domain field like `type` as a Zod discriminated-union key if the entity already uses that field for another meaning (for example section content category vs. content-item kind). Use a dedicated discriminator such as `itemType` or `kind` to avoid save/validation failures.
+- **Schema/Entity Contract Sweep**: When changing domain serialization (`toProperties`, `withProps`, readonly fields, discriminator keys), sweep API validators, repository mappings, seed data, and client payload producers in the same pass. Partial updates tend to surface later as save-route validation errors rather than obvious type errors.
 
 ## Notes
 

@@ -1,4 +1,4 @@
-import { withAuth, handleApiError, handleResult } from "@/infrastructure/api/api-utils";
+import { withAuth, handleApiError, handleUserResult } from "@/infrastructure/api/api-utils";
 import { container } from "@/infrastructure/di/container";
 import { UserController } from "@/modules/users/adapters/controllers/UserController";
 import { z } from "zod";
@@ -21,9 +21,9 @@ export const POST = withAuth(async ({ params, request, user: requester }) => {
         }
 
         const controller = container.resolve(UserController);
-        const result = await controller.disableUser(userId, validation.data.isDisabled);
+        const result = await controller.disableUser({ userId, isDisabled: validation.data.isDisabled });
         
-        return handleResult(result);
+        return handleUserResult(result);
     } catch (error) {
         return handleApiError(error);
     }

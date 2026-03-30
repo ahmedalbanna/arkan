@@ -14,6 +14,7 @@ export interface IAuthRepository {
     generatePasswordResetToken(email: string): Promise<Result<{ token: string, userId: string }, UserError>>;
     resetPasswordWithToken(token: string, password: string): Promise<Result<void, UserError>>;
     revokeAllSessions(userId: string): Promise<Result<void, UserError>>;
+    getUserFingerprints(userId: string): Promise<Result<any[], UserError>>;
 }
 
 export const IAuthRepositoryToken = Symbol("IAuthRepository");

@@ -51,7 +51,7 @@ export async function POST(request: Request) {
     const userProfileResult = await controller.getUser(user.uid);
     const userProfile = userProfileResult.isSuccess ? userProfileResult.getValue() : null;
 
-    if (userProfile?.isTwoFactorEnabled) {
+    if (userProfile && (userProfile as any).isTwoFactorEnabled) {
         return NextResponse.json({ 
             status: 'requires_2fa',
             userId: user.uid
@@ -63,14 +63,14 @@ export async function POST(request: Request) {
     // 2. Record Login History
     await controller.recordLogin({
         userId: user.uid,
-        ip,
+        ip: ip || undefined,
         userAgent: headersList.get('user-agent') || 'unknown',
-        fingerprint: fingerprint || null
+        fingerprint: fingerprint || undefined
     });
 
     // 3. Register Fingerprint if provided
     if (fingerprint && fingerprintData) {
-        await controller.registerFingerprint(user.uid, fingerprint, fingerprintData);
+        await controller.registerFingerprint({ userId: user.uid, fingerprint, metadata: fingerprintData });
     }
 
     // 30 days if remember me, otherwise 5 days

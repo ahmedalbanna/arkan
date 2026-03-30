@@ -1,12 +1,12 @@
 import { inject, injectable } from "tsyringe";
 import { db } from "@/infrastructure/db";
-import { users, passwordResets } from "@/infrastructure/db/schema";
+import { users, passwordResets, userFingerprints } from "@/infrastructure/db/schema";
 import { type IAuthRepository } from "../../domain/repositories/IAuthRepository";
 import { Result } from "@/infrastructure/utils/result";
 import { UserError } from "../../domain/errors/UserErrors";
 import { type IPasswordService, IPasswordServiceToken } from "../../domain/services/IPasswordService";
 import { type ITokenService, ITokenServiceToken } from "../../domain/services/ITokenService";
-import { eq, and, sql } from "drizzle-orm";
+import { eq, and, sql, desc } from "drizzle-orm";
 import { v4 as uuidv4 } from "uuid";
 
 @injectable()
@@ -224,6 +224,22 @@ export class SQLiteAuthRepository implements IAuthRepository {
                 })
                 .where(eq(users.id, userId));
             return Result.ok();
+        } catch (error: any) {
+            return Result.fail(UserError.internal(error.message));
+        }
+    }
+
+    async getUserFingerprints(userId: string): Promise<Result<any[], UserError>> {
+        try {
+            const results = await db.query.userFingerprints.findMany({
+                where: eq(userFingerprints.userId, userId),
+                orderBy: [desc(userFingerprints.lastUsedAt)],
+            });
+
+            return Result.ok(results.map(f => ({
+                ...f,
+                metadata: f.metadata ? JSON.parse(f.metadata) : {}
+            })));
         } catch (error: any) {
             return Result.fail(UserError.internal(error.message));
         }

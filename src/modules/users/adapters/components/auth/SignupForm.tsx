@@ -12,6 +12,8 @@ import Link from 'next/link';
 import { useForm } from 'react-hook-form';
 import { signupSchema as formSchema, type SignupInput as SignupCredentials } from '@/modules/users/domain/schemas/index';
 
+export type { SignupCredentials };
+
 export default function SignupForm() {
   const { t } = useLocalization();
   const signupMutation = useSignup();
