@@ -13,6 +13,10 @@ export class RetrieveContextUseCase {
     ) {}
 
     async execute(query: string, options: RagRetrievalOptions): Promise<Result<RagRetrievalResult, RagError>> {
-        return this.ragRepository.retrieveContext(query, options);
+        const result = await this.ragRepository.retrieveContext(query, options);
+        if (result.isFailure) {
+            return Result.fail(RagError.internal(`Retrieval failed: ${result.error?.message || 'Unknown error'}`));
+        }
+        return Result.ok(result.getValue());
     }
 }

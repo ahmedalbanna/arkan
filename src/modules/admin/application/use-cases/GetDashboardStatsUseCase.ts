@@ -13,6 +13,10 @@ export class GetDashboardStatsUseCase {
     ) {}
 
     async execute(): Promise<Result<DashboardStats, AdminError>> {
-        return this.adminStatsRepository.getDashboardStats();
+        const result = await this.adminStatsRepository.getDashboardStats();
+        if (result.isFailure) {
+            return Result.fail(AdminError.internal(`Failed to fetch dashboard stats: ${result.error?.message || 'Unknown error'}`));
+        }
+        return Result.ok(result.getValue());
     }
 }

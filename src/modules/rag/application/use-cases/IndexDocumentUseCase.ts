@@ -17,11 +17,12 @@ export class IndexDocumentUseCase {
     ) {}
 
     async execute(content: string, options: RagIndexingOptions): Promise<Result<RagIndexingResult, RagError>> {
+        // 1. Index
         const result = await this.ragRepository.indexDocument(content, options);
         
         if (result.isSuccess) {
             const data = result.getValue();
-            // Track the successful indexing
+            // 2. Track the successful indexing
             await this.documentRepository.record({
                 projectId: options.projectId || 'unknown',
                 userId: options.userId,
@@ -32,21 +33,22 @@ export class IndexDocumentUseCase {
                 chunkSize: options.chunkSize || 500,
                 overlap: options.overlap || 50,
             });
+            return Result.ok(data);
         } else {
-            // Log failure to db as well
+            // 3. Log failure to db as well
+            const errorMsg = result.error?.message || "Unknown indexing error";
             await this.documentRepository.recordFailed({
                 projectId: options.projectId || 'unknown',
                 userId: options.userId,
                 sourceFile: options.sourceFile || 'unknown',
                 fileSize: content.length,
                 type: options.type ?? 'context',
-                errorMessage: result.error?.message || "Unknown indexing error",
+                errorMessage: errorMsg,
                 chunkSize: options.chunkSize || 500,
                 overlap: options.overlap || 50,
             });
+            return Result.fail(RagError.internal(`Indexing failed: ${errorMsg}`));
         }
-
-        return result;
     }
 
     async recordFailed(data: Pick<IndexedDocumentRecord, 'projectId' | 'userId' | 'sourceFile' | 'fileSize' | 'type' | 'errorMessage'>): Promise<Result<string, RagError>> {

@@ -1,5 +1,6 @@
 export enum TemplateErrorType {
   NOT_FOUND = "NOT_FOUND",
+  VALIDATION = "VALIDATION",
   SAVE_ERROR = "SAVE_ERROR",
   DELETE_ERROR = "DELETE_ERROR",
   INTERNAL = "INTERNAL"
@@ -14,6 +15,10 @@ export class TemplateError {
 
   public static notFound(message: string = "Template not found"): TemplateError {
     return new TemplateError(TemplateErrorType.NOT_FOUND, message);
+  }
+
+  public static validation(message: string, details?: any): TemplateError {
+    return new TemplateError(TemplateErrorType.VALIDATION, message, details);
   }
 
   public static saveError(message: string = "Failed to save template", details?: any): TemplateError {

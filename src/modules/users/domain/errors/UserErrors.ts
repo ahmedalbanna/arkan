@@ -3,6 +3,7 @@ export enum UserErrorType {
   CONFLICT = "CONFLICT",
   UNAUTHORIZED = "UNAUTHORIZED",
   VALIDATION = "VALIDATION",
+  SAVE_ERROR = "SAVE_ERROR",
   INTERNAL = "INTERNAL"
 }
 
@@ -27,6 +28,10 @@ export class UserError {
 
   public static validation(message: string, details?: any): UserError {
     return new UserError(UserErrorType.VALIDATION, message, details);
+  }
+
+  public static saveError(message: string = "Failed to save resource", details?: any): UserError {
+    return new UserError(UserErrorType.SAVE_ERROR, message, details);
   }
 
   public static internal(message: string = "Internal server error"): UserError {
