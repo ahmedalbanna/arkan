@@ -1,11 +1,4 @@
 
-export interface BankAccount {
-    bankName: string;
-    accountHolder: string;
-    currencies: {
-        [key: string]: {
-            iban: string;
-            swift?: string;
-        }
-    };
-}
+import { type BankAccountType as BankAccount } from "../schemas/PaymentSchema";
+
+export type { BankAccount };

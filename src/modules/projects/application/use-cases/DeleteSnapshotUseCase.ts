@@ -12,6 +12,10 @@ export class DeleteSnapshotUseCase {
   ) {}
 
   async execute(snapshotId: string): Promise<Result<void, ProjectError>> {
-    return this.projectRepository.deleteSnapshot(snapshotId);
+    const result = await this.projectRepository.deleteSnapshot(snapshotId);
+    if (result.isFailure) {
+        return Result.fail(ProjectError.deleteError(`Failed to delete snapshot ${snapshotId}: ${result.error?.message || 'Unknown error'}`));
+    }
+    return Result.ok();
   }
 }

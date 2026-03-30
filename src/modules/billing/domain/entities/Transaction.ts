@@ -1,36 +1,23 @@
 
-export interface TransactionProperties {
-    id: string; // Firestore document ID
-    userId: string;
-    planId: string;
-    planName: string;
-    credits: number;
-    price: number;
-    userName: string;
-    userEmail: string;
-    status: 'pending' | 'verified' | 'rejected';
-    proofUrl: string;
-    createdAt: string;
-    adminNotes?: string;
-    verifiedAt?: string;
-    verifiedBy?: string;
-}
+import { type TransactionPropertiesType as TransactionProperties } from "../schemas/TransactionSchema";
+
+export type { TransactionProperties };
 
 export class Transaction implements TransactionProperties {
-    public id: string;
-    public userId: string;
-    public planId: string;
-    public planName: string;
-    public credits: number;
-    public price: number;
-    public userName: string;
-    public userEmail: string;
-    public status: 'pending' | 'verified' | 'rejected';
-    public proofUrl: string;
-    public createdAt: string;
-    public adminNotes?: string;
-    public verifiedAt?: string;
-    public verifiedBy?: string;
+    public readonly id: string;
+    public readonly userId: string;
+    public readonly planId: string;
+    public readonly planName: string;
+    public readonly credits: number;
+    public readonly price: number;
+    public readonly userName: string;
+    public readonly userEmail: string;
+    public readonly status: 'pending' | 'verified' | 'rejected';
+    public readonly proofUrl: string;
+    public readonly createdAt: string;
+    public readonly adminNotes?: string;
+    public readonly verifiedAt?: string;
+    public readonly verifiedBy?: string;
 
     constructor(props: TransactionProperties) {
         this.id = props.id;
@@ -65,5 +52,27 @@ export class Transaction implements TransactionProperties {
      */
     public getFormattedPrice(): string {
         return `$${this.price.toFixed(2)}`;
+    }
+
+    /**
+     * Convert the entity to a plain properties object.
+     */
+    public toJSON(): TransactionProperties {
+        return {
+            id: this.id,
+            userId: this.userId,
+            planId: this.planId,
+            planName: this.planName,
+            credits: this.credits,
+            price: this.price,
+            userName: this.userName,
+            userEmail: this.userEmail,
+            status: this.status,
+            proofUrl: this.proofUrl,
+            createdAt: this.createdAt,
+            adminNotes: this.adminNotes,
+            verifiedAt: this.verifiedAt,
+            verifiedBy: this.verifiedBy,
+        };
     }
 }

@@ -13,6 +13,10 @@ export class GetSnapshotsUseCase {
   ) {}
 
   async execute(projectId: string): Promise<Result<ProjectSnapshot[], ProjectError>> {
-    return this.projectRepository.getSnapshots(projectId);
+    const result = await this.projectRepository.getSnapshots(projectId);
+    if (result.isFailure) {
+        return Result.fail(ProjectError.internal(`Failed to fetch snapshots for project ${projectId}: ${result.error?.message || 'Unknown error'}`));
+    }
+    return Result.ok(result.getValue());
   }
 }

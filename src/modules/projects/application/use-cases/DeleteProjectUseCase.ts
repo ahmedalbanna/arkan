@@ -13,6 +13,10 @@ export class DeleteProjectUseCase {
   ) {}
 
   async execute(projectId: string): Promise<Result<void, ProjectError>> {
-    return this.projectRepository.delete(projectId);
+    const result = await this.projectRepository.delete(projectId);
+    if (result.isFailure) {
+      return Result.fail(ProjectError.deleteError(`Failed to delete project ${projectId}: ${result.error?.message || 'Unknown error'}`));
+    }
+    return Result.ok();
   }
 }

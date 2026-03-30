@@ -1,12 +1,8 @@
-import { ProjectProperties } from "./Project";
 
-export interface ProjectSnapshotProperties {
-  id: string;
-  projectId: string;
-  name: string;
-  snapshotData: ProjectProperties;
-  created: string;
-}
+import { type ProjectProperties } from "./Project";
+import { type ProjectSnapshotPropertiesType as ProjectSnapshotProperties } from "../schemas/SnapshotSchema";
+
+export type { ProjectSnapshotProperties };
 
 export class ProjectSnapshot {
   public readonly id: string;
@@ -19,7 +15,7 @@ export class ProjectSnapshot {
     this.id = props.id;
     this.projectId = props.projectId;
     this.name = props.name;
-    this.snapshotData = props.snapshotData;
+    this.snapshotData = props.snapshotData as ProjectProperties;
     this.created = props.created;
   }
 
@@ -28,7 +24,7 @@ export class ProjectSnapshot {
       id: this.id,
       projectId: this.projectId,
       name: this.name,
-      snapshotData: this.snapshotData,
+      snapshotData: this.snapshotData as any,
       created: this.created,
     };
   }

@@ -14,6 +14,10 @@ export class GetProjectsUseCase {
   ) {}
 
   async execute(userId: string): Promise<Result<Project[], ProjectError>> {
-    return this.projectRepository.getByUserId(userId);
+    const result = await this.projectRepository.getByUserId(userId);
+    if (result.isFailure) {
+      return Result.fail(ProjectError.internal(`Failed to fetch projects for user ${userId}: ${result.error?.message || 'Unknown error'}`));
+    }
+    return Result.ok(result.getValue());
   }
 }

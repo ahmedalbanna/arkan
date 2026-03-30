@@ -14,6 +14,10 @@ export class GetProjectByIdUseCase {
   ) {}
 
   async execute(projectId: string): Promise<Result<Project, ProjectError>> {
-    return this.projectRepository.getById(projectId);
+    const result = await this.projectRepository.getById(projectId);
+    if (result.isFailure) {
+      return Result.fail(ProjectError.notFound(`Project with id ${projectId} not found: ${result.error?.message || 'Unknown error'}`));
+    }
+    return Result.ok(result.getValue());
   }
 }
