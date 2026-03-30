@@ -1,25 +1,16 @@
-import { injectable } from "tsyringe";
-import { db } from "@/infrastructure/db";
-import { userFingerprints } from "@/infrastructure/db/schema";
+import { injectable, inject } from "tsyringe";
 import { Result } from "@/infrastructure/utils/result";
 import { UserError } from "../../domain/errors/UserErrors";
-import { eq, desc } from "drizzle-orm";
+import { type IAuthRepository, IAuthRepositoryToken } from "../../domain/repositories/IAuthRepository";
 
 @injectable()
 export class GetUserFingerprintsUseCase {
-    async execute(userId: string): Promise<Result<any[], UserError>> {
-        try {
-            const results = await db.query.userFingerprints.findMany({
-                where: eq(userFingerprints.userId, userId),
-                orderBy: [desc(userFingerprints.lastUsedAt)],
-            });
+    constructor(
+        @inject(IAuthRepositoryToken)
+        private authRepository: IAuthRepository
+    ) {}
 
-            return Result.ok(results.map(f => ({
-                ...f,
-                metadata: f.metadata ? JSON.parse(f.metadata) : {}
-            })));
-        } catch (error: any) {
-            return Result.fail(UserError.internal(error.message));
-        }
+    async execute(userId: string): Promise<Result<any[], UserError>> {
+        return this.authRepository.getUserFingerprints(userId);
     }
 }

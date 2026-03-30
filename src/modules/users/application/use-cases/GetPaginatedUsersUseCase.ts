@@ -2,7 +2,7 @@
 import { inject, injectable } from "tsyringe";
 import type { IUserRepository } from "../../domain/repositories/IUserRepository";
 import { IUserRepositoryToken } from "../../domain/repositories/IUserRepository";
-import { UserProfile } from "../../domain/entities/User";
+import { User } from "../../domain/entities/User";
 import { Result } from "@/infrastructure/utils/result";
 import { UserError } from "../../domain/errors/UserErrors";
 
@@ -13,7 +13,7 @@ export class GetPaginatedUsersUseCase {
         private userRepository: IUserRepository
     ) {}
 
-    async execute(options: { limit: number, lastVisibleId?: string }): Promise<Result<{ users: UserProfile[], hasNextPage: boolean, lastVisibleId: string | null }, UserError>> {
+    async execute(options: { limit: number, lastVisibleId?: string }): Promise<Result<{ users: User[], hasNextPage: boolean, lastVisibleId: string | null }, UserError>> {
         return this.userRepository.getPaginated(options);
     }
 }

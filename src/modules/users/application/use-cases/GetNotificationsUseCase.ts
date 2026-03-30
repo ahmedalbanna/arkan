@@ -4,6 +4,7 @@ import type { INotificationService } from "../../domain/services/INotificationSe
 import { INotificationServiceToken } from "../../domain/services/INotificationService";
 import { Result } from "@/infrastructure/utils/result";
 import { UserError } from "../../domain/errors/UserErrors";
+import { Notification } from "../../domain/entities/Notification";
 
 @injectable()
 export class GetNotificationsUseCase {
@@ -12,7 +13,7 @@ export class GetNotificationsUseCase {
         private notificationService: INotificationService
     ) {}
 
-    async execute(userId: string, limit?: number): Promise<Result<any[], UserError>> {
+    async execute(userId: string, limit?: number): Promise<Result<Notification[], UserError>> {
         return this.notificationService.getNotifications(userId, limit);
     }
 }
