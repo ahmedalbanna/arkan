@@ -5,6 +5,7 @@ import { useAuth } from '@/context/AuthContext';
 import { container } from '@/infrastructure/di/container';
 import { NotificationApiClient } from '@/modules/users/adapters/api-client/NotificationApiClient';
 import { notificationKeys } from '@/infrastructure/api/query-keys';
+import { handleErrorUtility } from '@/infrastructure/api/errorUtils';
 
 export function useNotifications() {
   const { user } = useAuth();
@@ -29,9 +30,11 @@ export function useNotifications() {
     isLoading: query.isLoading,
     isError: query.isError,
     error: query.error,
-    sendNotification: (data: any) => {
+    sendNotification: async (data: any) => {
         const client = container.resolve(NotificationApiClient);
-        return client.sendNotification(data);
+        const result = await client.sendNotification(data);
+        if (result.isFailure) handleErrorUtility(result.error, 'Failed to send notification');
+        return result;
     },
     markAsRead: (ids: string[]) => markMutation.mutate(ids),
     clearNotifications: (ids: string[]) => clearMutation.mutate(ids),
@@ -52,6 +55,7 @@ export function useMarkNotificationsAsRead() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: notificationKeys.all() });
     },
+    onError: (error) => handleErrorUtility(error, 'Failed to mark notifications as read'),
   });
 }
 
@@ -68,5 +72,6 @@ export function useClearNotifications() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: notificationKeys.all() });
     },
+    onError: (error) => handleErrorUtility(error, 'Failed to clear notifications'),
   });
 }

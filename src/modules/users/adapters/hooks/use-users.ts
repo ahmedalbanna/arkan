@@ -6,7 +6,8 @@ import { UserApiClient } from '@/modules/users/adapters/api-client/UserApiClient
 import { userKeys } from '@/infrastructure/api/query-keys';
 import { useAuth } from '@/context/AuthContext';
 import { useToast } from '@/hooks/util/use-toast';
-import { UserProfile } from '@/modules/users/domain/entities/User';
+import { UserProfile, User } from '@/modules/users/domain/entities/User';
+import { handleErrorUtility } from '@/infrastructure/api/errorUtils';
 
 export function useUserProfile(userId: string) {
   const { user } = useAuth();
@@ -18,7 +19,7 @@ export function useUserProfile(userId: string) {
       const client = container.resolve(UserApiClient);
       const result = await client.fetchUserProfile(userId);
       if (result.isFailure) throw result.error;
-      return result.getValue();
+      return new User(result.getValue());
     },
     enabled: !!user && !!userId,
   });
@@ -37,7 +38,12 @@ export function usePaginatedUsers(options: { limit: number; lastVisibleId?: stri
           lastVisibleId: options.lastVisibleId ?? undefined
       });
       if (result.isFailure) throw result.error;
-      return result.getValue();
+      
+      const data = result.getValue();
+      return {
+        ...data,
+        users: data.users.map(u => new User(u))
+      };
     },
     enabled: !!user,
   });
@@ -59,9 +65,7 @@ export function useCreateUser(options?: { onSuccess?: () => void }) {
       toast({ title: 'Success', description: 'User created successfully.' });
       options?.onSuccess?.();
     },
-    onError: (error: any) => {
-      toast({ title: 'Error', description: error.message || 'Failed to create user.', variant: 'destructive' });
-    },
+    onError: (error: any) => handleErrorUtility(error, 'Failed to create user'),
   });
 }
 
@@ -81,9 +85,7 @@ export function useUpdateUser() {
       queryClient.invalidateQueries({ queryKey: userKeys.all() });
       toast({ title: 'Success', description: 'User updated successfully.' });
     },
-    onError: (error: any) => {
-      toast({ title: 'Error', description: error.message || 'Failed to update user.', variant: 'destructive' });
-    },
+    onError: (error: any) => handleErrorUtility(error, 'Failed to update user'),
   });
 }
 
@@ -103,9 +105,7 @@ export function useAdminUpdateUser() {
       queryClient.invalidateQueries({ queryKey: userKeys.all() });
       toast({ title: 'Success', description: 'User updated successfully.' });
     },
-    onError: (error: any) => {
-      toast({ title: 'Error', description: error.message || 'Failed to update user.', variant: 'destructive' });
-    },
+    onError: (error: any) => handleErrorUtility(error, 'Failed to update user'),
   });
 }
 
@@ -124,8 +124,6 @@ export function useDeleteUser() {
       queryClient.invalidateQueries({ queryKey: userKeys.all() });
       toast({ title: 'Success', description: 'User deleted successfully.' });
     },
-    onError: (error: any) => {
-      toast({ title: 'Error', description: error.message || 'Failed to delete user.', variant: 'destructive' });
-    },
+    onError: (error: any) => handleErrorUtility(error, 'Failed to delete user'),
   });
 }

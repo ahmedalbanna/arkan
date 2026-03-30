@@ -1,17 +1,9 @@
 import { injectable } from 'tsyringe';
 import { apiService, ApiError } from '@/infrastructure/api/ApiService';
 import { Result } from '@/infrastructure/utils/result';
+import { NotificationProperties } from '../../domain/entities/Notification';
 
-export interface Notification {
-  id: string;
-  userId: string;
-  title: string;
-  description: string;
-  type: 'info' | 'success' | 'warning' | 'alert' | 'error';
-  link?: string;
-  read: boolean;
-  createdAt: string;
-}
+export type Notification = NotificationProperties;
 
 export interface SendNotificationInput {
   userId: string;

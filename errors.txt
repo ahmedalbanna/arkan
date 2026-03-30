@@ -1,0 +1,3 @@
+ When Save Project!!
+ POST /api/projects 400 in 358ms
+Validation failed: content.0.type: Invalid discriminator value. Expected 'chapter' | 'section'

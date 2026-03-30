@@ -156,29 +156,34 @@ export class SQLiteUserRepository implements IUserRepository {
     private toDomain(user: any): UserProfile {
         return {
             ...user,
-            apiKeys: user.apiKeys ? JSON.parse(user.apiKeys) : undefined,
+            apiKeys: user.apiKeys ? (typeof user.apiKeys === 'string' ? JSON.parse(user.apiKeys) : user.apiKeys) : undefined,
             hasCompletedOnboarding: !!user.hasCompletedOnboarding,
             isDisabled: !!user.isDisabled,
-            securitySettings: user.securitySettings ? JSON.parse(user.securitySettings) : undefined,
+            isTwoFactorEnabled: !!user.isTwoFactorEnabled,
+            securitySettings: user.securitySettings ? (typeof user.securitySettings === 'string' ? JSON.parse(user.securitySettings) : user.securitySettings) : { enableLoginAlerts: true },
         };
     }
 
     private toPersistence(user: UserProfile): any {
+        const data: any = { ...user };
+        if (data.apiKeys) data.apiKeys = JSON.stringify(data.apiKeys);
+        if (data.securitySettings) data.securitySettings = JSON.stringify(data.securitySettings);
+        
         return {
-            ...user,
-            apiKeys: user.apiKeys ? JSON.stringify(user.apiKeys) : null,
+            ...data,
             hasCompletedOnboarding: user.hasCompletedOnboarding ? 1 : 0,
             isDisabled: user.isDisabled ? 1 : 0,
-            securitySettings: user.securitySettings ? JSON.stringify(user.securitySettings) : null,
+            isTwoFactorEnabled: user.isTwoFactorEnabled ? 1 : 0,
         };
     }
 
     private toPersistencePartial(user: Partial<UserProfile>): any {
         const data: any = { ...user };
         if (user.apiKeys) data.apiKeys = JSON.stringify(user.apiKeys);
+        if (user.securitySettings) data.securitySettings = JSON.stringify(user.securitySettings);
         if (user.hasCompletedOnboarding !== undefined) data.hasCompletedOnboarding = user.hasCompletedOnboarding ? 1 : 0;
         if (user.isDisabled !== undefined) data.isDisabled = user.isDisabled ? 1 : 0;
-        if (user.securitySettings) data.securitySettings = JSON.stringify(user.securitySettings);
+        if (user.isTwoFactorEnabled !== undefined) data.isTwoFactorEnabled = user.isTwoFactorEnabled ? 1 : 0;
         return data;
     }
 }

@@ -5,35 +5,52 @@ import { Result } from "@/infrastructure/utils/result";
 import { UserError } from "../../domain/errors/UserErrors";
 import { eq, desc, and, inArray } from "drizzle-orm";
 import { v4 as uuidv4 } from "uuid";
+import { Notification } from "../../domain/entities/Notification";
 
 @injectable()
 export class SQLiteNotificationRepository {
-    async create(userId: string, data: any): Promise<Result<void, UserError>> {
+    async create(userId: string, data: any): Promise<Result<Notification, UserError>> {
         try {
-            await db.insert(notifications).values({
-                id: uuidv4(),
+            const id = uuidv4();
+            const createdAt = new Date().toISOString();
+            const notificationData = {
+                id,
                 userId,
                 title: data.title,
                 description: data.description,
-                type: data.type || 'info',
+                icon: data.icon || 'default',
                 link: data.link || null,
                 isRead: false,
-                createdAt: new Date().toISOString(),
-            });
-            return Result.ok();
+                createdAt,
+            };
+            
+            await db.insert(notifications).values(notificationData);
+            
+            return Result.ok(new Notification(notificationData));
         } catch (error: any) {
             return Result.fail(UserError.internal(error.message));
         }
     }
 
-    async getByUserId(userId: string, limit: number = 20): Promise<Result<any[], UserError>> {
+    async getByUserId(userId: string, limit: number = 20): Promise<Result<Notification[], UserError>> {
         try {
             const results = await db.query.notifications.findMany({
                 where: eq(notifications.userId, userId),
                 orderBy: [desc(notifications.createdAt)],
                 limit,
             });
-            return Result.ok(results);
+            
+            const domainNotifications = results.map(n => new Notification({
+                id: n.id,
+                title: n.title,
+                description: n.description,
+                icon: n.icon as any || 'default',
+                isRead: !!n.isRead,
+                createdAt: n.createdAt,
+                link: n.link || undefined
+            }));
+            
+            return Result.ok(domainNotifications);
         } catch (error: any) {
             return Result.fail(UserError.internal(error.message));
         }

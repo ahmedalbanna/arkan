@@ -78,4 +78,45 @@ export class User {
             return 'N/A';
         }
     }
+
+    /**
+     * Standardized serialization to plain properties.
+     */
+    public toProperties(): UserProfile {
+        return {
+            id: this.id,
+            name: this.name,
+            email: this.email,
+            role: this.role,
+            credits: this.credits,
+            createdAt: this.createdAt,
+            updatedAt: this.updatedAt,
+            bio: this.bio,
+            profilePictureUrl: this.profilePictureUrl,
+            hasCompletedOnboarding: this.hasCompletedOnboarding,
+            apiKeys: this.apiKeys ? { ...this.apiKeys } : undefined,
+            lastDailyCreditUpdate: this.lastDailyCreditUpdate,
+            securitySettings: { ...this.securitySettings },
+            isDisabled: this.isDisabled,
+            isTwoFactorEnabled: this.isTwoFactorEnabled,
+            tokenVersion: this.tokenVersion,
+        };
+    }
+
+    /**
+     * Compatibility alias for toProperties()
+     */
+    public toStateObject(): UserProfile {
+        return this.toProperties();
+    }
+
+    /**
+     * Standardized cloning with property updates.
+     */
+    public withProps(props: Partial<UserProfile>): User {
+        return new User({
+            ...this.toProperties(),
+            ...props,
+        });
+    }
 }
