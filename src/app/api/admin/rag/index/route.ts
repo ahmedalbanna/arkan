@@ -8,7 +8,8 @@
  * - Qdrant storage
  */
 
-import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest } from 'next/server';
+import { handleApiError, handleRagResult } from '@/infrastructure/api/api-utils';
 import { container } from '@/infrastructure/di/container';
 import { RagController } from '@/modules/rag/adapters/controllers/RagController';
 
@@ -77,7 +78,7 @@ export async function POST(request: NextRequest) {
     const userId = formData.get('userId') as string | null;
 
     if (!file || !projectId) {
-      return NextResponse.json({ success: false, error: 'File and Project ID are required' }, { status: 400 });
+      return handleApiError({ message: 'File and Project ID are required' }, 400);
     }
 
     const text = await extractTextFromFile(file);
@@ -90,18 +91,7 @@ export async function POST(request: NextRequest) {
       overlap,
     });
 
-    if (result.isFailure) {
-      return NextResponse.json({ success: false, error: result.error?.message || 'Indexing failed' }, { status: 500 });
-    }
-
-    const data = result.getValue();
-
-    return NextResponse.json({
-      success: true,
-      chunksCreated: data.chunksCreated,
-      fileName: file.name,
-      message: 'Document indexed successfully',
-    });
+    return handleRagResult(result);
 
   } catch (error) {
     console.error('Document indexing error:', error);
@@ -121,7 +111,7 @@ export async function POST(request: NextRequest) {
         }
     }
     
-    return NextResponse.json({ success: false, error: 'Internal server error' }, { status: 500 });
+    return handleApiError(error);
   }
 }
 

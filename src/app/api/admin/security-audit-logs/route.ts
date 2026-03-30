@@ -1,4 +1,4 @@
-import { withAuth, handleApiError, handleResult } from "@/infrastructure/api/api-utils";
+import { withAuth, handleApiError, handleUserResult } from "@/infrastructure/api/api-utils";
 import { container } from "@/infrastructure/di/container";
 import { UserController } from "@/modules/users/adapters/controllers/UserController";
 
@@ -11,7 +11,7 @@ export const GET = withAuth(async ({ user: requester }) => {
         const controller = container.resolve(UserController);
         const result = await controller.getSecurityAuditLogs();
         
-        return handleResult(result);
+        return handleUserResult(result);
     } catch (error) {
         return handleApiError(error);
     }

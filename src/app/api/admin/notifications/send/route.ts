@@ -1,7 +1,8 @@
 import { z } from 'zod';
-import { withAuth, handleApiError, createApiResponse } from '@/infrastructure/api/api-utils';
+import { withAuth, handleApiError, handleUserResult } from '@/infrastructure/api/api-utils';
 import { container } from '@/infrastructure/di/container';
 import { UserController } from '@/modules/users/adapters/controllers/UserController';
+import { Result } from '@/infrastructure/utils/result';
 
 const sendNotificationSchema = z.object({
   userId: z.string().min(1, 'User ID is required.'),
@@ -28,7 +29,7 @@ export const POST = withAuth(async ({ request }) => {
         link: link || '/dashboard'
     });
 
-    return createApiResponse({ message: 'Notification sent successfully.' }, 200);
+    return handleUserResult(Result.ok({ message: 'Notification sent successfully.' }));
 
   } catch (error: any) {
     console.error('Error sending notification:', error);

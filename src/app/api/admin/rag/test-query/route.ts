@@ -4,9 +4,11 @@
  * Test RAG queries with full control and detailed results
  */
 
-import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest } from 'next/server';
+import { handleApiError, handleRagResult } from '@/infrastructure/api/api-utils';
 import { container } from '@/infrastructure/di/container';
 import { RagController } from '@/modules/rag/adapters/controllers/RagController';
+import { Result } from '@/infrastructure/utils/result';
 
 export async function POST(request: NextRequest) {
   try {
@@ -22,10 +24,7 @@ export async function POST(request: NextRequest) {
     } = body;
 
     if (!query || typeof query !== 'string') {
-      return NextResponse.json(
-        { error: 'Query is required' },
-        { status: 400 }
-      );
+      return handleApiError({ message: 'Query is required' }, 400);
     }
 
     const controller = container.resolve(RagController);
@@ -48,34 +47,18 @@ export async function POST(request: NextRequest) {
     });
 
     if (result.isFailure) {
-      return NextResponse.json(
-        {
-          error: result.error?.message ?? 'Search failed',
-          sources: [],
-          context: '',
-        },
-        { status: 400 }
-      );
+      return handleRagResult(result);
     }
 
     const data = result.getValue();
 
-    return NextResponse.json({
+    return handleRagResult(Result.ok({
       ...data,
       cacheHit,
       timestamp: new Date().toISOString(),
-    });
+    }));
 
   } catch (error) {
-    console.error('RAG test error:', error);
-
-    return NextResponse.json(
-      {
-        error: error instanceof Error ? error.message : 'Search failed',
-        sources: [],
-        context: '',
-      },
-      { status: 500 }
-    );
+    return handleApiError(error);
   }
 }

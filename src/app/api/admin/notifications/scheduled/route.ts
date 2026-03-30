@@ -1,4 +1,3 @@
-import { NextResponse } from 'next/server';
 import { withAuth, handleApiError, handleUserResult } from '@/infrastructure/api/api-utils';
 import { container } from '@/infrastructure/di/container';
 import { UserController } from '@/modules/users/adapters/controllers/UserController';
@@ -24,7 +23,7 @@ export const DELETE = withAuth(async ({ request }) => {
     const id = searchParams.get('id');
 
     if (!id) {
-        return NextResponse.json({ error: "Missing ID" }, { status: 400 });
+        return handleApiError({ message: "Missing ID" }, 400);
     }
 
     const controller = container.resolve(UserController);
