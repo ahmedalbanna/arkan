@@ -1,5 +1,5 @@
 
-import { createApiResponse, handleApiError, withAuth } from '@/infrastructure/api/api-utils';
+import { handleBillingResult, handleApiError, withAuth } from '@/infrastructure/api/api-utils';
 import { z } from 'zod';
 import { container } from '@/infrastructure/di/container';
 import { BillingController } from '@/modules/billing/adapters/controllers/BillingController';
@@ -27,11 +27,7 @@ export const POST = withAuth(async ({ request, user }) => {
         adminId: user.id
     });
 
-    if (result.isFailure) {
-        return handleApiError(result.error);
-    }
-
-    return createApiResponse({ message: `Transaction ${validation.data.status} successfully.` }, 200);
+    return handleBillingResult(result);
   } catch (error) {
     return handleApiError(error);
   }

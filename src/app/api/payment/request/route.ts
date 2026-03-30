@@ -1,5 +1,5 @@
 
-import { withAuth, handleApiError, createApiResponse } from '@/infrastructure/api/api-utils';
+import { withAuth, handleApiError, handleBillingResult } from '@/infrastructure/api/api-utils';
 import { container } from '@/infrastructure/di/container';
 import { BillingController } from '@/modules/billing/adapters/controllers/BillingController';
 
@@ -41,15 +41,7 @@ export const POST = withAuth(async ({ request }) => {
         userEmail: userEmail || 'N/A'
     });
 
-    if (result.isFailure) {
-        return handleApiError(result.error);
-    }
-
-    const transaction = result.getValue();
-    return createApiResponse({ 
-        message: 'Request submitted successfully for review.', 
-        transactionId: transaction.id 
-    }, 200);
+    return handleBillingResult(result);
   } catch (error) {
     return handleApiError(error);
   }

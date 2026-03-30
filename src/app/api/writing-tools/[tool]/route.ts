@@ -1,7 +1,7 @@
 
 'use server';
 
-import { createApiResponse, handleApiError, withAuth } from '@/infrastructure/api/api-utils';
+import { handleAiResult, handleApiError, withAuth } from '@/infrastructure/api/api-utils';
 import { container } from '@/infrastructure/di/container';
 import { AiController } from '@/modules/ai/adapters/controllers/AiController';
 import { headers } from 'next/headers';
@@ -31,11 +31,7 @@ export const POST = withAuth(async ({ request, user, params }) => {
         ip
     });
 
-    if (result.isFailure) {
-        return handleApiError(result.error);
-    }
-
-    return createApiResponse(result.getValue(), 200);
+    return handleAiResult(result);
 
   } catch (error) {
     return handleApiError(error);
