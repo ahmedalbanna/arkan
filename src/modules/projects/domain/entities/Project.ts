@@ -18,7 +18,7 @@ import { Language, Behavior, Tone, defaultControls } from '@/modules/ai-content/
 export type ProjectContent = readonly (Chapter | Section)[];
 
 export interface ProjectProperties {
-  id?: string;
+  id: string;
   name?: string;
   description?: string;
   projectDescription?: string;
@@ -86,7 +86,10 @@ export class Project {
 
 
   constructor(props: ProjectProperties) {
-    this.id = props.id || uuidv4();
+    if (!props.id) {
+        throw new Error("Project must have an id.");
+    }
+    this.id = props.id;
     this.name = props.name || 'Untitled Project';
     this.description = props.description || '';
     this.projectDescription = props.projectDescription;
@@ -223,7 +226,14 @@ export class Project {
   // --- Immutable Logic ---
   
   public reset(): Project {
-    return new Project({});
+    return new Project({
+        ...this.toStateObject(),
+        content: [],
+        externalContext: [],
+        name: 'Untitled Project',
+        description: '',
+        tableOfContentsMarkdown: ''
+    });
   }
 
   public generateTableOfContents(): Project {
@@ -243,13 +253,13 @@ export class Project {
   }
 
   public addChapter(title: string = "Untitled Chapter"): Project {
-    const newChapter = new Chapter({ title, sections: [] });
+    const newChapter = new Chapter({ id: uuidv4(), title, sections: [] });
     return this.with({ content: [...this.content, newChapter] });
   }
 
   public addSectionToChapter(chapterId: string, sectionTitle: string, content?: string): Project {
     return this.updateChapter(chapterId, (chapter) =>
-        chapter.addSection(new Section({ title: sectionTitle, type: 'report', content, controls: { ...defaultControls } }))
+        chapter.addSection(new Section({ id: uuidv4(), title: sectionTitle, type: 'report', content, lastUpdated: new Date().toISOString(), controls: { ...defaultControls } }))
     );
   }
 
@@ -373,11 +383,11 @@ export class Project {
                 newContent.push(currentChapter);
             }
             const title = line.replace(/^#\s*/, '').replace(/^\d+\.\s*/, '').trim();
-            currentChapter = new Chapter({ title, sections: [] });
+            currentChapter = new Chapter({ id: uuidv4(), title, sections: [] });
         } else if (currentChapter) {
             const title = line.replace(/^\s*-\s*/, '').replace(/^\d+\.\d+\.?\s*/, '').trim();
             if (title) {
-                const newSection = new Section({ title, type: 'report', controls: { ...defaultControls } });
+                const newSection = new Section({ id: uuidv4(), title, type: 'report', controls: { ...defaultControls } });
                 currentChapter = currentChapter.addSection(newSection);
             }
         }

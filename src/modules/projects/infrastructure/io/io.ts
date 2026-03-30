@@ -1,4 +1,5 @@
 import { Project, type ProjectProperties } from '@/modules/projects/domain/entities/Project';
+import { v4 as uuidv4 } from 'uuid';
 
 /**
  * Creates a Project instance from a file.
@@ -11,7 +12,11 @@ export function projectFromFile(file: File): Promise<Project> {
         reader.onload = (e) => {
             try {
                 const json = JSON.parse(e.target?.result as string);
-                resolve(new Project(json as ProjectProperties));
+                const props = json as ProjectProperties;
+                if (!props.id) {
+                    props.id = uuidv4();
+                }
+                resolve(new Project(props));
             } catch (err) {
                 reject(new Error("Invalid or corrupted project file."));
             }

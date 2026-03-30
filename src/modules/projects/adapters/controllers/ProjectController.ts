@@ -6,6 +6,10 @@ import { DeleteProjectUseCase } from "../../application/use-cases/DeleteProjectU
 import { CreateSnapshotUseCase } from "../../application/use-cases/CreateSnapshotUseCase";
 import { GetSnapshotsUseCase } from "../../application/use-cases/GetSnapshotsUseCase";
 import { DeleteSnapshotUseCase } from "../../application/use-cases/DeleteSnapshotUseCase";
+import { Result } from "@/infrastructure/utils/result";
+import { Project, ProjectProperties } from "../../domain/entities/Project";
+import { ProjectError } from "../../domain/errors/ProjectErrors";
+import { ProjectSnapshot } from "../../domain/entities/ProjectSnapshot";
 
 @injectable()
 export class ProjectController {
@@ -26,31 +30,31 @@ export class ProjectController {
         private deleteSnapshotUseCase: DeleteSnapshotUseCase
     ) {}
 
-    async getProjects(userId: string) {
+    async getProjects(userId: string): Promise<Result<Project[], ProjectError>> {
         return this.getProjectsUseCase.execute(userId);
     }
 
-    async getProjectById(projectId: string) {
+    async getProjectById(projectId: string): Promise<Result<Project, ProjectError>> {
         return this.getProjectByIdUseCase.execute(projectId);
     }
 
-    async saveProject(projectData: any, userId: string) {
+    async saveProject(projectData: ProjectProperties, userId: string): Promise<Result<Project, ProjectError>> {
         return this.saveProjectUseCase.execute(projectData, userId);
     }
 
-    async deleteProject(projectId: string) {
+    async deleteProject(projectId: string): Promise<Result<void, ProjectError>> {
         return this.deleteProjectUseCase.execute(projectId);
     }
 
-    async createSnapshot(projectId: string, name: string, snapshotData: any) {
+    async createSnapshot(projectId: string, name: string, snapshotData: ProjectProperties): Promise<Result<ProjectSnapshot, ProjectError>> {
         return this.createSnapshotUseCase.execute(projectId, name, snapshotData);
     }
 
-    async getSnapshots(projectId: string) {
+    async getSnapshots(projectId: string): Promise<Result<ProjectSnapshot[], ProjectError>> {
         return this.getSnapshotsUseCase.execute(projectId);
     }
 
-    async deleteSnapshot(snapshotId: string) {
+    async deleteSnapshot(snapshotId: string): Promise<Result<void, ProjectError>> {
         return this.deleteSnapshotUseCase.execute(snapshotId);
     }
 }

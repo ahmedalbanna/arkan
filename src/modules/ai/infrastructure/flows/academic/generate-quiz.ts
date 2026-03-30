@@ -80,7 +80,7 @@ const generateQuizFlow = ai.defineFlow({
     name: 'generateQuizFlow',
     inputSchema: GenerateQuizInputSchema,
     outputSchema: GenerateQuizOutputSchema,
-}, async (input) => {
+}, async (input: GenerateQuizInput) => {
     let promptToUse;
     switch (input.questionType) {
         case 'multiple-choice':

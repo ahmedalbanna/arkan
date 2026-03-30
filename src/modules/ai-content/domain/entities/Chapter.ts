@@ -1,8 +1,7 @@
 import { Section, type SectionProperties } from './Section';
-import { v4 as uuidv4 } from 'uuid';
 
 export interface ChapterProperties {
-  id?: string;
+  id: string;
   title: string;
   sections?: (Section | SectionProperties)[];
 }
@@ -13,7 +12,7 @@ export class Chapter {
   public readonly sections: Section[];
 
   constructor(props: ChapterProperties) {
-    this.id = props.id || uuidv4();
+    this.id = props.id;
     this.title = props.title || 'Untitled Chapter';
     this.sections = (props.sections || []).map(s => s instanceof Section ? s : new Section(s));
   }

@@ -347,7 +347,27 @@ export const handleRagResult = <T>(result: Result<T, RagError>) => {
  */
 export const handleProjectResult = <T>(result: Result<T, ProjectError>) => {
   if (result.isSuccess) {
-    return createApiResponse(result.getValue(), 200);
+    const value = result.getValue();
+    
+    // Handle array of entities
+    if (Array.isArray(value)) {
+      const data = value.map(item => {
+        if (item && typeof item.toStateObject === 'function') return item.toStateObject();
+        if (item && typeof item.toJSON === 'function') return item.toJSON();
+        return item;
+      });
+      return createApiResponse(data, 200);
+    }
+
+    // Handle single entity
+    if (value && typeof (value as any).toStateObject === 'function') {
+      return createApiResponse((value as any).toStateObject(), 200);
+    }
+    if (value && typeof (value as any).toJSON === 'function') {
+      return createApiResponse((value as any).toJSON(), 200);
+    }
+
+    return createApiResponse(value, 200);
   }
 
   const error = result.error!;

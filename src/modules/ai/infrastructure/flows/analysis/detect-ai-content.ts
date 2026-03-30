@@ -53,7 +53,7 @@ const detectAiContentFlow = ai.defineFlow({
     name: 'detectAiContentFlow',
     inputSchema: DetectAIInputSchema,
     outputSchema: DetectAIOutputSchema,
-}, async (input) => {
+}, async (input: DetectAIInput) => {
   try {
     const result = await detectAiPrompt(input);
     

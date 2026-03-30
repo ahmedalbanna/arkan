@@ -71,11 +71,11 @@ const analyzeContextFlow = ai.defineFlow({
     name: 'analyzeContextFlow',
     inputSchema: AnalyzeContextInputSchema,
     outputSchema: AnalyzeContextOutputSchema,
-}, async (input) => {
+}, async (input: AnalyzeContextInput) => {
     const { prompt, contextFiles } = input;
     // Separate media from text files
-    const textFiles = contextFiles.filter(f => !f.content.startsWith('data:'));
-    const mediaFiles = contextFiles.filter(f => f.content.startsWith('data:'));
+    const textFiles = contextFiles.filter((f: any) => !f.content.startsWith('data:'));
+    const mediaFiles = contextFiles.filter((f: any) => f.content.startsWith('data:'));
 
     const { output } = await analysisPrompt({ prompt, textFiles, mediaFiles });
     if (!output) {

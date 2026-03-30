@@ -36,7 +36,7 @@ const aiProofreadDocumentFlow = ai.defineFlow(
     inputSchema: AiProofreadDocumentInputSchema,
     outputSchema: AiProofreadDocumentOutputSchema,
   },
-  async input => {
+  async (input: AiProofreadDocumentInput) => {
     const { output } = await prompt(input);
     return output!;
   }

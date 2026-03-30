@@ -26,7 +26,7 @@ export const academicPaperQualityCheckerFlow = ai.defineFlow(
         inputSchema: AcademicPaperQualityCheckerInputSchema,
         outputSchema: AcademicPaperQualityCheckerOutputSchema,
     },
-    async (input) => {
+    async (input: AcademicPaperQualityCheckerInput) => {
         const result = await ai.generate({
             prompt: `Analyze the quality of this paper: ${input.documentText}`,
             tools: [

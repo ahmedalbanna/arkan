@@ -1,5 +1,4 @@
 import { z } from 'zod';
-import { v4 as uuidv4 } from 'uuid';
 import { defaultControls } from './ControlTypes';
 
 export const SectionStatusSchema = z.enum(['pending', 'in_progress', 'completed', 'failed']);
@@ -57,7 +56,10 @@ export class Section {
   public context?: SectionContext;
 
   constructor(props: SectionProperties) {
-    this.id = props.id || uuidv4();
+    if (!props.id) {
+        throw new Error("Section must have an id.");
+    }
+    this.id = props.id;
     this.title = props.title;
     this.type = props.type || 'report';
     this.content = props.content || '';

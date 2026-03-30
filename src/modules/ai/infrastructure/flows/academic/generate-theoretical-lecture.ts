@@ -65,8 +65,8 @@ const generateTheoreticalLectureFlow = ai.defineFlow({
   name: 'generateTheoreticalLectureFlow',
   inputSchema: GenerateTheoreticalLectureInputSchema,
   outputSchema: GenerateTheoreticalLectureOutputSchema
-}, async (input) => {
-  const { output } = await withRetry(() => generateTheoreticalLecturePrompt(input));
+}, async (input: GenerateTheoreticalLectureInput) => {
+  const { output } = (await withRetry(() => generateTheoreticalLecturePrompt(input))) as { output: GenerateTheoreticalLectureOutput };
   if (!output) {
     throw new Error("Theoretical lecture generation failed to produce an output.");
   }

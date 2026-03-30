@@ -11,7 +11,7 @@ const solveAssignmentsFlow = ai.defineFlow({
     name: 'solveAssignmentsFlow',
     inputSchema: SolveAssignmentsInputSchema,
     outputSchema: SolveAssignmentsOutputSchema
-}, async (input) => {
+}, async (input: SolveAssignmentsInput) => {
     const { text } = input;
 
     const solvePrompt = ai.definePrompt({

@@ -8,10 +8,6 @@ export const GET = withAuth(async ({ params }) => {
     const { id } = await params;
     const controller = container.resolve(ProjectController);
     const result = await controller.getSnapshots(id);
-    
-    if (result.isSuccess) {
-      return Response.json(result.getValue().map((s: any) => s.toJSON()));
-    }
     return handleProjectResult(result);
   } catch (error) {
     return handleApiError(error);
@@ -26,10 +22,6 @@ export const POST = withAuth(async ({ params, request }) => {
     
     const controller = container.resolve(ProjectController);
     const result = await controller.createSnapshot(id, name, snapshotData);
-    
-    if (result.isSuccess) {
-        return Response.json(result.getValue().toJSON());
-    }
     return handleProjectResult(result);
   } catch (error) {
     return handleApiError(error);

@@ -22,7 +22,7 @@ export const academicLiteratureReviewFlow = ai.defineFlow(
         inputSchema: AcademicLiteratureReviewInputSchema,
         outputSchema: AcademicLiteratureReviewOutputSchema,
     },
-    async (input) => {
+    async (input: AcademicLiteratureReviewInput) => {
         const prompt = `Generate a literature review for topic: ${input.topic}`;
         const result = await ai.generate({
             prompt,

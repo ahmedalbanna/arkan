@@ -65,7 +65,7 @@ const aiResearcherFlow = ai.defineFlow({
   name: 'aiResearcherFlow',
   inputSchema: AIResearcherInputSchema,
   outputSchema: AIResearcherOutputSchema,
-}, async (input) => {
+}, async (input: AIResearcherInput) => {
   const { output } = await researcherPrompt(input);
   if (!output) {
     throw new Error('AI Researcher failed to produce an output.');

@@ -71,7 +71,7 @@ const literatureReviewFlow = ai.defineFlow({
   name: 'literatureReviewFlow',
   inputSchema: LiteratureReviewInputSchema,
   outputSchema: LiteratureReviewOutputSchema,
-}, async (input) => {
+}, async (input: LiteratureReviewInput) => {
   const { output } = await literatureReviewPrompt(input);
   if (!output) {
     throw new Error('Literature Review Generator failed to produce an output.');

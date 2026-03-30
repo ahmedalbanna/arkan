@@ -11,7 +11,8 @@ import { useEffect } from 'react';
 import { create } from 'zustand';
 import { toast } from '@/hooks/util/use-toast';
 import { useEditorStore } from '@/modules/ai-content/adapters/state/use-editor-store';
-import { projectFromFile } from '@/modules/projects/infrastructure/io/io'; // Import from new location
+import { projectFromFile } from '@/modules/projects/infrastructure/io/io';
+import { v4 as uuidv4 } from 'uuid';
 
 interface BuilderState {
     project: Project | null;
@@ -37,7 +38,15 @@ interface BuilderState {
     setComparisonSnapshotId: (snapshotId: string | null) => void;
 }
 
-const createNewTemporaryProject = (): Project => new Project({});
+const createNewTemporaryProject = (): Project => new Project({
+    id: uuidv4(),
+    meta: {
+        author: 'User',
+        version: '1.0.0',
+        created: new Date().toISOString(),
+        updated: new Date().toISOString()
+    }
+} as any);
 const MAX_HISTORY_SIZE = 50;
 
 const useBuilderStore = create<BuilderState>((set, get) => ({

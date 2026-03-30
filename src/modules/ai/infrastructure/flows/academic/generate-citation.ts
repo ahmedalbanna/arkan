@@ -37,7 +37,7 @@ const generateCitationFlow = ai.defineFlow({
   name: 'generateCitationFlow',
   inputSchema: GenerateCitationInputSchema,
   outputSchema: GenerateCitationOutputSchema,
-}, async (input) => {
+}, async (input: GenerateCitationInput) => {
   const { output } = await generateCitationPrompt(input);
   if (!output) {
     throw new Error("Citation generation failed.");

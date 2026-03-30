@@ -3,11 +3,12 @@ import { db } from "@/infrastructure/db";
 import { projects, projectSnapshots } from "@/infrastructure/db/schema";
 import { IProjectRepository } from "../../domain/repositories/IProjectRepository";
 import { Project, ProjectProperties } from "../../domain/entities/Project";
-import { ProjectSnapshot, ProjectSnapshotProperties } from "../../domain/entities/ProjectSnapshot";
+import { ProjectSnapshot } from "../../domain/entities/ProjectSnapshot";
 import { Result } from "@/infrastructure/utils/result";
 import { ProjectError } from "../../domain/errors/ProjectErrors";
-import { eq, desc, and } from "drizzle-orm";
+import { eq, desc } from "drizzle-orm";
 import { Telemetry } from "@/modules/ai/infrastructure/services/Telemetry";
+import { v4 as uuidv4 } from 'uuid';
 
 @injectable()
 export class SQLiteProjectRepository implements IProjectRepository {
@@ -43,7 +44,7 @@ export class SQLiteProjectRepository implements IProjectRepository {
 
   async save(project: ProjectProperties): Promise<Result<Project, ProjectError>> {
     try {
-      const id = project.id || require('uuid').v4();
+      const id = project.id || uuidv4();
       const persistenceData = this.toPersistence({ ...project, id });
 
       await db.insert(projects).values(persistenceData).onConflictDoUpdate({
@@ -121,36 +122,48 @@ export class SQLiteProjectRepository implements IProjectRepository {
   }
 
   private toDomain(result: any): ProjectProperties {
+    const parseJson = (val: any) => {
+        if (!val) return undefined;
+        try {
+            return typeof val === 'string' ? JSON.parse(val) : val;
+        } catch (e) {
+            console.error('Failed to parse JSON field:', val, e);
+            return undefined;
+        }
+    };
+
     return {
       ...result,
-      teamMembers: result.teamMembers ? JSON.parse(result.teamMembers) : undefined,
-      content: result.content ? JSON.parse(result.content) : undefined,
-      externalContext: result.externalContext ? JSON.parse(result.externalContext) : undefined,
-      behaviors: result.behaviors ? JSON.parse(result.behaviors) : undefined,
-      rules: result.rules ? JSON.parse(result.rules) : undefined,
-      constraints: result.constraints ? JSON.parse(result.constraints) : undefined,
+      teamMembers: parseJson(result.teamMembers),
+      content: parseJson(result.content),
+      externalContext: parseJson(result.externalContext),
+      behaviors: parseJson(result.behaviors),
+      rules: parseJson(result.rules),
+      constraints: parseJson(result.constraints),
       meta: {
-          author: result.authorId,
-          version: result.version,
-          created: result.created,
-          updated: result.updated
+          author: result.authorId || 'User',
+          version: result.version || '1.0.0',
+          created: result.created || new Date().toISOString(),
+          updated: result.updated || new Date().toISOString()
       }
     };
   }
 
   private toPersistence(project: ProjectProperties): any {
+    const stringifyJson = (val: any) => val ? JSON.stringify(val) : null;
+
     return {
       ...project,
       authorId: project.meta?.author || 'User',
       version: project.meta?.version || '1.0.0',
       created: project.meta?.created || new Date().toISOString(),
       updated: project.meta?.updated || new Date().toISOString(),
-      teamMembers: project.teamMembers ? JSON.stringify(project.teamMembers) : null,
-      content: project.content ? JSON.stringify(project.content) : null,
-      externalContext: project.externalContext ? JSON.stringify(project.externalContext) : null,
-      behaviors: project.behaviors ? JSON.stringify(project.behaviors) : null,
-      rules: project.rules ? JSON.stringify(project.rules) : null,
-      constraints: project.constraints ? JSON.stringify(project.constraints) : null,
+      teamMembers: stringifyJson(project.teamMembers),
+      content: stringifyJson(project.content),
+      externalContext: stringifyJson(project.externalContext),
+      behaviors: stringifyJson(project.behaviors),
+      rules: stringifyJson(project.rules),
+      constraints: stringifyJson(project.constraints),
     };
   }
 }

@@ -46,7 +46,7 @@ const biasCheckFlow = ai.defineFlow({
   name: 'biasCheckFlow',
   inputSchema: BiasCheckInputSchema,
   outputSchema: BiasCheckOutputSchema,
-}, async (input) => {
+}, async (input: BiasCheckInput) => {
   try {
     const result = await biasCheckPrompt(input);
     
