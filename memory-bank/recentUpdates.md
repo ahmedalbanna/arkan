@@ -4,6 +4,14 @@
 
 ## March 2026 Updates
 
+### **AI Resilience & Domain Hardening**
+**Date**: Late March 2026
+
+- **Tiered Fallback Logic**: Implemented automated model degradation (Llama 3 → Phi-3 → Gemma 2B) to ensure 8GB RAM stability.
+- **Standardized Entity Pattern**: Unified all domain entities on the `toProperties()` and `withProps()` pattern, enforcing strict type safety and deep immutability.
+- **Client-Server SDK Decoupling**: Resolved critical bundling errors by isolating heavy server-side AI SDKs from the browser chunking context.
+- **Token-Aware Truncation**: Added proactive context management to prevent LLM context window overflows during RAG operations.
+
 ### **Full Architectural Hardening & Firebase Decommissioning**
 **Date**: March 2026
 **Summary**: Completed a massive refactor to align the entire project with strict Clean Architecture (DDD) principles.

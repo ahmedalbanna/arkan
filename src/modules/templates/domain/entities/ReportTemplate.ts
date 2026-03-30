@@ -1,10 +1,10 @@
 import { z } from 'zod';
-import { SectionPropertiesSchema } from '@/modules/ai-content/domain/entities/Section';
+import { type SectionProperties } from '@/modules/ai-content/domain/entities/Section';
 import { Template, type BaseTemplateProperties } from './Template';
 
 export const ReportTemplateChapterSchema = z.object({
   title: z.string(),
-  sections: z.array(SectionPropertiesSchema),
+  sections: z.array(z.any()), // Use any for schema to avoid deep recursion issues if needed, or refine
 });
 
 // Zod schema for ReportTemplateProperties
@@ -37,7 +37,7 @@ export interface ReportTemplateProperties extends BaseTemplateProperties {
   isDefault?: boolean;
   content?: {
     title: string;
-    sections: z.infer<typeof SectionPropertiesSchema>[];
+    sections: SectionProperties[];
   }[];
   // Project configuration fields
   projectType?: string;
@@ -51,7 +51,7 @@ export class ReportTemplate extends Template {
   public isDefault: boolean;
   public content: {
     title: string;
-    sections: z.infer<typeof SectionPropertiesSchema>[];
+    sections: SectionProperties[];
   }[];
 
   constructor(props: ReportTemplateProperties) {

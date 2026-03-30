@@ -49,6 +49,9 @@
 - 🔄 **Collaboration Features**: Begin development of team-based features.
 
 ### Phase 7: Scaling & Optimization (Current Focus)
+✅ **AI Resilience Enhancement**: Implemented tiered model fallback and request timeouts for 8GB RAM stability.
+✅ **Domain Entity Standardization**: Unified all domain entities on the `toProperties()` and `withProps()` pattern.
+✅ **Client-Server SDK Decoupling**: Resolved critical bundling errors by isolating heavy AI SDKs from the browser.
 - 🔄 **RAG Retrieval Optimization**: Implement hybrid search and reranking improvements.
 - 🔄 **UI Performance**: Further optimize React rendering for the editor.
 - 🔄 **Enhanced Tooling**: Add specialized AI tools for academic research.

@@ -13,6 +13,9 @@
 - **Generation Models**:
   - Google Gemini 2.5 Flash Lite
   - Ollama for local models (Gemma 2B, Phi-3 Mini, Llama 3 8B).
+  - **Tiered Fallback**: Automated model degradation (Llama -> Phi -> Gemma) for reliability.
+- **Token Management**:
+  - `TokenManager`: Custom heuristic-based token counting and context truncation for local LLMs.
 - **Embedding Model**:
   - Ollama with `nomic-embed-text` for RAG.
 - **Zod Schemas**: Type-safe validation for all AI inputs and outputs.
@@ -91,6 +94,7 @@ src/
 - **Cookie-Based Sessions**: Automated session management via `ICookieService`.
 - **Middleware**: Route protection for authenticated and admin-only routes.
 - **Role-Based Access Control (RBAC)**: 'admin' vs 'user' roles enforced on the server.
+- **Client-Server SDK Decoupling**: Strict isolation of heavy AI infrastructure (Genkit, Express) from the client bundle using relocated constants and runtime guards.
 
 ### Data Security
 - **Firestore Rules**: Database-level security rules.

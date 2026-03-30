@@ -12,3 +12,6 @@
 - **Writing Tools Modernization**: Completed a high-fidelity overhaul of flagship specialist tools (**Summarizer, Researcher, Stylist, Document Writer, Blueprint, Quiz, UI Description, Idea Generator, Lecture Generator, Session Plan, Assignments Solver**), transitioning them to the Manifest Workspace layout.
 - **Platform-Wide Aesthetic Unification**: Standardized typography (`serif 15px`), layout grids, and interactive patterns across all core production surfaces.
 - **Admin Console Modernization**: Transitioned the internal management suite to a professional 3-zone layout with technical HUD navigation and manifest-style management consoles for core system operations.
+- **AI Module Resilience Enhancement**: Implemented tiered model fallback (Llama 3 → Phi-3 → Gemma 2B) and proactive request timeouts to ensure system stability in 8GB RAM environments.
+- **Domain Entity Property Pattern Standardization**: Standardized all domain entities on the `toProperties()`, `toStateObject()`, and `withProps()` pattern for type-safe serialization and cloning.
+- **Client-Server SDK Decoupling**: Successfully decoupled heavy AI SDK dependencies from the client bundle by relocating constants and implementing strict runtime guards.

@@ -57,14 +57,14 @@ export const CoverPage: React.FC<CoverPageProps> = ({ project }) => {
             } else {
                 (props as any)[field] = sanitizedValue;
             }
-            return p.with(props as Partial<ProjectProperties>);
+            return p.withProps(props as Partial<ProjectProperties>);
         });
     };
 
     const handleDateChange = (value: string) => {
         const sanitizedValue = value.replace(/<br>/g, '\n').replace(/&nbsp;/g, ' ').replace(/<[^>]+>/g, '');
         updateProject(p => {
-            return p.with({ meta: { ...p.meta, updated: new Date(sanitizedValue).toISOString() } });
+            return p.withProps({ meta: { ...p.meta, updated: new Date(sanitizedValue).toISOString() } });
         });
     };
 
@@ -72,7 +72,7 @@ export const CoverPage: React.FC<CoverPageProps> = ({ project }) => {
         const file = event.target.files?.[0];
         if (file) {
             handleMainLogoUpload(file, (dataUri) => {
-                updateProject(p => p.with({ logoUrl: dataUri }));
+                updateProject(p => p.withProps({ logoUrl: dataUri }));
             });
         }
     };
@@ -81,7 +81,7 @@ export const CoverPage: React.FC<CoverPageProps> = ({ project }) => {
         const file = event.target.files?.[0];
         if (file) {
             handleUniLogoUpload(file, (dataUri) => {
-                updateProject(p => p.with({ universityLogoUrl: dataUri }));
+                updateProject(p => p.withProps({ universityLogoUrl: dataUri }));
             });
         }
     };

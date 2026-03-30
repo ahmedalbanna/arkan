@@ -24,6 +24,19 @@
 **Purpose**: Maintaining domain purity for complex transformations.
 - **Implementation**: Domain methods (e.g., `Project.applyTemplate`) accept infrastructure functions as callbacks rather than importing them directly.
 
+### 5. Standardized Domain Property Pattern
+**Purpose**: Enforcing type safety and predictable state management for domain entities.
+- **Implementation**: All domain entities follow a strict contract:
+    - `toProperties()`: Primary serialization method returning plain data objects.
+    - `toStateObject()`: Backward-compatible alias for serialization.
+    - `withProps()`: Standardized cloning method using deep copies for complex fields.
+- **Benefits**: Eliminates naming conflicts, ensures deep immutability, and simplifies hydration.
+
+### 6. Tiered Model Fallback Pattern
+**Purpose**: Ensuring system availability in hardware-constrained (8GB RAM) environments.
+- **Implementation**: `GenkitAiService.runFlow` attempts a tiered fallback (e.g., Llama 3 → Phi-3 → Gemma 2B) upon failure.
+- **Benefits**: Prevents local server crashes and provides a graceful degradation of service quality.
+
 ## RAG & Vector Search Pattern
 
 ### **Purpose**
@@ -47,7 +60,8 @@ To provide relevant, up-to-date, and domain-specific context to AI models, reduc
         3.  `Filtering`: Results are filtered by `projectId`, `userId`, etc.
         4.  `Re-ranking`: Results are re-ordered using a hybrid approach (semantic + keyword) for better relevance.
         5.  `Context Formatting`: Top results are formatted into a context string for the LLM.
-    - **Implementation**: `src/modules/rag/infrastructure/retrieval.ts` & `src/modules/rag/infrastructure/reranker.ts`
+        6.  `Token Truncation`: Context is proactively truncated using `TokenManager` to fit within the specific model's context window.
+    - **Implementation**: `src/modules/rag/infrastructure/retrieval.ts`, `src/modules/rag/infrastructure/reranker.ts`, and `src/modules/ai/domain/utils/TokenManager.ts`
 
 ### **Components**
 - **Vector Store**: `src/modules/rag/infrastructure/vector-store.ts` (Factory pattern to switch between in-memory and Qdrant).
