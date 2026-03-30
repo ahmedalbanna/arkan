@@ -1,4 +1,4 @@
-import { inject, injectable, delay, container } from "tsyringe";
+import { inject, injectable, delay } from "tsyringe";
 import { GetUserProfileUseCase } from "../../application/use-cases/GetUserProfileUseCase";
 import { UpdateUserProfileUseCase } from "../../application/use-cases/UpdateUserProfileUseCase";
 import { GetPaginatedUsersUseCase } from "../../application/use-cases/GetPaginatedUsersUseCase";
@@ -16,7 +16,6 @@ import { CreateSessionUseCase } from "../../application/use-cases/CreateSessionU
 import { GetNotificationsUseCase } from "../../application/use-cases/GetNotificationsUseCase";
 import { SendNotificationUseCase } from "../../application/use-cases/SendNotificationUseCase";
 import { VerifySessionUseCase } from "../../application/use-cases/VerifySessionUseCase";
-import { INotificationService, INotificationServiceToken } from "../../domain/services/INotificationService";
 import { LoginUseCase } from "../../application/use-cases/LoginUseCase";
 import { SendPasswordResetUseCase } from "../../application/use-cases/SendPasswordResetUseCase";
 import { ChangePasswordUseCase } from "../../application/use-cases/ChangePasswordUseCase";
@@ -33,6 +32,10 @@ import { Setup2FAUseCase } from "../../application/use-cases/Setup2FAUseCase";
 import { VerifyAndEnable2FAUseCase } from "../../application/use-cases/VerifyAndEnable2FAUseCase";
 import { Verify2FATokenUseCase } from "../../application/use-cases/Verify2FATokenUseCase";
 import { CleanupOldRecordsUseCase } from "../../application/use-cases/CleanupOldRecordsUseCase";
+import { SendBatchNotificationUseCase } from "../../application/use-cases/SendBatchNotificationUseCase";
+import { ProcessScheduledNotificationsUseCase } from "../../application/use-cases/ProcessScheduledNotificationsUseCase";
+import { GetScheduledNotificationsUseCase } from "../../application/use-cases/GetScheduledNotificationsUseCase";
+import { CancelScheduledNotificationUseCase } from "../../application/use-cases/CancelScheduledNotificationUseCase";
 
 @injectable()
 export class UserController {
@@ -71,6 +74,14 @@ export class UserController {
         private getNotificationsUseCase: GetNotificationsUseCase,
         @inject(delay(() => SendNotificationUseCase))
         private sendNotificationUseCase: SendNotificationUseCase,
+        @inject(delay(() => SendBatchNotificationUseCase))
+        private sendBatchNotificationUseCase: SendBatchNotificationUseCase,
+        @inject(delay(() => ProcessScheduledNotificationsUseCase))
+        private processScheduledNotificationsUseCase: ProcessScheduledNotificationsUseCase,
+        @inject(delay(() => GetScheduledNotificationsUseCase))
+        private getScheduledNotificationsUseCase: GetScheduledNotificationsUseCase,
+        @inject(delay(() => CancelScheduledNotificationUseCase))
+        private cancelScheduledNotificationUseCase: CancelScheduledNotificationUseCase,
         @inject(delay(() => VerifySessionUseCase))
         private verifySessionUseCase: VerifySessionUseCase,
         @inject(delay(() => SendPasswordResetUseCase))
@@ -129,8 +140,8 @@ export class UserController {
         return this.getPaginatedUsersUseCase.execute(options);
     }
 
-    async giftCredits(userId: string, amount: number) {
-        return this.giftCreditsUseCase.execute({ userId, credits: amount, adminName: 'Admin' });
+    async giftCredits(params: { userId: string, credits: number, message?: string, adminName: string }) {
+        return this.giftCreditsUseCase.execute(params);
     }
 
     async deleteUser(id: string) {
@@ -170,27 +181,19 @@ export class UserController {
     }
 
     async sendBatchNotification(notification: any) {
-        const service = this.getNotificationService();
-        return service.sendToAll(notification);
+        return this.sendBatchNotificationUseCase.execute(notification);
     }
 
     async processScheduledNotifications() {
-        const service = this.getNotificationService();
-        return service.processScheduled();
+        return this.processScheduledNotificationsUseCase.execute();
     }
 
     async getScheduledNotifications(options?: { status?: string, limit?: number }) {
-        const service = this.getNotificationService();
-        return service.getScheduled(options);
+        return this.getScheduledNotificationsUseCase.execute(options);
     }
 
     async cancelScheduledNotification(id: string) {
-        const service = this.getNotificationService();
-        return service.cancelScheduled(id);
-    }
-
-    private getNotificationService(): INotificationService {
-        return container.resolve<INotificationService>(INotificationServiceToken);
+        return this.cancelScheduledNotificationUseCase.execute(id);
     }
 
     async createSession(idToken: string, expiresIn: number) {
@@ -213,19 +216,19 @@ export class UserController {
         return this.changePasswordUseCase.execute(userId, currentPassword, newPassword);
     }
 
-    async registerFingerprint(userId: string, fingerprint: string, metadata: any) {
-        return this.registerFingerprintUseCase.execute(userId, fingerprint, metadata);
+    async registerFingerprint(params: { userId: string, fingerprint: string, metadata: any }) {
+        return this.registerFingerprintUseCase.execute(params.userId, params.fingerprint, params.metadata);
     }
 
     async getUserFingerprints(userId: string) {
         return this.getUserFingerprintsUseCase.execute(userId);
     }
 
-    async revokeFingerprint(userId: string, fingerprintId: string) {
-        return this.revokeFingerprintUseCase.execute(userId, fingerprintId);
+    async revokeFingerprint(params: { userId: string, fingerprintId: string }) {
+        return this.revokeFingerprintUseCase.execute(params.userId, params.fingerprintId);
     }
 
-    async recordLogin(params: any) {
+    async recordLogin(params: { userId: string, ip?: string, userAgent?: string, fingerprint?: string }) {
         return this.recordLoginUseCase.execute(params);
     }
 
@@ -237,11 +240,17 @@ export class UserController {
         return this.logoutAllDevicesUseCase.execute(userId);
     }
 
-    async disableUser(userId: string, isDisabled: boolean) {
-        return this.disableUserUseCase.execute(userId, isDisabled);
+    async disableUser(params: { userId: string, isDisabled: boolean }) {
+        return this.disableUserUseCase.execute(params.userId, params.isDisabled);
     }
 
-    async logSecurityEvent(params: any) {
+    async logSecurityEvent(params: { 
+        userId: string, 
+        action: 'lockdown' | 'restore' | 'session_revocation' | 'password_change', 
+        details?: string, 
+        adminId?: string, 
+        ip?: string 
+    }) {
         return this.logSecurityEventUseCase.execute(params);
     }
 
