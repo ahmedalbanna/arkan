@@ -12,6 +12,7 @@ export interface ExportOptions {
 
 export interface IExportService {
     export(project: Project, content: ProjectContent, options: ExportOptions): Promise<Blob | Buffer>;
+    exportFromMarkdown(markdown: string, fileName: string, options: ExportOptions): Promise<Blob | Buffer>;
 }
 
 export const IDocxExportServiceToken = Symbol('IDocxExportService');

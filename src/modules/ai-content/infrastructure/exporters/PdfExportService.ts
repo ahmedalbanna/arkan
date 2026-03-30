@@ -12,6 +12,10 @@ export class PdfExportService implements IExportService {
         throw new Error("Method not implemented. PDF export currently uses element-based rendering on client.");
     }
 
+    async exportFromMarkdown(markdown: string, fileName: string, options: ExportOptions): Promise<Blob | Buffer> {
+        throw new Error("Method not implemented. PDF export currently uses element-based rendering on client.");
+    }
+
     async exportFromElement(element: HTMLElement, filename: string): Promise<void> {
         const { default: html2canvas } = await import('html2canvas');
         const { default: jsPDF } = await import('jspdf');

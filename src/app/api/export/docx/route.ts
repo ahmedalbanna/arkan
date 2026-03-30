@@ -3,27 +3,19 @@
 'use server';
 
 
-import { type ProjectProperties } from '@/modules/projects/domain/entities/Project';
 import { container } from '@/infrastructure/di/container';
-import { IDocxExportServiceToken } from '@/modules/ai-content/domain/services/IExportService';
-import type { ConversionOptions } from '@/modules/ai-content/domain/types/export-types';
+import { AIContentController } from '@/modules/ai-content/adapters/controllers/AIContentController';
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
+import { Project } from '@/modules/projects/domain/entities/Project';
 
-const projectExportSchema = z.object({
-  project: z.any().refine(val => val && typeof val === 'object' && val.id, { message: "Project object is invalid." }),
-  selectedContent: z.array(z.any()),
-  options: z.custom<ConversionOptions>().optional().default({}),
+const exportSchema = z.object({
+  project: z.any().optional(),
+  selectedContent: z.array(z.any()).optional(),
+  markdown: z.string().optional(),
+  fileName: z.string().optional(),
+  options: z.any().optional().default({}),
 });
-
-const markdownExportSchema = z.object({
-  markdown: z.string().min(1),
-  fileName: z.string().min(1),
-  options: z.custom<ConversionOptions>().optional().default({}),
-});
-
-const exportSchema = z.union([projectExportSchema, markdownExportSchema]);
-
 
 export async function POST(req: NextRequest) {
   try {
@@ -34,63 +26,35 @@ export async function POST(req: NextRequest) {
       return new NextResponse(JSON.stringify(validation.error.flatten()), { status: 400 });
     }
 
-    let docxBuffer: Buffer | Blob;
-    let fileName: string;
+    const controller = container.resolve(AIContentController);
+    const { project, selectedContent, markdown, fileName, options } = validation.data;
 
-    const exporter = container.resolve<any>(IDocxExportServiceToken);
+    const result = await controller.exportProject({
+      format: 'docx',
+      project: project ? new Project(project) : undefined,
+      selectedContent,
+      markdown,
+      fileName,
+      options
+    });
 
-    if ('project' in validation.data) {
-        // Handle project-based export
-        const { project: projectData, selectedContent: selectedContentData, options } = validation.data;
-        
-        docxBuffer = await exporter.export(
-          projectData as any, 
-          selectedContentData as any,
-          options
-        );
-        fileName = `${(projectData as ProjectProperties).name?.replace(/\s+/g, '_') || 'document'}.docx`;
-
-    } else {
-        // Handle direct markdown export
-        const directData = validation.data as { markdown: string; fileName: string; options: ConversionOptions };
-        docxBuffer = await exporter.exportFromMarkdown(directData.markdown, directData.fileName, directData.options);
-        fileName = `${directData.fileName}.docx`;
+    if (result.isFailure) {
+      return new NextResponse(JSON.stringify({ message: result.error?.message || 'Export failed' }), { status: 500 });
     }
 
-    if (!docxBuffer) {
-      return new NextResponse('Error creating DOCX file buffer.', { status: 500 });
-    }
+    const buffer = result.getValue();
+    const outFileName = fileName || (project?.name ? `${project.name.replace(/\s+/g, '_')}.docx` : 'document.docx');
 
-    return new NextResponse(docxBuffer as any, {
+    return new NextResponse(buffer as any, {
       status: 200,
       headers: {
         'Content-Type': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-        'Content-Disposition': `attachment; filename="${fileName}"`,
+        'Content-Disposition': `attachment; filename="${outFileName}"`,
       },
     });
 
   } catch (error) {
     console.error('DOCX Export API Error:', error);
-    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-    const errorStack = error instanceof Error ? error.stack : undefined;
-    
-    // Log detailed error for debugging
-    console.error('Error details:', {
-      message: errorMessage,
-      stack: errorStack,
-      type: error instanceof Error ? error.constructor.name : typeof error
-    });
-    
-    return new NextResponse(
-      JSON.stringify({ 
-        message: 'Error converting to .docx file.', 
-        error: errorMessage,
-        details: process.env.NODE_ENV === 'development' ? errorStack : undefined
-      }), 
-      { 
-        status: 500,
-        headers: { 'Content-Type': 'application/json' }
-      }
-    );
+    return new NextResponse(JSON.stringify({ message: 'Error converting to .docx file.' }), { status: 500 });
   }
 }

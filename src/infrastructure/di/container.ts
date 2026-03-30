@@ -21,7 +21,7 @@ import { IIndexedDocumentRepositoryToken } from "@/modules/rag/domain/repositori
 import { ITemplateRepositoryToken } from "@/modules/templates/domain/repositories/ITemplateRepository";
 import { ISectionRepositoryToken } from "@/modules/ai-content/domain/repositories/ISectionRepository";
 import { ISettingsRepositoryToken } from "@/modules/admin/domain/repositories/ISettingsRepository";
-import { IDocxExportServiceToken, IPptxExportServiceToken } from "@/modules/ai-content/domain/services/IExportService";
+import { IDocxExportServiceToken, IPptxExportServiceToken, IPdfExportServiceToken } from "@/modules/ai-content/domain/services/IExportService";
 import { ICookieServiceToken } from "@/modules/users/domain/services/ICookieService";
 import { ISessionServiceToken } from "@/modules/users/domain/services/ISessionService";
 import { IPasswordServiceToken } from "@/modules/users/domain/services/IPasswordService";
@@ -125,7 +125,7 @@ if (typeof window === 'undefined') {
   container.register(IAiServiceToken, { useClass: GenkitAiService }, { lifecycle: Lifecycle.Singleton });
   container.register(IDocxExportServiceToken, { useClass: DocxExportService }, { lifecycle: Lifecycle.Singleton });
   container.register(IPptxExportServiceToken, { useClass: PptxExportService }, { lifecycle: Lifecycle.Singleton });
-  container.register(PdfExportService, { useClass: PdfExportService }, { lifecycle: Lifecycle.Singleton });
+  container.register(IPdfExportServiceToken, { useClass: PdfExportService }, { lifecycle: Lifecycle.Singleton });
   container.register(WritingToolRegistry, { useClass: WritingToolRegistry }, { lifecycle: Lifecycle.Singleton });
   container.register(IAdminStatsRepositoryToken, { useClass: SQLiteAdminStatsRepository }, { lifecycle: Lifecycle.Singleton });
   container.register(IFeatureRepositoryToken, { useClass: SQLiteFeatureRepository }, { lifecycle: Lifecycle.Singleton });

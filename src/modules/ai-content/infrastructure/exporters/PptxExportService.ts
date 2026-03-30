@@ -36,6 +36,21 @@ export class PptxExportService implements IExportService {
         });
     }
 
+    async exportFromMarkdown(markdown: string, fileName: string, options: ExportOptions): Promise<Blob | Buffer> {
+        const pptxOptions: PptxConversionOptions = {
+            styles: options.styles as PptxConversionOptions['styles'],
+            isRtl: options.isRtl,
+            includeToc: options.includeToc,
+            title: fileName,
+        };
+
+        const result = await convertMarkdownToPptx(markdown, fileName, pptxOptions);
+
+        return result instanceof Blob ? result : new Blob([result as any], { 
+            type: 'application/vnd.openxmlformats-officedocument.presentationml.presentation' 
+        });
+    }
+
     private generateMarkdownFromContent(content: ProjectContent): string {
         return content.map(item => {
             if (item instanceof Chapter) {

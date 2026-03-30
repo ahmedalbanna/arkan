@@ -1,46 +1,22 @@
+
 import { z } from 'zod';
+import {
+  SectionContextSchema,
+  SectionPropertiesSchema,
+  SectionStatusSchema,
+  SectionTypeSchema,
+  type SectionContext,
+  type SectionStatus,
+  type SectionType
+} from '../schemas/SectionSchema';
 import { defaultControls, type GenerationControlState } from './ControlTypes';
 
-export const SectionStatusSchema = z.enum(['pending', 'in_progress', 'completed', 'failed']);
-export type SectionStatus = z.infer<typeof SectionStatusSchema>;
+export {
+  SectionContextSchema, SectionPropertiesSchema, SectionStatusSchema, SectionTypeSchema, type SectionContext, type SectionStatus, type SectionType
+};
 
-export const SectionTypeSchema = z.enum(['report', 'diagram', 'presentation', 'code', 'math']);
-export type SectionType = z.infer<typeof SectionTypeSchema>;
-
-export const SectionContextSchema = z.object({
-  sections: z.record(z.string(), z.string()).optional(),
-  externalContext: z.record(z.string(), z.string()).optional(),
-});
-export type SectionContext = z.infer<typeof SectionContextSchema>;
-
-export const SectionPropertiesSchema = z.object({
-  id: z.string(),
-  title: z.string(),
-  type: SectionTypeSchema.optional(),
-  content: z.string().optional(),
-  status: SectionStatusSchema.optional(),
-  progress: z.number().optional(),
-  aiOutput: z.any().optional(),
-  lastUpdated: z.string().optional(),
-  with: z.array(z.string()).optional(),
-  controls: z.any().optional(), // Use any for raw data, cast to GenerationControlState in class
-  prompt: z.string().optional(),
-  rules: z.array(z.string()).optional(),
-  guidelines: z.array(z.string()).optional(),
-  constraints: z.array(z.string()).optional(),
-  behaviors: z.array(z.string()).optional(),
-  context: SectionContextSchema.optional(),
-});
-
-export interface SectionProperties extends Omit<z.infer<typeof SectionPropertiesSchema>, 'with' | 'rules' | 'guidelines' | 'constraints' | 'behaviors'> {
-    readonly id: string;
-    readonly title: string;
-    readonly itemType?: 'section';
-    readonly with?: readonly string[];
-    readonly rules?: readonly string[];
-    readonly guidelines?: readonly string[];
-    readonly constraints?: readonly string[];
-    readonly behaviors?: readonly string[];
+export interface SectionProperties extends z.infer<typeof SectionPropertiesSchema> {
+  itemType?: 'section';
 }
 
 export class Section {
@@ -129,13 +105,13 @@ export class Section {
       progress: this.progress,
       aiOutput: this.aiOutput,
       lastUpdated: this.lastUpdated,
-      with: [...this.with],
-      controls: { ...this.controls },
+      with: this.with ? [...this.with] : [],
+      controls: this.controls ? { ...this.controls } : undefined,
       prompt: this.prompt,
-      rules: [...this.rules],
-      guidelines: [...this.guidelines],
-      constraints: [...this.constraints],
-      behaviors: [...this.behaviors],
+      rules: this.rules ? [...this.rules] : [],
+      guidelines: this.guidelines ? [...this.guidelines] : [],
+      constraints: this.constraints ? [...this.constraints] : [],
+      behaviors: this.behaviors ? [...this.behaviors] : [],
       context: this.context ? { ...this.context } : undefined,
     };
   }

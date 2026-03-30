@@ -21,7 +21,11 @@ export function applyReportTemplate(project: Project, template: ReportTemplatePr
         // sectionInfo from the template is the source of truth
         return new Section({ ...sectionInfo, id: uuidv4() });
       });
-      return new Chapter({ id: uuidv4(), title: chapterData.title, sections: sections });
+      return new Chapter({ 
+        id: uuidv4(), 
+        title: chapterData.title, 
+        sections: sections.map(s => s.toProperties()) 
+      });
     });
 
     // Apply project configuration from template if provided

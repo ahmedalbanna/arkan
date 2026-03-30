@@ -27,7 +27,7 @@ export interface ProjectProperties {
   supervisor?: string;
   course?: string;
   educationalLevel?: string;
-  teamMembers?: readonly string[];
+  teamMembers?: string[];
   logoUrl?: string;
   universityLogoUrl?: string;
   content?: (Chapter | Section | ChapterProperties | SectionProperties)[];
@@ -37,14 +37,13 @@ export interface ProjectProperties {
     version?: string;
     created?: string;
     updated?: string;
+    tags?: string[];
   };
-  tableOfContentsMarkdown?: string; // To store the generated TOC
-  // Deprecated - will be removed in a future refactor
+  tableOfContentsMarkdown?: string;
   activeSectionId?: string;
-  // New global settings
   language?: Language;
-  complexity?: number; // 0-100
-  formality?: number; // 0-100
+  complexity?: number;
+  formality?: number;
   tone?: Tone;
   behaviors?: Behavior[];
   rules?: string[];
@@ -121,7 +120,8 @@ export class Project {
       author: props.meta?.author || 'User',
       version: props.meta?.version || '1.0.0',
       created: props.meta?.created || new Date().toISOString(),
-      updated: props.meta?.updated || new Date().toISOString()
+      updated: props.meta?.updated || new Date().toISOString(),
+      tags: props.meta?.tags || []
     };
     
     // Initialize new global settings
@@ -417,15 +417,17 @@ export class Project {
       supervisor: this.supervisor,
       course: this.course,
       educationalLevel: this.educationalLevel,
-      teamMembers: this.teamMembers ? [...this.teamMembers] : undefined,
+      teamMembers: this.teamMembers ? [...this.teamMembers] : [],
       logoUrl: this.logoUrl,
       universityLogoUrl: this.universityLogoUrl,
       tableOfContentsMarkdown: this.tableOfContentsMarkdown,
       content: this.content.map(c => c.toProperties()),
       externalContext: this.externalContext.map(ec => ec.toProperties()),
-      meta: this.meta,
+      meta: {
+        ...this.meta,
+        tags: this.meta.tags ? [...this.meta.tags] : []
+      },
       activeSectionId: this.activeSectionId,
-      // Add new fields
       language: this.language,
       complexity: this.complexity,
       formality: this.formality,

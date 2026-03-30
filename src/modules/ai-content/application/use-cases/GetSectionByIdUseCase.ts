@@ -15,6 +15,10 @@ export class GetSectionByIdUseCase {
     ) {}
 
     async execute(id: string): Promise<Result<SectionProperties, AIContentError>> {
-        return this.sectionRepository.getById(id);
+        const result = await this.sectionRepository.getById(id);
+        if (result.isFailure) {
+            return Result.fail(AIContentError.notFound(`Section with id ${id} not found: ${result.error?.message || 'Unknown error'}`));
+        }
+        return Result.ok(result.getValue());
     }
 }

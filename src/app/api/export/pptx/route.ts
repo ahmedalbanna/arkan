@@ -3,51 +3,17 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
-import { type ProjectProperties } from '@/modules/projects/domain/entities/Project';
-import { convertMarkdownToPptx } from '@/modules/templates/infrastructure/exporters/pptx/markdown-to-pptx-converter';
-import type { PptxConversionOptions } from '@/modules/templates/infrastructure/exporters/pptx/markdown-to-pptx-converter';
+import { container } from '@/infrastructure/di/container';
+import { AIContentController } from '@/modules/ai-content/adapters/controllers/AIContentController';
+import { Project } from '@/modules/projects/domain/entities/Project';
 
-const projectExportSchema = z.object({
-  project: z.any().refine(val => val && typeof val === 'object' && val.id, { message: "Project object is invalid." }),
-  selectedContent: z.array(z.any()),
-  options: z.custom<PptxConversionOptions>().optional().default({}),
+const exportSchema = z.object({
+  project: z.any().optional(),
+  selectedContent: z.array(z.any()).optional(),
+  markdown: z.string().optional(),
+  fileName: z.string().optional(),
+  options: z.any().optional().default({}),
 });
-
-const markdownExportSchema = z.object({
-  markdown: z.string().min(1),
-  fileName: z.string().min(1),
-  options: z.custom<PptxConversionOptions>().optional().default({}),
-});
-
-const exportSchema = z.union([projectExportSchema, markdownExportSchema]);
-
-/**
- * Generate markdown from content data (plain objects)
- */
-function generateMarkdownFromContentData(content: any[]): string {
-  if (!content || !Array.isArray(content)) return '';
-  
-  return content.map(item => {
-    // Check if item has sections (Chapter-like)
-    if (item.sections && Array.isArray(item.sections)) {
-      const chapterContent = `# ${item.title || ''}`;
-      const sectionsContent = item.sections.map((section: any) => 
-        `## ${section.title || ''}\n\n${section.content || ''}`
-      ).join('\n\n');
-      return `${chapterContent}\n\n${sectionsContent}`;
-    } else { // Section-like
-      return `# ${item.title || ''}\n\n${item.content || ''}`;
-    }
-  }).join('\n\n<!-- slide-break -->\n\n');
-}
-
-/**
- * Generate full markdown from project data
- */
-function generateFullProjectMarkdown(project: any): string {
-  if (!project.content || !Array.isArray(project.content)) return '';
-  return generateMarkdownFromContentData(project.content);
-}
 
 export async function POST(req: NextRequest) {
   try {
@@ -58,72 +24,35 @@ export async function POST(req: NextRequest) {
       return new NextResponse(JSON.stringify(validation.error.flatten()), { status: 400 });
     }
 
-    let pptxBuffer: Buffer | Blob;
-    let fileName: string;
+    const controller = container.resolve(AIContentController);
+    const { project, selectedContent, markdown, fileName, options } = validation.data;
 
-    if ('project' in validation.data) {
-      // Handle project-based export
-      // Note: We pass plain data objects instead of instantiating classes
-      // because Project/Chapter/Section are client components
-      const { project: projectData, selectedContent: selectedContentData, options } = validation.data;
-      const project = projectData as ProjectProperties;
-      
-      // Generate markdown from content data
-      const markdownToExport = generateMarkdownFromContentData(selectedContentData);
-      
-      // Extract footnotes from the full project content
-      const fullProjectMarkdown = generateFullProjectMarkdown(project);
-      const footnoteRegex = /^\[\^.+?\]:.+$/gm;
-      const footnoteDefinitions = fullProjectMarkdown.match(footnoteRegex);
+    const result = await controller.exportProject({
+      format: 'pptx',
+      project: project ? new Project(project) : undefined,
+      selectedContent,
+      markdown,
+      fileName,
+      options
+    });
 
-      let finalMarkdown = markdownToExport;
-      if (footnoteDefinitions) {
-          finalMarkdown += '\n\n' + footnoteDefinitions.join('\n');
-      }
-
-      pptxBuffer = await convertMarkdownToPptx(finalMarkdown, project.name || 'Presentation', { ...options, title: project.name });
-      fileName = `${(project.name || 'presentation').replace(/\s+/g, '_')}.pptx`;
-    } else {
-      // Handle direct markdown export
-      const directData = validation.data as { markdown: string; fileName: string; options: PptxConversionOptions };
-      pptxBuffer = await convertMarkdownToPptx(directData.markdown, directData.fileName, directData.options);
-      fileName = `${directData.fileName}.pptx`;
+    if (result.isFailure) {
+      return new NextResponse(JSON.stringify({ message: result.error?.message || 'Export failed' }), { status: 500 });
     }
 
-    if (!pptxBuffer) {
-      return new NextResponse('Error creating PPTX file buffer.', { status: 500 });
-    }
+    const buffer = result.getValue();
+    const outFileName = fileName || (project?.name ? `${project.name.replace(/\s+/g, '_')}.pptx` : 'presentation.pptx');
 
-    return new NextResponse(pptxBuffer as any, {
+    return new NextResponse(buffer as any, {
       status: 200,
       headers: {
         'Content-Type': 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
-        'Content-Disposition': `attachment; filename="${fileName}"`,
+        'Content-Disposition': `attachment; filename="${outFileName}"`,
       },
     });
 
   } catch (error) {
     console.error('PPTX Export API Error:', error);
-    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-    const errorStack = error instanceof Error ? error.stack : undefined;
-    
-    // Log detailed error for debugging
-    console.error('Error details:', {
-      message: errorMessage,
-      stack: errorStack,
-      type: error instanceof Error ? error.constructor.name : typeof error
-    });
-    
-    return new NextResponse(
-      JSON.stringify({ 
-        message: 'Error converting to .pptx file.', 
-        error: errorMessage,
-        details: process.env.NODE_ENV === 'development' ? errorStack : undefined
-      }), 
-      { 
-        status: 500,
-        headers: { 'Content-Type': 'application/json' }
-      }
-    );
+    return new NextResponse(JSON.stringify({ message: 'Error converting to .pptx file.' }), { status: 500 });
   }
 }

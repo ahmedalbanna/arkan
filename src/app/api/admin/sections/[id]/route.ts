@@ -1,16 +1,8 @@
 // C:\Users\ahmed\source\repos\arkan\src\app\api\admin\sections\[id]\route.ts
 import { withAuth, handleApiError, handleAIContentResult } from '@/infrastructure/api/api-utils';
-import { z } from 'zod';
 import { container } from '@/infrastructure/di/container';
 import { AIContentController } from '@/modules/ai-content/adapters/controllers/AIContentController';
-
-const SectionUpdateSchema = z.object({
-  title: z.string().min(1).optional(),
-  type: z.enum(['report', 'diagram', 'presentation']).optional(),
-  prompt: z.string().optional(),
-  guidelines: z.array(z.string()).optional(),
-  model: z.string().optional(),
-});
+import { UpdateSectionSchema } from '@/modules/ai-content/domain/schemas/SectionSchema';
 
 // PUT to update a section (Admin only)
 export const PUT = withAuth(async ({ request, params }) => {
@@ -20,7 +12,7 @@ export const PUT = withAuth(async ({ request, params }) => {
       return handleApiError({ message: 'Section ID is required' }, 400);
     }
     let body = await request.json();
-    let validation = SectionUpdateSchema.safeParse(body);
+    let validation = UpdateSectionSchema.safeParse(body);
     if (!validation.success) {
       return handleApiError(validation.error);
     }

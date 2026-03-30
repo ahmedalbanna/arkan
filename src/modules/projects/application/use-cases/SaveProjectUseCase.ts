@@ -31,7 +31,7 @@ export class SaveProjectUseCase {
       };
     };
 
-    const normalizedProject = {
+    const normalizedProject: any = {
       ...projectData,
       name: projectData.name || 'Untitled Project',
       meta: {

@@ -1,11 +1,9 @@
-import { Section, type SectionProperties } from './Section';
 
-export interface ChapterProperties {
-  readonly id: string;
-  readonly title: string;
-  readonly itemType?: 'chapter';
-  readonly sections?: readonly SectionProperties[];
-}
+import { Section, type SectionProperties } from './Section';
+import { z } from 'zod';
+import { ChapterPropertiesSchema } from '../schemas/ChapterSchema';
+
+export type ChapterProperties = z.infer<typeof ChapterPropertiesSchema>;
 
 export class Chapter {
   public readonly id: string;

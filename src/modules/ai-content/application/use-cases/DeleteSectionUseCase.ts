@@ -14,6 +14,10 @@ export class DeleteSectionUseCase {
     ) {}
 
     async execute(id: string): Promise<Result<void, AIContentError>> {
-        return this.sectionRepository.delete(id);
+        const result = await this.sectionRepository.delete(id);
+        if (result.isFailure) {
+            return Result.fail(AIContentError.deleteError(`Failed to delete section ${id}: ${result.error?.message || 'Unknown error'}`));
+        }
+        return Result.ok();
     }
 }

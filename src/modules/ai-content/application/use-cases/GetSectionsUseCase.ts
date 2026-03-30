@@ -15,6 +15,10 @@ export class GetSectionsUseCase {
     ) {}
 
     async execute(): Promise<Result<SectionProperties[], AIContentError>> {
-        return this.sectionRepository.getAll();
+        const result = await this.sectionRepository.getAll();
+        if (result.isFailure) {
+            return Result.fail(AIContentError.internal(`Failed to fetch sections: ${result.error?.message || 'Unknown error'}`));
+        }
+        return Result.ok(result.getValue());
     }
 }

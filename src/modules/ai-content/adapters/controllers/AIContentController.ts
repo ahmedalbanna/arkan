@@ -4,9 +4,12 @@ import { GetSectionsUseCase } from "../../application/use-cases/GetSectionsUseCa
 import { SaveSectionUseCase } from "../../application/use-cases/SaveSectionUseCase";
 import { GetSectionByIdUseCase } from "../../application/use-cases/GetSectionByIdUseCase";
 import { DeleteSectionUseCase } from "../../application/use-cases/DeleteSectionUseCase";
+import { ExportProjectUseCase, ExportProjectInput } from "../../application/use-cases/ExportProjectUseCase";
+import { BuildProjectUseCase, BuildProjectInput } from "../../application/use-cases/BuildProjectUseCase";
 import { Result } from "@/infrastructure/utils/result";
 import { AIContentError } from "../../domain/errors/AIContentErrors";
 import { SectionProperties } from "../../domain/entities/Section";
+import { Project } from "@/modules/projects/domain/entities/Project";
 
 @injectable()
 export class AIContentController {
@@ -18,7 +21,11 @@ export class AIContentController {
         @inject(delay(() => GetSectionByIdUseCase))
         private getSectionByIdUseCase: GetSectionByIdUseCase,
         @inject(delay(() => DeleteSectionUseCase))
-        private deleteSectionUseCase: DeleteSectionUseCase
+        private deleteSectionUseCase: DeleteSectionUseCase,
+        @inject(delay(() => ExportProjectUseCase))
+        private exportProjectUseCase: ExportProjectUseCase,
+        @inject(delay(() => BuildProjectUseCase))
+        private buildProjectUseCase: BuildProjectUseCase
     ) {}
 
     async getSections(): Promise<Result<SectionProperties[], AIContentError>> {
@@ -35,5 +42,13 @@ export class AIContentController {
 
     async deleteSection(id: string): Promise<Result<void, AIContentError>> {
         return this.deleteSectionUseCase.execute(id);
+    }
+
+    async exportProject(input: ExportProjectInput): Promise<Result<Blob | Buffer, AIContentError>> {
+        return this.exportProjectUseCase.execute(input);
+    }
+
+    async buildProject(input: BuildProjectInput): Promise<Result<Project, AIContentError>> {
+        return this.buildProjectUseCase.execute(input);
     }
 }

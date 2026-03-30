@@ -3,7 +3,8 @@ export enum AIContentErrorType {
   SAVE_ERROR = "SAVE_ERROR",
   DELETE_ERROR = "DELETE_ERROR",
   VALIDATION = "VALIDATION",
-  INTERNAL = "INTERNAL"
+  INTERNAL = "INTERNAL",
+  UNAUTHORIZED = "UNAUTHORIZED"
 }
 
 export class AIContentError {
@@ -31,5 +32,9 @@ export class AIContentError {
 
   public static internal(message: string = "Internal server error"): AIContentError {
     return new AIContentError(AIContentErrorType.INTERNAL, message);
+  }
+
+  public static unauthorized(message: string = "Unauthorized"): AIContentError {
+    return new AIContentError(AIContentErrorType.UNAUTHORIZED, message);
   }
 }
