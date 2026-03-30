@@ -29,7 +29,7 @@ export function useUserTransactions() {
   const { user } = useAuth();
 
   return useQuery({
-    queryKey: ['user-transactions', user?.uid], // TODO: Add to transactionKeys if needed
+    queryKey: transactionKeys.user(user?.uid || 'anonymous'),
     queryFn: async () => {
       if (!user) return [];
       const client = container.resolve(TransactionApiClient);

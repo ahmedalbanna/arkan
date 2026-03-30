@@ -33,6 +33,7 @@ export const transactionKeys = {
   all: () => ['transactions'] as const,
   lists: () => [...transactionKeys.all(), 'list'] as const,
   list: (identifier: 'pending' | 'verified' | 'rejected' | string) => [...transactionKeys.lists(), { identifier }] as const,
+  user: (userId: string) => [...transactionKeys.all(), 'user', userId] as const,
 };
 
 export const generationLogKeys = {
