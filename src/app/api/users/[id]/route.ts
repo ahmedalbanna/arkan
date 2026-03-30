@@ -1,8 +1,8 @@
 
 import { revalidatePath } from "next/cache";
-import { withAuth, handleApiError, handleResult } from "@/infrastructure/api/api-utils";
+import { withAuth, handleApiError, handleUserResult } from "@/infrastructure/api/api-utils";
 import { container } from "@/infrastructure/di/container";
-import { adminUpdateUserSchema, userUpdateSchema } from "@/modules/users/domain/schemas/UserSchemas";
+import { adminUpdateUserSchema, userUpdateSchema } from "@/modules/users/domain/schemas/index";
 import { checkUserAccessPermission, checkUserUpdatePermission } from "@/modules/users/domain/utils/authorization";
 import { UserController } from "@/modules/users/adapters/controllers/UserController";
 
@@ -18,7 +18,7 @@ export const GET = withAuth(async ({ params, user: requester }) => {
         const controller = container.resolve(UserController);
         const result = await controller.getUser(targetUserId);
         
-        return handleResult(result);
+        return handleUserResult(result);
     } catch (error) {
         return handleApiError(error);
     }
@@ -50,7 +50,7 @@ export const PUT = withAuth(async ({ request, params, user: requester }) => {
             revalidatePath('/admin/manage-users');
         }
         
-        return handleResult(result);
+        return handleUserResult(result);
     } catch (error: any) {
         return handleApiError(error);
     }

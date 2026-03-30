@@ -1,6 +1,6 @@
 
 import { z } from 'zod';
-import { withAuth, handleApiError, handleResult } from '@/infrastructure/api/api-utils';
+import { withAuth, handleApiError, handleUserResult } from '@/infrastructure/api/api-utils';
 import { container } from '@/infrastructure/di/container';
 import { UserController } from '@/modules/users/adapters/controllers/UserController';
 
@@ -22,20 +22,14 @@ export const GET = withAuth(async ({ request }) => {
     const controller = container.resolve(UserController);
     const result = await controller.getPaginated({ limit, lastVisibleId });
     
-    return handleResult(result);
+    return handleUserResult(result);
   } catch (error) {
     return handleApiError(error);
   }
 }, { requireAdmin: true });
 
 
-const createUserSchema = z.object({
-  name: z.string().min(1, "Name is required"),
-  email: z.string().email("Invalid email address"),
-  password: z.string().min(6, "Password must be at least 6 characters long"),
-  role: z.enum(['user', 'admin']).default('user'),
-  credits: z.coerce.number().int().min(0).default(10),
-});
+import { signupSchema as createUserSchema } from '@/modules/users/domain/schemas/index';
 
 export const POST = withAuth(async ({ request }) => {
   try {
@@ -48,7 +42,7 @@ export const POST = withAuth(async ({ request }) => {
     const controller = container.resolve(UserController);
     const result = await controller.createUser(validation.data);
     
-    return handleResult(result);
+    return handleUserResult(result);
   } catch (error) {
     return handleApiError(error);
   }

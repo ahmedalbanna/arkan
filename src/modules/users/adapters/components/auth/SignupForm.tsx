@@ -10,15 +10,7 @@ import { Loader2 } from 'lucide-react';
 import { generateFingerprint } from '@/infrastructure/security/fingerprint';
 import Link from 'next/link';
 import { useForm } from 'react-hook-form';
-import { z } from 'zod';
-
-const formSchema = z.object({
-  name: z.string().min(2, { message: 'Name must be at least 2 characters.' }),
-  email: z.string().email({ message: 'Please enter a valid email address.' }),
-  password: z.string().min(6, { message: 'Password must be at least 6 characters.' }),
-});
-
-export type SignupCredentials = z.infer<typeof formSchema>;
+import { signupSchema as formSchema, type SignupInput as SignupCredentials } from '@/modules/users/domain/schemas/index';
 
 export default function SignupForm() {
   const { t } = useLocalization();

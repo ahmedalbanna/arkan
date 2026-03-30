@@ -13,15 +13,9 @@ import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { toast } from '@/hooks';
 import { useForm } from 'react-hook-form';
-import { z } from 'zod';
 import { apiService } from '@/infrastructure/api/ApiService';
 import { handleErrorUtility } from '@/infrastructure/api/errorUtils';
-
-const formSchema = z.object({ 
-  email: z.string().email({ message: 'Please enter a valid email address.' }), 
-  password: z.string().min(1, { message: 'Password is required.' }),
-  rememberMe: z.boolean().default(false)
-});
+import { loginSchema as formSchema } from '@/modules/users/domain/schemas/index';
 
 export default function LoginForm() {
   const loginMutation = useLogin();

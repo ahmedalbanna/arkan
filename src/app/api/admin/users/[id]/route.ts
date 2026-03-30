@@ -1,18 +1,11 @@
 
 import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
-import { withAuth, handleApiError, handleResult } from '@/infrastructure/api/api-utils';
+import { withAuth, handleApiError, handleUserResult } from '@/infrastructure/api/api-utils';
 import { container } from '@/infrastructure/di/container';
 import { UserController } from '@/modules/users/adapters/controllers/UserController';
 
-const adminUpdateUserSchema = z.object({
-  name: z.string().min(1, 'Name is required').optional(),
-  email: z.string().email('Invalid email address').optional(),
-  bio: z.string().optional(),
-  credits: z.coerce.number().int().min(0).optional(),
-  role: z.enum(['user', 'admin']).optional(),
-  hasCompletedOnboarding: z.boolean().optional(),
-});
+import { adminUpdateUserSchema } from '@/modules/users/domain/schemas/index';
 
 // GET logic to fetch a single user, admin only
 export const GET = withAuth(async ({ params }) => {
@@ -20,7 +13,7 @@ export const GET = withAuth(async ({ params }) => {
         const { id } = await params;
         const controller = container.resolve(UserController);
         const result = await controller.getUser(id);
-        return handleResult(result);
+        return handleUserResult(result);
     } catch (error) {
         return handleApiError(error);
     }
@@ -48,7 +41,7 @@ export const PUT = withAuth(async ({ request, params }) => {
       revalidatePath('/admin/manage-users');
     }
 
-    return handleResult(result);
+    return handleUserResult(result);
   } catch (error: any) {
     return handleApiError(error);
   }
@@ -63,7 +56,7 @@ export const DELETE = withAuth(async ({ params }) => {
     }
     const controller = container.resolve(UserController);
     const result = await controller.deleteUser(id);
-    return handleResult(result);
+    return handleUserResult(result);
   } catch (error) {
     return handleApiError(error);
   }

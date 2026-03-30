@@ -2,15 +2,11 @@
 'use server';
 
 import { z } from 'zod';
-import { withAuth, handleApiError, handleResult } from '@/infrastructure/api/api-utils';
+import { withAuth, handleApiError, handleUserResult } from '@/infrastructure/api/api-utils';
 import { container } from '@/infrastructure/di/container';
 import { UserController } from '@/modules/users/adapters/controllers/UserController';
 
-const giftCreditsSchema = z.object({
-  userId: z.string().min(1, 'User ID is required.'),
-  credits: z.coerce.number().int().positive('Credits must be a positive number.'),
-  message: z.string().optional(),
-});
+import { giftCreditsSchema } from '@/modules/users/domain/schemas/index';
 
 export const POST = withAuth(async ({ request, user: adminUser }) => {
   try {
@@ -25,7 +21,7 @@ export const POST = withAuth(async ({ request, user: adminUser }) => {
     const controller = container.resolve(UserController);
     const result = await controller.giftCredits(userId, credits);
 
-    return handleResult(result);
+    return handleUserResult(result);
 
   } catch (error) {
     return handleApiError(error);

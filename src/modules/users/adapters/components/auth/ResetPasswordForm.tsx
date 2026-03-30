@@ -3,7 +3,6 @@
 import { useSearchParams } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
 import { Button } from '@/components/ui/button';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
@@ -11,16 +10,7 @@ import { useResetPassword } from '@/modules/users/adapters/hooks/use-auth-mutati
 import { Loader2 } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { AlertCircle } from 'lucide-react';
-
-const schema = z.object({
-  password: z.string().min(6, 'Password must be at least 6 characters.'),
-  confirmPassword: z.string().min(6, 'Please confirm your password.'),
-}).refine((data) => data.password === data.confirmPassword, {
-  message: "Passwords don't match",
-  path: ["confirmPassword"],
-});
-
-type FormData = z.infer<typeof schema>;
+import { resetPasswordSchema as schema, type ResetPasswordInput as FormData } from '@/modules/users/domain/schemas/index';
 
 export default function ResetPasswordForm() {
   const searchParams = useSearchParams();

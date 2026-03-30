@@ -9,13 +9,7 @@ import { Loader2 } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
-import { z } from 'zod';
-
-const formSchema = z.object({
-  email: z.string().email({ message: 'Please enter a valid email address.' }),
-});
-
-type FormValues = z.infer<typeof formSchema>;
+import { forgotPasswordSchema as formSchema, type ForgotPasswordInput as FormValues } from '@/modules/users/domain/schemas/index';
 
 export default function ForgotPasswordForm() {
   const router = useRouter();
