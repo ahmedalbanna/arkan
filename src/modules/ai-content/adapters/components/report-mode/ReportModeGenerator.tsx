@@ -22,6 +22,8 @@ export default function ReportModeGenerator({ initialProject }: { initialProject
         setActivePanelKey,
         activeRightPanelKey,
         setActiveRightPanelKey,
+        isLeftPanelVisible,
+        isRightPanelVisible,
         showOnboarding,
         setShowOnboarding,
         handleOnboardingComplete,
@@ -96,10 +98,10 @@ export default function ReportModeGenerator({ initialProject }: { initialProject
                                     panels={leftPanels}
                                     activeKey={activePanelKey}
                                     onActiveKeyChange={setActivePanelKey}
-                                    defaultSize={activePanelKey ? 22 : 6}
+                                    defaultSize={isLeftPanelVisible ? 24 : 4.5}
                                 />
 
-                                <ResizableHandle withHandle className="bg-transparent hover:bg-primary/10 transition-colors w-1.5" />
+                                <ResizableHandle withHandle className="bg-transparent hover:bg-primary/20 transition-all w-1.5 z-50" />
 
                                 <BuilderCanvas
                                     zoomLevel={zoomLevel}
@@ -121,14 +123,14 @@ export default function ReportModeGenerator({ initialProject }: { initialProject
                                     />
                                 </BuilderCanvas>
 
-                                <ResizableHandle withHandle className="bg-transparent hover:bg-primary/10 transition-colors w-1.5" />
+                                <ResizableHandle withHandle className="bg-transparent hover:bg-primary/20 transition-all w-1.5 z-50" />
 
                                 <BuilderSidebar 
                                     side="right"
                                     panels={rightPanels}
                                     activeKey={activeRightPanelKey}
                                     onActiveKeyChange={setActiveRightPanelKey}
-                                    defaultSize={activeRightPanelKey ? 22 : 6}
+                                    defaultSize={isRightPanelVisible ? 24 : 4.5}
                                 />
                             </ResizablePanelGroup>
                         </div>

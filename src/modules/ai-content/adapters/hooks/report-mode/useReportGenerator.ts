@@ -11,8 +11,11 @@ import { type ProjectProperties } from '@/modules/projects/domain/entities/Proje
 
 export function useReportGenerator(initialProject?: ProjectProperties | null) {
   const { t, locale } = useLocalization();
-  const [activePanelKey, setActivePanelKey] = useState('settings');
-  const [activeRightPanelKey, setActiveRightPanelKey] = useState('section');
+  const [activePanelKey, setActivePanelKey] = useState<string>('settings');
+  const [activeRightPanelKey, setActiveRightPanelKey] = useState<string>('section');
+
+  const isLeftPanelVisible = !!activePanelKey;
+  const isRightPanelVisible = !!activeRightPanelKey;
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [zoomLevel, setZoomLevel] = useState(1);
   const [selectedSectionIds, setSelectedSectionIds] = useState<string[]>([]);
@@ -81,6 +84,8 @@ export function useReportGenerator(initialProject?: ProjectProperties | null) {
     setActivePanelKey,
     activeRightPanelKey,
     setActiveRightPanelKey,
+    isLeftPanelVisible,
+    isRightPanelVisible,
     isSaving,
     leftPanels,
     rightPanels,

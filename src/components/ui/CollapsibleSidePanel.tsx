@@ -102,17 +102,17 @@ export function CollapsibleSidePanel({
             initial={{ width: 0, opacity: 0 }}
             animate={{ width: 'auto', opacity: 1 }}
             exit={{ width: 0, opacity: 0 }}
-            transition={{ duration: 0.5, ease: [0.4, 0, 0.2, 1] }}
+            transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
             className="flex-1 overflow-hidden relative border-none"
           >
             <div className="h-full w-full min-w-[320px] overflow-auto custom-scrollbar bg-radial-gradient from-primary/[0.02] to-transparent">
                 <motion.div 
                     key={activeKey} 
-                    initial={{ opacity: 0, x: isLeft ? -20 : 20 }}
+                    initial={{ opacity: 0, x: isLeft ? -10 : 10 }}
                     animate={{ opacity: 1, x: 0 }}
-                    transition={{ duration: 0.3, delay: 0.2 }}
+                    transition={{ duration: 0.4, ease: "easeOut", delay: 0.1 }}
                     className={cn(
-                        "p-6 md:p-8 min-w-0 flex flex-col min-h-full",
+                        "p-6 md:p-7 min-w-0 flex flex-col min-h-full",
                     )}
                 >
                     {activePanel?.content}
@@ -121,8 +121,8 @@ export function CollapsibleSidePanel({
             
             {/* Subtle Content Edge Decoration */}
             <div className={cn(
-                "absolute inset-y-0 pointer-events-none w-px opacity-10",
-                isLeft ? "right-0 bg-gradient-to-b from-transparent via-primary to-transparent" : "left-0 bg-gradient-to-b from-transparent via-primary to-transparent"
+                "absolute inset-y-0 pointer-events-none w-px opacity-20",
+                isLeft ? "right-0 bg-gradient-to-b from-transparent via-primary/40 to-transparent" : "left-0 bg-gradient-to-b from-transparent via-primary/40 to-transparent"
             )} />
           </motion.div>
         )}

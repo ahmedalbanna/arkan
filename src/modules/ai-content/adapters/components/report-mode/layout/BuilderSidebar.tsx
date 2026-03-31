@@ -23,8 +23,9 @@ export const BuilderSidebar = React.forwardRef<any, BuilderSidebarProps>(({
             minSize={4} 
             maxSize={40} 
             className={cn(
-                "flex flex-col h-full bg-background transition-all duration-700 ease-in-out relative group/sidebar",
+                "flex flex-col h-full bg-background/40 backdrop-blur-2xl transition-all duration-700 ease-in-out relative group/sidebar overflow-hidden",
                 isLeft ? "border-r border-border/40" : "border-l border-border/40",
+                !activeKey && "w-[4.5%]",
                 className
             )}
         >
@@ -33,6 +34,7 @@ export const BuilderSidebar = React.forwardRef<any, BuilderSidebarProps>(({
                 activeKey={activeKey}
                 onActiveKeyChange={onActiveKeyChange}
                 side={side}
+                className="rounded-none border-none bg-transparent shadow-none"
             />
         </ResizablePanel>
     );
