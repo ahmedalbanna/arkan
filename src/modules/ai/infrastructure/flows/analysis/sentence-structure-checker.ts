@@ -32,7 +32,7 @@ const sentenceStructureCheckFlow = ai.defineFlow({
   name: 'sentenceStructureCheckFlow',
   inputSchema: SentenceStructureCheckInputSchema,
   outputSchema: SentenceStructureCheckOutputSchema,
-}, async (input: any) => {
+}, async (input: SentenceStructureCheckInput) => {
   try {
     const result = await sentenceStructureCheckPrompt(input);
     const text = result.text || result.output || "";

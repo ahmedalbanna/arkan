@@ -57,8 +57,7 @@ const generateChapterFlow = ai.defineFlow({
     name: 'generateChapterContentFlow',
     inputSchema: GenerateChapterInputSchema,
     outputSchema: GenerateChapterOutputSchema,
-}, async (input: any) => {
-
+}, async (input: GenerateChapterInput) => {
     const { output } = await chapterPrompt(input);
 
     if (!output) {

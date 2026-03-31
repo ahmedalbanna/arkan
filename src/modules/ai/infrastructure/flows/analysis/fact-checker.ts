@@ -39,7 +39,7 @@ const factCheckFlow = ai.defineFlow({
   name: 'factCheckFlow',
   inputSchema: FactCheckInputSchema,
   outputSchema: FactCheckOutputSchema,
-}, async (input: any) => {
+}, async (input: FactCheckInput) => {
   try {
     const result = await factCheckPrompt(input);
     

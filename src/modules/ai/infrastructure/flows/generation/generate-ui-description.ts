@@ -7,7 +7,7 @@ const uiDescriptionFlow = ai.defineFlow({
     name: 'generateUiDescriptionFlow',
     inputSchema: GenerateUIDescriptionInputSchema,
     outputSchema: GenerateUIDescriptionOutputSchema,
-}, async (input: any) => {
+}, async (input: GenerateUIDescriptionInput) => {
     const { projectFeatures, designType } = input;
 
     const uiPrompt = ai.definePrompt({

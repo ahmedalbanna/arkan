@@ -37,7 +37,7 @@ const improveReportMarkdownFlow = ai.defineFlow({
   name: 'improveReportMarkdownFlow',
   inputSchema: ImproveMarkdownInputSchema,
   outputSchema: ImproveMarkdownOutputSchema
-}, async (input: any) => {
+}, async (input: ImproveMarkdownInput) => {
   const { output } = await improveMarkdownPrompt(input);
   if (!output) {
     throw new Error('Failed to improve markdown.');

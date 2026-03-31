@@ -39,7 +39,7 @@ const summarizeDocumentFlow = ai.defineFlow(
     inputSchema: SummarizeDocumentInputSchema,
     outputSchema: SummarizeDocumentOutputSchema,
   },
-  async (input: any) => {
+  async (input: SummarizeDocumentInput) => {
     const result = await prompt(input);
     
     const text = result.text || result.output || '';

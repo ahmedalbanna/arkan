@@ -6,6 +6,7 @@
  */
 
 import { ai } from '@/modules/ai/infrastructure/services/Genkit';
+import { z } from 'zod';
 import {
     abstractPrompt,
     conclusionPrompt,
@@ -34,7 +35,7 @@ export const graduationProjectGenerator = ai.defineFlow(
         inputSchema: GraduationProjectInputSchema,
         outputSchema: GraduationProjectDocumentationSchema,
     },
-    async (input: any) => {
+    async (input: z.infer<typeof GraduationProjectInputSchema>) => {
         console.log(`\n${'='.repeat(60)}`);
         console.log(`🎓 GRADUATION PROJECT DOCUMENTATION GENERATOR`);
         console.log(`${'='.repeat(60)}`);

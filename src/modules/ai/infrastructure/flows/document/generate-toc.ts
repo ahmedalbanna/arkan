@@ -36,7 +36,7 @@ const generateTocFlow = ai.defineFlow({
   name: 'generateTocFlow',
   inputSchema: GenerateTocInputSchema,
   outputSchema: GenerateTocOutputSchema,
-}, async (input: any) => {
+}, async (input: GenerateTocInput) => {
   const { output } = await generateTocPrompt(input);
 
   if (!output) {

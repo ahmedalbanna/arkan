@@ -39,7 +39,7 @@ export const projectReportGenerator = ai.defineFlow(
         inputSchema: ProjectReportInputSchema,
         outputSchema: ProjectReportSchema,
     },
-    async (input: any) => {
+    async (input: z.infer<typeof ProjectReportInputSchema>) => {
         const {
             projectPath,
             projectName,

@@ -4,21 +4,18 @@ import { Suspense } from 'react';
 import { cookies } from 'next/headers';
 import { type ProjectProperties } from '@/modules/projects/domain/entities/Project';
 
-async function getInitialProject(id: string, token: string | undefined) {
-  if (!id || !token) return null;
+import { container } from '@/infrastructure/di/container';
+import { ProjectController } from '@/modules/projects/adapters/controllers/ProjectController';
+
+async function getInitialProject(id: string) {
+  if (!id) return null;
   
   try {
-    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:9002';
-    const response = await fetch(`${baseUrl}/api/projects/${id}`, {
-      headers: {
-        'Cookie': `__session=${token}`
-      },
-      next: { revalidate: 0 } // Bypass cache for builder to ensure fresh data
-    });
+    const controller = container.resolve(ProjectController);
+    const result = await controller.getProjectById(id);
     
-    if (response.ok) {
-      const result = await response.json();
-      return result as ProjectProperties;
+    if (result.isSuccess) {
+      return result.getValue().toProperties();
     }
   } catch (error) {
     console.error('Failed to fetch initial project on server:', error);
@@ -29,10 +26,8 @@ async function getInitialProject(id: string, token: string | undefined) {
 export default async function GeneratePage(props: { searchParams: Promise<{ id?: string }> }) {
   const searchParams = await props.searchParams;
   const projectId = searchParams.id;
-  const cookieStore = await cookies();
-  const sessionToken = cookieStore.get('__session')?.value;
 
-  const initialProject = projectId ? await getInitialProject(projectId, sessionToken) : null;
+  const initialProject = projectId ? await getInitialProject(projectId) : null;
 
   return (
     <Suspense fallback={<BuilderPageSkeleton />}>

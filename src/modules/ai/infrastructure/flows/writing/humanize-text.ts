@@ -35,7 +35,7 @@ const humanizeTextFlow = ai.defineFlow({
   name: 'humanizeTextFlow',
   inputSchema: HumanizeTextInputSchema,
   outputSchema: HumanizeTextOutputSchema,
-}, async (input: any) => {
+}, async (input: HumanizeTextInput) => {
   try {
     const result = await humanizeTextPrompt(input);
     

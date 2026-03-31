@@ -27,6 +27,7 @@ import { ISessionServiceToken } from "@/modules/users/domain/services/ISessionSe
 import { IPasswordServiceToken } from "@/modules/users/domain/services/IPasswordService";
 import { ITokenServiceToken } from "@/modules/users/domain/services/ITokenService";
 import { ICacheServiceToken } from "@/infrastructure/cache/ICacheService";
+import { IMarkdownServiceToken } from "@/infrastructure/di/tokens";
 
 // Client-side implementations (Safe to import anywhere)
 import { ProjectApiClient } from "@/modules/projects/adapters/api-client/ProjectApiClient";
@@ -54,11 +55,13 @@ import { PromptBuilder } from "@/modules/ai-content/domain/services/PromptBuilde
 import { CookieManager } from "@/modules/users/infrastructure/services/CookieManager";
 import { SessionManager } from "@/modules/users/infrastructure/services/SessionManager";
 import { BrowserCache } from "@/infrastructure/cache/BrowserCache";
+import { TurndownMarkdownService } from "@/modules/ai-content/infrastructure/services/TurndownMarkdownService";
 
 // Register Client API Clients (always — safe for browser)
 container.register(ICookieServiceToken, { useClass: CookieManager }, { lifecycle: Lifecycle.Singleton });
 container.register(ISessionServiceToken, { useClass: SessionManager }, { lifecycle: Lifecycle.Singleton });
 container.register(ICacheServiceToken, { useClass: BrowserCache }, { lifecycle: Lifecycle.Singleton });
+container.register(IMarkdownServiceToken, { useClass: TurndownMarkdownService }, { lifecycle: Lifecycle.Singleton });
 container.register(PromptBuilder, { useClass: PromptBuilder }, { lifecycle: Lifecycle.Singleton });
 container.register(CreditService, { useClass: CreditService }, { lifecycle: Lifecycle.Singleton });
 container.register(LocalProjectService, { useClass: LocalProjectService }, { lifecycle: Lifecycle.Singleton });

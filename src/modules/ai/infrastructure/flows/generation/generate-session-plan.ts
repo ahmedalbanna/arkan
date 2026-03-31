@@ -61,7 +61,7 @@ const generateSessionPlanFlow = ai.defineFlow(
     name: 'generateSessionPlanFlow',
     inputSchema: GenerateSessionPlanInputSchema,
     outputSchema: GenerateSessionPlanOutputSchema
-  }, async (input: any) => {
+  }, async (input: GenerateSessionPlanInput) => {
     const result = await withRetry(() => generateSessionPlanPrompt(input)) as any;
     const output = result.output;
     if (!output) {

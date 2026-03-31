@@ -46,7 +46,7 @@ const generateIdeasFlow = ai.defineFlow({
   name: 'generateIdeasFlow',
   inputSchema: IdeaGenerationInputSchema,
   outputSchema: IdeaGenerationOutputSchema,
-}, async (input: any) => {
+}, async (input: IdeaGenerationInput) => {
   const result = await generateIdeasPrompt(input);
   const text = result.text || result.output || "";
   if (!text) {

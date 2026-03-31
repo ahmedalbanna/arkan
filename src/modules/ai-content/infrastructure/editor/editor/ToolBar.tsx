@@ -9,13 +9,14 @@ import { Editor } from '@tiptap/react';
 import {
   AlignCenter, AlignLeft, AlignRight, Bold, BookText, Brush, Italic, Languages, List, ListOrdered, Loader2, Quote, Sigma, Square, Strikethrough, Table as TableIcon, Volume2, Heading1, Heading2, Heading3, Pilcrow, Palette, Baseline
 } from 'lucide-react';
-import React, { memo, useMemo } from 'react';
+import React, { memo } from 'react';
 
 import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSub, DropdownMenuSubContent, DropdownMenuSubTrigger, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Separator } from '@/components/ui/separator';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { EditorController } from './EditorController';
+import { useEditorController } from './EditorController';
+import { useEditorStore } from '@/modules/ai-content/adapters/state/use-editor-store';
 
 // ============================================================================
 // 1. Contextual Toolbar (for BubbleMenu)
@@ -29,7 +30,8 @@ const ContextualToolbar = memo(function ContextualToolbar({ editor }: Contextual
   const { t } = useLocalization();
   const { speak, stop, isSpeaking } = useBrowserSpeech();
   const { isProcessing, handleAiAction, rewriteStyles } = useAiActions({ editor });
-  const controller = useMemo(() => new EditorController(editor), [editor]);
+  const controller = useEditorController(editor);
+  const selection = useEditorStore(state => state.selection);
 
   function handleReadAloudClick() {
     if (isSpeaking) {
@@ -40,18 +42,20 @@ const ContextualToolbar = memo(function ContextualToolbar({ editor }: Contextual
       speak(textToRead);
     }
   }
+
+  if (!controller) return null;
   
   const formatButtons = [
-    { action: () => controller.toggleBold(), isActive: controller.isBold(), icon: Bold, label: t('builder.Section.tooltips.bold') },
-    { action: () => controller.toggleItalic(), isActive: controller.isItalic(), icon: Italic, label: t('builder.Section.tooltips.italic') },
-    { action: () => controller.toggleStrike(), isActive: controller.isStrike(), icon: Strikethrough, label: t('builder.Section.tooltips.strike') },
+    { action: () => controller.toggleBold(), isActive: selection.isBold, icon: Bold, label: t('builder.Section.tooltips.bold') },
+    { action: () => controller.toggleItalic(), isActive: selection.isItalic, icon: Italic, label: t('builder.Section.tooltips.italic') },
+    { action: () => controller.toggleStrike(), isActive: selection.isStrike, icon: Strikethrough, label: t('builder.Section.tooltips.strike') },
   ];
   
   const headingOptions = [
-    { name: 'Paragraph', command: () => controller.setParagraph(), icon: Pilcrow, isActive: controller.isParagraph() },
-    { name: 'Heading 1', command: () => controller.toggleHeading(1), icon: Heading1, isActive: controller.isHeading(1) },
-    { name: 'Heading 2', command: () => controller.toggleHeading(2), icon: Heading2, isActive: controller.isHeading(2) },
-    { name: 'Heading 3', command: () => controller.toggleHeading(3), icon: Heading3, isActive: controller.isHeading(3) },
+    { name: 'Paragraph', command: () => controller.setParagraph(), icon: Pilcrow, isActive: !selection.activeHeading },
+    { name: 'Heading 1', command: () => controller.toggleHeading(1), icon: Heading1, isActive: selection.activeHeading === 1 },
+    { name: 'Heading 2', command: () => controller.toggleHeading(2), icon: Heading2, isActive: selection.activeHeading === 2 },
+    { name: 'Heading 3', command: () => controller.toggleHeading(3), icon: Heading3, isActive: selection.activeHeading === 3 },
   ];
   const CurrentHeadingIcon = headingOptions.find(h => h.isActive)?.icon || Pilcrow;
 

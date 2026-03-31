@@ -18,9 +18,9 @@ import 'katex/dist/katex.min.css';
 import Katex from 'tiptap-katex';
 import PlantUML from './editor/plantUml-extension'; // Import the new extension
 import SlashCommand from './editor/slash-command';
-import { marked } from 'marked';
 import mammoth from 'mammoth';
 import { editorPlantUml } from '@/modules/ai/domain/utils/plantuml-utils';
+import { IMarkdownService } from '../../domain/services/IMarkdownService';
 import AIImageGeneratorNode from './editor/ai-image-generator-extension';
 import { Color } from '@tiptap/extension-color';
 import TextStyle from '@tiptap/extension-text-style';
@@ -30,8 +30,9 @@ import TextStyle from '@tiptap/extension-text-style';
  * It reads the file and inserts its content, converting from Markdown or DOCX if necessary.
  * @param file The file that was dropped.
  * @param editor The Tiptap editor instance.
+ * @param markdownService The service to convert Markdown to HTML.
  */
-export const handleFileDrop = (editor: Editor, file: File) => {
+export const handleFileDrop = (editor: Editor, file: File, markdownService: IMarkdownService) => {
   if (!file || !file.name) {
     console.warn('File dropped without a name or content, skipping.');
     return;
@@ -46,7 +47,7 @@ export const handleFileDrop = (editor: Editor, file: File) => {
       if (file.type.startsWith('image/')) {
         editor.chain().focus().setImage({ src: content }).run();
       } else if (fileExtension === 'md' || file.type === 'text/markdown') {
-        const html = marked.parse(content) as string;
+        const html = markdownService.toHtml(content);
         editor.chain().focus().insertContent(html).run();
       }
     } else if (content instanceof ArrayBuffer) {
@@ -113,16 +114,16 @@ export async function handleHtmlPaste(editor:Editor, html:string) {
   return false;
 }
 
-export async function handlePlainPaste(editor:Editor, plain:string) {
+export async function handlePlainPaste(editor:Editor, plain:string, markdownService: IMarkdownService) {
   if (plain && editor) {
     if (plain.includes('@startuml') && plain.includes('@enduml')) {
         const processed = await editorPlantUml(plain);
         if (processed) {
-            editor.chain().focus().insertContent(marked.parse(processed) as string).run();
+            editor.chain().focus().insertContent(markdownService.toHtml(processed)).run();
             return true;
         }
     }
-    const parsedHtml = marked.parse(plain) as string;
+    const parsedHtml = markdownService.toHtml(plain);
     editor.chain().focus().insertContent(parsedHtml).run();
     return true;
   }
@@ -130,7 +131,7 @@ export async function handlePlainPaste(editor:Editor, plain:string) {
 }
 
 
-export const editorExtensions = (uniqueId: string) => [
+export const editorExtensions = (uniqueId: string, markdownService: IMarkdownService) => [
   StarterKit.configure({
     codeBlock: { HTMLAttributes: { class: '' }, exitOnArrowDown: true, exitOnTripleEnter: true },
   }),
@@ -160,7 +161,7 @@ export const editorExtensions = (uniqueId: string) => [
   AIImageGeneratorNode,
   FileHandler.configure({
     onDrop: (currentEditor, files) => {
-      files.forEach(file => handleFileDrop(currentEditor, file));
+      files.forEach(file => handleFileDrop(currentEditor, file, markdownService));
       return true;
     },
     onPaste: async (currentEditor, files, htmlContent) => {

@@ -19,7 +19,7 @@ const rewriteToMarkdownFlow = ai.defineFlow(
     inputSchema: RewriteToMarkdownInputSchema,
     outputSchema: RewriteToMarkdownOutputSchema,
   },
-  async (input: any) => {
+  async (input: RewriteToMarkdownInput) => {
     const prompt = ai.definePrompt({
       name: 'rewriteToMarkdownPrompt',
       input: { schema: RewriteToMarkdownInputSchema },

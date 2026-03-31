@@ -3,6 +3,7 @@
 
 import { cn } from '@/infrastructure/utils/cn';
 import React from 'react';
+import { EDITOR_PROSE_CLASSES } from '@/modules/ai-content/adapters/components/report-mode/MarkdownEditor';
 
 interface A4PageProps {
     children: React.ReactNode;
@@ -54,7 +55,7 @@ export const A4Page = ({ children, title, className, viewMode = 'single' }: A4Pa
                 </div>
             )}
             
-            <div className="prose dark:prose-invert max-w-none text-[16px] leading-[1.75] flex-grow font-serif selection:bg-primary/20 prose-p:mb-6 prose-headings:font-black prose-headings:tracking-tighter prose-headings:text-foreground prose-strong:text-foreground prose-blockquote:border-primary/40 prose-blockquote:bg-primary/[0.02] prose-blockquote:px-6 prose-blockquote:py-1 prose-blockquote:rounded-r-xl">
+            <div className={cn(EDITOR_PROSE_CLASSES, "flex-grow")}>
                 {children}
             </div>
 

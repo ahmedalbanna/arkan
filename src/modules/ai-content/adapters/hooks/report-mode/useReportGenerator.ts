@@ -2,19 +2,10 @@
 
 import { useBuilderPageLogic } from '@/modules/projects/adapters/hooks/use-builder-page';
 import { useLocalization } from '@/context/LocalizationContext';
+import { useBuilderStore } from '@/modules/projects/adapters/state/useBuilderStore';
 import React, { useState, useMemo, lazy, useEffect } from 'react';
-import { Settings, UploadCloud, LayoutTemplate, BookOpenCheck, SlidersHorizontal, MessageSquare, Sparkles, History as HistoryIcon } from 'lucide-react';
 import { useSaveProject } from '@/modules/projects/adapters/hooks/use-projects';
-// Lazy load components
-const ProjectSettingsPanel = lazy(() => import('@/modules/ai-content/adapters/components/report-mode/settings/ProjectSettingsPanel'));
-const FileManager = lazy(() => import('@/modules/ai-content/adapters/components/report-mode/file-manager'));
-const GenerationTools = lazy(() => import('@/modules/ai-content/adapters/components/report-mode/generation-tools'));
-const ApplyTemplatePanel = lazy(() => import('@/modules/ai-content/adapters/components/report-mode/templates/ApplyTemplatePanel'));
-const GlobalProjectControls = lazy(() => import('@/modules/ai-content/adapters/components/report-mode/settings/GlobalProjectControls').then(m => ({ default: m.GlobalProjectControls })));
-const SectionTabsPanel = lazy(() => import('@/modules/ai-content/adapters/components/report-mode/generation-tools/SectionTabsPanel').then(m => ({ default: m.SectionTabsPanel })));
-const ChapterTabsPanel = lazy(() => import('@/modules/ai-content/adapters/components/report-mode/generation-tools/ChapterTabsPanel').then(m => ({ default: m.ChapterTabsPanel })));
-const ProjectChat = lazy(() => import('@/modules/ai-content/adapters/components/report-mode/chat/ProjectChat').then(m => ({ default: m.ProjectChat })));
-const SnapshotHistoryPanel = lazy(() => import('@/modules/projects/adapters/components/SnapshotHistoryPanel'));
+import { useSidebarPanels } from './useSidebarPanels';
 
 import { type ProjectProperties } from '@/modules/projects/domain/entities/Project';
 
@@ -30,8 +21,7 @@ export function useReportGenerator(initialProject?: ProjectProperties | null) {
   const [viewMode, setViewMode] = useState<'edit' | 'preview'>('edit');
   const { isSaving } = useSaveProject();
   const builderPageLogic = useBuilderPageLogic(initialProject);
-
-  const activeSectionId = selectedSectionIds.length > 0 ? selectedSectionIds[0] : null;
+  const project = useBuilderStore(state => state.project);
 
   useEffect(() => {
     document.documentElement.style.setProperty('--zoom-scale', String(zoomLevel));
@@ -64,84 +54,26 @@ export function useReportGenerator(initialProject?: ProjectProperties | null) {
     }
   };
 
-  const leftPanels = useMemo(() => [
-    {
-        key: 'settings',
-        title: 'Project Settings',
-        icon: React.createElement(Settings, { className: "h-5 w-5" }),
-        content: React.createElement(ProjectSettingsPanel),
-    },
-    {
-        key: 'files',
-        title: t('builder.tabs.files'),
-        icon: React.createElement(UploadCloud, { className: "h-5 w-5" }),
-        content: React.createElement(FileManager),
-    },
-    {
-        key: 'templates',
-        title: 'Apply Template',
-        icon: React.createElement(LayoutTemplate, { className: "h-5 w-5" }),
-        content: React.createElement(ApplyTemplatePanel),
-    },
-    {
-        key: 'generate',
-        title: t('builder.reportGenerator.toolsTitle'),
-        icon: React.createElement(BookOpenCheck, { className: "h-5 w-5" }),
-        content: React.createElement(GenerationTools, {
-          selectedSectionIds,
-          onActiveSectionChange: handleActiveSectionChange,
-          onActiveChapterChange: (id) => {
-            setActiveChapterId(id);
-            if (id) {
-              const chapter = builderPageLogic.project?.getChapter(id);
-              if (chapter) {
-                setSelectedSectionIds(chapter.sections.map(s => s.id));
-              } else {
-                setSelectedSectionIds([]);
-              }
-            }
-          },
-          activeChapterId,
-        }),
-    },
-  ], [t, selectedSectionIds, activeChapterId]);
+  const handleActiveChapterChange = (id: string | null) => {
+    setActiveChapterId(id);
+    if (id) {
+        const chapter = builderPageLogic.project?.getChapter(id);
+        if (chapter) {
+            setSelectedSectionIds(chapter.sections.map(s => s.id));
+        } else {
+            setSelectedSectionIds([]);
+        }
+    }
+  };
 
-  const rightPanels = useMemo(() => {
-    const activeSection = activeSectionId ? builderPageLogic.project?.getSection(activeSectionId) ?? null : null;
-    const activeChapter = activeChapterId ? builderPageLogic.project?.getChapter(activeChapterId) ?? null : null;
-    
-    return [
-      {
-          key: 'section',
-          title: activeChapterId ? 'Chapter Tools' : selectedSectionIds.length > 1 ? 'Bulk Editor' : 'Section Controls',
-          icon: React.createElement(Sparkles, { className: "h-5 w-5" }),
-          content: activeChapterId 
-            ? React.createElement(ChapterTabsPanel, { chapter: activeChapter })
-            : React.createElement(SectionTabsPanel, { 
-                section: activeSection,
-                selectedSectionIds: selectedSectionIds.length > 1 ? selectedSectionIds : undefined 
-              }),
-      },
-      {
-          key: 'global',
-          title: 'Global Controls',
-          icon: React.createElement(SlidersHorizontal, { className: "h-5 w-5" }),
-          content: React.createElement(GlobalProjectControls),
-      },
-      {
-          key: 'chat',
-          title: 'AI Consultant',
-          icon: React.createElement(MessageSquare, { className: "h-5 w-5" }),
-          content: React.createElement(ProjectChat, { isOpen: true, onClose: () => setActiveRightPanelKey('section') }),
-      },
-      {
-          key: 'snapshots',
-          title: 'Snapshots',
-          icon: React.createElement(HistoryIcon, { className: "h-5 w-5" }),
-          content: React.createElement(SnapshotHistoryPanel),
-      },
-    ];
-  }, [activeSectionId, activeChapterId, selectedSectionIds, builderPageLogic.project]);
+  const { leftPanels, rightPanels } = useSidebarPanels({
+    project: builderPageLogic.project,
+    selectedSectionIds,
+    activeChapterId,
+    onActiveSectionChange: handleActiveSectionChange,
+    onActiveChapterChange: handleActiveChapterChange,
+    setActiveRightPanelKey,
+  });
 
   return {
     ...builderPageLogic,

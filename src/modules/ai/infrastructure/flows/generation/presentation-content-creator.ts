@@ -41,7 +41,7 @@ export const presentationContentCreator = ai.defineFlow(
         inputSchema: PresentationInputSchema,
         outputSchema: PresentationContentSchema,
     },
-    async (input: any) => {
+    async (input: z.infer<typeof PresentationInputSchema>) => {
         const {
             projectPath,
             projectName,

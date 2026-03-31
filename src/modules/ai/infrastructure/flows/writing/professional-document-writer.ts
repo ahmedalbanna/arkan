@@ -22,7 +22,7 @@ export const professionalDocumentWriterFlow = ai.defineFlow(
         inputSchema: ProfessionalDocumentWriterInputSchema,
         outputSchema: ProfessionalDocumentWriterOutputSchema,
     },
-    async (input: any) => {
+    async (input: ProfessionalDocumentWriterInput) => {
         const result = await ai.generate({
             prompt: `Write a professional document for audience ${input.targetAudience} with purpose ${input.purpose}`,
             tools: [analyzeDocumentStructureTool, analyzeToneTool, checkLogicalFlowTool],

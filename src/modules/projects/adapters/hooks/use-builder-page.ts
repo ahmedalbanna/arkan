@@ -17,10 +17,11 @@ export function useBuilderPageLogic(initialProject?: ProjectProperties | null) {
   const loadProject = useBuilderStore(state => state.loadProject);
 
   useEffect(() => {
-    if (initialProject && isStoreInitialized && project?.id !== initialProject.id) {
+    const currentProjectId = useBuilderStore.getState().project?.id;
+    if (initialProject && isStoreInitialized && currentProjectId !== initialProject.id) {
         loadProject(initialProject);
     }
-  }, [initialProject, isStoreInitialized, loadProject, project?.id]);
+  }, [initialProject, isStoreInitialized, loadProject]);
   const [showOnboarding, setShowOnboarding] = useState(false);
   const queryClient = useQueryClient();
 

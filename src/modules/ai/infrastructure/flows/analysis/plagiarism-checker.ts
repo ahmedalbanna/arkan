@@ -46,7 +46,7 @@ const plagiarismCheckFlow = ai.defineFlow({
   name: 'plagiarismCheckFlow',
   inputSchema: PlagiarismCheckInputSchema,
   outputSchema: PlagiarismCheckOutputSchema,
-}, async (input: any) => {
+}, async (input: PlagiarismCheckInput) => {
   try {
     const result = await plagiarismCheckPrompt(input);
     

@@ -41,7 +41,7 @@ const rewriteDocumentFlow = ai.defineFlow(
     inputSchema: RewriteDocumentInputSchema,
     outputSchema: RewriteDocumentOutputSchema,
   },
-  async (input: any) => {
+  async (input: RewriteDocumentInput) => {
     const result = await generateMarkdownPrompt(input);
     
     const text = result.text || result.output || '';

@@ -29,7 +29,7 @@ const grammarCheckFlow = ai.defineFlow({
   name: 'grammarCheckFlow',
   inputSchema: GrammarCheckInputSchema,
   outputSchema: GrammarCheckOutputSchema,
-}, async (input: any) => {
+}, async (input: GrammarCheckInput) => {
   const result = await grammarCheckPrompt(input);
   const text = result.text || result.output || "";
   if (!text) {

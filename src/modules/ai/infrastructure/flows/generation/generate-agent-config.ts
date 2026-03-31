@@ -170,7 +170,7 @@ const generateAgentConfigFlow = ai.defineFlow({
   name: 'generateAgentConfigFlow',
   inputSchema: GenerateAgentConfigInputSchema,
   outputSchema: GenerateAgentConfigOutputSchema
-}, async (input: any) => {
+}, async (input: z.infer<typeof GenerateAgentConfigInputSchema>) => {
   const { output } = await generateAgentConfigPrompt(input);
   if (!output) {
     throw new Error("Agent configuration generation failed.");

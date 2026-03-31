@@ -29,13 +29,18 @@ export function CollapsibleSidePanel({
   className,
   side = 'left',
 }: CollapsibleSidePanelProps) {
-  const activePanel = panels.find((p) => p.key === activeKey);
+  const isLeft = side === 'left';
 
   if (!panels || panels.length === 0) {
     return null;
   }
 
-  const isLeft = side === 'left';
+  const activePanel = panels.find((p) => p.key === activeKey);
+
+  // Simplified toggle handler that ensures we can only have ONE panel active per side
+  const handlePanelToggle = (key: string) => {
+    onActiveKeyChange(activeKey === key ? '' : key);
+  };
 
   return (
     <div className={cn(
@@ -63,7 +68,7 @@ export function CollapsibleSidePanel({
                   <Button 
                     variant="ghost" 
                     size="icon" 
-                    onClick={() => onActiveKeyChange(isActive ? '' : panel.key)} 
+                    onClick={() => handlePanelToggle(panel.key)} 
                     aria-label={panel.title} 
                     className={cn(
                         "h-11 w-11 rounded-[14px] transition-all duration-500 relative group/icon",

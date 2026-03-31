@@ -11,7 +11,7 @@ const generateProjectBlueprintFlow = ai.defineFlow({
     name: 'generateProjectBlueprintFlow',
     inputSchema: GenerateProjectBlueprintInputSchema,
     outputSchema: GenerateProjectBlueprintOutputSchema
-}, async (input: any) => {
+}, async (input: GenerateProjectBlueprintInput) => {
     const { projectName, projectType, description, targetAudience, complexity, features, techStack, budget, timeline } = input;
 
     const blueprintPrompt = ai.definePrompt({

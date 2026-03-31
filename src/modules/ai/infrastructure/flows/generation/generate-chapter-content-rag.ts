@@ -126,7 +126,7 @@ Create a cohesive, well-structured chapter that flows naturally from section to 
     name: 'generateChapterContentFlowRAG',
     inputSchema: GenerateChapterInputSchema,
     outputSchema: GenerateChapterOutputSchema,
-  }, async (input: any) => {
+  }, async (input: GenerateChapterInput) => {
     const { output } = await chapterPrompt(input);
 
     if (!output) {

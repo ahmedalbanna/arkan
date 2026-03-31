@@ -81,7 +81,7 @@ const writeDocumentFlow = ai.defineFlow({
   name: 'writeDocumentFlow',
   inputSchema: WriteDocumentInputSchema,
   outputSchema: WriteDocumentOutputSchema
-}, async (input: any) => {
+}, async (input: WriteDocumentInput) => {
   let promptToUse;
   if (input.documentType === 'university subject material') {
     promptToUse = universitySubjectMaterialPrompt;

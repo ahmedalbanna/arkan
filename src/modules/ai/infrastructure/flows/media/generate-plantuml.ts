@@ -101,7 +101,7 @@ const generatePlantUMLFlow = ai.defineFlow({
   name: 'generatePlantUMLFlow',
   inputSchema: GeneratePlantUMLInputSchema,
   outputSchema: GeneratePlantUMLOutputSchema
-}, async (input: any) => {
+}, async (input: GeneratePlantUMLInput) => {
   const { description, diagramType } = input;
   const type = (diagramType || 'useCase') as DiagramType;
 
