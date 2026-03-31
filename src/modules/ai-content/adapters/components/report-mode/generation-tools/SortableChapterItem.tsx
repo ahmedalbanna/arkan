@@ -123,7 +123,7 @@ export function SortableChapterItem({
                 )}>
                     {chapter.title || 'UNTITLED CHAPTER'}
                 </span>
-                <span className="text-[9px] font-bold text-muted-foreground/30 uppercase tracking-[0.2em] mt-0.5">
+                <span className="text-[9px] font-black text-primary/40 uppercase tracking-[0.25em] mt-0.5">
                     {sectionsInChapter.length} Sections Integrated
                 </span>
               </div>
@@ -155,7 +155,7 @@ export function SortableChapterItem({
               initial={{ height: 0, opacity: 0 }}
               animate={{ height: "auto", opacity: 1 }}
               exit={{ height: 0, opacity: 0 }}
-              transition={{ duration: 0.35, ease: [0.33, 1, 0.68, 1] }}
+              transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
               className="overflow-hidden"
             >
               <div className="p-4 bg-muted/5 relative">
@@ -184,7 +184,7 @@ export function SortableChapterItem({
                     className="w-full h-9 text-[9px] font-black uppercase tracking-[0.2em] gap-2 hover:bg-primary/5 hover:text-primary border border-dashed border-border/60 hover:border-primary/30 transition-all duration-300 rounded-xl mt-4 text-muted-foreground/60"
                   >
                     <PlusCircle className="h-3.5 w-3.5" />
-                    Integrate New Section
+                    Integrate Neural Node
                   </Button>
                 </div>
               </div>

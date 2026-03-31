@@ -51,18 +51,18 @@ export const IntelligenceTab = ({ section, onAction, isProcessing }: Intelligenc
                     <div className="flex items-center justify-between mb-3">
                         <div className="flex items-center gap-2">
                             <div className="relative">
-                                <div className="h-2 w-2 rounded-full bg-primary animate-ping absolute inset-0" />
+                                <div className="h-2 w-2 rounded-full bg-primary animate-pulse absolute inset-0" />
                                 <div className="h-2 w-2 rounded-full bg-primary relative" />
                             </div>
-                            <span className="text-[10px] font-black uppercase tracking-[0.2em] text-primary">Neural Synthesis Active</span>
+                            <span className="text-[10px] font-black uppercase tracking-[0.3em] text-primary">Neural Core Active</span>
                         </div>
-                        <Badge variant="outline" className="h-5 text-[9px] font-black uppercase tracking-widest border-primary/20 bg-primary/5 text-primary">
-                            Gemma 2B_v2
+                        <Badge variant="outline" className="h-5 text-[9px] font-black uppercase tracking-widest border-primary/30 bg-primary/10 text-primary px-2 shadow-inner">
+                            Gemma 2B v2.4
                         </Badge>
                     </div>
-                    <p className="text-[11px] text-muted-foreground leading-relaxed font-medium">
-                        The AI is monitoring your <span className="text-foreground font-bold italic">"{section.title}"</span> context. 
-                        Neural weightings are tuned for <span className="text-primary font-bold">Academic Precision</span>.
+                    <p className="text-[11px] text-muted-foreground leading-relaxed font-medium uppercase tracking-tight opacity-80">
+                        System monitoring <span className="text-foreground font-black italic">"{section.title}"</span> Academic.
+                        Synthesis weights tuned for <span className="text-primary font-black tracking-widest">Academic Precision</span>.
                     </p>
                 </div>
             </div>

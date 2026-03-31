@@ -56,10 +56,10 @@ export function useSidebarPanels({
         },
         {
             key: 'generate',
-            title: t('builder.reportGenerator.toolsTitle'),
+            title: 'Neural Architect',
             icon: <BookOpenCheck className="h-5 w-5" />,
             content: (
-                <GenerationTools 
+                <GenerationTools
                     selectedSectionIds={selectedSectionIds}
                     onActiveSectionChange={onActiveSectionChange}
                     onActiveChapterChange={onActiveChapterChange}
@@ -73,17 +73,17 @@ export function useSidebarPanels({
         const activeSectionId = selectedSectionIds.length > 0 ? selectedSectionIds[0] : null;
         const activeSection = activeSectionId ? project?.getSection(activeSectionId) ?? null : null;
         const activeChapter = activeChapterId ? project?.getChapter(activeChapterId) ?? null : null;
-        
+
         return [
             {
                 key: 'section',
                 title: activeChapterId ? 'Chapter Tools' : selectedSectionIds.length > 1 ? 'Bulk Editor' : 'Section Controls',
                 icon: <Sparkles className="h-5 w-5" />,
-                content: activeChapterId 
+                content: activeChapterId
                     ? <ChapterTabsPanel chapter={activeChapter} />
-                    : <SectionTabsPanel 
+                    : <SectionTabsPanel
                         section={activeSection}
-                        selectedSectionIds={selectedSectionIds.length > 1 ? selectedSectionIds : undefined} 
+                        selectedSectionIds={selectedSectionIds.length > 1 ? selectedSectionIds : undefined}
                     />,
             },
             {

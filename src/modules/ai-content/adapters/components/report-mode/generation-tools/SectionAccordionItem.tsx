@@ -98,10 +98,10 @@ export function SectionAccordionItem({
                     {listeners && (
                         <div 
                             {...listeners} 
-                            className="flex items-center gap-1.5 text-muted-foreground/40 transition-colors hover:text-primary shrink-0 cursor-grab active:cursor-grabbing"
+                            className="flex items-center gap-1 text-muted-foreground/40 transition-colors hover:text-primary shrink-0 cursor-grab active:cursor-grabbing"
                             onClick={(e) => e.stopPropagation()}
                         >
-                            <span className="text-[9px] font-black uppercase tracking-[0.2em] w-6 text-center tabular-nums opacity-60">
+                            <span className="text-[9px] font-black uppercase tracking-[0.3em] w-8 text-center tabular-nums opacity-60 border-r border-primary/10 mr-1.5">
                                 {chapterIndex >= 0 ? `${chapterIndex + 1}.${sectionIndex + 1}` : `${sectionIndex + 1}`}
                             </span>
                             <GripVertical className="h-3.5 w-3.5 opacity-50 group-hover/item:opacity-100 transition-opacity" />
@@ -117,7 +117,7 @@ export function SectionAccordionItem({
                         ) : (
                             <div className={cn(
                                 "h-1.5 w-1.5 rounded-full shrink-0 transition-all duration-500",
-                                isActive ? "bg-primary scale-125 shadow-[0_0_8px_rgba(var(--primary),0.6)]" : "bg-muted-foreground/20"
+                                isActive ? "bg-primary scale-125 shadow-[0_0_12px_rgba(var(--primary),0.8)] animate-pulse" : "bg-muted-foreground/20"
                             )} />
                         )}
                         

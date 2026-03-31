@@ -76,8 +76,8 @@ export function GuidelineEditor({ itemKey, selectedSectionIds }: GuidelineEditor
             <ListChecks className="h-3 w-3" />
             Architectural Guidelines
         </h4>
-        <p className="text-[9px] text-muted-foreground italic font-medium opacity-60 uppercase tracking-wider">
-            Define AI behavioral logic and technical constraints.
+        <p className="text-[9px] text-muted-foreground italic font-black opacity-60 uppercase tracking-widest">
+        Define AI behavioral logic and technical constraints.
         </p>
       </div>
 

@@ -39,7 +39,7 @@ export function ChapterTabsPanel({ chapter, className, onClose }: ChapterTabsPan
     isProcessing,
     processedText,
     handleApplyToNewSection,
-  } = useChapterActions(chapter, () => {});
+  } = useChapterActions(chapter, () => { });
 
   if (!chapter) {
     return (
@@ -63,25 +63,25 @@ export function ChapterTabsPanel({ chapter, className, onClose }: ChapterTabsPan
         <div className="flex flex-col gap-3">
           <div className="space-y-0.5 min-w-0">
             <span className="text-[10px] font-black uppercase tracking-[0.2em] text-primary/60">Chapter Intelligence</span>
-            <h3 className="text-[15px] font-bold font-headline truncate tracking-tight">{chapter.title}</h3>
+            <h3 className="text-[14px] font-black uppercase truncate tracking-widest text-foreground/90">{chapter.title}</h3>
           </div>
 
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-              <Button 
+              <Button
                 type="submit"
-                disabled={isProcessing} 
+                disabled={isProcessing}
                 className="w-full font-bold h-10 gap-2 shadow-lg shadow-primary/20 animate-in fade-in slide-in-from-bottom-2 duration-500"
               >
                 {isProcessing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Wand2 className="h-4 w-4" />}
                 Process Chapter
               </Button>
-              
+
               {processedText && !isProcessing && (
-                <Button 
-                  type="button" 
-                  variant="secondary" 
-                  onClick={handleApplyToNewSection} 
+                <Button
+                  type="button"
+                  variant="secondary"
+                  onClick={handleApplyToNewSection}
                   className="w-full font-bold h-9 gap-2 border bg-background/50"
                 >
                   <PlusCircle className="h-3.5 w-3.5" />
@@ -186,7 +186,7 @@ export function ChapterTabsPanel({ chapter, className, onClose }: ChapterTabsPan
                       </Select>
                     </div>
                   )}
-                  
+
                   {manipulationType === 'conciseness-checker' && (
                     <div className="space-y-4 animate-in fade-in duration-300">
                       <div className="flex justify-between items-center">
@@ -214,7 +214,7 @@ export function ChapterTabsPanel({ chapter, className, onClose }: ChapterTabsPan
                 </div>
               </TabsContent>
               <TabsContent value="context" className="m-0 focus-visible:ring-0">
-                 <SectionContextSelector sectionId={chapter.id || ''} />
+                <SectionContextSelector sectionId={chapter.id || ''} />
               </TabsContent>
             </div>
           </ScrollArea>

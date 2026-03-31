@@ -99,7 +99,7 @@ export function SectionGenerationControls({
                     <Settings2 className="h-3 w-3" />
                     Generation Parameters
                 </h4>
-                <p className="text-[9px] text-muted-foreground italic font-medium opacity-60 uppercase tracking-wider">
+                <p className="text-[9px] text-muted-foreground italic font-black opacity-60 uppercase tracking-widest">
                     Optimize intelligence parameters for high-fidelity output.
                 </p>
             </div>
@@ -109,12 +109,12 @@ export function SectionGenerationControls({
 
                 <div className="space-y-3.5">
                     <div className="flex justify-between items-center group/label">
-                        <Label htmlFor={`formality-${section.id}`} className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground group-hover/label:text-primary transition-colors">
-                            Cognitive Formality
+                        <Label htmlFor={`formality-${section.id}`} className="text-[10px] font-black uppercase tracking-[0.2em] text-primary/60 group-hover/label:text-primary transition-colors">
+                            Cognitive Complexity
                         </Label>
                         <div className="flex items-center gap-2">
-                             <div className="h-1.5 w-1.5 rounded-full bg-primary animate-pulse shadow-[0_0_8px_rgba(var(--primary),0.6)]" />
-                             <Badge variant="outline" className="h-5 text-[9px] font-black border-primary/20 bg-primary/5 text-primary tabular-nums ring-1 ring-primary/10 shadow-inner">
+                            <div className="h-1.5 w-1.5 rounded-full bg-primary animate-pulse shadow-[0_0_8px_rgba(var(--primary),0.6)]" />
+                            <Badge variant="outline" className="h-5 text-[9px] font-black border-primary/20 bg-primary/5 text-primary tabular-nums ring-1 ring-primary/10 shadow-inner">
                                 {controls.formality}%
                             </Badge>
                         </div>
@@ -262,7 +262,7 @@ export function SectionGenerationControls({
 
                 {/* Additional conditional inputs following same pattern */}
                 <div className="grid gap-4 grid-cols-1">
-                     {controls.outputStyle?.diagram && (
+                    {controls.outputStyle?.diagram && (
                         <div className="space-y-2.5 rounded-2xl border bg-muted/5 p-4 shadow-sm">
                             <Label htmlFor={`diagramType-${section.id}`} className="text-[10px] font-bold uppercase tracking-widest text-primary flex items-center gap-2">
                                 <Network className="h-3 w-3" /> Schema Type

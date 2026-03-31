@@ -140,48 +140,48 @@ export function SectionTabsPanel({ section, selectedSectionIds = [], className }
           <div className="flex items-center justify-between gap-2">
             <div className="space-y-0.5 min-w-0">
               <span className="text-[10px] font-black uppercase tracking-[0.2em] text-primary/60">
-                {selectedSectionIds.length > 1 ? `Editing ${selectedSectionIds.length} Sections` : 'Active Context'}
+                {selectedSectionIds.length > 1 ? `Editing ${selectedSectionIds.length} Neural` : 'Active Context'}
               </span>
-              <h3 className="text-[15px] font-bold font-headline truncate tracking-tight">
+              <h3 className="text-[14px] font-black uppercase truncate tracking-widest text-foreground/90">
                 {selectedSectionIds.length > 1 ? 'Bulk Configuration' : section.title}
               </h3>
             </div>
 
             <div className="flex items-center gap-1 p-1 rounded-xl bg-muted/10 shrink-0">
-               <TooltipProvider>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-7 w-7 text-muted-foreground hover:text-primary hover:bg-background/80 transition-all rounded-lg"
-                        onClick={handleCopySettings}
-                      >
-                        <Copy className="h-3.5 w-3.5" />
-                      </Button>
-                    </TooltipTrigger>
-                    <TooltipContent side="bottom" className="text-[10px] font-black uppercase tracking-[0.2em]">
-                      Copy Settings
-                    </TooltipContent>
-                  </Tooltip>
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-7 w-7 text-muted-foreground hover:text-primary hover:bg-background/80 transition-all rounded-lg"
+                      onClick={handleCopySettings}
+                    >
+                      <Copy className="h-3.5 w-3.5" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent side="bottom" className="text-[10px] font-black uppercase tracking-[0.2em]">
+                    Copy Settings
+                  </TooltipContent>
+                </Tooltip>
 
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-7 w-7 text-muted-foreground hover:text-primary hover:bg-background/80 transition-all rounded-lg"
-                        onClick={handlePasteSettings}
-                        disabled={!clipboard}
-                      >
-                        <ClipboardPaste className="h-3.5 w-3.5" />
-                      </Button>
-                    </TooltipTrigger>
-                    <TooltipContent side="bottom" className="text-[10px] font-black uppercase tracking-[0.2em]">
-                      Paste Settings
-                    </TooltipContent>
-                  </Tooltip>
-               </TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-7 w-7 text-muted-foreground hover:text-primary hover:bg-background/80 transition-all rounded-lg"
+                      onClick={handlePasteSettings}
+                      disabled={!clipboard}
+                    >
+                      <ClipboardPaste className="h-3.5 w-3.5" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent side="bottom" className="text-[10px] font-black uppercase tracking-[0.2em]">
+                    Paste Settings
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
             </div>
           </div>
 
@@ -287,22 +287,22 @@ export function SectionTabsPanel({ section, selectedSectionIds = [], className }
           <ScrollArea className="h-full px-4 pr-4 -mr-4">
             <div className="pb-24 pt-4">
               <TabsContent value="context" className="m-0 focus-visible:ring-0 animate-in fade-in slide-in-from-right-2 duration-300">
-                 <SectionContextSelector
-                    sectionId={section.id}
-                    selectedSectionIds={selectedSectionIds.length > 1 ? selectedSectionIds : undefined}
-                 />
+                <SectionContextSelector
+                  sectionId={section.id}
+                  selectedSectionIds={selectedSectionIds.length > 1 ? selectedSectionIds : undefined}
+                />
               </TabsContent>
               <TabsContent value="prompt" className="m-0 focus-visible:ring-0 animate-in fade-in slide-in-from-right-2 duration-300">
-                 <GuidelineEditor
-                    itemKey={section.id}
-                    selectedSectionIds={selectedSectionIds.length > 1 ? selectedSectionIds : undefined}
-                 />
+                <GuidelineEditor
+                  itemKey={section.id}
+                  selectedSectionIds={selectedSectionIds.length > 1 ? selectedSectionIds : undefined}
+                />
               </TabsContent>
               <TabsContent value="controls" className="m-0 focus-visible:ring-0 animate-in fade-in slide-in-from-right-2 duration-300">
-                 <SectionGenerationControls
-                    section={section}
-                    selectedSectionIds={selectedSectionIds.length > 1 ? selectedSectionIds : undefined}
-                 />
+                <SectionGenerationControls
+                  section={section}
+                  selectedSectionIds={selectedSectionIds.length > 1 ? selectedSectionIds : undefined}
+                />
               </TabsContent>
             </div>
           </ScrollArea>
