@@ -1,2 +1,21 @@
-[TELEMETRY ERROR] [2026-03-30T05:20:57.267Z] [SQLiteProjectRepo:save]: NOT NULL constraint failed: projects.name
- POST /api/projects 400 in 335ms
+## Error Type
+Runtime Error
+
+## Error Message
+`Tooltip` must be used within `TooltipProvider`
+
+
+    at ReportResults (src/modules/ai-content/adapters/components/report-mode/ReportResults.tsx:729:13)
+    at ReportModeGenerator (src/modules/ai-content/adapters/components/report-mode/ReportModeGenerator.tsx:216:41)
+    at GeneratePage (src/app/builder/page.tsx:39:7)
+
+## Code Frame
+  727 |           {/* Cover PDF Export — available in both cover and edit modes */}
+  728 |           {(viewMode === 'cover' || viewMode === 'edit') && hasContent && (
+> 729 |             <Tooltip>
+      |             ^
+  730 |               <TooltipTrigger asChild>
+  731 |                 <Button
+  732 |                   variant="ghost" size="sm"
+
+Next.js version: 15.5.9 (Turbopack)

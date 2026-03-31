@@ -125,7 +125,7 @@ export default function UploadManager() {
     return (
         <Tabs defaultValue="files" className="h-full flex flex-col pt-2 animate-in fade-in slide-in-from-right-2 duration-300">
             <div className="px-4">
-                <TabsList className="grid w-full grid-cols-2 h-8 rounded-xl bg-muted/20 p-1 gap-1 border border-primary/5">
+                <TabsList className="grid w-full grid-cols-2 h-auto rounded-xl bg-muted/20 p-1 gap-1 border border-primary/5">
                     <TabsTrigger value="files" className="text-[9px] font-black uppercase tracking-[0.15em] data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:shadow-sm px-2 transition-all rounded-lg">
                         {t('builder.tabs.files')}
                     </TabsTrigger>
@@ -145,7 +145,7 @@ export default function UploadManager() {
                 <div className="flex-grow flex flex-col gap-6 min-h-0 relative">
                     <div className="absolute left-[-1.25rem] top-0 bottom-0 w-px bg-gradient-to-b from-primary/30 via-primary/5 to-transparent" />
                     <Tabs defaultValue="upload" className="w-full">
-                        <TabsList className="grid w-full grid-cols-2 h-8 rounded-xl bg-muted/20 p-1 gap-1 border border-primary/5">
+                        <TabsList className="grid w-full grid-cols-2 h-8 rounded-xl bg-muted/20 p-1 gap-1 border border-primary/5 h-auto">
                             <TabsTrigger value="upload" className="text-[9px] font-black uppercase tracking-[0.15em] data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:shadow-sm px-2 transition-all rounded-lg">{t('builder.files.uploadFilesTab')}</TabsTrigger>
                             <TabsTrigger value="text" className="text-[9px] font-black uppercase tracking-[0.15em] data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:shadow-sm px-2 transition-all rounded-lg">{t('builder.files.pasteTextTab')}</TabsTrigger>
                         </TabsList>

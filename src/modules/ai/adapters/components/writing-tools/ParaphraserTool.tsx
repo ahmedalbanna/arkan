@@ -1,7 +1,5 @@
-import { GuestTierBadge } from '@/components/shared/GuestTierBadge';
-
 'use client';
-
+import { GuestTierBadge } from '@/components/shared/GuestTierBadge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
