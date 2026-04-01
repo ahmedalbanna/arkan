@@ -22,6 +22,7 @@ import { Project } from '@/modules/projects/domain/entities/Project';
 import { Badge } from '@/components/ui/badge';
 import { X } from 'lucide-react';
 import { CoverPage } from '@/components/shared/CoverPage';
+import { CoverPageSettingsPanel } from './settings/CoverPageSettingsPanel';
 import { FileText, ChevronDown, History } from 'lucide-react';
 import { OutlineManager } from './outline/OutlineManager';
 import { ReportSteps } from './ReportSteps';
@@ -80,6 +81,13 @@ const ReportResults = ({
   const [isSuggestionVisible, setIsSuggestionVisible] = useState(true);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [showCoverPage, setShowCoverPage] = useState(false);
+  const [showCoverSettings, setShowCoverSettings] = useState(false);
+
+  // Toggle cover page + settings panel together
+  const handleToggleCoverPage = (visible: boolean) => {
+    setShowCoverPage(visible);
+    setShowCoverSettings(visible);
+  };
   const containerRef = React.useRef<HTMLDivElement>(null);
 
   const comparisonSnapshot = snapshots.find((s: any) => s.id === comparisonSnapshotId);
@@ -205,7 +213,7 @@ const ReportResults = ({
         toggleFullscreen={toggleFullscreen}
         suggestion={suggestion}
         showCoverPage={showCoverPage}
-        setShowCoverPage={setShowCoverPage}
+        setShowCoverPage={handleToggleCoverPage}
       />
 
       <AnimatePresence>
@@ -239,6 +247,12 @@ const ReportResults = ({
           selectedSectionIds={selectedSectionIds}
           onActiveChapterChange={setActiveChapterId}
           onActiveSectionChange={handleActiveSectionChange}
+        />
+
+        {/* Floating Cover Settings Panel */}
+        <CoverPageSettingsPanel
+          isOpen={showCoverSettings}
+          onClose={() => setShowCoverSettings(false)}
         />
 
         <ScrollArea className="flex-grow relative scroll-smooth">
