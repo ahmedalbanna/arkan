@@ -5,7 +5,7 @@ import { Project } from '@/modules/projects/domain/entities/Project';
 import { formatDistanceToNow } from 'date-fns';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { Eye, PenLine, ListTree, Maximize2, Minimize2, Lightbulb } from 'lucide-react';
+import { Eye, PenLine, ListTree, Maximize2, Minimize2, Lightbulb, BookOpen } from 'lucide-react';
 import { cn } from '@/infrastructure/utils/cn';
 
 interface DocumentToolbarProps {
@@ -17,6 +17,8 @@ interface DocumentToolbarProps {
     isFullscreen: boolean;
     toggleFullscreen: () => void;
     suggestion: string;
+    showCoverPage: boolean;
+    setShowCoverPage: (visible: boolean) => void;
 }
 
 export const DocumentToolbar = ({
@@ -27,7 +29,9 @@ export const DocumentToolbar = ({
     setIsOutlineVisible,
     isFullscreen,
     toggleFullscreen,
-    suggestion
+    suggestion,
+    showCoverPage,
+    setShowCoverPage,
 }: DocumentToolbarProps) => {
     return (
         <div className="flex items-center justify-between px-6 py-2.5 border-b bg-muted/10 backdrop-blur-md sticky top-0 z-10">
@@ -80,6 +84,26 @@ export const DocumentToolbar = ({
                         </TooltipTrigger>
                         <TooltipContent side="bottom" className="text-[10px] font-bold uppercase tracking-widest">
                             Toggle Document Outline
+                        </TooltipContent>
+                    </Tooltip>
+
+                    <Tooltip>
+                        <TooltipTrigger asChild>
+                            <Button
+                                variant="ghost"
+                                size="icon"
+                                className={cn(
+                                    "h-7 w-7 transition-all duration-300",
+                                    showCoverPage ? "bg-primary/10 text-primary" : "hover:bg-primary/5 hover:text-primary"
+                                )}
+                                onClick={() => setShowCoverPage(!showCoverPage)}
+                                aria-label="Toggle cover page"
+                            >
+                                <BookOpen className="h-3.5 w-3.5" />
+                            </Button>
+                        </TooltipTrigger>
+                        <TooltipContent side="bottom" className="text-[10px] font-bold uppercase tracking-widest">
+                            {showCoverPage ? "Hide Cover Page" : "Show Cover Page"}
                         </TooltipContent>
                     </Tooltip>
 

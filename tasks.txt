@@ -1,7 +1,81 @@
-"I want to perform a complete UI/UX redesign of this [Report Mode Generator] while strictly preserving its existing business logic and functionality.
-Please follow these steps:
-Analyze Current Logic: Extract and document the core functionality and state-management of the current component. Ensure no logic is lost during the redesign.
-Modernize & Restructure: Redesign the component’s UI to be more modern, clean, and consistent with the overall page layout. Apply best practices for [Resizable Content, Responsive Design, Accessibility, Auto Sidebar Collapsible (if resizing at end), Builder Canvas (min width)].
-Enhance Logic: While keeping the core functionality, suggest and implement performance improvements or cleaner code patterns ( optimizing state updates, using more efficient data structures).
-Provide Final Code: Output the complete, refactored component code. Include a brief explanation of how you maintained the original logic while upgrading the UI.
-Context: The component is currently located in [/src/modules/ai-content/adapters/components/report-mode/ReportModeGenerator.tsx], so please ensure the styling respects its surrounding layout."
+Here's the plan:
+
+┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+┃                                                 CoverPage UI/UX Redesign Plan                                                  ┃
+┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+
+
+                                                      Current State Analysis
+
+All logic to preserve (zero changes to business behavior):
+
+ • useBuilderStore / updateProject for all field mutations
+ • useImageUpload (x2) for main logo & university logo upload with loading state
+ • handleContentChange — sanitizes HTML & splits teamMembers by comma
+ • handleDateChange — parses and stores ISO date in project.meta.updated
+ • handleMainLogoChange / handleUniLogoChange — file input handlers → updateProject
+ • getFrameStyle() — maps projectType → 'academic' | 'professional' | 'creative'
+ • ToggleGroup that switches projectType (drives frame style)
+ • EditableField wrapper around react-contenteditable (keep, refine styling only)
+ • All ContentEditable date field behavior
+
+Fields displayed: name, projectDescription, educationalLevel, specialization, teamMembers, supervisor, course, university,
+universityLogoUrl, logoUrl, meta.updated
+
+──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+                                                          Redesign Goals
+
+ 1 Modern layout — cleaner vertical rhythm, stronger visual hierarchy, more generous whitespace within the A4 canvas
+ 2 Responsive / accessible — ensure all interactive elements have aria-label attributes, file inputs use <label> semantics or
+   aria-label on the wrapping div
+ 3 Autocomplete for text fields — add autoComplete hints via a thin <input> mirror strategy OR rely on browser autocomplete on the
+   contenteditable wrapper via a hidden <input> with autocomplete attribute per field (non-breaking, additive)
+ 4 Consistent with app aesthetics — match A4Page's glassmorphism, crop marks, shadow ring, technical typography (text-[10px] 
+   font-black uppercase tracking-widest)
+ 5 Performance — memoize handleContentChange, handleDateChange, handleMainLogoChange, handleUniLogoChange with useCallback; wrap
+   getFrameStyle result in useMemo
+
+──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+                                                      Key Structural Changes
+
+                                              Layout Rework (still A4 210mm × 297mm)
+
+ • Header zone — Keep logo + title + institution row but add a subtle horizontal rule beneath with a gradient accent line (matches
+   A4Page style)
+ • Body zone — Description block styled as a "document abstract" with left border accent + italic serif, flanked by decorative
+   lines
+ • Footer zone — Two-column grid: left (supervisor, course), right (date); team members & specialization in a styled mid-section
+   with pill badges for each team member (split by comma on render, rejoin on blur)
+ • Frame HUD (ToggleGroup) — Move slightly inward, add a faint label FRAME, keep functionality identical
+
+                                                       New Visual Elements
+
+ • Team members rendered as inline pill <Badge> chips in preview, still stored as comma-separated in the editable field
+ • Gradient accent line under project title (like A4Page title decoration)
+ • Subtle watermark/badge showing project type in bottom corner (read-only, cosmetic)
+ • aria-label on every logo upload zone and editable field wrapper
+
+                                                    EditableField Enhancements
+
+ • Add role="textbox" and aria-label={placeholder} for screen-reader support
+ • Add a hidden <input> sibling per field with matching name + autocomplete attribute for browser autocomplete to kick in (e.g.,
+   autocomplete="organization" for university, autocomplete="name" for supervisor)
+
+                                                           Performance
+
+ • useCallback wrappers for all 4 handlers + handleContentChange / handleDateChange
+ • useMemo for frameStyle and currentDate
+
+──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+                                                          Files Changed
+
+                                                                                                                   
+  File                                  Change                                                                     
+ ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 
+  src/components/shared/CoverPage.tsx   Full redesign — zero logic changes, pure UI/UX & performance improvements  
+                                                                                                                   
+
+No other files are touched. The component's public API (CoverPageProps) stays identical.

@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { ZoomIn, ZoomOut, Eye, PenLine, RotateCcw } from 'lucide-react';
+
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { A4Page } from '@/components/shared/A4Page';
 import { MarkdownViewer } from '@/components/shared/MarkdownViewer';
@@ -78,6 +79,7 @@ const ReportResults = ({
   const { snapshots } = useSnapshots(project?.id);
   const [isSuggestionVisible, setIsSuggestionVisible] = useState(true);
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [showCoverPage, setShowCoverPage] = useState(false);
   const containerRef = React.useRef<HTMLDivElement>(null);
 
   const comparisonSnapshot = snapshots.find((s: any) => s.id === comparisonSnapshotId);
@@ -136,31 +138,48 @@ const ReportResults = ({
       );
     }
 
-    if (hasContent && project) {
-      return (
-        <A4Page>
-          <Document
-            project={project}
-            viewMode={viewMode}
-            onMarkdownChange={updateProjectFromMarkdown}
-            activeChapterId={activeChapterId}
-            setActiveChapterId={setActiveChapterId}
-            selectedSectionIds={selectedSectionIds}
-            handleActiveSectionChange={handleActiveSectionChange}
-            summarizeMutation={summarizeMutation}
-            expandMutation={expandMutation}
-            rewriteMutation={rewriteMutation}
-            rewriteStyles={rewriteStyles}
-          />
-        </A4Page>
-      )
-    }
-
     return (
-      <div className="max-w-[210mm] mx-auto my-4">
-        <ReportSteps />
+      <div className="flex flex-col items-center">
+        {/* Cover Page — shown when toggled on */}
+        <AnimatePresence>
+          {showCoverPage && (
+            <motion.div
+              key="cover-page"
+              initial={{ opacity: 0, y: -16, scale: 0.98 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: -16, scale: 0.98 }}
+              transition={{ duration: 0.28, ease: 'easeOut' }}
+              className="w-full"
+            >
+              <CoverPage project={project} />
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* Document body */}
+        {hasContent && project ? (
+          <A4Page>
+            <Document
+              project={project}
+              viewMode={viewMode}
+              onMarkdownChange={updateProjectFromMarkdown}
+              activeChapterId={activeChapterId}
+              setActiveChapterId={setActiveChapterId}
+              selectedSectionIds={selectedSectionIds}
+              handleActiveSectionChange={handleActiveSectionChange}
+              summarizeMutation={summarizeMutation}
+              expandMutation={expandMutation}
+              rewriteMutation={rewriteMutation}
+              rewriteStyles={rewriteStyles}
+            />
+          </A4Page>
+        ) : (
+          <div className="max-w-[210mm] mx-auto my-4 w-full">
+            <ReportSteps />
+          </div>
+        )}
       </div>
-    )
+    );
   }
 
   if (comparisonSnapshot && project) {
@@ -185,6 +204,8 @@ const ReportResults = ({
         isFullscreen={isFullscreen}
         toggleFullscreen={toggleFullscreen}
         suggestion={suggestion}
+        showCoverPage={showCoverPage}
+        setShowCoverPage={setShowCoverPage}
       />
 
       <AnimatePresence>
