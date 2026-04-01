@@ -9,14 +9,14 @@ import { useBuilderStore } from '@/hooks';
 import { useAiActions } from '@/modules/ai-content/adapters/hooks/report-mode/use-ai-actions';
 import { Section } from '@/modules/ai-content/domain/entities/Section';
 import { cn } from '@/infrastructure/utils/cn';
-import { Link as LinkIcon, Loader2, SlidersHorizontal, Sparkles, StickyNote, Square, Copy, ClipboardPaste } from 'lucide-react';
+import { Link as LinkIcon, SlidersHorizontal, Sparkles, StickyNote, Square, Copy, ClipboardPaste } from 'lucide-react';
 import { useGenerationUIStore } from '@/modules/ai-content/adapters/state/useGenerationUIStore';
 import { useToast } from '@/hooks/util/use-toast';
 import { SectionContextSelector } from '../section-controls/SectionContextSelector';
 import { SectionGenerationControls } from '../section-controls/SectionGenerationControls';
 import { GuidelineEditor } from '../section-controls/SectionGuidelineEditor';
-import { ScrollArea } from '@/components/ui/scroll-area';
 import React from 'react';
+import { SidebarContainer } from '../layout/SidebarContainer';
 
 interface SectionTabsPanelProps {
   section: Section | null;
@@ -50,17 +50,19 @@ export function SectionTabsPanel({ section, selectedSectionIds = [], className }
 
   if (!section) {
     return (
-      <div className={cn("flex h-full flex-col items-center justify-center space-y-4 text-center p-8", className)}>
-        <div className="h-12 w-12 rounded-full bg-muted/20 flex items-center justify-center">
-          <Sparkles className="h-6 w-6 text-muted-foreground/40" />
+      <SidebarContainer title="Section Inspector" icon={<Sparkles className="h-3 w-3" />}>
+        <div className="flex flex-col items-center justify-center space-y-4 text-center py-20">
+            <div className="h-12 w-12 rounded-2xl bg-muted/20 flex items-center justify-center border border-border/40">
+                <Sparkles className="h-6 w-6 text-muted-foreground/40" />
+            </div>
+            <div className="space-y-1">
+                <h4 className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">No Vector Active</h4>
+                <p className="text-[11px] text-muted-foreground/60 italic leading-relaxed max-w-[200px]">
+                    Select a section from the architect to begin neural configuration.
+                </p>
+            </div>
         </div>
-        <div className="space-y-1">
-          <h4 className="text-xs font-bold uppercase tracking-widest text-muted-foreground">No Section Active</h4>
-          <p className="text-[11px] text-muted-foreground/60 italic leading-relaxed">
-            Select a section from the chapter list to begin configuring its AI parameters.
-          </p>
-        </div>
-      </div>
+      </SidebarContainer>
     );
   }
 
@@ -83,8 +85,8 @@ export function SectionTabsPanel({ section, selectedSectionIds = [], className }
       context: activeSection.context ? { ...activeSection.context } : undefined,
     });
     toast({
-      title: "Settings Copied",
-      description: `Configuration for "${activeSection.title}" saved to clipboard.`
+      title: "Configuration Cached",
+      description: `Neural parameters for "${activeSection.title}" saved to local cache.`
     });
   }
 
@@ -105,8 +107,8 @@ export function SectionTabsPanel({ section, selectedSectionIds = [], className }
     });
 
     toast({
-      title: "Settings Pasted",
-      description: `Applied configuration to ${targetIds.length} ${targetIds.length === 1 ? 'section' : 'sections'}.`
+      title: "Neural Sync Applied",
+      description: `Synchronized configuration across ${targetIds.length} ${targetIds.length === 1 ? 'node' : 'nodes'}.`
     });
   }
 
@@ -121,9 +123,9 @@ export function SectionTabsPanel({ section, selectedSectionIds = [], className }
       return;
     }
 
-    if (!canGenerate || !project) return;
+    if (!canGenerate) return;
 
-    if (isBulkGeneration) {
+    if (isBulkGeneration && project) {
       generateProjectMutation.mutate({
         project,
         selectedSectionIds: new Set(selectedSectionIds)
@@ -134,180 +136,169 @@ export function SectionTabsPanel({ section, selectedSectionIds = [], className }
   }
 
   return (
-    <div className={cn("h-full flex flex-col min-h-0", className)}>
-      <div className="px-4 pb-4 pt-2">
-        <div className="flex flex-col gap-3">
-          <div className="flex items-center justify-between gap-2">
-            <div className="space-y-0.5 min-w-0">
-              <span className="text-[10px] font-black uppercase tracking-[0.2em] text-primary/60">
-                {selectedSectionIds.length > 1 ? `Editing ${selectedSectionIds.length} Neural` : 'Active Context'}
-              </span>
-              <h3 className="text-[14px] font-black uppercase truncate tracking-widest text-foreground/90">
-                {selectedSectionIds.length > 1 ? 'Bulk Configuration' : section.title}
-              </h3>
+    <SidebarContainer 
+        title={isBulkGeneration ? `Neural Batch (${selectedSectionIds.length})` : 'Neural Vector'}
+        icon={<Sparkles className="h-3 w-3" />}
+        actions={
+            <div className="flex items-center gap-1.5 p-1 rounded-xl bg-muted/30 border border-border/40 backdrop-blur-md">
+                <TooltipProvider>
+                    <Tooltip>
+                        <TooltipTrigger asChild>
+                            <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-7 w-7 text-muted-foreground hover:text-primary hover:bg-background/80 transition-all rounded-lg"
+                                onClick={handleCopySettings}
+                            >
+                                <Copy className="h-3.5 w-3.5" />
+                            </Button>
+                        </TooltipTrigger>
+                        <TooltipContent side="bottom" className="text-[10px] font-black uppercase tracking-[0.2em]">
+                            Cache Params
+                        </TooltipContent>
+                    </Tooltip>
+
+                    <Tooltip>
+                        <TooltipTrigger asChild>
+                            <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-7 w-7 text-muted-foreground hover:text-primary hover:bg-background/80 transition-all rounded-lg"
+                                onClick={handlePasteSettings}
+                                disabled={!clipboard}
+                            >
+                                <ClipboardPaste className="h-3.5 w-3.5" />
+                            </Button>
+                        </TooltipTrigger>
+                        <TooltipContent side="bottom" className="text-[10px] font-black uppercase tracking-[0.2em]">
+                            Apply Sync
+                        </TooltipContent>
+                    </Tooltip>
+                </TooltipProvider>
             </div>
-
-            <div className="flex items-center gap-1 p-1 rounded-xl bg-muted/10 shrink-0">
-              <TooltipProvider>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-7 w-7 text-muted-foreground hover:text-primary hover:bg-background/80 transition-all rounded-lg"
-                      onClick={handleCopySettings}
-                    >
-                      <Copy className="h-3.5 w-3.5" />
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent side="bottom" className="text-[10px] font-black uppercase tracking-[0.2em]">
-                    Copy Settings
-                  </TooltipContent>
-                </Tooltip>
-
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-7 w-7 text-muted-foreground hover:text-primary hover:bg-background/80 transition-all rounded-lg"
-                      onClick={handlePasteSettings}
-                      disabled={!clipboard}
-                    >
-                      <ClipboardPaste className="h-3.5 w-3.5" />
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent side="bottom" className="text-[10px] font-black uppercase tracking-[0.2em]">
-                    Paste Settings
-                  </TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
-            </div>
-          </div>
-
-          {isBulkGenerating && (
-            <div className="space-y-2 animate-in fade-in slide-in-from-top-2 duration-500">
-              <div className="flex justify-between items-end px-1">
-                <div className="flex flex-col gap-0.5">
-                  <span className="text-[10px] font-bold uppercase tracking-widest text-primary/70 leading-none">Building Project</span>
-                  {estimatedRemaining && (
-                    <span className="text-[9px] font-medium text-muted-foreground/80 leading-none">{estimatedRemaining}</span>
-                  )}
+        }
+    >
+        <div className="space-y-8 relative">
+            {/* Section Identity Zone */}
+            <div className="flex flex-col gap-4">
+                <div className="space-y-1">
+                    <span className="text-[9px] font-black uppercase tracking-[0.2em] text-primary/60">
+                        {isBulkGeneration ? 'Target Nodes' : 'Active Context'}
+                    </span>
+                    <h3 className="text-[13px] font-black uppercase truncate tracking-widest text-foreground/90">
+                        {isBulkGeneration ? 'Multiple Section Context' : section.title}
+                    </h3>
                 </div>
-                <span className="text-[10px] font-mono font-bold text-muted-foreground">{bulkProgress} / {bulkTotal}</span>
-              </div>
-              <Progress value={(bulkProgress / bulkTotal) * 100} className="h-1.5" />
-            </div>
-          )}
 
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  onClick={handleGenerateClick}
-                  disabled={!canGenerate && !isBulkGenerating && !isGenerating}
-                  variant={(isBulkGenerating || (isGenerating && !isBulkGeneration)) ? "destructive" : "default"}
-                  className={cn(
-                    "w-full font-bold h-10 gap-2 shadow-lg animate-in fade-in slide-in-from-bottom-2 duration-500",
-                    !(isBulkGenerating || (isGenerating && !isBulkGeneration)) && "shadow-primary/20"
-                  )}
-                >
-                  {isBulkGenerating ? (
-                    <>
-                      <Square className="h-3.5 w-3.5 fill-current" />
-                      {abortRequested ? "Stopping..." : "Stop Generation"}
-                    </>
-                  ) : isGenerating ? (
-                    <>
-                      <Square className="h-3.5 w-3.5 fill-current" />
-                      Stop Generation
-                    </>
-                  ) : (
-                    <>
-                      <Sparkles className="h-4 w-4" />
-                      {isBulkGeneration
-                        ? `Generate ${selectedSectionIds.length} Sections`
-                        : t('builder.reportGenerator.generateButton')}
-                    </>
-                  )}
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent side="bottom" className="text-[10px]">
-                {isBulkGenerating ? (
-                  <p>Cancel the remaining sections in this batch.</p>
-                ) : isGenerating ? (
-                  <p>Stop the current section generation.</p>
-                ) : !canGenerate ? (
-                  <p>{isAnythingGenerating ? "Another generation is in progress." : "Insufficient credits."}</p>
-                ) : (
-                  <p>Cost: {creditCost} {creditCost === 1 ? 'Credit' : 'Credits'}</p>
+                {isBulkGenerating && (
+                    <div className="space-y-3 p-4 rounded-2xl bg-primary/[0.03] border border-primary/10 animate-in fade-in slide-in-from-top-2 duration-500">
+                        <div className="flex justify-between items-end">
+                            <div className="flex flex-col gap-0.5">
+                                <span className="text-[9px] font-bold uppercase tracking-widest text-primary/70 leading-none">Synthesizing Manifest</span>
+                                {estimatedRemaining && (
+                                    <span className="text-[8px] font-medium text-muted-foreground/80 leading-none mt-1">{estimatedRemaining}</span>
+                                )}
+                            </div>
+                            <span className="text-[10px] font-mono font-bold text-primary">{bulkProgress} / {bulkTotal}</span>
+                        </div>
+                        <Progress value={(bulkProgress / bulkTotal) * 100} className="h-1 bg-primary/10" />
+                    </div>
                 )}
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
-        </div>
-      </div>
 
-      <Tabs defaultValue="context" className="w-full flex-1 flex flex-col min-h-0">
-        <div className="px-4">
-          <TooltipProvider>
-            <TabsList className="grid w-full grid-cols-3 h-8 rounded-xl bg-muted/20 p-1 gap-1 border border-primary/5 h-auto">
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <TabsTrigger value="context" className="gap-2 text-[9px] font-black uppercase tracking-[0.15em] data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:shadow-sm px-2 transition-all rounded-lg">
-                    <LinkIcon className="h-3 w-3 shrink-0" />
-                    <span className="truncate">Context</span>
-                  </TabsTrigger>
-                </TooltipTrigger>
-                <TooltipContent side="bottom" className="text-[10px] font-black uppercase tracking-[0.2em]"><p>Data Sources</p></TooltipContent>
-              </Tooltip>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <TabsTrigger value="prompt" className="gap-2 text-[9px] font-black uppercase tracking-[0.15em] data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:shadow-sm px-2 transition-all rounded-lg">
-                    <StickyNote className="h-3 w-3 shrink-0" />
-                    <span className="truncate">Prompt</span>
-                  </TabsTrigger>
-                </TooltipTrigger>
-                <TooltipContent side="bottom" className="text-[10px] font-black uppercase tracking-[0.2em]"><p>Guidelines</p></TooltipContent>
-              </Tooltip>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <TabsTrigger value="controls" className="gap-2 text-[9px] font-black uppercase tracking-[0.15em] data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:shadow-sm px-2 transition-all rounded-lg">
-                    <SlidersHorizontal className="h-3 w-3 shrink-0" />
-                    <span className="truncate">Output</span>
-                  </TabsTrigger>
-                </TooltipTrigger>
-                <TooltipContent side="bottom" className="text-[10px] font-black uppercase tracking-[0.2em]"><p>Parameters</p></TooltipContent>
-              </Tooltip>
-            </TabsList>
-          </TooltipProvider>
-        </div>
-
-        <div className="flex-1 overflow-hidden relative mt-1">
-          <ScrollArea className="h-full px-4 pr-4 -mr-4">
-            <div className="pb-24 pt-4">
-              <TabsContent value="context" className="m-0 focus-visible:ring-0 animate-in fade-in slide-in-from-right-2 duration-300">
-                <SectionContextSelector
-                  sectionId={section.id}
-                  selectedSectionIds={selectedSectionIds.length > 1 ? selectedSectionIds : undefined}
-                />
-              </TabsContent>
-              <TabsContent value="prompt" className="m-0 focus-visible:ring-0 animate-in fade-in slide-in-from-right-2 duration-300">
-                <GuidelineEditor
-                  itemKey={section.id}
-                  selectedSectionIds={selectedSectionIds.length > 1 ? selectedSectionIds : undefined}
-                />
-              </TabsContent>
-              <TabsContent value="controls" className="m-0 focus-visible:ring-0 animate-in fade-in slide-in-from-right-2 duration-300">
-                <SectionGenerationControls
-                  section={section}
-                  selectedSectionIds={selectedSectionIds.length > 1 ? selectedSectionIds : undefined}
-                />
-              </TabsContent>
+                <TooltipProvider>
+                    <Tooltip>
+                        <TooltipTrigger asChild>
+                            <Button
+                                onClick={handleGenerateClick}
+                                disabled={!canGenerate && !isBulkGenerating && !isGenerating}
+                                variant={(isBulkGenerating || (isGenerating && !isBulkGeneration)) ? "destructive" : "default"}
+                                className={cn(
+                                    "w-full font-black h-11 gap-2 shadow-xl shadow-primary/10 rounded-xl uppercase tracking-[0.15em] text-[10px] relative overflow-hidden group/gen",
+                                    !(isBulkGenerating || (isGenerating && !isBulkGeneration)) && "bg-primary hover:opacity-90"
+                                )}
+                            >
+                                {isBulkGenerating ? (
+                                    <>
+                                        <Square className="h-3.5 w-3.5 fill-current" />
+                                        {abortRequested ? "Stopping..." : "Terminate Batch"}
+                                    </>
+                                ) : isGenerating ? (
+                                    <>
+                                        <Square className="h-3.5 w-3.5 fill-current" />
+                                        Cancel Process
+                                    </>
+                                ) : (
+                                    <>
+                                        <Sparkles className="h-3.5 w-3.5" />
+                                        {isBulkGeneration
+                                            ? `Generate ${selectedSectionIds.length} Vectors`
+                                            : t('builder.reportGenerator.generateButton')}
+                                    </>
+                                )}
+                                <div className="absolute inset-0 bg-white/10 -translate-x-full group-hover/gen:translate-x-full transition-transform duration-1000 ease-in-out" />
+                            </Button>
+                        </TooltipTrigger>
+                        <TooltipContent side="bottom" className="text-[10px] font-bold tracking-wider">
+                            {isBulkGenerating ? (
+                                <p>Halt current synthesis process.</p>
+                            ) : !canGenerate ? (
+                                <p>{isAnythingGenerating ? "Concurrency limit reached." : "Insufficient fuel (credits)."}</p>
+                            ) : (
+                                <p>Cost Requirement: {creditCost} Credits</p>
+                            )}
+                        </TooltipContent>
+                    </Tooltip>
+                </TooltipProvider>
             </div>
-          </ScrollArea>
+
+            {/* Parameter Configuration Zone */}
+            <Tabs defaultValue="context" className="w-full flex flex-col gap-6">
+                <TabsList className="grid w-full grid-cols-3 h-10 rounded-xl bg-muted/20 p-1 gap-1 border border-border/40 backdrop-blur-md">
+                    <TabsTrigger value="context" className="gap-2 text-[9px] font-black uppercase tracking-[0.15em] data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:shadow-md px-2 transition-all rounded-lg">
+                        <LinkIcon className="h-3 w-3 shrink-0" />
+                        <span className="truncate">Intel</span>
+                    </TabsTrigger>
+                    <TabsTrigger value="prompt" className="gap-2 text-[9px] font-black uppercase tracking-[0.15em] data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:shadow-md px-2 transition-all rounded-lg">
+                        <StickyNote className="h-3 w-3 shrink-0" />
+                        <span className="truncate">Rules</span>
+                    </TabsTrigger>
+                    <TabsTrigger value="controls" className="gap-2 text-[9px] font-black uppercase tracking-[0.15em] data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:shadow-md px-2 transition-all rounded-lg">
+                        <SlidersHorizontal className="h-3 w-3 shrink-0" />
+                        <span className="truncate">Params</span>
+                    </TabsTrigger>
+                </TabsList>
+
+                <div className="relative min-h-[300px]">
+                    <TabsContent value="context" className="m-0 focus-visible:ring-0 animate-in fade-in slide-in-from-right-4 duration-500">
+                        <div className="space-y-4">
+                            <span className="text-[9px] font-black uppercase tracking-widest text-muted-foreground/60">Source Knowledge Base</span>
+                            <SectionContextSelector
+                                sectionId={section.id}
+                                selectedSectionIds={selectedSectionIds.length > 1 ? selectedSectionIds : undefined}
+                            />
+                        </div>
+                    </TabsContent>
+                    <TabsContent value="prompt" className="m-0 focus-visible:ring-0 animate-in fade-in slide-in-from-right-4 duration-500">
+                        <div className="space-y-4">
+                            <span className="text-[9px] font-black uppercase tracking-widest text-muted-foreground/60">Behavioral Constraints</span>
+                            <GuidelineEditor
+                                itemKey={section.id}
+                                selectedSectionIds={selectedSectionIds.length > 1 ? selectedSectionIds : undefined}
+                            />
+                        </div>
+                    </TabsContent>
+                    <TabsContent value="controls" className="m-0 focus-visible:ring-0 animate-in fade-in slide-in-from-right-4 duration-500">
+                        <div className="space-y-4">
+                            <span className="text-[9px] font-black uppercase tracking-widest text-muted-foreground/60">Output Dimensionality</span>
+                            <SectionGenerationControls
+                                section={section}
+                                selectedSectionIds={selectedSectionIds.length > 1 ? selectedSectionIds : undefined}
+                            />
+                        </div>
+                    </TabsContent>
+                </div>
+            </Tabs>
         </div>
-      </Tabs>
-    </div>
+    </SidebarContainer>
   );
 }

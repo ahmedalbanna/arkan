@@ -1,13 +1,6 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
 import { useReportGenerationTools } from '@/modules/ai-content/adapters/hooks/report-mode/use-report-generation-tools';
 import {
   DndContext,
@@ -32,10 +25,10 @@ import { Label } from "@/components/ui/label";
 import { BuildProjectDialog } from "../dialogs/BuildProjectDialog";
 import { Chapter } from '@/modules/ai-content/domain/entities/Chapter';
 import { Section } from '@/modules/ai-content/domain/entities/Section';
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { SectionAccordionItem } from "./SectionAccordionItem";
 import { SortableChapterItem } from "./SortableChapterItem";
 import { AnimatePresence, motion } from 'framer-motion';
+import { SidebarContainer } from '../layout/SidebarContainer';
 
 interface GenerationToolsProps {
   selectedSectionIds: string[];
@@ -92,47 +85,35 @@ export default function GenerationTools({
         onGenerateProject={onGenerateProject}
         isLoading={projectMutation.isPending}
       />
-      <div className="flex flex-col h-full overflow-hidden bg-background/50">
-        <header className="space-y-4 px-6 pt-6 pb-4 border-b border-border/40 relative overflow-hidden group bg-background/40 backdrop-blur-2xl">
-          <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-20 transition-opacity duration-700">
-            <Layers className="h-16 w-16" />
-          </div>
+      
+      <SidebarContainer 
+        title={t('builder.reportGenerator.toolsTitle')}
+        icon={<Zap className="h-3 w-3" />}
+        actions={
+            <Button
+                onClick={handleAddChapter}
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8 text-primary hover:bg-primary/5 transition-colors rounded-lg"
+            >
+                <PlusCircle className="h-4 w-4" />
+            </Button>
+        }
+      >
+        <div className="space-y-6 relative">
+            <div className="flex flex-col space-y-1">
+                <p className="text-[10px] text-muted-foreground italic leading-relaxed font-medium opacity-80">
+                    {t('builder.reportGenerator.toolsDesc')}
+                </p>
+            </div>
 
-          <div className="flex flex-col space-y-1 relative z-10">
-            <h4 className="text-[11px] font-black uppercase tracking-[0.2em] text-primary flex items-center gap-2">
-              <Zap className="h-3 w-3" />
-              {t('builder.reportGenerator.toolsTitle')}
-            </h4>
-            <p className="text-[10px] text-muted-foreground italic leading-relaxed font-medium opacity-80">
-              {t('builder.reportGenerator.toolsDesc')}
-            </p>
-          </div>
-
-          <Button
-            onClick={handleAddChapter}
-            variant="outline"
-            size="sm"
-            className="w-full font-black h-10 border-dashed hover:border-primary/40 hover:bg-primary/5 transition-all duration-300 rounded-xl uppercase tracking-widest text-[9px] relative group overflow-hidden"
-          >
-            <PlusCircle className="me-2 h-3.5 w-3.5 text-primary group-hover:scale-110 transition-transform" />
-            Initialize New Chapter
-            <motion.div
-              className="absolute inset-0 bg-primary/5 translate-y-full group-hover:translate-y-0 transition-transform duration-500"
-            />
-          </Button>
-        </header>
-
-        <div className="flex-grow flex flex-col min-h-0 relative">
-          <div className="absolute inset-0 z-0 pointer-events-none opacity-20" style={{ backgroundImage: 'radial-gradient(circle at 2px 2px, hsl(var(--border)) 1px, transparent 0)', backgroundSize: '24px 24px' }} />
-
-          <div className="relative z-10 h-full flex flex-col pt-4">
             <AnimatePresence>
               {isProjectBuildMode && (
                 <motion.div
                   initial={{ height: 0, opacity: 0, marginBottom: 0 }}
                   animate={{ height: 'auto', opacity: 1, marginBottom: 16 }}
                   exit={{ height: 0, opacity: 0, marginBottom: 0 }}
-                  className="px-6 overflow-hidden"
+                  className="overflow-hidden"
                 >
                   <div className="flex items-center gap-4 p-4 rounded-2xl border bg-primary/[0.04] border-primary/20 backdrop-blur-xl shadow-[0_4px_20px_rgba(var(--primary),0.1)] ring-1 ring-primary/20 group/build-hud">
                     <div className="relative">
@@ -158,8 +139,7 @@ export default function GenerationTools({
               )}
             </AnimatePresence>
 
-            <ScrollArea className="flex-grow px-6">
-              <div className="pb-32">
+            <div className="space-y-4">
                 <DndContext collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
                   <SortableContext items={(project?.content || []).map(c => c.id)} strategy={verticalListSortingStrategy}>
                     <div className="w-full space-y-4">
@@ -202,12 +182,10 @@ export default function GenerationTools({
                     </div>
                   </SortableContext>
                 </DndContext>
-              </div>
-            </ScrollArea>
+            </div>
 
-            {/* Premium Sticky Action Bar */}
-            <div className="absolute bottom-0 left-0 right-0 p-6 pt-12 bg-gradient-to-t from-background via-background/95 to-transparent z-40 pointer-events-none">
-              <div className="flex gap-3 pointer-events-auto">
+            {/* Premium Action Bar */}
+            <div className="pt-8">
                 <AnimatePresence mode="wait">
                   {isProjectBuildMode ? (
                     <motion.div
@@ -252,11 +230,9 @@ export default function GenerationTools({
                     </motion.div>
                   )}
                 </AnimatePresence>
-              </div>
             </div>
-          </div>
         </div>
-      </div>
+      </SidebarContainer>
     </>
   );
 }
