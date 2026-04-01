@@ -3,7 +3,7 @@
 
 import { cn } from '@/infrastructure/utils/cn';
 import React from 'react';
-import { EDITOR_PROSE_CLASSES } from '@/modules/ai-content/adapters/components/report-mode/MarkdownEditor';
+import { PROSE_CLASSES } from '@/modules/ai-content/adapters/components/report-mode/markdown-styles';
 
 interface A4PageProps {
     children: React.ReactNode;
@@ -55,7 +55,7 @@ export const A4Page = ({ children, title, className, viewMode = 'single' }: A4Pa
                 </div>
             )}
             
-            <div className={cn(EDITOR_PROSE_CLASSES, "flex-grow")}>
+            <div className={cn(PROSE_CLASSES, "flex-grow")}>
                 {children}
             </div>
 

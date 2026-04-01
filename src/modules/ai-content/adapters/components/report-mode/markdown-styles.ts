@@ -1,53 +1,60 @@
-
 'use client';
 
 import { cn } from '@/infrastructure/utils/cn';
 import React from 'react';
 
-// Helper to check if a node is a paragraph with only text/inline children
-const isSimpleParagraph = (node: any) => {
-  if (node.type !== 'element' || node.tagName !== 'p') {
-    return false;
-  }
-  return node.children.every((child: any) => child.type === 'text' || (child.type === 'element' && ['a', 'strong', 'em', 'code', 'br'].includes(child.tagName)));
-};
+/**
+ * Standardized Prose Configuration
+ * Centralized styles for both Editor (Tiptap) and Viewer (ReactMarkdown)
+ */
+export const PROSE_CLASSES = cn(
+  'prose dark:prose-invert max-w-none focus:outline-none font-serif text-[16px] leading-[1.75] selection:bg-primary/20 transition-all duration-300',
+  'prose-p:mb-6 prose-p:my-0',
+  'prose-headings:font-black prose-headings:tracking-tighter prose-headings:text-foreground prose-headings:mb-4 prose-headings:mt-8 first:prose-headings:mt-0',
+  'prose-strong:text-foreground prose-strong:font-black',
+  'prose-blockquote:border-primary/40 prose-blockquote:bg-primary/[0.02] prose-blockquote:px-6 prose-blockquote:py-1 prose-blockquote:rounded-r-xl prose-blockquote:not-italic',
+  'prose-a:text-primary hover:prose-a:text-primary/80 transition-colors',
+  'prose-img:rounded-2xl prose-img:shadow-2xl',
+  'prose-table:w-full prose-table:border-collapse prose-table:my-8',
+  'prose-th:border prose-th:border-border/60 prose-th:p-3 prose-th:bg-muted/30 prose-th:text-left prose-th:font-black prose-th:text-[11px] prose-th:uppercase prose-th:tracking-widest',
+  'prose-td:border prose-td:border-border/60 prose-td:p-3 prose-td:align-top'
+);
 
+/**
+ * ReactMarkdown component overrides
+ * Simplified to rely on PROSE_CLASSES for styling
+ */
 export const markdownComponents: { [key: string]: React.ElementType } = {
-  h1: ({ node, ...props }) => React.createElement('h1', { className: "mt-8 mb-4 text-3xl font-bold font-headline text-primary", ...props }),
-  h2: ({ node, ...props }) => React.createElement('h2', { className: "mt-6 mb-3 text-2xl font-bold font-headline border-b pb-2", ...props }),
-  h3: ({ node, ...props }) => React.createElement('h3', { className: "mt-6 mb-3 text-xl font-semibold font-headline", ...props }),
+  h1: ({ node, ...props }) => React.createElement('h1', props),
+  h2: ({ node, ...props }) => React.createElement('h2', props),
+  h3: ({ node, ...props }) => React.createElement('h3', props),
   p: ({ node, ...props }) => {
-    // This is the key change to prevent nesting block elements inside <p>
-    // `react-markdown` sometimes wraps other block elements in a <p> internally.
-    // We check if the first child is a known block-level custom component. If so, we render it directly.
+    // Prevent ReactMarkdown from wrapping nested block elements in <p>
     if (node && node.children.length === 1 && ['pre', 'table', 'blockquote'].includes(node.children[0].tagName)) {
       return React.createElement(React.Fragment, props, props.children);
     }
-    return React.createElement('p', { className: "mb-4 leading-relaxed", ...props });
+    return React.createElement('p', props);
   },
-  a: ({ node, ...props }) => React.createElement('a', { className: "text-primary underline hover:text-primary/80", ...props }),
-  ul: ({ node, ...props }) => React.createElement('ul', { className: "mb-4 ml-6 list-disc space-y-2", ...props }),
-  ol: ({ node, ...props }) => React.createElement('ol', { className: "mb-4 ml-6 list-decimal space-y-2", ...props }),
+  a: ({ node, ...props }) => React.createElement('a', props),
+  ul: ({ node, ...props }) => React.createElement('ul', { className: "ml-6 list-disc space-y-2", ...props }),
+  ol: ({ node, ...props }) => React.createElement('ol', { className: "ml-6 list-decimal space-y-2", ...props }),
   li: ({ node, ...props }) => React.createElement('li', { className: "pl-2", ...props }),
-  blockquote: ({ node, ...props }) => React.createElement('blockquote', { className: "my-4 border-l-4 border-primary/30 bg-muted/50 p-4 italic text-muted-foreground", ...props }),
-  pre: ({ node, ...props }) => React.createElement('pre', { className: cn("my-4 overflow-x-auto rounded-lg bg-muted p-4 font-mono text-sm", (props as any).className), ...props }),
+  blockquote: ({ node, ...props }) => React.createElement('blockquote', props),
+  pre: ({ node, ...props }) => React.createElement('pre', { className: cn("overflow-x-auto rounded-lg bg-muted p-4 font-mono text-sm", (props as any).className), ...props }),
   code: ({ node, inline, className, children, ...props }) => {
-    // For inline code, just render the <code> tag
     if (inline) {
       return React.createElement(
         'code',
-        { className: `rounded bg-muted px-1.5 py-1 font-mono text-sm text-primary/80 ${className || ''}`.trim(), ...props },
+        { className: cn("rounded bg-muted px-1.5 py-1 font-mono text-sm text-primary/80", className), ...props },
         children
       );
     }
-    // For block code, the parent `pre` tag is handled by its own component now.
-    // This just renders the `<code>` inside it.
     return React.createElement('code', { className: cn("font-mono text-sm text-current", className), ...props }, children);
   },
-  table: ({ node, ...props }) => React.createElement('div', { className: "my-6 w-full overflow-x-auto" }, React.createElement('table', { className: "w-full border-collapse", ...props })),
-  thead: ({ node, ...props }) => React.createElement('thead', { className: "bg-muted", ...props }),
-  tbody: ({ node, ...props }) => React.createElement('tbody', { className: "[&_tr:last-child]:border-0", ...props }),
+  table: ({ node, ...props }) => React.createElement('div', { className: "w-full overflow-x-auto" }, React.createElement('table', props)),
+  thead: ({ node, ...props }) => React.createElement('thead', props),
+  tbody: ({ node, ...props }) => React.createElement('tbody', props),
   tr: ({ node, ...props }) => React.createElement('tr', { className: "border-b border-border transition-colors hover:bg-muted/50", ...props }),
-  th: ({ node, ...props }) => React.createElement('th', { className: "px-4 py-3 text-left align-middle font-semibold text-foreground border border-border", ...props }),
-  td: ({ node, ...props }) => React.createElement('td', { className: "px-4 py-3 align-middle border border-border", ...props }),
+  th: ({ node, ...props }) => React.createElement('th', props),
+  td: ({ node, ...props }) => React.createElement('td', props),
 };

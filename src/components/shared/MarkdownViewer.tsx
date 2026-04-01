@@ -2,7 +2,7 @@
 'use client';
 
 import { cn } from '@/infrastructure/utils/cn';
-import { markdownComponents } from '@/modules/ai-content/adapters/components/report-mode/markdown-styles';
+import { markdownComponents, PROSE_CLASSES } from '@/modules/ai-content/adapters/components/report-mode/markdown-styles';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { ScrollArea } from '../ui/scroll-area';
@@ -16,7 +16,7 @@ export const MarkdownViewer = ({ content, className, noScroll = false }: Markdow
   const contentNode = (
     <div className="p-1">
       <ReactMarkdown
-        className={cn('prose dark:prose-invert max-w-none text-[15px] leading-relaxed font-serif selection:bg-primary/10', className)}
+        className={cn(PROSE_CLASSES, className)}
         components={markdownComponents}
         remarkPlugins={[remarkGfm]}
       >

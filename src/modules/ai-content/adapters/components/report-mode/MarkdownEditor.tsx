@@ -10,21 +10,7 @@ import { IMarkdownService } from '@/modules/ai-content/domain/services/IMarkdown
 import { Button } from '@/components/ui/button';
 import { ContextualToolbar } from '@/modules/ai-content/infrastructure/editor/editor/ToolBar';
 import { cn } from '@/infrastructure/utils/cn';
-
-// Standardized Editor Prose Configuration
-// Matches A4Page.tsx for visual parity
-export const EDITOR_PROSE_CLASSES = cn(
-  'prose dark:prose-invert max-w-none focus:outline-none font-serif text-[16px] leading-[1.75] selection:bg-primary/20 transition-all duration-300',
-  'prose-p:mb-6 prose-p:my-0',
-  'prose-headings:font-black prose-headings:tracking-tighter prose-headings:text-foreground prose-headings:mb-4 prose-headings:mt-8 first:prose-headings:mt-0',
-  'prose-strong:text-foreground prose-strong:font-black',
-  'prose-blockquote:border-primary/40 prose-blockquote:bg-primary/[0.02] prose-blockquote:px-6 prose-blockquote:py-1 prose-blockquote:rounded-r-xl prose-blockquote:not-italic',
-  'prose-a:text-primary hover:prose-a:text-primary/80 transition-colors',
-  'prose-img:rounded-2xl prose-img:shadow-2xl',
-  'prose-table:w-full prose-table:border-collapse prose-table:my-8',
-  'prose-th:border prose-th:border-border/60 prose-th:p-3 prose-th:bg-muted/30 prose-th:text-left prose-th:font-black prose-th:text-[11px] prose-th:uppercase prose-th:tracking-widest',
-  'prose-td:border prose-td:border-border/60 prose-td:p-3 prose-td:align-top'
-);
+import { PROSE_CLASSES } from './markdown-styles';
 
 interface MarkdownEditorProps {
   content: string;
@@ -71,7 +57,7 @@ const MarkdownEditorComponent = ({
     },
     editorProps: {
       attributes: {
-        class: cn(EDITOR_PROSE_CLASSES, editorClassName),
+        class: cn(PROSE_CLASSES, editorClassName),
       },
       handlePaste: (view, event, slice): boolean => {
         const text = event.clipboardData?.getData('text/plain');
