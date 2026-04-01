@@ -31,7 +31,6 @@ import { cn } from '@/infrastructure/utils/cn';
 
 
 interface ReportResultsProps {
-  activePanelKey: string;
   activeChapterId: string | null;
   setActiveChapterId: (id: string | null) => void;
   selectedSectionIds: string[];
@@ -44,7 +43,6 @@ interface ReportResultsProps {
 }
 
 const ReportResults = ({
-  activePanelKey,
   activeChapterId,
   setActiveChapterId,
   selectedSectionIds,
@@ -125,55 +123,23 @@ const ReportResults = ({
       );
     }
 
-    switch (activePanelKey) {
-      case 'settings':
-        return <CoverPage project={project} />;
-      case 'templates':
-        return (
-          <A4Page>
-            <TableOfContentForm />
-          </A4Page>
-        );
-      case 'files': {
-        const selectedFile = project?.externalContext.find(f => f.id === selectedFileId);
-
-        if (!selectedFile) {
-          return (
-            <A4Page>
-              <div className="p-8 text-center text-muted-foreground h-full flex flex-col justify-center items-center">
-                <FileText className="mx-auto h-16 w-16 mb-4" />
-                <h3 className="text-xl font-semibold font-headline text-foreground">File Content Viewer</h3>
-                <p className="mt-2">When you select a file from the manager, its content will be displayed here for review and analysis.</p>
-              </div>
-            </A4Page>
-          );
-        }
-
-        return (
-          <A4Page>
-            <FileContentViewer fileName={selectedFile.fileName} content={selectedFile.content} />
-          </A4Page>
-        );
-      }
-      case 'generate':
-      default:
-        if (hasContent && project) {
-          return (
-            <A4Page>
-              <Document
-                project={project}
-                viewMode={viewMode}
-                onMarkdownChange={updateProjectFromMarkdown}
-              />
-            </A4Page>
-          )
-        }
-        return (
-          <div className="max-w-[210mm] mx-auto my-4">
-            <ReportSteps />
-          </div>
-        )
+    if (hasContent && project) {
+      return (
+        <A4Page>
+          <Document
+            project={project}
+            viewMode={viewMode}
+            onMarkdownChange={updateProjectFromMarkdown}
+          />
+        </A4Page>
+      )
     }
+
+    return (
+      <div className="max-w-[210mm] mx-auto my-4">
+        <ReportSteps />
+      </div>
+    )
   }
 
   if (comparisonSnapshot && project) {

@@ -110,7 +110,6 @@ export default function ReportModeGenerator({ initialProject }: { initialProject
                                     onZoomReset={handleZoomReset}
                                 >
                                     <ReportResults
-                                        activePanelKey={activePanelKey}
                                         activeChapterId={activeChapterId}
                                         setActiveChapterId={setActiveChapterId}
                                         selectedSectionIds={selectedSectionIds}

@@ -11,7 +11,7 @@ import { type ProjectProperties } from '@/modules/projects/domain/entities/Proje
 
 export function useReportGenerator(initialProject?: ProjectProperties | null) {
   const { t, locale } = useLocalization();
-  const [activePanelKey, setActivePanelKey] = useState<string>('settings');
+  const [activePanelKey, setActivePanelKey] = useState<string>('files');
   const [activeRightPanelKey, setActiveRightPanelKey] = useState<string>('section');
 
   const isLeftPanelVisible = !!activePanelKey;
@@ -32,14 +32,6 @@ export function useReportGenerator(initialProject?: ProjectProperties | null) {
       document.documentElement.style.removeProperty('--zoom-scale');
     };
   }, [zoomLevel]);
-
-  // Auto-switch to generation tools if a section or chapter is activated
-  useEffect(() => {
-    if (selectedSectionIds.length > 0 || activeChapterId) {
-      setActivePanelKey('generate');
-      setActiveRightPanelKey('section');
-    }
-  }, [selectedSectionIds, activeChapterId]);
 
   const handleActiveSectionChange = (id: string | null, multiSelect?: boolean) => {
     if (multiSelect && id) {
