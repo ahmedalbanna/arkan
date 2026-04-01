@@ -70,6 +70,47 @@ export function useReportGenerator(initialProject?: ProjectProperties | null) {
     setActiveRightPanelKey,
   });
 
+  const handleMoveItem = (activeId: string, overId: string) => {
+    updateProject(p => p.moveItem(activeId, overId));
+  };
+
+  const handleUpdateTitle = (id: string, newTitle: string, isChapter: boolean) => {
+    updateProject(p => p.updateItemTitle(id, newTitle, isChapter));
+  };
+
+  const handleDeleteItem = (id: string, isChapter: boolean) => {
+    updateProject(p => p.deleteItem(id, isChapter));
+  };
+
+  const handleAddChapter = () => {
+    updateProject(p => p.addChapter());
+  };
+
+  const handleAddSection = (chapterId: string) => {
+    updateProject(p => p.addSection(chapterId));
+  };
+
+  const handleDuplicateItem = (id: string, isChapter: boolean) => {
+    updateProject(p => p.duplicateItem(id, isChapter));
+  };
+
+  const handleUndo = () => {
+    useBuilderStore.getState().undo();
+  };
+
+  const handleCopyItem = (id: string, isChapter: boolean) => {
+    // Implement local storage or state based copy
+    localStorage.setItem('arkan_copied_item', JSON.stringify({ id, isChapter }));
+  };
+
+  const handlePasteItem = (targetId: string, isChapter: boolean) => {
+    const copied = localStorage.getItem('arkan_copied_item');
+    if (copied) {
+        const { id, isChapter: copiedIsChapter } = JSON.parse(copied);
+        updateProject(p => p.pasteItem(id, copiedIsChapter, targetId, isChapter));
+    }
+  };
+
   return {
     ...builderPageLogic,
     activePanelKey,
@@ -96,5 +137,14 @@ export function useReportGenerator(initialProject?: ProjectProperties | null) {
     setIsOutlineVisible,
     viewMode,
     setViewMode,
+    handleMoveItem,
+    handleUpdateTitle,
+    handleDeleteItem,
+    handleAddChapter,
+    handleAddSection,
+    handleDuplicateItem,
+    handleUndo,
+    handleCopyItem,
+    handlePasteItem
   };
 }

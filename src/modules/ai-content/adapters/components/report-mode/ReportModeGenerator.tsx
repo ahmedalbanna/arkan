@@ -12,6 +12,7 @@ import { BuilderHeader } from './layout/BuilderHeader';
 import { BuilderSidebar } from './layout/BuilderSidebar';
 import { BuilderCanvas } from './layout/BuilderCanvas';
 import { useBuilderStore } from '@/modules/projects/adapters/state/useBuilderStore';
+import { FloatingOutline } from './FloatingOutline';
 
 const ReportResults = lazy(() => import('./ReportResults'));
 
@@ -43,6 +44,15 @@ export default function ReportModeGenerator({ initialProject }: { initialProject
         setIsOutlineVisible,
         viewMode,
         setViewMode,
+        handleMoveItem,
+        handleUpdateTitle,
+        handleDeleteItem,
+        handleAddChapter,
+        handleAddSection,
+        handleDuplicateItem,
+        handleUndo,
+        handleCopyItem,
+        handlePasteItem
     } = useReportGenerator(initialProject);
 
     const hasUnsavedChanges = useBuilderStore(state => state.hasUnsavedChanges);
@@ -102,7 +112,6 @@ export default function ReportModeGenerator({ initialProject }: { initialProject
                                     panels={leftPanels}
                                     activeKey={activePanelKey}
                                     onActiveKeyChange={setActivePanelKey}
-                                    defaultSize={isLeftPanelVisible ? 22 : 4.5}
                                 />
 
                                 <ResizableHandle withHandle className="bg-transparent hover:bg-primary/10 transition-colors w-1.5 z-50" />
@@ -112,6 +121,25 @@ export default function ReportModeGenerator({ initialProject }: { initialProject
                                     onZoomIn={handleZoomIn}
                                     onZoomOut={handleZoomOut}
                                     onZoomReset={handleZoomReset}
+                                    floatingElements={
+                                        <FloatingOutline 
+                                            isVisible={isOutlineVisible}
+                                            project={project}
+                                            activeChapterId={activeChapterId}
+                                            selectedSectionIds={selectedSectionIds}
+                                            onActiveChapterChange={setActiveChapterId}
+                                            onActiveSectionChange={(id) => handleActiveSectionChange(id)}
+                                            onMoveItem={handleMoveItem}
+                                            onUpdateTitle={handleUpdateTitle}
+                                            onDeleteItem={handleDeleteItem}
+                                            onAddChapter={handleAddChapter}
+                                            onAddSection={handleAddSection}
+                                            onDuplicateItem={handleDuplicateItem}
+                                            onUndo={handleUndo}
+                                            onCopyItem={handleCopyItem}
+                                            onPasteItem={handlePasteItem}
+                                        />
+                                    }
                                 >
                                     <ReportResults
                                         activeChapterId={activeChapterId}
@@ -133,7 +161,6 @@ export default function ReportModeGenerator({ initialProject }: { initialProject
                                     panels={rightPanels}
                                     activeKey={activeRightPanelKey}
                                     onActiveKeyChange={setActiveRightPanelKey}
-                                    defaultSize={isRightPanelVisible ? 22 : 4.5}
                                 />
                             </ResizablePanelGroup>
                         </div>

@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useMemo, lazy } from 'react';
-import { Settings, UploadCloud, LayoutTemplate, BookOpenCheck, SlidersHorizontal, MessageSquare, Sparkles, History as HistoryIcon } from 'lucide-react';
+import { Settings, UploadCloud, LayoutTemplate, BookOpenCheck, SlidersHorizontal, MessageSquare, Sparkles, History as HistoryIcon, Database, Terminal, Cpu } from 'lucide-react';
 import { useLocalization } from '@/context/LocalizationContext';
 import { SidebarPanelConfig } from '@/modules/ai-content/adapters/components/report-mode/layout/types';
 
@@ -38,26 +38,26 @@ export function useSidebarPanels({
     const leftPanels = useMemo<SidebarPanelConfig[]>(() => [
         {
             key: 'settings',
-            title: 'Project Settings',
+            title: 'System Parameters',
             icon: <Settings className="h-5 w-5" />,
             content: <ProjectSettingsPanel />,
         },
         {
             key: 'files',
-            title: t('builder.tabs.files'),
-            icon: <UploadCloud className="h-5 w-5" />,
+            title: 'Data Assets',
+            icon: <Database className="h-5 w-5" />,
             content: <FileManager />,
         },
         {
             key: 'templates',
-            title: 'Apply Template',
+            title: 'Neural Blueprints',
             icon: <LayoutTemplate className="h-5 w-5" />,
             content: <ApplyTemplatePanel />,
         },
         {
             key: 'generate',
-            title: 'Neural Architect',
-            icon: <BookOpenCheck className="h-5 w-5" />,
+            title: 'Core Architect',
+            icon: <Terminal className="h-5 w-5" />,
             content: (
                 <GenerationTools
                     selectedSectionIds={selectedSectionIds}
@@ -77,8 +77,8 @@ export function useSidebarPanels({
         return [
             {
                 key: 'section',
-                title: activeChapterId ? 'Chapter Tools' : selectedSectionIds.length > 1 ? 'Bulk Editor' : 'Section Controls',
-                icon: <Sparkles className="h-5 w-5" />,
+                title: activeChapterId ? 'Chapter Engine' : selectedSectionIds.length > 1 ? 'Bulk Processor' : 'Neural Tuning',
+                icon: <Cpu className="h-5 w-5" />,
                 content: activeChapterId
                     ? <ChapterTabsPanel chapter={activeChapter} />
                     : <SectionTabsPanel
@@ -88,19 +88,19 @@ export function useSidebarPanels({
             },
             {
                 key: 'global',
-                title: 'Global Controls',
+                title: 'Global Bias',
                 icon: <SlidersHorizontal className="h-5 w-5" />,
                 content: <GlobalProjectControls />,
             },
             {
                 key: 'chat',
-                title: 'AI Consultant',
+                title: 'AI Synthesizer',
                 icon: <MessageSquare className="h-5 w-5" />,
                 content: <ProjectChat isOpen={true} onClose={() => setActiveRightPanelKey('section')} />,
             },
             {
                 key: 'snapshots',
-                title: 'Snapshots',
+                title: 'Temporal Logs',
                 icon: <HistoryIcon className="h-5 w-5" />,
                 content: <SnapshotHistoryPanel />,
             },

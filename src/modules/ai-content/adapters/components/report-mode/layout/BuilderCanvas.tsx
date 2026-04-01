@@ -13,6 +13,7 @@ interface BuilderCanvasProps {
     onZoomIn: () => void;
     onZoomOut: () => void;
     onZoomReset: () => void;
+    floatingElements?: React.ReactNode;
 }
 
 export const BuilderCanvas = React.forwardRef<any, BuilderCanvasProps>(({
@@ -20,13 +21,14 @@ export const BuilderCanvas = React.forwardRef<any, BuilderCanvasProps>(({
     zoomLevel,
     onZoomIn,
     onZoomOut,
-    onZoomReset
+    onZoomReset,
+    floatingElements
 }, ref) => {
     return (
         <ResizablePanel 
             ref={ref}
             defaultSize={50} 
-            className="flex flex-col min-h-0 bg-muted/5 relative overflow-hidden group/canvas transition-all duration-700 ease-[0.22,1,0.36,1]"
+            className="flex flex-col min-h-0 bg-muted/5 relative overflow-hidden group/canvas transition-all duration-700 ease-[0.22,1,0.36,1] z-10"
         >
             {/* Immersive Matrix Layer */}
             <div className="absolute inset-0 opacity-[0.02] pointer-events-none" style={{ backgroundImage: 'radial-gradient(circle at 2px 2px, hsl(var(--primary)) 1px, transparent 0)', backgroundSize: '32px 32px' }} />
@@ -41,8 +43,11 @@ export const BuilderCanvas = React.forwardRef<any, BuilderCanvasProps>(({
                 </Suspense>
             </main>
 
+            {/* Floating Contextual Layers */}
+            {floatingElements}
+
             {/* Contextual Zoom HUD */}
-            <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-30 opacity-0 group-hover/canvas:opacity-100 transition-all duration-700 translate-y-4 group-hover/canvas:translate-y-0">
+            <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-40 opacity-0 group-hover/canvas:opacity-100 transition-all duration-700 translate-y-4 group-hover/canvas:translate-y-0">
                 <div className="flex items-center gap-1.5 p-1.5 bg-background/40 backdrop-blur-2xl border border-border/40 rounded-2xl shadow-[0_8px_40px_rgba(0,0,0,0.12)] ring-1 ring-white/10">
                     <TooltipProvider delayDuration={200}>
                         <Tooltip>
