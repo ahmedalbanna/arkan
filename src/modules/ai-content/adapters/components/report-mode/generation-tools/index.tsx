@@ -1,34 +1,21 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Label } from '@/components/ui/label';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { useReportGenerationTools } from '@/modules/ai-content/adapters/hooks/report-mode/use-report-generation-tools';
-import {
-  DndContext,
-  closestCenter,
-} from '@dnd-kit/core';
-import {
-  SortableContext,
-  verticalListSortingStrategy,
-} from '@dnd-kit/sortable';
-import {
-  Building,
-  ChevronRight,
-  Layers,
-  PlusCircle,
-  Sparkles,
-  XCircle,
-  Zap,
-} from 'lucide-react';
-import { useMemo } from "react";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Label } from "@/components/ui/label";
-import { BuildProjectDialog } from "../dialogs/BuildProjectDialog";
 import { Chapter } from '@/modules/ai-content/domain/entities/Chapter';
 import { Section } from '@/modules/ai-content/domain/entities/Section';
-import { SectionAccordionItem } from "./SectionAccordionItem";
-import { SortableChapterItem } from "./SortableChapterItem";
+import { DndContext, closestCenter } from '@dnd-kit/core';
+import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { AnimatePresence, motion } from 'framer-motion';
+import { Building, ChevronRight, PlusCircle, Sparkles, XCircle, Zap } from 'lucide-react';
+import { useMemo } from 'react';
+import { BuildProjectDialog } from '../dialogs/BuildProjectDialog';
 import { SidebarContainer } from '../layout/SidebarContainer';
+import { SectionAccordionItem } from './SectionAccordionItem';
+import { SortableChapterItem } from './SortableChapterItem';
 
 interface GenerationToolsProps {
   selectedSectionIds: string[];
@@ -63,8 +50,14 @@ export default function GenerationTools({
   } = useReportGenerationTools();
 
   const totalSelectableSections = project?.sections.length || 0;
-  const isAllSelected = useMemo(() => totalSelectableSections > 0 && selectedSectionsForBuild.size === totalSelectableSections, [totalSelectableSections, selectedSectionsForBuild]);
-  const isIndeterminate = useMemo(() => selectedSectionsForBuild.size > 0 && !isAllSelected, [selectedSectionsForBuild, isAllSelected]);
+  const isAllSelected = useMemo(
+    () => totalSelectableSections > 0 && selectedSectionsForBuild.size === totalSelectableSections,
+    [totalSelectableSections, selectedSectionsForBuild]
+  );
+  const isIndeterminate = useMemo(
+    () => selectedSectionsForBuild.size > 0 && !isAllSelected,
+    [selectedSectionsForBuild, isAllSelected]
+  );
 
   const canBuildProject = project && project.content.length > 0;
 
@@ -85,152 +78,167 @@ export default function GenerationTools({
         onGenerateProject={onGenerateProject}
         isLoading={projectMutation.isPending}
       />
-      
-      <SidebarContainer 
+
+      <SidebarContainer
         title={t('builder.reportGenerator.toolsTitle')}
         icon={<Zap className="h-3 w-3" />}
         actions={
-            <Button
-                onClick={handleAddChapter}
-                variant="ghost"
-                size="icon"
-                className="h-8 w-8 text-primary hover:bg-primary/5 transition-colors rounded-lg"
-            >
-                <PlusCircle className="h-4 w-4" />
-            </Button>
+          <Button
+            onClick={handleAddChapter}
+            variant="ghost"
+            size="icon"
+            className="h-8 w-8 rounded-lg text-primary transition-colors hover:bg-primary/5"
+            aria-label={t('builder.buttons.newSession')}
+          >
+            <PlusCircle className="h-4 w-4" />
+          </Button>
         }
       >
-        <div className="space-y-6 relative">
-            <div className="flex flex-col space-y-1">
-                <p className="text-[10px] text-muted-foreground italic leading-relaxed font-medium opacity-80">
-                    {t('builder.reportGenerator.toolsDesc')}
-                </p>
-            </div>
+        <div className="flex h-full flex-col gap-6">
+          <div className="space-y-2">
+            <p className="text-[10px] font-medium italic leading-relaxed text-muted-foreground/90">
+              {t('builder.reportGenerator.toolsDesc')}
+            </p>
+          </div>
 
-            <AnimatePresence>
-              {isProjectBuildMode && (
-                <motion.div
-                  initial={{ height: 0, opacity: 0, marginBottom: 0 }}
-                  animate={{ height: 'auto', opacity: 1, marginBottom: 16 }}
-                  exit={{ height: 0, opacity: 0, marginBottom: 0 }}
-                  className="overflow-hidden"
-                >
-                  <div className="flex items-center gap-4 p-4 rounded-2xl border bg-primary/[0.04] border-primary/20 backdrop-blur-xl shadow-[0_4px_20px_rgba(var(--primary),0.1)] ring-1 ring-primary/20 group/build-hud">
-                    <div className="relative">
-                      <Checkbox
-                        id="select-all-chapters"
-                        checked={isAllSelected}
-                        onCheckedChange={(checked: any) => toggleSelectAll(!!checked)}
-                        aria-checked={isIndeterminate ? 'mixed' : isAllSelected}
-                        className="h-4.5 w-4.5 rounded-md border-primary/40 data-[state=checked]:bg-primary"
-                      />
-                      <Sparkles className="absolute -top-1.5 -right-1.5 h-2.5 w-2.5 text-primary opacity-0 group-hover/build-hud:opacity-100 transition-opacity duration-500" />
-                    </div>
-                    <div className="flex flex-col">
-                      <Label htmlFor="select-all-chapters" className="font-black text-[10px] uppercase tracking-[0.15em] text-primary cursor-pointer">
-                        Manifest Selection Mode
-                      </Label>
-                      <span className="text-[8px] font-bold text-primary/60 uppercase tracking-widest mt-0.5">
-                        {selectedSectionsForBuild.size} / {totalSelectableSections} Sections Prepared
-                      </span>
-                    </div>
+          <AnimatePresence initial={false}>
+            {isProjectBuildMode && (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: 'auto' }}
+                exit={{ opacity: 0, height: 0 }}
+                transition={{ duration: 0.2 }}
+                className="overflow-hidden"
+              >
+                <div className="flex items-center gap-4 rounded-2xl border border-primary/20 bg-primary/[0.05] p-4 shadow-[0_8px_24px_rgba(var(--primary),0.08)] backdrop-blur-xl">
+                  <div className="relative">
+                    <Checkbox
+                      id="select-all-chapters"
+                      checked={isAllSelected}
+                      onCheckedChange={(checked: boolean) => toggleSelectAll(!!checked)}
+                      aria-checked={isIndeterminate ? 'mixed' : isAllSelected}
+                      className="h-4.5 w-4.5 rounded-md border-primary/40 data-[state=checked]:bg-primary"
+                    />
+                    <Sparkles className="absolute -right-1.5 -top-1.5 h-2.5 w-2.5 text-primary/80" />
                   </div>
+                  <div className="flex flex-col">
+                    <Label
+                      htmlFor="select-all-chapters"
+                      className="cursor-pointer text-[10px] font-black uppercase tracking-[0.15em] text-primary"
+                    >
+                      Manifest Selection Mode
+                    </Label>
+                    <span className="mt-0.5 text-[9px] font-bold uppercase tracking-widest text-primary/60">
+                      {selectedSectionsForBuild.size} / {totalSelectableSections} Sections Prepared
+                    </span>
+                  </div>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          <ScrollArea className="flex-1 min-h-0 pr-1">
+            <DndContext collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+              <SortableContext
+                items={(project?.content || []).map((contentItem) => contentItem.id)}
+                strategy={verticalListSortingStrategy}
+              >
+                <div className="space-y-3">
+                  {(project?.content || []).map((item, index) => {
+                    if (item instanceof Chapter) {
+                      return (
+                        <SortableChapterItem
+                          chapter={item}
+                          index={index}
+                          key={item.id}
+                          isProjectBuildMode={isProjectBuildMode}
+                          selectedSectionsForBuild={selectedSectionsForBuild}
+                          toggleChapterSelection={toggleChapterSelection}
+                          toggleSectionSelection={toggleSectionSelection}
+                          activeSectionId={selectedSectionIds.length > 0 ? selectedSectionIds[0] : null}
+                          onActivateSection={handleActivateSection}
+                          onActivate={() => handleActivateChapter(item.id)}
+                          isActive={activeChapterId === item.id}
+                          selectedSectionIds={selectedSectionIds}
+                        />
+                      );
+                    }
+                    if (item instanceof Section) {
+                      return (
+                        <SectionAccordionItem
+                          key={item.id}
+                          section={item}
+                          sectionIndex={index}
+                          chapterIndex={-1}
+                          isProjectBuildMode={isProjectBuildMode}
+                          isSelected={selectedSectionsForBuild.has(item.id)}
+                          toggleSectionSelection={toggleSectionSelection}
+                          isActive={selectedSectionIds.includes(item.id)}
+                          onActivate={handleActivateSection}
+                        />
+                      );
+                    }
+                    return null;
+                  })}
+                </div>
+              </SortableContext>
+            </DndContext>
+          </ScrollArea>
+
+          <div className="pt-2">
+            <AnimatePresence mode="wait">
+              {isProjectBuildMode ? (
+                <motion.div
+                  key="build-mode-actions"
+                  initial={{ opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: 8 }}
+                  transition={{ duration: 0.2 }}
+                  className="flex w-full gap-2"
+                >
+                  <Button
+                    onClick={exitProjectBuildMode}
+                    variant="secondary"
+                    size="sm"
+                    className="h-11 flex-1 rounded-xl border border-border/40 bg-background/60 font-black uppercase tracking-widest text-[9px] backdrop-blur-xl transition-all hover:bg-muted/80"
+                  >
+                    <XCircle className="mr-2 h-4 w-4" /> Terminate
+                  </Button>
+                  <Button
+                    size="sm"
+                    className="h-11 flex-[2] rounded-xl bg-primary text-[10px] font-black uppercase tracking-[0.2em] shadow-[0_10px_28px_rgba(var(--primary),0.18)] transition-all hover:opacity-90"
+                    onClick={() => setIsBuildProjectDialogOpen(true)}
+                    disabled={selectedSectionsForBuild.size === 0 || projectMutation.isPending}
+                  >
+                    <Building className="mr-2 h-4 w-4" />
+                    Execute Build ({selectedSectionsForBuild.size})
+                    <ChevronRight className="ml-1 h-3 w-3" />
+                  </Button>
                 </motion.div>
+              ) : (
+                canBuildProject && (
+                  <motion.div
+                    key="standard-actions"
+                    initial={{ opacity: 0, y: 8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: 8 }}
+                    transition={{ duration: 0.2 }}
+                    className="w-full"
+                  >
+                    <Button
+                      size="sm"
+                      className="h-11 w-full rounded-xl bg-primary text-[10px] font-black uppercase tracking-[0.2em] shadow-[0_10px_24px_rgba(var(--primary),0.12)] transition-all hover:shadow-primary/30"
+                      onClick={enterProjectBuildMode}
+                      disabled={projectMutation.isPending}
+                    >
+                      <Building className="mr-2 h-4 w-4" />
+                      Assemble Project Manifest
+                    </Button>
+                  </motion.div>
+                )
               )}
             </AnimatePresence>
-
-            <div className="space-y-4">
-                <DndContext collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
-                  <SortableContext items={(project?.content || []).map(c => c.id)} strategy={verticalListSortingStrategy}>
-                    <div className="w-full space-y-4">
-                      {(project?.content || []).map((item, index) => {
-                        if (item instanceof Chapter) {
-                          return (
-                            <SortableChapterItem
-                              chapter={item}
-                              index={index}
-                              key={item.id}
-                              isProjectBuildMode={isProjectBuildMode}
-                              selectedSectionsForBuild={selectedSectionsForBuild}
-                              toggleChapterSelection={toggleChapterSelection}
-                              toggleSectionSelection={toggleSectionSelection}
-                              activeSectionId={selectedSectionIds.length > 0 ? selectedSectionIds[0] : null}
-                              onActivateSection={handleActivateSection}
-                              onActivate={() => handleActivateChapter(item.id)}
-                              isActive={activeChapterId === item.id}
-                              selectedSectionIds={selectedSectionIds}
-                            />
-                          )
-                        }
-                        if (item instanceof Section) {
-                          return (
-                            <SectionAccordionItem
-                              key={item.id}
-                              section={item}
-                              sectionIndex={index}
-                              chapterIndex={-1}
-                              isProjectBuildMode={isProjectBuildMode}
-                              isSelected={selectedSectionsForBuild.has(item.id)}
-                              toggleSectionSelection={toggleSectionSelection}
-                              isActive={selectedSectionIds.includes(item.id)}
-                              onActivate={handleActivateSection}
-                            />
-                          );
-                        }
-                        return null;
-                      })}
-                    </div>
-                  </SortableContext>
-                </DndContext>
-            </div>
-
-            {/* Premium Action Bar */}
-            <div className="pt-8">
-                <AnimatePresence mode="wait">
-                  {isProjectBuildMode ? (
-                    <motion.div
-                      key="build-mode-actions"
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: 20 }}
-                      className="flex gap-2 w-full"
-                    >
-                      <Button onClick={exitProjectBuildMode} variant="secondary" size="sm" className="flex-1 font-black h-11 border bg-background/60 backdrop-blur-xl rounded-xl uppercase tracking-widest text-[9px] hover:bg-muted/80 transition-all border-border/40">
-                        <XCircle className="mr-2 h-4 w-4" /> Terminate
-                      </Button>
-                      <Button
-                        size="sm"
-                        className="flex-[2] font-black h-11 shadow-[0_10px_30px_rgba(var(--primary),0.2)] rounded-xl uppercase tracking-[0.2em] text-[10px] bg-primary hover:opacity-90 transition-all relative overflow-hidden group"
-                        onClick={() => setIsBuildProjectDialogOpen(true)}
-                        disabled={selectedSectionsForBuild.size === 0 || projectMutation.isPending}
-                      >
-                        <Building className="mr-2 h-4 w-4 group-hover:scale-110 transition-transform" />
-                        Execute Build ({selectedSectionsForBuild.size})
-                        <ChevronRight className="ml-1 h-3 w-3 opacity-0 group-hover:opacity-100 -translate-x-2 group-hover:translate-x-0 transition-all" />
-                      </Button>
-                    </motion.div>
-                  ) : canBuildProject && (
-                    <motion.div
-                      key="standard-actions"
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: 20 }}
-                      className="w-full"
-                    >
-                      <Button
-                        size="sm"
-                        className="w-full font-black h-11 shadow-[0_10px_25px_rgba(var(--primary),0.1)] rounded-xl uppercase tracking-[0.2em] text-[10px] bg-primary group relative overflow-hidden transition-all duration-500 hover:shadow-primary/30"
-                        onClick={enterProjectBuildMode}
-                        disabled={projectMutation.isPending}
-                      >
-                        <Building className="mr-2 h-4 w-4" />
-                        Assemble Project Manifest
-                        <div className="absolute inset-0 bg-white/10 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-in-out" />
-                      </Button>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-            </div>
+          </div>
         </div>
       </SidebarContainer>
     </>

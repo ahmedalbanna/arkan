@@ -16,4 +16,5 @@ export interface BuilderSidebarProps {
     side: SidebarSide;
     defaultSize?: number;
     className?: string;
+    onResize?: (size: number) => void;
 }

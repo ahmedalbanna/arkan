@@ -104,7 +104,7 @@ export default function ReportModeGenerator({ initialProject }: { initialProject
                         <div className="absolute inset-0" style={{ background: 'radial-gradient(circle at 50% -20%, hsl(var(--primary) / 0.05), transparent 50%)' }} />
                     </div>
 
-                    <div className="relative z-10 flex-1 flex flex-col p-6 mx-auto w-full h-full">
+                    <div className="relative z-10 flex-1 flex flex-col w-full h-full">
                         <div className="h-full">
                             <ResizablePanelGroup 
                                 direction="horizontal" 

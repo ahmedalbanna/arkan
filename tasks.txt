@@ -1,69 +1,7 @@
- Here's the plan:
-
-                                    Multi-Mode Rendering & Canvas Refinement Plan
-
-Goal: Refactor the center canvas to prioritize the primary document and remove "Canvas Swapping" logic tied to
-side-panel keys.
-
-                                         1. ReportResults.tsx (Center Canvas)
-
- • Remove activePanelKey logic: Delete the prop and the switch (activePanelKey) block in renderContent.
- • Primary Canvas Focus: Force renderContent to strictly toggle between viewMode states (edit, preview, cover) and the
-   comparisonSnapshot view.
- • Structural Integrity: Ensure CoverPage and TableOfContent are integrated into the main flow rather than being
-   global replacements.
-
-                                         2. ReportModeGenerator.tsx (Layout)
-
- • Simplify Props: Remove activePanelKey passed to ReportResults.
- • Handle Logic: Ensure side-panel interactions (Files, Templates) act as navigators or inspectors that affect the
-   document, not replace it.
-
-                                             3. Aesthetics & Transitions
-
- • Visual Parity: Verify that CSS classes for prose match exactly across MarkdownEditor and MarkdownViewer.
- • Motion Refinement: Ensure the 500ms "Mouse Bridge" delay on popovers remains resilient during transitions.
- • Layout Persistence: Verify that ResizablePanel transitions (500ms duration) remain smooth when panels shrink in
-   preview mode.
-
- 1 Proceed with the architectural refactor (Server DI + Use Cases) first.
- 2 Jump straight into the IDE Layout and UI atomic refactor.
- 3 Provide a detailed breakdown of the proposed component hierarchy first.
-
-  1 Editor Refinement: Deepen the atomic refactor of the Tiptap editor components.
- 2 AI Integration: Enhance the BuilderSidebarRight with more context-aware AI tools.
- 3 Mobile Optimization: Refine the responsive behavior of the new 3-zone layout.
-
-  1 AI Workflow Enhancements: Refactor the GenerationTools or ProjectChat to match the new atomic component pattern.
- 2 Editor State Refinement: Deepen the refactor of the Tiptap editor integration for more granular control.
- 3 Advanced Layout Features: Implement the "Collapsible Resizable Panel" animation logic for the sidebars.
-
-  1 AI Contextual Tools: Enhance the BubbleMenu with more advanced, selection-aware AI actions (e.g., "Elaborate", "Fact Check").
- 2 Advanced Layout Animations: Implement smooth transitions for the 3-zone workspace using Framer Motion.
- 3 Real-time Collaboration Prep: Structure the editor state to support future multi-user synchronization patterns.
-
-  1 AI Workspace Sidebars: Refactor the left/right sidebar content components for atomic consistency.
- 2 Advanced Layout Motion: Add smooth Framer Motion transitions for panel resizing and HUD visibility.
- 3 Project Snapshot Features: Enhance the snapshot history panel with diffing and restoration UI.
-
-workspace orchestration
-
-refine the individual tools within the sidebar tabs
-Refine individual tools (Chapter Tools, Section Controls, etc.) within the new layout.
-remove Markdown Blueprint and  Visual Preview
-
- 1 Refactor the Center Canvas: Implement the Multi-Mode Rendering logic to decouple side-panel state from document display.
- 2 Visual Parity & CSS Sync: Standardize all prose styles across the application to ensure a seamless
-   transition between edit and preview modes.
- 3 Start Test Coverage Suite: Begin building out unit tests for core domain entities and use cases.
- 4 Mobile UX Refinement: Adjust the 3-zone architecture for better touch/small-screen support
-
-  1 Visual Parity Pass: Synchronize all prose CSS classes across the application (Editor vs Viewer).
- 2 Mobile UX Refinement: Implement a responsive drawer pattern for the sidebars.
- 3 Test Suite Expansion: Begin implementing unit tests for the projects or ai-content modules.
- 4 Snapshot Diffing UI: Enhance the SnapshotComparison view with more granular diffing features.
- AI Workspace Enhancements: Refactor the left/right sidebar content components for better atomic consistency.
-
- make builder convas shrink when resizing or toggle sidebars
- Final Polish Pass: Sweep for any remaining visual inconsistencies in the 3-zone layout.
- move all sidebar left to sidebar right than add writing tools to sidebar left
+"I want to perform a complete UI/UX redesign of this [Report Mode Generator] while strictly preserving its existing business logic and functionality.
+Please follow these steps:
+Analyze Current Logic: Extract and document the core functionality and state-management of the current component. Ensure no logic is lost during the redesign.
+Modernize & Restructure: Redesign the component’s UI to be more modern, clean, and consistent with the overall page layout. Apply best practices for [Resizable Content, Responsive Design, Accessibility, Auto Sidebar Collapsible (if resizing at end), Builder Canvas (min width)].
+Enhance Logic: While keeping the core functionality, suggest and implement performance improvements or cleaner code patterns ( optimizing state updates, using more efficient data structures).
+Provide Final Code: Output the complete, refactored component code. Include a brief explanation of how you maintained the original logic while upgrading the UI.
+Context: The component is currently located in [/src/modules/ai-content/adapters/components/report-mode/ReportModeGenerator.tsx], so please ensure the styling respects its surrounding layout."

@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useMemo, lazy } from 'react';
-import { Settings, UploadCloud, LayoutTemplate, BookOpenCheck, SlidersHorizontal, MessageSquare, Sparkles, History as HistoryIcon, Database, Terminal, Cpu } from 'lucide-react';
+import { Settings, UploadCloud, LayoutTemplate, BookOpenCheck, SlidersHorizontal, MessageSquare, Sparkles, History as HistoryIcon, Database, Terminal, Cpu, Layers } from 'lucide-react';
 import { useLocalization } from '@/context/LocalizationContext';
 import { SidebarPanelConfig } from '@/modules/ai-content/adapters/components/report-mode/layout/types';
 
@@ -15,6 +15,7 @@ const SectionTabsPanel = lazy(() => import('@/modules/ai-content/adapters/compon
 const ChapterTabsPanel = lazy(() => import('@/modules/ai-content/adapters/components/report-mode/generation-tools/ChapterTabsPanel').then(m => ({ default: m.ChapterTabsPanel })));
 const ProjectChat = lazy(() => import('@/modules/ai-content/adapters/components/report-mode/chat/ProjectChat').then(m => ({ default: m.ProjectChat })));
 const SnapshotHistoryPanel = lazy(() => import('@/modules/projects/adapters/components/SnapshotHistoryPanel'));
+const SidebarNavigator = lazy(() => import('@/modules/ai-content/adapters/components/report-mode/SidebarNavigator').then(m => ({ default: m.SidebarNavigator })));
 
 interface UseSidebarPanelsProps {
     project: any;
@@ -64,6 +65,19 @@ export function useSidebarPanels({
                     onActiveSectionChange={onActiveSectionChange}
                     onActiveChapterChange={onActiveChapterChange}
                     activeChapterId={activeChapterId}
+                />
+            ),
+        },
+        {
+            key: 'navigator',
+            title: 'Navigator',
+            icon: <Layers className="h-5 w-5" />,
+            content: (
+                <SidebarNavigator
+                    activeChapterId={activeChapterId}
+                    selectedSectionIds={selectedSectionIds}
+                    onActiveChapterChange={onActiveChapterChange}
+                    onActiveSectionChange={onActiveSectionChange}
                 />
             ),
         },

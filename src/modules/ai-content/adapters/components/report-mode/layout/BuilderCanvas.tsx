@@ -27,7 +27,8 @@ export const BuilderCanvas = React.forwardRef<any, BuilderCanvasProps>(({
     return (
         <ResizablePanel 
             ref={ref}
-            defaultSize={50} 
+            defaultSize={50}
+            minSize={30}
             className="flex flex-col min-h-0 bg-muted/5 relative overflow-hidden group/canvas transition-all duration-700 ease-[0.22,1,0.36,1] z-10"
         >
             {/* Immersive Matrix Layer */}
