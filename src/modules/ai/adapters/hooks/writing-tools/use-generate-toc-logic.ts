@@ -4,11 +4,12 @@
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { useToast, useBuilderStore } from '@/hooks';
+import { useToast } from '@/hooks';
 import { GenerateTocOutputSchema } from '@/modules/ai/domain/schemas';
 import { type TocSection } from '@/modules/ai-content/domain/entities/TOC';
 import { useMutation } from '@tanstack/react-query';
 import { useMemo } from 'react';
+import { apiService } from '@/infrastructure/api/ApiService';
 
 // Updated schema to include the optional additional instructions
 const formSchema = z.object({
@@ -29,32 +30,20 @@ export function useGenerateTocLogic() {
 
   const mutation = useMutation({
     mutationFn: async (data: FormValues): Promise<z.infer<typeof GenerateTocOutputSchema>> => {
-      // Hardcoded response for testing
-      await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate network delay
-      
-      console.log("Generating TOC with data:", data); // For debugging
+      const response = await apiService<FormValues, any>({
+        endpoint: '/api/writing-tools/generate-toc',
+        method: 'POST',
+        data
+      });
 
-      const hardcodedData: z.infer<typeof GenerateTocOutputSchema> = {
-        tableOfContents: [
-          {
-            title: "Chapter 1: Introduction (Sample)",
-            sections: ["1.1 Problem Statement", "1.2 Project Objectives", "1.3 Scope of Work"],
-          },
-          {
-            title: "Chapter 2: System Analysis (Sample)",
-            sections: ["2.1 Functional Requirements", "2.2 Non-Functional Requirements", "2.3 User Stories"],
-          },
-          {
-            title: "Chapter 3: Conclusion (Sample)",
-            sections: ["3.1 Final Summary", "3.2 Future Work"],
-          },
-        ],
-      };
-      
-      return hardcodedData;
+      if (response.success && response.data) {
+        return response.data;
+      }
+
+      throw new Error(response.error?.message || 'Failed to generate Table of Contents');
     },
     onSuccess: () => {
-        toast({ title: "Sample Table of Contents generated!" });
+        toast({ title: "Table of Contents generated successfully!" });
     },
     onError: (error: Error) => {
       toast({

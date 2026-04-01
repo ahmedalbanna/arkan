@@ -20,6 +20,13 @@ const generateTocPrompt = ai.definePrompt({
 {{{projectDescription}}}
 ---
 
+{{#if additionalInstructions}}
+**Additional Constraints & Instructions:**
+---
+{{{additionalInstructions}}}
+---
+{{/if}}
+
 **Instructions:**
 1.  Analyze the project Description to understand its core components, objectives, and scope.
 2.  Generate a list of relevant **chapters**.

@@ -81,10 +81,25 @@ export default function GenerateTocPage() {
                           {...form.register('projectDescription')}
                           rows={12}
                           placeholder="Define the primary goals and scope of your document..."
-                          className="text-xs bg-background shadow-inner focus-visible:ring-1 resize-none p-6 leading-relaxed rounded-2xl border-dashed min-h-[350px]"
+                          className="text-xs bg-background shadow-inner focus-visible:ring-1 resize-none p-6 leading-relaxed rounded-2xl border-dashed min-h-[250px]"
                           disabled={mutation.isPending}
                         />
                         {form.formState.errors.projectDescription && <p className="text-[9px] font-bold text-destructive uppercase tracking-widest px-2">{form.formState.errors.projectDescription.message}</p>}
+                      </div>
+
+                      <div className="space-y-4">
+                        <Label className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground/60 ml-1 flex items-center gap-2">
+                          <Sparkles className="h-3 w-3 text-primary" />
+                          Additional Constraints
+                        </Label>
+                        <Textarea
+                          id="additional-instructions"
+                          {...form.register('additionalInstructions')}
+                          rows={4}
+                          placeholder="e.g., 'Focus on technical requirements' or 'Exactly 5 chapters'..."
+                          className="text-xs bg-background shadow-inner focus-visible:ring-1 resize-none p-4 leading-relaxed rounded-2xl border-dashed"
+                          disabled={mutation.isPending}
+                        />
                       </div>
                     </div>
 

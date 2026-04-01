@@ -763,6 +763,7 @@ export type EvaluateReportOutput = z.infer<typeof EvaluateReportOutputSchema>;
 // generate-toc.ts
 export const GenerateTocInputSchema = z.object({
     projectDescription: z.string().min(10, 'Project idea must be at least 10 characters.'),
+    additionalInstructions: z.string().optional(),
 });
 export type GenerateTocInput = z.infer<typeof GenerateTocInputSchema>;
 
