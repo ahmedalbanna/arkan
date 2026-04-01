@@ -5,6 +5,7 @@ import { useLocalization } from '@/context/LocalizationContext';
 import { useBuilderStore } from '@/modules/projects/adapters/state/useBuilderStore';
 import React, { useState, useMemo, lazy, useEffect } from 'react';
 import { useSaveProject } from '@/modules/projects/adapters/hooks/use-projects';
+import { useWritingTool } from '@/hooks';
 import { useSidebarPanels } from './useSidebarPanels';
 
 import { type ProjectProperties } from '@/modules/projects/domain/entities/Project';
@@ -24,7 +25,20 @@ export function useReportGenerator(initialProject?: ProjectProperties | null) {
   const [viewMode, setViewMode] = useState<'edit' | 'preview'>('edit');
   const { isSaving } = useSaveProject();
   const builderPageLogic = useBuilderPageLogic(initialProject);
+  const { updateProject } = builderPageLogic;
   const project = useBuilderStore(state => state.project);
+
+  const summarizeMutation = useWritingTool('summarize');
+  const expandMutation = useWritingTool('expand-text');
+  const rewriteMutation = useWritingTool('rewrite-text');
+
+  const rewriteStyles = useMemo(() => [
+    { label: 'Professional', style: 'professional' },
+    { label: 'Academic', style: 'academic' },
+    { label: 'Creative', style: 'creative' },
+    { label: 'Simple', style: 'simple' },
+    { label: 'Detailed', style: 'detailed' },
+  ], []);
 
   useEffect(() => {
     document.documentElement.style.setProperty('--zoom-scale', String(zoomLevel));
@@ -71,27 +85,27 @@ export function useReportGenerator(initialProject?: ProjectProperties | null) {
   });
 
   const handleMoveItem = (activeId: string, overId: string) => {
-    updateProject(p => p.moveItem(activeId, overId));
+    updateProject((p: any) => p.moveItem(activeId, overId));
   };
 
   const handleUpdateTitle = (id: string, newTitle: string, isChapter: boolean) => {
-    updateProject(p => p.updateItemTitle(id, newTitle, isChapter));
+    updateProject((p: any) => p.updateItemTitle(id, newTitle, isChapter));
   };
 
   const handleDeleteItem = (id: string, isChapter: boolean) => {
-    updateProject(p => p.deleteItem(id, isChapter));
+    updateProject((p: any) => p.deleteItem(id, isChapter));
   };
 
   const handleAddChapter = () => {
-    updateProject(p => p.addChapter());
+    updateProject((p: any) => p.addChapter());
   };
 
   const handleAddSection = (chapterId: string) => {
-    updateProject(p => p.addSection(chapterId));
+    updateProject((p: any) => p.addSection(chapterId));
   };
 
   const handleDuplicateItem = (id: string, isChapter: boolean) => {
-    updateProject(p => p.duplicateItem(id, isChapter));
+    updateProject((p: any) => p.duplicateItem(id, isChapter));
   };
 
   const handleUndo = () => {
@@ -107,7 +121,7 @@ export function useReportGenerator(initialProject?: ProjectProperties | null) {
     const copied = localStorage.getItem('arkan_copied_item');
     if (copied) {
         const { id, isChapter: copiedIsChapter } = JSON.parse(copied);
-        updateProject(p => p.pasteItem(id, copiedIsChapter, targetId, isChapter));
+        updateProject((p: any) => p.pasteItem(id, copiedIsChapter, targetId, isChapter));
     }
   };
 
@@ -145,6 +159,10 @@ export function useReportGenerator(initialProject?: ProjectProperties | null) {
     handleDuplicateItem,
     handleUndo,
     handleCopyItem,
-    handlePasteItem
+    handlePasteItem,
+    summarizeMutation,
+    expandMutation,
+    rewriteMutation,
+    rewriteStyles
   };
 }

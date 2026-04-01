@@ -1,6 +1,9 @@
 'use client';
 
 import React, { useState } from 'react';
+import { AnimatePresence, motion } from 'framer-motion';
+import { ZoomIn, ZoomOut, Eye, PenLine, RotateCcw } from 'lucide-react';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { A4Page } from '@/components/shared/A4Page';
 import { MarkdownViewer } from '@/components/shared/MarkdownViewer';
 import {
@@ -40,6 +43,11 @@ interface ReportResultsProps {
   viewMode: 'edit' | 'preview';
   setViewMode: (mode: 'edit' | 'preview') => void;
   zoomLevel: number;
+  activeRightPanelKey?: string;
+  summarizeMutation?: any;
+  expandMutation?: any;
+  rewriteMutation?: any;
+  rewriteStyles?: { label: string; style: string }[];
 }
 
 const ReportResults = ({
@@ -51,7 +59,12 @@ const ReportResults = ({
   setIsOutlineVisible,
   viewMode,
   setViewMode,
-  zoomLevel
+  zoomLevel,
+  activeRightPanelKey,
+  summarizeMutation,
+  expandMutation,
+  rewriteMutation,
+  rewriteStyles
 }: ReportResultsProps) => {
   const { t } = useLocalization();
   const project = useBuilderStore(state => state.project);
@@ -130,6 +143,14 @@ const ReportResults = ({
             project={project}
             viewMode={viewMode}
             onMarkdownChange={updateProjectFromMarkdown}
+            activeChapterId={activeChapterId}
+            setActiveChapterId={setActiveChapterId}
+            selectedSectionIds={selectedSectionIds}
+            handleActiveSectionChange={handleActiveSectionChange}
+            summarizeMutation={summarizeMutation}
+            expandMutation={expandMutation}
+            rewriteMutation={rewriteMutation}
+            rewriteStyles={rewriteStyles}
           />
         </A4Page>
       )
@@ -152,7 +173,7 @@ const ReportResults = ({
 
   return (
     <div ref={containerRef} className={cn(
-      "flex flex-col overflow-hidden rounded-xl border bg-card text-card-foreground shadow-md transition-all duration-500",
+      "flex flex-col overflow-hidden rounded-xl border bg-card text-card-foreground shadow-md transition-all duration-500 relative",
       isFullscreen && "fixed inset-0 z-[100] rounded-none border-none"
     )}>
       <DocumentToolbar
@@ -165,6 +186,24 @@ const ReportResults = ({
         toggleFullscreen={toggleFullscreen}
         suggestion={suggestion}
       />
+
+      <AnimatePresence>
+        {viewMode === 'preview' && (
+          <motion.div
+            key="preview-indicator"
+            initial={{ opacity: 0, y: -6, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -6, scale: 0.95 }}
+            transition={{ duration: 0.18, ease: 'easeOut' }}
+            className="absolute top-16 left-1/2 -translate-x-1/2 z-30 flex items-center gap-2"
+          >
+            <div className="flex items-center gap-1.5 text-[10px] font-black uppercase tracking-widest text-amber-600 dark:text-amber-400 bg-background/95 backdrop-blur-xl border border-amber-500/20 px-4 py-2 rounded-full shadow-2xl shadow-amber-500/10">
+              <Eye className="h-3.5 w-3.5" />
+              Preview Mode — Hover items for AI Actions
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       <CardContent className="flex-grow flex flex-col p-0 relative min-h-0 overflow-hidden">
         {/* Subtle Canvas Background */}

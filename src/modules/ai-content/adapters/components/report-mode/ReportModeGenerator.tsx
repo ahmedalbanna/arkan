@@ -52,7 +52,11 @@ export default function ReportModeGenerator({ initialProject }: { initialProject
         handleDuplicateItem,
         handleUndo,
         handleCopyItem,
-        handlePasteItem
+        handlePasteItem,
+        summarizeMutation,
+        expandMutation,
+        rewriteMutation,
+        rewriteStyles
     } = useReportGenerator(initialProject);
 
     const hasUnsavedChanges = useBuilderStore(state => state.hasUnsavedChanges);
@@ -151,6 +155,11 @@ export default function ReportModeGenerator({ initialProject }: { initialProject
                                         viewMode={viewMode}
                                         setViewMode={setViewMode}
                                         zoomLevel={zoomLevel}
+                                        activeRightPanelKey={activeRightPanelKey}
+                                        summarizeMutation={summarizeMutation}
+                                        expandMutation={expandMutation}
+                                        rewriteMutation={rewriteMutation}
+                                        rewriteStyles={rewriteStyles}
                                     />
                                 </BuilderCanvas>
 

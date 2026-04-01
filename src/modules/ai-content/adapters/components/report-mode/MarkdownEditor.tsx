@@ -16,16 +16,18 @@ interface MarkdownEditorProps {
   content: string;
   onChange: (markdown: string) => void;
   onDebouncedChange?: (markdown: string) => void;
+  onActiveItemDetect?: (headingText: string | null) => void;
   editorClassName?: string;
   debounceMs?: number;
 }
 
-const MarkdownEditorComponent = ({ 
-  content, 
-  onChange, 
+const MarkdownEditorComponent = ({
+  content,
+  onChange,
   onDebouncedChange,
+  onActiveItemDetect,
   editorClassName,
-  debounceMs = 1000 
+  debounceMs = 1000
 }: MarkdownEditorProps) => {
   const { setActiveEditor, updateSelectionState } = useEditorStore();
   const markdownService = useService<IMarkdownService>(IMarkdownServiceToken);
@@ -34,10 +36,33 @@ const MarkdownEditorComponent = ({
   const editor = useEditor({
     extensions: editorExtensions(bubbleMenuId, markdownService),
     content: markdownService.toHtml(content),
+    onSelectionUpdate: ({ editor }) => {
+      if (!onActiveItemDetect) return;
+      // Find nearest heading node above cursor position
+      const { $anchor } = editor.state.selection;
+      let headingText: string | null = null;
+      for (let depth = $anchor.depth; depth >= 0; depth--) {
+        const node = $anchor.node(depth);
+        if (node.type.name === 'heading') {
+          headingText = node.textContent;
+          break;
+        }
+      }
+      // Walk backwards through doc to find nearest heading before cursor
+      if (!headingText) {
+        const pos = $anchor.pos;
+        editor.state.doc.nodesBetween(0, pos, (node) => {
+          if (node.type.name === 'heading') {
+            headingText = node.textContent;
+          }
+        });
+      }
+      onActiveItemDetect(headingText);
+    },
     onUpdate: ({ editor }) => {
       // Notify the store about selection/state changes
       updateSelectionState(editor);
-      
+
       if (onDebouncedChange) {
         const markdown = markdownService.toMarkdown(editor.getHTML());
         // Simple manual debounce
@@ -47,9 +72,6 @@ const MarkdownEditorComponent = ({
           onDebouncedChange(markdown);
         }, debounceMs);
       }
-    },
-    onSelectionUpdate: ({ editor }) => {
-      updateSelectionState(editor);
     },
     onBlur: ({ editor }) => {
       const markdown = markdownService.toMarkdown(editor.getHTML());
@@ -64,15 +86,15 @@ const MarkdownEditorComponent = ({
         const html = event.clipboardData?.getData('text/html');
 
         if (html) {
-            void handleHtmlPaste(editor!, html);
-            return true;
+          void handleHtmlPaste(editor!, html);
+          return true;
         }
 
         if (text) {
           void handlePlainPaste(editor!, text, markdownService);
           return true;
         }
-        
+
         return false;
       },
     },
@@ -116,8 +138,8 @@ const MarkdownEditorComponent = ({
       {editor && (
         <BubbleMenu
           editor={editor}
-          tippyOptions={{ 
-            duration: 200, 
+          tippyOptions={{
+            duration: 200,
             placement: 'top',
             animation: 'shift-away'
           }}
@@ -126,19 +148,19 @@ const MarkdownEditorComponent = ({
         >
           {editor.isActive('table') ? (
             <div className="flex items-center gap-1.5 rounded-2xl border border-primary/10 bg-background/60 backdrop-blur-2xl p-1.5 shadow-2xl shadow-primary/5 transition-all duration-300">
-                <div className="flex items-center gap-1 px-1">
-                    <Button variant="ghost" size="sm" className="h-8 text-[9px] font-black uppercase tracking-widest px-2 rounded-lg" onClick={() => editor.chain().focus().addColumnBefore().run()}>+ Col</Button>
-                    <Button variant="ghost" size="sm" className="h-8 text-[9px] font-black uppercase tracking-widest px-2 rounded-lg" onClick={() => editor.chain().focus().addRowBefore().run()}>+ Row</Button>
-                </div>
-                <div className="h-4 w-px bg-primary/10" />
-                <Button 
-                    variant="ghost" 
-                    size="sm" 
-                    className="h-8 text-[9px] font-black uppercase tracking-widest px-2 rounded-lg text-destructive hover:bg-destructive/10 hover:text-destructive" 
-                    onClick={() => editor.chain().focus().deleteTable().run()}
-                >
-                    Delete Table
-                </Button>
+              <div className="flex items-center gap-1 px-1">
+                <Button variant="ghost" size="sm" className="h-8 text-[9px] font-black uppercase tracking-widest px-2 rounded-lg" onClick={() => editor.chain().focus().addColumnBefore().run()}>+ Col</Button>
+                <Button variant="ghost" size="sm" className="h-8 text-[9px] font-black uppercase tracking-widest px-2 rounded-lg" onClick={() => editor.chain().focus().addRowBefore().run()}>+ Row</Button>
+              </div>
+              <div className="h-4 w-px bg-primary/10" />
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-8 text-[9px] font-black uppercase tracking-widest px-2 rounded-lg text-destructive hover:bg-destructive/10 hover:text-destructive"
+                onClick={() => editor.chain().focus().deleteTable().run()}
+              >
+                Delete Table
+              </Button>
             </div>
           ) : (
             <ContextualToolbar editor={editor as Editor} />

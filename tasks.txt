@@ -25,3 +25,45 @@ side-panel keys.
  • Motion Refinement: Ensure the 500ms "Mouse Bridge" delay on popovers remains resilient during transitions.
  • Layout Persistence: Verify that ResizablePanel transitions (500ms duration) remain smooth when panels shrink in
    preview mode.
+
+ 1 Proceed with the architectural refactor (Server DI + Use Cases) first.
+ 2 Jump straight into the IDE Layout and UI atomic refactor.
+ 3 Provide a detailed breakdown of the proposed component hierarchy first.
+
+  1 Editor Refinement: Deepen the atomic refactor of the Tiptap editor components.
+ 2 AI Integration: Enhance the BuilderSidebarRight with more context-aware AI tools.
+ 3 Mobile Optimization: Refine the responsive behavior of the new 3-zone layout.
+
+  1 AI Workflow Enhancements: Refactor the GenerationTools or ProjectChat to match the new atomic component pattern.
+ 2 Editor State Refinement: Deepen the refactor of the Tiptap editor integration for more granular control.
+ 3 Advanced Layout Features: Implement the "Collapsible Resizable Panel" animation logic for the sidebars.
+
+  1 AI Contextual Tools: Enhance the BubbleMenu with more advanced, selection-aware AI actions (e.g., "Elaborate", "Fact Check").
+ 2 Advanced Layout Animations: Implement smooth transitions for the 3-zone workspace using Framer Motion.
+ 3 Real-time Collaboration Prep: Structure the editor state to support future multi-user synchronization patterns.
+
+  1 AI Workspace Sidebars: Refactor the left/right sidebar content components for atomic consistency.
+ 2 Advanced Layout Motion: Add smooth Framer Motion transitions for panel resizing and HUD visibility.
+ 3 Project Snapshot Features: Enhance the snapshot history panel with diffing and restoration UI.
+
+workspace orchestration
+
+refine the individual tools within the sidebar tabs
+Refine individual tools (Chapter Tools, Section Controls, etc.) within the new layout.
+remove Markdown Blueprint and  Visual Preview
+
+ 1 Refactor the Center Canvas: Implement the Multi-Mode Rendering logic to decouple side-panel state from document display.
+ 2 Visual Parity & CSS Sync: Standardize all prose styles across the application to ensure a seamless
+   transition between edit and preview modes.
+ 3 Start Test Coverage Suite: Begin building out unit tests for core domain entities and use cases.
+ 4 Mobile UX Refinement: Adjust the 3-zone architecture for better touch/small-screen support
+
+  1 Visual Parity Pass: Synchronize all prose CSS classes across the application (Editor vs Viewer).
+ 2 Mobile UX Refinement: Implement a responsive drawer pattern for the sidebars.
+ 3 Test Suite Expansion: Begin implementing unit tests for the projects or ai-content modules.
+ 4 Snapshot Diffing UI: Enhance the SnapshotComparison view with more granular diffing features.
+ AI Workspace Enhancements: Refactor the left/right sidebar content components for better atomic consistency.
+
+ make builder convas shrink when resizing or toggle sidebars
+ Final Polish Pass: Sweep for any remaining visual inconsistencies in the 3-zone layout.
+ move all sidebar left to sidebar right than add writing tools to sidebar left
