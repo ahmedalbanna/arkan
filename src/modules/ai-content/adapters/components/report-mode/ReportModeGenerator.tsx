@@ -91,8 +91,12 @@ export default function ReportModeGenerator({ initialProject }: { initialProject
                     </div>
 
                     <div className="relative z-10 flex-1 flex flex-col p-6 mx-auto w-full h-full">
-                        <div className="h-full" dir={locale === 'ar' ? 'rtl' : 'ltr'}>
-                            <ResizablePanelGroup direction="horizontal" className="h-full items-stretch">
+                        <div className="h-full">
+                            <ResizablePanelGroup 
+                                direction="horizontal" 
+                                className="h-full items-stretch"
+                                dir={locale === 'ar' ? 'rtl' : 'ltr'}
+                            >
                                 <BuilderSidebar 
                                     side="left"
                                     panels={leftPanels}

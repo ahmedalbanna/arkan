@@ -30,6 +30,7 @@ export function CollapsibleSidePanel({
   side = 'left',
 }: CollapsibleSidePanelProps) {
   const isLeft = side === 'left';
+  const isRtl = typeof document !== 'undefined' && document.documentElement.dir === 'rtl';
 
   if (!panels || panels.length === 0) {
     return null;
@@ -51,12 +52,12 @@ export function CollapsibleSidePanel({
       {/* Sidebar HUD - Technical Control Bar */}
       <div className={cn(
         "flex flex-col gap-4 bg-muted/5 p-3.5 relative",
-        isLeft ? "border-r border-primary/5 shadow-[2px_0_15px_rgba(0,0,0,0.02)]" : "border-l border-primary/5 shadow-[-2px_0_15px_rgba(0,0,0,0.02)]"
+        isLeft ? "border-e border-primary/5 shadow-[2px_0_15px_rgba(0,0,0,0.02)]" : "border-s border-primary/5 shadow-[-2px_0_15px_rgba(0,0,0,0.02)]"
       )}>
         {/* Vertical Depth Accent */}
         <div className={cn(
             "absolute inset-y-0 w-0.5 bg-gradient-to-b from-transparent via-primary/20 to-transparent opacity-40",
-            isLeft ? "right-0" : "left-0"
+            isLeft ? "end-0" : "start-0"
         )} />
 
         <TooltipProvider>
@@ -108,7 +109,7 @@ export function CollapsibleSidePanel({
             <div className="h-full w-full min-w-[320px] overflow-auto custom-scrollbar bg-radial-gradient from-primary/[0.02] to-transparent">
                 <motion.div 
                     key={activeKey} 
-                    initial={{ opacity: 0, x: isLeft ? -10 : 10 }}
+                    initial={{ opacity: 0, x: isLeft ? (isRtl ? 10 : -10) : (isRtl ? -10 : 10) }}
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ duration: 0.4, ease: "easeOut", delay: 0.1 }}
                     className={cn(
@@ -122,7 +123,7 @@ export function CollapsibleSidePanel({
             {/* Subtle Content Edge Decoration */}
             <div className={cn(
                 "absolute inset-y-0 pointer-events-none w-px opacity-20",
-                isLeft ? "right-0 bg-gradient-to-b from-transparent via-primary/40 to-transparent" : "left-0 bg-gradient-to-b from-transparent via-primary/40 to-transparent"
+                isLeft ? "end-0 bg-gradient-to-b from-transparent via-primary/40 to-transparent" : "start-0 bg-gradient-to-b from-transparent via-primary/40 to-transparent"
             )} />
           </motion.div>
         )}
