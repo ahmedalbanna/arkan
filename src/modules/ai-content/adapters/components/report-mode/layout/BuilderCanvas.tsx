@@ -26,7 +26,7 @@ export const BuilderCanvas = React.forwardRef<any, BuilderCanvasProps>(({
         <ResizablePanel 
             ref={ref}
             defaultSize={50} 
-            className="flex flex-col min-h-0 bg-muted/5 relative overflow-hidden group/canvas"
+            className="flex flex-col min-h-0 bg-muted/5 relative overflow-hidden group/canvas transition-all duration-700 ease-[0.22,1,0.36,1]"
         >
             {/* Immersive Environment Layer */}
             <div className="absolute inset-0 opacity-[0.03] pointer-events-none" style={{ backgroundImage: 'radial-gradient(circle at 2px 2px, hsl(var(--primary)) 1px, transparent 0)', backgroundSize: '48px 48px' }} />

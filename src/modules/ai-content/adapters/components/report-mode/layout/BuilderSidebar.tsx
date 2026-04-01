@@ -23,9 +23,9 @@ export const BuilderSidebar = React.forwardRef<any, BuilderSidebarProps>(({
             minSize={4} 
             maxSize={40} 
             className={cn(
-                "flex flex-col h-full bg-background/40 backdrop-blur-2xl transition-all duration-700 ease-in-out relative group/sidebar overflow-hidden",
+                "flex flex-col h-full bg-background/40 backdrop-blur-2xl transition-all duration-700 ease-[0.22,1,0.36,1] relative group/sidebar overflow-hidden",
                 isLeft ? "border-r border-border/40" : "border-l border-border/40",
-                !activeKey && "w-[4.5%]",
+                !activeKey && (isLeft ? "w-[4.5%] min-w-[64px]" : "w-[4.5%] min-w-[64px]"),
                 className
             )}
         >

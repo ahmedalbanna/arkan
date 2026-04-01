@@ -98,10 +98,10 @@ export default function ReportModeGenerator({ initialProject }: { initialProject
                                     panels={leftPanels}
                                     activeKey={activePanelKey}
                                     onActiveKeyChange={setActivePanelKey}
-                                    defaultSize={isLeftPanelVisible ? 24 : 4.5}
+                                    defaultSize={isLeftPanelVisible ? 22 : 4.5}
                                 />
 
-                                <ResizableHandle withHandle className="bg-transparent hover:bg-primary/20 transition-all w-1.5 z-50" />
+                                <ResizableHandle withHandle className="bg-transparent hover:bg-primary/10 transition-colors w-1.5 z-50" />
 
                                 <BuilderCanvas
                                     zoomLevel={zoomLevel}
@@ -122,14 +122,14 @@ export default function ReportModeGenerator({ initialProject }: { initialProject
                                     />
                                 </BuilderCanvas>
 
-                                <ResizableHandle withHandle className="bg-transparent hover:bg-primary/20 transition-all w-1.5 z-50" />
+                                <ResizableHandle withHandle className="bg-transparent hover:bg-primary/10 transition-colors w-1.5 z-50" />
 
                                 <BuilderSidebar 
                                     side="right"
                                     panels={rightPanels}
                                     activeKey={activeRightPanelKey}
                                     onActiveKeyChange={setActiveRightPanelKey}
-                                    defaultSize={isRightPanelVisible ? 24 : 4.5}
+                                    defaultSize={isRightPanelVisible ? 22 : 4.5}
                                 />
                             </ResizablePanelGroup>
                         </div>
