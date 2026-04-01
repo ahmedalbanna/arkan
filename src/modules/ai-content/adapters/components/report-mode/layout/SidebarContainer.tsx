@@ -21,11 +21,11 @@ export const SidebarContainer = ({
 }: SidebarContainerProps) => {
     return (
         <div className={cn("flex flex-col h-full bg-background/40 backdrop-blur-2xl relative overflow-hidden", className)}>
-            {/* Background Texture */}
-            <div className="absolute inset-0 opacity-[0.02] pointer-events-none" style={{ backgroundImage: 'radial-gradient(circle at 2px 2px, hsl(var(--primary)) 1px, transparent 0)', backgroundSize: '24px 24px' }} />
+            {/* Immersive Matrix Layer */}
+            <div className="absolute inset-0 opacity-[0.02] pointer-events-none" style={{ backgroundImage: 'radial-gradient(circle at 2px 2px, hsl(var(--primary)) 1px, transparent 0)', backgroundSize: '32px 32px' }} />
 
             {/* Sticky Technical Header */}
-            <header className="h-12 shrink-0 px-6 flex items-center justify-between border-b border-border/40 bg-background/60 backdrop-blur-xl z-20">
+            <header className="h-12 shrink-0 px-6 flex items-center justify-between border-b border-border/40 bg-background/40 backdrop-blur-2xl z-20">
                 <div className="flex items-center gap-2.5 min-w-0">
                     {icon && <div className="text-primary/60">{icon}</div>}
                     <h2 className="text-[10px] font-black uppercase tracking-[0.2em] text-foreground/80 truncate">

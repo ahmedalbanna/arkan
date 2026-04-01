@@ -28,8 +28,8 @@ export const BuilderCanvas = React.forwardRef<any, BuilderCanvasProps>(({
             defaultSize={50} 
             className="flex flex-col min-h-0 bg-muted/5 relative overflow-hidden group/canvas transition-all duration-700 ease-[0.22,1,0.36,1]"
         >
-            {/* Immersive Environment Layer */}
-            <div className="absolute inset-0 opacity-[0.03] pointer-events-none" style={{ backgroundImage: 'radial-gradient(circle at 2px 2px, hsl(var(--primary)) 1px, transparent 0)', backgroundSize: '48px 48px' }} />
+            {/* Immersive Matrix Layer */}
+            <div className="absolute inset-0 opacity-[0.02] pointer-events-none" style={{ backgroundImage: 'radial-gradient(circle at 2px 2px, hsl(var(--primary)) 1px, transparent 0)', backgroundSize: '32px 32px' }} />
             <div className="absolute inset-x-0 top-0 h-40 bg-gradient-to-b from-background/60 to-transparent pointer-events-none z-10" />
             <div className="absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-background/20 to-transparent pointer-events-none z-10" />
 
@@ -43,7 +43,7 @@ export const BuilderCanvas = React.forwardRef<any, BuilderCanvasProps>(({
 
             {/* Contextual Zoom HUD */}
             <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-30 opacity-0 group-hover/canvas:opacity-100 transition-all duration-700 translate-y-4 group-hover/canvas:translate-y-0">
-                <div className="flex items-center gap-1.5 p-1.5 bg-background/60 backdrop-blur-2xl border border-primary/10 rounded-2xl shadow-[0_8px_40px_rgba(0,0,0,0.12)] ring-1 ring-white/10">
+                <div className="flex items-center gap-1.5 p-1.5 bg-background/40 backdrop-blur-2xl border border-border/40 rounded-2xl shadow-[0_8px_40px_rgba(0,0,0,0.12)] ring-1 ring-white/10">
                     <TooltipProvider delayDuration={200}>
                         <Tooltip>
                             <TooltipTrigger asChild>

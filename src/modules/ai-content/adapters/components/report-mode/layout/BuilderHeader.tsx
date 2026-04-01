@@ -63,7 +63,7 @@ export const BuilderHeader = React.forwardRef<HTMLDivElement, BuilderHeaderProps
             ref={ref}
             className="h-16 border-b border-border/40 bg-background/40 backdrop-blur-2xl shrink-0 z-50 px-8 flex items-center justify-between transition-all duration-700 ease-in-out group/header relative"
         >
-            {/* Animated Grid Overlay */}
+            {/* Immersive Matrix Layer */}
             <div className="absolute inset-0 opacity-[0.02] pointer-events-none" style={{ backgroundImage: 'radial-gradient(circle at 2px 2px, hsl(var(--primary)) 1px, transparent 0)', backgroundSize: '32px 32px' }} />
 
             <div className="flex items-center gap-5 relative z-10">
