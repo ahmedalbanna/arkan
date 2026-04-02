@@ -12,10 +12,6 @@
 import { ai } from '@/modules/ai/infrastructure/services/Genkit';
 import { AiProofreadDocumentInputSchema, AiProofreadDocumentOutputSchema, type AiProofreadDocumentInput, type AiProofreadDocumentOutput } from '@/modules/ai/domain/schemas';
 
-export async function aiProofreadDocument(input: AiProofreadDocumentInput): Promise<AiProofreadDocumentOutput> {
-  return aiProofreadDocumentFlow(input);
-}
-
 const prompt = ai.definePrompt({
   name: 'aiProofreadDocumentPrompt',
   input: { schema: AiProofreadDocumentInputSchema },
@@ -41,3 +37,7 @@ const aiProofreadDocumentFlow = ai.defineFlow(
     return output!;
   }
 );
+
+export async function aiProofreadDocument(input: AiProofreadDocumentInput): Promise<AiProofreadDocumentOutput> {
+  return aiProofreadDocumentFlow(input);
+}

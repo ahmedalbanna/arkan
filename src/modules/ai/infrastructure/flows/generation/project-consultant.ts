@@ -17,7 +17,7 @@ const ConsultantOutputSchema = z.object({
   response: z.string().describe('The AI consultant\'s helpful response.'),
 });
 
-export const projectConsultantFlow = ai.defineFlow({
+const projectConsultantFlow = ai.defineFlow({
   name: 'projectConsultantFlow',
   inputSchema: ConsultantInputSchema,
   outputSchema: ConsultantOutputSchema,
@@ -56,3 +56,7 @@ ${userMessage}
 
     return { response: responseText };
 });
+
+export async function projectConsultant(input: z.infer<typeof ConsultantInputSchema>): Promise<z.infer<typeof ConsultantOutputSchema>> {
+  return projectConsultantFlow(input);
+}

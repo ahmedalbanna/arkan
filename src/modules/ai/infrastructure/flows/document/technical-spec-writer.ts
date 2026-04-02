@@ -37,7 +37,7 @@ const TechnicalSpecInputSchema = z.object({
     targetAudience: z.enum(['developers', 'architects', 'stakeholders']).default('developers'),
 });
 
-export const technicalSpecificationWriter = ai.defineFlow(
+const technicalSpecificationWriterFlow = ai.defineFlow(
     {
         name: 'technicalSpecificationWriter',
         inputSchema: TechnicalSpecInputSchema,
@@ -255,3 +255,7 @@ Style: ${targetAudience === 'developers' ? 'Technical and detailed' : targetAudi
         return finalSpec.output!;
     }
 );
+
+export async function technicalSpecificationWriter(input: z.infer<typeof TechnicalSpecInputSchema>): Promise<z.infer<typeof TechnicalSpecificationSchema>> {
+    return technicalSpecificationWriterFlow(input);
+}

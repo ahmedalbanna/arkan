@@ -9,7 +9,7 @@ const RunAgentInputSchema = z.object({
   token: z.string().optional(), // Token is for server-side auth, not used in the AI prompt itself
 });
 
-export const runAgentFlow = ai.defineFlow(
+const runAgentFlow = ai.defineFlow(
   {
     name: 'runAgentFlow',
     inputSchema: RunAgentInputSchema,
@@ -28,3 +28,7 @@ export const runAgentFlow = ai.defineFlow(
     return llmResponse.text;
   }
 );
+
+export async function runAgent(input: z.infer<typeof RunAgentInputSchema>): Promise<string> {
+  return runAgentFlow(input);
+}

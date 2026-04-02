@@ -16,7 +16,7 @@ import { z } from 'zod';
 export type AcademicLiteratureReviewInput = z.infer<typeof AcademicLiteratureReviewInputSchema>;
 export type AcademicLiteratureReviewOutput = z.infer<typeof AcademicLiteratureReviewOutputSchema>;
 
-export const academicLiteratureReviewFlow = ai.defineFlow(
+const academicLiteratureReviewFlow = ai.defineFlow(
     {
         name: 'academicLiteratureReviewFlow',
         inputSchema: AcademicLiteratureReviewInputSchema,
@@ -56,3 +56,7 @@ export const academicLiteratureReviewFlow = ai.defineFlow(
         };
     }
 );
+
+export async function academicLiteratureReview(input: AcademicLiteratureReviewInput): Promise<AcademicLiteratureReviewOutput> {
+    return academicLiteratureReviewFlow(input);
+}

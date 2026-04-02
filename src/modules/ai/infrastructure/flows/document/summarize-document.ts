@@ -13,10 +13,6 @@
 import { ai } from '@/modules/ai/infrastructure/services/Genkit';
 import { SummarizeDocumentInputSchema, SummarizeDocumentOutputSchema, type SummarizeDocumentInput, type SummarizeDocumentOutput } from '@/modules/ai/domain/schemas';
 
-export async function summarizeDocument(input: SummarizeDocumentInput): Promise<SummarizeDocumentOutput> {
-  return summarizeDocumentFlow(input);
-}
-
 const prompt = ai.definePrompt({
   name: 'summarizeDocumentPrompt',
   input: { schema: SummarizeDocumentInputSchema },
@@ -51,3 +47,7 @@ const summarizeDocumentFlow = ai.defineFlow(
     return text.trim();
   }
 );
+
+export async function summarizeDocument(input: SummarizeDocumentInput): Promise<SummarizeDocumentOutput> {
+  return summarizeDocumentFlow(input);
+}

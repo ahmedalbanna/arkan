@@ -29,7 +29,7 @@ import { z as _z } from 'zod';
 
 // ==================== MAIN FLOW ====================
 
-export const graduationProjectGenerator = ai.defineFlow(
+const graduationProjectGeneratorFlow = ai.defineFlow(
     {
         name: 'graduationProjectGenerator',
         inputSchema: GraduationProjectInputSchema,
@@ -616,3 +616,7 @@ export const graduationProjectGenerator = ai.defineFlow(
         };
     }
 );
+
+export async function graduationProjectGenerator(input: z.infer<typeof GraduationProjectInputSchema>): Promise<z.infer<typeof GraduationProjectDocumentationSchema>> {
+    return graduationProjectGeneratorFlow(input);
+}

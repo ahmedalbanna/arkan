@@ -35,7 +35,7 @@ const PresentationInputSchema = z.object({
     includeDemo: z.boolean().default(false).describe('Include demo section'),
 });
 
-export const presentationContentCreator = ai.defineFlow(
+const presentationContentCreatorFlow = ai.defineFlow(
     {
         name: 'presentationContentCreator',
         inputSchema: PresentationInputSchema,
@@ -173,3 +173,7 @@ Guidelines:
         return result;
     }
 );
+
+export async function presentationContentCreator(input: z.infer<typeof PresentationInputSchema>): Promise<z.infer<typeof PresentationContentSchema>> {
+    return presentationContentCreatorFlow(input);
+}

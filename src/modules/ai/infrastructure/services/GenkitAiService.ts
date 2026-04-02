@@ -67,7 +67,7 @@ export class GenkitAiService implements IAiService {
     async runFlow<TInput, TOutput>(flow: any, input: TInput, flowName?: string): Promise<Result<TOutput, AiError>> {
         const primaryModel = flowName ? selectModel({ flowName }) : null;
         const modelsToTry = primaryModel 
-            ? [primaryModel, "ollama/phi3:mini-4k", "ollama/gemma:2b"] 
+            ? [primaryModel, "ollama/phi4-mini:latest", "ollama/gemma:2b"] 
             : [null]; // null means direct execution without queue manager model selection
         
         // Remove duplicates while preserving order

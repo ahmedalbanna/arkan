@@ -32,10 +32,7 @@ PDF Document:
 `,
 });
 
-export async function rewriteDocumentToMarkdown(input: RewriteDocumentInput): Promise<RewriteDocumentOutput> {
-  return rewriteDocumentFlow(input);
-}
-const rewriteDocumentFlow = ai.defineFlow(
+const rewriteDocumentToMarkdownFlow = ai.defineFlow(
   {
     name: 'rewriteDocumentToMarkdownFlow',
     inputSchema: RewriteDocumentInputSchema,
@@ -52,3 +49,7 @@ const rewriteDocumentFlow = ai.defineFlow(
     
     return text.trim();
   });
+
+export async function rewriteDocumentToMarkdown(input: RewriteDocumentInput): Promise<RewriteDocumentOutput> {
+  return rewriteDocumentToMarkdownFlow(input);
+}

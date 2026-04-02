@@ -20,7 +20,7 @@ import { z } from 'zod';
 export type AcademicPaperQualityCheckerInput = z.infer<typeof AcademicPaperQualityCheckerInputSchema>;
 export type AcademicPaperQualityCheckerOutput = z.infer<typeof AcademicPaperQualityCheckerOutputSchema>;
 
-export const academicPaperQualityCheckerFlow = ai.defineFlow(
+const academicPaperQualityCheckerFlow = ai.defineFlow(
     {
         name: 'academicPaperQualityCheckerFlow',
         inputSchema: AcademicPaperQualityCheckerInputSchema,
@@ -73,3 +73,7 @@ export const academicPaperQualityCheckerFlow = ai.defineFlow(
         };
     }
 );
+
+export async function academicPaperQualityChecker(input: AcademicPaperQualityCheckerInput): Promise<AcademicPaperQualityCheckerOutput> {
+    return academicPaperQualityCheckerFlow(input);
+}

@@ -16,7 +16,7 @@ import { z } from 'zod';
 export type ProfessionalDocumentWriterInput = z.infer<typeof ProfessionalDocumentWriterInputSchema>;
 export type ProfessionalDocumentWriterOutput = z.infer<typeof ProfessionalDocumentWriterOutputSchema>;
 
-export const professionalDocumentWriterFlow = ai.defineFlow(
+const professionalDocumentWriterFlow = ai.defineFlow(
     {
         name: 'professionalDocumentWriterFlow',
         inputSchema: ProfessionalDocumentWriterInputSchema,
@@ -51,3 +51,7 @@ export const professionalDocumentWriterFlow = ai.defineFlow(
         };
     }
 );
+
+export async function professionalDocumentWriter(input: ProfessionalDocumentWriterInput): Promise<ProfessionalDocumentWriterOutput> {
+    return professionalDocumentWriterFlow(input);
+}
