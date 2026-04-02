@@ -9,7 +9,7 @@ import { useLocalization } from '@/context/LocalizationContext';
 import { useBuilderStore } from '@/hooks';
 import { type GenerationControlState, type Tone } from '@/modules/ai-content/domain/entities/ControlTypes';
 import { Section } from '@/modules/ai-content/domain/entities/Section';
-import { Eye, Hash, Settings2, Sparkles, LayoutList, Table2, Network } from 'lucide-react';
+import { Eye, Hash, Settings2, Sparkles, LayoutList, Table2, Network, ScanText } from 'lucide-react';
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader } from '@/components/ui/card';
@@ -20,6 +20,39 @@ import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { cn } from '@/infrastructure/utils/cn';
 import { AnimatePresence, motion } from 'framer-motion';
+
+function detectFormatsFromMarkdown(content: string): GenerationControlState['outputStyle'] {
+    const lines = content.split('\n');
+    const hasHeading = lines.some(l => /^#{1,6}\s/.test(l));
+    const hasList = lines.some(l => /^(\s*[-*+]\s|\s*\d+\.\s)/.test(l));
+    const hasTable = lines.some(l => /\|.*\|/.test(l));
+    const hasCode = /```[\s\S]*?```/.test(content);
+    const hasDiagram = /```\s*(mermaid|plantuml|puml)[\s\S]*?```/i.test(content);
+    const hasMath = /(\$\$[\s\S]*?\$\$|\$[^$\n]+\$)/.test(content);
+    const hasIncludeCitations = /(\[@[\w-]+\]|\[\^[\w-]+\]|\([A-Z][a-z]+,\s*\d{4}\))/.test(content);
+    // Paragraph: non-empty lines that are not headings, list items, table rows, or fences
+    const hasParagraph = lines.some(l => {
+        const trimmed = l.trim();
+        return (
+            trimmed.length > 0 &&
+            !/^#{1,6}\s/.test(trimmed) &&
+            !/^(\s*[-*+]\s|\s*\d+\.\s)/.test(trimmed) &&
+            !/\|.*\|/.test(trimmed) &&
+            !/^```/.test(trimmed)
+        );
+    });
+
+    return {
+        heading: hasHeading,
+        paragraph: hasParagraph,
+        list: hasList,
+        table: hasTable,
+        code: hasCode && !hasDiagram,
+        diagram: hasDiagram,
+        math: hasMath,
+        includeCitations: hasIncludeCitations,
+    };
+}
 
 const diagramTypes = DiagramTypeSchema.options.map(value => {
     let label = '';
@@ -85,6 +118,22 @@ export function SectionGenerationControls({
             handleControlChange('tone', '' as Tone);
         } else {
             handleControlChange('tone', value as Tone);
+        }
+    };
+
+    const handleDetectFormats = () => {
+        const detected = detectFormatsFromMarkdown(section.content);
+        const keys = Object.keys(detected) as Array<keyof GenerationControlState['outputStyle']>;
+        if (selectedSectionIds && selectedSectionIds.length > 0) {
+            updateProject(p => {
+                selectedSectionIds.forEach(id => {
+                    p.updateSection(id, s => s.withProps({ controls: { ...s.controls, outputStyle: detected } }));
+                });
+            });
+        } else {
+            keys.forEach(key => {
+                onOutputStyleChange(key, !!detected[key]);
+            });
         }
     };
 
@@ -193,12 +242,25 @@ export function SectionGenerationControls({
 
             {/* Output format checkboxes */}
             <div className="space-y-4">
-                <div className="flex items-center gap-2 group/header">
-                    <div className="h-4 w-1 bg-primary rounded-full group-hover/header:h-6 transition-all duration-300" />
-                    <div className="space-y-0.5">
-                        <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/80">Output Format</Label>
-                        <p className="text-[9px] text-muted-foreground font-black uppercase tracking-[0.2em] opacity-60">Structural elements to include</p>
+                <div className="flex items-center justify-between gap-2 group/header">
+                    <div className="flex items-center gap-2">
+                        <div className="h-4 w-1 bg-primary rounded-full group-hover/header:h-6 transition-all duration-300" />
+                        <div className="space-y-0.5">
+                            <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/80">Output Format</Label>
+                            <p className="text-[9px] text-muted-foreground font-black uppercase tracking-[0.2em] opacity-60">Structural elements to include</p>
+                        </div>
                     </div>
+                    <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={handleDetectFormats}
+                        disabled={!section.content}
+                        className="h-7 rounded-lg bg-primary/5 text-primary border border-primary/10 hover:bg-primary/10 text-[9px] font-black gap-1.5 px-2.5 uppercase tracking-[0.18em] shrink-0"
+                        title="Detect formats from editor content"
+                    >
+                        <ScanText className="w-3 h-3" />
+                        Detect
+                    </Button>
                 </div>
 
                 <div className="grid gap-2 grid-cols-2">
