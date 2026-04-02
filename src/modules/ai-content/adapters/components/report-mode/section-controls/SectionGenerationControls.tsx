@@ -9,7 +9,7 @@ import { useLocalization } from '@/context/LocalizationContext';
 import { useBuilderStore } from '@/hooks';
 import { type GenerationControlState, type Tone } from '@/modules/ai-content/domain/entities/ControlTypes';
 import { Section } from '@/modules/ai-content/domain/entities/Section';
-import { Eye, Hash, Info, Settings2, Sparkles, LayoutList, Table2, Network } from 'lucide-react';
+import { Eye, Hash, Settings2, Sparkles, LayoutList, Table2, Network } from 'lucide-react';
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader } from '@/components/ui/card';
@@ -89,28 +89,29 @@ export function SectionGenerationControls({
     };
 
     const isCustomTone = !toneOptions.some(opt => opt.value === controls.tone);
-
     const instructionPreview = section.buildActionPrompt();
 
     return (
         <div className="space-y-6 pt-2">
+            {/* Section header */}
             <div className="space-y-1">
                 <h4 className="text-[10px] font-black uppercase tracking-[0.3em] text-primary/70 flex items-center gap-2">
                     <Settings2 className="h-3 w-3" />
-                    Generation Parameters
+                    Generation Settings
                 </h4>
-                <p className="text-[9px] text-muted-foreground italic font-black opacity-60 uppercase tracking-widest">
-                    Optimize intelligence parameters for high-fidelity output.
+                <p className="text-[9px] text-muted-foreground italic font-medium opacity-60 uppercase tracking-wider">
+                    Configure AI output parameters for this section.
                 </p>
             </div>
 
             <div className="space-y-6 relative">
                 <div className="absolute left-[-1.25rem] top-0 bottom-0 w-px bg-gradient-to-b from-primary/30 via-primary/5 to-transparent" />
 
+                {/* Formality slider */}
                 <div className="space-y-3.5">
                     <div className="flex justify-between items-center group/label">
                         <Label htmlFor={`formality-${section.id}`} className="text-[10px] font-black uppercase tracking-[0.2em] text-primary/60 group-hover/label:text-primary transition-colors">
-                            Cognitive Complexity
+                            Formality
                         </Label>
                         <div className="flex items-center gap-2">
                             <div className="h-1.5 w-1.5 rounded-full bg-primary animate-pulse shadow-[0_0_8px_rgba(var(--primary),0.6)]" />
@@ -129,15 +130,16 @@ export function SectionGenerationControls({
                     />
                     <div className="flex justify-between text-[8px] font-black text-muted-foreground/50 uppercase tracking-[0.2em]">
                         <span>Informal</span>
-                        <span>Analytical</span>
+                        <span>Neutral</span>
                         <span>Academic</span>
                     </div>
                 </div>
 
+                {/* Tone + Word count */}
                 <div className="grid gap-4 grid-cols-2">
                     <div className="space-y-2">
                         <Label htmlFor={`tone-${section.id}`} className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground">
-                            Intelligence Tone
+                            Tone
                         </Label>
                         {isCustomTone ? (
                             <div className="relative group">
@@ -148,7 +150,7 @@ export function SectionGenerationControls({
                                     onBlur={(e) => {
                                         if (e.target.value.trim() === '') handleControlChange('tone', 'professional');
                                     }}
-                                    placeholder="Custom..."
+                                    placeholder="Custom tone..."
                                     className="h-9 text-[11px] bg-muted/5 border-primary/10 focus-visible:ring-primary/20 focus-visible:border-primary/30 transition-all pl-7"
                                 />
                                 <Sparkles className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3 w-3 text-primary/40 group-focus-within:text-primary transition-colors" />
@@ -162,7 +164,7 @@ export function SectionGenerationControls({
                                     {toneOptions.map(opt => (
                                         <SelectItem key={opt.value} value={opt.value} className="text-xs font-medium">{opt.label}</SelectItem>
                                     ))}
-                                    <SelectItem value="custom" className="text-xs italic font-bold text-primary">Override...</SelectItem>
+                                    <SelectItem value="custom" className="text-xs italic font-bold text-primary">Custom...</SelectItem>
                                 </SelectContent>
                             </Select>
                         )}
@@ -170,7 +172,7 @@ export function SectionGenerationControls({
 
                     <div className="space-y-2">
                         <Label htmlFor={`wordCount-${section.id}`} className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground">
-                            Volume Target
+                            Word Count
                         </Label>
                         <div className="relative">
                             <Input
@@ -189,12 +191,13 @@ export function SectionGenerationControls({
 
             <Separator className="bg-gradient-to-r from-primary/20 via-primary/5 to-transparent h-px" />
 
+            {/* Output format checkboxes */}
             <div className="space-y-4">
                 <div className="flex items-center gap-2 group/header">
-                    <div className="h-4 w-1 bg-primary rounded-full group-hover:h-6 transition-all duration-300" />
+                    <div className="h-4 w-1 bg-primary rounded-full group-hover/header:h-6 transition-all duration-300" />
                     <div className="space-y-0.5">
-                        <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/80">Structure Matrix</Label>
-                        <p className="text-[9px] text-muted-foreground font-black uppercase tracking-[0.2em] opacity-60">Architectural Elements</p>
+                        <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/80">Output Format</Label>
+                        <p className="text-[9px] text-muted-foreground font-black uppercase tracking-[0.2em] opacity-60">Structural elements to include</p>
                     </div>
                 </div>
 
@@ -226,18 +229,19 @@ export function SectionGenerationControls({
                 </div>
             </div>
 
+            {/* Conditional sub-controls */}
             <div className="space-y-4">
                 <AnimatePresence>
                     {controls.outputStyle?.heading && (
-                        <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="space-y-2.5 rounded-2xl border bg-muted/5 p-4 shadow-sm group/topics">
+                        <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="space-y-2.5 rounded-2xl border bg-muted/5 p-4 shadow-sm">
                             <Label htmlFor={`includedHeadings-${section.id}`} className="text-[10px] font-bold uppercase tracking-widest text-primary flex items-center gap-2">
-                                <LayoutList className="h-3 w-3" /> Topic Blueprint
+                                <LayoutList className="h-3 w-3" /> Headings
                             </Label>
                             <Textarea
                                 id={`includedHeadings-${section.id}`}
                                 defaultValue={(controls.includedHeadings || []).join('\n')}
                                 onBlur={(e) => handleControlChange('includedHeadings', e.target.value.split('\n').filter(s => s.trim()))}
-                                placeholder="One topic per line..."
+                                placeholder="One heading per line..."
                                 rows={3}
                                 className="text-[11px] bg-background/50 border-primary/10 focus-visible:ring-primary/20 font-medium leading-relaxed resize-none p-3"
                             />
@@ -245,30 +249,31 @@ export function SectionGenerationControls({
                     )}
 
                     {controls.outputStyle?.table && (
-                        <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="space-y-2.5 rounded-2xl border bg-muted/5 p-4 shadow-sm group/table">
+                        <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="space-y-2.5 rounded-2xl border bg-muted/5 p-4 shadow-sm">
                             <Label htmlFor={`tableCaption-${section.id}`} className="text-[10px] font-bold uppercase tracking-widest text-primary flex items-center gap-2">
-                                <Table2 className="h-3 w-3" /> Data Legend
+                                <Table2 className="h-3 w-3" /> Table Caption
                             </Label>
                             <Input
                                 id={`tableCaption-${section.id}`}
                                 defaultValue={controls.tableCaption || ''}
                                 onBlur={(e) => handleControlChange('tableCaption', e.target.value)}
-                                placeholder="Table caption..."
+                                placeholder="e.g. Comparison of methods..."
                                 className="h-9 text-[11px] bg-background/50 border-primary/10 font-medium"
                             />
                         </motion.div>
                     )}
                 </AnimatePresence>
 
-                {/* Additional conditional inputs following same pattern */}
                 <div className="grid gap-4 grid-cols-1">
                     {controls.outputStyle?.diagram && (
                         <div className="space-y-2.5 rounded-2xl border bg-muted/5 p-4 shadow-sm">
                             <Label htmlFor={`diagramType-${section.id}`} className="text-[10px] font-bold uppercase tracking-widest text-primary flex items-center gap-2">
-                                <Network className="h-3 w-3" /> Schema Type
+                                <Network className="h-3 w-3" /> Diagram Type
                             </Label>
                             <Select value={controls.diagramType} onValueChange={(val) => handleControlChange('diagramType', val as DiagramType)}>
-                                <SelectTrigger id={`diagramType-${section.id}`} className="h-9 text-[11px] bg-background/50 border-primary/10 font-medium font-mono"><SelectValue /></SelectTrigger>
+                                <SelectTrigger id={`diagramType-${section.id}`} className="h-9 text-[11px] bg-background/50 border-primary/10 font-medium font-mono">
+                                    <SelectValue />
+                                </SelectTrigger>
                                 <SelectContent className="border-primary/10 backdrop-blur-xl">
                                     {diagramTypes.map(type => (
                                         <SelectItem key={type.value} value={type.value} className="text-xs font-mono">{type.label}</SelectItem>
@@ -280,6 +285,7 @@ export function SectionGenerationControls({
                 </div>
             </div>
 
+            {/* Prompt preview card */}
             <div className="relative group/manifest">
                 <div className="absolute -inset-0.5 bg-gradient-to-r from-primary/20 via-primary/5 to-primary/20 rounded-2xl blur opacity-20 group-hover/manifest:opacity-40 transition duration-1000" />
                 <Card className="relative bg-background/60 backdrop-blur-xl border-dashed border-primary/20 overflow-hidden rounded-2xl">
@@ -290,19 +296,19 @@ export function SectionGenerationControls({
                             </div>
                             <div className="space-y-0.5">
                                 <CardDescription className="text-[10px] font-black uppercase tracking-[0.2em] text-primary">
-                                    Instruction Manifest
+                                    Prompt Preview
                                 </CardDescription>
-                                <p className="text-[8px] font-bold text-muted-foreground uppercase tracking-widest opacity-60">Technical Preview</p>
+                                <p className="text-[8px] font-bold text-muted-foreground uppercase tracking-widest opacity-60">AI instruction summary</p>
                             </div>
                         </div>
                         <Button
                             variant="ghost"
                             size="sm"
                             onClick={() => setShowFullPrompt(true)}
-                            className="h-8 rounded-xl bg-primary/5 text-primary border border-primary/10 hover:bg-primary/10 text-[10px] font-bold gap-2 px-3"
+                            className="h-7 rounded-lg bg-primary/5 text-primary border border-primary/10 hover:bg-primary/10 text-[9px] font-black gap-1.5 px-2.5 uppercase tracking-[0.18em]"
                         >
-                            <Eye className="w-3.5 h-3.5" />
-                            Expand
+                            <Eye className="w-3 h-3" />
+                            Full Prompt
                         </Button>
                     </CardHeader>
                     <CardContent className="p-4 pt-0">
@@ -323,4 +329,4 @@ export function SectionGenerationControls({
             />
         </div>
     );
-};
+}

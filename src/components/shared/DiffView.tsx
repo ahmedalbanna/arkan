@@ -6,7 +6,7 @@ import type { DiffPart } from "@/modules/projects/domain/utils/diff";
 
 export const DiffView = ({ diff }: { diff: DiffPart[] }) => {
     return (
-        <div className="whitespace-pre-wrap text-[13px] leading-relaxed font-mono p-4 rounded-xl bg-muted/5 border shadow-inner">
+        <div className="whitespace-pre-wrap text-[13px] leading-relaxed font-mono p-4 rounded-xl bg-muted/5 border border-border/40 shadow-inner">
             {diff.map((part, index) => (
                 <span key={index} className={cn(
                     "transition-colors duration-300 rounded-sm px-0.5",

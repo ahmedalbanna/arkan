@@ -1,34 +1,23 @@
-
 'use client';
 
-import { useForm, Controller, useFieldArray } from 'react-hook-form';
+import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
-import { Button } from '@/components/ui/button';
+import * as z from 'zod';
+import { useBuilderStore } from '@/hooks';
+import { useEffect } from 'react';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { useBuilderStore } from '@/hooks';
-import { Loader2, UploadCloud, Trash2, X } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { useEffect, useState } from 'react';
-import Image from 'next/image';
-import { Label } from '@/components/ui/label';
 import { CustomSelect } from '@/components/ui/CustomSelect';
-import { useImageUpload } from '@/modules/ai/adapters/hooks/useImageUpload';
-import { type ProjectProperties } from '@/modules/projects/domain/entities/Project';
 
 const settingsSchema = z.object({
-  name: z.string().min(1, 'Project name is required.'),
+  name: z.string().min(1, 'Title is required'),
   projectDescription: z.string().optional(),
   projectType: z.string().optional(),
+  educationalLevel: z.string().optional(),
   specialization: z.string().optional(),
   university: z.string().optional(),
-  supervisor: z.string().optional(),
-  course: z.string().optional(),
-  educationalLevel: z.string().optional(),
-  teamMembers: z.string().optional(),
   citationStyle: z.string().optional(),
 });
 
@@ -36,23 +25,18 @@ type SettingsFormValues = z.infer<typeof settingsSchema>;
 
 export default function ProjectSettingsPanel() {
   const { project, updateProject } = useBuilderStore();
-  const [logoPreview, setLogoPreview] = useState<string | null>(null);
-  const { isUploading, handleFileUpload } = useImageUpload();
 
   const form = useForm<SettingsFormValues>({
     resolver: zodResolver(settingsSchema),
     defaultValues: {
-      name: '',
-      projectDescription: '',
-      projectType: '',
-      specialization: '',
-      university: '',
-      supervisor: '',
-      course: '',
-      educationalLevel: '',
-      teamMembers: '',
-      citationStyle: 'APA7',
-    }
+      name: project?.name || '',
+      projectDescription: project?.projectDescription || '',
+      projectType: project?.projectType || '',
+      educationalLevel: project?.educationalLevel || '',
+      specialization: project?.specialization || '',
+      university: project?.university || '',
+      citationStyle: project?.citationStyle || '',
+    },
   });
 
   useEffect(() => {
@@ -61,130 +45,111 @@ export default function ProjectSettingsPanel() {
         name: project.name || '',
         projectDescription: project.projectDescription || '',
         projectType: project.projectType || '',
+        educationalLevel: project.educationalLevel || '',
         specialization: project.specialization || '',
         university: project.university || '',
-        supervisor: project.supervisor || '',
-        course: project.course || '',
-        educationalLevel: project.educationalLevel || '',
-        teamMembers: Array.isArray(project.teamMembers) ? project.teamMembers.join(', ') : '',
-        citationStyle: project.citationStyle || 'APA7',
+        citationStyle: project.citationStyle || '',
       });
-      setLogoPreview(project.logoUrl || null);
     }
   }, [project, form]);
 
   const handleBlur = () => {
-    const data = form.getValues();
-    updateProject(p => {
-      const updatePayload: Partial<ProjectProperties> = { ...(data as any) };
-      if (data.teamMembers) {
-        updatePayload.teamMembers = (data.teamMembers as unknown as string).split(',').map((name: string) => name.trim()).filter(Boolean);
-      } else {
-        updatePayload.teamMembers = [];
-      }
-      return p.withProps(updatePayload);
+    const values = form.getValues();
+    updateProject((p) => {
+      return p.withProps({
+        ...values,
+      });
     });
   };
-  
+
   const documentTypeOptions = [
-      { value: 'Graduation Project', label: 'Graduation Project' },
-      { value: 'Research Paper', label: 'Research Paper' },
-      { value: 'Analytical Essay', label: 'Analytical Essay' },
-      { value: 'Argumentative Essay', label: 'Argumentative Essay' },
-      { value: 'Literature Review', label: 'Literature Review' },
-      { value: 'Case Study', label: 'Case Study' },
-      { value: 'Lab Report', label: 'Lab Report' },
-      { value: 'Research Proposal', label: 'Research Proposal' },
-      { value: 'Thesis Statement', label: 'Thesis Statement' },
-      { value: 'Dissertation Chapter', label: 'Dissertation Chapter' },
-      { value: 'Term Paper', label: 'Term Paper' },
-      { value: 'Critical Analysis', label: 'Critical Analysis' },
-      { value: 'Book Review', label: 'Book Review' },
-      { value: 'Article Summary', label: 'Article Summary' },
-      { value: 'Annotated Bibliography', label: 'Annotated Bibliography' },
-      { value: 'Position Paper', label: 'Position Paper' },
-      { value: 'Reflection Paper', label: 'Reflection Paper' },
-      { value: 'Technical Report', label: 'Technical Report' },
-      { value: 'Business Proposal', label: 'Business Proposal' },
-      { value: 'Software Documentation', label: 'Software Documentation' },
-      { value: 'Creative Story', label: 'Creative Story' },
-      { value: 'Blog Post', label: 'Blog Post' },
+    { value: 'report', label: 'Report' },
+    { value: 'essay', label: 'Essay' },
+    { value: 'research-paper', label: 'Research Paper' },
+    { value: 'thesis', label: 'Thesis' },
+    { value: 'dissertation', label: 'Dissertation' },
+    { value: 'case-study', label: 'Case Study' },
+    { value: 'literature-review', label: 'Literature Review' },
+    { value: 'business-plan', label: 'Business Plan' },
+    { value: 'project-proposal', label: 'Project Proposal' },
+    { value: 'reflection-paper', label: 'Reflection Paper' },
+    { value: 'lab-report', label: 'Lab Report' },
+    { value: 'annotated-bibliography', label: 'Annotated Bibliography' },
+    { value: 'other', label: 'Other' },
   ];
-  
+
   const specializationOptions = [
-      { value: 'Artificial Intelligence', label: 'Artificial Intelligence' },
-      { value: 'Web Development', label: 'Web Development' },
-      { value: 'Data Science', label: 'Data Science' },
-      { value: 'Cybersecurity', label: 'Cybersecurity' },
-      { value: 'Machine Learning', label: 'Machine Learning' },
-      { value: 'Software Engineering', label: 'Software Engineering' },
-      { value: 'Computer Science', label: 'Computer Science' },
-      { value: 'Electrical Engineering', label: 'Electrical Engineering' },
-      { value: 'Mechanical Engineering', label: 'Mechanical Engineering' },
-      { value: 'Civil Engineering', label: 'Civil Engineering' },
-      { value: 'Medicine', label: 'Medicine' },
-      { value: 'Law', label: 'Law' },
-      { value: 'Business Administration', label: 'Business Administration' },
-      { value: 'Marketing', label: 'Marketing' },
-      { value: 'Finance', label: 'Finance' },
-      { value: 'Physics', label: 'Physics' },
-      { value: 'Chemistry', label: 'Chemistry' },
-      { value: 'Biology', label: 'Biology' },
-      { value: 'Mathematics', label: 'Mathematics' },
-      { value: 'Psychology', label: 'Psychology' },
-      { value: 'Sociology', label: 'Sociology' },
-      { value: 'Economics', label: 'Economics' },
-      { value: 'Political Science', label: 'Political Science' },
-      { value: 'History', label: 'History' },
-      { value: 'Literature', label: 'Literature' },
-      { value: 'Philosophy', label: 'Philosophy' },
-      { value: 'Education', label: 'Education' },
-      { value: 'Environmental Science', label: 'Environmental Science' },
-      { value: 'Communication Studies', label: 'Communication Studies' },
-      { value: 'Art & Design', label: 'Art & Design' },
-      { value: 'Music', label: 'Music' },
-      { value: 'Geography', label: 'Geography' },
-      { value: 'Linguistics', label: 'Linguistics' },
+    { value: 'computer-science', label: 'Computer Science' },
+    { value: 'business-administration', label: 'Business Administration' },
+    { value: 'medicine', label: 'Medicine' },
+    { value: 'law', label: 'Law' },
+    { value: 'engineering', label: 'Engineering' },
+    { value: 'psychology', label: 'Psychology' },
+    { value: 'education', label: 'Education' },
+    { value: 'economics', label: 'Economics' },
+    { value: 'political-science', label: 'Political Science' },
+    { value: 'sociology', label: 'Sociology' },
+    { value: 'biology', label: 'Biology' },
+    { value: 'chemistry', label: 'Chemistry' },
+    { value: 'physics', label: 'Physics' },
+    { value: 'mathematics', label: 'Mathematics' },
+    { value: 'history', label: 'History' },
+    { value: 'philosophy', label: 'Philosophy' },
+    { value: 'linguistics', label: 'Linguistics' },
+    { value: 'literature', label: 'Literature' },
+    { value: 'art-history', label: 'Art History' },
+    { value: 'music', label: 'Music' },
+    { value: 'architecture', label: 'Architecture' },
+    { value: 'environmental-science', label: 'Environmental Science' },
+    { value: 'nursing', label: 'Nursing' },
+    { value: 'public-health', label: 'Public Health' },
+    { value: 'journalism', label: 'Journalism' },
+    { value: 'marketing', label: 'Marketing' },
+    { value: 'finance', label: 'Finance' },
+    { value: 'accounting', label: 'Accounting' },
+    { value: 'international-relations', label: 'International Relations' },
+    { value: 'anthropology', label: 'Anthropology' },
+    { value: 'geography', label: 'Geography' },
+    { value: 'geology', label: 'Geology' },
+    { value: 'astronomy', label: 'Physics' },
+    { value: 'religious-studies', label: 'Religious Studies' },
+    { value: 'social-work', label: 'Social Work' },
+    { value: 'criminology', label: 'Criminology' },
+    { value: 'other', label: 'Other' },
   ];
-  
+
   const educationalLevelOptions = [
-      { value: 'High School', label: 'High School' },
-      { value: 'Undergraduate (First Year)', label: 'Undergraduate (First Year)' },
-      { value: 'Undergraduate (Second/Third Year)', label: 'Undergraduate (Second/Third Year)' },
-      { value: 'Undergraduate (Final Year)', label: 'Undergraduate (Final Year)' },
-      { value: "Master's", label: "Master's" },
-      { value: 'Doctoral', label: 'Doctoral' },
-      { value: 'Post-Doctoral', label: 'Post-Doctoral' },
-      { value: 'Professional', label: 'Professional' },
+    { value: 'high-school', label: 'High School' },
+    { value: 'undergraduate', label: 'Undergraduate' },
+    { value: 'postgraduate', label: 'Postgraduate' },
+    { value: 'phd', label: 'PhD' },
+    { value: 'professional', label: 'Professional' },
+    { value: 'other', label: 'Other' },
   ];
 
   const universityOptions = [
-      { value: "King Saud University", label: "King Saud University" },
-      { value: "Umm Al-Qura University", label: "Umm Al-Qura University" },
-      { value: "Islamic University of Madinah", label: "Islamic University of Madinah" },
-      { value: "Imam Muhammad ibn Saud Islamic University", label: "Imam Muhammad ibn Saud Islamic University" },
-      { value: "King Fahd University of Petroleum and Minerals", label: "King Fahd University of Petroleum and Minerals" }
+    { value: 'king-saud-university', label: 'King Saud University' },
+    { value: 'king-abdulaziz-university', label: 'King Abdulaziz University' },
+    { value: 'king-fahd-university', label: 'King Fahd University' },
+    { value: 'other', label: 'Other' },
   ];
 
   const citationStyleOptions = [
-    { value: 'APA7', label: 'APA (7th Edition)' },
-    { value: 'MLA9', label: 'MLA (9th Edition)' },
-    { value: 'Chicago17', label: 'Chicago (17th Edition)' },
-    { value: 'Harvard', label: 'Harvard' },
-    { value: 'IEEE', label: 'IEEE' },
-    { value: 'Vancouver', label: 'Vancouver' },
-    { value: 'OSCOLA', label: 'OSCOLA (Legal)' },
-    { value: 'AMA', label: 'AMA' },
-    { value: 'ASA', label: 'ASA' },
-    { value: 'Turabian', label: 'Turabian' },
+    { value: 'apa', label: 'APA' },
+    { value: 'mla', label: 'MLA' },
+    { value: 'chicago', label: 'Chicago' },
+    { value: 'harvard', label: 'Harvard' },
+    { value: 'vancouver', label: 'Vancouver' },
+    { value: 'ieee', label: 'IEEE' },
+    { value: 'other', label: 'Other' },
   ];
 
   return (
     <div className="h-full flex flex-col space-y-6 pt-2 animate-in fade-in slide-in-from-right-2 duration-300">
       <div className="space-y-1">
-        <h4 className="text-[10px] font-black uppercase tracking-[0.3em] text-primary/70">Project Identity</h4>
+        <h4 className="text-[10px] font-black uppercase tracking-[0.3em] text-primary/70">Project Details</h4>
         <p className="text-[9px] text-muted-foreground italic font-medium opacity-60 uppercase tracking-wider">
-          Configure the core structural vectors for your document.
+          Configure the main metadata for your document.
         </p>
       </div>
 
@@ -200,7 +165,7 @@ export default function ProjectSettingsPanel() {
                   name="name" 
                   render={({ field }) => (
                     <FormItem className="space-y-1.5">
-                      <FormLabel className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/60">Core Title</FormLabel>
+                      <FormLabel className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/60">Title</FormLabel>
                       <FormControl>
                         <Input 
                           {...field} 
@@ -219,7 +184,7 @@ export default function ProjectSettingsPanel() {
                   name="projectDescription" 
                   render={({ field }) => (
                     <FormItem className="space-y-1.5">
-                      <FormLabel className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/60">Executive Abstract</FormLabel>
+                      <FormLabel className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/60">Description</FormLabel>
                       <FormControl>
                         <Textarea 
                           {...field} 
@@ -238,7 +203,7 @@ export default function ProjectSettingsPanel() {
               <div className="space-y-5">
                 <div className="flex items-center gap-3 group/header">
                     <div className="h-4 w-1 bg-primary/40 rounded-full group-hover:h-6 transition-all duration-300" />
-                    <span className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/80">Academic Matrix</span>
+                    <span className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/80">Academic Context</span>
                 </div>
 
                 <div className="grid gap-4">
@@ -247,11 +212,11 @@ export default function ProjectSettingsPanel() {
                     name="projectType"
                     render={({ field }) => (
                       <FormItem className="space-y-1.5">
-                        <FormLabel className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/60">Structural Type</FormLabel>
+                        <FormLabel className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/60">Document Type</FormLabel>
                         <FormControl>
                           <CustomSelect
                             value={field.value || ''}
-                            onChange={(value) => {
+                            onChange={(value: string) => {
                               field.onChange(value);
                               handleBlur();
                             }}
@@ -270,16 +235,16 @@ export default function ProjectSettingsPanel() {
                       name="specialization"
                       render={({ field }) => (
                           <FormItem className="space-y-1.5">
-                              <FormLabel className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/60">Domain Specialization</FormLabel>
+                              <FormLabel className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/60">Field of Study</FormLabel>
                               <FormControl>
                                   <CustomSelect
                                       value={field.value || ''}
-                                      onChange={(value) => {
+                                      onChange={(value: string) => {
                                           field.onChange(value);
                                           handleBlur();
                                       }}
                                       options={specializationOptions}
-                                      placeholder="Select domain..."
+                                      placeholder="Select field..."
                                       className="h-9 text-[11px] bg-muted/5 border-primary/10 focus:ring-primary/20 rounded-xl"
                                   />
                               </FormControl>
@@ -293,11 +258,11 @@ export default function ProjectSettingsPanel() {
                       name="educationalLevel"
                       render={({ field }) => (
                           <FormItem className="space-y-1.5">
-                              <FormLabel className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/60">Academic Stature</FormLabel>
+                              <FormLabel className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/60">Education Level</FormLabel>
                               <FormControl>
                                   <CustomSelect
                                       value={field.value || ''}
-                                      onChange={(value) => {
+                                      onChange={(value: string) => {
                                           field.onChange(value);
                                           handleBlur();
                                       }}
@@ -316,11 +281,11 @@ export default function ProjectSettingsPanel() {
                       name="university"
                       render={({ field }) => (
                           <FormItem className="space-y-1.5">
-                              <FormLabel className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/60">Core Institution</FormLabel>
+                              <FormLabel className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/60">Institution</FormLabel>
                               <FormControl>
                                   <CustomSelect
                                       value={field.value || ''}
-                                      onChange={(value) => {
+                                      onChange={(value: string) => {
                                           field.onChange(value);
                                           handleBlur();
                                       }}
@@ -339,16 +304,16 @@ export default function ProjectSettingsPanel() {
                     name="citationStyle"
                     render={({ field }) => (
                       <FormItem className="space-y-1.5">
-                        <FormLabel className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/60">Citation Standard</FormLabel>
+                        <FormLabel className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/60">Citation Style</FormLabel>
                         <FormControl>
                           <CustomSelect
                             value={field.value || ''}
-                            onChange={(value) => {
+                            onChange={(value: string) => {
                               field.onChange(value);
                               handleBlur();
                             }}
                             options={citationStyleOptions}
-                            placeholder="Select standard..."
+                            placeholder="Select style..."
                             className="h-9 text-[11px] bg-muted/5 border-primary/10 focus:ring-primary/20 rounded-xl"
                           />
                         </FormControl>
@@ -365,5 +330,3 @@ export default function ProjectSettingsPanel() {
     </div>
   );
 }
-
-  

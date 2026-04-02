@@ -228,7 +228,7 @@ export const CoverPageSettingsPanel: React.FC<CoverPageSettingsPanelProps> = ({ 
                     style={{ maxHeight: 'calc(100% - 5rem)' }}
                 >
                     {/* ── Panel Header ─────────────────────────────────────── */}
-                    <div className="flex items-center justify-between px-4 py-3 border-b border-primary/8 bg-muted/20 flex-shrink-0">
+                    <div className="flex items-center justify-between px-4 py-3 border-b border-primary/[0.08] bg-muted/20 flex-shrink-0">
                         <div className="flex items-center gap-2.5">
                             {/* Live pulse */}
                             <div className="relative flex-shrink-0">
@@ -579,7 +579,7 @@ export const CoverPageSettingsPanel: React.FC<CoverPageSettingsPanelProps> = ({ 
                     </ScrollArea>
 
                     {/* ── Footer hint ──────────────────────────────────────── */}
-                    <div className="flex-shrink-0 px-4 py-2.5 border-t border-primary/8 bg-muted/10 flex items-center gap-2">
+                    <div className="flex-shrink-0 px-4 py-2.5 border-t border-primary/[0.08] bg-muted/10 flex items-center gap-2">
                         <Sparkles className="h-3 w-3 text-primary/30 flex-shrink-0" />
                         <p className="text-[8px] font-medium uppercase tracking-widest text-muted-foreground/30">
                             Changes reflect live on the cover page

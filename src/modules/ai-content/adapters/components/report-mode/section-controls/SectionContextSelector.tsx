@@ -2,9 +2,7 @@
 'use client';
 
 import { Badge } from '@/components/ui/badge';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Label } from '@/components/ui/label';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useContextSelector } from '@/hooks';
 import { type ExternalContextType } from '@/modules/ai-content/domain/entities/ControlTypes';
@@ -14,6 +12,8 @@ import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useBuilderStore } from '@/hooks';
 import { useToast } from '@/hooks/util/use-toast';
+import { Label } from '@/components/ui/label';
+import { Card, CardContent } from '@/components/ui/card';
 import { cn } from '@/infrastructure/utils/cn';
 
 interface SectionContextSelectorProps {
@@ -36,7 +36,7 @@ export function SectionContextSelector({ sectionId, selectedSectionIds }: Sectio
 
   const fileTypes: ExternalContextType[] = ['context', 'example', 'question', 'textbook'];
 
-  // Get all sections except current one for copying context from
+  // Sections that have context to copy from
   const otherSections = useMemo(() => {
     return (reportSections as any[]).filter(s => s.id !== sectionId && (
       Object.keys((s as any).context?.sections || {}).length > 0 ||
@@ -50,7 +50,6 @@ export function SectionContextSelector({ sectionId, selectedSectionIds }: Sectio
     const sourceSection = project.getSection(selectedSourceSection);
     if (!sourceSection) return;
 
-    // Copy the context from source section to current section
     updateProject(p => p.updateSection(sectionId, s => s.withProps({
       context: {
         sections: { ...sourceSection.context?.sections },
@@ -83,72 +82,79 @@ export function SectionContextSelector({ sectionId, selectedSectionIds }: Sectio
 
   return (
     <div className="space-y-6 pt-2">
+      {/* Section header */}
       <div className="space-y-1">
         <h4 className="text-[10px] font-black uppercase tracking-[0.3em] text-primary/70 flex items-center gap-2">
-            <Share2 className="h-3 w-3" />
-            Context Orchestrator
+          <Share2 className="h-3 w-3" />
+          Context Links
         </h4>
         <p className="text-[9px] text-muted-foreground italic font-medium opacity-60 uppercase tracking-wider">
-            Define relational vectors and source data mapping.
+          Link other sections and uploaded files as AI context.
         </p>
       </div>
 
       <div className="space-y-6 relative">
         <div className="absolute left-[-1.25rem] top-0 bottom-0 w-px bg-gradient-to-b from-primary/30 via-primary/5 to-transparent" />
 
+        {/* Copy context from another section */}
         {otherSections.length > 0 && (
           <div className="relative group/copy">
             <div className="absolute -inset-0.5 bg-gradient-to-r from-primary/20 to-transparent rounded-2xl blur opacity-20 group-hover/copy:opacity-40 transition" />
             <Card className="relative bg-muted/5 border-dashed border-primary/20 shadow-none rounded-2xl overflow-hidden">
-                <CardContent className="p-4 space-y-3">
-                <Label className="text-[9px] font-black uppercase tracking-[0.2em] text-primary/60">Knowledge Mirroring</Label>
+              <CardContent className="p-4 space-y-3">
+                <Label className="text-[9px] font-black uppercase tracking-[0.2em] text-primary/60">Copy from Section</Label>
                 <div className="flex gap-2">
-                    <Select value={selectedSourceSection} onValueChange={setSelectedSourceSection}>
+                  <Select value={selectedSourceSection} onValueChange={setSelectedSourceSection}>
                     <SelectTrigger className="h-9 text-[11px] bg-background/50 border-primary/10 rounded-xl font-medium">
-                        <SelectValue placeholder="Sync from source..." />
+                      <SelectValue placeholder="Choose a section..." />
                     </SelectTrigger>
                     <SelectContent className="border-primary/10 backdrop-blur-xl">
-                        {otherSections.map(section => {
+                      {otherSections.map(section => {
                         const contextCount = Object.keys((section as any).context?.sections || {}).length +
                                             Object.keys((section as any).context?.externalContext || {}).length;
                         return (
-                            <SelectItem key={section.id} value={section.id} className="text-xs font-medium">
+                          <SelectItem key={section.id} value={section.id} className="text-xs font-medium">
                             {section.title} <span className="text-[10px] opacity-40">({contextCount})</span>
-                            </SelectItem>
+                          </SelectItem>
                         );
-                        })}
+                      })}
                     </SelectContent>
-                    </Select>
-                    <Button
-                        size="icon"
-                        onClick={handleCopyContext}
-                        disabled={!selectedSourceSection}
-                        className="h-9 w-9 shrink-0 rounded-xl shadow-lg shadow-primary/20"
-                    >
-                        <Copy className="h-4 w-4" />
-                    </Button>
+                  </Select>
+                  <Button
+                    size="icon"
+                    onClick={handleCopyContext}
+                    disabled={!selectedSourceSection}
+                    className="h-9 w-9 shrink-0 rounded-xl shadow-lg shadow-primary/20"
+                  >
+                    <Copy className="h-4 w-4" />
+                  </Button>
                 </div>
-                </CardContent>
+              </CardContent>
             </Card>
           </div>
         )}
 
         <div className="space-y-5">
-          <div className="rounded-2xl border border-primary/10 bg-muted/5 overflow-hidden flex flex-col shadow-sm group/sections">
+          {/* Sections list */}
+          <div className="rounded-2xl border border-primary/10 bg-muted/5 overflow-hidden flex flex-col shadow-sm">
             <div className="flex items-center justify-between px-4 py-2 bg-primary/[0.04] border-b border-primary/10">
               <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.2em] text-primary/70">
                 <Folder className="h-3 w-3" />
-                Relational Nodes
+                Sections
               </div>
-              <Badge variant="outline" className="h-5 text-[9px] font-black border-primary/20 bg-primary/10 text-primary tabular-nums px-2 rounded-full shadow-inner">{sectionOptions.length}</Badge>
+              <Badge variant="outline" className="h-5 text-[9px] font-black border-primary/20 bg-primary/10 text-primary tabular-nums px-2 rounded-full shadow-inner">
+                {sectionOptions.length}
+              </Badge>
             </div>
             <ScrollArea className="h-36">
               <div className="p-1 space-y-0.5">
                 {sectionOptions.length > 0 ? (
                   sectionOptions.map((option) => (
                     <label key={`section-${option.id}`} className={cn(
-                        "flex items-center gap-3 rounded-xl px-3 py-2 text-[11px] transition-all duration-300 cursor-pointer group",
-                        currentSelection.sections?.[option.id] ? "bg-primary/[0.04] text-primary" : "hover:bg-primary/[0.02] text-muted-foreground hover:text-foreground"
+                      "flex items-center gap-3 rounded-xl px-3 py-2 text-[11px] transition-all duration-300 cursor-pointer group",
+                      currentSelection.sections?.[option.id]
+                        ? "bg-primary/[0.04] text-primary"
+                        : "hover:bg-primary/[0.02] text-muted-foreground hover:text-foreground"
                     )}>
                       <Checkbox
                         id={`context-sec-${sectionId}-${option.id}`}
@@ -169,29 +175,34 @@ export function SectionContextSelector({ sectionId, selectedSectionIds }: Sectio
                   ))
                 ) : (
                   <div className="flex flex-col items-center justify-center py-8 px-4 text-center space-y-2 opacity-30">
-                     <FolderX className="h-6 w-6 text-muted-foreground" />
-                     <p className="text-[9px] text-muted-foreground font-black uppercase tracking-widest">{t('builder.reportGenerator.noOtherSections')}</p>
+                    <FolderX className="h-6 w-6 text-muted-foreground" />
+                    <p className="text-[9px] text-muted-foreground font-black uppercase tracking-widest">{t('builder.reportGenerator.noOtherSections')}</p>
                   </div>
                 )}
               </div>
             </ScrollArea>
           </div>
 
-          <div className="rounded-2xl border border-primary/10 bg-muted/5 overflow-hidden flex flex-col shadow-sm group/files">
+          {/* Uploaded files list */}
+          <div className="rounded-2xl border border-primary/10 bg-muted/5 overflow-hidden flex flex-col shadow-sm">
             <div className="flex items-center justify-between px-4 py-2 bg-primary/[0.04] border-b border-primary/10">
               <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.2em] text-primary/70">
                 <FileText className="h-3 w-3" />
-                Knowledge Base
+                Uploaded Files
               </div>
-              <Badge variant="outline" className="h-5 text-[9px] font-black border-primary/20 bg-primary/10 text-primary tabular-nums px-2 rounded-full shadow-inner">{fileOptions.length}</Badge>
+              <Badge variant="outline" className="h-5 text-[9px] font-black border-primary/20 bg-primary/10 text-primary tabular-nums px-2 rounded-full shadow-inner">
+                {fileOptions.length}
+              </Badge>
             </div>
             <ScrollArea className="h-36">
               <div className="p-1 space-y-0.5">
                 {fileOptions.length > 0 ? (
                   fileOptions.map((option) => (
                     <div key={`file-${option.id}`} className={cn(
-                        "flex items-center justify-between gap-2 rounded-xl px-3 py-2 text-[11px] transition-all duration-300 group",
-                        currentSelection.externalContext?.[option.id] ? "bg-primary/[0.04] text-primary" : "hover:bg-primary/[0.02] text-muted-foreground hover:text-foreground"
+                      "flex items-center justify-between gap-2 rounded-xl px-3 py-2 text-[11px] transition-all duration-300 group",
+                      currentSelection.externalContext?.[option.id]
+                        ? "bg-primary/[0.04] text-primary"
+                        : "hover:bg-primary/[0.02] text-muted-foreground hover:text-foreground"
                     )}>
                       <label className="flex items-center gap-3 flex-1 min-w-0 cursor-pointer">
                         <Checkbox
@@ -216,9 +227,9 @@ export function SectionContextSelector({ sectionId, selectedSectionIds }: Sectio
                     </div>
                   ))
                 ) : (
-                   <div className="flex flex-col items-center justify-center py-8 px-4 text-center space-y-2 opacity-30">
-                     <FileX className="h-6 w-6 text-muted-foreground" />
-                     <p className="text-[9px] text-muted-foreground font-black uppercase tracking-widest">{t('builder.files.toasts.noContext')}</p>
+                  <div className="flex flex-col items-center justify-center py-8 px-4 text-center space-y-2 opacity-30">
+                    <FileX className="h-6 w-6 text-muted-foreground" />
+                    <p className="text-[9px] text-muted-foreground font-black uppercase tracking-widest">{t('builder.files.toasts.noContext')}</p>
                   </div>
                 )}
               </div>

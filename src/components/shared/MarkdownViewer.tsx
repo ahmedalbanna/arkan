@@ -1,4 +1,3 @@
-
 'use client';
 
 import { cn } from '@/infrastructure/utils/cn';
@@ -32,8 +31,8 @@ export const MarkdownViewer = ({ content, className, noScroll = false }: Markdow
   return (
     <ScrollArea className="h-full relative group">
       {contentNode}
-      {/* Subtle bottom fade */}
-      <div className="absolute inset-x-0 bottom-0 h-8 bg-gradient-to-t from-background/40 to-transparent pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity" />
+      {/* Subtle bottom fade — aligned with SidebarContainer & BuilderCanvas */}
+      <div className="absolute inset-x-0 bottom-0 h-10 bg-gradient-to-t from-background/40 to-transparent pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
     </ScrollArea>
   );
 };

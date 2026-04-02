@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useMemo, lazy } from 'react';
-import { Settings, UploadCloud, LayoutTemplate, BookOpenCheck, SlidersHorizontal, MessageSquare, Sparkles, History as HistoryIcon, Database, Terminal, Cpu, Layers } from 'lucide-react';
+import { Settings, LayoutTemplate, SlidersHorizontal, MessageSquare, History as HistoryIcon, Database, Terminal, Layers, FileText } from 'lucide-react';
 import { useLocalization } from '@/context/LocalizationContext';
 import { SidebarPanelConfig } from '@/modules/ai-content/adapters/components/report-mode/layout/types';
 
@@ -39,26 +39,26 @@ export function useSidebarPanels({
     const leftPanels = useMemo<SidebarPanelConfig[]>(() => [
         {
             key: 'settings',
-            title: 'System Parameters',
-            icon: <Settings className="h-5 w-5" />,
+            title: 'Project Settings',
+            icon: <Settings className="h-4 w-4" />,
             content: <ProjectSettingsPanel />,
         },
         {
             key: 'files',
-            title: 'Data Assets',
-            icon: <Database className="h-5 w-5" />,
+            title: 'Files',
+            icon: <Database className="h-4 w-4" />,
             content: <FileManager />,
         },
         {
             key: 'templates',
-            title: 'Neural Blueprints',
-            icon: <LayoutTemplate className="h-5 w-5" />,
+            title: 'Templates',
+            icon: <LayoutTemplate className="h-4 w-4" />,
             content: <ApplyTemplatePanel />,
         },
         {
             key: 'generate',
-            title: 'Core Architect',
-            icon: <Terminal className="h-5 w-5" />,
+            title: 'Generation Tools',
+            icon: <Terminal className="h-4 w-4" />,
             content: (
                 <GenerationTools
                     selectedSectionIds={selectedSectionIds}
@@ -71,7 +71,7 @@ export function useSidebarPanels({
         {
             key: 'navigator',
             title: 'Navigator',
-            icon: <Layers className="h-5 w-5" />,
+            icon: <Layers className="h-4 w-4" />,
             content: (
                 <SidebarNavigator
                     activeChapterId={activeChapterId}
@@ -81,18 +81,24 @@ export function useSidebarPanels({
                 />
             ),
         },
-    ], [t, selectedSectionIds, activeChapterId, onActiveSectionChange, onActiveChapterChange]);
+    ], [selectedSectionIds, activeChapterId, onActiveSectionChange, onActiveChapterChange]);
 
     const rightPanels = useMemo<SidebarPanelConfig[]>(() => {
         const activeSectionId = selectedSectionIds.length > 0 ? selectedSectionIds[0] : null;
         const activeSection = activeSectionId ? project?.getSection(activeSectionId) ?? null : null;
         const activeChapter = activeChapterId ? project?.getChapter(activeChapterId) ?? null : null;
 
+        const sectionTitle = activeChapterId 
+            ? 'Chapter Tools' 
+            : selectedSectionIds.length > 1 
+                ? 'Bulk Edit' 
+                : 'Section Tools';
+
         return [
             {
                 key: 'section',
-                title: activeChapterId ? 'Chapter Engine' : selectedSectionIds.length > 1 ? 'Bulk Processor' : 'Neural Tuning',
-                icon: <Cpu className="h-5 w-5" />,
+                title: sectionTitle,
+                icon: <FileText className="h-4 w-4" />,
                 content: activeChapterId
                     ? <ChapterTabsPanel chapter={activeChapter} />
                     : <SectionTabsPanel
@@ -102,20 +108,20 @@ export function useSidebarPanels({
             },
             {
                 key: 'global',
-                title: 'Global Bias',
-                icon: <SlidersHorizontal className="h-5 w-5" />,
+                title: 'Global Settings',
+                icon: <SlidersHorizontal className="h-4 w-4" />,
                 content: <GlobalProjectControls />,
             },
             {
                 key: 'chat',
-                title: 'AI Synthesizer',
-                icon: <MessageSquare className="h-5 w-5" />,
+                title: 'Project Consultant',
+                icon: <MessageSquare className="h-4 w-4" />,
                 content: <ProjectChat isOpen={true} onClose={() => setActiveRightPanelKey('section')} />,
             },
             {
                 key: 'snapshots',
-                title: 'Temporal Logs',
-                icon: <HistoryIcon className="h-5 w-5" />,
+                title: 'Snapshots',
+                icon: <HistoryIcon className="h-4 w-4" />,
                 content: <SnapshotHistoryPanel />,
             },
         ];

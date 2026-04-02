@@ -40,37 +40,37 @@ export const A4Page = ({ children, title, className, viewMode = 'single' }: A4Pa
 
             {/* Premium Lighting Gradient */}
             <div className="absolute inset-0 pointer-events-none bg-gradient-to-br from-white/[0.02] via-transparent to-black/[0.01] dark:from-white/[0.01] dark:to-transparent" />
-            
+
             {/* Page Edge Decoration */}
             <div className="absolute inset-0 pointer-events-none border-[0.5px] border-black/5 dark:border-white/5 rounded-sm ring-1 ring-black/[0.02] dark:ring-white/[0.02]" />
-            
+
             {title && (
                 <div className="relative mb-12 group/title">
                     <div className="flex items-center gap-3 mb-2 opacity-40 group-hover/title:opacity-100 transition-opacity duration-500">
                         <div className="h-px w-6 bg-primary/40" />
-                        <span className="text-[9px] font-black uppercase tracking-[0.3em] text-primary">Manifest Section</span>
+                        <span className="text-[9px] font-black uppercase tracking-[0.3em] text-primary">Section</span>
                     </div>
                     <h2 className="text-4xl font-black font-headline text-foreground tracking-tighter leading-none mb-4">{title}</h2>
                     <div className="h-1.5 w-16 bg-gradient-to-r from-primary via-primary/60 to-transparent rounded-full group-hover:w-32 transition-all duration-700 ease-in-out" />
                 </div>
             )}
-            
+
             <div className={cn(PROSE_CLASSES, "flex-grow")}>
                 {children}
             </div>
 
-            {/* High-Fidelity Page Footer */}
+            {/* Page Footer */}
             <div className="mt-16 pt-8 border-t border-border/40 flex justify-between items-end text-[9px] text-muted-foreground font-black uppercase tracking-[0.2em] group-hover:text-primary transition-colors duration-500">
                 <div className="flex flex-col gap-1">
                     <div className="flex items-center gap-2">
                         <div className="h-1.5 w-1.5 rounded-full bg-primary animate-pulse" />
-                        <span>Arkan Intelligent Synthesis Engine</span>
+                        <span>Arkan AI</span>
                     </div>
-                    <span className="opacity-40 font-bold ml-3.5 tracking-widest">Document Artifact v1.0</span>
+                    <span className="opacity-40 font-bold ml-3.5 tracking-widest">Document v1.0</span>
                 </div>
                 <div className="flex items-center gap-4">
-                    <span className="opacity-40 font-bold">A4 Production Standard</span>
-                    <div className="px-2 py-1 bg-muted/20 border rounded-md min-w-[40px] text-center tabular-nums">
+                    <span className="opacity-40 font-bold">A4</span>
+                    <div className="px-2 py-1 bg-muted/20 border border-border/40 rounded-md min-w-[40px] text-center tabular-nums">
                         Page 01
                     </div>
                 </div>

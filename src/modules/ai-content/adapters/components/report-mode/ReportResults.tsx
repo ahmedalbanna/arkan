@@ -2,36 +2,21 @@
 
 import React, { useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
-import { ZoomIn, ZoomOut, Eye, PenLine, RotateCcw } from 'lucide-react';
+import { Eye } from 'lucide-react';
 
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { A4Page } from '@/components/shared/A4Page';
-import { MarkdownViewer } from '@/components/shared/MarkdownViewer';
-import {
-  CardContent,
-  CardDescription,
-  CardTitle,
-} from '@/components/ui/card';
+import { CardContent } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useLocalization } from '@/context/LocalizationContext';
 import { useBuilderStore } from '@/hooks';
 import { Document } from './Document';
 import { SnapshotComparison } from './SnapshotComparison';
 import { useSnapshots } from '@/modules/projects/adapters/hooks/useSnapshots';
-import { Project } from '@/modules/projects/domain/entities/Project';
-import { Badge } from '@/components/ui/badge';
-import { X } from 'lucide-react';
 import { CoverPage } from '@/components/shared/CoverPage';
 import { CoverPageSettingsPanel } from './settings/CoverPageSettingsPanel';
-import { FileText, ChevronDown, History } from 'lucide-react';
 import { OutlineManager } from './outline/OutlineManager';
 import { ReportSteps } from './ReportSteps';
 import { DocumentToolbar } from './DocumentToolbar';
-import { TableOfContentForm } from './TableOfContentForm';
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
-import { Button } from '@/components/ui/button';
-import { FileContentViewer } from './file-manager/FileContentViewer';
-import { Separator } from '@/components/ui/separator';
 import { cn } from '@/infrastructure/utils/cn';
 
 
@@ -66,7 +51,7 @@ const ReportResults = ({
   summarizeMutation,
   expandMutation,
   rewriteMutation,
-  rewriteStyles
+  rewriteStyles,
 }: ReportResultsProps) => {
   const { t } = useLocalization();
   const project = useBuilderStore(state => state.project);
@@ -78,7 +63,6 @@ const ReportResults = ({
   const comparisonSnapshotId = useBuilderStore(state => state.comparisonSnapshotId);
   const setComparisonSnapshotId = useBuilderStore(state => state.setComparisonSnapshotId);
   const { snapshots } = useSnapshots(project?.id);
-  const [isSuggestionVisible, setIsSuggestionVisible] = useState(true);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [showCoverPage, setShowCoverPage] = useState(false);
   const [showCoverSettings, setShowCoverSettings] = useState(false);
@@ -88,13 +72,12 @@ const ReportResults = ({
     setShowCoverPage(visible);
     setShowCoverSettings(visible);
   };
-  const containerRef = React.useRef<HTMLDivElement>(null);
 
+  const containerRef = React.useRef<HTMLDivElement>(null);
   const comparisonSnapshot = snapshots.find((s: any) => s.id === comparisonSnapshotId);
 
   const toggleFullscreen = () => {
     if (!containerRef.current) return;
-
     if (!document.fullscreenElement) {
       containerRef.current.requestFullscreen().then(() => {
         setIsFullscreen(true);
@@ -111,25 +94,20 @@ const ReportResults = ({
     const handleFullscreenChange = () => {
       setIsFullscreen(!!document.fullscreenElement);
     };
-
     document.addEventListener('fullscreenchange', handleFullscreenChange);
     return () => {
       document.removeEventListener('fullscreenchange', handleFullscreenChange);
     };
   }, []);
 
-  const handleContentChange = (newMarkdown: string) => {
-    updateProjectFromMarkdown(newMarkdown);
-  };
-
   const hasContent = project?.content && project.content.length > 0;
 
-  // Logic for suggestions
+  // Intelligent writing suggestion based on project state
   const getSuggestion = () => {
     if (!project || !project.sections) return "Start by adding a chapter or applying a template.";
     const emptySection = project.sections.find(s => !s.content);
     if (emptySection) {
-      return `Suggestion: Try generating the "${emptySection.title}" section next.`;
+      return `Try generating the "${emptySection.title}" section next.`;
     }
     return "All sections have content. You can now review or export your document.";
   };
@@ -148,7 +126,7 @@ const ReportResults = ({
 
     return (
       <div className="flex flex-col items-center">
-        {/* Cover Page — shown when toggled on */}
+        {/* Cover Page — animated entry/exit */}
         <AnimatePresence>
           {showCoverPage && (
             <motion.div
@@ -188,21 +166,24 @@ const ReportResults = ({
         )}
       </div>
     );
-  }
+  };
 
   if (comparisonSnapshot && project) {
     return (
-      <div className="h-full flex flex-col overflow-hidden rounded-xl border bg-card text-card-foreground shadow-md">
+      <div className="h-full flex flex-col overflow-hidden rounded-xl border border-border/40 bg-card text-card-foreground shadow-sm">
         {renderContent()}
       </div>
     );
   }
 
   return (
-    <div ref={containerRef} className={cn(
-      "flex flex-col overflow-hidden rounded-xl border bg-card text-card-foreground shadow-md transition-all duration-500 relative",
-      isFullscreen && "fixed inset-0 z-[100] rounded-none border-none"
-    )}>
+    <div
+      ref={containerRef}
+      className={cn(
+        "flex flex-col overflow-hidden rounded-xl border border-border/40 bg-card text-card-foreground shadow-sm transition-all duration-500 relative",
+        isFullscreen && "fixed inset-0 z-[100] rounded-none border-none"
+      )}
+    >
       <DocumentToolbar
         project={project}
         viewMode={viewMode}
@@ -216,6 +197,7 @@ const ReportResults = ({
         setShowCoverPage={handleToggleCoverPage}
       />
 
+      {/* Preview mode indicator — adjusted for h-14 toolbar */}
       <AnimatePresence>
         {viewMode === 'preview' && (
           <motion.div
@@ -224,20 +206,26 @@ const ReportResults = ({
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -6, scale: 0.95 }}
             transition={{ duration: 0.18, ease: 'easeOut' }}
-            className="absolute top-16 left-1/2 -translate-x-1/2 z-30 flex items-center gap-2"
+            className="absolute top-14 left-1/2 -translate-x-1/2 z-30 flex items-center gap-2 pointer-events-none"
           >
-            <div className="flex items-center gap-1.5 text-[10px] font-black uppercase tracking-widest text-amber-600 dark:text-amber-400 bg-background/95 backdrop-blur-xl border border-amber-500/20 px-4 py-2 rounded-full shadow-2xl shadow-amber-500/10">
-              <Eye className="h-3.5 w-3.5" />
-              Preview Mode — Hover items for AI Actions
+            <div className="flex items-center gap-1.5 text-[9px] font-black uppercase tracking-[0.2em] text-amber-600 dark:text-amber-400 bg-background/95 backdrop-blur-xl border border-amber-500/20 px-3 py-1.5 rounded-full shadow-lg shadow-amber-500/5">
+              <Eye className="h-3 w-3" />
+              Preview — hover for AI actions
             </div>
           </motion.div>
         )}
       </AnimatePresence>
 
       <CardContent className="flex-grow flex flex-col p-0 relative min-h-0 overflow-hidden">
-        {/* Subtle Canvas Background */}
+        {/* Canvas background — aligned with BuilderCanvas dot grid (28px, primary color) */}
         <div className="absolute inset-0 bg-[#f8fafc] dark:bg-[#0f172a] pointer-events-none">
-          <div className="absolute inset-0 opacity-[0.03] dark:opacity-[0.05]" style={{ backgroundImage: 'radial-gradient(#000 1px, transparent 1px)', backgroundSize: '24px 24px' }} />
+          <div
+            className="absolute inset-0 opacity-[0.03] dark:opacity-[0.05]"
+            style={{
+              backgroundImage: 'radial-gradient(circle at 1.5px 1.5px, hsl(var(--primary)) 1px, transparent 0)',
+              backgroundSize: '28px 28px',
+            }}
+          />
         </div>
 
         <OutlineManager

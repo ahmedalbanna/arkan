@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useMemo, useState } from 'react';
@@ -38,7 +37,7 @@ function TemplateCard({ template, onSelect }: { template: ReportTemplateProperti
       </div>
       <p className="text-[11px] text-muted-foreground/80 line-clamp-2 leading-relaxed mb-2.5 italic">{template.description}</p>
       <div className="flex items-center text-[9px] text-primary font-black uppercase tracking-[0.2em] opacity-0 group-hover:opacity-100 transition-opacity">
-        Initialize Vector <ChevronRight className="h-2.5 w-2.5 ml-1" />
+        Preview Template <ChevronRight className="h-2.5 w-2.5 ml-1" />
       </div>
     </div>
   );
@@ -59,7 +58,7 @@ function TemplatePreview({ template, onApply, onBack, isLoading }: { template: R
           <ArrowLeft className="h-3 w-3" />
           Back to Library
         </Button>
-        <Badge variant="outline" className="h-5 text-[9px] font-black border-primary/20 bg-primary/5 text-primary uppercase tracking-[0.1em] px-2 rounded-full shadow-inner">Blueprint</Badge>
+        <Badge variant="outline" className="h-5 text-[9px] font-black border-primary/20 bg-primary/5 text-primary uppercase tracking-[0.1em] px-2 rounded-full shadow-inner">Template</Badge>
       </div>
 
       <div className="space-y-5 relative flex-1 flex flex-col min-h-0">
@@ -75,7 +74,7 @@ function TemplatePreview({ template, onApply, onBack, isLoading }: { template: R
         <div className="space-y-4 flex-1 flex flex-col min-h-0">
           <div className="flex items-center gap-2 group/label">
             <BookOpen className="h-3.5 w-3.5 text-primary/40 group-hover/label:text-primary transition-colors" />
-            <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/60">Structural Schema</Label>
+            <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/60">Document Structure</Label>
           </div>
           
           <ScrollArea className="flex-1 border border-primary/10 rounded-2xl bg-muted/5 shadow-inner">
@@ -93,12 +92,12 @@ function TemplatePreview({ template, onApply, onBack, isLoading }: { template: R
           ) : (
             <>
               <CheckCircle2 className="h-3.5 w-3.5" />
-              Initialize Project Structure
+              Apply Structure to Project
             </>
           )}
         </Button>
         <p className="text-[9px] text-muted-foreground mt-3 text-center italic font-medium opacity-60 uppercase tracking-wider px-4">
-          Restructures current project vectors. This action is irreversible.
+          This will reset your current outline. This action cannot be undone.
         </p>
       </div>
     </div>
@@ -155,14 +154,14 @@ export default function ApplyTemplatePanel() {
   return (
     <div className="flex flex-col h-full pt-2 animate-in fade-in slide-in-from-right-2 duration-300">
         <div className="space-y-1 mb-6">
-          <h4 className="text-[10px] font-black uppercase tracking-[0.3em] text-primary/70">Structural Library</h4>
-          <p className="text-[9px] text-muted-foreground italic font-medium opacity-60 uppercase tracking-wider">Choose a pre-defined vector to jumpstart your synthesis.</p>
+          <h4 className="text-[10px] font-black uppercase tracking-[0.3em] text-primary/70">Template Library</h4>
+          <p className="text-[9px] text-muted-foreground italic font-medium opacity-60 uppercase tracking-wider">Choose a pre-defined structure to jumpstart your project.</p>
         </div>
 
         <div className="relative mb-6 flex-shrink-0">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground/40" />
           <Input
-            placeholder="Search structural vectors..."
+            placeholder="Search templates..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="pl-9 h-9 text-[11px] bg-muted/5 border-primary/10 focus-visible:ring-primary/20 rounded-xl shadow-inner transition-all"
@@ -176,12 +175,12 @@ export default function ApplyTemplatePanel() {
               {isLoading ? (
                 <div className="flex flex-col justify-center items-center h-64 space-y-3 opacity-50">
                   <Loader2 className="h-7 w-7 animate-spin text-primary/40" />
-                  <p className="text-[9px] uppercase tracking-[0.2em] font-black text-muted-foreground">Initializing Library</p>
+                  <p className="text-[9px] uppercase tracking-[0.2em] font-black text-muted-foreground">Loading Templates</p>
                 </div>
               ) : isError ? (
                 <div className="text-center py-10 px-4 border border-dashed rounded-2xl bg-destructive/5 text-destructive border-destructive/20 shadow-inner">
                   <AlertCircle className="mx-auto h-7 w-7 mb-2 opacity-50" />
-                  <h3 className="text-[10px] font-black uppercase tracking-[0.2em]">Synchronization Failure</h3>
+                  <h3 className="text-[10px] font-black uppercase tracking-[0.2em]">Failed to load</h3>
                   <p className="mt-1 text-[11px] leading-relaxed italic opacity-80">{error?.message}</p>
                 </div>
               ) : filteredTemplates.length > 0 ? (
@@ -198,9 +197,9 @@ export default function ApplyTemplatePanel() {
                     <FileText className="h-10 w-10 text-muted-foreground" />
                     <Search className="absolute -bottom-0.5 -right-0.5 h-4 w-4 text-primary bg-background rounded-full p-0.5 border" />
                   </div>
-                  <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground">Zero Vectors Found</h3>
+                  <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground">No templates found</h3>
                   <p className="mt-2 text-[11px] text-muted-foreground/60 leading-relaxed italic">
-                    Adjust your search query to locate structural blueprints.
+                    Try a different search query to find the right structure.
                   </p>
                 </div>
               )}

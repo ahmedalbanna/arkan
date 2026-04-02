@@ -24,16 +24,19 @@ export const SnapshotComparison = ({ activeProject, comparisonSnapshot, onClose 
     const diff = computeDiff(snapshotProject.fullMarkdownContent, activeProject.fullMarkdownContent);
 
     return (
-        <div className="flex flex-col h-full min-h-0 bg-background/40 backdrop-blur-xl border border-primary/10 rounded-2xl overflow-hidden shadow-2xl">
-            <div className="flex items-center justify-between px-8 py-6 border-b border-primary/10 bg-primary/5">
+        <div className="flex flex-col h-full min-h-0 bg-background/40 backdrop-blur-xl border border-border/40 rounded-2xl overflow-hidden shadow-2xl">
+            {/* Header */}
+            <div className="flex items-center justify-between px-6 py-4 border-b border-border/40 bg-background/60 backdrop-blur-2xl">
                 <div className="flex items-center gap-4">
-                    <div className="h-10 w-10 rounded-xl bg-primary/20 flex items-center justify-center border border-primary/20 shadow-inner">
-                        <GitCompare className="h-5 w-5 text-primary" />
+                    <div className="h-9 w-9 rounded-xl bg-primary/10 flex items-center justify-center border border-primary/20 shadow-sm">
+                        <GitCompare className="h-4.5 w-4.5 text-primary" />
                     </div>
                     <div>
-                        <h2 className="text-[14px] font-black uppercase tracking-[0.2em] text-foreground">Manifest_Comparison</h2>
-                        <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-widest mt-1">
-                            Comparing Active with <span className="text-primary font-bold">{comparisonSnapshot.name}</span>
+                        <h2 className="text-[13px] font-black uppercase tracking-[0.18em] text-foreground">
+                            Snapshot Comparison
+                        </h2>
+                        <p className="text-[10px] font-medium text-muted-foreground/60 uppercase tracking-wider mt-0.5">
+                            Comparing current with <span className="text-primary font-bold">{comparisonSnapshot.name}</span>
                         </p>
                     </div>
                 </div>
@@ -41,30 +44,40 @@ export const SnapshotComparison = ({ activeProject, comparisonSnapshot, onClose 
                     variant="outline"
                     size="sm"
                     onClick={onClose}
-                    className="h-9 px-4 text-[11px] font-black uppercase tracking-widest border-primary/10 hover:bg-primary/10 hover:text-primary transition-all rounded-xl"
+                    className="h-8 px-3.5 text-[9px] font-black uppercase tracking-[0.18em] border-border/40 hover:bg-primary/10 hover:text-primary hover:border-primary/20 transition-all rounded-lg gap-1.5"
                 >
-                    <X className="h-4 w-4 mr-2" />
-                    Exit Comparison
+                    <X className="h-3.5 w-3.5" />
+                    Exit
                 </Button>
             </div>
 
+            {/* Diff body */}
             <ScrollArea className="flex-1">
-                <div className="p-12 max-w-5xl mx-auto">
-                    <div className="mb-8 flex items-center gap-2">
-                        <Badge variant="outline" className="text-[10px] font-black tracking-widest border-green-500/20 text-green-500 bg-green-500/5">
-                            ADDITIONS_V1
+                <div className="p-10 max-w-5xl mx-auto">
+                    <div className="mb-6 flex items-center gap-2">
+                        <Badge
+                            variant="outline"
+                            className="text-[9px] font-black tracking-[0.18em] border-green-500/30 text-green-600 dark:text-green-400 bg-green-500/5 uppercase"
+                        >
+                            + Added
                         </Badge>
-                        <Badge variant="outline" className="text-[10px] font-black tracking-widest border-destructive/20 text-destructive bg-destructive/5">
-                            DELETIONS_V1
+                        <Badge
+                            variant="outline"
+                            className="text-[9px] font-black tracking-[0.18em] border-destructive/30 text-destructive bg-destructive/5 uppercase"
+                        >
+                            − Removed
                         </Badge>
                     </div>
                     <DiffView diff={diff} />
                 </div>
             </ScrollArea>
 
-            <div className="p-4 border-t border-primary/5 bg-muted/5 flex items-center justify-between opacity-50">
-                <span className="text-[9px] font-black uppercase tracking-[0.3em]">Technical_Diff_Engine_v1.0</span>
-                <span className="text-[9px] font-mono">LCS_ALGORITHM_STABLE</span>
+            {/* Footer */}
+            <div className="px-6 py-3 border-t border-border/40 bg-muted/5 flex items-center justify-between opacity-50">
+                <span className="text-[9px] font-black uppercase tracking-[0.2em] text-muted-foreground">
+                    Arkan Diff Engine · v1.0
+                </span>
+                <span className="text-[9px] font-mono text-muted-foreground/60">LCS algorithm</span>
             </div>
         </div>
     );

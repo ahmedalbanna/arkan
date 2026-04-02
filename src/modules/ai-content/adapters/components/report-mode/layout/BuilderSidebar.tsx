@@ -30,7 +30,7 @@ export const BuilderSidebar = React.forwardRef<any, BuilderSidebarProps>((
         lastActiveKeyRef.current = activeKey;
     }
 
-    // Intelligence Suite: Dynamically adjust panel constraints to force HUD mode when collapsed
+    // Dynamically constrain panel size to force icon-HUD mode when collapsed
     const minSize = isCollapsed ? 4.5 : 15;
     const maxSize = isCollapsed ? 4.5 : 40;
 
@@ -38,10 +38,10 @@ export const BuilderSidebar = React.forwardRef<any, BuilderSidebarProps>((
         onResize?.(size);
 
         if (size < AUTO_COLLAPSE_THRESHOLD && activeKey) {
-            // User dragged the panel narrower than the threshold — collapse to icon-HUD
+            // User dragged narrower than threshold — collapse to icon-HUD
             onActiveKeyChange('');
         } else if (size >= AUTO_COLLAPSE_THRESHOLD && !activeKey) {
-            // User dragged the panel wider than the threshold — restore last open panel
+            // User dragged wider than threshold — restore last open panel
             onActiveKeyChange(lastActiveKeyRef.current);
         }
     };
@@ -55,12 +55,22 @@ export const BuilderSidebar = React.forwardRef<any, BuilderSidebarProps>((
             collapsible={false}
             onResize={handleResize}
             className={cn(
-                'flex flex-col h-full bg-background/40 backdrop-blur-2xl transition-all duration-500 ease-[0.22,1,0.36,1] relative group/sidebar overflow-hidden z-20',
-                isLeft ? 'border-e border-border/10' : 'border-s border-border/10',
+                'flex flex-col h-full bg-background/40 backdrop-blur-2xl transition-all duration-500 ease-[0.22,1,0.36,1] relative overflow-hidden z-20',
+                // Aligned with header border weight (border-border/40)
+                isLeft ? 'border-e border-border/40' : 'border-s border-border/40',
                 className
             )}
         >
-            <div className="h-full w-full min-w-0 flex flex-col">
+            {/* Dot-grid atmosphere — aligned with BuilderCanvas & BuilderHeader (28px, 1.5px center) */}
+            <div
+                className="absolute inset-0 opacity-[0.02] dark:opacity-[0.04] pointer-events-none"
+                style={{
+                    backgroundImage: 'radial-gradient(circle at 1.5px 1.5px, hsl(var(--primary)) 1px, transparent 0)',
+                    backgroundSize: '28px 28px',
+                }}
+            />
+
+            <div className="h-full w-full min-w-0 flex flex-col relative z-10">
                 <CollapsibleSidePanel
                     panels={panels}
                     activeKey={activeKey}

@@ -362,7 +362,7 @@ export const FloatingOutline = ({
                 </div>
                 <div className="flex items-center gap-3">
                     <span className="text-[9px] font-bold text-muted-foreground/40 uppercase tracking-widest">
-                        {project.sections.length} Units
+                        {project.sections.length} Sections
                     </span>
                     <Button 
                         variant="ghost" 
@@ -454,7 +454,7 @@ export const FloatingOutline = ({
           {/* Footer Metadata */}
           <div className="px-4 py-2 bg-muted/20 border-t border-primary/10 flex items-center justify-between">
              <p className="text-[8px] font-black uppercase tracking-[0.2em] text-muted-foreground/60">
-                IDE Mode Active
+                Document Outline
              </p>
              <div className="flex items-center gap-1">
                 <div className="h-1 w-1 rounded-full bg-green-500" />

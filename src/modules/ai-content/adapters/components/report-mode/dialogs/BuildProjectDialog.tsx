@@ -1,4 +1,3 @@
-
 'use client';
 
 import { Alert, AlertDescription } from '@/components/ui/alert';
@@ -61,24 +60,31 @@ export function BuildProjectDialog({
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-5xl h-[90vh] p-0 overflow-hidden flex flex-col gap-0 border-primary/10 shadow-2xl rounded-[28px]">
-        <header className="px-8 py-6 border-b border-border/40 bg-background/40 backdrop-blur-2xl relative overflow-hidden group">
-          <div className="absolute inset-0 bg-radial-gradient from-primary/5 to-transparent opacity-50" />
+      <DialogContent className="max-w-5xl h-[90vh] p-0 overflow-hidden flex flex-col gap-0 border-border/40 shadow-2xl rounded-[24px]">
+        <header className="px-8 py-6 border-b border-border/40 bg-background/60 backdrop-blur-2xl relative overflow-hidden group">
+          {/* Dot-grid atmosphere */}
+          <div
+            className="absolute inset-0 opacity-[0.02] dark:opacity-[0.04] pointer-events-none"
+            style={{
+              backgroundImage: 'radial-gradient(circle at 1.5px 1.5px, hsl(var(--primary)) 1px, transparent 0)',
+              backgroundSize: '28px 28px',
+            }}
+          />
           <div className="flex flex-col gap-1 relative z-10">
-            <div className="flex items-center gap-3">
-              <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center border border-primary/20">
+            <div className="flex items-center gap-4">
+              <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center border border-primary/20 shrink-0">
                 <Building className="h-5 w-5 text-primary" />
               </div>
-              <div className="space-y-0.5">
-                <DialogTitle className="text-[18px] font-bold font-headline tracking-tight">Project Construction Manifest</DialogTitle>
+              <div className="space-y-0.5 min-w-0">
+                <DialogTitle className="text-[16px] font-bold tracking-tight">Generate Project Content</DialogTitle>
                 <div className="flex items-center gap-2">
                     <div className="h-1.5 w-1.5 rounded-full bg-primary animate-pulse" />
-                    <p className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/60">System Ready for Synthesis</p>
+                    <p className="text-[9px] font-black uppercase tracking-[0.2em] text-muted-foreground/50">Ready to Generate</p>
                 </div>
               </div>
             </div>
-            <DialogDescription className="text-[11px] text-muted-foreground italic max-w-2xl leading-relaxed mt-2 pl-13">
-              Review the complete generation plan for <span className="text-foreground font-bold not-italic">"{project?.name}"</span>. The AI will systematically generate content for <span className="text-primary font-bold not-italic">{totalSections} sections</span> across <span className="text-primary font-bold not-italic">{chaptersToBuild.length} chapters</span>.
+            <DialogDescription className="text-[11px] text-muted-foreground italic max-w-2xl leading-relaxed mt-2 pl-14">
+              Review the generation plan for <span className="text-foreground font-bold not-italic">"{project?.name}"</span>. The AI will generate content for <span className="text-primary font-bold not-italic">{totalSections} sections</span> across <span className="text-primary font-bold not-italic">{chaptersToBuild.length} chapters</span>.
             </DialogDescription>
           </div>
         </header>
@@ -92,12 +98,12 @@ export function BuildProjectDialog({
               </TabsTrigger>
               <TabsTrigger value="prompt" className="gap-2 text-[9px] font-black uppercase tracking-[0.15em] data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:shadow-sm px-4 transition-all rounded-lg">
                 <Code className="h-3 w-3" />
-                Final Compilation
+                Full Prompt
               </TabsTrigger>
             </TabsList>
 
             <Badge variant="outline" className="h-6 text-[9px] px-2.5 font-black uppercase tracking-[0.2em] border-primary/20 text-primary bg-primary/5 shadow-inner rounded-full">
-              {totalSections} SECTIONS_QUEUED
+              {totalSections} Sections
             </Badge>
           </div>
 
@@ -129,7 +135,7 @@ export function BuildProjectDialog({
                                 <div className="space-y-2.5">
                                   <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/60 flex items-center gap-2">
                                     <StickyNote className="w-3 h-3 text-primary/40" />
-                                    Cognitive Vector
+                                    Section Prompt
                                   </Label>
                                   <div className="p-3 rounded-xl border border-primary/10 bg-muted/5 text-[11px] italic leading-relaxed text-muted-foreground/80 font-serif shadow-inner">
                                     "{section.buildActionPrompt()}"
@@ -138,7 +144,7 @@ export function BuildProjectDialog({
                                 <div className="space-y-2.5">
                                   <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/60 flex items-center gap-2">
                                     <LinkIcon className="w-3 h-3 text-primary/40" />
-                                    Source Relatives
+                                    Context Links
                                   </Label>
                                   <div className="flex flex-wrap gap-1.5 min-h-[44px] p-3 rounded-xl border border-primary/10 bg-muted/5 shadow-inner">
                                     {project && getContextNames(project, section).length > 0 ? (
@@ -148,7 +154,7 @@ export function BuildProjectDialog({
                                         </Badge>
                                       ))
                                     ) : (
-                                      <span className="text-[10px] text-muted-foreground/40 italic font-medium">Zero local sources linked</span>
+                                      <span className="text-[10px] text-muted-foreground/40 italic font-medium">No context linked</span>
                                     )}
                                   </div>
                                 </div>
@@ -181,14 +187,14 @@ export function BuildProjectDialog({
             <div className="flex items-center gap-4">
               <AlertTriangle className="h-5 w-5 text-destructive animate-pulse" />
               <AlertDescription className="text-[11px] font-black uppercase tracking-[0.1em] leading-normal italic text-destructive/80">
-                Constructing this project will consume <span className="text-destructive underline decoration-2">{totalSections} credits</span>. This process may take several minutes to ensure academic rigor and coherence.
+                Generating this project will use <span className="text-destructive underline decoration-2">{totalSections} credits</span>. This may take several minutes to ensure quality and coherence.
               </AlertDescription>
             </div>
           </Alert>
 
           <DialogFooter className="flex items-center justify-between sm:justify-between w-full">
             <Button variant="ghost" onClick={() => onOpenChange(false)} className="text-[9px] font-black uppercase tracking-[0.2em] h-9 px-6 rounded-xl hover:bg-destructive/5 hover:text-destructive transition-all">
-              Abort Operation
+              Cancel
             </Button>
             <Button onClick={onGenerateProject} disabled={isLoading || chaptersToBuild.length === 0} className="text-[10px] font-black uppercase tracking-[0.2em] h-9 px-8 gap-2 shadow-xl shadow-primary/20 rounded-xl hover:scale-[1.02] transition-all">
               {isLoading ? (
@@ -196,7 +202,7 @@ export function BuildProjectDialog({
               ) : (
                 <Building className="h-3.5 w-3.5" />
               )}
-              Initialize Project Build
+              Start Generation
             </Button>
           </DialogFooter>
         </footer>
