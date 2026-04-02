@@ -12,7 +12,7 @@ const generateCitationPrompt = ai.definePrompt({
   name: 'generateCitationPrompt',
   input: { schema: GenerateCitationInputSchema },
   output: { schema: GenerateCitationOutputSchema },
-  model: 'ollama/phi3:mini-4k',
+  model: 'ollama/phi4-mini:latest',
 
   prompt: `You are an expert academic librarian specializing in generating accurate citations. Your task is to analyze the provided source material and generate one or more correctly formatted citations in the specified style.
 

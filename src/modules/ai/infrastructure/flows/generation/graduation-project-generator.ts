@@ -80,7 +80,7 @@ const graduationProjectGeneratorFlow = ai.defineFlow(
             });
 
             const abstractGenerated = await ai.generate({
-                model: 'ollama/llama3.1:latest',
+                model: 'ollama/llama2:7b',
                 prompt: abstractResult.text,
             });
 
@@ -108,7 +108,7 @@ const graduationProjectGeneratorFlow = ai.defineFlow(
             });
 
             const introGenerated = await ai.generate({
-                model: 'ollama/llama3.1:latest',
+                model: 'ollama/llama2:7b',
                 prompt: introResult.text,
             });
 
@@ -137,7 +137,7 @@ const graduationProjectGeneratorFlow = ai.defineFlow(
             });
 
             const litReviewGenerated = await ai.generate({
-                model: 'ollama/llama3.1:latest',
+                model: 'ollama/llama2:7b',
                 prompt: litReviewResult.text,
             });
 
@@ -176,7 +176,7 @@ const graduationProjectGeneratorFlow = ai.defineFlow(
             });
 
             const _methodGenerated = await ai.generate({
-                model: 'ollama/llama3.1:latest',
+                model: 'ollama/llama2:7b',
                 prompt: methodResult.text,
             });
 
@@ -235,7 +235,7 @@ const graduationProjectGeneratorFlow = ai.defineFlow(
             });
 
             const _analysisGenerated = await ai.generate({
-                model: 'ollama/llama3.1:latest',
+                model: 'ollama/llama2:7b',
                 prompt: analysisResult.text,
             });
 
@@ -288,7 +288,7 @@ const graduationProjectGeneratorFlow = ai.defineFlow(
             });
 
             const _designGenerated = await ai.generate({
-                model: 'ollama/llama3.1:latest',
+                model: 'ollama/llama2:7b',
                 prompt: designResult.text,
             });
 
@@ -336,7 +336,7 @@ const graduationProjectGeneratorFlow = ai.defineFlow(
             });
 
             const _implGenerated = await ai.generate({
-                model: 'ollama/llama3.1:latest',
+                model: 'ollama/llama2:7b',
                 prompt: implResult.text,
             });
 
@@ -376,7 +376,7 @@ const graduationProjectGeneratorFlow = ai.defineFlow(
             });
 
             const _testGenerated = await ai.generate({
-                model: 'ollama/llama3.1:latest',
+                model: 'ollama/llama2:7b',
                 prompt: testResult.text,
             });
 
@@ -429,7 +429,7 @@ const graduationProjectGeneratorFlow = ai.defineFlow(
             });
 
             const _resultsGenerated = await ai.generate({
-                model: 'ollama/llama3.1:latest',
+                model: 'ollama/llama2:7b',
                 prompt: resultsResult.text,
             });
 
@@ -461,7 +461,7 @@ const graduationProjectGeneratorFlow = ai.defineFlow(
             });
 
             const discussionGenerated = await ai.generate({
-                model: 'ollama/llama3.1:latest',
+                model: 'ollama/llama2:7b',
                 prompt: discussionResult.text,
             });
 
@@ -501,7 +501,7 @@ const graduationProjectGeneratorFlow = ai.defineFlow(
             });
 
             const conclusionGenerated = await ai.generate({
-                model: 'ollama/llama3.1:latest',
+                model: 'ollama/llama2:7b',
                 prompt: conclusionResult.text,
             });
 
@@ -526,7 +526,7 @@ const graduationProjectGeneratorFlow = ai.defineFlow(
             });
 
             const _recsGenerated = await ai.generate({
-                model: 'ollama/llama3.1:latest',
+                model: 'ollama/llama2:7b',
                 prompt: recsResult.text,
             });
 

@@ -13,7 +13,7 @@ import { performanceMonitor } from './model-performance-monitor';
  * Default request timeout in milliseconds (60 seconds)
  * Prevents queue deadlocks if a model hangs during loading or generation.
  */
-export const DEFAULT_REQUEST_TIMEOUT = Number(process.env.AI_REQUEST_TIMEOUT) || 60000;
+export const DEFAULT_REQUEST_TIMEOUT = Number(process.env.AI_REQUEST_TIMEOUT) || 120000;
 
 /**
  * Request priority levels

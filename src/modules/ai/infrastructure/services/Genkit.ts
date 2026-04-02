@@ -24,11 +24,11 @@ if (typeof window === 'undefined') {
             type: 'generate',
           },
           {
-            name: 'phi3:mini-4k',
+            name: 'phi4-mini:latest',
             type: 'generate',
           },
           {
-            name: 'llama3.1:latest',
+            name: 'llama2:7b',
             type: 'generate',
           },
         ],

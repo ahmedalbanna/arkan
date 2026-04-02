@@ -20,6 +20,7 @@ import { ToolConfig } from "../WritingToolRegistry";
 export const GenerationTools: Record<string, ToolConfig> = {
     'generate-chapter-content': { flow: generateChapterContent, schema: GenerateChapterInputSchema, creditCost: 2 },
     'generate-report-section': { flow: generateReportSection, schema: GenerateSectionInputSchema, creditCost: 2 },
+    'generate-section': { flow: generateReportSection, schema: GenerateSectionInputSchema, creditCost: 2 },
     'generate-image': { flow: generateImage, schema: GenerateImageInputSchema, creditCost: 5 },
     'image-to-text': { flow: imageToText, schema: ImageToTextInputSchema, creditCost: 2 },
     'rewrite-document-to-markdown': { flow: rewriteDocumentToMarkdown, schema: RewriteToMarkdownInputSchema, creditCost: 1 },

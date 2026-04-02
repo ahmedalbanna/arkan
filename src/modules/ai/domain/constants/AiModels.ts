@@ -27,13 +27,13 @@ export const MODEL_BY_TASK = {
   TEXT_GENERATION: OLLAMA_MODELS.GEMMA_2B,
 
   // 📊 Reports & Documentation: Structured output, formatting
-  REPORTS: OLLAMA_MODELS.GEMMA_2B,
+  REPORTS: OLLAMA_MODELS.PHI3_MINI,
 
   // ✅ Checking & Analysis: Reasoning and linguistic analysis
-  ANALYSIS: OLLAMA_MODELS.GEMMA_2B,
+  ANALYSIS: OLLAMA_MODELS.PHI3_MINI,
 
   // 🎯 Specific Tasks: Precise structured output (JSON, PlantUML, etc.)
-  STRUCTURED: OLLAMA_MODELS.GEMMA_2B,
+  STRUCTURED: OLLAMA_MODELS.PHI3_MINI,
 
   // 🎓 Academic & Research: Complex reasoning, high quality (use with RAG)
   ACADEMIC: OLLAMA_MODELS.LLAMA3_8B,

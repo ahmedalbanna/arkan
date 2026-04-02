@@ -4,7 +4,7 @@ if (typeof window !== 'undefined') {
 
 import { injectable, inject } from "tsyringe";
 import { IAiService } from "../../domain/services/IAiService";
-import { ai } from "./Genkit";
+import { ai, OLLAMA_MODELS } from "./Genkit";
 import { executeWithQueue } from "./model-request-queue";
 import { selectModel } from "./model-selector";
 import { generateRequestId } from "./model-performance-monitor";
@@ -67,7 +67,7 @@ export class GenkitAiService implements IAiService {
     async runFlow<TInput, TOutput>(flow: any, input: TInput, flowName?: string): Promise<Result<TOutput, AiError>> {
         const primaryModel = flowName ? selectModel({ flowName }) : null;
         const modelsToTry = primaryModel 
-            ? [primaryModel, "ollama/phi4-mini:latest", "ollama/gemma:2b"] 
+            ? [primaryModel, OLLAMA_MODELS.PHI3_MINI, OLLAMA_MODELS.GEMMA_2B] 
             : [null]; // null means direct execution without queue manager model selection
         
         // Remove duplicates while preserving order

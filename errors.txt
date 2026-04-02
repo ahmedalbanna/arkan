@@ -1,21 +1,16 @@
-## Error Type
-Runtime Error
+Flow execution failed for model ollama/phi4-mini:latest in generate-section. Error: Execution timeout: ollama/phi4-mini:latest failed to respond within 60000ms
+[TELEMETRY ERROR] [2026-04-02T22:45:13.416Z] [AiAPI]: [object Object] 
+ POST /api/generate/section 500 in 121578ms
 
-## Error Message
-`Tooltip` must be used within `TooltipProvider`
+---
 
-
-    at ReportResults (src/modules/ai-content/adapters/components/report-mode/ReportResults.tsx:729:13)
-    at ReportModeGenerator (src/modules/ai-content/adapters/components/report-mode/ReportModeGenerator.tsx:216:41)
-    at GeneratePage (src/app/builder/page.tsx:39:7)
-
-## Code Frame
-  727 |           {/* Cover PDF Export — available in both cover and edit modes */}
-  728 |           {(viewMode === 'cover' || viewMode === 'edit') && hasContent && (
-> 729 |             <Tooltip>
-      |             ^
-  730 |               <TooltipTrigger asChild>
-  731 |                 <Button
-  732 |                   variant="ghost" size="sm"
-
-Next.js version: 15.5.9 (Turbopack)
+error
+4 items
+message:
+"Execution timeout: ollama/phi4-mini:latest failed to respond within 60000ms"
+status:
+500
+details:
+null
+name:
+"ApiError"

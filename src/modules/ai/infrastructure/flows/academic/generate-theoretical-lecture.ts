@@ -19,7 +19,7 @@ const generateTheoreticalLecturePrompt = ai.definePrompt({
   name: 'generateTheoreticalLecturePrompt',
   input: { schema: GenerateTheoreticalLectureInputSchema },
   output: { schema: GenerateTheoreticalLectureOutputSchema },
-  model: 'ollama/phi3:mini-4k',
+  model: 'ollama/phi4-mini:latest',
   // Using a more powerful model for content generation
   prompt: `You are an esteemed university professor and a leading expert in your field. Your task is to write a comprehensive, clear, and engaging theoretical lecture for the specified target audience.
 
