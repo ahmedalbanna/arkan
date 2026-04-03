@@ -1,11 +1,11 @@
 'use client';
 
 import React, { Suspense } from 'react';
-import { ResizablePanel } from '@/components/ui/resizable';
 import { BuilderPageSkeleton } from '@/app/builder/loading';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Button } from '@/components/ui/button';
 import { ZoomIn, ZoomOut, RotateCcw } from 'lucide-react';
+import { cn } from '@/infrastructure/utils/cn';
 
 interface BuilderCanvasProps {
     children: React.ReactNode;
@@ -14,9 +14,10 @@ interface BuilderCanvasProps {
     onZoomOut: () => void;
     onZoomReset: () => void;
     floatingElements?: React.ReactNode;
+    className?: string;
 }
 
-export const BuilderCanvas = React.forwardRef<any, BuilderCanvasProps>((
+export const BuilderCanvas = React.forwardRef<HTMLDivElement, BuilderCanvasProps>((
     {
         children,
         zoomLevel,
@@ -24,15 +25,17 @@ export const BuilderCanvas = React.forwardRef<any, BuilderCanvasProps>((
         onZoomOut,
         onZoomReset,
         floatingElements,
+        className,
     },
     ref
 ) => {
     return (
-        <ResizablePanel
+        <div
             ref={ref}
-            defaultSize={50}
-            minSize={30}
-            className="flex flex-col min-h-0 bg-muted/5 relative overflow-hidden transition-all duration-700 ease-[0.22,1,0.36,1] z-10"
+            className={cn(
+                "flex flex-col h-full w-full bg-muted/5 relative overflow-hidden transition-all duration-700 ease-[0.22,1,0.36,1] z-10",
+                className
+            )}
         >
             {/* Subtle dot-grid atmosphere */}
             <div
@@ -164,7 +167,7 @@ export const BuilderCanvas = React.forwardRef<any, BuilderCanvasProps>((
                     </div>
                 </TooltipProvider>
             </div>
-        </ResizablePanel>
+        </div>
     );
 });
 

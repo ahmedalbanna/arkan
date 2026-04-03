@@ -2,7 +2,7 @@
 
 import { BuilderPageSkeleton } from '@/app/builder/loading';
 import { OnboardingGuide } from '@/components/onboarding/OnboardingGuide';
-import { ResizableHandle, ResizablePanelGroup } from '@/components/ui/resizable';
+// Resizable components removed in favor of floating HUD architecture
 import { useReportGenerator } from '@/modules/ai-content/adapters/hooks/report-mode/useReportGenerator';
 import { useKeyboardShortcuts } from '@/modules/ai-content/adapters/hooks/report-mode/useKeyboardShortcuts';
 import { useSaveProject } from '@/modules/projects/adapters/hooks/use-projects';
@@ -105,73 +105,73 @@ export default function ReportModeGenerator({ initialProject }: { initialProject
                     </div>
 
                     <div className="relative z-10 flex-1 flex flex-col w-full h-full">
-                        <div className="h-full">
-                            <ResizablePanelGroup 
-                                direction="horizontal" 
-                                className="h-full items-stretch"
-                                dir={locale === 'ar' ? 'rtl' : 'ltr'}
+                        {/* Base Canvas Layer */}
+                        <div className="absolute inset-0 z-10">
+                            <BuilderCanvas
+                                zoomLevel={zoomLevel}
+                                onZoomIn={handleZoomIn}
+                                onZoomOut={handleZoomOut}
+                                onZoomReset={handleZoomReset}
+                                floatingElements={
+                                    <FloatingOutline 
+                                        isVisible={isOutlineVisible}
+                                        project={project}
+                                        activeChapterId={activeChapterId}
+                                        selectedSectionIds={selectedSectionIds}
+                                        onActiveChapterChange={setActiveChapterId}
+                                        onActiveSectionChange={(id) => handleActiveSectionChange(id)}
+                                        onMoveItem={handleMoveItem}
+                                        onUpdateTitle={handleUpdateTitle}
+                                        onDeleteItem={handleDeleteItem}
+                                        onAddChapter={handleAddChapter}
+                                        onAddSection={handleAddSection}
+                                        onDuplicateItem={handleDuplicateItem}
+                                        onUndo={handleUndo}
+                                        onCopyItem={handleCopyItem}
+                                        onPasteItem={handlePasteItem}
+                                    />
+                                }
                             >
+                                <ReportResults
+                                    activeChapterId={activeChapterId}
+                                    setActiveChapterId={setActiveChapterId}
+                                    selectedSectionIds={selectedSectionIds}
+                                    handleActiveSectionChange={handleActiveSectionChange}
+                                    isOutlineVisible={isOutlineVisible}
+                                    setIsOutlineVisible={setIsOutlineVisible}
+                                    viewMode={viewMode}
+                                    setViewMode={setViewMode}
+                                    zoomLevel={zoomLevel}
+                                    activeRightPanelKey={activeRightPanelKey}
+                                    summarizeMutation={summarizeMutation}
+                                    expandMutation={expandMutation}
+                                    rewriteMutation={rewriteMutation}
+                                    rewriteStyles={rewriteStyles}
+                                />
+                            </BuilderCanvas>
+                        </div>
+
+                        {/* Floating Sidebar Controls */}
+                        <div className="absolute inset-0 z-30 pointer-events-none flex items-stretch justify-between p-6">
+                            {/* Left Sidebar HUD */}
+                            <div className="pointer-events-auto h-full flex flex-col">
                                 <BuilderSidebar 
                                     side="left"
                                     panels={leftPanels}
                                     activeKey={activePanelKey}
                                     onActiveKeyChange={setActivePanelKey}
                                 />
+                            </div>
 
-                                <ResizableHandle withHandle className="bg-transparent hover:bg-primary/10 transition-colors w-1.5 z-50" />
-
-                                <BuilderCanvas
-                                    zoomLevel={zoomLevel}
-                                    onZoomIn={handleZoomIn}
-                                    onZoomOut={handleZoomOut}
-                                    onZoomReset={handleZoomReset}
-                                    floatingElements={
-                                        <FloatingOutline 
-                                            isVisible={isOutlineVisible}
-                                            project={project}
-                                            activeChapterId={activeChapterId}
-                                            selectedSectionIds={selectedSectionIds}
-                                            onActiveChapterChange={setActiveChapterId}
-                                            onActiveSectionChange={(id) => handleActiveSectionChange(id)}
-                                            onMoveItem={handleMoveItem}
-                                            onUpdateTitle={handleUpdateTitle}
-                                            onDeleteItem={handleDeleteItem}
-                                            onAddChapter={handleAddChapter}
-                                            onAddSection={handleAddSection}
-                                            onDuplicateItem={handleDuplicateItem}
-                                            onUndo={handleUndo}
-                                            onCopyItem={handleCopyItem}
-                                            onPasteItem={handlePasteItem}
-                                        />
-                                    }
-                                >
-                                    <ReportResults
-                                        activeChapterId={activeChapterId}
-                                        setActiveChapterId={setActiveChapterId}
-                                        selectedSectionIds={selectedSectionIds}
-                                        handleActiveSectionChange={handleActiveSectionChange}
-                                        isOutlineVisible={isOutlineVisible}
-                                        setIsOutlineVisible={setIsOutlineVisible}
-                                        viewMode={viewMode}
-                                        setViewMode={setViewMode}
-                                        zoomLevel={zoomLevel}
-                                        activeRightPanelKey={activeRightPanelKey}
-                                        summarizeMutation={summarizeMutation}
-                                        expandMutation={expandMutation}
-                                        rewriteMutation={rewriteMutation}
-                                        rewriteStyles={rewriteStyles}
-                                    />
-                                </BuilderCanvas>
-
-                                <ResizableHandle withHandle className="bg-transparent hover:bg-primary/10 transition-colors w-1.5 z-50" />
-
+                            {/* Right Sidebar HUD */}
+                            <div className="pointer-events-auto h-full flex flex-col">
                                 <BuilderSidebar 
                                     side="right"
                                     panels={rightPanels}
                                     activeKey={activeRightPanelKey}
                                     onActiveKeyChange={setActiveRightPanelKey}
                                 />
-                            </ResizablePanelGroup>
+                            </div>
                         </div>
                     </div>
                 </main>
