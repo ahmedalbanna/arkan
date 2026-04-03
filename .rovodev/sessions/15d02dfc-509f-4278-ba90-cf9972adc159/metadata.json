@@ -1,0 +1,44 @@
+{
+    "bookmarks": [
+        {
+            "created_at": 1768368708,
+            "message_index": 73,
+            "name": "try install npm i and fix it",
+            "type": "prompt"
+        },
+        {
+            "created_at": 1768369186,
+            "message_index": 105,
+            "name": "we don't need firebase emulator. errors.txt",
+            "type": "prompt"
+        },
+        {
+            "created_at": 1768369590,
+            "message_index": 123,
+            "name": "src/services/flow-config-service.ts ## Error Type\nRuntime FirebaseError\n\n## Error Message\nExpected first argument to collection() to be a CollectionReference, a DocumentReference or FirebaseFirestore\n\nNext.js version: 15.5.9 (Turbopack)",
+            "type": "prompt"
+        },
+        {
+            "created_at": 1768369875,
+            "message_index": 141,
+            "name": "how can make fetch all dynamic flow from firestore to Admin Flows Management Page src/app/admin/flows",
+            "type": "prompt"
+        },
+        {
+            "created_at": 1768370173,
+            "message_index": 163,
+            "name": "test the page",
+            "type": "prompt"
+        },
+        {
+            "created_at": 1768370837,
+            "message_index": 203,
+            "name": "src/services/flow-config-service.ts ## Error Type\nRuntime FirebaseError\n\n## Error Message\nExpected first argument to collection() to be a CollectionReference, a DocumentReference or FirebaseFirestore\n\nNext.js version: 15.5.9 (Turbopack)\nplase fix error",
+            "type": "prompt"
+        }
+    ],
+    "fork_data": null,
+    "is_manual_title": false,
+    "title": "Fix NPM Installation Errors",
+    "workspace_path": "/teamspace/studios/this_studio/arkan"
+}

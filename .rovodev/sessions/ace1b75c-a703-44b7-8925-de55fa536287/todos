@@ -1,0 +1,38 @@
+[
+    {
+        "active_form": "Analyzing layout and UX",
+        "content": "Analyze current UX issues in ReportModeGenerator",
+        "id": 1,
+        "status": "completed"
+    },
+    {
+        "active_form": "Creating improved ReportModeGenerator layout",
+        "content": "Improve layout responsiveness and spacing",
+        "id": 2,
+        "status": "completed"
+    },
+    {
+        "active_form": null,
+        "content": "Enhance visual hierarchy and navigation",
+        "id": 3,
+        "status": "completed"
+    },
+    {
+        "active_form": null,
+        "content": "Improve ReportResults component UX",
+        "id": 4,
+        "status": "completed"
+    },
+    {
+        "active_form": null,
+        "content": "Add smooth transitions and animations",
+        "id": 5,
+        "status": "completed"
+    },
+    {
+        "active_form": "Testing build and creating summary",
+        "content": "Test on different screen sizes",
+        "id": 6,
+        "status": "completed"
+    }
+]

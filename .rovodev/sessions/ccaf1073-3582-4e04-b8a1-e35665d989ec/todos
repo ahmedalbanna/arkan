@@ -1,0 +1,38 @@
+[
+    {
+        "active_form": "Adding keyboard shortcuts",
+        "content": "Add keyboard shortcuts for flow builder",
+        "id": 1,
+        "status": "completed"
+    },
+    {
+        "active_form": "Integrating undo/redo into FlowBuilder",
+        "content": "Implement undo/redo functionality",
+        "id": 2,
+        "status": "completed"
+    },
+    {
+        "active_form": null,
+        "content": "Add step connection lines visualization",
+        "id": 3,
+        "status": "completed"
+    },
+    {
+        "active_form": null,
+        "content": "Create flow validation system",
+        "id": 4,
+        "status": "completed"
+    },
+    {
+        "active_form": null,
+        "content": "Add export flow as image feature",
+        "id": 5,
+        "status": "completed"
+    },
+    {
+        "active_form": null,
+        "content": "Create advanced step templates",
+        "id": 6,
+        "status": "completed"
+    }
+]

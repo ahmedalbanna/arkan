@@ -1,0 +1,50 @@
+[
+    {
+        "active_form": "Examining current project structure",
+        "content": "Examine dynamic flows, prompts, and tools structure in arkan",
+        "id": 1,
+        "status": "completed"
+    },
+    {
+        "active_form": "Creating new standalone project structure",
+        "content": "Create new standalone project structure",
+        "id": 2,
+        "status": "completed"
+    },
+    {
+        "active_form": "Creating new standalone project with proper structure",
+        "content": "Extract and move dynamic flows",
+        "id": 3,
+        "status": "completed"
+    },
+    {
+        "active_form": null,
+        "content": "Extract and move prompts",
+        "id": 4,
+        "status": "completed"
+    },
+    {
+        "active_form": null,
+        "content": "Extract and move tools",
+        "id": 5,
+        "status": "completed"
+    },
+    {
+        "active_form": "Fixing imports and dependencies for standalone operation",
+        "content": "Set up dependencies and configuration",
+        "id": 6,
+        "status": "completed"
+    },
+    {
+        "active_form": "Creating examples and documentation",
+        "content": "Create documentation and examples",
+        "id": 7,
+        "status": "completed"
+    },
+    {
+        "active_form": "Creating test script and verifying standalone functionality",
+        "content": "Test the new standalone project",
+        "id": 8,
+        "status": "completed"
+    }
+]

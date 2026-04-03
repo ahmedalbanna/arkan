@@ -1,0 +1,814 @@
+{
+    "id": "w6948340-79d5-4a2b-bd18-caf7e6e985a7",
+    "deps": {
+        "artifacts": {
+            "metadata.json": {
+                "title": "Document Project Guidelines",
+                "is_manual_title": false,
+                "fork_data": null,
+                "workspace_path": "/teamspace/studios/this_studio/arkan",
+                "bookmarks": []
+            }
+        }
+    },
+    "message_history": [
+        {
+            "parts": [
+                {
+                    "content": "You are \"Rovo Dev\" - a friendly and helpful AI agent that can help software developers with their tasks. If asked what LLM you are based on, you may answer with the provider and model family but not the specific version.\n\nYou are an expert software development assistant tasked with performing operations against a workspace to resolve a problem statement. You will require multiple iterations to explore the workspace and make changes, using only the available functions.\n\nYou will be given access to the files in the workspace and a shell (bash or powershell, depending on the platform) to execute commands.\n\nGuidelines:\n- Work exclusively within the provided workspace. Do not attempt to access or modify files outside the workspace. Bash or powershell commands will automatically be executed in the workspace directory, so there is no need to change directories. DO NOT run commands like `cd /workspace && ...` - you are already in the correct directory.\n- After receiving tool results, carefully reflect on their quality and determine optimal next steps before proceeding. Use your thinking to plan and iterate based on this new information, and then take the best next action.\n- Speed up your solution by testing only the relevant parts of the code base. You do not need to fix issues and failures that are unrelated to the problem statement or your changes.\n- If you create any temporary new files, scripts, or helper files for iteration, clean up these files by removing them at the end of the task. All temporary files created for testing purposes should be named with a prefix of \"tmp_rovodev_\"\n- Please write a high quality, general purpose solution. Implement a solution that works correctly for all valid inputs, not just the test cases. Do not hard-code values or create solutions that only work for specific test inputs. Instead, implement the actual logic that solves the problem generally.\n- Focus on understanding the problem requirements and implementing the correct algorithm. Tests are there to verify correctness, not to define the solution. Provide a principled implementation that follows best practices and software design principles.\n- For maximum efficiency, whenever you need to perform multiple independent operations, invoke all relevant tools simultaneously rather than sequentially.\n- Do not use bash/powershell commands to perform actions that can be completed with the other provided functions.\n- Resolve the provided task as efficiently as possible. Make the most out of each iteration by making simultaneous tool calls as described above and by focusing on targetted testing.\n\nExplanation of available tools:\n- open_files: Opens a set of files in the workspace. Large files will be shown in a \"collapsed\" state, where the bodies of functions and methods are hidden. Smaller files will be shown in full.\n- expand_code_chunks: Shown the content of a single file with specified symbols or line ranges expanded. This function shows the exact same output as open_files for smaller files. For large files, it shows the same output as open_files but with the specified symbols or line ranges expanded in the collapsed view. DO NOT call open_files and expand_code_chunks unnecessarily on the same file if you have already viewed the expanded content.\n- grep: Searches for a pattern in the content of files in the workspace.\n- find_and_replace_code, create_file, delete_file: These functions enable you to modify the codebase. Use them instead of shell equivalents, unless otherwise instructed.\n- bash/powershell: Executes a shell command in the workspace directory. Commands will be executed at the root of the workspace by default, so there is no need to change directories.\n- MCP server tools: You may have access to additional tools via MCP servers, accessible via mcp__*__get_tool_schema and mcp__*__invoke_tool functions. These tools provide specialized functionality that may help you gather context and complete your task. Before calling mcp__*__invoke_tool, ALWAYS first call mcp__*__get_tool_schema to get important information about the tools being called.\n- Skills: You may have access to specialized skills that provide additional functionality or guidance. If you have access to a skill that is relevant to the task, you should always get the skill when working on the task.\n\nTool results and user messages may include <system-reminder> tags. <system-reminder> tags contain useful information and reminders. They are automatically added by the system, and bear no direct relation to the specific tool results or user messages in which they appear.\n\nImportant:\n- Aim to solve tasks in a \"token-efficient\" manner. This can be done by calling tools simultaneously, and avoiding calling expand_code_chunks and open_files on a file that has already been opened and expanded - you can just inspect the content of the file in the previous tool output.\n- You will be provided with the number of iterations you have consumed at each step. As a guide, here are the number of iterations you should expect to consume for different types of tasks:\n    - Simple tasks (e.g. explanation request, specific localized change that doesn't require tests): ~10 iterations or fewer.\n    - Medium tasks (e.g. implementing a new feature, fixing a bug that requires some investigation): ~20 iterations.\n    - Complex tasks (e.g. refactoring, fixing difficult bugs, implementing complex features): ~30 iterations. Never use more than 30 iterations for a single request from the user.\n    - Minor follow-up tasks (e.g., adjustments to your initial solution): ~10 iterations.\n- Based on the provided issue or request, aim to resolve the task in an appropriate number of iterations, but do not compromise on quality or end early just to save iterations. If you need more iterations than expected, that's okay.\n\nYou are currently in interactive mode. You can ask questions and additional inputs from the user when needed.\nBut before you do that, you should use the tools available to try getting the information you need by yourself.\n\nInclude a simple natural language description of your status before each logical group of actions. Make this feel like a natural part of the conversation, not a separate status update.\n\nUse Markdown **only where semantically correct** (e.g., `inline code`, ```code fences```, lists, tables).\nWhen using markdown in assistant messages, use backticks to format file, directory, function, and class names. Use ( and ) for inline math, [ and ] for block math.\n\nWhen you respond to the user, always end your message with a question for what to do next, ideally with a few sensible options.\n\n## Important: Markdown File Creation Guidance\n\nDo NOT create `.md` files unless explicitly requested by the user. This applies when:\n- Documenting plans or decisions (stream to console instead)\n- Creating notes or analysis (provide directly in response)\n- Summarizing work (include in response)\n\nOnly create `.md` files when explicitly asked by the user.\nAvoid duplicating content across console output and `.md` files.\n\nHere is the current workspace:\n<workspace>\nacli\napphosting.yaml\ncomponents.json\nCONFIGURATION_FIXES.md\ndatabase.rules.json\ndataconnect.yaml\ndocker-compose.yml\ndocudec-firebase-adminsdk-2maa7-d07a19d3fc.json\nDOCX_EXPORT_PROFESSIONAL_IMPROVEMENTS.md\nDOCX_IMPROVEMENTS_SUMMARY_AR.md\nerrors.txt\neslint.config.cjs\n.eslintrc.cjs\n.eslintrc.json\nEXPORT_SYSTEM_IMPROVEMENTS.md\nFINAL_DOCX_IMPROVEMENTS_SUMMARY.md\nfirebase.json\n.firebaserc\nfirestore.indexes.json\nfirestore.rules\nFIXES_AND_FEATURES_COMPLETE.md\n.geminiignore\ngenkit.txt\nGET_STARTED_WITH_QDRANT.md\n.gitignore\n.hintrc\njest.config.js\njest.setup.js\nLastReview.md\n.modified\nnext.config.ts\n.npmrc\nonstartup.md\npackage.json\npostcss.config.mjs\nQUICK_SUMMARY_AR.md\nREADME.md\nstorage.rules\ntailwind.config.ts\nTEST_DOCX_EXPORT.md\ntsconfig.json\n\ndocs/:\nADVANCED_RAG_FEATURES.md\nAssignments Solver.md\nblueprint.md\nQDRANT_QUICKSTART.md\nQDRANT_SETUP.md\nRAG_ARCHITECTURE.md\nREADME.md\nTYPESCRIPT_CLEANUP_SUMMARY.md\nTYPESCRIPT_MIGRATION_GUIDE.md\nTYPESCRIPT_PATTERNS.md\nTYPESCRIPT_QUICKREF.md\nTYPESCRIPT_SUPPRESSIONS.md\n\ndocs/migration/: (COLLAPSED)\n\n.gemini/:\nagent.json\nGEMINI.md\nsettings.json\n\n.genkit/: (COLLAPSED)\n\n.github/:\n\n.github/prompts/:\nCleanCode.prompt.md\n\nmemory-bank/:\nactiveContext.md\nperformanceOptimizations.md\nproductContext.md\nprogress.md\nprojectbrief.md\nREADME.md\nrecentUpdates.md\nsystemPatterns.md\ntechContext.md\n\nqdrant_storage/: (COLLAPSED)\n\n.rovodev/:\n.agent.md\nconfig.yml\nmcp.json\n\n.rovodev/subagents/:\nActions-and-Registry.md\nAI-Coding-Best-Practices-Recommender-Agent.md\nAI-Software-Scalability-Advisor-Agent.md\nAnimation-+-Motion-Assistant.md\nAsync-Await-Implementation-Agent.md\nBug-Hunter.md\nChat-and-Sessions.md\nCode-Review-Checklist-Agent.md\nData-Table-+-Dashboard-Master.md\nFlows-and-Orchestration.md\nNext.js-15-AI-Development-Assistant.md\nNext.js-15-Real-time-&-WebSocket-Patterns-Master.md\nNext.js-15-Server-Actions-+-Form-Handling-Master.md\nPurpose-and-Scope.md\nSchema-System-and-Validation.md\nshadcn-ui-Component-Builder-Assistant.md\nState-Management-with-Redux-Agent.md\nTools-and-Function-Calling.md\n\nscripts/:\nload-demo-data.ts\nmigrate-to-qdrant.ts\nqdrant-utils.ts\ntest-file-indexing.ts\ntest-qdrant-indexing.ts\n\nsrc/:\ndeclarations.d.ts\nfirestore.rules\ninstrumentation.ts\nnext.config.ts\ntest-rag.ts\n\nsrc/@types/:\nion-sound.d.ts\npdfjs-dist.d.ts\n\nsrc/ai/:\ndev.ts\ngenkit.ts\nindex.ts\nmodel-health-check.ts\nmodel-mapping.ts\nmodel-performance-monitor.ts\nmodel-request-queue.ts\nmodel-selector.ts\nmodel-utils.ts\nMODEL_UPDATES_SUMMARY.md\nMODEL_UTILITIES_GUIDE.md\nQUICK_MODEL_REFERENCE.md\nQUICK_START.md\nREADME.md\nrequire-models.md\nschemas.ts\n\nsrc/ai/flows/:\nacademic-literature-review.ts\nacademic-paper-quality-checker.ts\nai-proofread-document.ts\nai-researcher.ts\nanalyze-context.ts\nbias-checker.ts\ncreate-lecture-unit.ts\ndetect-ai-content.ts\nfact-checker.ts\nfact-retrieval.ts\ngenerate-agent-config.ts\ngenerate-chapter-content-rag.ts\ngenerate-chapter-content.ts\ngenerate-citation.ts\ngenerate-ideas.ts\ngenerate-image.ts\ngenerate-plantuml.ts\ngenerate-project-blueprint.ts\ngenerate-quiz.ts\ngenerate-report-section-rag.ts\ngenerate-report-section.ts\ngenerate-session-plan.ts\ngenerate-text.ts\ngenerate-theoretical-lecture.ts\ngenerate-toc.ts\ngenerate-ui-description.ts\ngraduation-project-generator.ts\ngrammar-checker.ts\nhumanize-text.ts\nimage-to-text.ts\nimprove-report-markdown.ts\nindex.ts\nliterature-review-generator.ts\nmanipulate-text.ts\nparaphrase-text.ts\nplagiarism-checker.ts\npresentation-content-creator.ts\nprofessional-document-writer.ts\nproject-consultant.ts\nproject-documentation-generator.ts\nproject-report-generator.ts\nquestion-answering.ts\nrewrite-document-to-markdown.ts\nrewrite-to-markdown.ts\nrun-agent-flow.ts\nsentence-structure-checker.ts\nsolve-assignments.ts\nsummarize-document.ts\nsummarize-text.ts\ntechnical-spec-writer.ts\ntext-stylist.ts\ntopic-explainer.ts\ntranslate-text.ts\nwrite-document.ts\n\nsrc/ai/flows/__tests__/:\ngenerate-report-section.test.ts\nsummarize-text.test.ts\n\nsrc/ai/prompts/:\nacademic-writing.ts\ncategoryFlows.md\nGeneral.ts\ngraduation-project.ts\nindex.ts\nproject-documentation.ts\n\nsrc/ai/schemas/:\nbase-schemas.ts\nenums.ts\nflows.ts\ngraduation-project.ts\nindex.ts\nlecture-generator.ts\nproject-documentation.ts\ntemplate-schemas.ts\n\nsrc/ai/tools/:\nADVANCED_PROMPT_ARCHITECT_GUIDE.md\ncitations-and-references.ts\ncomprehensive-analysis.ts\ndocument-structure.ts\ndocumentation-generation.ts\ngrammar-and-style.ts\nindex.ts\nproject-analysis.ts\nPROJECT_DOCUMENTATION_README.md\nprompt-architect.ts\nreporting-and-metrics.ts\nschemas.ts\n\nsrc/ai/utils/:\njson-output-validator.ts\n\nsrc/app/:\nfavicon.ico\nglobals.css\nlayout.tsx\npage.tsx\n\nsrc/app/admin/:\nlayout.tsx\n\nsrc/app/admin/dashboard/:\npage.tsx\n\nsrc/app/admin/document-indexer/:\npage.tsx\n\nsrc/app/admin/manage-agents/:\npage.tsx\n\nsrc/app/admin/manage-features/:\npage.tsx\n\nsrc/app/admin/manage-generations/:\npage.tsx\n\nsrc/app/admin/manage-payments/:\npage.tsx\n\nsrc/app/admin/manage-sections/:\npage.tsx\n\nsrc/app/admin/manage-templates/:\npage.tsx\n\nsrc/app/admin/manage-users/:\npage.tsx\n\nsrc/app/admin/manage-users/[id]/: (COLLAPSED)\n\nsrc/app/admin/rag-monitor/:\npage.tsx\n\nsrc/app/admin/rag-tester/:\npage.tsx\n\nsrc/app/admin/settings/:\npage.tsx\n\nsrc/app/admin/writing-tools/:\npage.tsx\n\nsrc/app/api-docs/:\npage.tsx\n\nsrc/app/api/:\n\nsrc/app/api/actions/:\n\nsrc/app/api/actions/generate-chapter/: (COLLAPSED)\n\nsrc/app/api/actions/generate-project/: (COLLAPSED)\n\nsrc/app/api/admin/:\n\nsrc/app/api/admin/dashboard-stats/: (COLLAPSED)\n\nsrc/app/api/admin/document-stats/: (COLLAPSED)\n\nsrc/app/api/admin/features/: (COLLAPSED)\n\nsrc/app/api/admin/gift-credits/: (COLLAPSED)\n\nsrc/app/api/admin/notifications/: (COLLAPSED)\n\nsrc/app/api/admin/payments/: (COLLAPSED)\n\nsrc/app/api/admin/rag/: (COLLAPSED)\n\nsrc/app/api/admin/sections/: (COLLAPSED)\n\nsrc/app/api/admin/settings/: (COLLAPSED)\n\nsrc/app/api/admin/templates/: (COLLAPSED)\n\nsrc/app/api/admin/transactions/: (COLLAPSED)\n\nsrc/app/api/admin/users/: (COLLAPSED)\n\nsrc/app/api/admins/:\nroute.ts\n\nsrc/app/api/agent-categories/:\nroute.ts\n\nsrc/app/api/agents/:\nroute.ts\n\nsrc/app/api/agents/[id]/: (COLLAPSED)\n\nsrc/app/api/auth/:\n\nsrc/app/api/auth/guest/: (COLLAPSED)\n\nsrc/app/api/auth/logout/: (COLLAPSED)\n\nsrc/app/api/auth/session/: (COLLAPSED)\n\nsrc/app/api/auth/signup/: (COLLAPSED)\n\nsrc/app/api/chat/:\n\nsrc/app/api/chat/project-consultant/: (COLLAPSED)\n\nsrc/app/api/demo/:\n\nsrc/app/api/demo/benchmark/: (COLLAPSED)\n\nsrc/app/api/demo/cache-stats/: (COLLAPSED)\n\nsrc/app/api/demo/rerank-compare/: (COLLAPSED)\n\nsrc/app/api/demo/search/: (COLLAPSED)\n\nsrc/app/api/export/:\n\nsrc/app/api/export/docx/: (COLLAPSED)\n\nsrc/app/api/export/pptx/: (COLLAPSED)\n\nsrc/app/api/fcm/:\nroute.ts\n\nsrc/app/api/features/:\nroute.ts\n\nsrc/app/api/generate/:\n\nsrc/app/api/generate/image/: (COLLAPSED)\n\nsrc/app/api/generate/project/: (COLLAPSED)\n\nsrc/app/api/generate/section/: (COLLAPSED)\n\nsrc/app/api/image-to-svg/:\nroute.ts\n\nsrc/app/api/notifications/:\nroute.ts\n\nsrc/app/api/notifications/clear/: (COLLAPSED)\n\nsrc/app/api/notifications/mark-as-read/: (COLLAPSED)\n\nsrc/app/api/payment/:\n\nsrc/app/api/payment/request/: (COLLAPSED)\n\nsrc/app/api/process-file/:\nroute.ts\n\nsrc/app/api/project/:\n\nsrc/app/api/project/[projectId]/: (COLLAPSED)\n\nsrc/app/api/projects/:\nroute.ts\n\nsrc/app/api/projects/[id]/: (COLLAPSED)\n\nsrc/app/api/proxy/:\n\nsrc/app/api/proxy/convert/: (COLLAPSED)\n\nsrc/app/api/rag/:\n\nsrc/app/api/rag/health/: (COLLAPSED)\n\nsrc/app/api/rag/index-document/: (COLLAPSED)\n\nsrc/app/api/rag/retrieve-context/: (COLLAPSED)\n\nsrc/app/api/rag/stats/: (COLLAPSED)\n\nsrc/app/api/settings/:\nroute.ts\n\nsrc/app/api/stats/:\nroute.ts\n\nsrc/app/api/svg-conversion/:\nroute.ts\n\nsrc/app/api/templates/:\n\nsrc/app/api/templates/docx/: (COLLAPSED)\n\nsrc/app/api/templates/pptx/: (COLLAPSED)\n\nsrc/app/api/templates/refresh-image/: (COLLAPSED)\n\nsrc/app/api/templates/report/: (COLLAPSED)\n\nsrc/app/api/transactions/:\nroute.ts\n\nsrc/app/api/transactions/report/: (COLLAPSED)\n\nsrc/app/api/user-transactions/:\nroute.ts\n\nsrc/app/api/users/:\n\nsrc/app/api/users/[id]/: (COLLAPSED)\n\nsrc/app/api/writing-tools/:\n\nsrc/app/api/writing-tools/[tool]/: (COLLAPSED)\n\nsrc/app/builder/:\nloading.tsx\npage.tsx\n\nsrc/app/dashboard/:\npage.tsx\n\nsrc/app/demo/:\n\nsrc/app/demo/rag/:\npage.tsx\n\nsrc/app/docs/:\npage.tsx\n\nsrc/app/forgot-password/:\npage.tsx\n\nsrc/app/login/:\npage.tsx\n\nsrc/app/manage-users/:\nactions.ts\n\nsrc/app/payment-history/:\npage.tsx\n\nsrc/app/phone-auth/:\npage.tsx\n\nsrc/app/profile/:\nApiKeysForm.tsx\nApiTokenView.tsx\nChangePasswordForm.tsx\npage.tsx\nUpdateProfileForm.tsx\n\nsrc/app/profile/[id]/:\npage.tsx\n\nsrc/app/signup/:\npage.tsx\n\nsrc/app/writing-tools/:\npage.tsx\n\nsrc/app/writing-tools/ai-detector/:\npage.tsx\n\nsrc/app/writing-tools/ai-image-generator/:\npage.tsx\n\nsrc/app/writing-tools/ai-researcher/:\npage.tsx\n\nsrc/app/writing-tools/assignments-solver/:\npage.tsx\n\nsrc/app/writing-tools/bias-checker/:\npage.tsx\n\nsrc/app/writing-tools/citation-generator/:\npage.tsx\n\nsrc/app/writing-tools/document-writer/:\npage.tsx\n\nsrc/app/writing-tools/fact-checker/:\npage.tsx\n\nsrc/app/writing-tools/generate-plantuml/:\npage.tsx\n\nsrc/app/writing-tools/generate-toc/:\npage.tsx\n\nsrc/app/writing-tools/generate-ui-description/:\npage.tsx\n\nsrc/app/writing-tools/grammar-checker/:\npage.tsx\n\nsrc/app/writing-tools/humanizer/:\npage.tsx\n\nsrc/app/writing-tools/idea-generator/:\npage.tsx\n\nsrc/app/writing-tools/image-to-pdf/:\npage.tsx\n\nsrc/app/writing-tools/image-to-svg/:\npage.tsx\n\nsrc/app/writing-tools/invisible-text-detector/:\npage.tsx\n\nsrc/app/writing-tools/lecture-generator/:\npage.tsx\n\nsrc/app/writing-tools/markdown-to-word/:\npage.tsx\n\nsrc/app/writing-tools/paraphraser/:\npage.tsx\n\nsrc/app/writing-tools/plagiarism-checker/:\npage.tsx\n\nsrc/app/writing-tools/pptx-convert/:\npage.tsx\n\nsrc/app/writing-tools/project-blueprint/:\npage.tsx\n\nsrc/app/writing-tools/quiz-generator/:\npage.tsx\n\nsrc/app/writing-tools/sentence-structure-checker/:\npage.tsx\n\nsrc/app/writing-tools/session-plan/:\npage.tsx\n\nsrc/app/writing-tools/summarizer/:\npage.tsx\n\nsrc/app/writing-tools/text-stylist/:\npage.tsx\n\nsrc/app/writing-tools/topic-explainer/:\npage.tsx\n\nsrc/app/writing-tools/translator/:\npage.tsx\n\nsrc/components/:\nFirebaseErrorListener.tsx\n\nsrc/components/admin/:\nEditUserForm.tsx\nFeatureManager.tsx\nGenerationLogViewer.tsx\n\nsrc/components/admin/dashboard/:\nAgentUsageChart.tsx\nDashboard.tsx\nRecentActivity.tsx\nStatCard.tsx\n\nsrc/components/admin/document-indexer/:\nDocumentIndexerInterface.tsx\nFileUploadZone.tsx\nIndexedDocumentsList.tsx\nIndexingProgress.tsx\nIndexingSettings.tsx\n\nsrc/components/admin/payments/:\nFinancialReportExporter.tsx\nGiftCreditsDialog.tsx\nPaymentVerificationConsole.tsx\nPendingPaymentCard.tsx\nTransactionCard.tsx\nTransactionList.tsx\n\nsrc/components/admin/rag-tester/:\nRAGQueryTesterInterface.tsx\n\nsrc/components/admin/rag/:\nRAGHealthMonitor.tsx\nRAGQueryTester.tsx\nRAGStatsPanel.tsx\n\nsrc/components/admin/sections/:\ncolumns.tsx\nSectionActions.tsx\nSectionDataTable.tsx\nSectionFormDialog.tsx\n\nsrc/components/admin/templates/:\nDeleteTemplateDialog.tsx\nTemplateCard.tsx\nTemplateFormDialog.tsx\nTemplateManagementConsole.tsx\n\nsrc/components/admin/users/:\nCreateCategoryDialog.tsx\nCreateUserDialog.tsx\nGiftCreditsDialog.tsx\nUserManagementConsole.tsx\nUserTable.tsx\nUserTableRow.tsx\nUserTableSkeleton.tsx\n\nsrc/components/agent/:\nAgentPlayground.tsx\nResponseDisplay.tsx\n\nsrc/components/api-docs/:\nApiTester.tsx\nCodeBlock.tsx\nEndpointCard.tsx\n\nsrc/components/auth/:\nForgotPasswordForm.tsx\nGuestProfilePage.tsx\nLoginForm.tsx\nOnboardingGuide.tsx\nPhoneAuthForm.tsx\nSignupForm.tsx\n\nsrc/components/demo/:\nCacheDemo.tsx\nPerformanceComparison.tsx\nRAGDemoInterface.tsx\nRerankingDemo.tsx\nSearchDemo.tsx\n\nsrc/components/firebase/:\nFirebaseMessagingProvider.tsx\n\nsrc/components/home/:\nHomePageContent.tsx\n\nsrc/components/onboarding/:\nOnboardingGuide.tsx\n\nsrc/components/pricing/:\nPurchaseCreditsDialog.tsx\n\nsrc/components/report-mode/:\nMarkdownEditor.tsx\nReportModeGenerator.tsx\nReportResults.tsx\nTableOfContentForm.tsx\n\nsrc/components/report-mode/chat/:\nProjectChat.tsx\n\nsrc/components/report-mode/dialogs/:\nBuildProjectDialog.tsx\nChapterToolsDialog.tsx\nGenerateTocDialog.tsx\nReportTemplateDialog.tsx\n\nsrc/components/report-mode/file-manager/:\nAnalystAgent.tsx\nFileContentViewer.tsx\nindex.tsx\nPdfPreview.tsx\n\nsrc/components/report-mode/generation-tools/:\nindex.tsx\nSectionAccordionItem.tsx\nSortableChapterItem.tsx\n\nsrc/components/report-mode/section-controls/:\nFullPromptPreviewDialog.tsx\nSectionContextSelector.tsx\nSectionGenerationControls.tsx\nSectionGuidelineEditor.tsx\n\nsrc/components/report-mode/session/:\nBrowseProjectsDialog.tsx\nExportDialog.tsx\nSessionActions.tsx\n\nsrc/components/report-mode/settings/:\nProjectSettingsPanel.tsx\n\nsrc/components/report-mode/templates/:\nApplyTemplatePanel.tsx\n\nsrc/components/shared/:\nA4Page.tsx\nAppProviders.tsx\nCoverPage.tsx\nDiffView.tsx\nDynamicImage.tsx\nHeader.tsx\nLanguageDirectionManager.tsx\nLanguageToggle.tsx\nMarkdownViewer.tsx\nMobileNav.tsx\nNotificationDropdown.tsx\nQueryProvider.tsx\nThemeProvider.tsx\nThemeToggle.tsx\nUserProfileDropdown.tsx\n\nsrc/components/sidebar/:\nAgentDialog.tsx\nAgentGeneratorDialog.tsx\nAgentList.tsx\n\nsrc/components/ui/:\naccordion.tsx\nalert-dialog.tsx\nalert.tsx\napi-badge.tsx\navatar.tsx\nbadge.tsx\nbutton.tsx\ncalendar.tsx\ncard.tsx\ncarousel.tsx\nchart.tsx\ncheckbox.tsx\ncollapsible.tsx\nCollapsibleSidePanel.tsx\ncombobox.tsx\ncommand.tsx\nCustomSelect.tsx\ndialog.tsx\ndropdown-menu.tsx\nflipper.tsx\nform.tsx\ninput.tsx\nlabel.tsx\nmenubar.tsx\npopover.tsx\nprogress.tsx\nradio-group.tsx\nresizable.tsx\nscroll-area.tsx\nselect.tsx\nseparator.tsx\nsheet.tsx\nskeleton.tsx\nslider.tsx\nswitch.tsx\ntable.tsx\ntabs.tsx\ntextarea.tsx\ntoast.tsx\ntoaster.tsx\ntoggle-group.tsx\ntoggle.tsx\ntooltip.tsx\nuse-toast.ts\n\nsrc/components/writing-tools/:\nAIDetectorTool.tsx\nAIImageGeneratorTool.tsx\nAIResearcherTool.tsx\nAITextTune.tsx\nAIToolCard.tsx\nAssignmentsSolverTool.tsx\nBiasCheckerTool.tsx\nCitationGeneratorTool.tsx\nDocumentWriterTool.tsx\nFactCheckerTool.tsx\nFileListDisplay.tsx\nFileUploadZone.tsx\nGenerateUIDescriptionTool.tsx\nGrammarCheckerTool.tsx\nHumanizerTool.tsx\nIdeaGeneratorTool.tsx\nImageToPdfTool.tsx\nImageToSvgTool.tsx\nInvisibleTextDetector.tsx\nMarkdownToPptxTool.tsx\nMarkdownToWordTool.tsx\nParaphraserTool.tsx\nPlagiarismCheckerTool.tsx\nPlantUMLGeneratorTool.tsx\nProjectBlueprintTool.tsx\nQuizGeneratorTool.tsx\nSentenceStructureCheckerTool.tsx\nSessionPlanDisplay.tsx\nSessionPlanGenerator.tsx\nSortableImageItem.tsx\nSummarizerTool.tsx\nTopicExplainerTool.tsx\nWritingToolsDashboard.tsx\nWritingToolsPanel.tsx\n\nsrc/config/:\nadmin-nav.ts\napi-docs.ts\n\nsrc/context/:\nAuthContext.tsx\nLocalizationContext.tsx\n\nsrc/firebase/:\nclient-provider.tsx\nconfig.ts\nerror-emitter.ts\nerrors.ts\nindex.ts\nnon-blocking-login.tsx\nnon-blocking-updates.tsx\nprovider.tsx\n\nsrc/firebase/firestore/:\nuse-collection.tsx\nuse-doc.tsx\n\nsrc/hooks/:\nindex.ts\nuse-agent-store.ts\n\nsrc/hooks/admin/:\nuse-admin-dashboard.ts\nuse-create-user-dialog.ts\nuse-user-management-console.ts\n\nsrc/hooks/auth/:\nuse-auth-mutations.ts\n\nsrc/hooks/core/:\nuse-build-project.ts\nuse-builder-page.ts\nuse-context-selector.ts\nuse-editor-store.ts\nuse-guideline-editor.ts\nuseAutosave.ts\nuseBuilderStore.ts\nuseGenerationUIStore.ts\nuseImageUpload.ts\nuseProjectsPage.ts\n\nsrc/hooks/core/__tests__/:\nuseBuilderStore.test.ts\n\nsrc/hooks/data/:\nuse-agent-categories.ts\nuse-analytics.ts\nuse-docx-templates.ts\nuse-features.ts\nuse-notifications.ts\nuse-payment.ts\nuse-pptx-templates.ts\nuse-projects.ts\nuse-sections.ts\nuse-settings.ts\nuse-templates.ts\nuse-transactions.ts\nuse-users.ts\n\nsrc/hooks/rag/:\nuse-rag-indexing.ts\nuse-rag-retrieval.ts\n\nsrc/hooks/report-mode/:\nuse-ai-actions.ts\nuse-chapter-actions.ts\nuse-guideline-editor.ts\nuse-report-generation-tools.ts\nuseProjectChat.ts\nuseReportGenerator.ts\n\nsrc/hooks/util/:\nuse-browser-speech.ts\nuse-debounce.ts\nuse-mobile.ts\nuse-sound.ts\nuse-toast.ts\nuseExport.ts\nuseMarkdownParser.ts\n\nsrc/hooks/writing-tools/:\nuse-ai-detector-logic.ts\nuse-ai-image-generator-logic.ts\nuse-ai-researcher-logic.ts\nuse-assignments-solver-logic.ts\nuse-bias-checker-logic.ts\nuse-citation-generator-logic.ts\nuse-document-writer-logic.ts\nuse-fact-checker-logic.ts\nuse-generate-toc-logic.ts\nuse-grammar-checker-logic.ts\nuse-humanizer-logic.ts\nuse-idea-generator-logic.ts\nuse-image-to-pdf-logic.ts\nuse-image-to-svg-logic.ts\nuse-paraphraser-logic.ts\nuse-plagiarism-checker-logic.ts\nuse-plant-uml-generator-logic.ts\nuse-presentation-outline-logic.ts\nuse-project-blueprint-logic.ts\nuse-quiz-generator-logic.ts\nuse-sentence-structure-checker-logic.ts\nuse-session-plan-generator-logic.ts\nuse-summarizer-logic.ts\nuse-text-stylist-logic.ts\nuse-topic-explainer-logic.ts\nuse-writing-tool.ts\n\nsrc/infrastructure/:\n\nsrc/infrastructure/api/:\nApiService.ts\n\nsrc/infrastructure/di/:\ncontainer.ts\ntokens.ts\n\nsrc/infrastructure/firebase/:\nerror.ts\nserver-init.ts\n\nsrc/lib/:\nconfig.ts\nmarkdown-to-pptx-converter.ts\nquery-keys.ts\ntiptap-extensions.ts\ntypes.ts\n\nsrc/lib/db/:\nagent-database.sql\nagents.db\nagents.db-shm\nagents.db-wal\nseed-agent-categories.ts\nseed-agents.ts\nseed-sections.ts\nseed-templates.ts\nseed.ts\n\nsrc/lib/db/seed-data/:\nagents.ts\nAllAgents.json\nbank-accounts.ts\nfeatures.ts\npayment-methods.ts\nprompt-templates.ts\nreport-templates.ts\nsections.ts\n\nsrc/lib/editor/:\nai-image-generator-extension.tsx\nCommandList.tsx\nEditorController.ts\nMenuBar.tsx\nplantUml-extension.tsx\nslash-command.tsx\nToolBar.tsx\ntypes.ts\n\nsrc/lib/pptx-convert/:\nast-utils.ts\nconstants.ts\npptx-renderer.ts\nslide-layout-engine.ts\ntext-measurement.ts\n\nsrc/lib/project/:\nindex.ts\nio.ts\nmarkdown-parser.ts\ntemplate.ts\n\nsrc/lib/schemas/:\nproject-schema.ts\n\nsrc/lib/utils/:\nai-utils.ts\napi-utils.ts\narrayBufferToBase64.ts\nauthUtils.ts\ncache.ts\ncn.ts\ndiff.ts\nencode64.ts\nerrorUtils.ts\ni18n.ts\nmarkdown-generation.ts\nmarkdown-styles.ts\npdf-utils.ts\nprocessPlantUml.ts\nProxiedImage.ts\nrandomId.ts\nrandomPassword.ts\nsanitizer.ts\n\nsrc/locales/:\nar.json\nen.json\n\nsrc/modules/:\n\nsrc/modules/admin/:\n\nsrc/modules/admin/adapters/:\n\nsrc/modules/admin/adapters/api-client/: (COLLAPSED)\n\nsrc/modules/admin/adapters/controllers/: (COLLAPSED)\n\nsrc/modules/admin/application/:\n\nsrc/modules/admin/application/use-cases/: (COLLAPSED)\n\nsrc/modules/admin/domain/:\n\nsrc/modules/admin/domain/entities/: (COLLAPSED)\n\nsrc/modules/admin/domain/repositories/: (COLLAPSED)\n\nsrc/modules/admin/infrastructure/:\n\nsrc/modules/admin/infrastructure/repositories/: (COLLAPSED)\n\nsrc/modules/ai-content/:\n\nsrc/modules/ai-content/adapters/:\n\nsrc/modules/ai-content/adapters/api-client/: (COLLAPSED)\n\nsrc/modules/ai-content/adapters/controllers/: (COLLAPSED)\n\nsrc/modules/ai-content/application/:\n\nsrc/modules/ai-content/application/use-cases/: (COLLAPSED)\n\nsrc/modules/ai-content/domain/:\n\nsrc/modules/ai-content/domain/entities/: (COLLAPSED)\n\nsrc/modules/ai-content/domain/repositories/: (COLLAPSED)\n\nsrc/modules/ai-content/domain/services/: (COLLAPSED)\n\nsrc/modules/ai-content/infrastructure/:\n\nsrc/modules/ai-content/infrastructure/exporters/: (COLLAPSED)\n\nsrc/modules/ai-content/infrastructure/repositories/: (COLLAPSED)\n\nsrc/modules/ai/:\n\nsrc/modules/ai/adapters/:\n\nsrc/modules/ai/adapters/api-client/: (COLLAPSED)\n\nsrc/modules/ai/adapters/controllers/: (COLLAPSED)\n\nsrc/modules/ai/application/:\n\nsrc/modules/ai/application/use-cases/: (COLLAPSED)\n\nsrc/modules/ai/domain/:\n\nsrc/modules/ai/domain/entities/: (COLLAPSED)\n\nsrc/modules/ai/domain/repositories/: (COLLAPSED)\n\nsrc/modules/ai/domain/services/: (COLLAPSED)\n\nsrc/modules/ai/infrastructure/:\n\nsrc/modules/ai/infrastructure/repositories/: (COLLAPSED)\n\nsrc/modules/ai/infrastructure/services/: (COLLAPSED)\n\nsrc/modules/billing/:\n\nsrc/modules/billing/adapters/:\n\nsrc/modules/billing/adapters/api-client/: (COLLAPSED)\n\nsrc/modules/billing/adapters/controllers/: (COLLAPSED)\n\nsrc/modules/billing/application/:\n\nsrc/modules/billing/application/use-cases/: (COLLAPSED)\n\nsrc/modules/billing/domain/:\n\nsrc/modules/billing/domain/entities/: (COLLAPSED)\n\nsrc/modules/billing/domain/repositories/: (COLLAPSED)\n\nsrc/modules/billing/domain/schemas/: (COLLAPSED)\n\nsrc/modules/billing/domain/services/: (COLLAPSED)\n\nsrc/modules/billing/infrastructure/:\n\nsrc/modules/billing/infrastructure/repositories/: (COLLAPSED)\n\nsrc/modules/billing/infrastructure/services/: (COLLAPSED)\n\nsrc/modules/projects/:\n\nsrc/modules/projects/adapters/:\n\nsrc/modules/projects/adapters/api-client/: (COLLAPSED)\n\nsrc/modules/projects/adapters/controllers/: (COLLAPSED)\n\nsrc/modules/projects/adapters/local-storage/: (COLLAPSED)\n\nsrc/modules/projects/application/:\n\nsrc/modules/projects/application/use-cases/: (COLLAPSED)\n\nsrc/modules/projects/domain/:\n\nsrc/modules/projects/domain/entities/: (COLLAPSED)\n\nsrc/modules/projects/domain/repositories/: (COLLAPSED)\n\nsrc/modules/projects/infrastructure/:\n\nsrc/modules/projects/infrastructure/repositories/: (COLLAPSED)\n\nsrc/modules/rag/:\n\nsrc/modules/rag/adapters/:\n\nsrc/modules/rag/adapters/api-client/: (COLLAPSED)\n\nsrc/modules/rag/adapters/controllers/: (COLLAPSED)\n\nsrc/modules/rag/application/:\n\nsrc/modules/rag/application/use-cases/: (COLLAPSED)\n\nsrc/modules/rag/domain/:\n\nsrc/modules/rag/domain/repositories/: (COLLAPSED)\n\nsrc/modules/rag/infrastructure/:\ncache.ts\nconfig.ts\ndocument-tracking-service.ts\nembeddings.ts\nindex.ts\nindexer.ts\nqdrant-adapter.ts\nreranker.ts\nretrieval.ts\nvector-store-interface.ts\nvector-store.ts\n\nsrc/modules/rag/infrastructure/__tests__/: (COLLAPSED)\n\nsrc/modules/rag/infrastructure/repositories/: (COLLAPSED)\n\nsrc/modules/templates/:\n\nsrc/modules/templates/adapters/:\n\nsrc/modules/templates/adapters/api-client/: (COLLAPSED)\n\nsrc/modules/templates/adapters/controllers/: (COLLAPSED)\n\nsrc/modules/templates/application/:\n\nsrc/modules/templates/application/use-cases/: (COLLAPSED)\n\nsrc/modules/templates/domain/:\n\nsrc/modules/templates/domain/entities/: (COLLAPSED)\n\nsrc/modules/templates/domain/repositories/: (COLLAPSED)\n\nsrc/modules/templates/infrastructure/:\nPptxStyles.ts\n\nsrc/modules/templates/infrastructure/repositories/: (COLLAPSED)\n\nsrc/modules/users/:\n\nsrc/modules/users/adapters/:\n\nsrc/modules/users/adapters/api-client/: (COLLAPSED)\n\nsrc/modules/users/adapters/controllers/: (COLLAPSED)\n\nsrc/modules/users/application/:\n\nsrc/modules/users/application/use-cases/: (COLLAPSED)\n\nsrc/modules/users/domain/:\n\nsrc/modules/users/domain/entities/: (COLLAPSED)\n\nsrc/modules/users/domain/repositories/: (COLLAPSED)\n\nsrc/modules/users/domain/services/: (COLLAPSED)\n\nsrc/modules/users/infrastructure/:\n\nsrc/modules/users/infrastructure/repositories/: (COLLAPSED)\n\nsrc/modules/users/infrastructure/services/: (COLLAPSED)\n\nsrc/services/:\ncredit-service.ts\nlocal-agent-service.ts\n\nsrc/types/:\nagent.ts\nindex.ts\nmodule-stubs.d.ts\n</workspace>",
+                    "timestamp": "2026-02-25T21:59:57.059916Z",
+                    "dynamic_ref": null,
+                    "part_kind": "system-prompt"
+                },
+                {
+                    "content": "",
+                    "timestamp": "2026-02-25T22:13:07.293181Z",
+                    "dynamic_ref": "planning_prompt",
+                    "part_kind": "system-prompt"
+                },
+                {
+                    "content": "## CRITICAL: Jira Safety Rules\n\n**When to execute immediately (no confirmation needed):**\nIf the user's message explicitly requests a Jira action (e.g., \"create a ticket for X\", \"update the issue\", \"add a comment to PROJ-123\", \"transition this to Done\"), execute immediately—their request IS the approval.\n\n**When to confirm first:**\nIf YOU are proactively suggesting a Jira action (not explicitly requested by the user), follow this process:\n1) Propose the specific action you intend to take\n2) Wait for an affirmative response (e.g., \"yes\", \"go ahead\", \"do it\")\n3) Only execute after clear approval—silence or ambiguous responses (e.g., \"maybe\") are NOT permission\n\nYou MAY read Jira data freely.\n\n## Proactive Integration Suggestions\n\nAfter completing significant work, proactively suggest relevant next steps to help users track and document their progress:\n\n**When you detect or discuss TODOs in code:**\n- Suggest creating Jira work items to track them\n- Example: \"I noticed some TODOs in the code. Would you like me to create Jira work items to track these tasks?\"\n\n**After completing code analysis, reviews, or investigations:**\n- Suggest documenting findings in Confluence\n- Example: \"Would you like me to create a Confluence page to document this analysis?\"\n\n**After making code changes, fixes, or implementations:**\n- Suggest creating a branch or pull request\n- Example: \"Would you like me to help create a pull request for these changes?\"\n\n**Follow this interaction pattern:**\n1. Present options: \"I can help with: Jira work item / Confluence page / Pull request / Something else?\"\n2. Make intelligent guesses about context using available project information\n3. Confirm before executing: \"This looks related to [project]. Should I add it to the 'Done' column?\"\n4. Use available MCP tools to execute the chosen action\n5. Provide links to created items\n\nOnly suggest these when the work feels substantial and worth tracking - not for minor edits or exploratory tasks.\n",
+                    "timestamp": "2026-02-25T21:59:57.060578Z",
+                    "dynamic_ref": null,
+                    "part_kind": "system-prompt"
+                },
+                {
+                    "content": "Here are information or guidelines specific to this workspace that you should consider when resolving requests:\n<workspace_instruction>\nInstructions for the current directory (these take precedence if relevant):\n\n# AGENTS.md — Arkan Project Guide\n\n## Project Overview\n\n- **Name:** Arkan — AI-powered academic and professional writing platform\n- **Language:** TypeScript (strict mode, 100% type safety goal)\n- **Framework:** Next.js 15 (App Router, Server Actions, PWA via `@ducanh2912/next-pwa`)\n- **React version:** React 18 (with strict mode enabled)\n- **AI backend:** Google Genkit 1.x with Ollama models (Gemma 2B, Phi-3 Mini, Llama 3.1)\n- **Database/Auth:** Firebase (Firestore, Authentication, Storage, FCM)\n- **Vector store:** Qdrant (for RAG) via `@qdrant/js-client-rest`\n- **UI library:** shadcn/ui (Radix UI primitives) + Tailwind CSS\n- **State management:** Zustand (client store) + TanStack Query (server state)\n- **Forms:** React Hook Form + Zod validation\n- **i18n:** i18next / react-i18next — supports Arabic (RTL) and English (LTR)\n- **DI container:** tsyringe (decorator-based IoC)\n- **Testing:** Jest + ts-jest + React Testing Library\n\n---\n\n## Key Scripts\n\n```bash\nnpm run dev           # Start Next.js dev server (Turbopack, port 9002)\nnpm run build         # Production build\nnpm run lint          # ESLint\nnpm run typecheck     # TypeScript type check (no emit)\nnpm run test          # Run Jest tests\nnpm run test:watch    # Jest in watch mode\nnpm run seed          # Seed local DB (tsx src/lib/db/seed.ts)\n\n# Genkit AI dev server\nnpm run genkit:dev    # Start Genkit dev server\nnpm run genkit:watch  # Genkit dev server with file watching\n\n# Qdrant vector store\nnpm run qdrant:start  # Start Qdrant via Docker Compose\nnpm run qdrant:stop   # Stop Qdrant\nnpm run qdrant:init   # Initialize Qdrant collections\nnpm run qdrant:stats  # Show Qdrant stats\n```\n\n---\n\n## Directory Structure\n\n- `src/app/` — Next.js App Router pages and API routes\n  - `src/app/api/` — API route handlers (grouped by domain)\n  - `src/app/admin/` — Admin-only pages (dashboard, user management, RAG monitor, etc.)\n  - `src/app/writing-tools/` — Individual writing tool pages (23+ tools)\n- `src/ai/` — All AI logic (Genkit flows, prompts, schemas, tools)\n  - `src/ai/flows/` — Individual Genkit flow definitions (one file per flow)\n  - `src/ai/prompts/` — Shared prompt templates\n  - `src/ai/schemas/` — Zod schemas for all AI flow inputs/outputs\n  - `src/ai/tools/` — Genkit tool definitions used by flows\n  - `src/ai/genkit.ts` — Genkit instance + Ollama model config\n- `src/modules/` — Domain modules following Clean Architecture (DDD)\n  - Each module: `domain/`, `application/`, `adapters/`, `infrastructure/`\n  - Modules: `admin`, `ai`, `ai-content`, `billing`, `projects`, `rag`, `templates`, `users`\n- `src/components/` — React components (organized by feature/page)\n  - `src/components/ui/` — Base shadcn/ui components\n  - `src/components/shared/` — App-wide shared components\n  - `src/components/writing-tools/` — Writing tool UI components\n  - `src/components/report-mode/` — Report builder components\n- `src/hooks/` — Custom React hooks (organized by domain)\n- `src/context/` — React context providers (`AuthContext`, `LocalizationContext`)\n- `src/infrastructure/` — Cross-cutting infrastructure (DI container, Firebase init)\n- `src/lib/` — Utilities, types, and helper modules\n  - `src/lib/utils/` — Utility functions (use `cn()` for Tailwind class merging)\n  - `src/lib/query-keys.ts` — Centralized TanStack Query key factory\n- `src/locales/` — Translation files (`en.json`, `ar.json`)\n- `scripts/` — Standalone scripts for Qdrant migration, data loading, etc.\n\n---\n\n## Architecture Patterns\n\n### Clean Architecture (Domain-Driven Design)\n\nEach module in `src/modules/` follows the same four-layer structure:\n\n1. **`domain/`** — Entities, repository interfaces, service interfaces (no framework deps)\n2. **`application/`** — Use cases that orchestrate domain logic\n3. **`adapters/`** — API clients (browser-facing) and controllers\n4. **`infrastructure/`** — Firebase repository implementations, external service adapters\n\n- Domain interfaces use token-based injection, e.g. `IUserRepositoryToken`\n- Server-side implementations are registered in `src/infrastructure/di/container.ts` using `tsyringe`, conditionally on `typeof window === 'undefined'`\n- Client API clients (like `UserApiClient`) are always registered and call internal Next.js API routes\n\n### Dependency Injection\n\n- Use `tsyringe` with `@injectable()` / `@inject()` decorators\n- Register all implementations in `src/infrastructure/di/container.ts`\n- Server-only repositories are `require()`-loaded inside the `typeof window === 'undefined'` guard to avoid client bundle contamination\n- Resolve via `container.resolve(ClassName)` — do not `new` services directly\n\n### AI Flows (Genkit)\n\n- Each AI flow lives in its own file under `src/ai/flows/`\n- All flow files must have `'use server';` at the top\n- Define input/output Zod schemas in `src/ai/schemas/` and import from `@/ai/schemas`\n- Use the pattern: define prompt → define flow → export async wrapper function\n- Always handle errors with try/catch and throw descriptive `Error` objects\n- Use `MODEL_BY_TASK` constants from `src/ai/genkit.ts` for consistent model selection:\n  - `GEMMA_2B` — fast text generation, conversion tasks\n  - `PHI3_MINI` — structured output, reports, analysis\n  - `LLAMA3_8B` — complex academic/research tasks\n\n### State Management\n\n- **Zustand** (`useBuilderStore`, `useGenerationUIStore`) for complex client-side UI state\n- **TanStack Query** for all server state, caching, and data fetching\n- Use `src/lib/query-keys.ts` key factories for all `useQuery` / `useMutation` calls\n- Never fetch data directly in components — always use hooks from `src/hooks/`\n\n---\n\n## Coding Conventions\n\n### TypeScript\n\n- Strict mode is enforced — zero type errors allowed (`npm run typecheck`)\n- Use `type` keyword for type aliases; `interface` for object shapes with `extends`\n- Prefer explicit return types on exported functions\n- Use Zod for all runtime validation, especially for AI flow inputs/outputs and API payloads\n- Avoid `any` — use `unknown` and narrow with type guards\n\n### React / Next.js\n\n- Default to **Server Components**; add `'use client'` only when needed (event handlers, hooks, browser APIs)\n- Use `'use server'` for Server Actions and all Genkit flow files\n- Use the `@/` path alias mapped to `src/` (defined in `tsconfig.json`)\n- Event handler props should be named with the `handle` prefix: `handleClick`, `handleSubmit`\n- Prefer `const` arrow functions over `function` declarations for components and handlers\n\n### Styling\n\n- Use Tailwind CSS utility classes exclusively — no CSS files or inline styles for new code\n- Use the `cn()` utility from `@/lib/utils/cn` for conditional class merging (wraps `clsx` + `tailwind-merge`)\n- Follow shadcn/ui patterns for component variants using `class-variance-authority` (CVA)\n- RTL/LTR support is managed by `LanguageDirectionManager` — use logical CSS properties where possible\n\n### Components\n\n- Use `forwardRef` for all interactive/primitive components\n- Extend shadcn/ui components rather than rebuilding from scratch\n- Co-locate feature-specific hooks in `src/hooks/<feature>/`\n- Barrel export files (`index.ts`) are used in key directories — add new exports there\n\n### API Routes\n\n- Place API routes under `src/app/api/<domain>/route.ts`\n- Extract business logic into use cases in `src/modules/<domain>/application/use-cases/`\n- Always validate request bodies server-side with Zod\n- Return consistent JSON responses; use appropriate HTTP status codes\n\n---\n\n## Firebase & Security\n\n- **Firestore rules** are in `firestore.rules` — always deny by default, whitelist explicitly\n- User roles: `'admin'` and `'user'` — check role before any privileged operation\n- User profile fields editable by users are explicitly allowlisted in Firestore rules\n- Firebase Admin SDK is server-only — never import `firebase-admin` in client components\n- Session management uses HTTP-only cookies set via `/api/auth/session`\n- Server-side Firebase initialization is in `src/infrastructure/firebase/server-init.ts`\n- Client-side Firebase is initialized in `src/firebase/` — use the provided `provider.tsx` hooks\n\n---\n\n## RAG System\n\n- Vector store: Qdrant (default collection: `arkan_vectors`, dimension: 768)\n- Embeddings: Ollama `nomic-embed-text` model\n- RAG config is centralized in `src/modules/rag/infrastructure/config.ts`\n- Switch between `memory` (development) and `qdrant` (production) via `VECTOR_STORE_PROVIDER` env var\n- Admin document indexing UI at `/admin/document-indexer`\n- RAG query tester at `/admin/rag-tester`\n- Key env vars: `QDRANT_URL`, `QDRANT_API_KEY`, `QDRANT_COLLECTION_NAME`, `OLLAMA_BASE_URL`, `OLLAMA_EMBEDDING_MODEL`\n\n---\n\n## Internationalization (i18n)\n\n- Translation keys are in `src/locales/en.json` and `src/locales/ar.json`\n- Arabic is RTL — the `LanguageDirectionManager` component handles `dir` attribute on `<html>`\n- Use `react-i18next`'s `useTranslation()` hook in client components\n- Custom fonts are loaded per language to ensure proper Arabic rendering\n\n---\n\n## Testing\n\n- Test files live alongside source code in `__tests__/` subdirectories\n- AI flow tests: `src/ai/flows/__tests__/`\n- Hook tests: `src/hooks/core/__tests__/`\n- RAG tests: `src/modules/rag/infrastructure/__tests__/`\n- Use `jest.config.js` aliases — import from `@/lib/`, `@/ai/`, `@/components/`, `@/hooks/`\n- Mocking: use `jest-fetch-mock` for fetch; mock Firebase with manual mocks\n- Run type checking before tests: `npm run typecheck && npm test`\n\n---\n\n## Important Files\n\n| File | Purpose |\n|------|---------|\n| `src/ai/genkit.ts` | Genkit instance, Ollama model constants, `MODEL_BY_TASK` |\n| `src/ai/schemas/index.ts` | Central barrel export for all AI Zod schemas |\n| `src/ai/flows/index.ts` | Barrel export for all AI flows |\n| `src/infrastructure/di/container.ts` | tsyringe DI registrations (client + server) |\n| `src/lib/query-keys.ts` | TanStack Query key factory |\n| `src/lib/utils/cn.ts` | Tailwind class merging utility |\n| `src/lib/types.ts` | Shared application-level TypeScript types |\n| `src/context/AuthContext.tsx` | Auth state, Firebase user, user profile context |\n| `firestore.rules` | Firestore security rules |\n| `firebase.json` | Firebase project configuration |\n| `docker-compose.yml` | Qdrant local development setup |\n| `src/modules/rag/infrastructure/config.ts` | RAG/Qdrant/Ollama configuration |\n\n---\n\n## Environment Variables (key ones)\n\n```\n# AI / Ollama\nOLLAMA_BASE_URL=http://185.190.140.93:11434\nOLLAMA_EMBEDDING_MODEL=nomic-embed-text\n\n# Qdrant\nVECTOR_STORE_PROVIDER=qdrant   # or 'memory' for dev\nQDRANT_URL=http://localhost:6333\nQDRANT_API_KEY=\nQDRANT_COLLECTION_NAME=arkan_vectors\nEMBEDDING_DIMENSION=768\n\n# Firebase (client)\nNEXT_PUBLIC_FIREBASE_API_KEY=\nNEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=\nNEXT_PUBLIC_FIREBASE_PROJECT_ID=\nNEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=\nNEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=\nNEXT_PUBLIC_FIREBASE_APP_ID=\n\n# Firebase Admin (server)\nFIREBASE_ADMIN_PROJECT_ID=\nFIREBASE_ADMIN_CLIENT_EMAIL=\nFIREBASE_ADMIN_PRIVATE_KEY=\n```\n\n---\n\n## Common Pitfalls\n\n- Do not import `firebase-admin` or any server-only module in client components or hooks\n- Do not use `new` to instantiate services — always resolve via `container.resolve()`\n- All Genkit flow files must declare `'use server'` at the top\n- Server-only DI registrations must be inside the `typeof window === 'undefined'` guard in `container.ts`\n- When adding new TanStack Query data fetches, always add a key factory to `src/lib/query-keys.ts`\n- Credits are deducted server-side only — never trust client-side credit values\n- RTL/LTR layout changes must be tested in both Arabic and English\n\n</workspace_instruction>\nLocation-specific best practices, tips, and patterns may be found throughout the current workspace in AGENTS.md or AGENTS.local.md files. Before making any changes in a subdirectory, please read the contents of any memory files if present.",
+                    "timestamp": "2026-02-25T22:13:07.311241Z",
+                    "dynamic_ref": "memory_prompt",
+                    "part_kind": "system-prompt"
+                },
+                {
+                    "content": "Task Management:\nYou have access to the update_todo tool to help you manage and plan tasks. Use this tool VERY frequently\nfor complex tasks to ensure that you are tracking your tasks and giving the user visibility into your\nprogress. This tool is also EXTREMELY helpful for planning tasks, and for breaking down larger\ncomplex tasks into smaller steps. If you do not use this tool when planning, you may forget to do important\ntasks - and that is unacceptable. It is critical that you mark todos as completed as soon as you\nare done with a task. Do not batch up multiple tasks before marking them as completed.",
+                    "timestamp": "2026-02-25T22:13:07.311668Z",
+                    "dynamic_ref": "TodoListReminderCallback.todolist_system_prompt",
+                    "part_kind": "system-prompt"
+                },
+                {
+                    "content": "The user's Atlassian Account ID (AAID) is 5e5860cf4befbd0c96ca5158.",
+                    "timestamp": "2026-02-25T21:59:57.066449Z",
+                    "dynamic_ref": null,
+                    "part_kind": "system-prompt"
+                },
+                {
+                    "content": "The current date and time is Wednesday, 2026-02-25 21:59:57.",
+                    "timestamp": "2026-02-25T21:59:57.066904Z",
+                    "dynamic_ref": null,
+                    "part_kind": "system-prompt"
+                },
+                {
+                    "content": "Your goal is to explore the current workspace and create or update the top-level AGENTS.md file with information that will be useful for developers working on this project.\n\nYou should aim to include:\n- Key information about the project (purpose, language, frameworks, etc.)\n- Important files and directories\n- Best practices and conventions you observe\n\nDon't call grep tools with overly broad patterns at it will be very slow and provide noisy output.\n\nFormat the file primarily as lists of instructions grouped by simple markdown headers.\nIn addition, if any of the following files are present in the root directory (not sub-directories), you should migrate their content to the AGENTS.md file:\n- CLAUDE.md, CLAUDE.local.md\n- codex.md, .codex/*.md\n- .cursor/rules/*.mdc, .cursorrules.md, .cursorrules\n- rules.md, .rules.md\n- .agent.md, .agent.local.md",
+                    "timestamp": "2026-02-25T21:59:57.066913Z",
+                    "part_kind": "user-prompt"
+                },
+                {
+                    "content": "\n\nYou have used 0 iterations.",
+                    "timestamp": "2026-02-25T21:59:57.075227Z",
+                    "part_kind": "user-prompt"
+                }
+            ],
+            "instructions": null,
+            "kind": "request",
+            "run_id": "e9a9e032-b09a-4fc5-9602-65ab18228aba",
+            "metadata": null
+        },
+        {
+            "parts": [
+                {
+                    "content": "I'll explore the workspace to understand the project structure and create a comprehensive AGENTS.md file. Let me start by examining the key files and directories.",
+                    "id": null,
+                    "provider_details": null,
+                    "part_kind": "text"
+                },
+                {
+                    "tool_name": "open_files",
+                    "args": "{\"file_paths\": [\"package.json\",\"next.config.ts\",\"README.md\",\".rovodev/.agent.md\"]}",
+                    "tool_call_id": "toolu_vrtx_01MvpyjASB5zqeGbvUCcj9LU",
+                    "id": null,
+                    "provider_details": null,
+                    "part_kind": "tool-call"
+                },
+                {
+                    "tool_name": "expand_folder",
+                    "args": "{\"folder_path\": \"src/ai\"}",
+                    "tool_call_id": "toolu_vrtx_01Qc7scVfpJmnBPTSKcWcoUP",
+                    "id": null,
+                    "provider_details": null,
+                    "part_kind": "tool-call"
+                }
+            ],
+            "usage": {
+                "input_tokens": 24023,
+                "cache_write_tokens": 21692,
+                "cache_read_tokens": 2328,
+                "output_tokens": 152,
+                "input_audio_tokens": 0,
+                "cache_audio_read_tokens": 0,
+                "output_audio_tokens": 0,
+                "details": {
+                    "cache_creation_input_tokens": 21692,
+                    "cache_read_input_tokens": 2328,
+                    "input_tokens": 3,
+                    "output_tokens": 152
+                }
+            },
+            "model_name": "claude-sonnet-4-6",
+            "timestamp": "2026-02-25T21:59:59.273977Z",
+            "kind": "response",
+            "provider_name": "anthropic",
+            "provider_details": {
+                "finish_reason": "tool_use"
+            },
+            "provider_response_id": "msg_vrtx_01Krh7jkPncVyJW7aR1DJ4QM",
+            "finish_reason": "tool_call",
+            "run_id": "e9a9e032-b09a-4fc5-9602-65ab18228aba",
+            "metadata": null
+        },
+        {
+            "parts": [
+                {
+                    "tool_name": "open_files",
+                    "content": [
+                        "Successfully opened package.json:\n\n````json\n   0 {\n   1   \"name\": \"nextn\",\n   2   \"version\": \"0.1.0\",\n   3   \"private\": true,\n   4   \"scripts\": {\n   5     \"dev\": \"next dev --turbopack --port 9002\",\n   6     \"genkit:dev\": \"genkit start -- tsx src/ai/dev.ts\",\n   7     \"genkit:watch\": \"genkit start -- tsx --watch src/ai/dev.ts\",\n   8     \"build\": \"next build\",\n   9     \"start\": \"next start\",\n  10     \"lint\": \"next lint\",\n  11     \"typecheck\": \"tsc --noEmit\",\n  12     \"test\": \"jest\",\n  13     \"test:watch\": \"jest --watch\",\n  14     \"seed\": \"tsx src/lib/db/seed.ts\",\n  15     \"qdrant:start\": \"docker-compose up -d qdrant\",\n  16     \"qdrant:stop\": \"docker-compose stop qdrant\",\n  17     \"qdrant:logs\": \"docker-compose logs -f qdrant\",\n  18     \"qdrant:init\": \"tsx scripts/qdrant-utils.ts init\",\n  19     \"qdrant:stats\": \"tsx scripts/qdrant-utils.ts stats\",\n  20     \"qdrant:test\": \"tsx scripts/qdrant-utils.ts test\",\n  21     \"migrate:qdrant\": \"tsx scripts/migrate-to-qdrant.ts\",\n  22     \"migrate:qdrant:dry-run\": \"tsx scripts/migrate-to-qdrant.ts --dry-run\",\n  23     \"demo:load-data\": \"tsx scripts/load-demo-data.ts\",\n  24     \"demo:test\": \"tsx scripts/test-qdrant-indexing.ts\",\n  25     \"test:indexing\": \"tsx scripts/test-file-indexing.ts\"\n  26   },\n  27   \"dependencies\": {\n  28     \"@dnd-kit/core\": \"^6.1.0\",\n  29     \"@dnd-kit/sortable\": \"^8.0.0\",\n  30     \"@ducanh2912/next-pwa\": \"^10.2.7\",\n  31     \"@genkit-ai/dotprompt\": \"^0.9.12\",\n  32     \"@genkit-ai/evaluator\": \"^1.19.2\",\n  33     \"@genkit-ai/firebase\": \"^1.19.2\",\n  34     \"@genkit-ai/googleai\": \"^1.19.2\",\n  35     \"@genkit-ai/next\": \"^1.19.2\",\n  36     \"@hookform/resolvers\": \"^4.1.3\",\n  37     \"@ljharb/tsconfig\": \"^0.3.2\",\n  38     \"@microlink/react-json-view\": \"^1.23.0\",\n  39     \"@opentelemetry/exporter-jaeger\": \"^2.0.1\",\n  40     \"@opentelemetry/winston-transport\": \"^0.14.1\",\n  41     \"@qdrant/js-client-rest\": \"^1.16.2\",\n  42     \"@radix-ui/react-accordion\": \"^1.2.3\",\n  43     \"@radix-ui/react-alert-dialog\": \"^1.1.6\",\n  44     \"@radix-ui/react-avatar\": \"^1.1.3\",\n  45     \"@radix-ui/react-checkbox\": \"^1.1.4\",\n  46     \"@radix-ui/react-collapsible\": \"^1.1.11\",\n  47     \"@radix-ui/react-dialog\": \"^1.1.6\",\n  48     \"@radix-ui/react-dropdown-menu\": \"^2.1.6\",\n  49     \"@radix-ui/react-label\": \"^2.1.2\",\n  50     \"@radix-ui/react-menubar\": \"^1.1.6\",\n  51     \"@radix-ui/react-popover\": \"^1.1.6\",\n  52     \"@radix-ui/react-progress\": \"^1.1.2\",\n  53     \"@radix-ui/react-radio-group\": \"^1.2.3\",\n  54     \"@radix-ui/react-scroll-area\": \"^1.2.3\",\n  55     \"@radix-ui/react-select\": \"^2.1.6\",\n  56     \"@radix-ui/react-separator\": \"^1.1.2\",\n  57     \"@radix-ui/react-slider\": \"^1.2.3\",\n  58     \"@radix-ui/react-slot\": \"^1.2.3\",\n  59     \"@radix-ui/react-switch\": \"^1.1.3\",\n  60     \"@radix-ui/react-tabs\": \"^1.1.3\",\n  61     \"@radix-ui/react-toast\": \"^1.2.6\",\n  62     \"@radix-ui/react-toggle\": \"^1.1.9\",\n  63     \"@radix-ui/react-toggle-group\": \"^1.1.11\",\n  64     \"@radix-ui/react-tooltip\": \"^1.1.8\",\n  65     \"@tailwindcss/typography\": \"^0.5.13\",\n  66     \"@tanstack/react-query\": \"^5.51.1\",\n  67     \"@tanstack/react-query-devtools\": \"^5.51.1\",\n  68     \"@tanstack/react-table\": \"^8.21.3\",\n  69     \"@tiptap/extension-bubble-menu\": \"^2.4.0\",\n  70     \"@tiptap/extension-color\": \"^2.7.0\",\n  71     \"@tiptap/extension-drag-handle\": \"^2.26.4\",\n  72     \"@tiptap/extension-dropcursor\": \"^2.26.4\",\n  73     \"@tiptap/extension-file-handler\": \"^2.26.4\",\n  74     \"@tiptap/extension-image\": \"^2.26.4\",\n  75     \"@tiptap/extension-placeholder\": \"^2.4.0\",\n  76     \"@tiptap/extension-table\": \"^2.26.4\",\n  77     \"@tiptap/extension-table-cell\": \"^2.26.4\",\n  78     \"@tiptap/extension-table-header\": \"^2.26.4\",\n  79     \"@tiptap/extension-table-row\": \"^2.26.4\",\n  80     \"@tiptap/extension-text-align\": \"^2.4.0\",\n  81     \"@tiptap/extension-text-style\": \"^2.7.0\",\n  82     \"@tiptap/react\": \"^2.4.0\",\n  83     \"@tiptap/starter-kit\": \"^2.4.0\",\n  84     \"@tiptap/suggestion\": \"^2.4.0\",\n  85     \"@vitalets/google-translate-api\": \"^9.2.1\",\n  86     \"autoprefixer\": \"^10.4.21\",\n  87     \"class-variance-authority\": \"^0.7.1\",\n  88     \"clsx\": \"^2.1.1\",\n  89     \"cmdk\": \"^1.0.0\",\n  90     \"date-fns\": \"^3.6.0\",\n  91     \"dexie\": \"^4.2.1\",\n  92     \"dexie-react-hooks\": \"^4.2.0\",\n  93     \"docx\": \"^8.5.0\",\n  94     \"dotenv\": \"^17.2.0\",\n  95     \"embla-carousel-react\": \"^8.6.0\",\n  96     \"file-saver\": \"^2.0.5\",\n  97     \"firebase\": \"^11.10.0\",\n  98     \"firebase-admin\": \"13.4.0\",\n  99     \"firebase-tools\": \"^15.3.1\",\n 100     \"framer-motion\": \"^12.26.2\",\n 101     \"genkit\": \"^1.19.2\",\n 102     \"genkitx-ollama\": \"^1.27.0\",\n 103     \"handlebars-loader\": \"^1.7.3\",\n 104     \"html-to-docx\": \"^1.8.0\",\n 105     \"html2canvas\": \"^1.4.1\",\n 106     \"i18next\": \"^25.7.4\",\n 107     \"ion-sound\": \"^3.0.7\",\n 108     \"isomorphic-dompurify\": \"^2.30.0\",\n 109     \"jspdf\": \"^3.0.0\",\n 110     \"jszip\": \"^3.10.1\",\n 111     \"katex\": \"^0.13.24\",\n 112     \"lucide-react\": \"^0.475.0\",\n 113     \"mammoth\": \"^1.11.0\",\n 114     \"marked\": \"^16.3.0\",\n 115     \"next\": \"15.5.9\",\n 116     \"next-themes\": \"^0.3.0\",\n 117     \"pako\": \"^2.1.0\",\n 118     \"pdf-parse\": \"^2.4.5\",\n 119     \"pdfjs-dist\": \"^5.4.54\",\n 120     \"pptxgenjs\": \"^3.12.0\",\n 121     \"puppeteer\": \"^24.33.0\",\n 122     \"react\": \"^18.3.1\",\n 123     \"react-contenteditable\": \"^3.3.7\",\n 124     \"react-day-picker\": \"^8.10.1\",\n 125     \"react-dom\": \"^18.3.1\",\n 126     \"react-dropzone\": \"^14.2.3\",\n 127     \"react-hook-form\": \"^7.54.2\",\n 128     \"react-i18next\": \"^16.5.3\",\n 129     \"react-markdown\": \"^9.1.0\",\n 130     \"react-resizable-panels\": \"^2.0.22\",\n 131     \"recharts\": \"^2.15.1\",\n 132     \"reflect-metadata\": \"^0.2.2\",\n 133     \"rehype-sanitize\": \"^6.0.0\",\n 134     \"rehype-stringify\": \"^10.0.0\",\n 135     \"remark\": \"^15.0.1\",\n 136     \"remark-gfm\": \"^4.0.1\",\n 137     \"remark-html\": \"^16.0.1\",\n 138     \"remark-parse\": \"^11.0.0\",\n 139     \"tailwind-merge\": \"^3.0.1\",\n 140     \"tailwindcss-animate\": \"^1.0.7\",\n 141     \"tiptap-katex\": \"^0.0.8\",\n 142     \"tsyringe\": \"^4.10.0\",\n 143     \"turndown\": \"^7.2.2\",\n 144     \"turndown-plugin-gfm\": \"^1.0.2\",\n 145     \"unified\": \"^11.0.5\",\n 146     \"uuid\": \"^10.0.0\",\n 147     \"wav\": \"^1.0.2\",\n 148     \"zod\": \"^3.24.2\",\n 149     \"zustand\": \"^4.5.4\"\n 150   },\n 151   \"devDependencies\": {\n 152     \"@testing-library/jest-dom\": \"^6.4.6\",\n 153     \"@testing-library/react\": \"^16.0.0\",\n 154     \"@types/file-saver\": \"^2.0.7\",\n 155     \"@types/jest\": \"^29.5.14\",\n 156     \"@types/jszip\": \"^3.4.1\",\n 157     \"@types/marked\": \"^5.0.2\",\n 158     \"@types/mdast\": \"^4.0.3\",\n 159     \"@types/node\": \"^20\",\n 160     \"@types/pako\": \"^2.0.4\",\n 161     \"@types/pdf-parse\": \"^1.1.4\",\n 162     \"@types/react\": \"^18\",\n 163     \"@types/react-dom\": \"^18\",\n 164     \"@types/turndown\": \"^5.0.5\",\n 165     \"@types/uuid\": \"^10.0.0\",\n 166     \"@types/wav\": \"^1.0.4\",\n 167     \"@typescript-eslint/eslint-plugin\": \"^8.46.2\",\n 168     \"@typescript-eslint/parser\": \"^8.46.2\",\n 169     \"eslint\": \"^9.35.0\",\n 170     \"eslint-config-next\": \"^15.5.3\",\n 171     \"file-loader\": \"^6.2.0\",\n 172     \"genkit-cli\": \"^1.19.2\",\n 173     \"jest\": \"^29.7.0\",\n 174     \"jest-environment-jsdom\": \"^29.7.0\",\n 175     \"jest-fetch-mock\": \"^3.0.3\",\n 176     \"postcss\": \"^8.5.6\",\n 177     \"tailwindcss\": \"^3.4.17\",\n 178     \"ts-jest\": \"^29.4.1\",\n 179     \"tsx\": \"^4.16.2\",\n 180     \"typescript\": \"^5\"\n 181   }\n 182 }\n 183 \n````",
+                        "Successfully opened next.config.ts:\n\n````typescript\n   0 \n   1 import type { NextConfig, SizeLimit } from 'next';\n   2 import withPWA from \"@ducanh2912/next-pwa\";\n   3 \n   4 const pwaConfig = withPWA({\n   5   dest: 'public',\n   6   register: true,\n   7   disable: process.env.NODE_ENV === 'development',\n   8 });\n   9 \n  10 const nextConfig: NextConfig = {\n  11   reactStrictMode: true, // Enable React strict mode for better development experience\n  12   output: 'standalone',\n  13   transpilePackages: ['tsyringe'],\n  14   typescript: {\n  15     ignoreBuildErrors: false,\n  16   },\n  17   eslint: {\n  18     ignoreDuringBuilds: false,\n  19   },\n  20   images: {\n  21     remotePatterns: [\n  22       {\n  23         protocol: 'https',\n  24         hostname: 'placehold.co',\n  25         port: '',\n  26         pathname: '/**',\n  27       },\n  28       {\n  29         protocol: 'https',\n  30         hostname: 'www.plantuml.com',\n  31         port: '',\n  32         pathname: '/plantuml/**',\n  33       },\n  34       {\n  35         protocol: 'https',\n  36         hostname: 'storage.googleapis.com',\n  37         port: '',\n  38         pathname: '/**',\n  39       },\n  40       {\n  41         protocol: 'https',\n  42         hostname: 'image.pollinations.ai',\n  43         port: '',\n  44         pathname: '/**',\n  45       },\n  46     ],\n  47   },\n  48   async rewrites() {\n  49     return [\n  50       {\n  51         source: '/_next/static/chunks/pdf.worker.mjs',\n  52         destination: '/node_modules/pdfjs-dist/legacy/build/pdf.worker.mjs',\n  53       },\n  54     ]\n  55   },\n  56   webpack: (config, { isServer }) => {\n  57     // Fix for canvas in server-side rendering\n  58     if (isServer) {\n  59       config.externals = config.externals || [];\n  60       config.externals.push({\n  61         canvas: 'canvas',\n  62         'pdf-parse': 'pdf-parse',\n  63       });\n  64     }\n  65 \n  66     // Exclude async_hooks from client-side bundle\n  67     if (!isServer) {\n  68       config.resolve.fallback = {\n  69         ...config.resolve.fallback,\n  70         async_hooks: false,\n  71       };\n  72     }\n  73 \n  74     // Suppress specific warnings\n  75     config.ignoreWarnings = config.ignoreWarnings || [];\n  76     config.ignoreWarnings.push(\n  77       { module: /@opentelemetry\\/instrumentation/ },\n  78       { module: /handlebars/ }\n  79     );\n  80 \n  81     return config;\n  82   },\n  83   turbopack: {\n  84   },\n  85   experimental: {\n  86     serverActions: { bodySizeLimit: '10mb' as SizeLimit },\n  87     useCache: true,\n  88   }\n  89 };\n  90 \n  91 export default pwaConfig(nextConfig);\n  92 \n````",
+                        "Successfully opened README.md:\n\n````markdown\n   0 # Arkan application\n   1 \n   2 ## Application Overview\n   3 \n   4 Arkan is a sophisticated AI-powered platform designed for writing and document generation. It is built utilizing Next.js 15, Firebase, and Google's Genkit AI. Although the README presents a basic overview, the application functions as a comprehensive academic and professional writing assistant with extensive capabilities.\n   5 \n   6 ## Architecture Strengths\n   7 \n   8 ### Technology Stack\n   9 \n  10 *   **Frontend:** Next.js 15 with React 18, TypeScript, and Tailwind CSS.\n  11 *   **AI Integration:** Google Genkit utilizing the Gemini 2.5 Flash Lite model.\n  12 *   **Backend:** Firebase services including Authentication, Firestore, Storage, and Functions.\n  13 *   **UI Framework:** Radix UI components with custom theming.\n  14 *   **State Management:** Zustand combined with React Query for efficient data management.\n  15 \n  16 ### Code Organization\n  17 \n  18 *   The codebase exhibits an excellent modular structure with a clear separation of concerns.\n  19 *   Barrel exports are employed for streamlined import paths (e.g., `src/ai/flows/index.ts`).\n  20 *   AI flows are type-safe through the use of Zod schemas.\n  21 *   Consistent naming conventions and file organization are maintained throughout the project.\n  22 \n  23 ## Key Features\n  24 \n  25 ### AI Writing Tools (23 tools available)\n  26 \n  27 *   Text generation, summarization, and paraphrasing capabilities.\n  28 *   Grammar checking and plagiarism detection.\n  29 *   AI content detection and humanization of text.\n  30 *   Citation generation and fact-checking functionalities.\n  31 *   Document conversion between Markdown and Microsoft Word/PowerPoint formats.\n  32 \n  33 ### Advanced Capabilities\n  34 \n  35 *   **Report Generation:** A template-driven system with a section-based approach.\n  36 *   **Diagram Generation:** Support for creating PlantUML and UML diagrams.\n  37 *   **Presentation Builder:** AI-powered generation of slide decks.\n  38 *   **Multi-language Support:** Functionality for Arabic and English, including Right-to-Left (RTL) support.\n  39 *   **Document Processing:** Capabilities for PDF parsing and handwriting recognition.\n  40 \n  41 ### Professional Features\n  42 \n  43 *   **User Management:** Includes authentication, user profiles, and team management functionalities.\n  44 *   **Payment System:** A credit-based system with transaction tracking.\n  45 *   **Admin Dashboard:** Provides analytics, user management tools, and feature toggles.\n  46 *   **Project Management:** Features a session-based workflow with autosave functionality.\n  47 \n  48 ## Technical Highlights\n  49 \n  50 ### AI Integration\n  51 \n  52 ```typescript\n  53 // Clean AI flow architecture\n  54 const generateTextFlow = ai.defineFlow({\n  55   name: 'generateTextFlow',\n  56   inputSchema: GenerateTextInputSchema,\n  57   outputSchema: GenerateTextOutputSchema,\n  58 }, async input => {\n  59   const { output } = await promptTemplate(input);\n  60   return output!;\n  61 });\n  62 ```\n  63 \n  64 ### Authentication System\n  65 \n  66 *   Utilizes Firebase Authentication with integrated session management.\n  67 *   Features server-side authentication protection implemented via middleware.\n  68 *   Includes automatic user profile creation.\n  69 *   Supports real-time synchronization of user profiles.\n  70 \n  71 ### Internationalization\n  72 \n  73 *   Comprehensive internationalization (i18n) support for Arabic and English.\n  74 *   Includes handling for RTL layout configurations.\n  75 *   Custom font loading is implemented to accommodate different languages.\n  76 ## TypeScript & Code Quality\n  77 \n  78 Arkan maintains **100% type safety** in all source code. The following documentation helps you understand and maintain these standards:\n  79 \n  80 ### TypeScript Documentation\n  81 \n  82 - **[TypeScript Cleanup Summary](./docs/TYPESCRIPT_CLEANUP_SUMMARY.md)** - Overview of the type safety initiative and achievements\n  83 - **[TypeScript Patterns](./docs/TYPESCRIPT_PATTERNS.md)** - Complete reference for TypeScript patterns used in the codebase\n  84 - **[Migration Guide](./docs/TYPESCRIPT_MIGRATION_GUIDE.md)** - How to work with the new type-safe patterns\n  85 - **[Suppressions Reference](./docs/TYPESCRIPT_SUPPRESSIONS.md)** - Documentation of all @ts-expect-error uses and removal plans\n  86 \n  87 ### Code Quality Standards\n  88 \n  89 - ✅ Zero type errors in source code\n  90 - ✅ Immutable state management patterns\n  91 - ✅ Type-safe AI flows with Zod validation\n  92 - ✅ Fully typed React components and hooks\n  93 - ✅ Comprehensive type coverage (99%+)\n  94 - ✅ Clear type organization and exports\n  95 \n  96 ### Quick Type Check\n  97 \n  98 ```bash\n  99 # Run TypeScript type checking\n 100 npm run typecheck\n 101 \n 102 # Run with watch mode\n 103 npm run typecheck -- --watch\n 104 ```\n 105 \n````",
+                        "Successfully opened .rovodev/.agent.md:\n\n````markdown\n   0 \n````"
+                    ],
+                    "tool_call_id": "toolu_vrtx_01MvpyjASB5zqeGbvUCcj9LU",
+                    "metadata": null,
+                    "timestamp": "2026-02-25T22:00:01.699489Z",
+                    "part_kind": "tool-return"
+                },
+                {
+                    "tool_name": "expand_folder",
+                    "content": "src/:\n\nsrc/ai/:\ndev.ts\ngenkit.ts\nindex.ts\nmodel-health-check.ts\nmodel-mapping.ts\nmodel-performance-monitor.ts\nmodel-request-queue.ts\nmodel-selector.ts\nmodel-utils.ts\nMODEL_UPDATES_SUMMARY.md\nMODEL_UTILITIES_GUIDE.md\nQUICK_MODEL_REFERENCE.md\nQUICK_START.md\nREADME.md\nrequire-models.md\nschemas.ts\n\nsrc/ai/flows/:\nacademic-literature-review.ts\nacademic-paper-quality-checker.ts\nai-proofread-document.ts\nai-researcher.ts\nanalyze-context.ts\nbias-checker.ts\ncreate-lecture-unit.ts\ndetect-ai-content.ts\nfact-checker.ts\nfact-retrieval.ts\ngenerate-agent-config.ts\ngenerate-chapter-content-rag.ts\ngenerate-chapter-content.ts\ngenerate-citation.ts\ngenerate-ideas.ts\ngenerate-image.ts\ngenerate-plantuml.ts\ngenerate-project-blueprint.ts\ngenerate-quiz.ts\ngenerate-report-section-rag.ts\ngenerate-report-section.ts\ngenerate-session-plan.ts\ngenerate-text.ts\ngenerate-theoretical-lecture.ts\ngenerate-toc.ts\ngenerate-ui-description.ts\ngraduation-project-generator.ts\ngrammar-checker.ts\nhumanize-text.ts\nimage-to-text.ts\nimprove-report-markdown.ts\nindex.ts\nliterature-review-generator.ts\nmanipulate-text.ts\nparaphrase-text.ts\nplagiarism-checker.ts\npresentation-content-creator.ts\nprofessional-document-writer.ts\nproject-consultant.ts\nproject-documentation-generator.ts\nproject-report-generator.ts\nquestion-answering.ts\nrewrite-document-to-markdown.ts\nrewrite-to-markdown.ts\nrun-agent-flow.ts\nsentence-structure-checker.ts\nsolve-assignments.ts\nsummarize-document.ts\nsummarize-text.ts\ntechnical-spec-writer.ts\ntext-stylist.ts\ntopic-explainer.ts\ntranslate-text.ts\nwrite-document.ts\n\nsrc/ai/flows/__tests__/:\ngenerate-report-section.test.ts\nsummarize-text.test.ts\n\nsrc/ai/prompts/:\nacademic-writing.ts\ncategoryFlows.md\nGeneral.ts\ngraduation-project.ts\nindex.ts\nproject-documentation.ts\n\nsrc/ai/schemas/:\nbase-schemas.ts\nenums.ts\nflows.ts\ngraduation-project.ts\nindex.ts\nlecture-generator.ts\nproject-documentation.ts\ntemplate-schemas.ts\n\nsrc/ai/tools/:\nADVANCED_PROMPT_ARCHITECT_GUIDE.md\ncitations-and-references.ts\ncomprehensive-analysis.ts\ndocument-structure.ts\ndocumentation-generation.ts\ngrammar-and-style.ts\nindex.ts\nproject-analysis.ts\nPROJECT_DOCUMENTATION_README.md\nprompt-architect.ts\nreporting-and-metrics.ts\nschemas.ts\n\nsrc/ai/utils/:\njson-output-validator.ts",
+                    "tool_call_id": "toolu_vrtx_01Qc7scVfpJmnBPTSKcWcoUP",
+                    "metadata": null,
+                    "timestamp": "2026-02-25T22:00:01.761802Z",
+                    "part_kind": "tool-return"
+                },
+                {
+                    "content": "\n\nYou have used 1 iterations.",
+                    "timestamp": "2026-02-25T22:00:01.915337Z",
+                    "part_kind": "user-prompt"
+                }
+            ],
+            "instructions": null,
+            "kind": "request",
+            "run_id": "e9a9e032-b09a-4fc5-9602-65ab18228aba",
+            "metadata": null
+        },
+        {
+            "parts": [
+                {
+                    "content": "Let me explore more key files to understand the project conventions and patterns.",
+                    "id": null,
+                    "provider_details": null,
+                    "part_kind": "text"
+                },
+                {
+                    "tool_name": "open_files",
+                    "args": "{\"file_paths\": [\"src/ai/genkit.ts\",\"src/ai/schemas.ts\",\"tsconfig.json\",\"jest.config.js\"]}",
+                    "tool_call_id": "toolu_vrtx_018CrtaNrZ3qxFFFfR25HQhx",
+                    "id": null,
+                    "provider_details": null,
+                    "part_kind": "tool-call"
+                },
+                {
+                    "tool_name": "expand_folder",
+                    "args": "{\"folder_path\": \"src/modules\"}",
+                    "tool_call_id": "toolu_vrtx_01PPiKMWjmwVzUVmCVcJkHga",
+                    "id": null,
+                    "provider_details": null,
+                    "part_kind": "tool-call"
+                }
+            ],
+            "usage": {
+                "input_tokens": 31525,
+                "cache_write_tokens": 29194,
+                "cache_read_tokens": 2328,
+                "output_tokens": 141,
+                "input_audio_tokens": 0,
+                "cache_audio_read_tokens": 0,
+                "output_audio_tokens": 0,
+                "details": {
+                    "cache_creation_input_tokens": 29194,
+                    "cache_read_input_tokens": 2328,
+                    "input_tokens": 3,
+                    "output_tokens": 141
+                }
+            },
+            "model_name": "claude-sonnet-4-6",
+            "timestamp": "2026-02-25T22:00:03.458052Z",
+            "kind": "response",
+            "provider_name": "anthropic",
+            "provider_details": {
+                "finish_reason": "tool_use"
+            },
+            "provider_response_id": "msg_vrtx_017AeqfMyYnkdN1CaoSCzs2u",
+            "finish_reason": "tool_call",
+            "run_id": "e9a9e032-b09a-4fc5-9602-65ab18228aba",
+            "metadata": null
+        },
+        {
+            "parts": [
+                {
+                    "tool_name": "open_files",
+                    "content": "Tool result pruned from message history.",
+                    "tool_call_id": "toolu_vrtx_018CrtaNrZ3qxFFFfR25HQhx",
+                    "metadata": null,
+                    "timestamp": "2026-02-25T22:00:05.534287Z",
+                    "part_kind": "tool-return"
+                },
+                {
+                    "tool_name": "expand_folder",
+                    "content": "Tool result pruned from message history.",
+                    "tool_call_id": "toolu_vrtx_01PPiKMWjmwVzUVmCVcJkHga",
+                    "metadata": null,
+                    "timestamp": "2026-02-25T22:00:05.765111Z",
+                    "part_kind": "tool-return"
+                },
+                {
+                    "content": "\n\nYou have used 2 iterations.",
+                    "timestamp": "2026-02-25T22:00:05.897013Z",
+                    "part_kind": "user-prompt"
+                }
+            ],
+            "instructions": null,
+            "kind": "request",
+            "run_id": "e9a9e032-b09a-4fc5-9602-65ab18228aba",
+            "metadata": null
+        },
+        {
+            "parts": [
+                {
+                    "content": "Let me examine a few more key files to understand conventions and patterns before writing the AGENTS.md.",
+                    "id": null,
+                    "provider_details": null,
+                    "part_kind": "text"
+                },
+                {
+                    "tool_name": "open_files",
+                    "args": "{\"file_paths\": [\"src/ai/flows/generate-text.ts\",\"src/modules/users/domain/entities/User.ts\",\"src/lib/utils/cn.ts\",\"firestore.rules\"]}",
+                    "tool_call_id": "toolu_vrtx_01Sy8PbpSX5hSxAFfs7Yh3P5",
+                    "id": null,
+                    "provider_details": null,
+                    "part_kind": "tool-call"
+                },
+                {
+                    "tool_name": "expand_folder",
+                    "args": "{\"folder_path\": \"src/hooks/core\"}",
+                    "tool_call_id": "toolu_vrtx_01PCVUv6PiMDMnJThd2R16eg",
+                    "id": null,
+                    "provider_details": null,
+                    "part_kind": "tool-call"
+                }
+            ],
+            "usage": {
+                "input_tokens": 35911,
+                "cache_write_tokens": 4386,
+                "cache_read_tokens": 31522,
+                "output_tokens": 163,
+                "input_audio_tokens": 0,
+                "cache_audio_read_tokens": 0,
+                "output_audio_tokens": 0,
+                "details": {
+                    "cache_creation_input_tokens": 4386,
+                    "cache_read_input_tokens": 31522,
+                    "input_tokens": 3,
+                    "output_tokens": 163
+                }
+            },
+            "model_name": "claude-sonnet-4-6",
+            "timestamp": "2026-02-25T22:00:07.122652Z",
+            "kind": "response",
+            "provider_name": "anthropic",
+            "provider_details": {
+                "finish_reason": "tool_use"
+            },
+            "provider_response_id": "msg_vrtx_01MnnmQGhCqUXCrK6ZYP24GV",
+            "finish_reason": "tool_call",
+            "run_id": "e9a9e032-b09a-4fc5-9602-65ab18228aba",
+            "metadata": null
+        },
+        {
+            "parts": [
+                {
+                    "tool_name": "open_files",
+                    "content": "Tool result pruned from message history.",
+                    "tool_call_id": "toolu_vrtx_01Sy8PbpSX5hSxAFfs7Yh3P5",
+                    "metadata": null,
+                    "timestamp": "2026-02-25T22:00:09.863662Z",
+                    "part_kind": "tool-return"
+                },
+                {
+                    "tool_name": "expand_folder",
+                    "content": "Tool result pruned from message history.",
+                    "tool_call_id": "toolu_vrtx_01PCVUv6PiMDMnJThd2R16eg",
+                    "metadata": null,
+                    "timestamp": "2026-02-25T22:00:09.886014Z",
+                    "part_kind": "tool-return"
+                },
+                {
+                    "content": "\n\nYou have used 3 iterations.",
+                    "timestamp": "2026-02-25T22:00:10.038925Z",
+                    "part_kind": "user-prompt"
+                },
+                {
+                    "content": "<system_reminder>\nYou've made 6 tool calls. Consider if this task needs a todo list (3+ distinct steps warrant tracking).\n</system_reminder>",
+                    "timestamp": "2026-02-25T22:00:10.040179Z",
+                    "part_kind": "user-prompt"
+                }
+            ],
+            "instructions": null,
+            "kind": "request",
+            "run_id": "e9a9e032-b09a-4fc5-9602-65ab18228aba",
+            "metadata": null
+        },
+        {
+            "parts": [
+                {
+                    "content": "Let me look at a few more key files to round out the picture.",
+                    "id": null,
+                    "provider_details": null,
+                    "part_kind": "text"
+                },
+                {
+                    "tool_name": "open_files",
+                    "args": "{\"file_paths\": [\"src/context/AuthContext.tsx\",\"src/infrastructure/di/container.ts\",\"src/modules/rag/infrastructure/config.ts\"]}",
+                    "tool_call_id": "toolu_vrtx_01DN9tm3ijYvK2p2wJYi5P5G",
+                    "id": null,
+                    "provider_details": null,
+                    "part_kind": "tool-call"
+                },
+                {
+                    "tool_name": "expand_folder",
+                    "args": "{\"folder_path\": \"src/locales\"}",
+                    "tool_call_id": "toolu_vrtx_01Eqxpk3e7JamjM9BeiyBB1E",
+                    "id": null,
+                    "provider_details": null,
+                    "part_kind": "tool-call"
+                }
+            ],
+            "usage": {
+                "input_tokens": 40005,
+                "cache_write_tokens": 4094,
+                "cache_read_tokens": 35908,
+                "output_tokens": 146,
+                "input_audio_tokens": 0,
+                "cache_audio_read_tokens": 0,
+                "output_audio_tokens": 0,
+                "details": {
+                    "cache_creation_input_tokens": 4094,
+                    "cache_read_input_tokens": 35908,
+                    "input_tokens": 3,
+                    "output_tokens": 146
+                }
+            },
+            "model_name": "claude-sonnet-4-6",
+            "timestamp": "2026-02-25T22:00:11.826592Z",
+            "kind": "response",
+            "provider_name": "anthropic",
+            "provider_details": {
+                "finish_reason": "tool_use"
+            },
+            "provider_response_id": "msg_vrtx_015f32SvN3KVyVA3iYoix8Pw",
+            "finish_reason": "tool_call",
+            "run_id": "e9a9e032-b09a-4fc5-9602-65ab18228aba",
+            "metadata": null
+        },
+        {
+            "parts": [
+                {
+                    "tool_name": "open_files",
+                    "content": "Tool result pruned from message history.",
+                    "tool_call_id": "toolu_vrtx_01DN9tm3ijYvK2p2wJYi5P5G",
+                    "metadata": null,
+                    "timestamp": "2026-02-25T22:00:14.161948Z",
+                    "part_kind": "tool-return"
+                },
+                {
+                    "tool_name": "expand_folder",
+                    "content": "src/:\n\nsrc/locales/:\nar.json\nen.json",
+                    "tool_call_id": "toolu_vrtx_01Eqxpk3e7JamjM9BeiyBB1E",
+                    "metadata": null,
+                    "timestamp": "2026-02-25T22:00:14.197402Z",
+                    "part_kind": "tool-return"
+                },
+                {
+                    "content": "\n\nYou have used 4 iterations.",
+                    "timestamp": "2026-02-25T22:00:14.396904Z",
+                    "part_kind": "user-prompt"
+                }
+            ],
+            "instructions": null,
+            "kind": "request",
+            "run_id": "e9a9e032-b09a-4fc5-9602-65ab18228aba",
+            "metadata": null
+        },
+        {
+            "parts": [
+                {
+                    "content": "Now I have enough information to create a comprehensive AGENTS.md file.",
+                    "id": null,
+                    "provider_details": null,
+                    "part_kind": "text"
+                },
+                {
+                    "tool_name": "create_file",
+                    "args": "{\"file_path\": \"AGENTS.md\", \"overwrite\": true, \"initial_content\": \"# AGENTS.md — Arkan Project Guide\\n\\n## Project Overview\\n\\n- **Name:** Arkan — AI-powered academic and professional writing platform\\n- **Language:** TypeScript (strict mode, 100% type safety goal)\\n- **Framework:** Next.js 15 (App Router, Server Actions, PWA via `@ducanh2912/next-pwa`)\\n- **React version:** React 18 (with strict mode enabled)\\n- **AI backend:** Google Genkit 1.x with Ollama models (Gemma 2B, Phi-3 Mini, Llama 3.1)\\n- **Database/Auth:** Firebase (Firestore, Authentication, Storage, FCM)\\n- **Vector store:** Qdrant (for RAG) via `@qdrant/js-client-rest`\\n- **UI library:** shadcn/ui (Radix UI primitives) + Tailwind CSS\\n- **State management:** Zustand (client store) + TanStack Query (server state)\\n- **Forms:** React Hook Form + Zod validation\\n- **i18n:** i18next / react-i18next — supports Arabic (RTL) and English (LTR)\\n- **DI container:** tsyringe (decorator-based IoC)\\n- **Testing:** Jest + ts-jest + React Testing Library\\n\\n---\\n\\n## Key Scripts\\n\\n```bash\\nnpm run dev           # Start Next.js dev server (Turbopack, port 9002)\\nnpm run build         # Production build\\nnpm run lint          # ESLint\\nnpm run typecheck     # TypeScript type check (no emit)\\nnpm run test          # Run Jest tests\\nnpm run test:watch    # Jest in watch mode\\nnpm run seed          # Seed local DB (tsx src/lib/db/seed.ts)\\n\\n# Genkit AI dev server\\nnpm run genkit:dev    # Start Genkit dev server\\nnpm run genkit:watch  # Genkit dev server with file watching\\n\\n# Qdrant vector store\\nnpm run qdrant:start  # Start Qdrant via Docker Compose\\nnpm run qdrant:stop   # Stop Qdrant\\nnpm run qdrant:init   # Initialize Qdrant collections\\nnpm run qdrant:stats  # Show Qdrant stats\\n```\\n\\n---\\n\\n## Directory Structure\\n\\n- `src/app/` — Next.js App Router pages and API routes\\n  - `src/app/api/` — API route handlers (grouped by domain)\\n  - `src/app/admin/` — Admin-only pages (dashboard, user management, RAG monitor, etc.)\\n  - `src/app/writing-tools/` — Individual writing tool pages (23+ tools)\\n- `src/ai/` — All AI logic (Genkit flows, prompts, schemas, tools)\\n  - `src/ai/flows/` — Individual Genkit flow definitions (one file per flow)\\n  - `src/ai/prompts/` — Shared prompt templates\\n  - `src/ai/schemas/` — Zod schemas for all AI flow inputs/outputs\\n  - `src/ai/tools/` — Genkit tool definitions used by flows\\n  - `src/ai/genkit.ts` — Genkit instance + Ollama model config\\n- `src/modules/` — Domain modules following Clean Architecture (DDD)\\n  - Each module: `domain/`, `application/`, `adapters/`, `infrastructure/`\\n  - Modules: `admin`, `ai`, `ai-content`, `billing`, `projects`, `rag`, `templates`, `users`\\n- `src/components/` — React components (organized by feature/page)\\n  - `src/components/ui/` — Base shadcn/ui components\\n  - `src/components/shared/` — App-wide shared components\\n  - `src/components/writing-tools/` — Writing tool UI components\\n  - `src/components/report-mode/` — Report builder components\\n- `src/hooks/` — Custom React hooks (organized by domain)\\n- `src/context/` — React context providers (`AuthContext`, `LocalizationContext`)\\n- `src/infrastructure/` — Cross-cutting infrastructure (DI container, Firebase init)\\n- `src/lib/` — Utilities, types, and helper modules\\n  - `src/lib/utils/` — Utility functions (use `cn()` for Tailwind class merging)\\n  - `src/lib/query-keys.ts` — Centralized TanStack Query key factory\\n- `src/locales/` — Translation files (`en.json`, `ar.json`)\\n- `scripts/` — Standalone scripts for Qdrant migration, data loading, etc.\\n\\n---\\n\\n## Architecture Patterns\\n\\n### Clean Architecture (Domain-Driven Design)\\n\\nEach module in `src/modules/` follows the same four-layer structure:\\n\\n1. **`domain/`** — Entities, repository interfaces, service interfaces (no framework deps)\\n2. **`application/`** — Use cases that orchestrate domain logic\\n3. **`adapters/`** — API clients (browser-facing) and controllers\\n4. **`infrastructure/`** — Firebase repository implementations, external service adapters\\n\\n- Domain interfaces use token-based injection, e.g. `IUserRepositoryToken`\\n- Server-side implementations are registered in `src/infrastructure/di/container.ts` using `tsyringe`, conditionally on `typeof window === 'undefined'`\\n- Client API clients (like `UserApiClient`) are always registered and call internal Next.js API routes\\n\\n### Dependency Injection\\n\\n- Use `tsyringe` with `@injectable()` / `@inject()` decorators\\n- Register all implementations in `src/infrastructure/di/container.ts`\\n- Server-only repositories are `require()`-loaded inside the `typeof window === 'undefined'` guard to avoid client bundle contamination\\n- Resolve via `container.resolve(ClassName)` — do not `new` services directly\\n\\n### AI Flows (Genkit)\\n\\n- Each AI flow lives in its own file under `src/ai/flows/`\\n- All flow files must have `'use server';` at the top\\n- Define input/output Zod schemas in `src/ai/schemas/` and import from `@/ai/schemas`\\n- Use the pattern: define prompt → define flow → export async wrapper function\\n- Always handle errors with try/catch and throw descriptive `Error` objects\\n- Use `MODEL_BY_TASK` constants from `src/ai/genkit.ts` for consistent model selection:\\n  - `GEMMA_2B` — fast text generation, conversion tasks\\n  - `PHI3_MINI` — structured output, reports, analysis\\n  - `LLAMA3_8B` — complex academic/research tasks\\n\\n### State Management\\n\\n- **Zustand** (`useBuilderStore`, `useGenerationUIStore`) for complex client-side UI state\\n- **TanStack Query** for all server state, caching, and data fetching\\n- Use `src/lib/query-keys.ts` key factories for all `useQuery` / `useMutation` calls\\n- Never fetch data directly in components — always use hooks from `src/hooks/`\\n\\n---\\n\\n## Coding Conventions\\n\\n### TypeScript\\n\\n- Strict mode is enforced — zero type errors allowed (`npm run typecheck`)\\n- Use `type` keyword for type aliases; `interface` for object shapes with `extends`\\n- Prefer explicit return types on exported functions\\n- Use Zod for all runtime validation, especially for AI flow inputs/outputs and API payloads\\n- Avoid `any` — use `unknown` and narrow with type guards\\n\\n### React / Next.js\\n\\n- Default to **Server Components**; add `'use client'` only when needed (event handlers, hooks, browser APIs)\\n- Use `'use server'` for Server Actions and all Genkit flow files\\n- Use the `@/` path alias mapped to `src/` (defined in `tsconfig.json`)\\n- Event handler props should be named with the `handle` prefix: `handleClick`, `handleSubmit`\\n- Prefer `const` arrow functions over `function` declarations for components and handlers\\n\\n### Styling\\n\\n- Use Tailwind CSS utility classes exclusively — no CSS files or inline styles for new code\\n- Use the `cn()` utility from `@/lib/utils/cn` for conditional class merging (wraps `clsx` + `tailwind-merge`)\\n- Follow shadcn/ui patterns for component variants using `class-variance-authority` (CVA)\\n- RTL/LTR support is managed by `LanguageDirectionManager` — use logical CSS properties where possible\\n\\n### Components\\n\\n- Use `forwardRef` for all interactive/primitive components\\n- Extend shadcn/ui components rather than rebuilding from scratch\\n- Co-locate feature-specific hooks in `src/hooks/<feature>/`\\n- Barrel export files (`index.ts`) are used in key directories — add new exports there\\n\\n### API Routes\\n\\n- Place API routes under `src/app/api/<domain>/route.ts`\\n- Extract business logic into use cases in `src/modules/<domain>/application/use-cases/`\\n- Always validate request bodies server-side with Zod\\n- Return consistent JSON responses; use appropriate HTTP status codes\\n\\n---\\n\\n## Firebase & Security\\n\\n- **Firestore rules** are in `firestore.rules` — always deny by default, whitelist explicitly\\n- User roles: `'admin'` and `'user'` — check role before any privileged operation\\n- User profile fields editable by users are explicitly allowlisted in Firestore rules\\n- Firebase Admin SDK is server-only — never import `firebase-admin` in client components\\n- Session management uses HTTP-only cookies set via `/api/auth/session`\\n- Server-side Firebase initialization is in `src/infrastructure/firebase/server-init.ts`\\n- Client-side Firebase is initialized in `src/firebase/` — use the provided `provider.tsx` hooks\\n\\n---\\n\\n## RAG System\\n\\n- Vector store: Qdrant (default collection: `arkan_vectors`, dimension: 768)\\n- Embeddings: Ollama `nomic-embed-text` model\\n- RAG config is centralized in `src/modules/rag/infrastructure/config.ts`\\n- Switch between `memory` (development) and `qdrant` (production) via `VECTOR_STORE_PROVIDER` env var\\n- Admin document indexing UI at `/admin/document-indexer`\\n- RAG query tester at `/admin/rag-tester`\\n- Key env vars: `QDRANT_URL`, `QDRANT_API_KEY`, `QDRANT_COLLECTION_NAME`, `OLLAMA_BASE_URL`, `OLLAMA_EMBEDDING_MODEL`\\n\\n---\\n\\n## Internationalization (i18n)\\n\\n- Translation keys are in `src/locales/en.json` and `src/locales/ar.json`\\n- Arabic is RTL — the `LanguageDirectionManager` component handles `dir` attribute on `<html>`\\n- Use `react-i18next`'s `useTranslation()` hook in client components\\n- Custom fonts are loaded per language to ensure proper Arabic rendering\\n\\n---\\n\\n## Testing\\n\\n- Test files live alongside source code in `__tests__/` subdirectories\\n- AI flow tests: `src/ai/flows/__tests__/`\\n- Hook tests: `src/hooks/core/__tests__/`\\n- RAG tests: `src/modules/rag/infrastructure/__tests__/`\\n- Use `jest.config.js` aliases — import from `@/lib/`, `@/ai/`, `@/components/`, `@/hooks/`\\n- Mocking: use `jest-fetch-mock` for fetch; mock Firebase with manual mocks\\n- Run type checking before tests: `npm run typecheck && npm test`\\n\\n---\\n\\n## Important Files\\n\\n| File | Purpose |\\n|------|---------|\\n| `src/ai/genkit.ts` | Genkit instance, Ollama model constants, `MODEL_BY_TASK` |\\n| `src/ai/schemas/index.ts` | Central barrel export for all AI Zod schemas |\\n| `src/ai/flows/index.ts` | Barrel export for all AI flows |\\n| `src/infrastructure/di/container.ts` | tsyringe DI registrations (client + server) |\\n| `src/lib/query-keys.ts` | TanStack Query key factory |\\n| `src/lib/utils/cn.ts` | Tailwind class merging utility |\\n| `src/lib/types.ts` | Shared application-level TypeScript types |\\n| `src/context/AuthContext.tsx` | Auth state, Firebase user, user profile context |\\n| `firestore.rules` | Firestore security rules |\\n| `firebase.json` | Firebase project configuration |\\n| `docker-compose.yml` | Qdrant local development setup |\\n| `src/modules/rag/infrastructure/config.ts` | RAG/Qdrant/Ollama configuration |\\n\\n---\\n\\n## Environment Variables (key ones)\\n\\n```\\n# AI / Ollama\\nOLLAMA_BASE_URL=http://185.190.140.93:11434\\nOLLAMA_EMBEDDING_MODEL=nomic-embed-text\\n\\n# Qdrant\\nVECTOR_STORE_PROVIDER=qdrant   # or 'memory' for dev\\nQDRANT_URL=http://localhost:6333\\nQDRANT_API_KEY=\\nQDRANT_COLLECTION_NAME=arkan_vectors\\nEMBEDDING_DIMENSION=768\\n\\n# Firebase (client)\\nNEXT_PUBLIC_FIREBASE_API_KEY=\\nNEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=\\nNEXT_PUBLIC_FIREBASE_PROJECT_ID=\\nNEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=\\nNEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=\\nNEXT_PUBLIC_FIREBASE_APP_ID=\\n\\n# Firebase Admin (server)\\nFIREBASE_ADMIN_PROJECT_ID=\\nFIREBASE_ADMIN_CLIENT_EMAIL=\\nFIREBASE_ADMIN_PRIVATE_KEY=\\n```\\n\\n---\\n\\n## Common Pitfalls\\n\\n- Do not import `firebase-admin` or any server-only module in client components or hooks\\n- Do not use `new` to instantiate services — always resolve via `container.resolve()`\\n- All Genkit flow files must declare `'use server'` at the top\\n- Server-only DI registrations must be inside the `typeof window === 'undefined'` guard in `container.ts`\\n- When adding new TanStack Query data fetches, always add a key factory to `src/lib/query-keys.ts`\\n- Credits are deducted server-side only — never trust client-side credit values\\n- RTL/LTR layout changes must be tested in both Arabic and English\\n\"}",
+                    "tool_call_id": "toolu_vrtx_01Xnw5GtHJMnGtx4iDxwLLyY",
+                    "id": null,
+                    "provider_details": null,
+                    "part_kind": "tool-call"
+                }
+            ],
+            "usage": {
+                "input_tokens": 45100,
+                "cache_write_tokens": 5095,
+                "cache_read_tokens": 40002,
+                "output_tokens": 3596,
+                "input_audio_tokens": 0,
+                "cache_audio_read_tokens": 0,
+                "output_audio_tokens": 0,
+                "details": {
+                    "cache_creation_input_tokens": 5095,
+                    "cache_read_input_tokens": 40002,
+                    "input_tokens": 3,
+                    "output_tokens": 3596
+                }
+            },
+            "model_name": "claude-sonnet-4-6",
+            "timestamp": "2026-02-25T22:00:16.357410Z",
+            "kind": "response",
+            "provider_name": "anthropic",
+            "provider_details": {
+                "finish_reason": "tool_use"
+            },
+            "provider_response_id": "msg_vrtx_01L9cRov6zNmzTWYtDVPMzo2",
+            "finish_reason": "tool_call",
+            "run_id": "e9a9e032-b09a-4fc5-9602-65ab18228aba",
+            "metadata": null
+        },
+        {
+            "parts": [
+                {
+                    "tool_name": "create_file",
+                    "content": "Successfully created AGENTS.md.",
+                    "tool_call_id": "toolu_vrtx_01Xnw5GtHJMnGtx4iDxwLLyY",
+                    "metadata": null,
+                    "timestamp": "2026-02-25T22:03:27.152253Z",
+                    "part_kind": "tool-return"
+                },
+                {
+                    "content": "\n\nYou have used 5 iterations.",
+                    "timestamp": "2026-02-25T22:03:27.207284Z",
+                    "part_kind": "user-prompt"
+                }
+            ],
+            "instructions": null,
+            "kind": "request",
+            "run_id": "e9a9e032-b09a-4fc5-9602-65ab18228aba",
+            "metadata": null
+        },
+        {
+            "parts": [
+                {
+                    "content": "The `AGENTS.md` file has been created at the project root. Here's a summary of what's included:\n\n**Sections covered:**\n\n- **Project Overview** — tech stack (Next.js 15, React 18, Genkit/Ollama, Firebase, Qdrant, shadcn/ui, Zustand, TanStack Query, tsyringe, i18next)\n- **Key Scripts** — dev, build, lint, typecheck, test, seed, Genkit, Qdrant\n- **Directory Structure** — annotated breakdown of `src/app`, `src/ai`, `src/modules`, `src/components`, `src/hooks`, `src/lib`, etc.\n- **Architecture Patterns** — Clean Architecture / DDD module structure, DI container usage, Genkit flow patterns, state management approach\n- **Coding Conventions** — TypeScript strict mode rules, React/Next.js Server vs Client component guidance, Tailwind/cn() usage, component patterns, API route conventions\n- **Firebase & Security** — Firestore rules summary, role model, session management, server-only Admin SDK boundary\n- **RAG System** — Qdrant setup, embedding config, env vars, admin UI pages\n- **Internationalization** — Arabic/English support, RTL handling\n- **Testing** — test file locations, aliases, mocking patterns\n- **Important Files** — quick-reference table of key files\n- **Environment Variables** — all key env vars documented\n- **Common Pitfalls** — server/client boundary violations, DI misuse, missing query keys, etc.\n\nWhat would you like to do next? Some options:\n1. **Add more detail** to any specific section (e.g., expand the AI flows or billing module)\n2. **Create sub-directory AGENTS.md files** for specific modules like `src/ai/` or `src/modules/`\n3. **Move on to other development tasks** in the workspace",
+                    "id": null,
+                    "provider_details": null,
+                    "part_kind": "text"
+                }
+            ],
+            "usage": {
+                "input_tokens": 48729,
+                "cache_write_tokens": 3629,
+                "cache_read_tokens": 45097,
+                "output_tokens": 448,
+                "input_audio_tokens": 0,
+                "cache_audio_read_tokens": 0,
+                "output_audio_tokens": 0,
+                "details": {
+                    "cache_creation_input_tokens": 3629,
+                    "cache_read_input_tokens": 45097,
+                    "input_tokens": 3,
+                    "output_tokens": 448
+                }
+            },
+            "model_name": "claude-sonnet-4-6",
+            "timestamp": "2026-02-25T22:03:29.282259Z",
+            "kind": "response",
+            "provider_name": "anthropic",
+            "provider_details": {
+                "finish_reason": "end_turn"
+            },
+            "provider_response_id": "msg_vrtx_015eWc3AS1q8zDgpsnSxishb",
+            "finish_reason": "stop",
+            "run_id": "e9a9e032-b09a-4fc5-9602-65ab18228aba",
+            "metadata": null
+        },
+        {
+            "parts": [
+                {
+                    "content": "make AGENTS to use subagents to do taskas",
+                    "timestamp": "2026-02-25T22:13:07.311697Z",
+                    "part_kind": "user-prompt"
+                },
+                {
+                    "content": "\n\nYou have used 0 iterations.",
+                    "timestamp": "2026-02-25T22:13:07.315825Z",
+                    "part_kind": "user-prompt"
+                }
+            ],
+            "instructions": null,
+            "kind": "request",
+            "run_id": "ba9548fb-90b2-46c8-a431-7fef3f36d3db",
+            "metadata": null
+        },
+        {
+            "parts": [
+                {
+                    "content": "Let me look at the existing AGENTS.md and the subagents available to understand what's there and what's needed.",
+                    "id": null,
+                    "provider_details": null,
+                    "part_kind": "text"
+                },
+                {
+                    "tool_name": "open_files",
+                    "args": "{\"file_paths\": [\"AGENTS.md\",\".rovodev/config.yml\",\".rovodev/mcp.json\"]}",
+                    "tool_call_id": "toolu_vrtx_01SWqRWnZjfmhjRc7yxaueNg",
+                    "id": null,
+                    "provider_details": null,
+                    "part_kind": "tool-call"
+                },
+                {
+                    "tool_name": "expand_folder",
+                    "args": "{\"folder_path\": \".rovodev/subagents\"}",
+                    "tool_call_id": "toolu_vrtx_01PdLLvcjEP7xyfAhzxc7etC",
+                    "id": null,
+                    "provider_details": null,
+                    "part_kind": "tool-call"
+                }
+            ],
+            "usage": {
+                "input_tokens": 39928,
+                "cache_write_tokens": 37597,
+                "cache_read_tokens": 2328,
+                "output_tokens": 151,
+                "input_audio_tokens": 0,
+                "cache_audio_read_tokens": 0,
+                "output_audio_tokens": 0,
+                "details": {
+                    "cache_creation_input_tokens": 37597,
+                    "cache_read_input_tokens": 2328,
+                    "input_tokens": 3,
+                    "output_tokens": 151
+                }
+            },
+            "model_name": "claude-sonnet-4-6",
+            "timestamp": "2026-02-25T22:13:10.329656Z",
+            "kind": "response",
+            "provider_name": "anthropic",
+            "provider_details": {
+                "finish_reason": "tool_use"
+            },
+            "provider_response_id": "msg_vrtx_01UD5165ZeY8woWgKnaTXZEx",
+            "finish_reason": "tool_call",
+            "run_id": "ba9548fb-90b2-46c8-a431-7fef3f36d3db",
+            "metadata": null
+        },
+        {
+            "parts": [
+                {
+                    "tool_name": "open_files",
+                    "content": [
+                        "Successfully opened AGENTS.md:\n\n````markdown\n   0 # AGENTS.md — Arkan Project Guide\n...\n  77 ### Clean Architecture (Domain-Driven Design)\n...\n 159 ## Firebase & Security\n...\n 253 ## Common Pitfalls\n...\n 262 \n````",
+                        "Successfully opened .rovodev/config.yml:\n\n````yaml\n   0 version: 1\n   1 \n   2 # Agent behavior and model settings\n   3 agent:\n   4   # Additional system prompt to append to the agent's default system prompt\n   5   additionalSystemPrompt: null\n   6   # Enable streaming responses from the AI model\n   7   streaming: true\n   8   # Temperature setting for AI model responses (0.0-1.0)\n   9   temperature: 0.3\n  10   # Model ID to use for the agent. See /models command to list available models.\n  11   modelId: auto\n  12   # Enable the deep planning tool for complex task planning\n  13   enableDeepPlanTool: false\n  14   # Enable/disable experimental features\n  15   experimental:\n  16     # Enable/disable the agent to run in shadow mode. This will run the agent on\n  17     # a temporary clone of your workspace, prompting you before any changes are\n  18     # applied to your working directory.\n  19     enableShadowMode: false\n  20 \n  21 # Session management settings\n  22 sessions:\n  23   # Directory where session data is stored\n  24   persistenceDir: /teamspace/studios/this_studio/.rovodev/sessions\n  25   # (Experimental) When enabled, Rovo Dev may warn and offer to switch your\n  26   # workspace git state (branch/commit) to match the session checkpoint when\n  27   # restoring or switching sessions.\n  28   enableWorkspaceStateSync: false\n  29 \n  30 # Atlassian product integration settings\n  31 atlassianConnections:\n  32   # Global jira projects user is part of\n  33   jiraProjects: []\n  34   # Directory where any local overrides are stored\n  35   localOverridePath: .rovodev/atlassian_connections.json\n  36   # Whether atlassian integration is enabled\n  37   enabled: true\n  38 \n  39 # Console and UI behavior settings\n  40 console:\n  41   # Output format for console display (markdown, simple, or raw)\n  42   outputFormat: markdown\n  43   # Show tool execution results in the console\n  44   showToolResults: true\n  45   # Per-tool configuration for whether to show tool execution results in the\n  46   # console\n  47   toolResultVisibility:\n  48     bash: true\n  49     powershell: true\n  50     open_files: true\n  51     create_file: true\n  52     delete_file: true\n  53     move_file: true\n  54     expand_code_chunks: true\n  55     find_and_replace_code: true\n  56     grep: true\n  57     expand_folder: true\n  58     update_allowed_external_paths: true\n  59   # Editing mode for the prompt session\n  60   editingMode: EMACS\n  61   # Shell command to generate a command prompt that replaces the default '> '.\n  62   # For example, set 'STARSHIP_SHELL=rovodev starship prompt' to use Starship.\n  63   customCommandPrompt: null\n  64   # Maximum width of the console output in characters, or 'fill' to fill the\n  65   # terminal width\n  66   maxOutputWidth: 120\n  67   # Enable or disable animated startup loading screen\n  68   enableStartupAnimations: true\n  69 \n  70 # Logging and prompt collection settings\n  71 logging:\n  72   # Path to the log file\n  73   path: /teamspace/studios/this_studio/.rovodev/logs/rovodev.log\n  74 \n  75 # Model Context Protocol server configuration\n  76 mcp:\n  77   # Path to the MCP (Model Context Protocol) configuration file\n  78   mcpConfigPath: /teamspace/studios/this_studio/.rovodev/mcp.json\n  79   # List of allowed MCP server signatures\n  80   allowedMcpServers: []\n  81   # List of globally disabled MCP server signatures\n  82   disabledMcpServers: []\n  83 \n  84 # Tool and command permission settings\n  85 toolPermissions:\n  86   # Default permission for tools not explicitly listed\n  87   default: ask\n  88   # Permission settings for specific tools\n  89   tools:\n  90     create_file: ask\n  91     delete_file: ask\n  92     move_file: ask\n  93     find_and_replace_code: ask\n  94     open_files: allow\n  95     expand_code_chunks: allow\n  96     expand_folder: allow\n  97     grep: allow\n  98   bash:\n  99     # Default permission for bash commands not explicitly listed\n 100     default: ask\n 101     # List of specific bash commands with their permission settings\n 102     commands:\n 103     - command: ls(\\s.*)?\n 104       permission: allow\n 105     - command: cat(\\s.*)?\n 106       permission: allow\n 107     - command: echo(\\s.*)?\n 108       permission: allow\n 109     - command: pwd\n 110       permission: allow\n 111     # Run bash commands in a sandboxed environment - currently available for\n 112     # MacOS and Linux only. Enabling this option for Windows will prevent the\n 113     # agent from running powershell commands.\n 114     runInSandbox: false\n 115     # Environment variables to set when running bash commands. Env vars are\n 116     # automatically inherited from the user's environment, except for sensitive\n 117     # variables such as API tokens and passwords. Use this config to set\n 118     # additional env vars, or to pass secrets. Env vars can be set to strings or\n 119     # can reference other env vars using the ${VAR_NAME} syntax.\n 120     env: {}\n 121   # List of file or directory paths that are allowed to be accessed outside the\n 122   # workspace\n 123   allowedExternalPaths: []\n 124 \n 125 announcementTracking:\n 126   announcementViewCounts:\n 127     88e7a1da2281d86bac8049ce3f6f1650: 1\n 128     a512042e5151b93dd5e511adc9731fbb: 1\n 129 \n 130 sessionFeedback:\n 131   permanentlyDisabled: false\n 132   # ISO timestamp of the last provided feedback\n 133   lastFeedbackAsked: null\n 134 \n 135 atlassianBillingSite:\n 136   siteUrl: https://albannatech.atlassian.net\n 137 \n 138 smartTasks:\n 139   # Enable Smart Tasks discovery\n 140   enabled: true\n 141   # List of task discovery sources\n 142   sources:\n 143   - filesystem\n 144 \n````",
+                        "Successfully opened .rovodev/mcp.json:\n\n````json\n   0 {\n   1     \"mcpServers\": {}\n   2 }\n````"
+                    ],
+                    "tool_call_id": "toolu_vrtx_01SWqRWnZjfmhjRc7yxaueNg",
+                    "metadata": null,
+                    "timestamp": "2026-02-25T22:13:13.150480Z",
+                    "part_kind": "tool-return"
+                },
+                {
+                    "tool_name": "expand_folder",
+                    "content": ".rovodev/:\n\n.rovodev/subagents/:\nActions-and-Registry.md\nAI-Coding-Best-Practices-Recommender-Agent.md\nAI-Software-Scalability-Advisor-Agent.md\nAnimation-+-Motion-Assistant.md\nAsync-Await-Implementation-Agent.md\nBug-Hunter.md\nChat-and-Sessions.md\nCode-Review-Checklist-Agent.md\nData-Table-+-Dashboard-Master.md\nFlows-and-Orchestration.md\nNext.js-15-AI-Development-Assistant.md\nNext.js-15-Real-time-&-WebSocket-Patterns-Master.md\nNext.js-15-Server-Actions-+-Form-Handling-Master.md\nPurpose-and-Scope.md\nSchema-System-and-Validation.md\nshadcn-ui-Component-Builder-Assistant.md\nState-Management-with-Redux-Agent.md\nTools-and-Function-Calling.md",
+                    "tool_call_id": "toolu_vrtx_01PdLLvcjEP7xyfAhzxc7etC",
+                    "metadata": null,
+                    "timestamp": "2026-02-25T22:13:13.172994Z",
+                    "part_kind": "tool-return"
+                },
+                {
+                    "content": "\n\nYou have used 1 iterations.",
+                    "timestamp": "2026-02-25T22:13:13.262111Z",
+                    "part_kind": "user-prompt"
+                }
+            ],
+            "instructions": null,
+            "kind": "request",
+            "run_id": "ba9548fb-90b2-46c8-a431-7fef3f36d3db",
+            "metadata": null
+        },
+        {
+            "parts": [
+                {
+                    "content": "Let me look at a couple of the subagent files to understand their format and capabilities.",
+                    "id": null,
+                    "provider_details": null,
+                    "part_kind": "text"
+                },
+                {
+                    "tool_name": "open_files",
+                    "args": "{\"file_paths\": [\".rovodev/subagents/Next.js-15-AI-Development-Assistant.md\",\".rovodev/subagents/shadcn-ui-Component-Builder-Assistant.md\",\".rovodev/subagents/Bug-Hunter.md\",\".rovodev/subagents/Next.js-15-Server-Actions-+-Form-Handling-Master.md\"]}",
+                    "tool_call_id": "toolu_vrtx_01GVqZxGQL1qRR339gTeeBBz",
+                    "id": null,
+                    "provider_details": null,
+                    "part_kind": "tool-call"
+                }
+            ],
+            "usage": {
+                "input_tokens": 42319,
+                "cache_write_tokens": 2391,
+                "cache_read_tokens": 39925,
+                "output_tokens": 165,
+                "input_audio_tokens": 0,
+                "cache_audio_read_tokens": 0,
+                "output_audio_tokens": 0,
+                "details": {
+                    "cache_creation_input_tokens": 2391,
+                    "cache_read_input_tokens": 39925,
+                    "input_tokens": 3,
+                    "output_tokens": 165
+                }
+            },
+            "model_name": "claude-sonnet-4-6",
+            "timestamp": "2026-02-25T22:13:15.059406Z",
+            "kind": "response",
+            "provider_name": "anthropic",
+            "provider_details": {
+                "finish_reason": "tool_use"
+            },
+            "provider_response_id": "msg_vrtx_01HptzXy8ScmWdcQ5kqmc32J",
+            "finish_reason": "tool_call",
+            "run_id": "ba9548fb-90b2-46c8-a431-7fef3f36d3db",
+            "metadata": null
+        },
+        {
+            "parts": [
+                {
+                    "tool_name": "open_files",
+                    "content": [
+                        "Successfully opened .rovodev/subagents/Next.js-15-AI-Development-Assistant.md:\n\n````markdown\n   0 ---\n   1 name: Next.js 15 AI Development Assistant\n   2 description: '# Next.js 15 AI Development Assistant\n   3 \n   4 \n   5   You are a Senior Front-End Developer and expert in ReactJS, Next.js 15, JavaScript,\n   6   TypeScript, HTML, CSS, and modern UI/UX frameworks (TailwindCSS, shadcn/ui, Radix).\n   7   You specialize in AI SDK v5 integration and provide thoughtful, nuanced answers\n   8   with brilliant reasoning.\n   9 \n  10 \n  11   ## Core Responsibilities\n  12 \n  13   * Follow user requirements precisely and to the letter\n  14 \n  15   * Think step-by-step: describe your plan in detailed pseudocode first\n  16 \n  17   * Confirm approach, then write complete, working code\n  18 \n  19   * Write correct, best practice, DRY, bug-free, fully functional code\n  20 \n  21   * Prioritize readable code over performance optimization\n  22 \n  23   * Implement all requested functionality completely\n  24 \n  25   * Leave NO todos, placeholders, or missing pieces\n  26 \n  27   * Include all required imports and proper component naming\n  28 \n  29   * Be concise and minimize unnecessary prose\n  30 \n  31 \n  32   ## Technology Stack Focus\n  33 \n  34   * **Next.js 15**: App Router, Server Components, Server Actions\n  35 \n  36   * **AI SDK v5**: Latest patterns and integrations\n  37 \n  38   * **shadcn/ui**: Component library implementation\n  39 \n  40   * **TypeScript**: Strict typing and best practices\n  41 \n  42   * **TailwindCSS**: Utility-first styling\n  43 \n  44   * **Radix UI**: Accessible component primitives\n  45 \n  46 \n  47   ## Code Implementation Rules\n  48 \n  49 \n  50   ### Code Quality\n  51 \n  52   * Use early returns for better readability\n  53 \n  54   * Use descriptive variable and function names\n  55 \n  56   * Prefix event handlers with \"handle\" (handleClick, handleKeyDown)\n  57 \n  58   * Use const over function declarations: `const toggle = () => {}`\n  59 \n  60   * Define types when possible\n  61 \n  62   * Implement proper accessibility features (tabindex, aria-label, keyboard events)\n  63 \n  64 \n  65   ### Styling Guidelines\n  66 \n  67   * Always use Tailwind classes for styling\n  68 \n  69   * Avoid CSS files or inline styles\n  70 \n  71   * Use conditional classes efficiently\n  72 \n  73   * Follow shadcn/ui patterns for component styling\n  74 \n  75 \n  76   ### Next.js 15 Specific\n  77 \n  78   * Leverage App Router architecture\n  79 \n  80   * Use Server Components by default, Client Components when needed\n  81 \n  82   * Implement proper data fetching patterns\n  83 \n  84   * Follow Next.js 15 caching and optimization strategies\n  85 \n  86 \n  87   ### AI SDK v5 Integration\n  88 \n  89   * Use latest AI SDK v5 patterns and APIs\n  90 \n  91   * Implement proper error handling for AI operations\n  92 \n  93   * Follow streaming and real-time response patterns\n  94 \n  95   * Integrate with Next.js Server Actions when appropriate\n  96 \n  97 \n  98   ## Response Protocol\n  99 \n 100   1. If uncertain about correctness, state so explicitly\n 101 \n 102   2. If you don''t know something, admit it rather than guessing\n 103 \n 104   3. Search for latest information when dealing with rapidly evolving technologies\n 105 \n 106   4. Provide explanations without unnecessary examples unless requested\n 107 \n 108   5. Stay on-point and avoid verbose explanations\n 109 \n 110 \n 111   ## Knowledge Updates\n 112 \n 113   When working with Next.js 15, AI SDK v5, or other rapidly evolving technologies,\n 114   search for the latest documentation and best practices to ensure accuracy and current\n 115   implementation patterns.'\n 116 tools:\n 117 - open_files\n 118 - create_file\n 119 - delete_file\n 120 - move_file\n 121 - expand_code_chunks\n 122 - find_and_replace_code\n 123 - grep\n 124 - expand_folder\n 125 - bash\n 126 - get_atlassian_site_urls\n 127 - get_confluence_page\n 128 - get_confluence_spaces\n 129 - view_confluence_descendants\n 130 - view_confluence_ancestors\n 131 - get_adf_documentation\n 132 - create_confluence_page\n 133 - update_confluence_page\n 134 - add_confluence_page_comment\n 135 - search_confluence_using_cql\n 136 - get_jira_issue\n 137 - get_jira_projects\n 138 - create_jira_issue\n 139 - update_jira_issue\n 140 - search_jira_using_jql\n 141 - download_jira_issue_attachment\n 142 - upload_jira_issue_attachment\n 143 model: null\n 144 load_memory: true\n 145 ---\n 146 You are a Senior Front-End Developer and expert in Next.js 15, ReactJS, TypeScript, and modern UI frameworks including TailwindCSS, shadcn/ui, and Radix UI. You specialize in AI SDK v5 integration and provide precise, well-reasoned implementations. Follow user requirements exactly, think through your approach step-by-step in pseudocode before implementation, and deliver complete, production-ready code with zero placeholders or todos.\n 147 \n 148 Your implementation standards are strict: write correct, DRY, fully functional code prioritizing readability; use TypeScript with proper typing; implement all functionality completely; include all required imports and proper naming conventions; use Tailwind for all styling; leverage Next.js 15 App Router and Server Components; and follow AI SDK v5 patterns for integrations. Code must be accessible, use early returns, prefix event handlers with \"handle\", and follow shadcn/ui component patterns.\n 149 \n 150 When working with rapidly evolving technologies like Next.js 15 and AI SDK v5, proactively search for the latest documentation and best practices. Be concise, admit uncertainty explicitly, and avoid verbose explanations unless requested. Your goal is to deliver functioning, maintainable code that meets all specifications without compromise.\n 151 \n````",
+                        "Successfully opened .rovodev/subagents/shadcn-ui-Component-Builder-Assistant.md:\n\n````markdown\n   0 ---\n   1 name: shadcn/ui Component Builder Assistant\n   2 description: '# shadcn/ui Component Builder Assistant\n   3 \n   4 \n   5   You are a Senior UI/UX Engineer and expert in ReactJS, TypeScript, component design\n   6   systems, and accessibility. You specialize in building, extending, and customizing\n   7   shadcn/ui components with deep knowledge of Radix UI primitives and advanced Tailwind\n   8   CSS patterns.\n   9 \n  10 \n  11   ## Core Responsibilities\n  12 \n  13   * Follow user requirements precisely and to the letter\n  14 \n  15   * Think step-by-step: describe your component architecture plan in detailed pseudocode\n  16   first\n  17 \n  18   * Confirm approach, then write complete, working component code\n  19 \n  20   * Write correct, best practice, DRY, bug-free, fully functional components\n  21 \n  22   * Prioritize accessibility and user experience over complexity\n  23 \n  24   * Implement all requested functionality completely\n  25 \n  26   * Leave NO todos, placeholders, or missing pieces\n  27 \n  28   * Include all required imports, types, and proper component exports\n  29 \n  30   * Be concise and minimize unnecessary prose\n  31 \n  32 \n  33   ## Technology Stack Focus\n  34 \n  35   * **shadcn/ui**: Component patterns, theming, and customization\n  36 \n  37   * **Radix UI**: Primitive components and accessibility patterns\n  38 \n  39   * **TypeScript**: Strict typing with component props and variants\n  40 \n  41   * **Tailwind CSS**: Utility-first styling with shadcn design tokens\n  42 \n  43   * **Class Variance Authority (CVA)**: Component variant management\n  44 \n  45   * **React**: Modern patterns with hooks and composition\n  46 \n  47 \n  48   ## Code Implementation Rules\n  49 \n  50 \n  51   ### Component Architecture\n  52 \n  53   * Use forwardRef for all interactive components\n  54 \n  55   * Implement proper TypeScript interfaces for all props\n  56 \n  57   * Use CVA for variant management and conditional styling\n  58 \n  59   * Follow shadcn/ui naming conventions and file structure\n  60 \n  61   * Create compound components when appropriate (Card.Header, Card.Content)\n  62 \n  63   * Export components with proper display names\n  64 \n  65 \n  66   ### Styling Guidelines\n  67 \n  68   * Always use Tailwind classes with shadcn design tokens\n  69 \n  70   * Use CSS variables for theme-aware styling (hsl(var(--primary)))\n  71 \n  72   * Implement proper focus states and accessibility indicators\n  73 \n  74   * Follow shadcn/ui spacing and typography scales\n  75 \n  76   * Use conditional classes with cn() utility function\n  77 \n  78   * Support dark mode through CSS variables\n  79 \n  80 \n  81   ### Accessibility Standards\n  82 \n  83   * Implement ARIA labels, roles, and properties correctly\n  84 \n  85   * Ensure keyboard navigation works properly\n  86 \n  87   * Provide proper focus management and visual indicators\n  88 \n  89   * Include screen reader support with appropriate announcements\n  90 \n  91   * Test with assistive technologies in mind\n  92 \n  93   * Follow WCAG 2.1 AA guidelines\n  94 \n  95 \n  96   ### shadcn/ui Specific\n  97 \n  98   * Extend existing shadcn components rather than rebuilding from scratch\n  99 \n 100   * Use Radix UI primitives as the foundation when building new components\n 101 \n 102   * Follow the shadcn/ui component API patterns and conventions\n 103 \n 104   * Implement proper variant systems with sensible defaults\n 105 \n 106   * Support theming through CSS custom properties\n 107 \n 108   * Create components that integrate seamlessly with existing shadcn components\n 109 \n 110 \n 111   ### Component Patterns\n 112 \n 113   * Use composition over complex prop drilling\n 114 \n 115   * Implement proper error boundaries where needed\n 116 \n 117   * Create reusable sub-components for complex UI patterns\n 118 \n 119   * Use render props or compound components for flexible APIs\n 120 \n 121   * Implement proper loading and error states\n 122 \n 123   * Support controlled and uncontrolled component modes\n 124 \n 125 \n 126   ## Response Protocol\n 127 \n 128   1. If uncertain about shadcn/ui patterns, state so explicitly\n 129 \n 130   2. If you don''t know a specific Radix primitive, admit it rather than guessing\n 131 \n 132   3. Search for latest shadcn/ui and Radix documentation when needed\n 133 \n 134   4. Provide component usage examples only when requested\n 135 \n 136   5. Stay focused on component implementation over general explanations\n 137 \n 138 \n 139   ## Knowledge Updates\n 140 \n 141   When working with shadcn/ui, Radix UI, or component design patterns, search for\n 142   the latest documentation and community best practices to ensure components follow\n 143   current standards and accessibility guidelines.'\n 144 tools:\n 145 - open_files\n 146 - create_file\n 147 - delete_file\n 148 - move_file\n 149 - expand_code_chunks\n 150 - find_and_replace_code\n 151 - grep\n 152 - expand_folder\n 153 - bash\n 154 - get_atlassian_site_urls\n 155 - get_confluence_page\n 156 - get_confluence_spaces\n 157 - view_confluence_descendants\n 158 - view_confluence_ancestors\n 159 - get_adf_documentation\n 160 - create_confluence_page\n 161 - update_confluence_page\n 162 - add_confluence_page_comment\n 163 - search_confluence_using_cql\n 164 - get_jira_issue\n 165 - get_jira_projects\n 166 - create_jira_issue\n 167 - update_jira_issue\n 168 - search_jira_using_jql\n 169 - download_jira_issue_attachment\n 170 - upload_jira_issue_attachment\n 171 model: null\n 172 load_memory: true\n 173 ---\n 174 You are a Senior UI/UX Engineer specializing in shadcn/ui component development with deep expertise in ReactJS, TypeScript, Radix UI primitives, and advanced Tailwind CSS. Your role is to build, extend, and customize high-quality, accessible components that follow shadcn/ui best practices and design system patterns. You prioritize accessibility, clean code architecture, and user experience while maintaining strict adherence to user requirements.\n 175 \n 176 When developing components, follow this workflow: (1) Think step-by-step and describe your component architecture plan in detailed pseudocode before implementation, (2) Confirm your approach with the user, (3) Write complete, working, production-ready component code with all required imports, types, and proper exports. Use forwardRef for interactive components, implement proper TypeScript interfaces, leverage CVA for variant management, and apply Tailwind CSS with shadcn design tokens. All compo\n 177 \n 178 Your implementation must follow shadcn/ui conventions: extend existing components when possible, use Radix UI as the foundation, support theming through CSS variables, implement sensible defaults, and create components that integrate seamlessly with existing shadcn ecosystems. Be concise, minimize unnecessary prose, and provide usage examples only when explicitly requested.\n 179 \n````",
+                        "Successfully opened .rovodev/subagents/Bug-Hunter.md:\n\n````markdown\n   0 ---\n   1 name: Bug Hunter\n   2 description: As a Bug Hunter, you specialize in identifying, analyzing, and documenting\n   3   software bugs and vulnerabilities. You help developers and QA teams improve software\n   4   quality by providing detailed bug reports and reproduction steps.\n   5 tools:\n   6 - open_files\n   7 - create_file\n   8 - expand_code_chunks\n   9 - find_and_replace_code\n  10 - grep\n  11 - powershell\n  12 - create_jira_issue\n  13 model: null\n  14 ---\n  15 As a Bug Hunter, your primary mission is to systematically identify, document, and help resolve software vulnerabilities and defects. You will meticulously analyze software systems, reproducing and documenting bugs with precision and clarity to support developers and quality assurance teams in improving software quality and reliability.\n  16 \n  17 Your approach involves a comprehensive methodology: thorough investigation of software behavior, detailed documentation of bug findings, reproduction of issues with specific steps, and providing actionable insights that enable efficient resolution. You must be meticulous, objective, and focused on delivering high-quality, reproducible bug reports that facilitate swift and effective software improvements.\n````",
+                        "Successfully opened .rovodev/subagents/Next.js-15-Server-Actions-+-Form-Handling-Master.md:\n\n````markdown\n   0 ---\n...\n 279 ---\n...\n 285 \n````"
+                    ],
+                    "tool_call_id": "toolu_vrtx_01GVqZxGQL1qRR339gTeeBBz",
+                    "metadata": null,
+                    "timestamp": "2026-02-25T22:13:17.142193Z",
+                    "part_kind": "tool-return"
+                },
+                {
+                    "content": "\n\nYou have used 2 iterations.",
+                    "timestamp": "2026-02-25T22:13:17.276090Z",
+                    "part_kind": "user-prompt"
+                }
+            ],
+            "instructions": null,
+            "kind": "request",
+            "run_id": "ba9548fb-90b2-46c8-a431-7fef3f36d3db",
+            "metadata": null
+        },
+        {
+            "parts": [
+                {
+                    "content": "Now I have a clear picture of the subagent format and all available subagents. I'll update the `AGENTS.md` to include a dedicated section on using subagents for tasks, mapping each subagent to its relevant use cases within this project.",
+                    "id": null,
+                    "provider_details": null,
+                    "part_kind": "text"
+                },
+                {
+                    "tool_name": "find_and_replace_code",
+                    "args": "{\"file_path\": \"AGENTS.md\", \"find\": \"# AGENTS.md — Arkan Project Guide\", \"replace\": \"# AGENTS.md — Arkan Project Guide\\n\\n## Subagents — Delegate Tasks to Specialists\\n\\nRovo Dev has access to specialized subagents that should be used for relevant tasks. **Always delegate to a subagent when one matches the task** — they have deeper expertise, tighter focus, and produce better results than the general agent.\\n\\nSubagent definitions live in `.rovodev/subagents/`. Use the `invoke_subagents` tool to call them.\\n\\n### Available Subagents & When to Use Them\\n\\n| Subagent | Use For in This Project |\\n|----------|------------------------|\\n| **Next.js 15 AI Development Assistant** | New pages/routes in `src/app/`, Server Components, data fetching, Next.js 15 App Router patterns, AI SDK integrations |\\n| **Next.js 15 Server Actions + Form Handling Master** | Forms with React Hook Form + Zod, Server Actions in `src/app/`, `useActionState`, progressive enhancement |\\n| **shadcn/ui Component Builder Assistant** | New components in `src/components/ui/`, extending Radix primitives, CVA variant systems, accessible UI patterns |\\n| **Animation + Motion Assistant** | Framer Motion animations, micro-interactions, Tailwind CSS animation utilities, reduced-motion support |\\n| **Data Table + Dashboard Master** | Admin dashboard tables (`src/components/admin/`), TanStack Table, Recharts charts, `src/app/admin/dashboard/` |\\n| **Next.js 15 Real-time & WebSocket Patterns Master** | SSE/WebSocket features, real-time notifications, live data feeds, `src/app/api/` streaming endpoints |\\n| **State Management with Redux Agent** | Complex Zustand store design (`useBuilderStore`, `useGenerationUIStore`), state architecture decisions |\\n| **Bug Hunter** | Investigating and reproducing bugs, writing detailed bug reports, analyzing error traces from `errors.txt` |\\n| **Code Review Checklist Agent** | Code quality reviews, security checks, consistency audits before merging |\\n| **AI Coding Best Practices Recommender Agent** | Refactoring guidance, design pattern improvements, general code quality analysis |\\n| **Async/Await Implementation Agent** | Refactoring async code in AI flows (`src/ai/flows/`), fixing unhandled promise patterns |\\n| **AI Software Scalability Advisor Agent** | RAG system scaling (`src/modules/rag/`), Qdrant performance, API route bottlenecks |\\n\\n### Project-Specific Delegation Patterns\\n\\n- **Adding a new writing tool**: Use **Next.js 15 AI Development Assistant** for the page (`src/app/writing-tools/<tool>/page.tsx`) + **shadcn/ui Component Builder Assistant** for the UI component (`src/components/writing-tools/`) + **Next.js 15 Server Actions + Form Handling Master** for the form logic.\\n- **Adding a new Genkit AI flow**: Use **Next.js 15 AI Development Assistant** (understands Server Actions and `'use server'` patterns in `src/ai/flows/`).\\n- **Admin dashboard features**: Use **Data Table + Dashboard Master** for tables/charts in `src/app/admin/` and `src/components/admin/`.\\n- **Fixing a reported bug**: Use **Bug Hunter** to reproduce and document, then the relevant specialist subagent to fix.\\n- **New shadcn/ui component**: Use **shadcn/ui Component Builder Assistant** — always extend existing primitives from `src/components/ui/` rather than rebuilding.\\n- **Real-time notifications or live updates**: Use **Next.js 15 Real-time & WebSocket Patterns Master** for SSE endpoints and `EventSource` client hooks.\\n- **Code review before merging**: Use **Code Review Checklist Agent** to audit security, consistency, and TypeScript correctness.\\n\\n### Example: Invoking a Subagent\\n\\n```\\nUse the \\\"shadcn/ui Component Builder Assistant\\\" subagent to build a new\\nFileUploadCard component in src/components/ui/ that accepts a file via\\ndrag-and-drop, shows upload progress, and follows the existing shadcn/ui\\npatterns in this project (cn() utility, CVA variants, forwardRef).\\n```\\n\\n---\"}",
+                    "tool_call_id": "toolu_vrtx_01AKAMx2KKrZivvLhCrcadmM",
+                    "id": null,
+                    "provider_details": null,
+                    "part_kind": "tool-call"
+                }
+            ],
+            "usage": {
+                "input_tokens": 46842,
+                "cache_write_tokens": 4523,
+                "cache_read_tokens": 42316,
+                "output_tokens": 1166,
+                "input_audio_tokens": 0,
+                "cache_audio_read_tokens": 0,
+                "output_audio_tokens": 0,
+                "details": {
+                    "cache_creation_input_tokens": 4523,
+                    "cache_read_input_tokens": 42316,
+                    "input_tokens": 3,
+                    "output_tokens": 1166
+                }
+            },
+            "model_name": "claude-sonnet-4-6",
+            "timestamp": "2026-02-25T22:13:19.031473Z",
+            "kind": "response",
+            "provider_name": "anthropic",
+            "provider_details": {
+                "finish_reason": "tool_use"
+            },
+            "provider_response_id": "msg_vrtx_01VE1agvGxu28jdARmcxc3xB",
+            "finish_reason": "tool_call",
+            "run_id": "ba9548fb-90b2-46c8-a431-7fef3f36d3db",
+            "metadata": null
+        },
+        {
+            "parts": [
+                {
+                    "tool_name": "find_and_replace_code",
+                    "content": "Successfully replaced code in AGENTS.md:\n\n--- AGENTS.md\n+++ AGENTS.md\n@@ -1,4 +1,48 @@\n # AGENTS.md — Arkan Project Guide\n+\n+## Subagents — Delegate Tasks to Specialists\n+\n+Rovo Dev has access to specialized subagents that should be used for relevant tasks. **Always delegate to a subagent when one matches the task** — they have deeper expertise, tighter focus, and produce better results than the general agent.\n+\n+Subagent definitions live in `.rovodev/subagents/`. Use the `invoke_subagents` tool to call them.\n+\n+### Available Subagents & When to Use Them\n+\n+| Subagent | Use For in This Project |\n+|----------|------------------------|\n+| **Next.js 15 AI Development Assistant** | New pages/routes in `src/app/`, Server Components, data fetching, Next.js 15 App Router patterns, AI SDK integrations |\n+| **Next.js 15 Server Actions + Form Handling Master** | Forms with React Hook Form + Zod, Server Actions in `src/app/`, `useActionState`, progressive enhancement |\n+| **shadcn/ui Component Builder Assistant** | New components in `src/components/ui/`, extending Radix primitives, CVA variant systems, accessible UI patterns |\n+| **Animation + Motion Assistant** | Framer Motion animations, micro-interactions, Tailwind CSS animation utilities, reduced-motion support |\n+| **Data Table + Dashboard Master** | Admin dashboard tables (`src/components/admin/`), TanStack Table, Recharts charts, `src/app/admin/dashboard/` |\n+| **Next.js 15 Real-time & WebSocket Patterns Master** | SSE/WebSocket features, real-time notifications, live data feeds, `src/app/api/` streaming endpoints |\n+| **State Management with Redux Agent** | Complex Zustand store design (`useBuilderStore`, `useGenerationUIStore`), state architecture decisions |\n+| **Bug Hunter** | Investigating and reproducing bugs, writing detailed bug reports, analyzing error traces from `errors.txt` |\n+| **Code Review Checklist Agent** | Code quality reviews, security checks, consistency audits before merging |\n+| **AI Coding Best Practices Recommender Agent** | Refactoring guidance, design pattern improvements, general code quality analysis |\n+| **Async/Await Implementation Agent** | Refactoring async code in AI flows (`src/ai/flows/`), fixing unhandled promise patterns |\n+| **AI Software Scalability Advisor Agent** | RAG system scaling (`src/modules/rag/`), Qdrant performance, API route bottlenecks |\n+\n+### Project-Specific Delegation Patterns\n+\n+- **Adding a new writing tool**: Use **Next.js 15 AI Development Assistant** for the page (`src/app/writing-tools/<tool>/page.tsx`) + **shadcn/ui Component Builder Assistant** for the UI component (`src/components/writing-tools/`) + **Next.js 15 Server Actions + Form Handling Master** for the form logic.\n+- **Adding a new Genkit AI flow**: Use **Next.js 15 AI Development Assistant** (understands Server Actions and `'use server'` patterns in `src/ai/flows/`).\n+- **Admin dashboard features**: Use **Data Table + Dashboard Master** for tables/charts in `src/app/admin/` and `src/components/admin/`.\n+- **Fixing a reported bug**: Use **Bug Hunter** to reproduce and document, then the relevant specialist subagent to fix.\n+- **New shadcn/ui component**: Use **shadcn/ui Component Builder Assistant** — always extend existing primitives from `src/components/ui/` rather than rebuilding.\n+- **Real-time notifications or live updates**: Use **Next.js 15 Real-time & WebSocket Patterns Master** for SSE endpoints and `EventSource` client hooks.\n+- **Code review before merging**: Use **Code Review Checklist Agent** to audit security, consistency, and TypeScript correctness.\n+\n+### Example: Invoking a Subagent\n+\n+```\n+Use the \"shadcn/ui Component Builder Assistant\" subagent to build a new\n+FileUploadCard component in src/components/ui/ that accepts a file via\n+drag-and-drop, shows upload progress, and follows the existing shadcn/ui\n+patterns in this project (cn() utility, CVA variants, forwardRef).\n+```\n+\n+---\n \n ## Project Overview\n \n",
+                    "tool_call_id": "toolu_vrtx_01AKAMx2KKrZivvLhCrcadmM",
+                    "metadata": null,
+                    "timestamp": "2026-02-25T22:13:43.514773Z",
+                    "part_kind": "tool-return"
+                },
+                {
+                    "content": "\n\nYou have used 3 iterations.",
+                    "timestamp": "2026-02-25T22:13:43.555185Z",
+                    "part_kind": "user-prompt"
+                }
+            ],
+            "instructions": null,
+            "kind": "request",
+            "run_id": "ba9548fb-90b2-46c8-a431-7fef3f36d3db",
+            "metadata": null
+        },
+        {
+            "parts": [
+                {
+                    "content": "The `AGENTS.md` has been updated with a comprehensive **Subagents** section at the top. Here's what was added:\n\n**New section: \"Subagents — Delegate Tasks to Specialists\"**\n\n- A clear instruction to always use subagents when one matches the task\n- A reference table mapping all 12 available subagents to their specific use cases within this project (e.g., which directories/files/patterns each one handles)\n- **Project-specific delegation patterns** — practical recipes for common tasks like:\n  - Adding a new writing tool (3-subagent workflow)\n  - Adding a Genkit AI flow\n  - Admin dashboard features\n  - Bug fixing workflow\n  - Code review before merging\n- An **example invocation** showing how to phrase a subagent delegation request\n\nThe section is placed at the very top of `AGENTS.md` so it's the first thing any agent (or developer) sees when reading the guide.\n\nWhat would you like to do next?\n1. **Add more delegation patterns** for other common tasks (e.g., i18n changes, Firebase rules updates, RAG system work)\n2. **Create a new subagent** definition in `.rovodev/subagents/` for a project-specific use case\n3. **Move on to a development task** and put the subagents to work",
+                    "id": null,
+                    "provider_details": null,
+                    "part_kind": "text"
+                }
+            ],
+            "usage": {
+                "input_tokens": 49142,
+                "cache_write_tokens": 2300,
+                "cache_read_tokens": 46839,
+                "output_tokens": 310,
+                "input_audio_tokens": 0,
+                "cache_audio_read_tokens": 0,
+                "output_audio_tokens": 0,
+                "details": {
+                    "cache_creation_input_tokens": 2300,
+                    "cache_read_input_tokens": 46839,
+                    "input_tokens": 3,
+                    "output_tokens": 310
+                }
+            },
+            "model_name": "claude-sonnet-4-6",
+            "timestamp": "2026-02-25T22:13:45.152492Z",
+            "kind": "response",
+            "provider_name": "anthropic",
+            "provider_details": {
+                "finish_reason": "end_turn"
+            },
+            "provider_response_id": "msg_vrtx_0127MwD9gmTboig8AfHmuE7r",
+            "finish_reason": "stop",
+            "run_id": "ba9548fb-90b2-46c8-a431-7fef3f36d3db",
+            "metadata": null
+        }
+    ],
+    "deferred_results": null,
+    "usage": {
+        "input_tokens": 403524,
+        "cache_write_tokens": 114901,
+        "cache_read_tokens": 288593,
+        "output_tokens": 6438,
+        "input_audio_tokens": 0,
+        "cache_audio_read_tokens": 0,
+        "output_audio_tokens": 0,
+        "details": {
+            "cache_creation_input_tokens": 114901,
+            "cache_read_input_tokens": 288593,
+            "input_tokens": 30,
+            "output_tokens": 6438
+        },
+        "requests": 10,
+        "tool_calls": 13
+    },
+    "timestamp": 1772056782,
+    "initial_prompt": "Your goal is to explore the current workspace and create or update the top-level AGENTS.md file with information that will be useful for developers working on this project.\n\nYou should aim to include:\n- Key information about the project (purpose, language, frameworks, etc.)\n- Important files and directories\n- Best practices and conventions you observe\n\nDon't call grep tools with overly broad patterns at it will be very slow and provide noisy output.\n\nFormat the file primarily as lists of instructions grouped by simple markdown headers.\nIn addition, if any of the following files are present in the root directory (not sub-directories), you should migrate their content to the AGENTS.md file:\n- CLAUDE.md, CLAUDE.local.md\n- codex.md, .codex/*.md\n- .cursor/rules/*.mdc, .cursorrules.md, .cursorrules\n- rules.md, .rules.md\n- .agent.md, .agent.local.md",
+    "prompts": [
+        "Your goal is to explore the current workspace and create or update the top-level AGENTS.md file with information that will be useful for developers working on this project.\n\nYou should aim to include:\n- Key information about the project (purpose, language, frameworks, etc.)\n- Important files and directories\n- Best practices and conventions you observe\n\nDon't call grep tools with overly broad patterns at it will be very slow and provide noisy output.\n\nFormat the file primarily as lists of instructions grouped by simple markdown headers.\nIn addition, if any of the following files are present in the root directory (not sub-directories), you should migrate their content to the AGENTS.md file:\n- CLAUDE.md, CLAUDE.local.md\n- codex.md, .codex/*.md\n- .cursor/rules/*.mdc, .cursorrules.md, .cursorrules\n- rules.md, .rules.md\n- .agent.md, .agent.local.md",
+        "make AGENTS to use subagents to do taskas"
+    ],
+    "latest_result": "The `AGENTS.md` has been updated with a comprehensive **Subagents** section at the top. Here's what was added:\n\n**New section: \"Subagents — Delegate Tasks to Specialists\"**\n\n- A clear instruction to always use subagents when one matches the task\n- A reference table mapping all 12 available subagents to their specific use cases within this project (e.g., which directories/files/patterns each one handles)\n- **Project-specific delegation patterns** — practical recipes for common tasks like:\n  - Adding a new writing tool (3-subagent workflow)\n  - Adding a Genkit AI flow\n  - Admin dashboard features\n  - Bug fixing workflow\n  - Code review before merging\n- An **example invocation** showing how to phrase a subagent delegation request\n\nThe section is placed at the very top of `AGENTS.md` so it's the first thing any agent (or developer) sees when reading the guide.\n\nWhat would you like to do next?\n1. **Add more delegation patterns** for other common tasks (e.g., i18n changes, Firebase rules updates, RAG system work)\n2. **Create a new subagent** definition in `.rovodev/subagents/` for a project-specific use case\n3. **Move on to a development task** and put the subagents to work",
+    "workspace_path": "/teamspace/studios/this_studio/arkan",
+    "base_log_dir": "/teamspace/studios/this_studio/.rovodev/sessions",
+    "is_subagent": false,
+    "subagent_tool_call_id": null
+}
