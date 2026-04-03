@@ -1,44 +1,34 @@
 'use client';
 
-import { useState } from 'react';
-import { useAuth } from '@/context/AuthContext';
-import { useToast } from '@/hooks';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { AlertTriangle, Check, Copy } from 'lucide-react';
+import { ShieldCheck, Lock } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { getAuthenticatedToken } from '@/modules/users/domain/utils/authUtils';
 
 export function ApiTokenView() {
-  const { user } = useAuth();
-  const [token, setToken] = useState<string | null>(null);
-  const [isCopied, setIsCopied] = useState(false);
-  const { toast } = useToast();
-
-  const handleShowToken = async () => {
-    if (user) {
-      const idToken = await getAuthenticatedToken(user);
-      setToken(idToken);
-    }
-  };
-
-  const handleCopy = () => {
-    if (!token) return;
-    navigator.clipboard.writeText(token);
-    setIsCopied(true);
-    toast({ title: 'Token Copied!' });
-    setTimeout(() => setIsCopied(false), 2000);
-  };
-
   return (
     <Card>
-      <CardHeader><CardTitle>API Access Token</CardTitle><CardDescription>Use this token to authenticate with the Arkan API for external integrations.</CardDescription></CardHeader>
+      <CardHeader>
+        <CardTitle>Session Security</CardTitle>
+        <CardDescription>Arkan uses industry-standard secure session management.</CardDescription>
+      </CardHeader>
       <CardContent className="space-y-4">
-        <Alert variant="destructive"><AlertTriangle className="h-4 w-4" /><AlertDescription><strong>Warning:</strong> Treat this token like a password. Do not share it or expose it in client-side code.</AlertDescription></Alert>
-        {token ? <div className="flex items-center gap-2"><Input readOnly value={token} className="font-mono text-xs" /><Button variant="outline" size="icon" onClick={handleCopy}>{isCopied ? <Check className="h-4 w-4 text-green-500" /> : <Copy className="h-4 w-4" />}</Button></div> : <p className="text-sm text-muted-foreground">Click the button to reveal your access token.</p>}
+        <Alert>
+          <ShieldCheck className="h-4 w-4" />
+          <AlertDescription>
+            <strong>HttpOnly Cookies:</strong> Your session token is stored in a secure, encrypted cookie that cannot be accessed by scripts, protecting you from cross-site scripting (XSS) attacks.
+          </AlertDescription>
+        </Alert>
+        <p className="text-sm text-muted-foreground">
+          For your security, session tokens are not revealed in the UI. External API integrations should use the AI Provider API Keys configured in the section above.
+        </p>
       </CardContent>
-      <CardFooter><Button onClick={handleShowToken}>{token ? 'Refresh Token' : 'Show Token'}</Button></CardFooter>
+      <CardFooter>
+        <Button variant="outline" disabled className="w-full">
+          <Lock className="mr-2 h-4 w-4" />
+          Session Securely Managed
+        </Button>
+      </CardFooter>
     </Card>
   );
 }

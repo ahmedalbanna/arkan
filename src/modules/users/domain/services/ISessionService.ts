@@ -1,5 +1,5 @@
 export interface ISessionService {
-    manageSession(user: { getIdToken: (forceRefresh: boolean) => Promise<string> } | null): Promise<void>;
+    manageSession(user: any | null): Promise<void>;
 }
 
 export const ISessionServiceToken = Symbol("ISessionService");

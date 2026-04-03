@@ -14,17 +14,10 @@ import { ISessionService } from '../../domain/services/ISessionService';
 @injectable()
 export class SessionManager implements ISessionService {
   async manageSession(
-    user: { getIdToken: (forceRefresh: boolean) => Promise<string> } | null,
+    user: any | null,
   ): Promise<void> {
     if (user) {
-      const idToken = await user.getIdToken(true);
-
-      await apiService<{ idToken: string }, void>({
-        endpoint: '/api/auth/session',
-        method: 'POST',
-        data: { idToken },
-      });
-
+      // Session is already created by login/signup routes via cookie
       return;
     }
 

@@ -15,9 +15,11 @@ export interface LoginCredentials {
  * @returns A promise that resolves with the user's token.
  * @throws An error with the message "User not authenticated" if user is null.
  */
-export const getAuthenticatedToken = async (user: { uid: string; getIdToken: (force: boolean) => Promise<string> } | null): Promise<string> => {
+export const getAuthenticatedToken = async (user: any | null): Promise<string | undefined> => {
   if (!user) {
     throw new Error("User not authenticated");
   }
-  return await user.getIdToken(true);
+  // With cookie-based auth, we don't need to return a token here
+  // as the browser sends the __session cookie automatically.
+  return undefined;
 };

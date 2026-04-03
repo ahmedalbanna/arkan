@@ -48,7 +48,7 @@ function LogDetailView({ log }: { log: Activity }) {
                     </DialogDescription>
                 </div>
                 <Badge variant="outline" className="h-5 text-[9px] uppercase tracking-widest font-bold border-primary/20 text-primary bg-primary/5">
-                    Log: {log.id.slice(0, 8)}
+                    Log: {String(log.id).slice(0, 8)}
                 </Badge>
             </header>
 
@@ -97,7 +97,14 @@ function LogDetailView({ log }: { log: Activity }) {
                 </p>
                 <div className="flex items-center gap-2">
                     <Badge variant="outline" className="h-4 text-[8px] uppercase tracking-tighter text-muted-foreground/60 border-border/60">
-                        Timestamp: {new Date(log.createdAt).toISOString()}
+                        Timestamp: {(() => {
+                            try {
+                                const d = new Date(log.createdAt);
+                                return isNaN(d.getTime()) ? 'Unregistered' : d.toISOString();
+                            } catch {
+                                return 'Unregistered';
+                            }
+                        })()}
                     </Badge>
                 </div>
             </footer>
@@ -146,7 +153,14 @@ export function RecentActivity({ data }: RecentActivityProps) {
                                                     {activity.userName || 'Anonymous Node'}
                                                 </p>
                                                 <span className="text-[9px] font-bold text-muted-foreground/40 uppercase tracking-widest">
-                                                    {formatDistanceToNow(new Date(activity.createdAt), { addSuffix: true })}
+                                                    {(() => {
+                                                        try {
+                                                            const d = new Date(activity.createdAt);
+                                                            return isNaN(d.getTime()) ? 'Recently' : formatDistanceToNow(d, { addSuffix: true });
+                                                        } catch {
+                                                            return 'Recently';
+                                                        }
+                                                    })()}
                                                 </span>
                                             </div>
                                             <div className="flex items-center gap-2">

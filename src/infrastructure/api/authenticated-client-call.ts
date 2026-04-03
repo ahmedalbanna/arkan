@@ -9,9 +9,9 @@ type ClientConstructor<TClient> = new (...args: unknown[]) => TClient;
 const getAuthenticationError = (): Error => new Error('User not authenticated');
 
 export const runAuthenticatedClientCall = async <TClient, TResult>(
-  user: { uid: string; getIdToken: (force: boolean) => Promise<string> } | null | undefined,
+  user: any | null | undefined,
   clientClass: ClientConstructor<TClient>,
-  callback: (client: TClient, token: string) => Promise<TResult>,
+  callback: (client: TClient, token?: string) => Promise<TResult>,
 ): Promise<TResult> => {
   if (!user) {
     throw getAuthenticationError();
@@ -36,9 +36,9 @@ export const unwrapResult = <TValue, TError>(result: Result<TValue, TError>): TV
 };
 
 export const runAuthenticatedResultCall = async <TClient, TValue, TError>(
-  user: { uid: string; getIdToken: (force: boolean) => Promise<string> } | null | undefined,
+  user: any | null | undefined,
   clientClass: ClientConstructor<TClient>,
-  callback: (client: TClient, token: string) => Promise<Result<TValue, TError>>,
+  callback: (client: TClient, token?: string) => Promise<Result<TValue, TError>>,
 ): Promise<TValue> => {
   const result = await runAuthenticatedClientCall(user, clientClass, callback);
   return unwrapResult(result);
