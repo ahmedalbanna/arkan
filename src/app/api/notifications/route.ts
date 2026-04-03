@@ -11,7 +11,7 @@ import { withAuth, handleApiError, handleUserResult } from '@/infrastructure/api
 export const GET = withAuth(async ({ user }) => {
     try {
         const controller = container.resolve(UserController);
-        const result = await controller.getNotifications(user.uid);
+        const result = await controller.getNotifications(user.id);
 
         return handleUserResult(result);
 

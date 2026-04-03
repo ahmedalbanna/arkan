@@ -23,7 +23,7 @@ export const POST = withAuth(async ({ request, user }) => {
         const { notificationIds } = validation.data;
         const controller = container.resolve(UserController);
         
-        const result = await controller.markNotificationsAsRead(user.uid, notificationIds);
+        const result = await controller.markNotificationsAsRead(user.id, notificationIds);
 
         return handleUserResult(result);
 

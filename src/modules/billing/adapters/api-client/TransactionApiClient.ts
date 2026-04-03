@@ -5,6 +5,8 @@ import { Result } from '@/infrastructure/utils/result';
 
 export interface VerifyPaymentVariables {
   transactionId: string;
+  userId: string;
+  creditsToGrant: number;
   status: 'verified' | 'rejected';
   adminNotes?: string;
 }
@@ -24,7 +26,7 @@ export class TransactionApiClient {
       if (options.lastVisibleId) query.append('lastVisibleId', options.lastVisibleId);
 
       const data = await apiService<never, any>({ 
-        endpoint: `/api/transactions?${query.toString()}`
+        endpoint: `/api/admin/transactions?${query.toString()}`
       });
       return Result.ok(data);
     } catch (error: unknown) {

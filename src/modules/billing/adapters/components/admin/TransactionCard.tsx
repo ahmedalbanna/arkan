@@ -29,9 +29,11 @@ export function TransactionCard({ transaction }: TransactionCardProps) {
     const handleVerification = (status: 'verified' | 'rejected') => {
         mutate({
             transactionId: transaction.id,
+            userId: transaction.userId,
+            creditsToGrant: transaction.credits,
             status,
             adminNotes: adminNotes || (status === 'verified' ? t('managePayments.defaultApproveNote') : t('managePayments.defaultDeclineNote')),
-        } as any);
+        });
     }
 
     const isVerified = transaction.status === 'verified';

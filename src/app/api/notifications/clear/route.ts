@@ -23,7 +23,7 @@ export const POST = withAuth(async ({ request, user }) => {
         const { notificationIds } = validation.data;
         const controller = container.resolve(UserController);
         
-        const result = await controller.clearNotifications(user.uid, notificationIds);
+        const result = await controller.clearNotifications(user.id, notificationIds);
 
         return handleUserResult(result);
 

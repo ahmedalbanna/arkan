@@ -67,7 +67,8 @@ export function TransactionList({ status }: { status: TransactionStatus }) {
         );
     }
 
-    const allTransactions = (data as any)?.pages?.flatMap((page: any) => page.transactions) ?? [];
+    const allTransactions = ((data as any)?.pages?.flatMap((page: any) => page.transactions) ?? [])
+        .map((t: any) => (t instanceof Transaction ? t : new Transaction(t)));
 
     if (allTransactions.length === 0) {
         return (
