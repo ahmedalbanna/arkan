@@ -11,7 +11,10 @@ import { Chapter } from "@/modules/ai-content/domain/entities/Chapter";
 @injectable()
 export class PptxExportService implements IExportService {
     async export(project: Project, content: ProjectContent, options: ExportOptions): Promise<Blob | Buffer> {
-        const markdown = this.generateMarkdownFromContent(content);
+        const isFullExport = content.length === project.content.length;
+        const markdown = isFullExport && project.fullMarkdownContent 
+            ? project.fullMarkdownContent 
+            : this.generateMarkdownFromContent(content);
         
         // Extract footnotes from full project content
         const fullMarkdown = project.fullMarkdownContent || '';
@@ -19,8 +22,14 @@ export class PptxExportService implements IExportService {
         const footnoteDefinitions = fullMarkdown.match(footnoteRegex);
 
         let finalMarkdown = markdown;
-        if (footnoteDefinitions) {
-            finalMarkdown += '\n\n' + footnoteDefinitions.join('\n');
+        // Only append footnotes if they aren't already in the markdown (to avoid duplicates for full exports)
+        if (footnoteDefinitions && footnoteDefinitions.length > 0) {
+            const existingFootnotes = markdown.match(footnoteRegex) || [];
+            const newFootnotes = footnoteDefinitions.filter(fn => !existingFootnotes.includes(fn));
+            
+            if (newFootnotes.length > 0) {
+                finalMarkdown += '\n\n' + newFootnotes.join('\n');
+            }
         }
 
         const pptxOptions: PptxConversionOptions = {

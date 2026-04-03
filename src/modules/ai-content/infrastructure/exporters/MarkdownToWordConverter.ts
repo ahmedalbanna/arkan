@@ -471,7 +471,16 @@ export async function convertMarkdownToWord(
     // Generate markdown safely
     let markdown: string;
     try {
-      markdown = generateMarkdownFromContent(contentToExport);
+      // If we're exporting the full project, use the raw markdown from the editor (source of truth)
+      // Otherwise, generate markdown for the specific selected subset.
+      const isFullExport = !selectedContent || (selectedContent.length === project.content.length);
+      
+      if (isFullExport && project.fullMarkdownContent) {
+        markdown = project.fullMarkdownContent;
+      } else {
+        markdown = generateMarkdownFromContent(contentToExport);
+      }
+
       if (!markdown || markdown.trim().length === 0) {
         throw new Error('Generated markdown is empty');
       }
@@ -479,15 +488,20 @@ export async function convertMarkdownToWord(
       throw new Error(`Failed to generate markdown from content: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
 
-    const fullProjectMarkdown = project.fullMarkdownContent || '';
-
     // Extract footnotes safely
+    const fullProjectMarkdown = project.fullMarkdownContent || '';
     const footnoteRegex = /^\[\^.+?\]:.+$/gm;
     const footnoteDefinitions = fullProjectMarkdown.match(footnoteRegex);
 
     let finalMarkdown = markdown;
+    // Only append footnotes if they aren't already in the markdown (to avoid duplicates for full exports)
     if (footnoteDefinitions && footnoteDefinitions.length > 0) {
-      finalMarkdown += '\n\n' + footnoteDefinitions.join('\n');
+      const existingFootnotes = markdown.match(footnoteRegex) || [];
+      const newFootnotes = footnoteDefinitions.filter(fn => !existingFootnotes.includes(fn));
+      
+      if (newFootnotes.length > 0) {
+        finalMarkdown += '\n\n' + newFootnotes.join('\n');
+      }
     }
 
     // Create DOCX content with error handling

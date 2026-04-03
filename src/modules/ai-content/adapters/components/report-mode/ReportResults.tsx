@@ -1,10 +1,11 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Eye } from 'lucide-react';
 
 import { A4Page } from '@/components/shared/A4Page';
+import { useDebounce } from '@/hooks/util/use-debounce';
 import { CardContent } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useLocalization } from '@/context/LocalizationContext';
@@ -59,6 +60,7 @@ const ReportResults = ({
   const undo = useBuilderStore(state => state.undo);
   const version = useBuilderStore(state => state.version);
   const updateProjectFromMarkdown = useBuilderStore(state => state.updateProjectFromMarkdown);
+  const syncProjectStructure = useBuilderStore(state => state.syncProjectStructure);
   const selectedFileId = useBuilderStore(state => state.selectedFileId);
   const comparisonSnapshotId = useBuilderStore(state => state.comparisonSnapshotId);
   const setComparisonSnapshotId = useBuilderStore(state => state.setComparisonSnapshotId);
@@ -99,6 +101,22 @@ const ReportResults = ({
       document.removeEventListener('fullscreenchange', handleFullscreenChange);
     };
   }, []);
+
+  // Sync structure when switching to preview mode
+  React.useEffect(() => {
+    if (viewMode === 'preview') {
+      syncProjectStructure();
+    }
+  }, [viewMode, syncProjectStructure]);
+
+  // Debounced auto-sync of project structure (3 seconds of inactivity)
+  const debouncedMarkdown = useDebounce(project?.markdown || '', 3000);
+
+  useEffect(() => {
+    if (debouncedMarkdown && viewMode === 'edit') {
+      syncProjectStructure();
+    }
+  }, [debouncedMarkdown, syncProjectStructure, viewMode]);
 
   const hasContent = project?.content && project.content.length > 0;
 

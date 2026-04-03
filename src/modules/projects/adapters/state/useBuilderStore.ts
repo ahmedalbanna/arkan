@@ -30,6 +30,7 @@ interface BuilderState {
     updateProject: (updater: (project: Project) => void | Project) => void;
     undo: () => void;
     updateProjectFromMarkdown: (markdown: string) => void;
+    syncProjectStructure: () => void;
     loadProject: (projectData: ProjectProperties) => void;
     loadProjectFromFile: (file: File) => Promise<void>;
     newSession: () => void;
@@ -136,8 +137,12 @@ const useBuilderStore = create<BuilderState>((set, get) => ({
     },
 
     updateProjectFromMarkdown: (markdown: string) => {
+        get().updateProject(p => p.updateMarkdown(markdown));
+    },
+
+    syncProjectStructure: () => {
         const { parseMarkdownToContent } = require('@/modules/projects/infrastructure/io/markdown-parser');
-        get().updateProject(p => p.updateProjectFromMarkdown(markdown, parseMarkdownToContent));
+        get().updateProject(p => p.syncStructure(parseMarkdownToContent));
     },
 
     loadProject: (projectData) => {

@@ -251,11 +251,17 @@ export function SidebarOutlineManager({
   onActiveChapterChange,
   onActiveSectionChange,
 }: SidebarOutlineManagerProps) {
-  const { project, updateProject, undo } = useBuilderStore(state => ({
+  const { project, updateProject, undo, syncProjectStructure } = useBuilderStore(state => ({
     project: state.project,
     updateProject: state.updateProject,
     undo: state.undo,
+    syncProjectStructure: state.syncProjectStructure,
   }));
+
+  // Sync structure on mount to ensure outline matches editor content
+  useEffect(() => {
+    syncProjectStructure();
+  }, [syncProjectStructure]);
 
   const [expandedChapters, setExpandedChapters] = useState<Set<string>>(new Set());
   const [searchQuery, setSearchQuery] = useState('');

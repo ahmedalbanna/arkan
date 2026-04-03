@@ -148,6 +148,9 @@ export function useAiActions({ editor: initialEditor }: AiActionsProps = {}) {
   const generateSectionMutation = useMutation({
     mutationKey: ['generateReportSection'],
     mutationFn: async (sectionId: string) => {
+      // Sync structure from markdown before generation to ensure correct context
+      useBuilderStore.getState().syncProjectStructure();
+      
       const currentProject = useBuilderStore.getState().project;
       if (!currentProject || !user) throw new Error('Project or user not found.');
 
@@ -193,6 +196,9 @@ export function useAiActions({ editor: initialEditor }: AiActionsProps = {}) {
   const generateChapterMutation = useMutation({
     mutationKey: ['generateChapterContent'],
     mutationFn: async (variables: { chapterId: string; sectionIds: string[] }) => {
+      // Sync structure from markdown before generation to ensure correct context
+      useBuilderStore.getState().syncProjectStructure();
+
       const { chapterId, sectionIds } = variables;
       const currentProject = useBuilderStore.getState().project;
       if (!currentProject || !user) throw new Error('User or project not found.');

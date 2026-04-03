@@ -49,6 +49,7 @@ export interface ProjectProperties {
   rules?: string[];
   constraints?: string[];
   citationStyle?: string;
+  markdown?: string;
 }
 
 export class Project {
@@ -66,6 +67,7 @@ export class Project {
   public readonly logoUrl?: string;
   public readonly universityLogoUrl?: string;
   public readonly tableOfContentsMarkdown?: string;
+  public readonly markdown: string;
 
   public readonly content: ProjectContent;
   public readonly externalContext: readonly ExternalContext[];
@@ -114,6 +116,10 @@ export class Project {
       // Assume it's a Section
       return new Section(c as SectionProperties);
     });
+
+    // Initialize markdown from props or generate from content
+    this.markdown = props.markdown || this.generateMarkdownFromContent(this.content);
+
     this.externalContext = (props.externalContext || []).map(ec => ec instanceof ExternalContext ? ec : new ExternalContext(ec));
 
     this.meta = {
@@ -158,7 +164,16 @@ export class Project {
   }
   
   get fullMarkdownContent(): string {
-    return this.generateMarkdownFromContent(this.content);
+    return this.markdown;
+  }
+
+  public updateMarkdown(markdown: string): Project {
+    return this.withProps({ markdown });
+  }
+
+  public syncStructure(parser: (markdown: string, existing: ProjectContent) => ProjectContent): Project {
+    const newContent = parser(this.markdown, this.content);
+    return this.withProps({ content: [...newContent] });
   }
 
   public generateMarkdownFromContent(content: ProjectContent): string {
@@ -253,7 +268,7 @@ export class Project {
 
   public addChapter(id: string, title: string = "Untitled Chapter"): Project {
     const newChapter = new Chapter({ id, title, sections: [] });
-    return this.withProps({ content: [...this.content, newChapter] });
+    return this.withProps({ content: [...this.content, newChapter], markdown: undefined });
   }
 
   public addSectionToChapter(chapterId: string, sectionId: string, sectionTitle: string, content?: string): Project {
@@ -270,11 +285,11 @@ export class Project {
     const originalChapter = newContent[idx] as Chapter;
     newContent[idx] = updater(originalChapter);
 
-    return this.withProps({ content: newContent });
+    return this.withProps({ content: newContent, markdown: undefined });
   }
 
   public removeChapter(id: string): Project {
-    return this.withProps({ content: this.content.filter(c => c.id !== id) });
+    return this.withProps({ content: this.content.filter(c => c.id !== id), markdown: undefined });
   }
 
   public duplicateChapter(id: string, idGenerator: () => string): Project {
@@ -291,7 +306,7 @@ export class Project {
     const newContent = [...this.content];
     newContent.splice(index + 1, 0, newChapter);
 
-    return this.withProps({ content: newContent });
+    return this.withProps({ content: newContent, markdown: undefined });
   }
 
   public duplicateSection(id: string, idGenerator: () => string): Project {
@@ -313,7 +328,7 @@ export class Project {
     
     if (oldIndex !== -1 && newIndex !== -1) {
       const newContent = arrayMove([...this.content], oldIndex, newIndex);
-      return this.withProps({ content: newContent });
+      return this.withProps({ content: newContent, markdown: undefined });
     }
     return this;
   }
@@ -341,7 +356,7 @@ export class Project {
       return item;
     });
 
-    return sectionFound ? this.withProps({ content: newContent }) : this;
+    return sectionFound ? this.withProps({ content: newContent, markdown: undefined }) : this;
   }
 
   public updateSectionContent(sectionId: string, newMarkdown: string): Project {
@@ -436,6 +451,7 @@ export class Project {
       rules: this.rules ? [...this.rules] : [],
       constraints: this.constraints ? [...this.constraints] : [],
       citationStyle: this.citationStyle,
+      markdown: this.markdown,
     };
   }
 
