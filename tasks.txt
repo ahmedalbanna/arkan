@@ -14,3 +14,15 @@ Keep going — ReportSteps.tsx, OutlineManager.tsx, CoverPageSettingsPanel.tsx, 
 Go even deeper — FloatingOutline.tsx, SnapshotComparison.tsx, or Document.tsx
 Go even deeper — MarkdownEditor, A4Page, DiffView, or other shared components
 Other shared components — Header.tsx, MarkdownViewer.tsx, NotificationDropdown.tsx
+
+
+
+ • Debounced Auto-Sync: Implement a background sync that updates the outline after a few seconds of inactivity.
+ • Refine Export Logic: Update the DOCX/PDF export services to use the raw markdown source.
+ • RAG Context Updates: Ensure the document indexer uses the synced structure for accurate search.
+
+ Would you like to explore adding a debounced auto-sync for the Outline, or should we move on to refining the document export logic
+based on this new Markdown-primary structure?
+
+Would you like me to proceed with these consistency updates in Project.ts, or should we focus on another area like the AI Content
+Generation logic?
