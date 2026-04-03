@@ -1,13 +1,13 @@
 // src/app/api/agent-categories/route.ts
-import { handleApiError, createApiResponse, withAuth } from '@/infrastructure/api/api-utils';
+import { handleApiError, handleAiResult, withAuth } from '@/infrastructure/api/api-utils';
 import { container } from '@/infrastructure/di/container';
 import { AiController } from '@/modules/ai/adapters/controllers/AiController';
 
 export const GET = withAuth(async () => {
     try {
         const controller = container.resolve(AiController);
-        const categories = await controller.getAgentCategories();
-        return createApiResponse(categories, 200);
+        const result = await controller.getAgentCategories();
+        return handleAiResult(result);
     } catch (error) {
         return handleApiError(error);
     }

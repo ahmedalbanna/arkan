@@ -6,7 +6,7 @@ import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 
-import { runAgentFlow } from '@/modules/ai/infrastructure/flows/generation/run-agent-flow';
+import { runAgent } from '@/modules/ai/infrastructure/flows/generation/run-agent-flow';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Form, FormControl, FormField, FormItem } from '@/components/ui/form';
@@ -48,7 +48,7 @@ function AgentPlayground({ agent }: AgentPlaygroundProps) {
   }, [agent, form]);
 
   const mutation = useMutation({
-    mutationFn: (input: { systemPrompt: string; userPrompt: string; token: string }) => runAgentFlow(input),
+    mutationFn: (input: { systemPrompt: string; userPrompt: string; token: string }) => runAgent(input),
     onSuccess: (data: any) => {
       if (agent) {
         setResponse(agent.id, agent.id, { response: data, prompt: form.getValues('userPrompt') });
@@ -65,7 +65,7 @@ function AgentPlayground({ agent }: AgentPlaygroundProps) {
 
   async function onSubmit(values: PlaygroundFormValues) {
     if (!agent || !user) return;
-    const token = await getAuthenticatedToken(user);
+    const token = (await getAuthenticatedToken(user)) || '';
     const systemPrompt = `${agent.prompt}\n\n${(agent.guidelines || []).join('\n')}`;
     mutation.mutate({ systemPrompt, userPrompt: values.userPrompt, token });
   }
@@ -122,7 +122,7 @@ function AgentPlayground({ agent }: AgentPlaygroundProps) {
                             <div className="space-y-3">
                                 <Label className="text-[9px] font-bold uppercase tracking-[0.3em] text-primary/60 px-1">Neural Output</Label>
                                 <div className="rounded-[32px] border bg-card p-10 md:p-12 shadow-2xl relative group">
-                                    <ResponseDisplay response={res.response} prompt={res.prompt} />
+                                    <ResponseDisplay response={res.response as string} prompt={res.prompt} />
                                     {/* Page Footer Visual */}
                                     <div className="mt-16 pt-8 border-t border-border/40 flex justify-between items-center text-[9px] text-muted-foreground/40 font-bold uppercase tracking-widest">
                                         <span>Arkan Neural Engine</span>

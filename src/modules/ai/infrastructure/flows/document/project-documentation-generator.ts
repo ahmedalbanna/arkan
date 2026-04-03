@@ -47,7 +47,7 @@ const ProjectDocumentationOutputSchema = z.object({
 
 // ==================== MAIN FLOW ====================
 
-export const projectDocumentationGenerator = ai.defineFlow(
+const projectDocumentationGeneratorFlow = ai.defineFlow(
     {
         name: 'projectDocumentationGenerator',
         inputSchema: ProjectDocumentationInputSchema,
@@ -206,3 +206,7 @@ Write a 2-3 sentence summary highlighting what was generated and its purpose.`,
         return results;
     }
 );
+
+export async function projectDocumentationGenerator(input: z.infer<typeof ProjectDocumentationInputSchema>): Promise<z.infer<typeof ProjectDocumentationOutputSchema>> {
+    return projectDocumentationGeneratorFlow(input);
+}

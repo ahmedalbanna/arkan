@@ -63,6 +63,6 @@ export * from './generation/graduation-project-generator';
 export * from './generation/presentation-content-creator';
 export * from './generation/project-consultant';
 export * from './generation/question-answering';
-export { runAgentFlow } from './generation/run-agent-flow';
+export { runAgent } from './generation/run-agent-flow';
 export { topicExplainer } from './generation/topic-explainer';
 export { answerQuestion } from './generation/question-answering';

@@ -1,3 +1,5 @@
+import { OLLAMA_MODELS } from '@/modules/ai/domain/constants/AiModels';
+
 /**
  * RAG Configuration
  * 
@@ -22,7 +24,7 @@ export const RAGConfig = {
   // Ollama Configuration
   ollama: {
     baseUrl: process.env.OLLAMA_BASE_URL || 'http://185.190.140.93:11434',
-    embeddingModel: process.env.OLLAMA_EMBEDDING_MODEL || 'nomic-embed-text',
+    embeddingModel: process.env.OLLAMA_EMBEDDING_MODEL || OLLAMA_MODELS.EMBEDDING_MODEL,
   },
 
   // Chunking Configuration

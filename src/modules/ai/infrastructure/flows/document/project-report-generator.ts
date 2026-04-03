@@ -33,7 +33,7 @@ const ProjectReportInputSchema = z.object({
     format: z.enum(['markdown', 'html', 'json']).default('markdown'),
 });
 
-export const projectReportGenerator = ai.defineFlow(
+const projectReportGeneratorFlow = ai.defineFlow(
     {
         name: 'projectReportGenerator',
         inputSchema: ProjectReportInputSchema,
@@ -163,3 +163,7 @@ Format: Markdown with tables and visual indicators (✅ ⚠️ ❌ 📈 📉)`,
         return fullReport.output!;
     }
 );
+
+export async function projectReportGenerator(input: z.infer<typeof ProjectReportInputSchema>): Promise<z.infer<typeof ProjectReportSchema>> {
+    return projectReportGeneratorFlow(input);
+}

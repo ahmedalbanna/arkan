@@ -14,6 +14,9 @@ export const OLLAMA_MODELS = {
 
   // High quality for complex academic tasks
   LLAMA3_8B: 'ollama/llama2:7b',
+
+  // Embedding models for RAG
+  EMBEDDING_MODEL: 'nomic-embed-text',
 } as const;
 
 /**

@@ -496,8 +496,8 @@ export async function convertMarkdownToWord(
     let finalMarkdown = markdown;
     // Only append footnotes if they aren't already in the markdown (to avoid duplicates for full exports)
     if (footnoteDefinitions && footnoteDefinitions.length > 0) {
-      const existingFootnotes = markdown.match(footnoteRegex) || [];
-      const newFootnotes = footnoteDefinitions.filter(fn => !existingFootnotes.includes(fn));
+      const existingFootnotes = (markdown.match(footnoteRegex) || []) as string[];
+      const newFootnotes = footnoteDefinitions.filter((fn: string) => !existingFootnotes.includes(fn));
       
       if (newFootnotes.length > 0) {
         finalMarkdown += '\n\n' + newFootnotes.join('\n');
