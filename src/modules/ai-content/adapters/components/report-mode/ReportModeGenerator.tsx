@@ -88,16 +88,18 @@ export default function ReportModeGenerator({ initialProject }: { initialProject
         <div className="relative flex-grow flex flex-col bg-background h-[calc(100vh-64px)] overflow-hidden">
             <OnboardingGuide isOpen={showOnboarding} onOpenChange={setShowOnboarding} onComplete={handleOnboardingComplete} />
             <Suspense fallback={<BuilderPageSkeleton />}>
-                <BuilderHeader 
-                    projectName={project?.name || ''}
-                    onProjectNameChange={updateProjectName}
-                    onProjectNameBlur={() => updateProject(p => p)}
-                    isSaving={isSaving}
-                    hasUnsavedChanges={hasUnsavedChanges}
-                    onSave={handleSave}
-                />
-
                 <main className="flex-1 flex flex-col relative z-10 overflow-hidden">
+                    {/* Floating Global Header HUD */}
+                    <div className="absolute top-6 left-1/2 -translate-x-1/2 z-50 w-auto max-w-[95vw] pointer-events-none">
+                        <BuilderHeader 
+                            projectName={project?.name || ''}
+                            onProjectNameChange={updateProjectName}
+                            onProjectNameBlur={() => updateProject(p => p)}
+                            isSaving={isSaving}
+                            hasUnsavedChanges={hasUnsavedChanges}
+                            onSave={handleSave}
+                        />
+                    </div>
                     {/* Immersive Global Environment Layer */}
                     <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden">
                         <div className="absolute inset-0 opacity-[0.03] dark:opacity-[0.05]" style={{ backgroundImage: 'radial-gradient(#000 1px, transparent 1px)', backgroundSize: '32px 32px' }} />
