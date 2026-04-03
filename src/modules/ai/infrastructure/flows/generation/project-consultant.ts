@@ -1,7 +1,7 @@
 
 'use server';
 
-import { ai } from '@/modules/ai/infrastructure/services/Genkit';
+import { ai, OLLAMA_MODELS } from '@/modules/ai/infrastructure/services/Genkit';
 import { z } from 'zod';
 
 const ConsultantInputSchema = z.object({
@@ -34,7 +34,7 @@ You have been provided with the full context of their current project. Your role
 Always be helpful, encouraging, and provide actionable advice. Keep your responses concise and to the point. Format your responses using simple markdown.`;
     
     const llmResponse = await (ai.generate as any)({
-      model: 'ollama/phi4-mini:latest', // Updated model
+      model: OLLAMA_MODELS.PHI3_MINI,
       system: systemPrompt,
       prompt: `
 **Project Context:**

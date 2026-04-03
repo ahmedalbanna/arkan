@@ -8,7 +8,7 @@
  * from the vector store before generating chapter content.
  */
 
-import { ai } from '@/modules/ai/infrastructure/services/Genkit';
+import { ai, OLLAMA_MODELS } from '@/modules/ai/infrastructure/services/Genkit';
 import { GenerateChapterInputSchema, GenerateChapterOutputSchema, type GenerateChapterInput, type GenerateChapterOutput } from '@/modules/ai/domain/schemas';
 import { container } from '@/infrastructure/di/container';
 import { IAiServiceToken } from '@/modules/ai/domain/services/IAiService';
@@ -64,7 +64,7 @@ export async function generateChapterContentWithRAG(input: GenerateChapterWithRA
     name: 'generateChapterContentPromptRAG',
     input: { schema: GenerateChapterInputSchema },
     output: { schema: GenerateChapterOutputSchema },
-    model: 'ollama/phi4-mini:latest',
+    model: OLLAMA_MODELS.PHI3_MINI,
 
     prompt: `You are an expert author and technical writer. Your task is to write the complete content for a chapter titled "{{chapterTitle}}".
 

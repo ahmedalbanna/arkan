@@ -6,7 +6,7 @@
  * - translateText
  */
 
-import { ai } from '@/modules/ai/infrastructure/services/Genkit';
+import { ai, OLLAMA_MODELS } from '@/modules/ai/infrastructure/services/Genkit';
 import { TranslateTextInputSchema, TranslateTextOutputSchema, type TranslateTextInput, type TranslateTextOutput } from '@/modules/ai/domain/schemas';
 
 export async function translateText(
@@ -25,7 +25,7 @@ const translateTextFlow = ai.defineFlow(
     const prompt = ai.definePrompt({
       name: 'translateTextPrompt',
       input: { schema: TranslateTextInputSchema },
-      model: 'ollama/gemma:2b',
+      model: OLLAMA_MODELS.GEMMA_2B,
       prompt: `You are an expert translator. Your task is to translate the given text into the specified target language while perfectly preserving all markdown formatting.
 
 **CRITICAL INSTRUCTIONS:**

@@ -5,13 +5,13 @@
  * @fileOverview An AI agent for making text sound more human-like.
  */
 
-import { ai, MODEL_BY_TASK } from '@/modules/ai/infrastructure/services/Genkit';
+import { ai, MODEL_BY_TASK, OLLAMA_MODELS } from '@/modules/ai/infrastructure/services/Genkit';
 import { HumanizeTextInputSchema, HumanizeTextOutputSchema, type HumanizeTextInput, type HumanizeTextOutput } from '@/modules/ai/domain/schemas';
 
 const humanizeTextPrompt = ai.definePrompt({
   name: 'humanizeTextPrompt',
   input: { schema: HumanizeTextInputSchema },
-  model: 'ollama/gemma:2b',
+  model: OLLAMA_MODELS.GEMMA_2B,
   config: {
     temperature: 0.9, // Balanced high temperature for creativity
   },

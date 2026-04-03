@@ -5,7 +5,7 @@
  * achievements, challenges, and recommendations.
  */
 
-import { ai } from '@/modules/ai/infrastructure/services/Genkit';
+import { ai, OLLAMA_MODELS } from '@/modules/ai/infrastructure/services/Genkit';
 import { projectReportPrompt } from '@/modules/ai/infrastructure/prompts/project-documentation';
 import {
     ProjectReportSchema,
@@ -119,7 +119,7 @@ export const projectReportGenerator = ai.defineFlow(
 
         // Combine all information
         const fullReport = await ai.generate({
-            model: 'ollama/llama2:7b',
+            model: OLLAMA_MODELS.LLAMA3_8B,
             prompt: `Create a comprehensive ${reportPeriod} project report for ${projectName}.
 
 Target Audience: ${targetAudience}

@@ -5,14 +5,14 @@
  * @fileOverview An AI agent for analyzing the sentence structure of a text.
  */
 
-import { ai } from '@/modules/ai/infrastructure/services/Genkit';
+import { ai, OLLAMA_MODELS } from '@/modules/ai/infrastructure/services/Genkit';
 import { SentenceStructureCheckInputSchema, SentenceStructureCheckOutputSchema, type SentenceStructureCheckInput, type SentenceStructureCheckOutput } from '@/modules/ai/domain/schemas';
 
 const sentenceStructureCheckPrompt = ai.definePrompt({
   name: 'sentenceStructureCheckPrompt',
   input: { schema: SentenceStructureCheckInputSchema },
   // No output schema - model returns plain JSON text
-  model: 'ollama/gemma:2b',
+  model: OLLAMA_MODELS.GEMMA_2B,
   config: {
     temperature: 0.2,
   },

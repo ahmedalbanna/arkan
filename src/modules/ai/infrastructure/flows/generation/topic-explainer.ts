@@ -5,14 +5,14 @@
  * @fileOverview An AI agent for breaking down complex topics.
  */
 
-import { ai } from '@/modules/ai/infrastructure/services/Genkit';
+import { ai, OLLAMA_MODELS } from '@/modules/ai/infrastructure/services/Genkit';
 import { TopicExplainerInputSchema, TopicExplainerOutputSchema, type TopicExplainerInput, type TopicExplainerOutput } from '@/modules/ai/domain/schemas';
 
 const topicExplainerPrompt = ai.definePrompt({
     name: 'topicExplainerPrompt',
     input: { schema: TopicExplainerInputSchema },
     output: { schema: TopicExplainerOutputSchema },
-    model: 'ollama/gemma:2b',
+    model: OLLAMA_MODELS.GEMMA_2B,
     prompt: `You are an expert educator who excels at breaking down complex topics into simple, easy-to-understand explanations. Your task is to explain the following topic for a beginner.
 Your output must be a valid JSON object that adheres to the defined schema.
 

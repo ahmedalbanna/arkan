@@ -5,7 +5,7 @@
  * @fileOverview An AI agent for summarizing text.
  */
 
-import { ai, MODEL_BY_TASK } from '@/modules/ai/infrastructure/services/Genkit';
+import { ai, MODEL_BY_TASK, OLLAMA_MODELS } from '@/modules/ai/infrastructure/services/Genkit';
 import { SummarizeInputSchema, SummarizeLength, SummarizeOutputSchema, type SummarizeInput, type SummarizeOutput } from '@/modules/ai/domain/schemas';
 import { RECOMMENDED_TEMPERATURES } from '@/modules/ai/domain/utils/json-output-validator';
 import z from 'zod';
@@ -19,7 +19,7 @@ const lengthDescriptions: Record<SummarizeLength, string> = {
 const summarizePrompt = ai.definePrompt({
     name: 'summarizeTextPrompt',
     input: { schema: z.object({ text: z.string(), instruction: z.string() }) },
-    model: 'ollama/gemma:2b',
+    model: OLLAMA_MODELS.GEMMA_2B,
     config: {
         temperature: RECOMMENDED_TEMPERATURES.PRECISE,
     },

@@ -5,7 +5,7 @@
  * including README, API docs, user guide, and architecture diagrams.
  */
 
-import { ai } from '@/modules/ai/infrastructure/services/Genkit';
+import { ai, OLLAMA_MODELS } from '@/modules/ai/infrastructure/services/Genkit';
 import { readmeGenerationPrompt } from '@/modules/ai/infrastructure/prompts/project-documentation';
 import {
     ProjectDataSchema,
@@ -158,7 +158,7 @@ export const projectDocumentationGenerator = ai.defineFlow(
         console.log('✅ Finalizing documentation package...');
 
         const summary = await ai.generate({
-            model: 'ollama/phi4-mini:latest',
+            model: OLLAMA_MODELS.PHI3_MINI,
             prompt: `Create a brief summary of the generated documentation package for ${projectName}.
 
 Project Description: ${projectDescription}

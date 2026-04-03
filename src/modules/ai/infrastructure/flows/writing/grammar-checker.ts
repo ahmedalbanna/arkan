@@ -5,13 +5,13 @@
  * @fileOverview An AI agent for checking grammar and providing explanations.
  */
 
-import { ai } from '@/modules/ai/infrastructure/services/Genkit';
+import { ai, OLLAMA_MODELS } from '@/modules/ai/infrastructure/services/Genkit';
 import { GrammarCheckInputSchema, GrammarCheckOutputSchema, type GrammarCheckInput, type GrammarCheckOutput } from '@/modules/ai/domain/schemas';
 
 const grammarCheckPrompt = ai.definePrompt({
   name: 'grammarCheckPrompt',
   input: { schema: GrammarCheckInputSchema },
-  model: 'ollama/gemma:2b',
+  model: OLLAMA_MODELS.GEMMA_2B,
   prompt: `You are an expert English grammar, spelling, and punctuation checker. Your task is to analyze the text and correct any errors.
 
 **Original Text:**

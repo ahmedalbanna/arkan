@@ -5,7 +5,7 @@
  * Follows the Flow-Prompts-Tools pattern with all 12 chapters.
  */
 
-import { ai } from '@/modules/ai/infrastructure/services/Genkit';
+import { ai, OLLAMA_MODELS } from '@/modules/ai/infrastructure/services/Genkit';
 import { z } from 'zod';
 import {
     abstractPrompt,
@@ -80,7 +80,7 @@ const graduationProjectGeneratorFlow = ai.defineFlow(
             });
 
             const abstractGenerated = await ai.generate({
-                model: 'ollama/llama2:7b',
+                model: OLLAMA_MODELS.LLAMA3_8B,
                 prompt: abstractResult.text,
             });
 
@@ -108,7 +108,7 @@ const graduationProjectGeneratorFlow = ai.defineFlow(
             });
 
             const introGenerated = await ai.generate({
-                model: 'ollama/llama2:7b',
+                model: OLLAMA_MODELS.LLAMA3_8B,
                 prompt: introResult.text,
             });
 
@@ -137,7 +137,7 @@ const graduationProjectGeneratorFlow = ai.defineFlow(
             });
 
             const litReviewGenerated = await ai.generate({
-                model: 'ollama/llama2:7b',
+                model: OLLAMA_MODELS.LLAMA3_8B,
                 prompt: litReviewResult.text,
             });
 
@@ -176,7 +176,7 @@ const graduationProjectGeneratorFlow = ai.defineFlow(
             });
 
             const _methodGenerated = await ai.generate({
-                model: 'ollama/llama2:7b',
+                model: OLLAMA_MODELS.LLAMA3_8B,
                 prompt: methodResult.text,
             });
 
@@ -235,7 +235,7 @@ const graduationProjectGeneratorFlow = ai.defineFlow(
             });
 
             const _analysisGenerated = await ai.generate({
-                model: 'ollama/llama2:7b',
+                model: OLLAMA_MODELS.LLAMA3_8B,
                 prompt: analysisResult.text,
             });
 
@@ -288,7 +288,7 @@ const graduationProjectGeneratorFlow = ai.defineFlow(
             });
 
             const _designGenerated = await ai.generate({
-                model: 'ollama/llama2:7b',
+                model: OLLAMA_MODELS.LLAMA3_8B,
                 prompt: designResult.text,
             });
 
@@ -336,7 +336,7 @@ const graduationProjectGeneratorFlow = ai.defineFlow(
             });
 
             const _implGenerated = await ai.generate({
-                model: 'ollama/llama2:7b',
+                model: OLLAMA_MODELS.LLAMA3_8B,
                 prompt: implResult.text,
             });
 
@@ -376,7 +376,7 @@ const graduationProjectGeneratorFlow = ai.defineFlow(
             });
 
             const _testGenerated = await ai.generate({
-                model: 'ollama/llama2:7b',
+                model: OLLAMA_MODELS.LLAMA3_8B,
                 prompt: testResult.text,
             });
 
@@ -429,7 +429,7 @@ const graduationProjectGeneratorFlow = ai.defineFlow(
             });
 
             const _resultsGenerated = await ai.generate({
-                model: 'ollama/llama2:7b',
+                model: OLLAMA_MODELS.LLAMA3_8B,
                 prompt: resultsResult.text,
             });
 
@@ -461,7 +461,7 @@ const graduationProjectGeneratorFlow = ai.defineFlow(
             });
 
             const discussionGenerated = await ai.generate({
-                model: 'ollama/llama2:7b',
+                model: OLLAMA_MODELS.LLAMA3_8B,
                 prompt: discussionResult.text,
             });
 
@@ -501,7 +501,7 @@ const graduationProjectGeneratorFlow = ai.defineFlow(
             });
 
             const conclusionGenerated = await ai.generate({
-                model: 'ollama/llama2:7b',
+                model: OLLAMA_MODELS.LLAMA3_8B,
                 prompt: conclusionResult.text,
             });
 
@@ -526,7 +526,7 @@ const graduationProjectGeneratorFlow = ai.defineFlow(
             });
 
             const _recsGenerated = await ai.generate({
-                model: 'ollama/llama2:7b',
+                model: OLLAMA_MODELS.LLAMA3_8B,
                 prompt: recsResult.text,
             });
 

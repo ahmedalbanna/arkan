@@ -7,7 +7,7 @@
  * - generateReportSection
  */
 
-import { ai } from '@/modules/ai/infrastructure/services/Genkit';
+import { ai, OLLAMA_MODELS } from '@/modules/ai/infrastructure/services/Genkit';
 import { GenerateSectionInputSchema, type GenerateSectionInput, type GenerateSectionOutput } from '@/modules/ai/domain/schemas';
 
 export async function generateReportSection(input: GenerateSectionInput): Promise<GenerateSectionOutput> {
@@ -20,7 +20,7 @@ You are also an expert analyst. Before you begin writing, you must first review 
     name: 'generateReportSectionPrompt', // Static name
     input: { schema: GenerateSectionInputSchema },
     // No output schema - model returns plain text
-    model: 'ollama/gemma:2b',
+    model: OLLAMA_MODELS.GEMMA_2B,
     system: systemPrompt,
     prompt: `
 Write the requested section: '{{sectionToGenerate}}'. Your writing style should be natural and engaging, not robotic.

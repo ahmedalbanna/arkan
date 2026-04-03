@@ -7,7 +7,7 @@
  * of a document, including grammar, structure, citations, and readability.
  */
 
-import { ai } from '../services/Genkit';
+import { ai, OLLAMA_MODELS } from '../services/Genkit';
 import {
   AnalyzeDocumentQualityToolInputSchema,
   AnalyzeDocumentQualityToolOutputSchema,
@@ -88,7 +88,7 @@ Provide actionable, specific feedback that will help the writer improve the docu
       name: 'documentQualityAnalyzerPrompt',
       input: { schema: AnalyzeDocumentQualityToolInputSchema },
       output: { schema: AnalyzeDocumentQualityToolOutputSchema },
-      model: 'ollama/gemma:2b',
+      model: OLLAMA_MODELS.GEMMA_2B,
       prompt: analysisPrompt,
     });
 

@@ -5,7 +5,7 @@
  * @fileOverview An AI agent for creating comprehensive theoretical lectures.
  */
 
-import { ai } from '@/modules/ai/infrastructure/services/Genkit';
+import { ai, OLLAMA_MODELS } from '@/modules/ai/infrastructure/services/Genkit';
 import {
   GenerateTheoreticalLectureInputSchema,
   GenerateTheoreticalLectureOutputSchema,
@@ -19,7 +19,7 @@ const generateTheoreticalLecturePrompt = ai.definePrompt({
   name: 'generateTheoreticalLecturePrompt',
   input: { schema: GenerateTheoreticalLectureInputSchema },
   output: { schema: GenerateTheoreticalLectureOutputSchema },
-  model: 'ollama/phi4-mini:latest',
+  model: OLLAMA_MODELS.PHI3_MINI,
   // Using a more powerful model for content generation
   prompt: `You are an esteemed university professor and a leading expert in your field. Your task is to write a comprehensive, clear, and engaging theoretical lecture for the specified target audience.
 

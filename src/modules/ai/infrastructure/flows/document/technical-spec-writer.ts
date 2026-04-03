@@ -5,7 +5,7 @@
  * new features, system architecture, and design decisions.
  */
 
-import { ai } from '@/modules/ai/infrastructure/services/Genkit';
+import { ai, OLLAMA_MODELS } from '@/modules/ai/infrastructure/services/Genkit';
 import { technicalSpecPrompt } from '@/modules/ai/infrastructure/prompts/project-documentation';
 import {
     TechnicalSpecificationSchema,
@@ -110,7 +110,7 @@ const technicalSpecificationWriterFlow = ai.defineFlow(
 
         // Generate comprehensive technical specification
         const finalSpec = await ai.generate({
-            model: 'ollama/phi4-mini:latest',
+            model: OLLAMA_MODELS.PHI3_MINI,
             prompt: `Create a comprehensive technical specification document.
 
 Target Audience: ${targetAudience}

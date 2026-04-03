@@ -6,7 +6,7 @@
  * - rewriteDocumentToMarkdown
  */
 
-import { ai } from '@/modules/ai/infrastructure/services/Genkit';
+import { ai, OLLAMA_MODELS } from '@/modules/ai/infrastructure/services/Genkit';
 import { RewriteDocumentInputSchema, RewriteDocumentOutputSchema, type RewriteDocumentInput, type RewriteDocumentOutput } from '@/modules/ai/domain/schemas';
 
 // Define the prompt outside the flow definition
@@ -14,7 +14,7 @@ const generateMarkdownPrompt = ai.definePrompt({
   name: 'generateMarkdownFromDocumentPrompt',
   input: { schema: RewriteDocumentInputSchema },
   // No output schema - model returns plain text
-  model: 'ollama/gemma:2b',
+  model: OLLAMA_MODELS.GEMMA_2B,
   prompt: `You are an expert document editor. Your task is to take the content of the provided PDF document and rewrite it into clean, well-structured markdown.
 
 Output ONLY the markdown text. Do NOT wrap it in JSON or any other format.

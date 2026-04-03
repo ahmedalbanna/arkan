@@ -5,14 +5,14 @@
  * @fileOverview An AI agent for checking text for potential bias.
  */
 
-import { ai } from '@/modules/ai/infrastructure/services/Genkit';
+import { ai, OLLAMA_MODELS } from '@/modules/ai/infrastructure/services/Genkit';
 import { BiasCheckInputSchema, BiasCheckOutputSchema, type BiasCheckInput, type BiasCheckOutput } from '@/modules/ai/domain/schemas';
 
 const biasCheckPrompt = ai.definePrompt({
   name: 'biasCheckPrompt',
   input: { schema: BiasCheckInputSchema },
   // No output schema - model returns plain JSON text
-  model: 'ollama/phi4-mini:latest',
+  model: OLLAMA_MODELS.PHI3_MINI,
   config: {
     temperature: 0.3,
   },

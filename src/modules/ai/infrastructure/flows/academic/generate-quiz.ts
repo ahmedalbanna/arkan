@@ -5,14 +5,14 @@
  * @fileOverview An AI agent for generating a quiz from a block of text.
  */
 
-import { ai } from '@/modules/ai/infrastructure/services/Genkit';
+import { ai, OLLAMA_MODELS } from '@/modules/ai/infrastructure/services/Genkit';
 import { GenerateQuizInputSchema, GenerateQuizOutputSchema, type GenerateQuizInput, type GenerateQuizOutput } from '@/modules/ai/domain/schemas';
 
 const multipleChoiceQuizPrompt = ai.definePrompt({
     name: 'multipleChoiceQuizPrompt',
     input: { schema: GenerateQuizInputSchema },
     output: { schema: GenerateQuizOutputSchema },
-    model: 'ollama/phi4-mini:latest',
+    model: OLLAMA_MODELS.PHI3_MINI,
     prompt: `You are an expert educator and quiz creator. Your task is to generate a multiple-choice quiz based on the provided text.
 
 **Instructions:**
@@ -35,7 +35,7 @@ const trueFalseQuizPrompt = ai.definePrompt({
     name: 'trueFalseQuizPrompt',
     input: { schema: GenerateQuizInputSchema },
     output: { schema: GenerateQuizOutputSchema },
-    model: 'ollama/phi4-mini:latest',
+    model: OLLAMA_MODELS.PHI3_MINI,
     prompt: `You are an expert educator and quiz creator. Your task is to generate a true/false quiz based on the provided text.
 
 **Instructions:**
@@ -58,7 +58,7 @@ const directQuestionQuizPrompt = ai.definePrompt({
     name: 'directQuestionQuizPrompt',
     input: { schema: GenerateQuizInputSchema },
     output: { schema: GenerateQuizOutputSchema },
-    model: 'ollama/phi4-mini:latest',
+    model: OLLAMA_MODELS.PHI3_MINI,
     prompt: `You are an expert educator and quiz creator. Your task is to generate a direct question quiz based on the provided text.
 
 **Instructions:**

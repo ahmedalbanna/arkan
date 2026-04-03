@@ -5,7 +5,7 @@
  * demos, pitches, technical reviews, and status updates.
  */
 
-import { ai } from '@/modules/ai/infrastructure/services/Genkit';
+import { ai, OLLAMA_MODELS } from '@/modules/ai/infrastructure/services/Genkit';
 import { presentationContentPrompt } from '@/modules/ai/infrastructure/prompts/project-documentation';
 import {
     PresentationContentSchema,
@@ -109,7 +109,7 @@ const presentationContentCreatorFlow = ai.defineFlow(
 
         // Enhance with project-specific data
         const enhancedPresentation = await ai.generate({
-            model: 'ollama/phi4-mini:latest',
+            model: OLLAMA_MODELS.PHI3_MINI,
             prompt: `Create detailed presentation slides for a ${presentationType} presentation.
 
 Project: ${projectName}

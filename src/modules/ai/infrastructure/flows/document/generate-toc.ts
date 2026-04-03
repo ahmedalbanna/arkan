@@ -5,14 +5,14 @@
  * @fileOverview An AI agent for generating a table of contents from a project Description.
  */
 
-import { ai } from '@/modules/ai/infrastructure/services/Genkit';
+import { ai, OLLAMA_MODELS } from '@/modules/ai/infrastructure/services/Genkit';
 import { GenerateTocInputSchema, GenerateTocOutputSchema, type GenerateTocInput, type GenerateTocOutput } from '@/modules/ai/domain/schemas';
 
 const generateTocPrompt = ai.definePrompt({
   name: 'generateTocPrompt',
   input: { schema: GenerateTocInputSchema },
   output: { schema: GenerateTocOutputSchema },
-  model: 'ollama/gemma:2b',
+  model: OLLAMA_MODELS.GEMMA_2B,
   prompt: `You are an expert project planner and technical writer. Based on the provided project Description, generate a logical and comprehensive table of contents for a formal report.
 
 **Project Description:**

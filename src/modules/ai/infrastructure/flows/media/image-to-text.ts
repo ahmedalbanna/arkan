@@ -6,14 +6,14 @@
  * - imageToText
  */
 
-import { ai } from '@/modules/ai/infrastructure/services/Genkit';
+import { ai, OLLAMA_MODELS } from '@/modules/ai/infrastructure/services/Genkit';
 import { ImageToTextInputSchema, ImageToTextOutputSchema, type ImageToTextInput, type ImageToTextOutput } from '@/modules/ai/domain/schemas';
 
 const extractTextPrompt = ai.definePrompt({
   name: 'extractTextFromImagePrompt',
   input: { schema: ImageToTextInputSchema },
   output: { schema: ImageToTextOutputSchema },
-  model: 'ollama/gemma:2b',
+  model: OLLAMA_MODELS.GEMMA_2B,
   prompt: `You are an expert OCR (Optical Character Recognition) tool. Your task is to take the provided image and extract all text content from it.
 Your output must be a valid JSON object that adheres to the defined schema.
 

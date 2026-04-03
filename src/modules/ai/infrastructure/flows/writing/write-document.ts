@@ -5,14 +5,14 @@
  * @fileOverview An AI agent for writing a full document from a topic.
  */
 
-import { ai, MODEL_BY_TASK } from '@/modules/ai/infrastructure/services/Genkit';
+import { ai, MODEL_BY_TASK, OLLAMA_MODELS } from '@/modules/ai/infrastructure/services/Genkit';
 import { WriteDocumentInputSchema, WriteDocumentOutputSchema, type WriteDocumentInput, type WriteDocumentOutput } from '@/modules/ai/domain/schemas';
 
 
 const universitySubjectMaterialPrompt = ai.definePrompt({
   name: 'universitySubjectMaterialPrompt',
   input: { schema: WriteDocumentInputSchema },
-  model: 'ollama/gemma:2b',
+  model: OLLAMA_MODELS.GEMMA_2B,
   prompt: `You are an expert university lecturer with a talent for making complex topics simple and engaging for students. Your task is to create educational material for the given university-level subject.
 
 **Your Process:**
@@ -46,7 +46,7 @@ Output ONLY the document markdown. Do NOT include any preamble, filler, or JSON 
 const defaultWriteDocumentPrompt = ai.definePrompt({
   name: 'defaultWriteDocumentPrompt',
   input: { schema: WriteDocumentInputSchema },
-  model: 'ollama/gemma:2b',
+  model: OLLAMA_MODELS.GEMMA_2B,
   prompt: `You are an expert writer and researcher. Your task is to generate a complete, well-structured, and comprehensive document based on the user's request.
 
 **Topic:** {{{topic}}}

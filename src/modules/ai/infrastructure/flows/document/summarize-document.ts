@@ -10,14 +10,14 @@
  * - SummarizeDocumentOutput - The return type for the summarizeDocument function.
  */
 
-import { ai } from '@/modules/ai/infrastructure/services/Genkit';
+import { ai, OLLAMA_MODELS } from '@/modules/ai/infrastructure/services/Genkit';
 import { SummarizeDocumentInputSchema, SummarizeDocumentOutputSchema, type SummarizeDocumentInput, type SummarizeDocumentOutput } from '@/modules/ai/domain/schemas';
 
 const prompt = ai.definePrompt({
   name: 'summarizeDocumentPrompt',
   input: { schema: SummarizeDocumentInputSchema },
   // No output schema - model returns plain text
-  model: 'ollama/gemma:2b',
+  model: OLLAMA_MODELS.GEMMA_2B,
   config: {
     temperature: 0.3,
   },

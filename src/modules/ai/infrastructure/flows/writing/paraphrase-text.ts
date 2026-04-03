@@ -5,7 +5,7 @@
  * @fileOverview An AI agent for paraphrasing text in different styles.
  */
 
-import { ai, MODEL_BY_TASK } from '@/modules/ai/infrastructure/services/Genkit';
+import { ai, MODEL_BY_TASK, OLLAMA_MODELS } from '@/modules/ai/infrastructure/services/Genkit';
 import { ParaphraseInputSchema, ParaphraseOutputSchema, type ParaphraseInput, type ParaphraseMode, type ParaphraseOutput } from '@/modules/ai/domain/schemas';
 
 const styleDescriptions: Record<ParaphraseMode, string> = {
@@ -19,7 +19,7 @@ const styleDescriptions: Record<ParaphraseMode, string> = {
 const paraphrasePrompt = ai.definePrompt({
     name: 'paraphraseTextPrompt',
     input: { schema: ParaphraseInputSchema },
-    model: 'ollama/gemma:2b',
+    model: OLLAMA_MODELS.GEMMA_2B,
     prompt: `You are an expert editor. Your task is to paraphrase the given text based on the selected mode. You must perfectly preserve all markdown formatting.
 
 **Mode**: {{{mode}}}

@@ -5,7 +5,7 @@
  * @fileOverview An AI agent for brainstorming new ideas based on user-provided context.
  */
 
-import { ai } from '@/modules/ai/infrastructure/services/Genkit';
+import { ai, OLLAMA_MODELS } from '@/modules/ai/infrastructure/services/Genkit';
 import { IdeaGenerationInputSchema, IdeaGenerationOutputSchema, type IdeaGenerationInput, type IdeaGenerationOutput } from '@/modules/ai/domain/schemas';
 
 import { MODEL_BY_TASK } from '../../services/Genkit';
@@ -13,7 +13,7 @@ import { MODEL_BY_TASK } from '../../services/Genkit';
 const generateIdeasPrompt = ai.definePrompt({
   name: 'generateIdeasPrompt',
   input: { schema: IdeaGenerationInputSchema },
-  model: 'ollama/gemma:2b',
+  model: OLLAMA_MODELS.GEMMA_2B,
   prompt: `You are an expert strategist and innovator. Your task is to generate creative and actionable ideas based on the user's provided context and format them as a single Markdown string.
 
 **User's Context:**

@@ -8,7 +8,7 @@
  * from the vector store before generating content.
  */
 
-import { ai } from '@/modules/ai/infrastructure/services/Genkit';
+import { ai, OLLAMA_MODELS } from '@/modules/ai/infrastructure/services/Genkit';
 import { GenerateSectionInputSchema, GenerateSectionOutputSchema, type GenerateSectionInput, type GenerateSectionOutput } from '@/modules/ai/domain/schemas';
 import { container } from '@/infrastructure/di/container';
 import { IAiServiceToken } from '@/modules/ai/domain/services/IAiService';
@@ -68,7 +68,7 @@ ${ragContext ? 'IMPORTANT: You have access to RAG-retrieved context which contai
     name: 'generateReportSectionPromptRAG',
     input: { schema: GenerateSectionInputSchema },
     output: { schema: GenerateSectionOutputSchema },
-    model: 'ollama/phi4-mini:latest',
+    model: OLLAMA_MODELS.PHI3_MINI,
     config: {
       responseSchema: GenerateSectionOutputSchema,
       temperature: RECOMMENDED_TEMPERATURES.BALANCED,

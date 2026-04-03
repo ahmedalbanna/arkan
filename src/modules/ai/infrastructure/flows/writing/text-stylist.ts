@@ -6,7 +6,7 @@
  * @fileOverview AI agents for text manipulation: rewriting and summarizing.
  */
 
-import { ai, MODEL_BY_TASK } from '@/modules/ai/infrastructure/services/Genkit';
+import { ai, MODEL_BY_TASK, OLLAMA_MODELS } from '@/modules/ai/infrastructure/services/Genkit';
 import {
   type ClarityAdvisorInput,
   type ClarityAdvisorOutput,
@@ -55,7 +55,7 @@ export async function rewriteText(input: RewriteTextInput): Promise<RewriteTextO
   const instruction = styleInstructions[input.style] || "Rewrite the text as requested.";
 
   const result = await ai.generate({
-    model: 'ollama/gemma:2b',
+    model: OLLAMA_MODELS.GEMMA_2B,
     prompt: `You are an expert editor. Your task is to rewrite the following text based on the provided style instruction, preserving the core meaning and markdown formatting.
 
 **Style Instruction**: ${instruction}
@@ -83,7 +83,7 @@ Output ONLY the rewritten text. Do NOT include any preamble, filler, or JSON wra
 // --- Summarize Text with Ratio Flow ---
 export async function summarizeTextWithRatio(input: SummarizeTextWithRatioInput): Promise<SummarizeTextWithRatioOutput> {
   const result = await ai.generate({
-    model: 'ollama/gemma:2b',
+    model: OLLAMA_MODELS.GEMMA_2B,
     prompt: `You are an expert summarizer. Your task is to read the provided text and generate a summary.
 The summary should be approximately ${input.ratio}% of the original text's length.
 

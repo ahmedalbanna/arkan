@@ -5,14 +5,14 @@
  * @fileOverview An AI agent for checking text for potential plagiarism.
  */
 
-import { ai } from '@/modules/ai/infrastructure/services/Genkit';
+import { ai, OLLAMA_MODELS } from '@/modules/ai/infrastructure/services/Genkit';
 import { PlagiarismCheckInputSchema, PlagiarismCheckOutputSchema, type PlagiarismCheckInput, type PlagiarismCheckOutput } from '@/modules/ai/domain/schemas';
 
 const plagiarismCheckPrompt = ai.definePrompt({
   name: 'plagiarismCheckPrompt',
   input: { schema: PlagiarismCheckInputSchema },
   // No output schema - model returns plain JSON text
-  model: 'ollama/phi4-mini:latest',
+  model: OLLAMA_MODELS.PHI3_MINI,
   config: {
     temperature: 0.3,
   },

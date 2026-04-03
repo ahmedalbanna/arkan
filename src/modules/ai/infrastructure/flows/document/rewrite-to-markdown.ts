@@ -6,7 +6,7 @@
  * - rewriteToMarkdown
  */
 
-import { ai } from '@/modules/ai/infrastructure/services/Genkit';
+import { ai, OLLAMA_MODELS } from '@/modules/ai/infrastructure/services/Genkit';
 import { RewriteToMarkdownInputSchema, RewriteToMarkdownOutputSchema, type RewriteToMarkdownInput, type RewriteToMarkdownOutput } from '@/modules/ai/domain/schemas';
 
 export async function rewriteToMarkdown(input: RewriteToMarkdownInput): Promise<RewriteToMarkdownOutput> {
@@ -24,7 +24,7 @@ const rewriteToMarkdownFlow = ai.defineFlow(
       name: 'rewriteToMarkdownPrompt',
       input: { schema: RewriteToMarkdownInputSchema },
       // No output schema - model returns plain text
-      model: 'ollama/gemma:2b',
+      model: OLLAMA_MODELS.GEMMA_2B,
       prompt: `You are an expert document editor. Your task is to take a raw text input, which was extracted from a PDF, and rewrite it into clean, well-structured markdown.
 
 Output ONLY the markdown text. Do NOT wrap it in JSON or any other format.

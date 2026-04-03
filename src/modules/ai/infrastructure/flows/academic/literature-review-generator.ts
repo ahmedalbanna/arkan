@@ -5,14 +5,14 @@
  * @fileOverview An AI agent for generating comprehensive literature reviews.
  */
 
-import { ai } from '@/modules/ai/infrastructure/services/Genkit';
+import { ai, OLLAMA_MODELS } from '@/modules/ai/infrastructure/services/Genkit';
 import { LiteratureReviewInputSchema, LiteratureReviewOutputSchema, type LiteratureReviewInput, type LiteratureReviewOutput } from '@/modules/ai/domain/schemas';
 
 const literatureReviewPrompt = ai.definePrompt({
   name: 'literatureReviewPrompt',
   input: { schema: LiteratureReviewInputSchema },
   output: { schema: LiteratureReviewOutputSchema },
-  model: 'ollama/gemma:2b',
+  model: OLLAMA_MODELS.GEMMA_2B,
   prompt: `You are an expert academic researcher specializing in literature reviews. Your task is to create a comprehensive, well-structured literature review on the given topic.
 
 **Your Process:**

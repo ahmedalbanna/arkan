@@ -9,7 +9,7 @@
  * - GenerateTextOutput - The return type for the generateText function.
  */
 
-import { ai } from '@/modules/ai/infrastructure/services/Genkit';
+import { ai, OLLAMA_MODELS } from '@/modules/ai/infrastructure/services/Genkit';
 import { GenerateTextInputSchema, GenerateTextOutputSchema, type GenerateTextInput, type GenerateTextOutput } from '@/modules/ai/domain/schemas';
 import { RECOMMENDED_TEMPERATURES } from '@/modules/ai/domain/utils/json-output-validator';
 
@@ -22,7 +22,7 @@ export async function generateText(input: GenerateTextInput): Promise<GenerateTe
     name: 'generateTextPrompt',
     input: { schema: GenerateTextInputSchema },
     // No output schema - model returns plain text
-    model: 'ollama/gemma:2b',
+    model: OLLAMA_MODELS.GEMMA_2B,
     config: {
       temperature: RECOMMENDED_TEMPERATURES.CREATIVE,
     },

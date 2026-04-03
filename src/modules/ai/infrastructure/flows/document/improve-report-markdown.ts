@@ -5,14 +5,14 @@
  * @fileOverview An AI agent for improving a full report provided in Markdown.
  */
 
-import { ai } from '@/modules/ai/infrastructure/services/Genkit';
+import { ai, OLLAMA_MODELS } from '@/modules/ai/infrastructure/services/Genkit';
 import { ImproveMarkdownInputSchema, ImproveMarkdownOutputSchema, type ImproveMarkdownInput, type ImproveMarkdownOutput } from '@/modules/ai/domain/schemas';
 
 const improveMarkdownPrompt = ai.definePrompt({
   name: 'improveReportMarkdownPrompt',
   input: { schema: ImproveMarkdownInputSchema },
   output: { schema: ImproveMarkdownOutputSchema },
-  model: 'ollama/gemma:2b',
+  model: OLLAMA_MODELS.GEMMA_2B,
   prompt: `You are an expert technical editor and document formatter. A user has provided a full report in Markdown format and a set of instructions for how to improve it.
 Your output must be a valid JSON object that adheres to the defined schema.
 

@@ -5,14 +5,14 @@
  * @fileOverview An AI agent for generating academic citations.
  */
 
-import { ai } from '@/modules/ai/infrastructure/services/Genkit';
+import { ai, OLLAMA_MODELS } from '@/modules/ai/infrastructure/services/Genkit';
 import { GenerateCitationInputSchema, GenerateCitationOutputSchema, type GenerateCitationInput, type GenerateCitationOutput } from '@/modules/ai/domain/schemas';
 
 const generateCitationPrompt = ai.definePrompt({
   name: 'generateCitationPrompt',
   input: { schema: GenerateCitationInputSchema },
   output: { schema: GenerateCitationOutputSchema },
-  model: 'ollama/phi4-mini:latest',
+  model: OLLAMA_MODELS.PHI3_MINI,
 
   prompt: `You are an expert academic librarian specializing in generating accurate citations. Your task is to analyze the provided source material and generate one or more correctly formatted citations in the specified style.
 

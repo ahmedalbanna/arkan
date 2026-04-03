@@ -5,14 +5,14 @@
  * @fileOverview An AI agent for fact-checking claims within a text.
  */
 
-import { ai } from '@/modules/ai/infrastructure/services/Genkit';
+import { ai, OLLAMA_MODELS } from '@/modules/ai/infrastructure/services/Genkit';
 import { FactCheckInputSchema, FactCheckOutputSchema, type FactCheckInput, type FactCheckOutput } from '@/modules/ai/domain/schemas';
 
 const factCheckPrompt = ai.definePrompt({
   name: 'factCheckPrompt',
   input: { schema: FactCheckInputSchema },
   // No output schema - model returns plain JSON text
-  model: 'ollama/phi4-mini:latest',
+  model: OLLAMA_MODELS.PHI3_MINI,
   config: {
     // responseSchema removed
     temperature: 0.3,
