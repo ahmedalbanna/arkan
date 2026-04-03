@@ -1,4 +1,4 @@
-import ReportModeGenerator from '@/modules/ai-content/adapters/components/report-mode/ReportModeGenerator';
+import { BuilderWorkspace } from '@/modules/ai-content/adapters/components/builder/BuilderWorkspace';
 import { BuilderPageSkeleton } from './loading';
 import { Suspense } from 'react';
 import { cookies } from 'next/headers';
@@ -31,7 +31,7 @@ export default async function GeneratePage(props: { searchParams: Promise<{ id?:
 
   return (
     <Suspense fallback={<BuilderPageSkeleton />}>
-      <ReportModeGenerator initialProject={initialProject} />
+      <BuilderWorkspace initialProject={initialProject} />
     </Suspense>
   );
 }

@@ -3,7 +3,7 @@
 import React, { useMemo, lazy } from 'react';
 import { Settings, LayoutTemplate, SlidersHorizontal, MessageSquare, History as HistoryIcon, Database, Terminal, Layers, FileText } from 'lucide-react';
 import { useLocalization } from '@/context/LocalizationContext';
-import { SidebarPanelConfig } from '@/modules/ai-content/adapters/components/report-mode/layout/types';
+import { SidebarPanelConfig } from '@/modules/ai-content/adapters/components/builder/layout/types';
 
 // Lazy load components
 const ProjectSettingsPanel = lazy(() => import('@/modules/ai-content/adapters/components/report-mode/settings/ProjectSettingsPanel'));

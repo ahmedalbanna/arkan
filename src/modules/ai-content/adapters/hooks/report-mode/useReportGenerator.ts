@@ -125,6 +125,21 @@ export function useReportGenerator(initialProject?: ProjectProperties | null) {
     }
   };
 
+  const { setHasUnsavedChanges } = useBuilderStore();
+  const { saveProjectMutation } = useSaveProject();
+
+  const handleSave = () => {
+    if (builderPageLogic.project) {
+        saveProjectMutation.mutate(builderPageLogic.project.toProperties());
+    }
+  };
+
+  const handleZoomIn = () => setZoomLevel(prev => Math.min(prev + 0.1, 2));
+  const handleZoomOut = () => setZoomLevel(prev => Math.max(prev - 0.1, 0.5));
+  const handleZoomReset = () => setZoomLevel(1);
+
+  const hasUnsavedChanges = useBuilderStore(state => state.hasUnsavedChanges);
+
   return {
     ...builderPageLogic,
     activePanelKey,
@@ -134,6 +149,8 @@ export function useReportGenerator(initialProject?: ProjectProperties | null) {
     isLeftPanelVisible,
     isRightPanelVisible,
     isSaving,
+    handleSave,
+    hasUnsavedChanges,
     leftPanels,
     rightPanels,
     t,
@@ -142,9 +159,13 @@ export function useReportGenerator(initialProject?: ProjectProperties | null) {
     setIsChatOpen,
     zoomLevel,
     setZoomLevel,
+    handleZoomIn,
+    handleZoomOut,
+    handleZoomReset,
     selectedSectionIds,
     setSelectedSectionIds,
     handleActiveSectionChange,
+    handleActiveChapterChange,
     activeChapterId,
     setActiveChapterId,
     isOutlineVisible,
