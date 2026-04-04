@@ -13,7 +13,7 @@ import { useLocalization } from '@/context/LocalizationContext';
 import { useReportGenerationTools } from '@/modules/ai-content/adapters/hooks/report-mode/use-report-generation-tools';
 import { Chapter } from '@/modules/ai-content/domain/entities/Chapter';
 import { Section } from '@/modules/ai-content/domain/entities/Section';
-import { BuildProjectDialog } from '@/modules/ai-content/adapters/components/report-mode/dialogs/BuildProjectDialog';
+import { BuildManifestHUD } from './BuildManifestHUD';
 import { SidebarContainer } from '../layout/SidebarContainer';
 import { GenerationNodeItem } from './GenerationNodeItem';
 
@@ -71,7 +71,7 @@ export function GenerationNavigator({
 
   return (
     <>
-      <BuildProjectDialog
+      <BuildManifestHUD
         isOpen={isBuildProjectDialogOpen}
         onOpenChange={setIsBuildProjectDialogOpen}
         chaptersToBuild={chaptersToBuild}
