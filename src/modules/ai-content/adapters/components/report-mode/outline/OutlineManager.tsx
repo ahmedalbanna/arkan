@@ -6,7 +6,7 @@ import { toast, useBuilderStore } from '@/hooks';
 import { Project } from '@/modules/projects/domain/entities/Project';
 import { Chapter } from '@/modules/ai-content/domain/entities/Chapter';
 import { Section } from '@/modules/ai-content/domain/entities/Section';
-import { FloatingOutline } from '../FloatingOutline';
+import { ProjectOutlineHUD } from '../../builder/hud/ProjectOutlineHUD';
 
 interface OutlineManagerProps {
     isVisible: boolean;
@@ -32,7 +32,7 @@ export const OutlineManager = ({
     if (!project) return null;
 
     return (
-        <FloatingOutline
+        <ProjectOutlineHUD
             isVisible={isVisible}
             project={project}
             activeChapterId={activeChapterId}

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useMemo } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   DndContext, 
@@ -10,10 +10,8 @@ import {
   useSensor, 
   useSensors,
   DragEndEvent,
-  DragStartEvent
 } from '@dnd-kit/core';
 import { 
-  arrayMove, 
   SortableContext, 
   sortableKeyboardCoordinates, 
   verticalListSortingStrategy,
@@ -21,15 +19,29 @@ import {
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { cn } from '@/infrastructure/utils/cn';
-import { GripVertical, ChevronRight, ChevronDown, Search, X, Trash2, Check, Pencil, Plus, Copy, ClipboardPaste, RotateCcw } from 'lucide-react';
+import { 
+  GripVertical, 
+  ChevronRight, 
+  ChevronDown, 
+  Search, 
+  X, 
+  Trash2, 
+  Check, 
+  Pencil, 
+  Plus, 
+} from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Project } from '@/modules/projects/domain/entities/Project';
 import { Chapter } from '@/modules/ai-content/domain/entities/Chapter';
 import { Section } from '@/modules/ai-content/domain/entities/Section';
-import { useEffect } from 'react';
 
-interface SortableItemProps {
+/**
+ * ProjectOutlineHUD — A high-fidelity, interactive document map for the Intelligence Suite.
+ * Provides drag-and-drop structural management, inline editing, and rapid navigation.
+ */
+
+interface SortableOutlineItemProps {
   id: string;
   index: number;
   title: string;
@@ -44,7 +56,11 @@ interface SortableItemProps {
   children?: React.ReactNode;
 }
 
-const SortableItem = ({ 
+/**
+ * Individual item within the sortable outline.
+ * Handles its own drag state, inline editing, and selection styling.
+ */
+const SortableOutlineItem = ({ 
   id, 
   index, 
   title, 
@@ -57,9 +73,9 @@ const SortableItem = ({
   onUpdateTitle,
   onDelete,
   children 
-}: SortableItemProps) => {
-  const [isEditing, setIsEditing] = React.useState(false);
-  const [editValue, setEditValue] = React.useState(title);
+}: SortableOutlineItemProps) => {
+  const [isEditing, setIsEditing] = useState(false);
+  const [editValue, setEditValue] = useState(title);
 
   const {
     attributes,
@@ -98,17 +114,17 @@ const SortableItem = ({
   };
 
   return (
-    <div ref={setNodeRef} style={style} className={cn("group/item", isChapter ? "mb-2" : "mb-1 ml-4")}>
+    <div ref={setNodeRef} style={style} className={cn("group/item select-none", isChapter ? "mb-2" : "mb-1 ml-4")}>
       <div 
         className={cn(
-            "flex items-center gap-2 p-1.5 rounded-lg transition-all duration-300 cursor-pointer border",
+            "flex items-center gap-2 p-1.5 rounded-xl transition-all duration-300 cursor-pointer border",
             isActive
-                ? "bg-primary/10 border-primary/20 shadow-sm" 
+                ? "bg-primary/10 border-primary/20 shadow-[0_2px_8px_rgba(var(--primary),0.08)]" 
                 : "bg-transparent border-transparent hover:bg-muted/10",
         )}
         onDoubleClick={handleStartEdit}
       >
-        {/* Drag Handle */}
+        {/* Drag Handle — High-sensitivity indicator */}
         <div 
           {...attributes} 
           {...listeners} 
@@ -119,9 +135,9 @@ const SortableItem = ({
           <GripVertical className="h-3 w-3" />
         </div>
 
-        {/* Index & Title */}
+        {/* Content Area — Logic and Navigation */}
         <div 
-          className="flex-1 flex items-center gap-2 min-w-0"
+          className="flex-1 flex items-center gap-2.5 min-w-0"
           onClick={(e) => {
             e.stopPropagation();
             onActivate();
@@ -133,82 +149,98 @@ const SortableItem = ({
                 e.stopPropagation();
                 onToggleExpand?.();
               }}
-              className="p-0.5 hover:bg-primary/10 rounded transition-colors"
+              className="p-1 hover:bg-primary/10 rounded-lg transition-all active:scale-90"
             >
-              {isExpanded ? <ChevronDown className="h-3 w-3" /> : <ChevronRight className="h-3 w-3" />}
+              {isExpanded ? <ChevronDown className="h-3 w-3" /> : <ChevronRight className="h-3 w-3 text-primary/40" />}
             </button>
           )}
 
+          {/* Status Dot — High-density content awareness */}
           {!isEditing && (
             <div className={cn(
-                "h-1.5 w-1.5 rounded-full shrink-0",
-                hasContent ? "bg-green-500" : "bg-amber-500/60"
+                "h-1.5 w-1.5 rounded-full shrink-0 transition-colors duration-500",
+                hasContent ? "bg-green-500 shadow-[0_0_6px_rgba(34,197,94,0.4)]" : "bg-amber-500/40"
             )} />
           )}
 
+          {/* Technical Index */}
           {!isEditing && (
             <span className={cn(
-                "text-[10px] font-black tabular-nums opacity-40 uppercase tracking-widest shrink-0",
+                "text-[9px] font-black tabular-nums opacity-40 uppercase tracking-[0.15em] shrink-0",
                 isActive && "opacity-100 text-primary",
             )}>
-                {index + 1}
+                {(index + 1).toString().padStart(2, '0')}
             </span>
           )}
 
+          {/* Title / Editor — Specialized typography */}
           {isEditing ? (
-            <div className="flex-1 flex items-center gap-1">
+            <div className="flex-1 flex items-center gap-1.5">
                 <Input 
                     autoFocus
                     value={editValue}
                     onChange={(e) => setEditValue(e.target.value)}
                     onBlur={handleFinishEdit}
                     onKeyDown={handleKeyDown}
-                    className="h-6 text-[10px] py-0 px-2 bg-background border-primary/20 rounded-md font-bold uppercase tracking-widest"
+                    className="h-6 text-[10px] py-0 px-2 bg-background border-primary/20 rounded-lg font-bold uppercase tracking-widest focus-visible:ring-primary/20"
                 />
-                <Button variant="ghost" size="icon" className="h-6 w-6 text-green-600" onClick={handleFinishEdit}>
+                <Button variant="ghost" size="icon" className="h-6 w-6 text-green-600 shrink-0" onClick={handleFinishEdit}>
                     <Check className="h-3 w-3" />
                 </Button>
             </div>
           ) : (
             <span className={cn(
-                "text-[10px] font-bold uppercase tracking-widest truncate",
+                "text-[10px] font-bold uppercase tracking-widest truncate transition-colors duration-300",
                 isActive ? "text-primary" : "text-muted-foreground group-hover/item:text-foreground",
-                isChapter && "font-black",
+                isChapter && "font-black tracking-[0.18em]",
             )}>
                 {title || (isChapter ? 'Untitled Chapter' : 'Untitled Section')}
             </span>
           )}
         </div>
 
-        {/* Action HUD (Edit & Delete) */}
+        {/* Action HUD — Contextual operations */}
         {!isEditing && (
             <div className="flex items-center gap-1 opacity-0 group-hover/item:opacity-100 transition-opacity">
-                <div 
-                    className="p-1 hover:bg-primary/10 rounded-md cursor-pointer transition-colors text-muted-foreground hover:text-primary" 
+                <Button 
+                    variant="ghost" 
+                    size="icon" 
+                    className="h-6 w-6 rounded-lg hover:bg-primary/10 text-muted-foreground hover:text-primary transition-all" 
                     onClick={handleStartEdit}
                 >
                     <Pencil className="h-2.5 w-2.5" />
-                </div>
-                <div 
-                    className="p-1 hover:bg-red-500/10 rounded-md cursor-pointer transition-colors text-muted-foreground hover:text-red-600" 
+                </Button>
+                <Button 
+                    variant="ghost" 
+                    size="icon" 
+                    className="h-6 w-6 rounded-lg hover:bg-red-500/10 text-muted-foreground hover:text-red-600 transition-all" 
                     onClick={(e) => { e.stopPropagation(); onDelete?.(); }}
                 >
                     <Trash2 className="h-2.5 w-2.5" />
-                </div>
+                </Button>
             </div>
         )}
       </div>
       
-      {isChapter && isExpanded && (
-        <div className="mt-1 border-l border-primary/10 ml-3.5 pl-1">
-          {children}
-        </div>
-      )}
+      {/* Recursion / Nested Content */}
+      <AnimatePresence>
+        {isChapter && isExpanded && (
+            <motion.div 
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: 'auto' }}
+                exit={{ opacity: 0, height: 0 }}
+                transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
+                className="mt-1 border-l border-primary/10 ml-[13px] pl-1 overflow-hidden"
+            >
+            {children}
+            </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };
 
-interface FloatingOutlineProps {
+interface ProjectOutlineHUDProps {
   isVisible: boolean;
   project: Project | null;
   activeChapterId: string | null;
@@ -226,7 +258,11 @@ interface FloatingOutlineProps {
   onPasteItem: (targetId: string, isChapter: boolean) => void;
 }
 
-export const FloatingOutline = ({
+/**
+ * ProjectOutlineHUD — Primary workspace navigator.
+ * Aligned with the Intelligence Suite HUD architecture.
+ */
+export const ProjectOutlineHUD = ({
   isVisible,
   project,
   activeChapterId,
@@ -242,15 +278,16 @@ export const FloatingOutline = ({
   onUndo,
   onCopyItem,
   onPasteItem
-}: FloatingOutlineProps) => {
-  const [expandedChapters, setExpandedChapters] = React.useState<Set<string>>(new Set());
-  const [searchQuery, setSearchQuery] = React.useState('');
+}: ProjectOutlineHUDProps) => {
+  const [expandedChapters, setExpandedChapters] = useState<Set<string>>(new Set());
+  const [searchQuery, setSearchQuery] = useState('');
   
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
   );
 
+  // Global Keyboard Shortcuts for High-Density Workflow
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
         if (!isVisible) return;
@@ -300,7 +337,7 @@ export const FloatingOutline = ({
         onActiveSectionChange(id);
     }
 
-    // Scroll to the element
+    // Scroll coordination with document canvas
     setTimeout(() => {
         const element = document.getElementById(`item-${id}`);
         if (element) {
@@ -318,6 +355,7 @@ export const FloatingOutline = ({
 
   if (!project) return null;
 
+  // Search Logic — Specialized for structural filtering
   const filteredChapters = useMemo(() => {
     if (!searchQuery.trim()) return project.chapters as readonly Chapter[];
 
@@ -351,52 +389,53 @@ export const FloatingOutline = ({
           initial={{ opacity: 0, x: -20, scale: 0.95 }}
           animate={{ opacity: 1, x: 0, scale: 1 }}
           exit={{ opacity: 0, x: -20, scale: 0.95 }}
-          className="absolute top-4 left-4 z-50 w-72 max-h-[calc(100%-2rem)] overflow-hidden flex flex-col bg-background/60 backdrop-blur-2xl border border-primary/10 rounded-2xl shadow-[0_8px_40px_rgba(0,0,0,0.1)] transition-all duration-500"
+          transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+          className="absolute top-20 left-8 z-[50] w-80 max-h-[calc(100vh-12rem)] overflow-hidden flex flex-col bg-background/60 backdrop-blur-3xl border border-primary/10 rounded-[32px] shadow-[0_12px_48px_rgba(0,0,0,0.12)]"
         >
-          {/* Header */}
-          <div className="px-4 py-3 border-b border-primary/10 space-y-3 bg-primary/[0.03]">
+          {/* HUD Header — Architectural Pulse */}
+          <div className="px-5 py-4 border-b border-primary/10 space-y-4 bg-primary/[0.03]">
             <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                <div className="h-1.5 w-1.5 rounded-full bg-primary animate-pulse shadow-[0_0_8px_rgba(var(--primary),0.6)]" />
-                <h3 className="text-[11px] font-black uppercase tracking-[0.2em] text-primary">Document Outline</h3>
+                <div className="flex items-center gap-2.5">
+                  <div className="h-1.5 w-1.5 rounded-full bg-primary animate-pulse shadow-[0_0_8px_rgba(var(--primary),0.6)]" />
+                  <h3 className="text-[11px] font-black uppercase tracking-[0.22em] text-primary">Project Outline</h3>
                 </div>
-                <div className="flex items-center gap-3">
-                    <span className="text-[9px] font-bold text-muted-foreground/40 uppercase tracking-widest">
-                        {project.sections.length} Sections
+                <div className="flex items-center gap-4">
+                    <span className="text-[9px] font-bold text-muted-foreground/30 uppercase tracking-[0.2em]">
+                        {project.sections.length} NODES
                     </span>
                     <Button 
                         variant="ghost" 
                         size="icon" 
-                        className="h-6 w-6 rounded-lg bg-primary/10 text-primary border border-primary/20 hover:bg-primary/20 transition-all"
+                        className="h-7 w-7 rounded-xl bg-primary/10 text-primary border border-primary/20 hover:bg-primary/20 transition-all hover:scale-110 active:scale-95 shadow-sm"
                         onClick={(e) => { e.stopPropagation(); onAddChapter(); }}
                     >
-                        <Plus className="h-3 w-3" />
+                        <Plus className="h-4 w-4" />
                     </Button>
                 </div>
             </div>
 
-            {/* Search HUD */}
+            {/* Tactical Search Interface */}
             <div className="relative group/search">
                 <Input 
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    placeholder="Search outline..."
-                    className="h-8 pl-8 pr-8 text-[10px] bg-muted/5 border-primary/10 focus-visible:ring-primary/20 rounded-xl transition-all"
+                    placeholder="SCAN STRUCTURE..."
+                    className="h-9 pl-9 pr-9 text-[10px] bg-muted/5 border-primary/5 focus-visible:border-primary/20 focus-visible:ring-primary/10 rounded-2xl transition-all uppercase font-bold tracking-widest placeholder:text-muted-foreground/30"
                 />
-                <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3 w-3 text-muted-foreground/40 group-focus-within/search:text-primary transition-colors" />
+                <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground/20 group-focus-within/search:text-primary transition-colors" />
                 {searchQuery && (
                     <button 
                         onClick={() => setSearchQuery('')}
-                        className="absolute right-2.5 top-1/2 -translate-y-1/2 hover:text-primary transition-colors"
+                        className="absolute right-3.5 top-1/2 -translate-y-1/2 hover:text-primary transition-colors text-muted-foreground/40"
                     >
-                        <X className="h-3 w-3" />
+                        <X className="h-3.5 w-3.5" />
                     </button>
                 )}
             </div>
           </div>
 
-          {/* Outline List */}
-          <div className="flex-1 overflow-auto p-2 custom-scrollbar">
+          {/* Primary Outline Logic */}
+          <div className="flex-1 overflow-auto px-2 py-3 custom-scrollbar">
             <DndContext 
               sensors={sensors}
               collisionDetection={closestCenter}
@@ -407,7 +446,7 @@ export const FloatingOutline = ({
                 strategy={verticalListSortingStrategy}
               >
                 {filteredChapters.map((chapter, cIdx) => (
-                  <SortableItem
+                  <SortableOutlineItem
                     key={chapter.id}
                     id={chapter.id}
                     index={cIdx}
@@ -424,7 +463,7 @@ export const FloatingOutline = ({
                     {(chapter.sections as Section[])
                       .filter(s => !searchQuery.trim() || s.title.toLowerCase().includes(searchQuery.toLowerCase()) || chapter.title.toLowerCase().includes(searchQuery.toLowerCase()))
                       .map((section, sIdx) => (
-                      <SortableItem
+                      <SortableOutlineItem
                         key={section.id}
                         id={section.id}
                         index={sIdx}
@@ -438,27 +477,32 @@ export const FloatingOutline = ({
                     ))}
                     {!searchQuery && (
                         <div 
-                            className="ml-4 mt-1 mb-2 px-2 py-1.5 flex items-center gap-2 rounded-lg border border-dashed border-primary/20 bg-primary/[0.02] hover:bg-primary/[0.05] transition-all cursor-pointer group/add"
+                            className="ml-4 mt-2 mb-3 px-3 py-2 flex items-center gap-2.5 rounded-xl border border-dashed border-primary/20 bg-primary/[0.02] hover:bg-primary/[0.05] transition-all cursor-pointer group/add active:scale-[0.98]"
                             onClick={(e) => { e.stopPropagation(); onAddSection(chapter.id); }}
                         >
-                            <Plus className="h-3 w-3 text-primary/40 group-hover/add:text-primary transition-colors" />
-                            <span className="text-[9px] font-black uppercase tracking-[0.2em] text-primary/40 group-hover/add:text-primary transition-colors">Add Section</span>
+                            <div className="h-5 w-5 rounded-lg bg-primary/5 flex items-center justify-center border border-primary/10 group-hover/add:border-primary/30 transition-all">
+                                <Plus className="h-3 w-3 text-primary/40 group-hover/add:text-primary transition-colors" />
+                            </div>
+                            <span className="text-[10px] font-black uppercase tracking-[0.2em] text-primary/40 group-hover/add:text-primary transition-colors">Integrate Node</span>
                         </div>
                     )}
-                  </SortableItem>
+                  </SortableOutlineItem>
                 ))}
               </SortableContext>
             </DndContext>
           </div>
 
-          {/* Footer Metadata */}
-          <div className="px-4 py-2 bg-muted/20 border-t border-primary/10 flex items-center justify-between">
-             <p className="text-[8px] font-black uppercase tracking-[0.2em] text-muted-foreground/60">
-                Document Outline
-             </p>
-             <div className="flex items-center gap-1">
-                <div className="h-1 w-1 rounded-full bg-green-500" />
-                <p className="text-[8px] font-black uppercase tracking-[0.2em] text-green-600/60">Live</p>
+          {/* Persistent Metadata Footer */}
+          <div className="px-5 py-2.5 bg-background/40 border-t border-primary/10 flex items-center justify-between backdrop-blur-2xl">
+             <div className="flex items-center gap-2">
+                 <div className="h-1.5 w-1.5 rounded-full bg-primary/20" />
+                 <p className="text-[9px] font-black uppercase tracking-[0.2em] text-muted-foreground/40">
+                    Manifest Outline
+                 </p>
+             </div>
+             <div className="flex items-center gap-2 px-2 py-0.5 rounded-full bg-green-500/5 border border-green-500/10">
+                <div className="h-1 w-1 rounded-full bg-green-500 animate-pulse" />
+                <p className="text-[9px] font-black uppercase tracking-[0.15em] text-green-600/60">Live Mode</p>
              </div>
           </div>
         </motion.div>
@@ -466,3 +510,5 @@ export const FloatingOutline = ({
     </AnimatePresence>
   );
 };
+
+ProjectOutlineHUD.displayName = 'ProjectOutlineHUD';

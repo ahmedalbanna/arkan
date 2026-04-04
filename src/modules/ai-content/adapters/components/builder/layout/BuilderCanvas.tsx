@@ -80,7 +80,7 @@ export const BuilderCanvas = React.forwardRef<HTMLDivElement, BuilderCanvasProps
                 </Suspense>
             </main>
 
-            {/* Floating contextual layers (e.g. FloatingOutline, CoverSettingsHUD) */}
+            {/* Floating contextual layers (e.g. ProjectOutlineHUD, CoverSettingsHUD) */}
             {floatingElements}
 
             {/* Zoom HUD — Unified control at the bottom */}

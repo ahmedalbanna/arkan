@@ -18,7 +18,7 @@ import { BuilderCanvas } from './layout/BuilderCanvas';
 import { DocumentToolbar } from './toolbar/DocumentToolbar';
 import { DocumentRenderer } from './renderer/DocumentRenderer';
 import { CoverPageSettingsHUD } from './hud/CoverPageSettingsHUD';
-import { FloatingOutline } from '@/modules/ai-content/adapters/components/report-mode/FloatingOutline';
+import { ProjectOutlineHUD } from './hud/ProjectOutlineHUD';
 
 interface BuilderWorkspaceProps {
     initialProject?: ProjectProperties | null;
@@ -191,7 +191,7 @@ export const BuilderWorkspace: React.FC<BuilderWorkspaceProps> = ({ initialProje
                             }
                             floatingElements={
                                 <>
-                                    <FloatingOutline 
+                                    <ProjectOutlineHUD 
                                         isVisible={isOutlineVisible}
                                         project={project}
                                         activeChapterId={activeChapterId}
