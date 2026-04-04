@@ -25,7 +25,7 @@ const ApplyTemplatePanel = lazy(() => import('@/modules/ai-content/adapters/comp
 const GlobalIntelligenceHUD = lazy(() => import('@/modules/ai-content/adapters/components/builder/settings/GlobalIntelligenceHUD').then(m => ({ default: m.GlobalIntelligenceHUD })));
 const SectionGenerationHUD = lazy(() => import('@/modules/ai-content/adapters/components/builder/generation/SectionGenerationHUD').then(m => ({ default: m.SectionGenerationHUD })));
 const ChapterGenerationHUD = lazy(() => import('@/modules/ai-content/adapters/components/builder/generation/ChapterGenerationHUD').then(m => ({ default: m.ChapterGenerationHUD })));
-const ProjectChat = lazy(() => import('@/modules/ai-content/adapters/components/report-mode/chat/ProjectChat').then(m => ({ default: m.ProjectChat })));
+const ProjectConsultantHUD = lazy(() => import('@/modules/ai-content/adapters/components/builder/chat/ProjectConsultantHUD').then(m => ({ default: m.ProjectConsultantHUD })));
 const SnapshotHistoryPanel = lazy(() => import('@/modules/projects/adapters/components/SnapshotHistoryPanel'));
 const SidebarNavigator = lazy(() => import('@/modules/ai-content/adapters/components/builder/SidebarNavigator').then(m => ({ default: m.SidebarNavigator })));
 const GenerationNavigator = lazy(() => import('@/modules/ai-content/adapters/components/builder/generation/GenerationNavigator').then(m => ({ default: m.GenerationNavigator })));
@@ -126,7 +126,7 @@ export function useSidebarPanels({
                 key: 'chat',
                 title: 'Project Consultant',
                 icon: <MessageSquare className="h-4 w-4" />,
-                content: <ProjectChat isOpen={true} onClose={() => setActiveRightPanelKey('section')} />,
+                content: <ProjectConsultantHUD isOpen={true} onClose={() => setActiveRightPanelKey('section')} />,
             },
             {
                 key: 'snapshots',
