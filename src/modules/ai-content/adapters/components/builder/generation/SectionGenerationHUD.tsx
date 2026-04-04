@@ -1,10 +1,9 @@
 'use client';
 
 import React from 'react';
-import { ClipboardPaste, Copy, Link as LinkIcon, SlidersHorizontal, Sparkles, Square, StickyNote, Loader2 } from 'lucide-react';
+import { ClipboardPaste, Copy, Sparkles, Square, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/infrastructure/utils/cn';
@@ -17,6 +16,7 @@ import { GuidelineEditor } from './controls/GuidelineEditor';
 import { ContextSelector } from './controls/ContextSelector';
 import { ControlPanel } from './controls/ControlPanel';
 import { SidebarContainer } from '../layout/SidebarContainer';
+import { SidebarSection } from '../layout/SidebarSection';
 
 /**
  * SectionGenerationHUD — Context-sensitive AI operations for Sections.
@@ -228,52 +228,26 @@ export function SectionGenerationHUD({ section, selectedSectionIds = [], classNa
                 </div>
 
                 {/* Synthesis Parameter Zone */}
-                <Tabs defaultValue="context" className="w-full flex flex-col gap-6">
-                    <TabsList className="grid w-full grid-cols-3 h-11 rounded-2xl bg-muted/20 p-1 gap-1 border border-border/40 backdrop-blur-md">
-                        <TabsTrigger value="context" className="gap-2 text-[9px] font-black uppercase tracking-[0.15em] data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:shadow-lg px-2 transition-all rounded-xl">
-                            <LinkIcon className="h-3.5 w-3.5 shrink-0" />
-                            <span className="truncate">Context</span>
-                        </TabsTrigger>
-                        <TabsTrigger value="prompt" className="gap-2 text-[9px] font-black uppercase tracking-[0.15em] data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:shadow-lg px-2 transition-all rounded-xl">
-                            <StickyNote className="h-3.5 w-3.5 shrink-0" />
-                            <span className="truncate">Logic</span>
-                        </TabsTrigger>
-                        <TabsTrigger value="controls" className="gap-2 text-[9px] font-black uppercase tracking-[0.15em] data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:shadow-lg px-2 transition-all rounded-xl">
-                            <SlidersHorizontal className="h-3.5 w-3.5 shrink-0" />
-                            <span className="truncate">Styles</span>
-                        </TabsTrigger>
-                    </TabsList>
-
-                    <div className="relative min-h-[320px]">
-                        <TabsContent value="context" className="m-0 focus-visible:ring-0 animate-in fade-in slide-in-from-right-4 duration-500">
-                            <div className="space-y-5">
-                                <span className="text-[9px] font-black uppercase tracking-widest text-muted-foreground/60 px-1">Source Matrices</span>
-                                <ContextSelector
-                                    sectionId={section.id}
-                                    selectedSectionIds={selectedSectionIds.length > 1 ? selectedSectionIds : undefined}
-                                />
-                            </div>
-                        </TabsContent>
-                        <TabsContent value="prompt" className="m-0 focus-visible:ring-0 animate-in fade-in slide-in-from-right-4 duration-500">
-                            <div className="space-y-5">
-                                <span className="text-[9px] font-black uppercase tracking-widest text-muted-foreground/60 px-1">Neural Instructions</span>
-                                <GuidelineEditor
-                                    itemId={section.id}
-                                    selectedIds={selectedSectionIds.length > 1 ? selectedSectionIds : undefined}
-                                />
-                            </div>
-                        </TabsContent>
-                        <TabsContent value="controls" className="m-0 focus-visible:ring-0 animate-in fade-in slide-in-from-right-4 duration-500">
-                            <div className="space-y-5">
-                                <span className="text-[9px] font-black uppercase tracking-widest text-muted-foreground/60 px-1">Structural Vector</span>
-                                <ControlPanel
-                                    section={section}
-                                    selectedIds={selectedSectionIds.length > 1 ? selectedSectionIds : undefined}
-                                />
-                            </div>
-                        </TabsContent>
-                    </div>
-                </Tabs>
+                <div className="flex flex-col gap-4">
+                    <SidebarSection title="Source Matrix" defaultOpen>
+                        <ContextSelector
+                            sectionId={section.id}
+                            selectedSectionIds={selectedSectionIds.length > 1 ? selectedSectionIds : undefined}
+                        />
+                    </SidebarSection>
+                    <SidebarSection title="Logic Directives" defaultOpen={false}>
+                        <GuidelineEditor
+                            itemId={section.id}
+                            selectedIds={selectedSectionIds.length > 1 ? selectedSectionIds : undefined}
+                        />
+                    </SidebarSection>
+                    <SidebarSection title="Style Controls" defaultOpen={false}>
+                        <ControlPanel
+                            section={section}
+                            selectedIds={selectedSectionIds.length > 1 ? selectedSectionIds : undefined}
+                        />
+                    </SidebarSection>
+                </div>
             </div>
 
             {/* Stable Version Footer */}

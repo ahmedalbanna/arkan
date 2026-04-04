@@ -37,6 +37,7 @@ const MarkdownEditorComponent = ({
     extensions: editorExtensions(bubbleMenuId, markdownService),
     content: markdownService.toHtml(content),
     onSelectionUpdate: ({ editor }) => {
+      updateSelectionState(editor);
       if (!onActiveItemDetect) return;
       // Find nearest heading node above cursor position
       const { $anchor } = editor.state.selection;

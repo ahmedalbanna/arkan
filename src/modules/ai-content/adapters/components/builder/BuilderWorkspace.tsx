@@ -17,8 +17,7 @@ import { BuilderSidebar } from './layout/BuilderSidebar';
 import { BuilderCanvas } from './layout/BuilderCanvas';
 import { DocumentToolbar } from './toolbar/DocumentToolbar';
 import { DocumentRenderer } from './renderer/DocumentRenderer';
-import { CoverPageSettingsHUD } from './hud/CoverPageSettingsHUD';
-import { ProjectOutlineHUD } from './outline/ProjectOutlineHUD';
+import { SelectionGenerationHUD } from './generation/SelectionGenerationHUD';
 
 interface BuilderWorkspaceProps {
     initialProject?: ProjectProperties | null;
@@ -40,21 +39,10 @@ export const BuilderWorkspace: React.FC<BuilderWorkspaceProps> = ({ initialProje
         setActivePanelKey,
         activeRightPanelKey,
         setActiveRightPanelKey,
-        isOutlineVisible,
-        setIsOutlineVisible,
         zoomLevel,
         handleZoomIn,
         handleZoomOut,
         handleZoomReset,
-        handleMoveItem,
-        handleUpdateTitle,
-        handleDeleteItem,
-        handleAddChapter,
-        handleAddSection,
-        handleDuplicateItem,
-        handleUndo,
-        handleCopyItem,
-        handlePasteItem,
         summarizeMutation,
         expandMutation,
         rewriteMutation,
@@ -75,22 +63,12 @@ export const BuilderWorkspace: React.FC<BuilderWorkspaceProps> = ({ initialProje
 
     const [showOnboarding, setShowOnboarding] = useState(false);
     const [isFullscreen, setIsFullscreen] = useState(false);
-    const [showCoverPage, setShowCoverPage] = useState(false);
-    const [showCoverSettings, setShowCoverSettings] = useState(false);
     
     const containerRef = useRef<HTMLDivElement>(null);
     const comparisonSnapshotId = useBuilderStore(state => state.comparisonSnapshotId);
     const setComparisonSnapshotId = useBuilderStore(state => state.setComparisonSnapshotId);
     const { snapshots } = useSnapshots(project?.id);
     const comparisonSnapshot = snapshots.find((s: any) => s.id === comparisonSnapshotId);
-
-    // Toggle cover page + settings panel together
-    const handleCoverPageToggle = (visible: boolean) => {
-        setShowCoverPage(visible);
-        setShowCoverSettings(visible);
-    };
-
-    const handleCoverSettingsClose = () => setShowCoverSettings(false);
 
     const handleToggleFullscreen = () => {
         if (!containerRef.current) return;
@@ -172,27 +150,7 @@ export const BuilderWorkspace: React.FC<BuilderWorkspaceProps> = ({ initialProje
                     }
                     canvas={
                         <div className="relative h-full">
-                            <CoverPageSettingsHUD 
-                                isOpen={showCoverSettings}
-                                onClose={handleCoverSettingsClose}
-                            />
-                            <ProjectOutlineHUD 
-                                isVisible={isOutlineVisible}
-                                project={project}
-                                activeChapterId={activeChapterId}
-                                selectedSectionIds={selectedSectionIds}
-                                onActiveChapterChange={setActiveChapterId}
-                                onActiveSectionChange={(id) => handleActiveSectionChange(id)}
-                                onMoveItem={handleMoveItem}
-                                onUpdateTitle={handleUpdateTitle}
-                                onDeleteItem={handleDeleteItem}
-                                onAddChapter={handleAddChapter}
-                                onAddSection={handleAddSection}
-                                onDuplicateItem={handleDuplicateItem}
-                                onUndo={handleUndo}
-                                onCopyItem={handleCopyItem}
-                                onPasteItem={handlePasteItem}
-                            />
+                            <SelectionGenerationHUD viewMode={viewMode} />
                             <BuilderCanvas
                                 zoomLevel={zoomLevel}
                                 onZoomIn={handleZoomIn}
@@ -204,13 +162,9 @@ export const BuilderWorkspace: React.FC<BuilderWorkspaceProps> = ({ initialProje
                                         project={project}
                                         viewMode={viewMode}
                                         setViewMode={setViewMode}
-                                        isOutlineVisible={isOutlineVisible}
-                                        setIsOutlineVisible={setIsOutlineVisible}
                                         isFullscreen={isFullscreen}
                                         onToggleFullscreen={handleToggleFullscreen}
                                         suggestion={suggestion}
-                                        showCoverPage={showCoverPage}
-                                        setShowCoverPage={handleCoverPageToggle}
                                     />
                                 }
                             >
@@ -221,7 +175,7 @@ export const BuilderWorkspace: React.FC<BuilderWorkspaceProps> = ({ initialProje
                                     setActiveChapterId={setActiveChapterId}
                                     selectedSectionIds={selectedSectionIds}
                                     handleActiveSectionChange={handleActiveSectionChange}
-                                    showCoverPage={showCoverPage}
+                                    showCoverPage={true}
                                     comparisonSnapshot={comparisonSnapshot}
                                     onCloseComparison={() => setComparisonSnapshotId(null)}
                                     updateProjectFromMarkdown={useBuilderStore.getState().updateProjectFromMarkdown}

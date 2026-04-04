@@ -1,14 +1,12 @@
 'use client';
 
 import React, { useMemo, lazy } from 'react';
-import { Settings, LayoutTemplate, SlidersHorizontal, MessageSquare, History as HistoryIcon, Database, Terminal, Layers, FileText } from 'lucide-react';
+import { Settings, LayoutTemplate, SlidersHorizontal, MessageSquare, History as HistoryIcon, Layers, FileText } from 'lucide-react';
 import { useLocalization } from '@/context/LocalizationContext';
 import { SidebarPanelConfig } from '@/modules/ai-content/adapters/components/builder/layout/types';
 
 // Lazy load components
 const ProjectSettingsPanel = lazy(() => import('@/modules/ai-content/adapters/components/report-mode/settings/ProjectSettingsPanel'));
-const FileManager = lazy(() => import('@/modules/ai-content/adapters/components/report-mode/file-manager'));
-const GenerationNavigator = lazy(() => import('@/modules/ai-content/adapters/components/builder/generation/GenerationNavigator').then(m => ({ default: m.GenerationNavigator })));
 const ApplyTemplatePanel = lazy(() => import('@/modules/ai-content/adapters/components/report-mode/templates/ApplyTemplatePanel'));
 const GlobalProjectControls = lazy(() => import('@/modules/ai-content/adapters/components/report-mode/settings/GlobalProjectControls').then(m => ({ default: m.GlobalProjectControls })));
 const SectionGenerationHUD = lazy(() => import('@/modules/ai-content/adapters/components/builder/generation/SectionGenerationHUD').then(m => ({ default: m.SectionGenerationHUD })));
@@ -44,30 +42,12 @@ export function useSidebarPanels({
             content: <ProjectSettingsPanel />,
         },
         {
-            key: 'files',
-            title: 'Files',
-            icon: <Database className="h-4 w-4" />,
-            content: <FileManager />,
-        },
-        {
             key: 'templates',
             title: 'Templates',
             icon: <LayoutTemplate className="h-4 w-4" />,
             content: <ApplyTemplatePanel />,
         },
-        {
-            key: 'generate',
-            title: 'AI Production',
-            icon: <Terminal className="h-4 w-4" />,
-            content: (
-                <GenerationNavigator
-                    selectedSectionIds={selectedSectionIds}
-                    onActiveSectionChange={onActiveSectionChange}
-                    onActiveChapterChange={onActiveChapterChange}
-                    activeChapterId={activeChapterId}
-                />
-            ),
-        },
+
         {
             key: 'navigator',
             title: 'Navigator',
@@ -88,10 +68,10 @@ export function useSidebarPanels({
         const activeSection = activeSectionId ? project?.getSection(activeSectionId) ?? null : null;
         const activeChapter = activeChapterId ? project?.getChapter(activeChapterId) ?? null : null;
 
-        const sectionTitle = activeChapterId 
-            ? 'Chapter Tools' 
-            : selectedSectionIds.length > 1 
-                ? 'Bulk Edit' 
+        const sectionTitle = activeChapterId
+            ? 'Chapter Tools'
+            : selectedSectionIds.length > 1
+                ? 'Bulk Edit'
                 : 'Section Tools';
 
         return [

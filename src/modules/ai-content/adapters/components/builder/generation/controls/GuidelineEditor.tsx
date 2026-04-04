@@ -75,11 +75,11 @@ export function GuidelineEditor({ itemId, selectedIds }: GuidelineEditorProps) {
     <div className="space-y-8 pt-2">
       {/* HUD Header Group */}
       <div className="space-y-1.5 px-1">
-        <h4 className="text-[10px] font-black uppercase tracking-[0.3em] text-primary/70 flex items-center gap-2.5">
+        <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-primary/70 flex items-center gap-2.5">
             <ListChecks className="h-3.5 w-3.5" />
             Neural Guidelines
         </h4>
-        <p className="text-[9px] text-muted-foreground italic font-medium opacity-60 uppercase tracking-widest">
+        <p className="text-[9px] text-muted-foreground italic font-medium uppercase tracking-widest text-muted-foreground/60">
             Define architectural logic and technical constraints.
         </p>
       </div>
@@ -125,7 +125,7 @@ export function GuidelineEditor({ itemId, selectedIds }: GuidelineEditorProps) {
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2.5">
               <Plus className="h-3.5 w-3.5 text-primary/60" />
-              <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground">Logic Constraints</Label>
+              <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/60">Logic Constraints</Label>
             </div>
             <Badge variant="outline" className="h-5 text-[9px] font-black border-primary/20 bg-primary/5 text-primary tabular-nums px-2.5 rounded-full shadow-inner ring-1 ring-inset ring-primary/10">
                 {guidelines.length} NODES
@@ -145,7 +145,7 @@ export function GuidelineEditor({ itemId, selectedIds }: GuidelineEditorProps) {
                 type="button" 
                 size="icon" 
                 onClick={handleAddGuideline} 
-                className="h-10 w-10 shrink-0 rounded-xl shadow-xl shadow-primary/10 group-hover/input:scale-105 active:scale-95 transition-all"
+                className="h-7 w-7 shrink-0 rounded-lg text-[9px] font-black uppercase tracking-[0.2em] shadow-xl shadow-primary/10 group-hover/input:scale-105 active:scale-95 transition-all"
               >
                 <Plus className="h-4 w-4" />
               </Button>
@@ -176,7 +176,7 @@ export function GuidelineEditor({ itemId, selectedIds }: GuidelineEditorProps) {
                 ) : (
                   <div className="flex flex-col items-center justify-center py-16 px-6 text-center space-y-4 opacity-30">
                     <div className="p-5 rounded-full bg-muted/20 border border-dashed border-muted-foreground/40 shadow-inner">
-                        <ListChecks className="h-9 w-9 text-muted-foreground" />
+                        <ListChecks className="h-8 w-8 text-muted-foreground" />
                     </div>
                     <div className="space-y-1.5">
                         <p className="text-[10px] text-muted-foreground font-black uppercase tracking-[0.25em]">Manifest Stable</p>

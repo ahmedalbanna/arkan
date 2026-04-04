@@ -15,6 +15,9 @@ interface SelectionState {
   activeFontSize: string | null;
   activeColor: string | null;
   textAlign: 'left' | 'center' | 'right' | 'justify';
+  hasSelection: boolean;
+  selectionText: string;
+  selectionLength: number;
 }
 
 interface EditorState {
@@ -39,6 +42,9 @@ const initialSelection: SelectionState = {
   activeFontSize: null,
   activeColor: null,
   textAlign: 'left',
+  hasSelection: false,
+  selectionText: '',
+  selectionLength: 0,
 };
 
 export const useEditorStore = create<EditorState>((set) => ({
@@ -51,7 +57,10 @@ export const useEditorStore = create<EditorState>((set) => ({
   
   updateSelectionState: (editor) => {
     if (!editor) return;
-    
+    const { from, to } = editor.state.selection;
+    const selectionText = editor.state.doc.textBetween(from, to).trim();
+    const hasSelection = from !== to && selectionText.length > 0;
+
     set({
       selection: {
         isBold: editor.isActive('bold'),
@@ -69,6 +78,9 @@ export const useEditorStore = create<EditorState>((set) => ({
         textAlign: editor.isActive({ textAlign: 'center' }) ? 'center' :
                    editor.isActive({ textAlign: 'right' }) ? 'right' :
                    editor.isActive({ textAlign: 'justify' }) ? 'justify' : 'left',
+        hasSelection,
+        selectionText,
+        selectionLength: selectionText.length,
       }
     });
   },

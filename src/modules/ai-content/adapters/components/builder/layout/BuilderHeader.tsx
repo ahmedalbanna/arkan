@@ -65,7 +65,7 @@ export const BuilderHeader = React.forwardRef<HTMLDivElement, BuilderHeaderProps
         <header
             ref={ref}
             className={cn(
-                "h-16 flex items-center justify-between gap-8 px-6 bg-background/40 backdrop-blur-3xl border border-primary/10 shadow-2xl rounded-[32px] transition-all duration-700 ease-[0.22,1,0.36,1] relative overflow-hidden pointer-events-auto",
+                "h-16 flex items-center justify-between gap-8 px-6 bg-background/40 backdrop-blur-3xl border border-primary/10 shadow-2xl transition-all duration-700 ease-[0.22,1,0.36,1] relative overflow-hidden pointer-events-auto",
                 className
             )}
         >

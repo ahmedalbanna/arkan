@@ -12,7 +12,7 @@ import { type ProjectProperties } from '@/modules/projects/domain/entities/Proje
 
 export function useReportGenerator(initialProject?: ProjectProperties | null) {
   const { t, locale } = useLocalization();
-  const [activePanelKey, setActivePanelKey] = useState<string>('files');
+  const [activePanelKey, setActivePanelKey] = useState<string>('navigator');
   const [activeRightPanelKey, setActiveRightPanelKey] = useState<string>('section');
 
   const isLeftPanelVisible = !!activePanelKey;
@@ -66,12 +66,12 @@ export function useReportGenerator(initialProject?: ProjectProperties | null) {
   const handleActiveChapterChange = (id: string | null) => {
     setActiveChapterId(id);
     if (id) {
-        const chapter = builderPageLogic.project?.getChapter(id);
-        if (chapter) {
-            setSelectedSectionIds(chapter.sections.map(s => s.id));
-        } else {
-            setSelectedSectionIds([]);
-        }
+      const chapter = builderPageLogic.project?.getChapter(id);
+      if (chapter) {
+        setSelectedSectionIds(chapter.sections.map(s => s.id));
+      } else {
+        setSelectedSectionIds([]);
+      }
     }
   };
 
@@ -120,8 +120,8 @@ export function useReportGenerator(initialProject?: ProjectProperties | null) {
   const handlePasteItem = (targetId: string, isChapter: boolean) => {
     const copied = localStorage.getItem('arkan_copied_item');
     if (copied) {
-        const { id, isChapter: copiedIsChapter } = JSON.parse(copied);
-        updateProject((p: any) => p.pasteItem(id, copiedIsChapter, targetId, isChapter));
+      const { id, isChapter: copiedIsChapter } = JSON.parse(copied);
+      updateProject((p: any) => p.pasteItem(id, copiedIsChapter, targetId, isChapter));
     }
   };
 
@@ -130,7 +130,7 @@ export function useReportGenerator(initialProject?: ProjectProperties | null) {
 
   const handleSave = () => {
     if (builderPageLogic.project) {
-        saveProjectMutation.mutate(builderPageLogic.project.toProperties());
+      saveProjectMutation.mutate(builderPageLogic.project.toProperties());
     }
   };
 

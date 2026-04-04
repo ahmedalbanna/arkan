@@ -33,21 +33,26 @@ export function ContextSelector({ sectionId, selectedSectionIds }: ContextSelect
 
   const handleUpdateContext = (type: 'sections' | 'externalContext', id: string, enabled: boolean) => {
     const targets = selectedSectionIds && selectedSectionIds.length > 0 ? selectedSectionIds : [sectionId];
-    
-    updateProject(p => {
-      targets.forEach(tid => {
-        p.updateSection(tid, s => {
-          const currentContext = { ...s.context };
+
+    updateProject((project) => {
+      const updatedProject = targets.reduce((currentProject, targetId) => {
+        return currentProject.updateSection(targetId, (sectionToUpdate) => {
+          const currentContext = { ...(sectionToUpdate.context || {}) };
           const subContext = { ...(currentContext[type] || {}) };
-          
-          if (enabled) subContext[id] = 'true'; // Store as string to satisfy Record<string, string>
-          else delete subContext[id];
-          
-          return s.withProps({
-            context: { ...currentContext, [type]: subContext }
+
+          if (enabled) {
+            subContext[id] = 'true';
+          } else {
+            delete subContext[id];
+          }
+
+          return sectionToUpdate.withProps({
+            context: { ...currentContext, [type]: subContext },
           });
         });
-      });
+      }, project);
+
+      return updatedProject;
     });
   };
 
@@ -75,11 +80,11 @@ export function ContextSelector({ sectionId, selectedSectionIds }: ContextSelect
     <div className="space-y-8 pt-2">
       {/* HUD Header */}
       <div className="space-y-1.5 px-1">
-        <h4 className="text-[10px] font-black uppercase tracking-[0.3em] text-primary/70 flex items-center gap-2.5">
+        <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-primary/70 flex items-center gap-2.5">
             <Database className="h-3.5 w-3.5" />
             Neural Source Matrix
         </h4>
-        <p className="text-[9px] text-muted-foreground italic font-medium opacity-60 uppercase tracking-widest">
+        <p className="text-[9px] text-muted-foreground italic font-medium uppercase tracking-widest text-muted-foreground/60">
             Map intellectual dependencies and source data.
         </p>
       </div>
@@ -108,7 +113,7 @@ export function ContextSelector({ sectionId, selectedSectionIds }: ContextSelect
                         key={opt.value}
                         onClick={() => handleUpdateContext('sections', opt.value, !isActive)}
                         className={cn(
-                            "px-3 py-1.5 rounded-xl border text-[10px] font-bold uppercase tracking-wider transition-all duration-300",
+                            "px-3 py-1.5 rounded-xl border text-[10px] font-bold uppercase tracking-[0.2em] transition-all duration-300",
                             isActive 
                                 ? "bg-primary/10 border-primary/20 text-primary shadow-sm ring-1 ring-primary/10" 
                                 : "bg-background/40 border-transparent text-muted-foreground hover:border-primary/10 hover:bg-muted/10"
@@ -146,7 +151,7 @@ export function ContextSelector({ sectionId, selectedSectionIds }: ContextSelect
                         key={opt.value}
                         onClick={() => handleUpdateContext('externalContext', opt.value, !isActive)}
                         className={cn(
-                            "px-3 py-1.5 rounded-xl border text-[10px] font-bold uppercase tracking-wider transition-all duration-300",
+                            "px-3 py-1.5 rounded-xl border text-[10px] font-bold uppercase tracking-[0.2em] transition-all duration-300",
                             isActive 
                                 ? "bg-primary/10 border-primary/20 text-primary shadow-sm ring-1 ring-primary/10" 
                                 : "bg-background/40 border-transparent text-muted-foreground hover:border-primary/10 hover:bg-muted/10"
@@ -167,7 +172,7 @@ export function ContextSelector({ sectionId, selectedSectionIds }: ContextSelect
             <div className="flex justify-center mb-1">
                 <Sparkles className="h-4 w-4 text-primary/30 group-hover/info:scale-110 transition-transform" />
             </div>
-            <p className="text-[10px] text-primary/40 italic leading-relaxed font-medium uppercase tracking-wider group-hover:text-primary/60 transition-colors px-4">
+            <p className="text-[10px] text-primary/40 italic leading-relaxed font-medium uppercase tracking-[0.2em] group-hover:text-primary/60 transition-colors px-4">
                 Selected nodes will be injected into the AI context window to ensure thematic continuity.
             </p>
         </div>

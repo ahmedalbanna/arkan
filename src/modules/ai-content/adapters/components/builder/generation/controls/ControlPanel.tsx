@@ -13,6 +13,7 @@ import { useBuilderStore } from '@/hooks';
 import { Section } from '@/modules/ai-content/domain/entities/Section';
 import { DiagramType, DiagramTypeSchema, ToneSchema } from '@/modules/ai/domain/schemas';
 import { GenerationControlState } from '@/modules/ai-content/domain/entities/ControlTypes';
+import { Separator } from '@/components/ui/separator';
 
 /**
  * ControlPanel — Low-level neural parameter tuning HUD.
@@ -67,11 +68,11 @@ export function ControlPanel({ section, selectedIds }: ControlPanelProps) {
         <div className="space-y-8 pt-2">
             {/* HUD Header */}
             <div className="space-y-1.5 px-1">
-                <h4 className="text-[10px] font-black uppercase tracking-[0.3em] text-primary/70 flex items-center gap-2.5">
+                <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-primary/70 flex items-center gap-2.5">
                     <SlidersHorizontal className="h-3.5 w-3.5" />
                     Cognitive Vectors
                 </h4>
-                <p className="text-[9px] text-muted-foreground italic font-medium opacity-60 uppercase tracking-widest">
+                <p className="text-[9px] text-muted-foreground italic font-medium uppercase tracking-widest text-muted-foreground/60">
                     Fine-tune the neural weight and linguistic elevation.
                 </p>
             </div>
@@ -92,10 +93,10 @@ export function ControlPanel({ section, selectedIds }: ControlPanelProps) {
                                 {section.controls.formality}%
                             </Badge>
                         </div>
-                        <Slider 
-                            value={[section.controls.formality]} 
-                            onValueChange={(v) => handleUpdate({ formality: v[0] })} 
-                            min={0} max={100} step={5} 
+                        <Slider
+                            value={[section.controls.formality]}
+                            onValueChange={(v) => handleUpdate({ formality: v[0] })}
+                            min={0} max={100} step={5}
                             className="py-2"
                         />
                     </div>
@@ -110,23 +111,23 @@ export function ControlPanel({ section, selectedIds }: ControlPanelProps) {
                                 {section.controls.complexity}%
                             </Badge>
                         </div>
-                        <Slider 
-                            value={[section.controls.complexity]} 
-                            onValueChange={(v) => handleUpdate({ complexity: v[0] })} 
-                            min={0} max={100} step={5} 
+                        <Slider
+                            value={[section.controls.complexity]}
+                            onValueChange={(v) => handleUpdate({ complexity: v[0] })}
+                            min={0} max={100} step={5}
                             className="py-2"
                         />
                     </div>
                 </div>
 
-                <div className="h-px bg-primary/5" />
+                <Separator className="bg-gradient-to-r from-primary/20 via-primary/5 to-transparent h-px" />
 
                 {/* Persona & Flow Zone */}
                 <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-3">
-                        <Label className="text-[9px] font-black uppercase tracking-widest text-muted-foreground/60">Intelligence Tone</Label>
-                        <Select 
-                            value={section.controls.tone} 
+                        <Label className="text-[9px] font-black uppercase tracking-[0.2em] text-muted-foreground/60">Intelligence Tone</Label>
+                        <Select
+                            value={section.controls.tone}
                             onValueChange={(v) => handleUpdate({ tone: v as any })}
                         >
                             <SelectTrigger className="h-10 text-[11px] font-bold bg-muted/5 border-primary/10 rounded-xl focus:ring-primary/20 transition-all">
@@ -143,9 +144,9 @@ export function ControlPanel({ section, selectedIds }: ControlPanelProps) {
                     </div>
 
                     <div className="space-y-3">
-                        <Label className="text-[9px] font-black uppercase tracking-widest text-muted-foreground/60">Diagram Logic</Label>
-                        <Select 
-                            value={section.controls.diagramType} 
+                        <Label className="text-[9px] font-black uppercase tracking-[0.2em] text-muted-foreground/60">Diagram Logic</Label>
+                        <Select
+                            value={section.controls.diagramType}
                             onValueChange={(v) => handleUpdate({ diagramType: v as DiagramType })}
                         >
                             <SelectTrigger className="h-10 text-[11px] font-bold bg-muted/5 border-primary/10 rounded-xl focus:ring-primary/20 transition-all">
@@ -169,12 +170,12 @@ export function ControlPanel({ section, selectedIds }: ControlPanelProps) {
                             <Layout className="h-3.5 w-3.5 text-primary/60" />
                             <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground">Structural Matrix</Label>
                         </div>
-                        <Button 
-                            variant="ghost" 
-                            size="sm" 
+                        <Button
+                            variant="ghost"
+                            size="sm"
                             onClick={handleDetectFormats}
                             disabled={!section.content}
-                            className="h-7 px-3 rounded-lg text-[9px] font-black uppercase tracking-widest border border-primary/10 hover:bg-primary/5 hover:text-primary transition-all gap-1.5"
+                            className="h-7 px-3 rounded-lg text-[9px] font-black uppercase tracking-[0.2em] border border-primary/10 hover:bg-primary/5 hover:text-primary transition-all gap-1.5"
                         >
                             <Zap className="h-3 w-3" />
                             Auto-Sync
@@ -185,13 +186,13 @@ export function ControlPanel({ section, selectedIds }: ControlPanelProps) {
                         {Object.entries(section.controls.outputStyle).map(([key, enabled]) => (
                             <button
                                 key={key}
-                                onClick={() => handleUpdate({ 
-                                    outputStyle: { ...section.controls.outputStyle, [key]: !enabled } 
+                                onClick={() => handleUpdate({
+                                    outputStyle: { ...section.controls.outputStyle, [key]: !enabled }
                                 })}
                                 className={cn(
-                                    "flex items-center justify-between px-3 py-2.5 rounded-xl border transition-all duration-300 group/btn",
-                                    enabled 
-                                        ? "bg-primary/10 border-primary/20 text-primary shadow-sm" 
+                                    "flex items-center justify-between px-3 py-1.5 rounded-xl border transition-all duration-300 group/btn",
+                                    enabled
+                                        ? "bg-primary/10 border-primary/20 text-primary shadow-sm ring-1 ring-primary/10"
                                         : "bg-muted/5 border-transparent text-muted-foreground hover:border-primary/10 hover:bg-muted/10"
                                 )}
                             >

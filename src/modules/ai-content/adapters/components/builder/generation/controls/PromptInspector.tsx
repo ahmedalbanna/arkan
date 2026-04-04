@@ -55,7 +55,7 @@ export function PromptInspector({ isOpen, onOpenChange, section }: PromptInspect
             </div>
             <div className="min-w-0">
               <div className="flex items-center gap-3 mb-1">
-                <DialogTitle className="text-[16px] font-black uppercase tracking-tight">AI Instruction Matrix</DialogTitle>
+                <DialogTitle className="text-[15px] font-black uppercase tracking-[0.2em]">AI Instruction Matrix</DialogTitle>
                 <div className="flex items-center gap-2 px-2 py-0.5 rounded-full bg-primary/5 border border-primary/10">
                   <div className="h-1.5 w-1.5 rounded-full bg-primary animate-pulse shadow-[0_0_8px_rgba(var(--primary),0.6)]" />
                   <span className="text-[9px] font-black uppercase tracking-[0.2em] text-primary/70 tabular-nums">
@@ -63,7 +63,7 @@ export function PromptInspector({ isOpen, onOpenChange, section }: PromptInspect
                   </span>
                 </div>
               </div>
-              <DialogDescription className="text-[11px] text-muted-foreground/60 font-medium leading-relaxed uppercase tracking-wider">
+              <DialogDescription className="text-[11px] text-muted-foreground/60 font-medium leading-relaxed uppercase tracking-[0.2em]">
                 Integrated neural vector for <span className="text-foreground font-black italic">"{section.title}"</span> — Composing Project Metadata + Context Vectors.
               </DialogDescription>
             </div>
