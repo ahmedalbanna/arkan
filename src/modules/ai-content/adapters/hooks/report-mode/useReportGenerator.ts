@@ -184,6 +184,7 @@ export function useReportGenerator(initialProject?: ProjectProperties | null) {
     summarizeMutation,
     expandMutation,
     rewriteMutation,
-    rewriteStyles
+    rewriteStyles,
+    syncProjectStructure: useBuilderStore.getState().syncProjectStructure,
   };
 }
