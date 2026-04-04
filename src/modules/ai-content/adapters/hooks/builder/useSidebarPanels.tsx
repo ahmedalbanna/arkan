@@ -29,6 +29,7 @@ const ProjectChat = lazy(() => import('@/modules/ai-content/adapters/components/
 const SnapshotHistoryPanel = lazy(() => import('@/modules/projects/adapters/components/SnapshotHistoryPanel'));
 const SidebarNavigator = lazy(() => import('@/modules/ai-content/adapters/components/builder/SidebarNavigator').then(m => ({ default: m.SidebarNavigator })));
 const GenerationNavigator = lazy(() => import('@/modules/ai-content/adapters/components/builder/generation/GenerationNavigator').then(m => ({ default: m.GenerationNavigator })));
+const UploadManager = lazy(() => import('@/modules/ai-content/adapters/components/builder/file-manager/UploadManager').then(m => ({ default: m.UploadManager })));
 
 interface UseSidebarPanelsProps {
     project: any;

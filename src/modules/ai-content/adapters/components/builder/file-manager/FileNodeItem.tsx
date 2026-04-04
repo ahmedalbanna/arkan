@@ -1,0 +1,102 @@
+'use client';
+
+import React from 'react';
+import { FileText, Pencil, Trash2, ExternalLink, Database, Cpu, Eye } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { cn } from '@/infrastructure/utils/cn';
+import { ExternalContext } from '@/modules/ai-content/domain/entities/ExternalContext';
+
+/**
+ * FileNodeItem — A shared high-fidelity component for source context nodes.
+ * Used in SourceManager and UploadManager to represent files or text blocks.
+ */
+
+interface FileNodeItemProps {
+    item: ExternalContext;
+    onEdit?: () => void;
+    onDelete?: () => void;
+    onView?: () => void;
+    className?: string;
+}
+
+export function FileNodeItem({
+    item,
+    onEdit,
+    onDelete,
+    onView,
+    className,
+}: FileNodeItemProps) {
+    // Technical metadata formatting
+    const typeLabel = item.type.charAt(0).toUpperCase() + item.type.slice(1);
+    const sizeInKb = (item.content.length / 1024).toFixed(1);
+
+    return (
+        <div className={cn(
+            "group/item relative p-3.5 rounded-2xl border border-border/40 bg-card/40 transition-all duration-300 hover:translate-x-0.5 hover:border-primary/20 hover:bg-muted/5 shadow-sm",
+            className
+        )}>
+            <div className="flex flex-col gap-3">
+                {/* Identity Header */}
+                <div className="flex items-start justify-between gap-3">
+                    <div className="flex items-center gap-3 min-w-0">
+                        <div className="h-9 w-9 rounded-xl bg-primary/5 border border-primary/10 flex items-center justify-center shrink-0 group-hover/item:border-primary/30 transition-colors">
+                            <FileText className="h-4.5 w-4.5 text-primary/60 group-hover/item:text-primary transition-all group-hover/item:scale-110" />
+                        </div>
+                        <div className="min-w-0">
+                            <h4 className="text-[12px] font-bold text-foreground/90 truncate uppercase tracking-tight">
+                                {item.fileName}
+                            </h4>
+                            <div className="flex items-center gap-2 mt-0.5">
+                                <div className="flex items-center gap-1 opacity-40">
+                                    <div className="h-1 w-1 rounded-full bg-green-500 shadow-[0_0_6px_rgba(34,197,94,0.4)]" />
+                                    <span className="text-[8px] font-black uppercase tracking-widest tabular-nums">{sizeInKb} KB</span>
+                                </div>
+                                <span className="text-[8px] text-muted-foreground/30 font-black">•</span>
+                                <span className="text-[8px] font-black text-primary/40 uppercase tracking-widest">{typeLabel}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="flex items-center gap-1 opacity-0 group-hover/item:opacity-100 transition-opacity">
+                        {onView && (
+                            <Button 
+                                variant="ghost" 
+                                size="icon" 
+                                className="h-7 w-7 rounded-lg hover:bg-primary/10 text-muted-foreground hover:text-primary"
+                                onClick={onView}
+                            >
+                                <Eye className="h-3.5 w-3.5" />
+                            </Button>
+                        )}
+                        {onEdit && (
+                            <Button 
+                                variant="ghost" 
+                                size="icon" 
+                                className="h-7 w-7 rounded-lg hover:bg-primary/10 text-muted-foreground hover:text-primary"
+                                onClick={onEdit}
+                            >
+                                <Pencil className="h-3.5 w-3.5" />
+                            </Button>
+                        )}
+                        {onDelete && (
+                            <Button 
+                                variant="ghost" 
+                                size="icon" 
+                                className="h-7 w-7 rounded-lg hover:bg-red-500/10 text-muted-foreground hover:text-red-600"
+                                onClick={onDelete}
+                            >
+                                <Trash2 className="h-3.5 w-3.5" />
+                            </Button>
+                        )}
+                    </div>
+                </div>
+
+                {/* Technical Atmospheric Decoration */}
+                <div className="absolute bottom-2 right-2 opacity-[0.03] group-hover:opacity-[0.08] transition-opacity pointer-events-none">
+                    <Database className="h-8 w-8" />
+                </div>
+            </div>
+        </div>
+    );
+}

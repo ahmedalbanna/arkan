@@ -3,7 +3,7 @@
 import React from 'react';
 import { SidebarSection } from './layout/SidebarSection';
 import { SidebarOutlineManager } from './outline/SidebarOutlineManager';
-import { SidebarFileManager } from '@/modules/ai-content/adapters/components/report-mode/file-manager/SidebarFileManager';
+import { SourceManager } from './file-manager/SourceManager';
 
 /**
  * SidebarNavigator — Main structural navigation hub for the builder side panel.
@@ -25,9 +25,9 @@ export function SidebarNavigator({
 }: SidebarNavigatorProps) {
   return (
     <div className="flex flex-col h-full overflow-y-auto custom-scrollbar -mx-5 -my-5">
-      {/* File Management Group */}
+      {/* Source Context Layer — High-Density Logic */}
       <SidebarSection title="Source Context" defaultOpen={true}>
-        <SidebarFileManager />
+        <SourceManager />
       </SidebarSection>
 
       {/* Structural Navigation Group */}
