@@ -11,7 +11,7 @@ import { useLocalization } from '@/context/LocalizationContext';
 import { useBuilderStore } from '@/hooks';
 import { useProjectFileOperations } from '@/modules/projects/adapters/hooks/useProjectFileOperations';
 import { BrowseProjectsDialog } from '@/modules/ai-content/adapters/components/report-mode/dialogs/BrowseProjectsDialog';
-import { ExportDialog } from '@/modules/ai-content/adapters/components/report-mode/dialogs/ExportDialog';
+import { ExportHUD } from '../session/ExportHUD';
 
 interface BuilderHeaderProps {
     projectName: string;
@@ -226,7 +226,7 @@ export const BuilderHeader = React.forwardRef<HTMLDivElement, BuilderHeaderProps
                         {/* Divider — tactical hairline */}
                         <div className="h-5 w-px bg-primary/10 mx-1" aria-hidden />
 
-                        <ExportDialog />
+                        <ExportHUD />
                     </div>
                 </TooltipProvider>
             </div>
