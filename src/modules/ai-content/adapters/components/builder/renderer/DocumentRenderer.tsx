@@ -3,11 +3,12 @@
 import React from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { A4Page } from '@/components/shared/A4Page';
-import { Document } from '@/modules/ai-content/adapters/components/report-mode/Document';
-import { SnapshotComparison } from '@/modules/ai-content/adapters/components/report-mode/SnapshotComparison';
+import { BuilderDocument } from './BuilderDocument';
+import { SnapshotComparison } from './SnapshotComparison';
 import { CoverPage } from '@/components/shared/CoverPage';
-import { ReportSteps } from '@/modules/ai-content/adapters/components/report-mode/ReportSteps';
+import { ReportSteps } from './ReportSteps';
 import { Project } from '@/modules/projects/domain/entities/Project';
+import { type ComparisonSnapshot, type RewriteStyleOption, type SectionMutation } from './types';
 
 interface DocumentRendererProps {
     project: Project | null;
@@ -17,13 +18,13 @@ interface DocumentRendererProps {
     selectedSectionIds: string[];
     handleActiveSectionChange: (id: string | null, multiSelect?: boolean) => void;
     showCoverPage: boolean;
-    comparisonSnapshot: any;
+    comparisonSnapshot: ComparisonSnapshot | null;
     onCloseComparison: () => void;
     updateProjectFromMarkdown: (markdown: string) => void;
-    summarizeMutation: any;
-    expandMutation: any;
-    rewriteMutation: any;
-    rewriteStyles: { label: string; style: string }[];
+    summarizeMutation: SectionMutation;
+    expandMutation: SectionMutation;
+    rewriteMutation: SectionMutation;
+    rewriteStyles: RewriteStyleOption[];
 }
 
 export const DocumentRenderer: React.FC<DocumentRendererProps> = ({
@@ -75,7 +76,7 @@ export const DocumentRenderer: React.FC<DocumentRendererProps> = ({
             {/* Document body */}
             {hasContent && project ? (
                 <A4Page>
-                    <Document
+                    <BuilderDocument
                         project={project}
                         viewMode={viewMode}
                         onMarkdownChange={updateProjectFromMarkdown}

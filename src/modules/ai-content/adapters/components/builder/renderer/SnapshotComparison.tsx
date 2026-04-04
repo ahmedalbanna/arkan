@@ -8,19 +8,16 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { GitCompare, X } from 'lucide-react';
+import { type ComparisonSnapshot } from './types';
 
 interface SnapshotComparisonProps {
     activeProject: Project;
-    comparisonSnapshot: {
-        id: string;
-        name: string;
-        snapshotData: any;
-    };
+    comparisonSnapshot: ComparisonSnapshot;
     onClose: () => void;
 }
 
 export const SnapshotComparison = ({ activeProject, comparisonSnapshot, onClose }: SnapshotComparisonProps) => {
-    const snapshotProject = new Project(comparisonSnapshot.snapshotData);
+    const snapshotProject = new Project(comparisonSnapshot.snapshotData as any);
     const diff = computeDiff(snapshotProject.fullMarkdownContent, activeProject.fullMarkdownContent);
 
     return (

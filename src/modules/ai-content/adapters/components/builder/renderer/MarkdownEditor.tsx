@@ -10,7 +10,7 @@ import { IMarkdownService } from '@/modules/ai-content/domain/services/IMarkdown
 import { Button } from '@/components/ui/button';
 import { ContextualToolbar } from '@/modules/ai-content/infrastructure/editor/editor/ToolBar';
 import { cn } from '@/infrastructure/utils/cn';
-import { PROSE_CLASSES } from './markdown-styles';
+import { PROSE_CLASSES } from '@/modules/ai-content/adapters/components/report-mode/markdown-styles';
 
 interface MarkdownEditorProps {
   content: string;
@@ -179,4 +179,5 @@ const MarkdownEditorComponent = ({
 
 const MarkdownEditor = React.memo(MarkdownEditorComponent);
 
+export { MarkdownEditor };
 export default MarkdownEditor;

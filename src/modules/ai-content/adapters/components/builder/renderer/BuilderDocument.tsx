@@ -11,6 +11,7 @@ import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { PenLine, RefreshCw, Sparkles, MousePointer2, AlignLeft, ZoomIn, Wand2 } from 'lucide-react';
 import { cn } from '@/infrastructure/utils/cn';
+import { type SectionMutation, type RewriteStyleOption } from './types';
 
 interface DocumentProps {
     project: Project;
@@ -20,13 +21,13 @@ interface DocumentProps {
     setActiveChapterId: (id: string | null) => void;
     selectedSectionIds: string[];
     handleActiveSectionChange: (id: string | null, multiSelect?: boolean) => void;
-    summarizeMutation?: any;
-    expandMutation?: any;
-    rewriteMutation?: any;
-    rewriteStyles?: { label: string; style: string }[];
+    summarizeMutation?: SectionMutation;
+    expandMutation?: SectionMutation;
+    rewriteMutation?: SectionMutation;
+    rewriteStyles?: RewriteStyleOption[];
 }
 
-export const Document = ({
+export const BuilderDocument = ({
     project,
     viewMode,
     onMarkdownChange,
@@ -37,7 +38,7 @@ export const Document = ({
     summarizeMutation,
     expandMutation,
     rewriteMutation,
-    rewriteStyles
+    rewriteStyles,
 }: DocumentProps) => {
     const [hoveredItemId, setHoveredItemId] = useState<string | null>(null);
     const hoverTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -54,6 +55,7 @@ export const Document = ({
     };
     return (
         <div className="pb-32">
+            {/* Editor / preview switch retains selection context */}
             {viewMode === 'edit' ? (
                 <MarkdownEditor
                     content={project.fullMarkdownContent}
@@ -154,9 +156,9 @@ export const Document = ({
                         }
 
                         if (item instanceof Section) {
-                            const isSummarizing = summarizeMutation?.isPending && (summarizeMutation.variables as any)?.sectionId === item.id;
-                            const isExpanding = expandMutation?.isPending && (expandMutation.variables as any)?.sectionId === item.id;
-                            const isRewriting = rewriteMutation?.isPending && (rewriteMutation.variables as any)?.sectionId === item.id;
+                            const isSummarizing = summarizeMutation?.isPending && summarizeMutation?.variables?.sectionId === item.id;
+                            const isExpanding = expandMutation?.isPending && expandMutation?.variables?.sectionId === item.id;
+                            const isRewriting = rewriteMutation?.isPending && rewriteMutation?.variables?.sectionId === item.id;
                             const isActiveSectionInEdit = !isPreview && selectedSectionIds.includes(item.id);
 
                             const sectionContent = (
