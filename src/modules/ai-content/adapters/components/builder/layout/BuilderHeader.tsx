@@ -10,7 +10,7 @@ import { cn } from '@/infrastructure/utils/cn';
 import { useLocalization } from '@/context/LocalizationContext';
 import { useBuilderStore } from '@/hooks';
 import { useProjectFileOperations } from '@/modules/projects/adapters/hooks/useProjectFileOperations';
-import { BrowseProjectsDialog } from '@/modules/ai-content/adapters/components/report-mode/dialogs/BrowseProjectsDialog';
+import { LibraryHUD } from '../session/LibraryHUD';
 import { ExportHUD } from '../session/ExportHUD';
 
 interface BuilderHeaderProps {
@@ -149,7 +149,7 @@ export const BuilderHeader = React.forwardRef<HTMLDivElement, BuilderHeaderProps
                             </TooltipContent>
                         </Tooltip>
 
-                        <BrowseProjectsDialog />
+                        <LibraryHUD />
 
                         <Tooltip>
                             <TooltipTrigger asChild>

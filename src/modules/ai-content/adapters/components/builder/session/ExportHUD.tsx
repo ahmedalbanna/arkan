@@ -170,7 +170,7 @@ export function ExportHUD() {
                                 description="Comprehensive report format with professional layout and citation support."
                                 isSelected={activeFormat === 'docx'}
                                 onSelect={() => setActiveFormat('docx')}
-                                templateName={docxTemplates.find(t => t.id === selectedDocxTemplate)?.name}
+                                templateName={docxTemplates[selectedDocxTemplate]?.name}
                                 specs={['Standard Pagination', 'TOC Sync', 'Header Logic']}
                             />
                             <FormatSelector 
@@ -179,7 +179,7 @@ export function ExportHUD() {
                                 description="Visual presentation format optimized for high-impact knowledge transfer."
                                 isSelected={activeFormat === 'pptx'}
                                 onSelect={() => setActiveFormat('pptx')}
-                                templateName={pptxTemplates.find(t => t.id === selectedPptxTemplate)?.name}
+                                templateName={pptxTemplates[selectedPptxTemplate]?.name}
                                 specs={['Dynamic Layouts', 'Auto-Transition', 'Visual Hierarchies']}
                             />
                         </div>
@@ -259,8 +259,8 @@ export function ExportHUD() {
                                                     <SelectValue />
                                                 </SelectTrigger>
                                                 <SelectContent className="rounded-2xl border-primary/10 backdrop-blur-3xl shadow-2xl">
-                                                    {docxTemplates.map(t => (
-                                                        <SelectItem key={t.id} value={t.id} className="text-[11px] font-medium py-3 focus:bg-primary/5 focus:text-primary">{t.name}</SelectItem>
+                                                    {Object.entries(docxTemplates).map(([id, t]) => (
+                                                        <SelectItem key={id} value={id} className="text-[11px] font-medium py-3 focus:bg-primary/5 focus:text-primary">{t.name}</SelectItem>
                                                     ))}
                                                 </SelectContent>
                                             </Select>
@@ -282,8 +282,8 @@ export function ExportHUD() {
                                                     <SelectValue />
                                                 </SelectTrigger>
                                                 <SelectContent className="rounded-2xl border-primary/10 backdrop-blur-3xl shadow-2xl">
-                                                    {pptxTemplates.map(t => (
-                                                        <SelectItem key={t.id} value={t.id} className="text-[11px] font-medium py-3 focus:bg-primary/5 focus:text-primary">{t.name}</SelectItem>
+                                                    {Object.entries(pptxTemplates).map(([id, t]) => (
+                                                        <SelectItem key={id} value={id} className="text-[11px] font-medium py-3 focus:bg-primary/5 focus:text-primary">{t.name}</SelectItem>
                                                     ))}
                                                 </SelectContent>
                                             </Select>

@@ -134,11 +134,16 @@ function SourceEditor({ isOpen, onClose, initialName = '', initialContent = '', 
 
 export function SourceManager() {
     const { project, updateProject } = useBuilderStore();
-    const { getRootProps, getInputProps } = useFileUpload((_field, _val) => {});
-    const handleFileUpload = async () => {
-        // useFileUpload hook in this project is dropzone-based, 
-        // manual click handled via getRootProps in UploadManager
-    };
+    const { getRootProps, getInputProps } = useFileUpload((_field, val) => {
+        if (val && typeof val === 'string') {
+            updateProject(p => p.addExternalContext({
+                fileName: 'Extracted Content',
+                content: val,
+                type: 'context'
+            }, String(Date.now())));
+        }
+    }, { fieldName: 'text' });
+    
     const [isAddingText, setIsAddingText] = useState(false);
     const [editingIndex, setEditingIndex] = useState<number | null>(null);
 
@@ -170,15 +175,8 @@ export function SourceManager() {
         updateProject(p => p.updateExternalContextType(index, type));
     };
 
-    const handleFileUpload = async () => {
-        const result = await handleFileSelect();
-        if (result && project) {
-            updateProject(p => p.addExternalContext({
-                fileName: result.name,
-                content: result.content,
-                type: 'context'
-            }, result.id));
-        }
+    const handleManualUpload = () => {
+        // Dropzone handle via getRootProps/getInputProps in the UI
     };
 
     if (!project) return null;
@@ -197,14 +195,16 @@ export function SourceManager() {
 
             {/* Quick Ingestion Hub */}
             <div className="grid grid-cols-2 gap-2.5">
-                <Button 
-                    variant="outline" 
-                    className="h-14 flex flex-col items-center justify-center gap-1.5 rounded-2xl border-dashed border-primary/20 bg-primary/[0.02] hover:bg-primary/5 hover:border-primary/40 transition-all group/up"
-                    onClick={handleFileUpload}
-                >
-                    <UploadCloud className="h-4 w-4 text-primary/40 group-hover/up:text-primary group-hover/up:scale-110 transition-all" />
-                    <span className="text-[8px] font-black uppercase tracking-[0.2em] text-muted-foreground/60 group-hover/up:text-primary transition-colors">Import File</span>
-                </Button>
+                <div {...getRootProps()}>
+                    <input {...getInputProps()} />
+                    <Button 
+                        variant="outline" 
+                        className="h-14 w-full flex flex-col items-center justify-center gap-1.5 rounded-2xl border-dashed border-primary/20 bg-primary/[0.02] hover:bg-primary/5 hover:border-primary/40 transition-all group/up"
+                    >
+                        <UploadCloud className="h-4 w-4 text-primary/40 group-hover/up:text-primary group-hover/up:scale-110 transition-all" />
+                        <span className="text-[8px] font-black uppercase tracking-[0.2em] text-muted-foreground/60 group-hover/up:text-primary transition-colors">Import File</span>
+                    </Button>
+                </div>
                 <Button 
                     variant="outline" 
                     className="h-14 flex flex-col items-center justify-center gap-1.5 rounded-2xl border-dashed border-primary/20 bg-primary/[0.02] hover:bg-primary/5 hover:border-primary/40 transition-all group/txt"
