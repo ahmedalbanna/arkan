@@ -3,7 +3,7 @@
 import { useBuilderPageLogic } from '@/modules/projects/adapters/hooks/use-builder-page';
 import { useLocalization } from '@/context/LocalizationContext';
 import { useBuilderStore } from '@/modules/projects/adapters/state/useBuilderStore';
-import React, { useState, useMemo, lazy, useEffect } from 'react';
+import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import { useSaveProject } from '@/modules/projects/adapters/hooks/use-projects';
 import { useWritingTool } from '@/hooks';
 import { useSidebarPanels } from '@/modules/ai-content/adapters/hooks/builder/useSidebarPanels';
@@ -47,33 +47,37 @@ export function useReportGenerator(initialProject?: ProjectProperties | null) {
     };
   }, [zoomLevel]);
 
-  const handleActiveSectionChange = (id: string | null, multiSelect?: boolean) => {
+  const handleActiveSectionChange = useCallback((id: string | null, multiSelect?: boolean) => {
     if (multiSelect && id) {
       setSelectedSectionIds(prev => {
         if (prev.includes(id)) {
           return prev.filter(sid => sid !== id);
-        } else {
-          return [...prev, id];
         }
+        return [...prev, id];
       });
       setActiveChapterId(null);
-    } else {
-      setSelectedSectionIds(id ? [id] : []);
-      if (id) setActiveChapterId(null);
+      return;
     }
-  };
 
-  const handleActiveChapterChange = (id: string | null) => {
+    setSelectedSectionIds(id ? [id] : []);
+    if (id) setActiveChapterId(null);
+  }, []);
+
+  const handleActiveChapterChange = useCallback((id: string | null) => {
     setActiveChapterId(id);
-    if (id) {
-      const chapter = builderPageLogic.project?.getChapter(id);
-      if (chapter) {
-        setSelectedSectionIds(chapter.sections.map(s => s.id));
-      } else {
-        setSelectedSectionIds([]);
-      }
+    if (!id) {
+      setSelectedSectionIds([]);
+      return;
     }
-  };
+
+    const chapter = builderPageLogic.project?.getChapter(id);
+    if (chapter) {
+      setSelectedSectionIds(chapter.sections.map(s => s.id));
+      return;
+    }
+
+    setSelectedSectionIds([]);
+  }, [builderPageLogic.project]);
 
   const { leftPanels, rightPanels } = useSidebarPanels({
     project: builderPageLogic.project,
@@ -84,59 +88,66 @@ export function useReportGenerator(initialProject?: ProjectProperties | null) {
     setActiveRightPanelKey,
   });
 
-  const handleMoveItem = (activeId: string, overId: string) => {
+  const handleMoveItem = useCallback((activeId: string, overId: string) => {
     updateProject((p: any) => p.moveItem(activeId, overId));
-  };
+  }, [updateProject]);
 
-  const handleUpdateTitle = (id: string, newTitle: string, isChapter: boolean) => {
+  const handleUpdateTitle = useCallback((id: string, newTitle: string, isChapter: boolean) => {
     updateProject((p: any) => p.updateItemTitle(id, newTitle, isChapter));
-  };
+  }, [updateProject]);
 
-  const handleDeleteItem = (id: string, isChapter: boolean) => {
+  const handleDeleteItem = useCallback((id: string, isChapter: boolean) => {
     updateProject((p: any) => p.deleteItem(id, isChapter));
-  };
+  }, [updateProject]);
 
-  const handleAddChapter = () => {
+  const handleAddChapter = useCallback(() => {
     updateProject((p: any) => p.addChapter());
-  };
+  }, [updateProject]);
 
-  const handleAddSection = (chapterId: string) => {
+  const handleAddSection = useCallback((chapterId: string) => {
     updateProject((p: any) => p.addSection(chapterId));
-  };
+  }, [updateProject]);
 
-  const handleDuplicateItem = (id: string, isChapter: boolean) => {
+  const handleDuplicateItem = useCallback((id: string, isChapter: boolean) => {
     updateProject((p: any) => p.duplicateItem(id, isChapter));
-  };
+  }, [updateProject]);
 
-  const handleUndo = () => {
+  const handleUndo = useCallback(() => {
     useBuilderStore.getState().undo();
-  };
+  }, []);
 
-  const handleCopyItem = (id: string, isChapter: boolean) => {
+  const handleCopyItem = useCallback((id: string, isChapter: boolean) => {
     // Implement local storage or state based copy
     localStorage.setItem('arkan_copied_item', JSON.stringify({ id, isChapter }));
-  };
+  }, []);
 
-  const handlePasteItem = (targetId: string, isChapter: boolean) => {
+  const handlePasteItem = useCallback((targetId: string, isChapter: boolean) => {
     const copied = localStorage.getItem('arkan_copied_item');
     if (copied) {
       const { id, isChapter: copiedIsChapter } = JSON.parse(copied);
       updateProject((p: any) => p.pasteItem(id, copiedIsChapter, targetId, isChapter));
     }
-  };
+  }, [updateProject]);
 
-  const { setHasUnsavedChanges } = useBuilderStore();
   const { saveProjectMutation } = useSaveProject();
 
-  const handleSave = () => {
+  const handleSave = useCallback(() => {
     if (builderPageLogic.project) {
       saveProjectMutation.mutate(builderPageLogic.project.toProperties());
     }
-  };
+  }, [builderPageLogic.project, saveProjectMutation]);
 
-  const handleZoomIn = () => setZoomLevel(prev => Math.min(prev + 0.1, 2));
-  const handleZoomOut = () => setZoomLevel(prev => Math.max(prev - 0.1, 0.5));
-  const handleZoomReset = () => setZoomLevel(1);
+  const handleZoomIn = useCallback(() => {
+    setZoomLevel(prev => Math.min(prev + 0.1, 2));
+  }, []);
+
+  const handleZoomOut = useCallback(() => {
+    setZoomLevel(prev => Math.max(prev - 0.1, 0.5));
+  }, []);
+
+  const handleZoomReset = useCallback(() => {
+    setZoomLevel(1);
+  }, []);
 
   const hasUnsavedChanges = useBuilderStore(state => state.hasUnsavedChanges);
 

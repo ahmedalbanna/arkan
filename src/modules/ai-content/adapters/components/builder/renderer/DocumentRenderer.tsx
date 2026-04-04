@@ -5,6 +5,9 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { A4Page } from '@/components/shared/A4Page';
 import { BuilderDocument } from './BuilderDocument';
 import { SnapshotComparison } from './SnapshotComparison';
+
+const MemoizedSnapshotComparison = React.memo(SnapshotComparison);
+const MemoizedBuilderDocument = React.memo(BuilderDocument);
 import { CoverPage } from '@/components/shared/CoverPage';
 import { ReportSteps } from './ReportSteps';
 import { Project } from '@/modules/projects/domain/entities/Project';
@@ -27,7 +30,7 @@ interface DocumentRendererProps {
     rewriteStyles: RewriteStyleOption[];
 }
 
-export const DocumentRenderer: React.FC<DocumentRendererProps> = ({
+const DocumentRendererComponent: React.FC<DocumentRendererProps> = ({
     project,
     viewMode,
     activeChapterId,
@@ -47,7 +50,7 @@ export const DocumentRenderer: React.FC<DocumentRendererProps> = ({
 
     if (comparisonSnapshot && project) {
         return (
-            <SnapshotComparison
+            <MemoizedSnapshotComparison
                 activeProject={project}
                 comparisonSnapshot={comparisonSnapshot}
                 onClose={onCloseComparison}
@@ -76,7 +79,7 @@ export const DocumentRenderer: React.FC<DocumentRendererProps> = ({
             {/* Document body */}
             {hasContent && project ? (
                 <A4Page>
-                    <BuilderDocument
+                    <MemoizedBuilderDocument
                         project={project}
                         viewMode={viewMode}
                         onMarkdownChange={updateProjectFromMarkdown}
@@ -98,3 +101,7 @@ export const DocumentRenderer: React.FC<DocumentRendererProps> = ({
         </div>
     );
 };
+
+export const DocumentRenderer = React.memo(DocumentRendererComponent);
+
+DocumentRenderer.displayName = 'DocumentRenderer';

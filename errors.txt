@@ -1,0 +1,132 @@
+## Error Type
+Console Error
+
+## Error Message
+React has detected a change in the order of Hooks called by SectionGenerationHUD. This will lead to bugs and errors if not fixed. For more information, read the Rules of Hooks: https://react.dev/link/rules-of-hooks
+
+   Previous render            Next render
+   ------------------------------------------------------
+1. useContext                 useContext
+2. useRef                     useRef
+3. useMemo                    useMemo
+4. useSyncExternalStore       useSyncExternalStore
+5. useEffect                  useEffect
+6. useDebugValue              useDebugValue
+7. useDebugValue              useDebugValue
+8. useRef                     useRef
+9. useMemo                    useMemo
+10. useSyncExternalStore      useSyncExternalStore
+11. useEffect                 useEffect
+12. useDebugValue             useDebugValue
+13. useDebugValue             useDebugValue
+14. useContext                useContext
+15. useState                  useState
+16. useEffect                 useEffect
+17. useContext                useContext
+18. useRef                    useRef
+19. useMemo                   useMemo
+20. useSyncExternalStore      useSyncExternalStore
+21. useEffect                 useEffect
+22. useDebugValue             useDebugValue
+23. useDebugValue             useDebugValue
+24. useRef                    useRef
+25. useMemo                   useMemo
+26. useSyncExternalStore      useSyncExternalStore
+27. useEffect                 useEffect
+28. useDebugValue             useDebugValue
+29. useDebugValue             useDebugValue
+30. useContext                useContext
+31. useCallback               useCallback
+32. useCallback               useCallback
+33. useContext                useContext
+34. useState                  useState
+35. useEffect                 useEffect
+36. useCallback               useCallback
+37. useSyncExternalStore      useSyncExternalStore
+38. useCallback               useCallback
+39. useContext                useContext
+40. useState                  useState
+41. useEffect                 useEffect
+42. useCallback               useCallback
+43. useSyncExternalStore      useSyncExternalStore
+44. useCallback               useCallback
+45. useContext                useContext
+46. useState                  useState
+47. useEffect                 useEffect
+48. useCallback               useCallback
+49. useSyncExternalStore      useSyncExternalStore
+50. useCallback               useCallback
+51. useContext                useContext
+52. useState                  useState
+53. useEffect                 useEffect
+54. useCallback               useCallback
+55. useSyncExternalStore      useSyncExternalStore
+56. useCallback               useCallback
+57. useContext                useContext
+58. useState                  useState
+59. useEffect                 useEffect
+60. useCallback               useCallback
+61. useSyncExternalStore      useSyncExternalStore
+62. useCallback               useCallback
+63. useMemo                   useMemo
+64. useRef                    useRef
+65. useMemo                   useMemo
+66. useSyncExternalStore      useSyncExternalStore
+67. useEffect                 useEffect
+68. useDebugValue             useDebugValue
+69. useDebugValue             useDebugValue
+70. useRef                    useRef
+71. useMemo                   useMemo
+72. useSyncExternalStore      useSyncExternalStore
+73. useEffect                 useEffect
+74. useDebugValue             useDebugValue
+75. useDebugValue             useDebugValue
+76. useMemo                   useMemo
+77. undefined                 useCallback
+   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+
+
+    at SectionGenerationHUD (src/modules/ai-content/adapters/components/builder/generation/SectionGenerationHUD.tsx:82:43)
+    at useSidebarPanels.useMemo[rightPanels] (src/modules/ai-content/adapters/hooks/builder/useSidebarPanels.tsx:101:23)
+    at useSidebarPanels (src/modules/ai-content/adapters/hooks/builder/useSidebarPanels.tsx:83:32)
+    at useReportGenerator (src/modules/ai-content/adapters/hooks/report-mode/useReportGenerator.ts:82:55)
+    at BuilderWorkspace (src/modules/ai-content/adapters/components/builder/BuilderWorkspace.tsx:54:27)
+    at GeneratePage (src/app/builder/page.tsx:34:7)
+
+## Code Frame
+  80 |     const creditCost = isBulkGeneration ? selectedSectionIds.length : 1;
+  81 |
+> 82 |     const handleCopySettings = useCallback(() => {
+     |                                           ^
+  83 |         if (!section) return;
+  84 |         copySettings({
+  85 |             controls: { ...section.controls },
+
+Next.js version: 15.5.9 (Turbopack)
+
+---
+## Error Type
+Runtime Error
+
+## Error Message
+Rendered more hooks than during the previous render.
+
+
+    at SectionGenerationHUD (src/modules/ai-content/adapters/components/builder/generation/SectionGenerationHUD.tsx:82:43)
+    at useSidebarPanels.useMemo[rightPanels] (src/modules/ai-content/adapters/hooks/builder/useSidebarPanels.tsx:101:23)
+    at useSidebarPanels (src/modules/ai-content/adapters/hooks/builder/useSidebarPanels.tsx:83:32)
+    at useReportGenerator (src/modules/ai-content/adapters/hooks/report-mode/useReportGenerator.ts:82:55)
+    at BuilderWorkspace (src/modules/ai-content/adapters/components/builder/BuilderWorkspace.tsx:54:27)
+    at GeneratePage (src/app/builder/page.tsx:34:7)
+
+## Code Frame
+  80 |     const creditCost = isBulkGeneration ? selectedSectionIds.length : 1;
+  81 |
+> 82 |     const handleCopySettings = useCallback(() => {
+     |                                           ^
+  83 |         if (!section) return;
+  84 |         copySettings({
+  85 |             controls: { ...section.controls },
+
+Next.js version: 15.5.9 (Turbopack)

@@ -122,7 +122,7 @@ export function useSidebarPanels({
                 content: <SnapshotHistoryPanel />,
             },
         ];
-    }, [project, selectedSectionIds, activeChapterId, setActiveRightPanelKey, onActiveSectionChange, onActiveChapterChange]);
+    }, [project, selectedSectionIds, activeChapterId, setActiveRightPanelKey]);
 
     return { leftPanels, rightPanels };
 }

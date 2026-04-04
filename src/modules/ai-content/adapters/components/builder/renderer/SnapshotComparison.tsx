@@ -16,7 +16,7 @@ interface SnapshotComparisonProps {
     onClose: () => void;
 }
 
-export const SnapshotComparison = ({ activeProject, comparisonSnapshot, onClose }: SnapshotComparisonProps) => {
+const SnapshotComparisonComponent = ({ activeProject, comparisonSnapshot, onClose }: SnapshotComparisonProps) => {
     const snapshotProject = new Project(comparisonSnapshot.snapshotData as any);
     const diff = computeDiff(snapshotProject.fullMarkdownContent, activeProject.fullMarkdownContent);
 
@@ -79,3 +79,7 @@ export const SnapshotComparison = ({ activeProject, comparisonSnapshot, onClose 
         </div>
     );
 };
+
+export const SnapshotComparison = React.memo(SnapshotComparisonComponent);
+
+SnapshotComparison.displayName = 'SnapshotComparison';

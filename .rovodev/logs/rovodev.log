@@ -2130,3 +2130,1183 @@ Any other components in the settings folder you want me to audit?
 2026-04-04 14:55:48.139 | 1653284 (1653284) | DEBUG    | Sending event to Atlassian Analytics: command completed
 2026-04-04 14:55:48.222 | 1653284 (1653284) | DEBUG    | Successfully sent event to Atlassian Analytics
 2026-04-04 14:55:48.264 | 1653284 (1653284) | INFO     | Built file cache: 1942 files
+2026-04-04 15:09:19.677 | 2003560 (1653284) | INFO     | Configuring Nautilus MCP server
+2026-04-04 15:09:19.709 | 2003560 (1653284) | INFO     | Starting MCP Nautilus server using STDIO transport
+[04/04/26 15:11:50] Error calling tool 'find_and_replace_code'                  
+                    ╭─────────── Traceback (most recent call last) ────────────╮
+                    │ in call_tool:160                                         │
+                    │                                                          │
+                    │ in run:381                                               │
+                    │                                                          │
+                    │                 ... 3 frames hidden ...                  │
+                    │                                                          │
+                    │ in wrapper:298                                           │
+                    │                                                          │
+                    │ in find_and_replace_code:30                              │
+                    ╰──────────────────────────────────────────────────────────╯
+                    ValueError: Find and replace strings are the same:          
+                    ```                                                         
+                    import React, { useState, useMemo, useEffect, useCallback } 
+                    from 'react';                                               
+                    ```                                                         
+                                                                                
+[04/04/26 15:12:16] Error calling tool 'find_and_replace_code'                  
+                    ╭─────────── Traceback (most recent call last) ────────────╮
+                    │ in call_tool:160                                         │
+                    │                                                          │
+                    │ in run:381                                               │
+                    │                                                          │
+                    │                 ... 3 frames hidden ...                  │
+                    │                                                          │
+                    │ in wrapper:298                                           │
+                    │                                                          │
+                    │ in find_and_replace_code:30                              │
+                    ╰──────────────────────────────────────────────────────────╯
+                    ValueError: Find and replace strings are the same:          
+                    ```                                                         
+                    import React, { useState, useMemo, useEffect, useCallback } 
+                    from 'react';                                               
+                    ```                                                         
+                                                                                
+                    Error calling tool 'find_and_replace_code'                  
+                    ╭─────────── Traceback (most recent call last) ────────────╮
+                    │ in call_tool:160                                         │
+                    │                                                          │
+                    │ in run:381                                               │
+                    │                                                          │
+                    │                 ... 3 frames hidden ...                  │
+                    │                                                          │
+                    │ in wrapper:298                                           │
+                    │                                                          │
+                    │ in find_and_replace_code:30                              │
+                    ╰──────────────────────────────────────────────────────────╯
+                    ValueError: Find and replace strings are the same:          
+                    ```                                                         
+                    import React, { useState, useMemo, useEffect, useCallback } 
+                    from 'react';                                               
+                    ```                                                         
+                                                                                
+[04/04/26 17:26:14] Error calling tool 'find_and_replace_code'                  
+                    ╭─────────── Traceback (most recent call last) ────────────╮
+                    │ in call_tool:160                                         │
+                    │                                                          │
+                    │ in run:381                                               │
+                    │                                                          │
+                    │                 ... 3 frames hidden ...                  │
+                    │                                                          │
+                    │ in wrapper:298                                           │
+                    │                                                          │
+                    │ in find_and_replace_code:30                              │
+                    ╰──────────────────────────────────────────────────────────╯
+                    ValueError: Find and replace strings are the same:          
+                    ```                                                         
+                        return (                                                
+                            <div                                                
+                                className={cn(                                  
+                                    'absolute right-6 top-6 z-40 w-[280px]      
+                    rounded-2xl border border-border/40 bg-background/80        
+                    backdrop-blur-2xl shadow-[0_12px_40px_rgba(0,0,0,0.12)]',   
+                                    className                                   
+                                )}                                              
+                            >                                                   
+                    ```                                                         
+                                                                                
+[04/04/26 17:28:37] Error calling tool 'find_and_replace_code'                  
+                    ╭─────────── Traceback (most recent call last) ────────────╮
+                    │ in call_tool:160                                         │
+                    │                                                          │
+                    │ in run:381                                               │
+                    │                                                          │
+                    │                 ... 3 frames hidden ...                  │
+                    │                                                          │
+                    │ in wrapper:298                                           │
+                    │                                                          │
+                    │ in find_and_replace_code:93                              │
+                    ╰──────────────────────────────────────────────────────────╯
+                    ValueError: ControlPanel.tsx: No matches found for find     
+                    string:                                                     
+                    ```                                                         
+                      const handleUpdate = (updates:                            
+                    Partial<GenerationControlState>) => {                       
+                        const targets = selectedIds && selectedIds.length > 0 ? 
+                    selectedIds : [section.id];                                 
+                        updateProject((project) => {                            
+                          return targets.reduce((currentProject, id) => {       
+                            return currentProject.updateSection(id,             
+                    (sectionToUpdate) =>                                        
+                              sectionToUpdate.withProps({                       
+                                controls: { ...sectionToUpdate.controls,        
+                    ...updates },                                               
+                              })                                                
+                            );                                                  
+                          }, project);                                          
+                        });                                                     
+                      };                                                        
+                                                                                
+                      const handleDetectFormats = () => {                       
+                        if (!section.content) return;                           
+                        const lines = section.content.split('\n');              
+                        const detected: GenerationControlState['outputStyle'] = 
+                    {                                                           
+                          heading: lines.some(l => l.trim().startsWith('#')),   
+                          paragraph: lines.some(l => l.trim() &&                
+                    !l.startsWith('#') && !l.startsWith('-') &&                 
+                    !l.startsWith('|')),                                        
+                          list: lines.some(l => l.trim().startsWith('- ') ||    
+                    l.trim().startsWith('* ') || /^\d+\./.test(l.trim())),      
+                          table: lines.some(l => l.includes('|')),              
+                          code: lines.some(l => l.startsWith('```')),           
+                          diagram: lines.some(l => l.includes('mermaid')),      
+                          math: lines.some(l => l.includes('$')),               
+                        };                                                      
+                        handleUpdate({ outputStyle: detected });                
+                      };                                                        
+                                                                                
+                    ```                                                         
+                    The diff with the closest match is:                         
+                    ```                                                         
+                    @@ @@                                                       
+                    -  const handleUpdate = (updates:                           
+                    Partial<GenerationControlState>) => {                       
+                    -    const targets = selectedIds && selectedIds.length > 0 ?
+                    selectedIds : [section.id];                                 
+                    -    updateProject((project) => {                           
+                    -      return targets.reduce((currentProject, id) => {      
+                    -        return currentProject.updateSection(id,            
+                    (sectionToUpdate) =>                                        
+                    -          sectionToUpdate.withProps({                      
+                    -            controls: { ...sectionToUpdate.controls,       
+                    ...updates },                                               
+                    -          })                                               
+                    -        );                                                 
+                    -      }, project);                                         
+                    -    });                                                    
+                    -  };                                                       
+                    +    const handleUpdate = (updates:                         
+                    Partial<GenerationControlState>) => {                       
+                    +        const targets = selectedIds && selectedIds.length >
+                    0 ? selectedIds : [section.id];                             
+                    +        updateProject((project) => {                       
+                    +            return targets.reduce((currentProject, id) => {
+                    +                return currentProject.updateSection(id,    
+                    (sectionToUpdate) =>                                        
+                    +                    sectionToUpdate.withProps({            
+                    +                        controls: {                        
+                    ...sectionToUpdate.controls, ...updates },                  
+                    +                    })                                     
+                    +                );                                         
+                    +            }, project);                                   
+                    +        });                                                
+                    +    };                                                     
+                                                                                
+                    -  const handleDetectFormats = () => {                      
+                    -    if (!section.content) return;                          
+                    -    const lines = section.content.split('\n');             
+                    -    const detected: GenerationControlState['outputStyle'] =
+                    {                                                           
+                    -      heading: lines.some(l => l.trim().startsWith('#')),  
+                    -      paragraph: lines.some(l => l.trim() &&               
+                    !l.startsWith('#') && !l.startsWith('-') &&                 
+                    !l.startsWith('|')),                                        
+                    -      list: lines.some(l => l.trim().startsWith('- ') ||   
+                    l.trim().startsWith('* ') || /^\d+\./.test(l.trim())),      
+                    -      table: lines.some(l => l.includes('|')),             
+                    -      code: lines.some(l => l.startsWith('```')),          
+                    -      diagram: lines.some(l => l.includes('mermaid')),     
+                    -      math: lines.some(l => l.includes('$')),              
+                    +    const handleDetectFormats = () => {                    
+                    +        if (!section.content) return;                      
+                    +        const lines = section.content.split('\n');         
+                    +        const detected:                                    
+                    GenerationControlState['outputStyle'] = {                   
+                    +            heading: lines.some(l =>                       
+                    l.trim().startsWith('#')),                                  
+                    +            paragraph: lines.some(l => l.trim() &&         
+                    !l.startsWith('#') && !l.startsWith('-') &&                 
+                    !l.startsWith('|')),                                        
+                    +            list: lines.some(l => l.trim().startsWith('- ')
+                    || l.trim().startsWith('* ') || /^\d+\./.test(l.trim())),   
+                    +            table: lines.some(l => l.includes('|')),       
+                    +            code: lines.some(l => l.startsWith('```')),    
+                    +            diagram: lines.some(l =>                       
+                    l.includes('mermaid')),                                     
+                    +            math: lines.some(l => l.includes('$')),        
+                    +        };                                                 
+                    +        handleUpdate({ outputStyle: detected });           
+                         };                                                     
+                    -    handleUpdate({ outputStyle: detected });               
+                    -  };                                                       
+                    +                                                           
+                                                                                
+                    ```                                                         
+                                                                                
+                    The code section with the closest match has been expanded in
+                    the file for review.                                        
+[04/04/26 17:29:45] Error calling tool 'find_and_replace_code'                  
+                    ╭─────────── Traceback (most recent call last) ────────────╮
+                    │ in call_tool:160                                         │
+                    │                                                          │
+                    │ in run:381                                               │
+                    │                                                          │
+                    │                 ... 3 frames hidden ...                  │
+                    │                                                          │
+                    │ in wrapper:298                                           │
+                    │                                                          │
+                    │ in find_and_replace_code:97                              │
+                    ╰──────────────────────────────────────────────────────────╯
+                    ValueError: ControlPanel.tsx: No matches found for find     
+                    string:                                                     
+                    ```                                                         
+                        return (                                                
+                            <div className="space-y-8 pt-2 relative">           
+                                {/* Dot-grid atmosphere — Standardized Workspace
+                    Alignment (28px) */}                                        
+                                <div                                            
+                                    className="absolute inset-0 opacity-[0.02]  
+                    dark:opacity-[0.04]                                         
+                    bg-[radial-gradient(circle_at_center,_var(--primary)_1px,_tr
+                    ansparent_1px)] bg-[size:28px_28px] pointer-events-none"    
+                                />                                              
+                                                                                
+                                {/* HUD Header */}                              
+                                <div className="space-y-1.5 px-1 relative z-10">
+                                    <h4 className="text-[10px] font-black       
+                    uppercase tracking-[0.3em] text-primary/70 flex items-center
+                    gap-2.5">                                                   
+                                        <SlidersHorizontal className="h-3.5     
+                    w-3.5" />                                                   
+                                        Cognitive Vectors                       
+                                    </h4>                                       
+                                    <p className="text-[9px]                    
+                    text-muted-foreground italic font-medium uppercase          
+                    tracking-[0.2em] opacity-60">                               
+                                        Fine-tune the neural weight and         
+                    linguistic elevation.                                       
+                                    </p>                                        
+                                </div>                                          
+                                                                                
+                                <div className="space-y-8 relative px-1 z-10">  
+                                    {/* Depth accent line */}                   
+                                    <div className="absolute left-[-1.25rem]    
+                    top-0 bottom-0 w-px bg-gradient-to-b from-primary/30        
+                    via-primary/5 to-transparent" />                            
+                                                                                
+                                    {/* Linguistic Weight Zone */}              
+                                    <div className="space-y-6">                 
+                                        <div className="space-y-4">             
+                                            <div className="flex justify-between
+                    items-center group/label">                                  
+                                                <div className="flex            
+                    items-center gap-2">                                        
+                                                    <PenTool className="h-3.5   
+                    w-3.5 text-primary/40 group-hover/label:text-primary        
+                    transition-colors" />                                       
+                                                    <Label                      
+                    className="text-[10px] font-black uppercase tracking-[0.2em]
+                    text-muted-foreground/60">Neural Formality</Label>          
+                                                </div>                          
+                                                <Badge variant="outline"        
+                    className="h-5 text-[9px] font-black border-primary/20      
+                    bg-primary/5 text-primary tabular-nums shadow-inner ring-1  
+                    ring-inset ring-primary/10 px-2 rounded-full">              
+                                                    {section.controls.formality}
+                    %                                                           
+                                                </Badge>                        
+                                            </div>                              
+                                            <Slider                             
+                                                value={[section.controls.formali
+                    ty]}                                                        
+                                                onValueChange={(v) =>           
+                    handleUpdate({ formality: v[0] })}                          
+                                                min={0} max={100} step={5}      
+                                                className="py-2"                
+                                            />                                  
+                                        </div>                                  
+                                                                                
+                                        <div className="space-y-4">             
+                                            <div className="flex justify-between
+                    items-center group/label">                                  
+                                                <div className="flex            
+                    items-center gap-2">                                        
+                                                    <Target className="h-3.5    
+                    w-3.5 text-primary/40 group-hover/label:text-primary        
+                    transition-colors" />                                       
+                                                    <Label                      
+                    className="text-[10px] font-black uppercase tracking-[0.2em]
+                    text-muted-foreground/60">Syntactic Density</Label>         
+                                                </div>                          
+                                                <Badge variant="outline"        
+                    className="h-5 text-[9px] font-black border-primary/20      
+                    bg-primary/5 text-primary tabular-nums shadow-inner ring-1  
+                    ring-inset ring-primary/10 px-2 rounded-full">              
+                                                    {section.controls.complexity
+                    }%                                                          
+                                                </Badge>                        
+                                            </div>                              
+                                            <Slider                             
+                                                value={[section.controls.complex
+                    ity]}                                                       
+                                                onValueChange={(v) =>           
+                    handleUpdate({ complexity: v[0] })}                         
+                                                min={0} max={100} step={5}      
+                                                className="py-2"                
+                                            />                                  
+                                        </div>                                  
+                                                                                
+                                        <div className="space-y-4">             
+                                            <div className="flex justify-between
+                    items-center group/label">                                  
+                                                <div className="flex            
+                    items-center gap-2">                                        
+                                                    <Zap className="h-3.5 w-3.5 
+                    text-primary/40 group-hover/label:text-primary              
+                    transition-colors" />                                       
+                                                    <Label                      
+                    className="text-[10px] font-black uppercase tracking-[0.2em]
+                    text-muted-foreground/60">Creativity Flux</Label>           
+                                                </div>                          
+                                                <Badge variant="outline"        
+                    className="h-5 text-[9px] font-black border-primary/20      
+                    bg-primary/5 text-primary tabular-nums shadow-inner ring-1  
+                    ring-inset ring-primary/10 px-2 rounded-full">              
+                                                    {section.controls.creativity
+                    }%                                                          
+                                                </Badge>                        
+                                            </div>                              
+                                            <Slider                             
+                                                value={[section.controls.creativ
+                    ity]}                                                       
+                                                onValueChange={(v) =>           
+                    handleUpdate({ creativity: v[0] })}                         
+                                                min={0} max={100} step={5}      
+                                                className="py-2"                
+                                            />                                  
+                                        </div>                                  
+                                    </div>                                      
+                                                                                
+                                    {/* Output Control Matrix */}               
+                                    <div className="space-y-4">                 
+                                        <div className="flex items-center       
+                    justify-between group/label">                               
+                                            <div className="flex items-center   
+                    gap-2">                                                     
+                                                <Layout className="h-3.5 w-3.5  
+                    text-primary/40 group-hover/label:text-primary              
+                    transition-colors" />                                       
+                                                <Label className="text-[10px]   
+                    font-black uppercase tracking-[0.2em]                       
+                    text-muted-foreground/60">Output Shape</Label>              
+                                            </div>                              
+                                            <Button                             
+                                                variant="outline"               
+                                                size="sm"                       
+                                                className="h-7 px-2.5 text-[9px]
+                    font-black uppercase tracking-[0.2em] border-primary/10     
+                    text-primary/60 hover:text-primary hover:border-primary/20  
+                    hover:bg-primary/5"                                         
+                                                onClick={handleDetectFormats}   
+                                            >                                   
+                                                Detect Format                   
+                                            </Button>                           
+                                        </div>                                  
+                                                                                
+                                        <div className="grid grid-cols-2 gap-3">
+                                            <div className="space-y-2">         
+                                                <Label className="text-[9px]    
+                    font-black uppercase tracking-[0.2em]                       
+                    text-muted-foreground/60">Primary Layout</Label>            
+                                                <Select                         
+                                                    value={section.controls.layo
+                    ut}                                                         
+                                                    onValueChange={(v) =>       
+                    handleUpdate({ layout: v as GenerationControlState['layout']
+                    })}                                                         
+                                                >                               
+                                                    <SelectTrigger              
+                    className="h-9 bg-background/40 border-primary/10           
+                    text-[10px] font-bold uppercase tracking-[0.2em]">          
+                                                        <SelectValue />         
+                                                    </SelectTrigger>            
+                                                    <SelectContent>             
+                                                        <SelectItem             
+                    value="report">Report</SelectItem>                          
+                                                        <SelectItem             
+                    value="essay">Essay</SelectItem>                            
+                                                        <SelectItem             
+                    value="summary">Summary</SelectItem>                        
+                                                        <SelectItem             
+                    value="memo">Memo</SelectItem>                              
+                                                    </SelectContent>            
+                                                </Select>                       
+                                            </div>                              
+                                                                                
+                                            <div className="space-y-2">         
+                                                <Label className="text-[9px]    
+                    font-black uppercase tracking-[0.2em]                       
+                    text-muted-foreground/60">Diagram Format</Label>            
+                                                <Select                         
+                                                    value={section.controls.diag
+                    ramType || 'flowchart'}                                     
+                                                    onValueChange={(v) =>       
+                    handleUpdate({ diagramType: v as DiagramType })}            
+                                                >                               
+                                                    <SelectTrigger              
+                    className="h-9 bg-background/40 border-primary/10           
+                    text-[10px] font-bold uppercase tracking-[0.2em]">          
+                                                        <SelectValue />         
+                                                    </SelectTrigger>            
+                                                    <SelectContent>             
+                                                        {diagramTypes.map(({    
+                    value, label }) => (                                        
+                                                            <SelectItem         
+                    key={value} value={value}>{label}</SelectItem>              
+                                                        ))}                     
+                                                    </SelectContent>            
+                                                </Select>                       
+                                            </div>                              
+                                        </div>                                  
+                                    </div>                                      
+                                                                                
+                                    {/* Tonal Overlay Matrix */}                
+                                    <div className="space-y-4">                 
+                                        <div className="flex items-center       
+                    gap-2">                                                     
+                                            <PenTool className="h-3.5 w-3.5     
+                    text-primary/40" />                                         
+                                            <Label className="text-[10px]       
+                    font-black uppercase tracking-[0.2em]                       
+                    text-muted-foreground/60">Tone Signature</Label>            
+                                        </div>                                  
+                                        <div className="grid grid-cols-2 gap-3">
+                                            {toneOptions.map(({ value, label }) 
+                    => (                                                        
+                                                <Button                         
+                                                    key={value}                 
+                                                    variant="ghost"             
+                                                    size="sm"                   
+                                                    onClick={() =>              
+                    handleUpdate({ tone: value })}                              
+                                                    className={cn(              
+                                                        "h-8 text-[9px]         
+                    font-black uppercase tracking-[0.2em] rounded-xl border     
+                    border-primary/10",                                         
+                                                        section.controls.tone   
+                    === value                                                   
+                                                            ? "bg-primary/10    
+                    text-primary border-primary/20"                             
+                                                            :                   
+                    "text-muted-foreground/70 hover:bg-primary/5                
+                    hover:text-primary"                                         
+                                                    )}                          
+                                                >                               
+                                                    {label}                     
+                                                </Button>                       
+                                            ))}                                 
+                                        </div>                                  
+                                    </div>                                      
+                                </div>                                          
+                            </div>                                              
+                        );                                                      
+                    }                                                           
+                    ```                                                         
+                                                                                
+                    The code section with the closest match has been expanded in
+                    the file for review.                                        
+[04/04/26 17:30:40] Error calling tool 'find_and_replace_code'                  
+                    ╭─────────── Traceback (most recent call last) ────────────╮
+                    │ in call_tool:160                                         │
+                    │                                                          │
+                    │ in run:381                                               │
+                    │                                                          │
+                    │                 ... 3 frames hidden ...                  │
+                    │                                                          │
+                    │ in wrapper:298                                           │
+                    │                                                          │
+                    │ in find_and_replace_code:30                              │
+                    ╰──────────────────────────────────────────────────────────╯
+                    ValueError: Find and replace strings are the same:          
+                    ```                                                         
+                        return (                                                
+                            <div className="space-y-8 pt-2 relative">           
+                                {/* Dot-grid atmosphere — Standardized Workspace
+                    Alignment (28px) */}                                        
+                                <div                                            
+                                    className="absolute inset-0 opacity-[0.02]  
+                    dark:opacity-[0.04]                                         
+                    bg-[radial-gradient(circle_at_center,_var(--primary)_1px,_tr
+                    ansparent_1px)] bg-[size:28px_28px] pointer-events-none"    
+                                />                                              
+                                                                                
+                                {/* HUD Header */}                              
+                                <div className="space-y-1.5 px-1 relative z-10">
+                                    <h4 className="text-[10px] font-black       
+                    uppercase tracking-[0.3em] text-primary/70 flex items-center
+                    gap-2.5">                                                   
+                                        <SlidersHorizontal className="h-3.5     
+                    w-3.5" />                                                   
+                                        Cognitive Vectors                       
+                                    </h4>                                       
+                                    <p className="text-[9px]                    
+                    text-muted-foreground italic font-medium uppercase          
+                    tracking-[0.2em] opacity-60">                               
+                                        Fine-tune the neural weight and         
+                    linguistic elevation.                                       
+                                    </p>                                        
+                                </div>                                          
+                                                                                
+                                <div className="space-y-8 relative px-1 z-10">  
+                                    {/* Depth accent line */}                   
+                                    <div className="absolute left-[-1.25rem]    
+                    top-0 bottom-0 w-px bg-gradient-to-b from-primary/30        
+                    via-primary/5 to-transparent" />                            
+                                                                                
+                                    {/* Linguistic Weight Zone */}              
+                                    <div className="space-y-6">                 
+                                        <div className="space-y-4">             
+                                            <div className="flex justify-between
+                    items-center group/label">                                  
+                                                <div className="flex            
+                    items-center gap-2">                                        
+                                                    <PenTool className="h-3.5   
+                    w-3.5 text-primary/40 group-hover/label:text-primary        
+                    transition-colors" />                                       
+                                                    <Label                      
+                    className="text-[10px] font-black uppercase tracking-[0.2em]
+                    text-muted-foreground/60">Neural Formality</Label>          
+                                                </div>                          
+                                                <Badge variant="outline"        
+                    className="h-5 text-[9px] font-black border-primary/20      
+                    bg-primary/5 text-primary tabular-nums shadow-inner ring-1  
+                    ring-inset ring-primary/10 px-2 rounded-full">              
+                                                    {section.controls.formality}
+                    %                                                           
+                                                </Badge>                        
+                                            </div>                              
+                                            <Slider                             
+                                                value={[section.controls.formali
+                    ty]}                                                        
+                                                onValueChange={(v) =>           
+                    handleUpdate({ formality: v[0] })}                          
+                                                min={0} max={100} step={5}      
+                                                className="py-2"                
+                                            />                                  
+                                        </div>                                  
+                                                                                
+                                        <div className="space-y-4">             
+                                            <div className="flex justify-between
+                    items-center group/label">                                  
+                                                <div className="flex            
+                    items-center gap-2">                                        
+                                                    <Target className="h-3.5    
+                    w-3.5 text-primary/40 group-hover/label:text-primary        
+                    transition-colors" />                                       
+                                                    <Label                      
+                    className="text-[10px] font-black uppercase tracking-[0.2em]
+                    text-muted-foreground/60">Syntactic Density</Label>         
+                                                </div>                          
+                                                <Badge variant="outline"        
+                    className="h-5 text-[9px] font-black border-primary/20      
+                    bg-primary/5 text-primary tabular-nums shadow-inner ring-1  
+                    ring-inset ring-primary/10 px-2 rounded-full">              
+                                                    {section.controls.complexity
+                    }%                                                          
+                                                </Badge>                        
+                                            </div>                              
+                                            <Slider                             
+                                                value={[section.controls.complex
+                    ity]}                                                       
+                                                onValueChange={(v) =>           
+                    handleUpdate({ complexity: v[0] })}                         
+                                                min={0} max={100} step={5}      
+                                                className="py-2"                
+                                            />                                  
+                                        </div>                                  
+                                                                                
+                                        <div className="space-y-4">             
+                                            <div className="flex justify-between
+                    items-center group/label">                                  
+                                                <div className="flex            
+                    items-center gap-2">                                        
+                                                    <Zap className="h-3.5 w-3.5 
+                    text-primary/40 group-hover/label:text-primary              
+                    transition-colors" />                                       
+                                                    <Label                      
+                    className="text-[10px] font-black uppercase tracking-[0.2em]
+                    text-muted-foreground/60">Creativity Flux</Label>           
+                                                </div>                          
+                                                <Badge variant="outline"        
+                    className="h-5 text-[9px] font-black border-primary/20      
+                    bg-primary/5 text-primary tabular-nums shadow-inner ring-1  
+                    ring-inset ring-primary/10 px-2 rounded-full">              
+                                                    {section.controls.creativity
+                    }%                                                          
+                                                </Badge>                        
+                                            </div>                              
+                                            <Slider                             
+                                                value={[section.controls.creativ
+                    ity]}                                                       
+                                                onValueChange={(v) =>           
+                    handleUpdate({ creativity: v[0] })}                         
+                                                min={0} max={100} step={5}      
+                                                className="py-2"                
+                                            />                                  
+                                        </div>                                  
+                                    </div>                                      
+                                                                                
+                                    {/* Output Control Matrix */}               
+                                    <div className="space-y-4">                 
+                                        <div className="flex items-center       
+                    justify-between group/label">                               
+                                            <div className="flex items-center   
+                    gap-2">                                                     
+                                                <Layout className="h-3.5 w-3.5  
+                    text-primary/40 group-hover/label:text-primary              
+                    transition-colors" />                                       
+                                                <Label className="text-[10px]   
+                    font-black uppercase tracking-[0.2em]                       
+                    text-muted-foreground/60">Output Shape</Label>              
+                                            </div>                              
+                                            <Button                             
+                                                variant="outline"               
+                                                size="sm"                       
+                                                className="h-7 px-2.5 text-[9px]
+                    font-black uppercase tracking-[0.2em] border-primary/10     
+                    text-primary/60 hover:text-primary hover:border-primary/20  
+                    hover:bg-primary/5"                                         
+                                                onClick={handleDetectFormats}   
+                                            >                                   
+                                                Detect Format                   
+                                            </Button>                           
+                                        </div>                                  
+                                                                                
+                                        <div className="grid grid-cols-2 gap-3">
+                                            <div className="space-y-2">         
+                                                <Label className="text-[9px]    
+                    font-black uppercase tracking-[0.2em]                       
+                    text-muted-foreground/60">Primary Layout</Label>            
+                                                <Select                         
+                                                    value={section.controls.layo
+                    ut}                                                         
+                                                    onValueChange={(v) =>       
+                    handleUpdate({ layout: v as GenerationControlState['layout']
+                    })}                                                         
+                                                >                               
+                                                    <SelectTrigger              
+                    className="h-9 bg-background/40 border-primary/10           
+                    text-[10px] font-bold uppercase tracking-[0.2em]">          
+                                                        <SelectValue />         
+                                                    </SelectTrigger>            
+                                                    <SelectContent>             
+                                                        <SelectItem             
+                    value="report">Report</SelectItem>                          
+                                                        <SelectItem             
+                    value="essay">Essay</SelectItem>                            
+                                                        <SelectItem             
+                    value="summary">Summary</SelectItem>                        
+                                                        <SelectItem             
+                    value="memo">Memo</SelectItem>                              
+                                                    </SelectContent>            
+                                                </Select>                       
+                                            </div>                              
+                                                                                
+                                            <div className="space-y-2">         
+                                                <Label className="text-[9px]    
+                    font-black uppercase tracking-[0.2em]                       
+                    text-muted-foreground/60">Diagram Format</Label>            
+                                                <Select                         
+                                                    value={section.controls.diag
+                    ramType || 'flowchart'}                                     
+                                                    onValueChange={(v) =>       
+                    handleUpdate({ diagramType: v as DiagramType })}            
+                                                >                               
+                                                    <SelectTrigger              
+                    className="h-9 bg-background/40 border-primary/10           
+                    text-[10px] font-bold uppercase tracking-[0.2em]">          
+                                                        <SelectValue />         
+                                                    </SelectTrigger>            
+                                                    <SelectContent>             
+                                                        {diagramTypes.map(({    
+                    value, label }) => (                                        
+                                                            <SelectItem         
+                    key={value} value={value}>{label}</SelectItem>              
+                                                        ))}                     
+                                                    </SelectContent>            
+                                                </Select>                       
+                                            </div>                              
+                                        </div>                                  
+                                    </div>                                      
+                                                                                
+                                    {/* Tonal Overlay Matrix */}                
+                                    <div className="space-y-4">                 
+                                        <div className="flex items-center       
+                    gap-2">                                                     
+                                            <PenTool className="h-3.5 w-3.5     
+                    text-primary/40" />                                         
+                                            <Label className="text-[10px]       
+                    font-black uppercase tracking-[0.2em]                       
+                    text-muted-foreground/60">Tone Signature</Label>            
+                                        </div>                                  
+                                        <div className="grid grid-cols-2 gap-3">
+                                            {toneOptions.map(({ value, label }) 
+                    => (                                                        
+                                                <Button                         
+                                                    key={value}                 
+                                                    variant="ghost"             
+                                                    size="sm"                   
+                                                    onClick={() =>              
+                    handleUpdate({ tone: value })}                              
+                                                    className={cn(              
+                                                        "h-8 text-[9px]         
+                    font-black uppercase tracking-[0.2em] rounded-xl border     
+                    border-primary/10",                                         
+                                                        section.controls.tone   
+                    === value                                                   
+                                                            ? "bg-primary/10    
+                    text-primary border-primary/20"                             
+                                                            :                   
+                    "text-muted-foreground/70 hover:bg-primary/5                
+                    hover:text-primary"                                         
+                                                    )}                          
+                                                >                               
+                                                    {label}                     
+                                                </Button>                       
+                                            ))}                                 
+                                        </div>                                  
+                                    </div>                                      
+                                </div>                                          
+                            </div>                                              
+                        );                                                      
+                    };                                                          
+                                                                                
+                    export const ControlPanel =                                 
+                    React.memo(ControlPanelComponent);                          
+                                                                                
+                    ControlPanel.displayName = 'ControlPanel';                  
+                    ```                                                         
+                                                                                
+[04/04/26 17:31:14] Error calling tool 'find_and_replace_code'                  
+                    ╭─────────── Traceback (most recent call last) ────────────╮
+                    │ in call_tool:160                                         │
+                    │                                                          │
+                    │ in run:381                                               │
+                    │                                                          │
+                    │                 ... 3 frames hidden ...                  │
+                    │                                                          │
+                    │ in wrapper:298                                           │
+                    │                                                          │
+                    │ in find_and_replace_code:97                              │
+                    ╰──────────────────────────────────────────────────────────╯
+                    ValueError: ControlPanel.tsx: No matches found for find     
+                    string:                                                     
+                    ```                                                         
+                        return (                                                
+                            <div className="space-y-8 pt-2 relative">           
+                                {/* Dot-grid atmosphere — Standardized Workspace
+                    Alignment (28px) */}                                        
+                                <div                                            
+                                    className="absolute inset-0 opacity-[0.02]  
+                    dark:opacity-[0.04]                                         
+                    bg-[radial-gradient(circle_at_center,_var(--primary)_1px,_tr
+                    ansparent_1px)] bg-[size:28px_28px] pointer-events-none"    
+                                />                                              
+                                                                                
+                                {/* HUD Header */}                              
+                                <div className="space-y-1.5 px-1 relative z-10">
+                                    <h4 className="text-[10px] font-black       
+                    uppercase tracking-[0.3em] text-primary/70 flex items-center
+                    gap-2.5">                                                   
+                                        <SlidersHorizontal className="h-3.5     
+                    w-3.5" />                                                   
+                                        Cognitive Vectors                       
+                                    </h4>                                       
+                                    <p className="text-[9px]                    
+                    text-muted-foreground italic font-medium uppercase          
+                    tracking-[0.2em] opacity-60">                               
+                                        Fine-tune the neural weight and         
+                    linguistic elevation.                                       
+                                    </p>                                        
+                                </div>                                          
+                                                                                
+                                <div className="space-y-8 relative px-1 z-10">  
+                                    {/* Depth accent line */}                   
+                                    <div className="absolute left-[-1.25rem]    
+                    top-0 bottom-0 w-px bg-gradient-to-b from-primary/30        
+                    via-primary/5 to-transparent" />                            
+                                                                                
+                                    {/* Linguistic Weight Zone */}              
+                                    <div className="space-y-6">                 
+                                        <div className="space-y-4">             
+                                            <div className="flex justify-between
+                    items-center group/label">                                  
+                                                <div className="flex            
+                    items-center gap-2">                                        
+                                                    <PenTool className="h-3.5   
+                    w-3.5 text-primary/40 group-hover/label:text-primary        
+                    transition-colors" />                                       
+                                                    <Label                      
+                    className="text-[10px] font-black uppercase tracking-[0.2em]
+                    text-muted-foreground/60">Neural Formality</Label>          
+                                                </div>                          
+                                                <Badge variant="outline"        
+                    className="h-5 text-[9px] font-black border-primary/20      
+                    bg-primary/5 text-primary tabular-nums shadow-inner ring-1  
+                    ring-inset ring-primary/10 px-2 rounded-full">              
+                                                    {section.controls.formality}
+                    %                                                           
+                                                </Badge>                        
+                                            </div>                              
+                                            <Slider                             
+                                                value={[section.controls.formali
+                    ty]}                                                        
+                                                onValueChange={(v) =>           
+                    handleUpdate({ formality: v[0] })}                          
+                                                min={0} max={100} step={5}      
+                                                className="py-2"                
+                                            />                                  
+                                        </div>                                  
+                                                                                
+                                        <div className="space-y-4">             
+                                            <div className="flex justify-between
+                    items-center group/label">                                  
+                                                <div className="flex            
+                    items-center gap-2">                                        
+                                                    <Target className="h-3.5    
+                    w-3.5 text-primary/40 group-hover/label:text-primary        
+                    transition-colors" />                                       
+                                                    <Label                      
+                    className="text-[10px] font-black uppercase tracking-[0.2em]
+                    text-muted-foreground/60">Syntactic Density</Label>         
+                                                </div>                          
+                                                <Badge variant="outline"        
+                    className="h-5 text-[9px] font-black border-primary/20      
+                    bg-primary/5 text-primary tabular-nums shadow-inner ring-1  
+                    ring-inset ring-primary/10 px-2 rounded-full">              
+                                                    {section.controls.complexity
+                    }%                                                          
+                                                </Badge>                        
+                                            </div>                              
+                                            <Slider                             
+                                                value={[section.controls.complex
+                    ity]}                                                       
+                                                onValueChange={(v) =>           
+                    handleUpdate({ complexity: v[0] })}                         
+                                                min={0} max={100} step={5}      
+                                                className="py-2"                
+                                            />                                  
+                                        </div>                                  
+                                                                                
+                                        <div className="space-y-4">             
+                                            <div className="flex justify-between
+                    items-center group/label">                                  
+                                                <div className="flex            
+                    items-center gap-2">                                        
+                                                    <Zap className="h-3.5 w-3.5 
+                    text-primary/40 group-hover/label:text-primary              
+                    transition-colors" />                                       
+                                                    <Label                      
+                    className="text-[10px] font-black uppercase tracking-[0.2em]
+                    text-muted-foreground/60">Creativity Flux</Label>           
+                                                </div>                          
+                                                <Badge variant="outline"        
+                    className="h-5 text-[9px] font-black border-primary/20      
+                    bg-primary/5 text-primary tabular-nums shadow-inner ring-1  
+                    ring-inset ring-primary/10 px-2 rounded-full">              
+                                                    {section.controls.creativity
+                    }%                                                          
+                                                </Badge>                        
+                                            </div>                              
+                                            <Slider                             
+                                                value={[section.controls.creativ
+                    ity]}                                                       
+                                                onValueChange={(v) =>           
+                    handleUpdate({ creativity: v[0] })}                         
+                                                min={0} max={100} step={5}      
+                                                className="py-2"                
+                                            />                                  
+                                        </div>                                  
+                                    </div>                                      
+                                                                                
+                                    {/* Output Control Matrix */}               
+                                    <div className="space-y-4">                 
+                                        <div className="flex items-center       
+                    justify-between group/label">                               
+                                            <div className="flex items-center   
+                    gap-2">                                                     
+                                                <Layout className="h-3.5 w-3.5  
+                    text-primary/40 group-hover/label:text-primary              
+                    transition-colors" />                                       
+                                                <Label className="text-[10px]   
+                    font-black uppercase tracking-[0.2em]                       
+                    text-muted-foreground/60">Output Shape</Label>              
+                                            </div>                              
+                                            <Button                             
+                                                variant="outline"               
+                                                size="sm"                       
+                                                className="h-7 px-2.5 text-[9px]
+                    font-black uppercase tracking-[0.2em] border-primary/10     
+                    text-primary/60 hover:text-primary hover:border-primary/20  
+                    hover:bg-primary/5"                                         
+                                                onClick={handleDetectFormats}   
+                                            >                                   
+                                                Detect Format                   
+                                            </Button>                           
+                                        </div>                                  
+                                                                                
+                                        <div className="grid grid-cols-2 gap-3">
+                                            <div className="space-y-2">         
+                                                <Label className="text-[9px]    
+                    font-black uppercase tracking-[0.2em]                       
+                    text-muted-foreground/60">Primary Layout</Label>            
+                                                <Select                         
+                                                    value={section.controls.layo
+                    ut}                                                         
+                                                    onValueChange={(v) =>       
+                    handleUpdate({ layout: v as GenerationControlState['layout']
+                    })}                                                         
+                                                >                               
+                                                    <SelectTrigger              
+                    className="h-9 bg-background/40 border-primary/10           
+                    text-[10px] font-bold uppercase tracking-[0.2em]">          
+                                                        <SelectValue />         
+                                                    </SelectTrigger>            
+                                                    <SelectContent>             
+                                                        <SelectItem             
+                    value="report">Report</SelectItem>                          
+                                                        <SelectItem             
+                    value="essay">Essay</SelectItem>                            
+                                                        <SelectItem             
+                    value="summary">Summary</SelectItem>                        
+                                                        <SelectItem             
+                    value="memo">Memo</SelectItem>                              
+                                                    </SelectContent>            
+                                                </Select>                       
+                                            </div>                              
+                                                                                
+                                            <div className="space-y-2">         
+                                                <Label className="text-[9px]    
+                    font-black uppercase tracking-[0.2em]                       
+                    text-muted-foreground/60">Diagram Format</Label>            
+                                                <Select                         
+                                                    value={section.controls.diag
+                    ramType || 'flowchart'}                                     
+                                                    onValueChange={(v) =>       
+                    handleUpdate({ diagramType: v as DiagramType })}            
+                                                >                               
+                                                    <SelectTrigger              
+                    className="h-9 bg-background/40 border-primary/10           
+                    text-[10px] font-bold uppercase tracking-[0.2em]">          
+                                                        <SelectValue />         
+                                                    </SelectTrigger>            
+                                                    <SelectContent>             
+                                                        {diagramTypes.map(({    
+                    value, label }) => (                                        
+                                                            <SelectItem         
+                    key={value} value={value}>{label}</SelectItem>              
+                                                        ))}                     
+                                                    </SelectContent>            
+                                                </Select>                       
+                                            </div>                              
+                                        </div>                                  
+                                    </div>                                      
+                                                                                
+                                    {/* Tonal Overlay Matrix */}                
+                                    <div className="space-y-4">                 
+                                        <div className="flex items-center       
+                    gap-2">                                                     
+                                            <PenTool className="h-3.5 w-3.5     
+                    text-primary/40" />                                         
+                                            <Label className="text-[10px]       
+                    font-black uppercase tracking-[0.2em]                       
+                    text-muted-foreground/60">Tone Signature</Label>            
+                                        </div>                                  
+                                        <div className="grid grid-cols-2 gap-3">
+                                            {toneOptions.map(({ value, label }) 
+                    => (                                                        
+                                                <Button                         
+                                                    key={value}                 
+                                                    variant="ghost"             
+                                                    size="sm"                   
+                                                    onClick={() =>              
+                    handleUpdate({ tone: value })}                              
+                                                    className={cn(              
+                                                        "h-8 text-[9px]         
+                    font-black uppercase tracking-[0.2em] rounded-xl border     
+                    border-primary/10",                                         
+                                                        section.controls.tone   
+                    === value                                                   
+                                                            ? "bg-primary/10    
+                    text-primary border-primary/20"                             
+                                                            :                   
+                    "text-muted-foreground/70 hover:bg-primary/5                
+                    hover:text-primary"                                         
+                                                    )}                          
+                                                >                               
+                                                    {label}                     
+                                                </Button>                       
+                                            ))}                                 
+                                        </div>                                  
+                                    </div>                                      
+                                </div>                                          
+                            </div>                                              
+                        );                                                      
+                    };                                                          
+                    ```                                                         
+                                                                                
+                    The code section with the closest match has been expanded in
+                    the file for review.                                        
+[04/04/26 17:37:50] Error calling tool 'find_and_replace_code'                  
+                    ╭─────────── Traceback (most recent call last) ────────────╮
+                    │ in call_tool:160                                         │
+                    │                                                          │
+                    │ in run:381                                               │
+                    │                                                          │
+                    │                 ... 3 frames hidden ...                  │
+                    │                                                          │
+                    │ in wrapper:298                                           │
+                    │                                                          │
+                    │ in find_and_replace_code:97                              │
+                    ╰──────────────────────────────────────────────────────────╯
+                    ValueError: GuidelineEditor.tsx: No matches found for find  
+                    string:                                                     
+                    ```                                                         
+                      return (                                                  
+                        <div className="space-y-8 pt-2 relative">               
+                          {/* Dot-grid atmosphere — Standardized Workspace      
+                    Alignment (28px) */}                                        
+                          <div                                                  
+                            className="absolute inset-0 opacity-[0.02]          
+                    dark:opacity-[0.04]                                         
+                    bg-[radial-gradient(circle_at_center,_var(--primary)_1px,_tr
+                    ansparent_1px)] bg-[size:28px_28px] pointer-events-none"    
+                          />                                                    
+                                                                                
+                          {/* HUD Header */}                                    
+                          <div className="space-y-1.5 px-1 relative z-10">      
+                            <h4 className="text-[10px] font-black uppercase     
+                    tracking-[0.3em] text-primary/70 flex items-center gap-2.5">
+                              <ListChecks className="h-3.5 w-3.5" />            
+                              Guideline Matrix                                  
+                            </h4>                                               
+                            <p className="text-[9px] text-muted-foreground      
+                    italic font-medium uppercase tracking-[0.2em] opacity-60">  
+                              Add constraints and editorial directives for this 
+                    section.                                                    
+                            </p>                                                
+                          </div>                                                
+                                                                                
+                          <div className="space-y-6 relative px-1 z-10">        
+                            {/* Depth accent line */}                           
+                            <div className="absolute left-[-1.25rem] top-0      
+                    bottom-0 w-px bg-gradient-to-b from-primary/30 via-primary/5
+                    to-transparent" />                                          
+                                                                                
+                            <div className="space-y-3">                         
+                              <div className="flex items-center gap-3">         
+                                <Input                                          
+                                  placeholder="Add a guideline..."              
+                                  value={newGuideline}                          
+                                  onChange={(e) =>                              
+                    setNewGuideline(e.target.value)}                            
+                                  onKeyDown={(e) => e.key === 'Enter' &&        
+                    handleAddGuideline()}                                       
+                                  className="flex-1 text-[10px] font-black      
+                    uppercase tracking-[0.2em] bg-muted/5 border-primary/10"    
+                                />                                              
+                                <Button                                         
+                                  onClick={handleAddGuideline}                  
+                                  variant="outline"                             
+                                  size="icon"                                   
+                                  className="h-9 w-9 rounded-xl                 
+                    border-primary/10"                                          
+                                >                                               
+                                  <Plus className="h-4 w-4" />                  
+                                </Button>                                       
+                              </div>                                            
+                                                                                
+                              {guidelines.length === 0 && (                     
+                                <div className="flex items-center gap-2         
+                    text-[9px] uppercase tracking-[0.2em]                       
+                    text-muted-foreground/50">                                  
+                                  <StickyNote className="h-3 w-3" />            
+                                  No guidelines added yet.                      
+                                </div>                                          
+                              )}                                                
+                                                                                
+                              <div className="space-y-2">                       
+                                {guidelines.map((g, idx) => (                   
+                                  <div                                          
+                                    key={`${g}-${idx}`}                         
+                                    className="group flex items-center          
+                    justify-between gap-2 rounded-xl border border-primary/10   
+                    bg-background/40 p-2 text-[10px] font-semibold uppercase    
+                    tracking-[0.2em]"                                           
+                                  >                                             
+                                    <span className="flex-1                     
+                    text-muted-foreground/80">{g}</span>                        
+                                    <Button                                     
+                                      variant="ghost"                           
+                                      size="icon"                               
+                                      onClick={() => handleRemoveGuideline(idx)}
+                                      className="h-7 w-7 rounded-lg             
+                    text-muted-foreground/60 hover:text-destructive"            
+                                    >                                           
+                                      <Trash2 className="h-3.5 w-3.5" />        
+                                    </Button>                                   
+                                  </div>                                        
+                                ))}                                             
+                              </div>                                            
+                            </div>                                              
+                          </div>                                                
+                        </div>                                                  
+                      );                                                        
+                    }                                                           
+                    ```                                                         
+                                                                                
+                    The code section with the closest match has been expanded in
+                    the file for review.                                        
+[04/04/26 17:55:05] Error calling tool 'find_and_replace_code'                  
+                    ╭─────────── Traceback (most recent call last) ────────────╮
+                    │ in call_tool:160                                         │
+                    │                                                          │
+                    │ in run:381                                               │
+                    │                                                          │
+                    │                 ... 3 frames hidden ...                  │
+                    │                                                          │
+                    │ in wrapper:298                                           │
+                    │                                                          │
+                    │ in find_and_replace_code:97                              │
+                    ╰──────────────────────────────────────────────────────────╯
+                    ValueError: BuildManifestHUD.tsx: No matches found for find 
+                    string:                                                     
+                    ```                                                         
+                                  onClick={onGenerateProject}                   
+                                  disabled={isLoading}                          
+                                  className="h-12 px-6 text-[11px] font-black   
+                    uppercase tracking-[0.2em] rounded-2xl bg-primary/90        
+                    hover:bg-primary text-primary-foreground shadow-xl"         
+                                >                                               
+                    ```                                                         
+                                                                                
+                    The code section with the closest match has been expanded in
+                    the file for review.                                        
+[04/04/26 18:08:19] Error calling tool 'open_files'                             
+                    ╭─────────── Traceback (most recent call last) ────────────╮
+                    │ in call_tool:160                                         │
+                    │                                                          │
+                    │ in run:381                                               │
+                    │                                                          │
+                    │                 ... 1 frames hidden ...                  │
+                    │                                                          │
+                    │ in wrapper:32                                            │
+                    │                                                          │
+                    │ in open_files:32                                         │
+                    ╰──────────────────────────────────────────────────────────╯
+                    ValueError: Error opening                                   
+                    src/modules/projects/domain/entities/Chapter.ts: File       
+                    src/modules/projects/domain/entities/Chapter.ts not found in
+                    workspace.                                                  
+                                                                                
+                    Error opening                                               
+                    src/modules/projects/domain/entities/Section.ts: File       
+                    src/modules/projects/domain/entities/Section.ts not found in
+                    workspace.                                                  

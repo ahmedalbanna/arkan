@@ -1,7 +1,6 @@
 'use client';
 
-import React, { Suspense } from 'react';
-import { BuilderPageSkeleton } from '@/app/builder/loading';
+import React from 'react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Button } from '@/components/ui/button';
 import { ZoomIn, ZoomOut, RotateCcw } from 'lucide-react';
@@ -67,18 +66,16 @@ export const BuilderCanvas = React.forwardRef<HTMLDivElement, BuilderCanvasProps
 
             {/* Primary content area with unified scroll and zoom handling */}
             <main ref={containerRef} className="flex-1 flex flex-col min-h-0 overflow-hidden relative z-20">
-                <Suspense fallback={<BuilderPageSkeleton />}>
-                    <ScrollArea className="flex-1 w-full h-full relative scroll-smooth transition-all duration-700 ease-[0.22,1,0.36,1]">
-                        <div className="py-24 px-8 flex justify-center min-h-full">
-                            <div
-                                className="w-full max-w-5xl transition-all duration-700 ease-[0.22,1,0.36,1] origin-top"
-                                style={{ transform: `scale(${zoomLevel})` }}
-                            >
-                                {children}
-                            </div>
+                <ScrollArea className="flex-1 w-full h-full relative scroll-smooth transition-all duration-700 ease-[0.22,1,0.36,1]">
+                    <div className="py-24 px-8 flex justify-center min-h-full">
+                        <div
+                            className="w-full max-w-5xl transition-all duration-700 ease-[0.22,1,0.36,1] origin-top"
+                            style={{ transform: `scale(${zoomLevel})` }}
+                        >
+                            {children}
                         </div>
-                    </ScrollArea>
-                </Suspense>
+                    </div>
+                </ScrollArea>
             </main>
 
             {/* Zoom HUD — Unified control at the bottom */}

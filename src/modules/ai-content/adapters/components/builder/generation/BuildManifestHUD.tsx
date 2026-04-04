@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useMemo, useCallback } from 'react';
 import { 
     AlertCircle, 
     Building, 
@@ -53,15 +53,23 @@ export function BuildManifestHUD({
   onGenerateProject,
   isLoading,
 }: BuildManifestHUDProps) {
-  const { project } = useBuilderStore();
+  const project = useBuilderStore(state => state.project);
 
-  const totalSections = chaptersToBuild.reduce(
-    (acc, chapter) => acc + chapter.sections.length,
-    0
+  const totalSections = useMemo(
+    () => chaptersToBuild.reduce((acc, chapter) => acc + chapter.sections.length, 0),
+    [chaptersToBuild]
   );
 
+  const handleOpenChange = useCallback((open: boolean) => {
+    onOpenChange(open);
+  }, [onOpenChange]);
+
+  const handleGenerateProject = useCallback(() => {
+    onGenerateProject();
+  }, [onGenerateProject]);
+
   return (
-    <Dialog open={isOpen} onOpenChange={onOpenChange}>
+    <Dialog open={isOpen} onOpenChange={handleOpenChange}>
       <DialogContent className="max-w-5xl h-[85vh] p-0 overflow-hidden flex flex-col gap-0 border-primary/10 shadow-2xl rounded-[32px] bg-background/80 backdrop-blur-3xl">
         
         {/* Production Manifest Header */}
@@ -201,7 +209,7 @@ export function BuildManifestHUD({
                     </Button>
                 </DialogClose>
                 <Button 
-                    onClick={onGenerateProject} 
+                    onClick={handleGenerateProject} 
                     disabled={isLoading || chaptersToBuild.length === 0}
                     className="h-10 px-8 text-[10px] font-black uppercase tracking-[0.3em] shadow-2xl shadow-primary/20 bg-primary hover:opacity-90 gap-2.5 rounded-xl transition-all hover:scale-105 active:scale-95 ring-1 ring-inset ring-white/20"
                 >

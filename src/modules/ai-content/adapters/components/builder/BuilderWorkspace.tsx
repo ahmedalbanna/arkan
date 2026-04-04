@@ -1,9 +1,8 @@
 'use client';
 
-import React, { Suspense, useState, useEffect, useRef } from 'react';
+import React, { Suspense, useState, useEffect, useRef, useMemo, Profiler, useCallback } from 'react';
 import { ProjectProperties } from '@/modules/projects/domain/entities/Project';
 import { useReportGenerator } from '@/modules/ai-content/adapters/hooks/report-mode/useReportGenerator';
-import { useSidebarPanels } from '@/modules/ai-content/adapters/hooks/builder/useSidebarPanels';
 import { useBuilderStore } from '@/hooks';
 import { BuilderPageSkeleton } from '@/app/builder/loading';
 import { OnboardingGuide } from '@/components/onboarding/OnboardingGuide';
@@ -50,16 +49,9 @@ export const BuilderWorkspace: React.FC<BuilderWorkspaceProps> = ({ initialProje
         viewMode,
         setViewMode,
         syncProjectStructure,
+        leftPanels,
+        rightPanels,
     } = useReportGenerator(initialProject);
-
-    const { leftPanels, rightPanels } = useSidebarPanels({
-        project,
-        activeChapterId,
-        selectedSectionIds,
-        onActiveChapterChange: setActiveChapterId,
-        onActiveSectionChange: handleActiveSectionChange,
-        setActiveRightPanelKey,
-    });
 
     const [showOnboarding, setShowOnboarding] = useState(false);
     const [isFullscreen, setIsFullscreen] = useState(false);
@@ -101,94 +93,105 @@ export const BuilderWorkspace: React.FC<BuilderWorkspaceProps> = ({ initialProje
     };
 
     // Intelligent writing suggestion based on project state
-    const suggestion = (() => {
+    const suggestion = useMemo(() => {
         if (!project || !project.sections) return "Start by adding a chapter or applying a template.";
         const emptySection = project.sections.find(s => !s.content);
         if (emptySection) return `Try generating the "${emptySection.title}" section next.`;
         return "All sections have content. You can now review or export your document.";
-    })();
+    }, [project]);
+
+    const handleProfilerRender = useCallback((
+        id: string,
+        phase: 'mount' | 'update' | 'nested-update',
+        actualDuration: number,
+        baseDuration: number
+    ) => {
+        console.info(`[Profiler:${id}]`, { phase, actualDuration, baseDuration });
+    }, []);
 
     if (!project) return <BuilderPageSkeleton />;
 
     return (
-        <div 
-            ref={containerRef}
-            className={cn(
-                "relative flex-grow flex flex-col bg-background h-[calc(100vh-64px)] overflow-hidden",
-                isFullscreen && "fixed inset-0 z-[100] h-screen h-svh w-screen"
-            )}
-        >
-            <OnboardingGuide isOpen={showOnboarding} onOpenChange={setShowOnboarding} onComplete={handleOnboardingComplete} />
-            
-            <Suspense fallback={<BuilderPageSkeleton />}>
-                <BuilderLayout
-                    header={
-                        <BuilderHeader 
-                            projectName={project?.name || ''}
-                            onProjectNameChange={updateProjectName}
-                            onProjectNameBlur={() => updateProject(p => p)}
-                            isSaving={isSaving}
-                            hasUnsavedChanges={hasUnsavedChanges}
-                            onSave={handleSave}
-                        />
-                    }
-                    leftSidebar={
-                        <BuilderSidebar 
-                            side="left"
-                            panels={leftPanels}
-                            activeKey={activePanelKey}
-                            onActiveKeyChange={setActivePanelKey}
-                        />
-                    }
-                    rightSidebar={
-                        <BuilderSidebar 
-                            side="right"
-                            panels={rightPanels}
-                            activeKey={activeRightPanelKey}
-                            onActiveKeyChange={setActiveRightPanelKey}
-                        />
-                    }
-                    canvas={
-                        <div className="relative h-full">
-                            <SelectionGenerationHUD viewMode={viewMode} />
-                            <BuilderCanvas
-                                zoomLevel={zoomLevel}
-                                onZoomIn={handleZoomIn}
-                                onZoomOut={handleZoomOut}
-                                onZoomReset={handleZoomReset}
-                                containerRef={containerRef}
-                                toolbar={
-                                    <DocumentToolbar 
+        <Profiler id="BuilderWorkspace" onRender={handleProfilerRender}>
+            <div 
+                ref={containerRef}
+                className={cn(
+                    "relative flex-grow flex flex-col bg-background h-[calc(100vh-64px)] overflow-hidden",
+                    isFullscreen && "fixed inset-0 z-[100] h-screen h-svh w-screen"
+                )}
+            >
+                <OnboardingGuide isOpen={showOnboarding} onOpenChange={setShowOnboarding} onComplete={handleOnboardingComplete} />
+                
+                <Suspense fallback={<BuilderPageSkeleton />}>
+                    <BuilderLayout
+                        header={
+                            <BuilderHeader 
+                                projectName={project?.name || ''}
+                                onProjectNameChange={updateProjectName}
+                                onProjectNameBlur={() => updateProject(p => p)}
+                                isSaving={isSaving}
+                                hasUnsavedChanges={hasUnsavedChanges}
+                                onSave={handleSave}
+                            />
+                        }
+                        leftSidebar={
+                            <BuilderSidebar 
+                                side="left"
+                                panels={leftPanels}
+                                activeKey={activePanelKey}
+                                onActiveKeyChange={setActivePanelKey}
+                            />
+                        }
+                        rightSidebar={
+                            <BuilderSidebar 
+                                side="right"
+                                panels={rightPanels}
+                                activeKey={activeRightPanelKey}
+                                onActiveKeyChange={setActiveRightPanelKey}
+                            />
+                        }
+                        canvas={
+                            <div className="relative h-full">
+                                <SelectionGenerationHUD viewMode={viewMode} />
+                                <BuilderCanvas
+                                    zoomLevel={zoomLevel}
+                                    onZoomIn={handleZoomIn}
+                                    onZoomOut={handleZoomOut}
+                                    onZoomReset={handleZoomReset}
+                                    containerRef={containerRef}
+                                    toolbar={
+                                        <DocumentToolbar 
+                                            project={project}
+                                            viewMode={viewMode}
+                                            setViewMode={setViewMode}
+                                            isFullscreen={isFullscreen}
+                                            onToggleFullscreen={handleToggleFullscreen}
+                                            suggestion={suggestion}
+                                        />
+                                    }
+                                >
+                                    <DocumentRenderer
                                         project={project}
                                         viewMode={viewMode}
-                                        setViewMode={setViewMode}
-                                        isFullscreen={isFullscreen}
-                                        onToggleFullscreen={handleToggleFullscreen}
-                                        suggestion={suggestion}
+                                        activeChapterId={activeChapterId}
+                                        setActiveChapterId={setActiveChapterId}
+                                        selectedSectionIds={selectedSectionIds}
+                                        handleActiveSectionChange={handleActiveSectionChange}
+                                        showCoverPage={true}
+                                        comparisonSnapshot={comparisonSnapshot}
+                                        onCloseComparison={() => setComparisonSnapshotId(null)}
+                                        updateProjectFromMarkdown={useBuilderStore.getState().updateProjectFromMarkdown}
+                                        summarizeMutation={summarizeMutation}
+                                        expandMutation={expandMutation}
+                                        rewriteMutation={rewriteMutation}
+                                        rewriteStyles={rewriteStyles}
                                     />
-                                }
-                            >
-                                <DocumentRenderer
-                                    project={project}
-                                    viewMode={viewMode}
-                                    activeChapterId={activeChapterId}
-                                    setActiveChapterId={setActiveChapterId}
-                                    selectedSectionIds={selectedSectionIds}
-                                    handleActiveSectionChange={handleActiveSectionChange}
-                                    showCoverPage={true}
-                                    comparisonSnapshot={comparisonSnapshot}
-                                    onCloseComparison={() => setComparisonSnapshotId(null)}
-                                    updateProjectFromMarkdown={useBuilderStore.getState().updateProjectFromMarkdown}
-                                    summarizeMutation={summarizeMutation}
-                                    expandMutation={expandMutation}
-                                    rewriteMutation={rewriteMutation}
-                                    rewriteStyles={rewriteStyles}
-                                />
-                            </BuilderCanvas>
-                        </div>
-                    }
-                />
-            </Suspense>
-        </div>
+                                </BuilderCanvas>
+                            </div>
+                        }
+                    />
+                </Suspense>
+            </div>
+        </Profiler>
     );
 };

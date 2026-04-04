@@ -2,7 +2,7 @@
 
 import { useEditorStore } from '@/modules/ai-content/adapters/state/use-editor-store';
 import { BubbleMenu, EditorContent, useEditor, type Editor } from '@tiptap/react';
-import React, { useState } from 'react';
+import React, { useMemo, useRef, useEffect } from 'react';
 import { editorExtensions, handleHtmlPaste, handlePlainPaste } from '@/modules/ai-content/infrastructure/editor/tiptap-extensions';
 import { useService } from '@/hooks/util/use-service';
 import { IMarkdownServiceToken } from '@/infrastructure/di/tokens';
@@ -29,13 +29,22 @@ const MarkdownEditorComponent = ({
   editorClassName,
   debounceMs = 1000
 }: MarkdownEditorProps) => {
-  const { setActiveEditor, updateSelectionState } = useEditorStore();
+  const setActiveEditor = useEditorStore(state => state.setActiveEditor);
+  const updateSelectionState = useEditorStore(state => state.updateSelectionState);
   const markdownService = useService<IMarkdownService>(IMarkdownServiceToken);
   const bubbleMenuId = React.useId();
+  const debounceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const extensions = useMemo(
+    () => editorExtensions(bubbleMenuId, markdownService),
+    [bubbleMenuId, markdownService]
+  );
+
+  const initialHtml = useMemo(() => markdownService.toHtml(content), [content, markdownService]);
 
   const editor = useEditor({
-    extensions: editorExtensions(bubbleMenuId, markdownService),
-    content: markdownService.toHtml(content),
+    extensions,
+    content: initialHtml,
     onSelectionUpdate: ({ editor }) => {
       updateSelectionState(editor);
       if (!onActiveItemDetect) return;
@@ -67,9 +76,10 @@ const MarkdownEditorComponent = ({
       if (onDebouncedChange) {
         const markdown = markdownService.toMarkdown(editor.getHTML());
         // Simple manual debounce
-        const timer = (editor as any)._updateTimer;
-        if (timer) clearTimeout(timer);
-        (editor as any)._updateTimer = setTimeout(() => {
+        if (debounceTimerRef.current) {
+          clearTimeout(debounceTimerRef.current);
+        }
+        debounceTimerRef.current = setTimeout(() => {
           onDebouncedChange(markdown);
         }, debounceMs);
       }
@@ -116,6 +126,13 @@ const MarkdownEditorComponent = ({
       updateSelectionState(editor);
     }
   }, [content, editor, markdownService, updateSelectionState]);
+
+  useEffect(() => () => {
+    if (debounceTimerRef.current) {
+      clearTimeout(debounceTimerRef.current);
+      debounceTimerRef.current = null;
+    }
+  }, []);
 
   // Set the global editor instance
   React.useEffect(() => {
