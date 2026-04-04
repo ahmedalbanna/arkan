@@ -3,7 +3,7 @@
 import React, { Suspense, useState, useEffect, useRef } from 'react';
 import { ProjectProperties } from '@/modules/projects/domain/entities/Project';
 import { useReportGenerator } from '@/modules/ai-content/adapters/hooks/report-mode/useReportGenerator';
-import { useSidebarPanels } from '@/modules/ai-content/adapters/hooks/report-mode/useSidebarPanels';
+import { useSidebarPanels } from '@/modules/ai-content/adapters/hooks/builder/useSidebarPanels';
 import { useBuilderStore } from '@/hooks';
 import { BuilderPageSkeleton } from '@/app/builder/loading';
 import { OnboardingGuide } from '@/components/onboarding/OnboardingGuide';

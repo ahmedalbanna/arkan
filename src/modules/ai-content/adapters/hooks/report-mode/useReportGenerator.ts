@@ -6,7 +6,7 @@ import { useBuilderStore } from '@/modules/projects/adapters/state/useBuilderSto
 import React, { useState, useMemo, lazy, useEffect } from 'react';
 import { useSaveProject } from '@/modules/projects/adapters/hooks/use-projects';
 import { useWritingTool } from '@/hooks';
-import { useSidebarPanels } from './useSidebarPanels';
+import { useSidebarPanels } from '@/modules/ai-content/adapters/hooks/builder/useSidebarPanels';
 
 import { type ProjectProperties } from '@/modules/projects/domain/entities/Project';
 

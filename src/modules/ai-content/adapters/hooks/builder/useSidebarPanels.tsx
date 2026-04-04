@@ -1,11 +1,25 @@
 'use client';
 
 import React, { useMemo, lazy } from 'react';
-import { Settings, LayoutTemplate, SlidersHorizontal, MessageSquare, History as HistoryIcon, Layers, FileText } from 'lucide-react';
+import { 
+    Settings, 
+    LayoutTemplate, 
+    SlidersHorizontal, 
+    MessageSquare, 
+    History as HistoryIcon, 
+    Layers, 
+    FileText,
+    Terminal
+} from 'lucide-react';
 import { useLocalization } from '@/context/LocalizationContext';
 import { SidebarPanelConfig } from '@/modules/ai-content/adapters/components/builder/layout/types';
 
-// Lazy load components
+/**
+ * useSidebarPanels — Primary panel registration hook for the Builder workspace.
+ * Manages the dynamic configuration of left and right HUD panels.
+ */
+
+// Modular HUD Components — Lazy loaded for performance
 const ProjectSettingsHUD = lazy(() => import('@/modules/ai-content/adapters/components/builder/settings/ProjectSettingsHUD').then(m => ({ default: m.ProjectSettingsHUD })));
 const ApplyTemplatePanel = lazy(() => import('@/modules/ai-content/adapters/components/report-mode/templates/ApplyTemplatePanel'));
 const GlobalIntelligenceHUD = lazy(() => import('@/modules/ai-content/adapters/components/builder/settings/GlobalIntelligenceHUD').then(m => ({ default: m.GlobalIntelligenceHUD })));
@@ -14,6 +28,7 @@ const ChapterGenerationHUD = lazy(() => import('@/modules/ai-content/adapters/co
 const ProjectChat = lazy(() => import('@/modules/ai-content/adapters/components/report-mode/chat/ProjectChat').then(m => ({ default: m.ProjectChat })));
 const SnapshotHistoryPanel = lazy(() => import('@/modules/projects/adapters/components/SnapshotHistoryPanel'));
 const SidebarNavigator = lazy(() => import('@/modules/ai-content/adapters/components/builder/SidebarNavigator').then(m => ({ default: m.SidebarNavigator })));
+const GenerationNavigator = lazy(() => import('@/modules/ai-content/adapters/components/builder/generation/GenerationNavigator').then(m => ({ default: m.GenerationNavigator })));
 
 interface UseSidebarPanelsProps {
     project: any;
@@ -34,6 +49,7 @@ export function useSidebarPanels({
 }: UseSidebarPanelsProps) {
     const { t } = useLocalization();
 
+    // Setup Utility Panels (Left Sidebar)
     const leftPanels = useMemo<SidebarPanelConfig[]>(() => [
         {
             key: 'settings',
@@ -43,14 +59,13 @@ export function useSidebarPanels({
         },
         {
             key: 'templates',
-            title: 'Templates',
+            title: 'Layout Blueprint',
             icon: <LayoutTemplate className="h-4 w-4" />,
             content: <ApplyTemplatePanel />,
         },
-
         {
             key: 'navigator',
-            title: 'Navigator',
+            title: 'Architecture',
             icon: <Layers className="h-4 w-4" />,
             content: (
                 <SidebarNavigator
@@ -63,18 +78,32 @@ export function useSidebarPanels({
         },
     ], [selectedSectionIds, activeChapterId, onActiveSectionChange, onActiveChapterChange]);
 
+    // AI & Intelligence Panels (Right Sidebar)
     const rightPanels = useMemo<SidebarPanelConfig[]>(() => {
         const activeSectionId = selectedSectionIds.length > 0 ? selectedSectionIds[0] : null;
         const activeSection = activeSectionId ? project?.getSection(activeSectionId) ?? null : null;
         const activeChapter = activeChapterId ? project?.getChapter(activeChapterId) ?? null : null;
 
         const sectionTitle = activeChapterId
-            ? 'Chapter Tools'
+            ? 'Chapter Neural Core'
             : selectedSectionIds.length > 1
-                ? 'Bulk Edit'
-                : 'Section Tools';
+                ? 'Cluster Synthesis'
+                : 'Section Synthesis';
 
         return [
+            {
+                key: 'generate',
+                title: 'AI Production',
+                icon: <Terminal className="h-4 w-4" />,
+                content: (
+                    <GenerationNavigator
+                        selectedSectionIds={selectedSectionIds}
+                        onActiveSectionChange={onActiveSectionChange}
+                        onActiveChapterChange={onActiveChapterChange}
+                        activeChapterId={activeChapterId}
+                    />
+                ),
+            },
             {
                 key: 'section',
                 title: sectionTitle,
@@ -100,12 +129,12 @@ export function useSidebarPanels({
             },
             {
                 key: 'snapshots',
-                title: 'Snapshots',
+                title: 'Temporal Snapshots',
                 icon: <HistoryIcon className="h-4 w-4" />,
                 content: <SnapshotHistoryPanel />,
             },
         ];
-    }, [project, selectedSectionIds, activeChapterId, setActiveRightPanelKey]);
+    }, [project, selectedSectionIds, activeChapterId, setActiveRightPanelKey, onActiveSectionChange, onActiveChapterChange]);
 
     return { leftPanels, rightPanels };
 }
