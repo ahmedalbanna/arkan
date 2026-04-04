@@ -8,11 +8,11 @@ import { SidebarPanelConfig } from '@/modules/ai-content/adapters/components/bui
 // Lazy load components
 const ProjectSettingsPanel = lazy(() => import('@/modules/ai-content/adapters/components/report-mode/settings/ProjectSettingsPanel'));
 const FileManager = lazy(() => import('@/modules/ai-content/adapters/components/report-mode/file-manager'));
-const GenerationTools = lazy(() => import('@/modules/ai-content/adapters/components/report-mode/generation-tools'));
+const GenerationNavigator = lazy(() => import('@/modules/ai-content/adapters/components/builder/generation/GenerationNavigator').then(m => ({ default: m.GenerationNavigator })));
 const ApplyTemplatePanel = lazy(() => import('@/modules/ai-content/adapters/components/report-mode/templates/ApplyTemplatePanel'));
 const GlobalProjectControls = lazy(() => import('@/modules/ai-content/adapters/components/report-mode/settings/GlobalProjectControls').then(m => ({ default: m.GlobalProjectControls })));
-const SectionTabsPanel = lazy(() => import('@/modules/ai-content/adapters/components/report-mode/generation-tools/SectionTabsPanel').then(m => ({ default: m.SectionTabsPanel })));
-const ChapterTabsPanel = lazy(() => import('@/modules/ai-content/adapters/components/report-mode/generation-tools/ChapterTabsPanel').then(m => ({ default: m.ChapterTabsPanel })));
+const SectionGenerationHUD = lazy(() => import('@/modules/ai-content/adapters/components/builder/generation/SectionGenerationHUD').then(m => ({ default: m.SectionGenerationHUD })));
+const ChapterGenerationHUD = lazy(() => import('@/modules/ai-content/adapters/components/builder/generation/ChapterGenerationHUD').then(m => ({ default: m.ChapterGenerationHUD })));
 const ProjectChat = lazy(() => import('@/modules/ai-content/adapters/components/report-mode/chat/ProjectChat').then(m => ({ default: m.ProjectChat })));
 const SnapshotHistoryPanel = lazy(() => import('@/modules/projects/adapters/components/SnapshotHistoryPanel'));
 const SidebarNavigator = lazy(() => import('@/modules/ai-content/adapters/components/builder/SidebarNavigator').then(m => ({ default: m.SidebarNavigator })));
@@ -57,10 +57,10 @@ export function useSidebarPanels({
         },
         {
             key: 'generate',
-            title: 'Generation Tools',
+            title: 'AI Production',
             icon: <Terminal className="h-4 w-4" />,
             content: (
-                <GenerationTools
+                <GenerationNavigator
                     selectedSectionIds={selectedSectionIds}
                     onActiveSectionChange={onActiveSectionChange}
                     onActiveChapterChange={onActiveChapterChange}
@@ -100,8 +100,8 @@ export function useSidebarPanels({
                 title: sectionTitle,
                 icon: <FileText className="h-4 w-4" />,
                 content: activeChapterId
-                    ? <ChapterTabsPanel chapter={activeChapter} />
-                    : <SectionTabsPanel
+                    ? <ChapterGenerationHUD chapter={activeChapter} />
+                    : <SectionGenerationHUD
                         section={activeSection}
                         selectedSectionIds={selectedSectionIds.length > 1 ? selectedSectionIds : undefined}
                     />,
