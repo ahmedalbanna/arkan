@@ -10,8 +10,8 @@ import { cn } from '@/infrastructure/utils/cn';
 import { useLocalization } from '@/context/LocalizationContext';
 import { useBuilderStore } from '@/hooks';
 import { useProjectFileOperations } from '@/modules/projects/adapters/hooks/useProjectFileOperations';
-import { BrowseProjectsDialog } from '@/modules/ai-content/adapters/components/report-mode/session/BrowseProjectsDialog';
-import { ExportDialog } from '@/modules/ai-content/adapters/components/report-mode/session/ExportDialog';
+import { BrowseProjectsDialog } from '@/modules/ai-content/adapters/components/report-mode/dialogs/BrowseProjectsDialog';
+import { ExportDialog } from '@/modules/ai-content/adapters/components/report-mode/dialogs/ExportDialog';
 
 interface BuilderHeaderProps {
     projectName: string;

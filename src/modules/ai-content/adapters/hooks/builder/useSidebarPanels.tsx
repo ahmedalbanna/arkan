@@ -21,7 +21,7 @@ import { SidebarPanelConfig } from '@/modules/ai-content/adapters/components/bui
 
 // Modular HUD Components — Lazy loaded for performance
 const ProjectSettingsHUD = lazy(() => import('@/modules/ai-content/adapters/components/builder/settings/ProjectSettingsHUD').then(m => ({ default: m.ProjectSettingsHUD })));
-const ApplyTemplatePanel = lazy(() => import('@/modules/ai-content/adapters/components/report-mode/templates/ApplyTemplatePanel'));
+const TemplateLibraryHUD = lazy(() => import('@/modules/ai-content/adapters/components/builder/templates/TemplateLibraryHUD').then(m => ({ default: m.TemplateLibraryHUD })));
 const GlobalIntelligenceHUD = lazy(() => import('@/modules/ai-content/adapters/components/builder/settings/GlobalIntelligenceHUD').then(m => ({ default: m.GlobalIntelligenceHUD })));
 const SectionGenerationHUD = lazy(() => import('@/modules/ai-content/adapters/components/builder/generation/SectionGenerationHUD').then(m => ({ default: m.SectionGenerationHUD })));
 const ChapterGenerationHUD = lazy(() => import('@/modules/ai-content/adapters/components/builder/generation/ChapterGenerationHUD').then(m => ({ default: m.ChapterGenerationHUD })));
@@ -62,7 +62,7 @@ export function useSidebarPanels({
             key: 'templates',
             title: 'Layout Blueprint',
             icon: <LayoutTemplate className="h-4 w-4" />,
-            content: <ApplyTemplatePanel />,
+            content: <TemplateLibraryHUD />,
         },
         {
             key: 'navigator',
