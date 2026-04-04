@@ -107,7 +107,7 @@ export const BuilderDocument = ({
                                         </h2>
                                         {isPreview && (
                                             <div className="absolute top-0 right-0 opacity-0 group-hover/chapter:opacity-100 transition-opacity duration-200">
-                                                <div className="flex items-center gap-1 text-[9px] font-black uppercase tracking-widest text-primary/60 bg-primary/5 px-2 py-1 rounded-md border border-primary/10">
+                                                <div className="flex items-center gap-1 text-[9px] font-black uppercase tracking-[0.2em] text-primary/60 bg-primary/5 px-2 py-1 rounded-md border border-primary/10">
                                                     <MousePointer2 className="h-3 w-3" />
                                                     AI Actions
                                                 </div>
@@ -142,11 +142,11 @@ export const BuilderDocument = ({
                                         onMouseLeave={handleItemMouseLeave}
                                     >
                                         <div className="flex items-center gap-1">
-                                            <div className="text-[9px] font-black uppercase tracking-widest text-primary/60 px-2 py-1 border-r border-primary/10 mr-1">Chapter</div>
-                                            <Button variant="ghost" size="sm" className="h-8 px-3 text-[10px] font-black uppercase tracking-widest gap-1.5 hover:bg-primary/10 hover:text-primary rounded-xl" onClick={() => { setActiveChapterId(item.id); setHoveredItemId(null); }}>
+                                            <div className="text-[9px] font-black uppercase tracking-[0.2em] text-primary/60 px-2 py-1 border-r border-primary/10 mr-1">Chapter</div>
+                                            <Button variant="ghost" size="sm" className="h-8 px-3 text-[10px] font-black uppercase tracking-[0.2em] gap-1.5 hover:bg-primary/10 hover:text-primary rounded-xl" onClick={() => { setActiveChapterId(item.id); setHoveredItemId(null); }}>
                                                 <PenLine className="h-3.5 w-3.5" /> Edit
                                             </Button>
-                                            <Button variant="ghost" size="sm" className="h-8 px-3 text-[10px] font-black uppercase tracking-widest gap-1.5 hover:bg-primary/10 hover:text-primary rounded-xl" onClick={() => { setActiveChapterId(item.id); setHoveredItemId(null); }}>
+                                            <Button variant="ghost" size="sm" className="h-8 px-3 text-[10px] font-black uppercase tracking-[0.2em] gap-1.5 hover:bg-primary/10 hover:text-primary rounded-xl" onClick={() => { setActiveChapterId(item.id); setHoveredItemId(null); }}>
                                                 <Sparkles className="h-3.5 w-3.5" /> AI Tools
                                             </Button>
                                         </div>
@@ -182,7 +182,7 @@ export const BuilderDocument = ({
                                         </h3>
                                         {isPreview && (
                                             <div className="absolute top-0 right-0 opacity-0 group-hover/section:opacity-100 transition-opacity duration-200">
-                                                <div className="flex items-center gap-1 text-[9px] font-black uppercase tracking-widest text-primary/60 bg-primary/5 px-2 py-1 rounded-md border border-primary/10">
+                                                <div className="flex items-center gap-1 text-[9px] font-black uppercase tracking-[0.2em] text-primary/60 bg-primary/5 px-2 py-1 rounded-md border border-primary/10">
                                                     <MousePointer2 className="h-3 w-3" />
                                                     AI Actions
                                                 </div>
@@ -207,14 +207,14 @@ export const BuilderDocument = ({
                                         onMouseLeave={handleItemMouseLeave}
                                     >
                                         <div className="flex items-center gap-1">
-                                            <div className="text-[9px] font-black uppercase tracking-widest text-primary/60 px-2 py-1 border-r border-primary/10 mr-1">Section</div>
-                                            <Button variant="ghost" size="sm" className="h-8 px-3 text-[10px] font-black uppercase tracking-widest gap-1.5 hover:bg-primary/10 hover:text-primary rounded-xl" onClick={() => { handleActiveSectionChange(item.id); setHoveredItemId(null); }}>
+                                            <div className="text-[9px] font-black uppercase tracking-[0.2em] text-primary/60 px-2 py-1 border-r border-primary/10 mr-1">Section</div>
+                                            <Button variant="ghost" size="sm" className="h-8 px-3 text-[10px] font-black uppercase tracking-[0.2em] gap-1.5 hover:bg-primary/10 hover:text-primary rounded-xl" onClick={() => { handleActiveSectionChange(item.id); setHoveredItemId(null); }}>
                                                 <PenLine className="h-3.5 w-3.5" /> Edit
                                             </Button>
                                             <Button
                                                 variant="ghost" size="sm"
                                                 disabled={isSummarizing}
-                                                className="h-8 px-3 text-[10px] font-black uppercase tracking-widest gap-1.5 hover:bg-primary/10 hover:text-primary rounded-xl"
+                                                className="h-8 px-3 text-[10px] font-black uppercase tracking-[0.2em] gap-1.5 hover:bg-primary/10 hover:text-primary rounded-xl"
                                                 onClick={() => summarizeMutation?.mutate({ text: item.content, sectionId: item.id } as any)}
                                             >
                                                 {isSummarizing ? <RefreshCw className="h-3.5 w-3.5 animate-spin" /> : <AlignLeft className="h-3.5 w-3.5" />}
@@ -223,7 +223,7 @@ export const BuilderDocument = ({
                                             <Button
                                                 variant="ghost" size="sm"
                                                 disabled={isExpanding}
-                                                className="h-8 px-3 text-[10px] font-black uppercase tracking-widest gap-1.5 hover:bg-primary/10 hover:text-primary rounded-xl"
+                                                className="h-8 px-3 text-[10px] font-black uppercase tracking-[0.2em] gap-1.5 hover:bg-primary/10 hover:text-primary rounded-xl"
                                                 onClick={() => expandMutation?.mutate({ text: item.content, sectionId: item.id } as any)}
                                             >
                                                 {isExpanding ? <RefreshCw className="h-3.5 w-3.5 animate-spin" /> : <ZoomIn className="h-3.5 w-3.5" />}
@@ -234,7 +234,7 @@ export const BuilderDocument = ({
                                                     <Button
                                                         variant="ghost" size="sm"
                                                         disabled={isRewriting}
-                                                        className="h-8 px-3 text-[10px] font-black uppercase tracking-widest gap-1.5 hover:bg-primary/10 hover:text-primary rounded-xl"
+                                                        className="h-8 px-3 text-[10px] font-black uppercase tracking-[0.2em] gap-1.5 hover:bg-primary/10 hover:text-primary rounded-xl"
                                                     >
                                                         {isRewriting ? <RefreshCw className="h-3.5 w-3.5 animate-spin" /> : <Wand2 className="h-3.5 w-3.5" />}
                                                         Rewrite
@@ -244,7 +244,7 @@ export const BuilderDocument = ({
                                                     {rewriteStyles?.map(({ label, style }) => (
                                                         <DropdownMenuItem
                                                             key={style}
-                                                            className="text-[10px] font-black uppercase tracking-widest cursor-pointer"
+                                                            className="text-[10px] font-black uppercase tracking-[0.2em] cursor-pointer"
                                                             onSelect={() => rewriteMutation?.mutate({ text: item.content, style, sectionId: item.id } as any)}
                                                         >
                                                             {label}

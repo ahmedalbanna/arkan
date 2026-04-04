@@ -117,7 +117,7 @@ export function SectionGenerationHUD({ section, selectedSectionIds = [], classNa
 
     return (
         <SidebarContainer
-            title={isBulkGeneration ? `Bulk Production (${selectedSectionIds.length})` : 'Section Synthesis'}
+            title={isBulkGeneration ? `Bulk Generation (${selectedSectionIds.length})` : 'Section Generation'}
             icon={<Sparkles className="h-3.5 w-3.5" />}
             actions={
                 <div className="flex items-center gap-1 p-1 rounded-xl bg-background/20 border border-primary/5 backdrop-blur-md shadow-inner">

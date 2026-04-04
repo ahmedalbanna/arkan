@@ -196,7 +196,7 @@ export const ProjectOutlineHUD = (props: ProjectOutlineHUDProps) => {
             <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2.5">
                   <div className="h-1.5 w-1.5 rounded-full bg-primary animate-pulse shadow-[0_0_8px_rgba(var(--primary),0.6)]" />
-                  <h3 className="text-[11px] font-black uppercase tracking-[0.22em] text-primary">Project Outline</h3>
+                  <h3 className="text-[11px] font-black uppercase tracking-[0.22em] text-primary">Outline</h3>
                 </div>
                 <div className="flex items-center gap-4">
                     <span className="text-[9px] font-bold text-muted-foreground/30 uppercase tracking-[0.2em]">

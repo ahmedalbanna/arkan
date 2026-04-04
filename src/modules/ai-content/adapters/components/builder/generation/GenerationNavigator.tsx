@@ -80,7 +80,7 @@ export function GenerationNavigator({
       />
 
       <SidebarContainer
-        title="AI Production"
+        title="AI Generation"
         icon={<Zap className="h-3.5 w-3.5" />}
         actions={
           <Button
@@ -96,7 +96,7 @@ export function GenerationNavigator({
         <div className="flex h-full flex-col gap-6">
           <div className="space-y-1.5">
             <p className="text-[10px] font-medium italic leading-relaxed text-muted-foreground/60 uppercase tracking-wider">
-              Orchestrate the neural assembly of your project manifest.
+              Orchestrate the AI assembly of your project.
             </p>
           </div>
 
@@ -125,10 +125,10 @@ export function GenerationNavigator({
                       htmlFor="select-all-nodes"
                       className="cursor-pointer text-[10px] font-black uppercase tracking-[0.15em] text-primary"
                     >
-                      Production Selection Mode
+                      Selection Mode
                     </Label>
                     <span className="mt-0.5 text-[9px] font-bold uppercase tracking-widest text-primary/50 tabular-nums">
-                      {selectedSectionsForBuild.size} / {totalSelectableSections} Nodes Optimized
+                      {selectedSectionsForBuild.size} / {totalSelectableSections} Selected
                     </span>
                   </div>
                 </div>
@@ -231,7 +231,7 @@ export function GenerationNavigator({
                     disabled={selectedSectionsForBuild.size === 0 || projectMutation.isPending}
                   >
                     <Building className="mr-2.5 h-4 w-4" />
-                    Execute Build ({selectedSectionsForBuild.size})
+                    Generate Selected ({selectedSectionsForBuild.size})
                     <ChevronRight className="ml-1.5 h-3.5 w-3.5" />
                   </Button>
                 </motion.div>
@@ -252,7 +252,7 @@ export function GenerationNavigator({
                       disabled={projectMutation.isPending}
                     >
                       <Building className="mr-2.5 h-4 w-4 transition-transform group-hover/assemble:scale-110" />
-                      Assemble Project Manifest
+                      Generate Project
                     </Button>
                   </motion.div>
                 )

@@ -85,12 +85,14 @@ export const BuilderWorkspace: React.FC<BuilderWorkspaceProps> = ({ initialProje
     const comparisonSnapshot = snapshots.find((s: any) => s.id === comparisonSnapshotId);
 
     // Toggle cover page + settings panel together
-    const handleToggleCoverPage = (visible: boolean) => {
+    const handleCoverPageToggle = (visible: boolean) => {
         setShowCoverPage(visible);
         setShowCoverSettings(visible);
     };
 
-    const toggleFullscreen = () => {
+    const handleCoverSettingsClose = () => setShowCoverSettings(false);
+
+    const handleToggleFullscreen = () => {
         if (!containerRef.current) return;
         if (!document.fullscreenElement) {
             containerRef.current.requestFullscreen().then(() => {
@@ -169,69 +171,67 @@ export const BuilderWorkspace: React.FC<BuilderWorkspaceProps> = ({ initialProje
                         />
                     }
                     canvas={
-                        <BuilderCanvas
-                            zoomLevel={zoomLevel}
-                            onZoomIn={handleZoomIn}
-                            onZoomOut={handleZoomOut}
-                            onZoomReset={handleZoomReset}
-                            containerRef={containerRef}
-                            stickyToolbar={
-                                <DocumentToolbar 
+                        <div className="relative h-full">
+                            <CoverPageSettingsHUD 
+                                isOpen={showCoverSettings}
+                                onClose={handleCoverSettingsClose}
+                            />
+                            <ProjectOutlineHUD 
+                                isVisible={isOutlineVisible}
+                                project={project}
+                                activeChapterId={activeChapterId}
+                                selectedSectionIds={selectedSectionIds}
+                                onActiveChapterChange={setActiveChapterId}
+                                onActiveSectionChange={(id) => handleActiveSectionChange(id)}
+                                onMoveItem={handleMoveItem}
+                                onUpdateTitle={handleUpdateTitle}
+                                onDeleteItem={handleDeleteItem}
+                                onAddChapter={handleAddChapter}
+                                onAddSection={handleAddSection}
+                                onDuplicateItem={handleDuplicateItem}
+                                onUndo={handleUndo}
+                                onCopyItem={handleCopyItem}
+                                onPasteItem={handlePasteItem}
+                            />
+                            <BuilderCanvas
+                                zoomLevel={zoomLevel}
+                                onZoomIn={handleZoomIn}
+                                onZoomOut={handleZoomOut}
+                                onZoomReset={handleZoomReset}
+                                containerRef={containerRef}
+                                toolbar={
+                                    <DocumentToolbar 
+                                        project={project}
+                                        viewMode={viewMode}
+                                        setViewMode={setViewMode}
+                                        isOutlineVisible={isOutlineVisible}
+                                        setIsOutlineVisible={setIsOutlineVisible}
+                                        isFullscreen={isFullscreen}
+                                        onToggleFullscreen={handleToggleFullscreen}
+                                        suggestion={suggestion}
+                                        showCoverPage={showCoverPage}
+                                        setShowCoverPage={handleCoverPageToggle}
+                                    />
+                                }
+                            >
+                                <DocumentRenderer
                                     project={project}
                                     viewMode={viewMode}
-                                    setViewMode={setViewMode}
-                                    isOutlineVisible={isOutlineVisible}
-                                    setIsOutlineVisible={setIsOutlineVisible}
-                                    isFullscreen={isFullscreen}
-                                    toggleFullscreen={toggleFullscreen}
-                                    suggestion={suggestion}
+                                    activeChapterId={activeChapterId}
+                                    setActiveChapterId={setActiveChapterId}
+                                    selectedSectionIds={selectedSectionIds}
+                                    handleActiveSectionChange={handleActiveSectionChange}
                                     showCoverPage={showCoverPage}
-                                    setShowCoverPage={handleToggleCoverPage}
+                                    comparisonSnapshot={comparisonSnapshot}
+                                    onCloseComparison={() => setComparisonSnapshotId(null)}
+                                    updateProjectFromMarkdown={useBuilderStore.getState().updateProjectFromMarkdown}
+                                    summarizeMutation={summarizeMutation}
+                                    expandMutation={expandMutation}
+                                    rewriteMutation={rewriteMutation}
+                                    rewriteStyles={rewriteStyles}
                                 />
-                            }
-                            floatingElements={
-                                <>
-                                    <ProjectOutlineHUD 
-                                        isVisible={isOutlineVisible}
-                                        project={project}
-                                        activeChapterId={activeChapterId}
-                                        selectedSectionIds={selectedSectionIds}
-                                        onActiveChapterChange={setActiveChapterId}
-                                        onActiveSectionChange={(id) => handleActiveSectionChange(id)}
-                                        onMoveItem={handleMoveItem}
-                                        onUpdateTitle={handleUpdateTitle}
-                                        onDeleteItem={handleDeleteItem}
-                                        onAddChapter={handleAddChapter}
-                                        onAddSection={handleAddSection}
-                                        onDuplicateItem={handleDuplicateItem}
-                                        onUndo={handleUndo}
-                                        onCopyItem={handleCopyItem}
-                                        onPasteItem={handlePasteItem}
-                                    />
-                                    <CoverPageSettingsHUD 
-                                        isOpen={showCoverSettings}
-                                        onClose={() => setShowCoverSettings(false)}
-                                    />
-                                </>
-                            }
-                        >
-                            <DocumentRenderer
-                                project={project}
-                                viewMode={viewMode}
-                                activeChapterId={activeChapterId}
-                                setActiveChapterId={setActiveChapterId}
-                                selectedSectionIds={selectedSectionIds}
-                                handleActiveSectionChange={handleActiveSectionChange}
-                                showCoverPage={showCoverPage}
-                                comparisonSnapshot={comparisonSnapshot}
-                                onCloseComparison={() => setComparisonSnapshotId(null)}
-                                updateProjectFromMarkdown={useBuilderStore.getState().updateProjectFromMarkdown}
-                                summarizeMutation={summarizeMutation}
-                                expandMutation={expandMutation}
-                                rewriteMutation={rewriteMutation}
-                                rewriteStyles={rewriteStyles}
-                            />
-                        </BuilderCanvas>
+                            </BuilderCanvas>
+                        </div>
                     }
                 />
             </Suspense>

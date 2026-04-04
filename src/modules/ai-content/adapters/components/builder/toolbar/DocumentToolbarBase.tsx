@@ -15,7 +15,7 @@ interface DocumentToolbarBaseProps {
     isOutlineVisible: boolean;
     setIsOutlineVisible: (visible: boolean) => void;
     isFullscreen: boolean;
-    toggleFullscreen: () => void;
+    onToggleFullscreen: () => void;
     suggestion: string;
     showCoverPage: boolean;
     setShowCoverPage: (visible: boolean) => void;
@@ -29,7 +29,7 @@ export const DocumentToolbarBase = ({
     isOutlineVisible,
     setIsOutlineVisible,
     isFullscreen,
-    toggleFullscreen,
+    onToggleFullscreen,
     suggestion,
     showCoverPage,
     setShowCoverPage,
@@ -146,7 +146,7 @@ export const DocumentToolbarBase = ({
                                 size="icon"
                                 aria-label={isFullscreen ? 'Exit fullscreen' : 'Enter fullscreen'}
                                 className="h-7 w-7 rounded-lg hover:bg-primary/5 hover:text-primary text-muted-foreground transition-all duration-200"
-                                onClick={toggleFullscreen}
+                                onClick={onToggleFullscreen}
                             >
                                 {isFullscreen
                                     ? <Minimize2 className="h-3.5 w-3.5" />

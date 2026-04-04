@@ -14,8 +14,7 @@ interface BuilderCanvasProps {
     onZoomIn: () => void;
     onZoomOut: () => void;
     onZoomReset: () => void;
-    floatingElements?: React.ReactNode;
-    stickyToolbar?: React.ReactNode;
+    toolbar?: React.ReactNode;
     className?: string;
     containerRef?: React.RefObject<HTMLDivElement>;
 }
@@ -27,8 +26,7 @@ export const BuilderCanvas = React.forwardRef<HTMLDivElement, BuilderCanvasProps
         onZoomIn,
         onZoomOut,
         onZoomReset,
-        floatingElements,
-        stickyToolbar,
+        toolbar,
         className,
         containerRef,
     },
@@ -61,8 +59,11 @@ export const BuilderCanvas = React.forwardRef<HTMLDivElement, BuilderCanvasProps
                 style={{ boxShadow: 'inset 0 0 80px 0 hsl(var(--background) / 0.35)' }}
             />
 
-            {/* Sticky Document Toolbar slot */}
-            {stickyToolbar}
+            {toolbar && (
+                <div className="flex-shrink-0 border-b border-border/40 bg-background/70 backdrop-blur-xl">
+                    {toolbar}
+                </div>
+            )}
 
             {/* Primary content area with unified scroll and zoom handling */}
             <main ref={containerRef} className="flex-1 flex flex-col min-h-0 overflow-hidden relative z-20">
@@ -79,9 +80,6 @@ export const BuilderCanvas = React.forwardRef<HTMLDivElement, BuilderCanvasProps
                     </ScrollArea>
                 </Suspense>
             </main>
-
-            {/* Floating contextual layers (e.g. ProjectOutlineHUD, CoverSettingsHUD) */}
-            {floatingElements}
 
             {/* Zoom HUD — Unified control at the bottom */}
             <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-40 transition-all duration-500 opacity-60 hover:opacity-100 focus-within:opacity-100">

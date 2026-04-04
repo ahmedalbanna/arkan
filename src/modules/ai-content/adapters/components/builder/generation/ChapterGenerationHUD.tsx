@@ -64,7 +64,7 @@ export function ChapterGenerationHUD({ chapter, className, onClose }: ChapterGen
 
     return (
         <SidebarContainer
-            title="Chapter Logic"
+            title="Chapter Generation"
             icon={<Layout className="h-3.5 w-3.5" />}
         >
             <div className="space-y-8 relative">
@@ -89,7 +89,7 @@ export function ChapterGenerationHUD({ chapter, className, onClose }: ChapterGen
                                 ) : (
                                     <Wand2 className="h-4 w-4 shrink-0 transition-transform group-hover/gen:rotate-12" />
                                 )}
-                                <span>Initialize Process</span>
+                                <span>Generate Chapter</span>
                                 <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/10 to-white/0 -translate-x-full group-hover/gen:translate-x-full transition-transform duration-1000 ease-in-out" />
                             </Button>
 
@@ -101,7 +101,7 @@ export function ChapterGenerationHUD({ chapter, className, onClose }: ChapterGen
                                     className="w-full font-black h-10 gap-2 border border-primary/20 bg-primary/5 text-primary hover:bg-primary/10 rounded-xl uppercase tracking-widest text-[9px] transition-all hover:scale-[1.02] active:scale-[0.98]"
                                 >
                                     <PlusCircle className="h-3.5 w-3.5" />
-                                    Materialize Result
+                                    Create Section
                                 </Button>
                             )}
                         </form>

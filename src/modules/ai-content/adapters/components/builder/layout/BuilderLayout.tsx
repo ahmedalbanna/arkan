@@ -8,7 +8,6 @@ interface BuilderLayoutProps {
     leftSidebar?: React.ReactNode;
     rightSidebar?: React.ReactNode;
     canvas: React.ReactNode;
-    floatingElements?: React.ReactNode;
     className?: string;
 }
 
@@ -17,43 +16,29 @@ export const BuilderLayout: React.FC<BuilderLayoutProps> = ({
     leftSidebar,
     rightSidebar,
     canvas,
-    floatingElements,
     className,
 }) => {
     return (
         <div className={cn("relative flex-grow flex flex-col bg-background h-[calc(100vh-64px)] overflow-hidden", className)}>
-            <main className="flex-1 flex flex-col relative z-10 overflow-hidden">
-                {/* Floating Global Header HUD */}
-                {header && (
-                    <div className="absolute top-6 left-1/2 -translate-x-1/2 z-50 w-auto max-w-[95vw] pointer-events-none">
-                        {header}
+            {header && (
+                <div className="flex-shrink-0 px-6 pt-6">
+                    {header}
+                </div>
+            )}
+            <main className="flex-1 flex min-h-0 gap-6 px-6 pb-6">
+                {leftSidebar && (
+                    <div className="flex-shrink-0 h-full">
+                        {leftSidebar}
                     </div>
                 )}
-
-                {/* Base Canvas Layer */}
-                <div className="absolute inset-0 z-10">
+                <div className="flex-1 min-w-0 h-full">
                     {canvas}
                 </div>
-
-                {/* Floating Sidebar Controls */}
-                <div className="absolute inset-0 z-30 pointer-events-none flex items-stretch justify-between p-6">
-                    {/* Left Sidebar HUD */}
-                    {leftSidebar && (
-                        <div className="pointer-events-auto h-full flex flex-col">
-                            {leftSidebar}
-                        </div>
-                    )}
-
-                    {/* Right Sidebar HUD */}
-                    {rightSidebar && (
-                        <div className="pointer-events-auto h-full flex flex-col">
-                            {rightSidebar}
-                        </div>
-                    )}
-                </div>
-
-                {/* Additional Global Floating Layers (Outline, Chat, etc.) */}
-                {floatingElements}
+                {rightSidebar && (
+                    <div className="flex-shrink-0 h-full">
+                        {rightSidebar}
+                    </div>
+                )}
             </main>
         </div>
     );

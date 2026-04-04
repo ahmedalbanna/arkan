@@ -21,9 +21,9 @@ export const BuilderSidebar = React.forwardRef<HTMLDivElement, BuilderSidebarPro
         <div
             ref={ref}
             className={cn(
-                'flex flex-col h-full bg-background/40 backdrop-blur-2xl transition-all duration-500 ease-[0.22,1,0.36,1] relative overflow-hidden z-20',
-                'border border-primary/10 shadow-[0_8px_40px_rgba(0,0,0,0.08)] rounded-[32px]',
-                isCollapsed ? 'w-[72px]' : 'w-[400px]',
+                'flex flex-col h-full bg-background/40 backdrop-blur-2xl transition-all duration-500 ease-[0.22,1,0.36,1] relative overflow-hidden',
+                'border border-border/40 shadow-[0_6px_24px_rgba(0,0,0,0.08)] rounded-2xl',
+                isCollapsed ? 'w-[72px]' : 'w-[360px]',
                 className
             )}
         >

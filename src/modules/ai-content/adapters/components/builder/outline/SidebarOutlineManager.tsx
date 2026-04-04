@@ -174,7 +174,7 @@ export function SidebarOutlineManager({
           <div className="flex items-center gap-2">
             <div className="h-1 w-1 rounded-full bg-primary/40 shadow-[0_0_8px_rgba(var(--primary),0.4)]" />
             <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-primary/80">
-              Nav Structure
+              Outline
             </h3>
           </div>
           <div className="flex items-center gap-3">

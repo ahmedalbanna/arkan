@@ -41,7 +41,7 @@ export const BuilderHeader = React.forwardRef<HTMLDivElement, BuilderHeaderProps
         fileInputRef.current?.click();
     };
 
-    const onFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (file) {
             try {
@@ -126,7 +126,7 @@ export const BuilderHeader = React.forwardRef<HTMLDivElement, BuilderHeaderProps
                         <input
                             type="file"
                             ref={fileInputRef}
-                            onChange={onFileChange}
+                            onChange={handleFileChange}
                             accept=".arkan"
                             className="hidden"
                         />

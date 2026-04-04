@@ -177,9 +177,9 @@ export const SortableOutlineItem = ({
           ) : (
             <span
               className={cn(
-                'text-[10px] font-bold uppercase tracking-widest truncate transition-colors duration-300',
+                'text-[10px] font-bold uppercase tracking-[0.16em] truncate transition-colors duration-300',
                 isActive ? 'text-primary' : 'text-muted-foreground group-hover/item:text-foreground',
-                isChapter && 'font-black tracking-[0.18em]'
+                isChapter && 'font-black tracking-[0.2em]'
               )}
             >
               {title || (isChapter ? 'Untitled Chapter' : 'Untitled Section')}

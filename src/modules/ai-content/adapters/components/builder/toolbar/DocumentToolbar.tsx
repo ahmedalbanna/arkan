@@ -11,7 +11,7 @@ interface DocumentToolbarProps {
     isOutlineVisible: boolean;
     setIsOutlineVisible: (visible: boolean) => void;
     isFullscreen: boolean;
-    toggleFullscreen: () => void;
+    onToggleFullscreen: () => void;
     suggestion: string;
     showCoverPage: boolean;
     setShowCoverPage: (visible: boolean) => void;
