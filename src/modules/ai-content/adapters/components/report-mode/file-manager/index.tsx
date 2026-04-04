@@ -30,7 +30,7 @@ import ReactMarkdown from 'react-markdown';
 import { markdownComponents } from '@/modules/ai-content/adapters/components/report-mode/markdown-styles';
 import AnalystAgent from "./AnalystAgent";
 import { FileContentViewer } from './FileContentViewer';
-import { SidebarContainer } from '../layout/SidebarContainer';
+import { SidebarContainer } from '../../builder/layout/SidebarContainer';
 // Extracted ViewContextDialog component
 function ViewContextDialog({ item }: { item: { fileName: string, content: string } }) {
     return (

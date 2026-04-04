@@ -13,7 +13,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { Building, ChevronRight, PlusCircle, Sparkles, XCircle, Zap } from 'lucide-react';
 import { useMemo } from 'react';
 import { BuildProjectDialog } from '../dialogs/BuildProjectDialog';
-import { SidebarContainer } from '../layout/SidebarContainer';
+import { SidebarContainer } from '../../builder/layout/SidebarContainer';
 import { SectionAccordionItem } from './SectionAccordionItem';
 import { SortableChapterItem } from './SortableChapterItem';
 

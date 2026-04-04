@@ -10,7 +10,7 @@ import { useProjectChat } from "@/modules/ai-content/adapters/hooks/report-mode/
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { cn } from "@/infrastructure/utils/cn";
 import { useState, useRef, useEffect } from "react";
-import { SidebarContainer } from "../layout/SidebarContainer";
+import { SidebarContainer } from "../../builder/layout/SidebarContainer";
 
 interface ProjectChatProps {
     isOpen: boolean;

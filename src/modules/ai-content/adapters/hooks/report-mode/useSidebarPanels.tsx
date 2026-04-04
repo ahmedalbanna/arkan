@@ -15,7 +15,7 @@ const SectionTabsPanel = lazy(() => import('@/modules/ai-content/adapters/compon
 const ChapterTabsPanel = lazy(() => import('@/modules/ai-content/adapters/components/report-mode/generation-tools/ChapterTabsPanel').then(m => ({ default: m.ChapterTabsPanel })));
 const ProjectChat = lazy(() => import('@/modules/ai-content/adapters/components/report-mode/chat/ProjectChat').then(m => ({ default: m.ProjectChat })));
 const SnapshotHistoryPanel = lazy(() => import('@/modules/projects/adapters/components/SnapshotHistoryPanel'));
-const SidebarNavigator = lazy(() => import('@/modules/ai-content/adapters/components/report-mode/SidebarNavigator').then(m => ({ default: m.SidebarNavigator })));
+const SidebarNavigator = lazy(() => import('@/modules/ai-content/adapters/components/builder/SidebarNavigator').then(m => ({ default: m.SidebarNavigator })));
 
 interface UseSidebarPanelsProps {
     project: any;

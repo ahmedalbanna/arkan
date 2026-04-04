@@ -10,7 +10,7 @@ import { Camera, History, RotateCcw, Trash2, GitCompare, Search, Plus } from 'lu
 import { formatDistanceToNow } from 'date-fns';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/infrastructure/utils/cn';
-import { SidebarContainer } from '@/modules/ai-content/adapters/components/report-mode/layout/SidebarContainer';
+import { SidebarContainer } from '@/modules/ai-content/adapters/components/builder/layout/SidebarContainer';
 
 export default function SnapshotHistoryPanel() {
     const { project, loadProject, setComparisonSnapshotId, comparisonSnapshotId } = useBuilderStore();
@@ -33,13 +33,13 @@ export default function SnapshotHistoryPanel() {
         }
     };
 
-    const filteredSnapshots = snapshots.filter((s: any) => 
+    const filteredSnapshots = snapshots.filter((s: any) =>
         s.name.toLowerCase().includes(searchQuery.toLowerCase())
     );
 
     return (
-        <SidebarContainer 
-            title="Snapshot History" 
+        <SidebarContainer
+            title="Snapshot History"
             icon={<History className="h-3.5 w-3.5" />}
             actions={
                 <Badge variant="outline" className="h-5 text-[9px] font-black border-primary/20 bg-primary/5 text-primary tabular-nums px-2 rounded-full">
@@ -58,7 +58,7 @@ export default function SnapshotHistoryPanel() {
                             className="bg-muted/5 border-border/40 text-[11px] font-mono tracking-wider h-10 pr-10 focus-visible:ring-primary/20 uppercase rounded-xl shadow-inner transition-all"
                             onKeyDown={(e) => e.key === 'Enter' && handleCreateSnapshot()}
                         />
-                        <Button 
+                        <Button
                             size="icon"
                             variant="ghost"
                             className="absolute right-1 top-1 h-8 w-8 text-primary hover:bg-primary/5 rounded-lg transition-all"
@@ -97,8 +97,8 @@ export default function SnapshotHistoryPanel() {
                                 exit={{ opacity: 0, scale: 0.95 }}
                                 className={cn(
                                     "group relative p-3 rounded-xl border transition-all duration-300 hover:translate-x-0.5 shadow-sm",
-                                    comparisonSnapshotId === snapshot.id 
-                                        ? "bg-primary/[0.03] border-primary/30 shadow-[0_0_20px_rgba(var(--primary),0.08)] ring-1 ring-primary/10" 
+                                    comparisonSnapshotId === snapshot.id
+                                        ? "bg-primary/[0.03] border-primary/30 shadow-[0_0_20px_rgba(var(--primary),0.08)] ring-1 ring-primary/10"
                                         : "bg-card/40 border-border/40 hover:border-primary/20 hover:bg-muted/5"
                                 )}
                             >
@@ -127,7 +127,7 @@ export default function SnapshotHistoryPanel() {
                                             <GitCompare className="h-3 w-3 mr-1.5" />
                                             {comparisonSnapshotId === snapshot.id ? 'CANCEL' : 'COMPARE'}
                                         </Button>
-                                        
+
                                         <Button
                                             size="sm"
                                             variant="outline"
@@ -147,7 +147,7 @@ export default function SnapshotHistoryPanel() {
                                         </Button>
                                     </div>
                                 </div>
-                                
+
                                 {/* Technical Decoration */}
                                 <div className="absolute top-2 right-2 opacity-[0.03] group-hover:opacity-[0.08] transition-opacity">
                                     <Camera className="h-7 w-7" />
