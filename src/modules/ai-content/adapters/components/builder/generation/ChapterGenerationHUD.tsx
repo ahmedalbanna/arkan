@@ -46,13 +46,13 @@ export function ChapterGenerationHUD({ chapter, className, onClose }: ChapterGen
 
     if (!chapter) {
         return (
-            <SidebarContainer title="Chapter Tools" icon={<Layout className="h-3.5 w-3.5" />}>
+            <SidebarContainer title="Chapter Neural Core" icon={<Layout className="h-3.5 w-3.5" />}>
                 <div className="flex flex-col items-center justify-center h-64 text-center space-y-4 opacity-40">
                     <div className="p-5 rounded-[24px] bg-primary/5 border border-primary/10 shadow-inner">
                         <Layout className="h-8 w-8 text-primary/40" />
                     </div>
                     <div className="space-y-1.5 px-6">
-                        <p className="text-[10px] font-black uppercase tracking-[0.25em] text-muted-foreground">No selection</p>
+                        <p className="text-[10px] font-black uppercase tracking-[0.3em] text-muted-foreground">No selection</p>
                         <p className="text-[11px] font-medium leading-relaxed italic text-muted-foreground/60">
                             Select a chapter in the navigator to perform bulk AI operations.
                         </p>
@@ -64,15 +64,15 @@ export function ChapterGenerationHUD({ chapter, className, onClose }: ChapterGen
 
     return (
         <SidebarContainer
-            title="Chapter Generation"
+            title="Chapter Neural Core"
             icon={<Layout className="h-3.5 w-3.5" />}
         >
             <div className="space-y-8 relative">
                 {/* Chapter Identity & Trigger */}
                 <div className="flex flex-col gap-5">
-                    <div className="space-y-1.5">
-                        <span className="text-[9px] font-black uppercase tracking-[0.25em] text-primary/60">Active Chapter</span>
-                        <h3 className="text-[13px] font-black uppercase truncate tracking-widest text-foreground/90 tabular-nums">
+                    <div className="space-y-1.5 px-1">
+                        <span className="text-[9px] font-black uppercase tracking-[0.3em] text-primary/60">Active Chapter</span>
+                        <h3 className="text-[13px] font-black uppercase truncate tracking-[0.15em] text-foreground/90 tabular-nums leading-tight">
                             {chapter.title}
                         </h3>
                     </div>
@@ -82,7 +82,7 @@ export function ChapterGenerationHUD({ chapter, className, onClose }: ChapterGen
                             <Button
                                 type="submit"
                                 disabled={isProcessing}
-                                className="w-full font-black h-12 gap-2.5 shadow-xl shadow-primary/10 rounded-2xl uppercase tracking-[0.2em] text-[10px] relative overflow-hidden group/gen"
+                                className="w-full font-black h-12 gap-2.5 shadow-xl shadow-primary/10 rounded-2xl uppercase tracking-[0.2em] text-[10px] relative overflow-hidden group/gen transition-all duration-500 ease-[0.22,1,0.36,1]"
                             >
                                 {isProcessing ? (
                                     <Loader2 className="h-4 w-4 animate-spin shrink-0" />
@@ -101,7 +101,7 @@ export function ChapterGenerationHUD({ chapter, className, onClose }: ChapterGen
                                     className="w-full font-black h-10 gap-2 border border-primary/20 bg-primary/5 text-primary hover:bg-primary/10 rounded-xl uppercase tracking-widest text-[9px] transition-all hover:scale-[1.02] active:scale-[0.98]"
                                 >
                                     <PlusCircle className="h-3.5 w-3.5" />
-                                    Create Section
+                                    Materialize Logic
                                 </Button>
                             )}
                         </form>
@@ -124,8 +124,8 @@ export function ChapterGenerationHUD({ chapter, className, onClose }: ChapterGen
                     <div className="relative min-h-[320px]">
                         <TabsContent value="actions" className="m-0 focus-visible:ring-0 space-y-8 animate-in fade-in slide-in-from-right-4 duration-500">
                             <div className="space-y-6">
-                                <div className="space-y-3.5">
-                                    <Label className="text-[9px] font-black uppercase tracking-widest text-muted-foreground/60 px-1">Operation Vector</Label>
+                                <div className="space-y-3.5 px-1">
+                                    <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/60 px-1">Operation Vector</Label>
                                     <Select value={manipulationType} onValueChange={(v) => setManipulationType(v as any)}>
                                         <SelectTrigger className="h-11 text-[11px] font-bold bg-muted/20 border-border/40 rounded-xl focus:ring-primary/20 transition-all hover:border-primary/20">
                                             <SelectValue />
@@ -141,8 +141,8 @@ export function ChapterGenerationHUD({ chapter, className, onClose }: ChapterGen
                                 </div>
 
                                 {manipulationType === 'rewrite' && (
-                                    <div className="space-y-3.5 animate-in fade-in duration-300">
-                                        <Label className="text-[9px] font-black uppercase tracking-widest text-muted-foreground/60 px-1">Linguistic Style</Label>
+                                    <div className="space-y-3.5 animate-in fade-in duration-300 px-1">
+                                        <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/60 px-1">Linguistic Style</Label>
                                         <Select onValueChange={(val) => form.setValue('rewriteStyle', val)} defaultValue={form.getValues('rewriteStyle')}>
                                             <SelectTrigger className="h-11 text-[11px] font-bold bg-muted/20 border-border/40 rounded-xl">
                                                 <SelectValue placeholder="Select style" />
@@ -155,9 +155,9 @@ export function ChapterGenerationHUD({ chapter, className, onClose }: ChapterGen
                                 )}
 
                                 {manipulationType === 'summarize' && (
-                                    <div className="space-y-5 animate-in fade-in duration-300">
+                                    <div className="space-y-5 animate-in fade-in duration-300 px-1">
                                         <div className="flex justify-between items-center px-1">
-                                            <Label className="text-[9px] font-black uppercase tracking-widest text-muted-foreground/60">Density Vector</Label>
+                                            <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/60">Density Vector</Label>
                                             <Badge variant="outline" className="h-5 text-[9px] font-black border-primary/20 bg-primary/5 text-primary shadow-inner tabular-nums">{compressionRatio}%</Badge>
                                         </div>
                                         <div className="px-1">
@@ -167,21 +167,21 @@ export function ChapterGenerationHUD({ chapter, className, onClose }: ChapterGen
                                 )}
 
                                 {manipulationType === 'style-editor' && (
-                                    <div className="space-y-5 animate-in fade-in duration-300">
+                                    <div className="space-y-5 animate-in fade-in duration-300 px-1">
                                         <div className="space-y-3.5">
-                                            <Label className="text-[9px] font-black uppercase tracking-widest text-muted-foreground/60 px-1">Target Persona</Label>
+                                            <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/60 px-1">Target Persona</Label>
                                             <Input {...form.register('targetAudience')} placeholder="e.g., Clinical, Academic, Executive" className="h-11 text-[11px] font-bold bg-muted/20 border-border/40 rounded-xl focus-visible:ring-primary/10 shadow-inner" />
                                         </div>
                                         <div className="space-y-3.5">
-                                            <Label className="text-[9px] font-black uppercase tracking-widest text-muted-foreground/60 px-1">Intellectual Tone</Label>
+                                            <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/60 px-1">Intellectual Tone</Label>
                                             <Input {...form.register('tone')} placeholder="e.g., Sophisticated, Analytical" className="h-11 text-[11px] font-bold bg-muted/20 border-border/40 rounded-xl focus-visible:ring-primary/10 shadow-inner" />
                                         </div>
                                     </div>
                                 )}
 
                                 {manipulationType === 'readability-enhancer' && (
-                                    <div className="space-y-3.5 animate-in fade-in duration-300">
-                                        <Label className="text-[9px] font-black uppercase tracking-widest text-muted-foreground/60 px-1">Complexity Level</Label>
+                                    <div className="space-y-3.5 animate-in fade-in duration-300 px-1">
+                                        <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/60 px-1">Complexity Level</Label>
                                         <Select onValueChange={(val) => form.setValue('targetLevel', val)} defaultValue={form.getValues('targetLevel')}>
                                             <SelectTrigger className="h-11 text-[11px] font-bold bg-muted/20 border-border/40 rounded-xl">
                                                 <SelectValue />
@@ -201,7 +201,7 @@ export function ChapterGenerationHUD({ chapter, className, onClose }: ChapterGen
                             <Separator className="bg-primary/10 h-px" />
 
                             <div className="p-5 rounded-[24px] border border-dashed border-primary/10 bg-primary/[0.02] text-center space-y-2 group/info hover:bg-primary/[0.04] transition-all">
-                                <p className="text-[10px] text-primary/40 italic leading-relaxed font-medium uppercase tracking-wider group-hover:text-primary/60 transition-colors">
+                                <p className="text-[9px] text-primary/40 italic leading-relaxed font-medium uppercase tracking-widest group-hover:text-primary/60 transition-colors px-4">
                                     Unified Neural Processing — All chapter nodes will be updated simultaneously.
                                 </p>
                             </div>
@@ -210,8 +210,8 @@ export function ChapterGenerationHUD({ chapter, className, onClose }: ChapterGen
                         <TabsContent value="context" className="m-0 focus-visible:ring-0 animate-in fade-in slide-in-from-right-4 duration-500">
                             <div className="space-y-5">
                                 <div className="space-y-1.5 px-1">
-                                    <span className="text-[9px] font-black uppercase tracking-widest text-muted-foreground/60">Chapter Sources</span>
-                                    <p className="text-[10px] text-muted-foreground italic font-medium leading-relaxed">
+                                    <span className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/60 px-1">Chapter Sources</span>
+                                    <p className="text-[10px] text-muted-foreground italic font-medium leading-relaxed px-1">
                                         Define the context hierarchy for all sections within this chapter.
                                     </p>
                                 </div>
@@ -225,10 +225,10 @@ export function ChapterGenerationHUD({ chapter, className, onClose }: ChapterGen
             {/* Stable Version Footer */}
             <div className="absolute bottom-0 left-0 right-0 px-6 py-3 border-t border-primary/10 bg-background/40 backdrop-blur-xl flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                    <div className="h-1 w-1 rounded-full bg-primary/30" />
-                    <span className="text-[8px] font-black uppercase tracking-widest text-muted-foreground/40">Chapter Manifest</span>
+                    <div className="h-1 w-1 rounded-full bg-primary/30 shadow-[0_0_8px_rgba(var(--primary),0.4)]" />
+                    <span className="text-[8px] font-black uppercase tracking-[0.3em] text-muted-foreground/40">Chapter Manifest</span>
                 </div>
-                <span className="text-[8px] font-bold text-muted-foreground/20 tabular-nums">v2.4.0-STABLE</span>
+                <span className="text-[8px] font-bold text-muted-foreground/20 tabular-nums tracking-widest uppercase">v2.4.0-STABLE</span>
             </div>
         </SidebarContainer>
     );

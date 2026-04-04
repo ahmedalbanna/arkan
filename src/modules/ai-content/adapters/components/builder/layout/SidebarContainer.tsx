@@ -44,17 +44,17 @@ export const SidebarContainer = ({
             <div className="absolute inset-0 pointer-events-none ring-1 ring-inset ring-white/10 dark:ring-white/5 rounded-none" />
 
             {/* Sticky Technical Header — Intelligence Suite standard */}
-            <header className="h-12 shrink-0 px-5 flex items-center justify-between border-b border-primary/10 bg-background/50 backdrop-blur-2xl relative z-20 overflow-hidden group/header">
+            <header className="h-12 shrink-0 px-5 flex items-center justify-between border-b border-primary/10 bg-background/50 backdrop-blur-2xl relative z-20 overflow-hidden group/header transition-all duration-500">
                 {/* Tactical left accent line */}
-                <div className="absolute left-0 inset-y-2 w-[2px] rounded-full bg-primary/30 group-hover/header:bg-primary/60 transition-colors duration-500" aria-hidden />
+                <div className="absolute left-0 inset-y-2.5 w-[2.5px] rounded-full bg-primary/30 group-hover/header:bg-primary/60 transition-all duration-500" aria-hidden />
 
-                <div className="flex items-center gap-2.5 min-w-0">
+                <div className="flex items-center gap-3 min-w-0">
                     {icon && (
-                        <span className="text-primary/40 shrink-0 group-hover/header:text-primary/60 transition-colors duration-500">
+                        <span className="text-primary/40 shrink-0 group-hover/header:text-primary/60 transition-all duration-500 group-hover/header:scale-110">
                             {icon}
                         </span>
                     )}
-                    <h2 className="text-[10px] font-black uppercase tracking-[0.25em] text-foreground/60 group-hover/header:text-foreground/90 transition-colors duration-500 truncate">
+                    <h2 className="text-[10px] font-black uppercase tracking-[0.3em] text-foreground/60 group-hover/header:text-foreground/90 transition-all duration-500 truncate">
                         {title}
                     </h2>
                 </div>

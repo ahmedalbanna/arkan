@@ -52,13 +52,13 @@ export function SectionGenerationHUD({ section, selectedSectionIds = [], classNa
 
     if (!section) {
         return (
-            <SidebarContainer title="Section Tools" icon={<Sparkles className="h-3.5 w-3.5" />}>
+            <SidebarContainer title="Section Synthesis" icon={<Sparkles className="h-3.5 w-3.5" />}>
                 <div className="flex flex-col items-center justify-center h-64 text-center space-y-4 opacity-40">
                     <div className="p-5 rounded-[24px] bg-primary/5 border border-primary/10 shadow-inner">
                         <Sparkles className="h-8 w-8 text-primary/40" />
                     </div>
                     <div className="space-y-1.5 px-6">
-                        <p className="text-[10px] font-black uppercase tracking-[0.25em] text-muted-foreground">No selection</p>
+                        <p className="text-[10px] font-black uppercase tracking-[0.3em] text-muted-foreground">No selection</p>
                         <p className="text-[11px] font-medium leading-relaxed italic text-muted-foreground/60 max-w-[200px]">
                             Select a node in the document to configure neural generation parameters.
                         </p>
@@ -74,7 +74,7 @@ export function SectionGenerationHUD({ section, selectedSectionIds = [], classNa
         : generateSectionMutation.isPending && (generateSectionMutation.variables as any) === section.id;
 
     const isAnythingGenerating = generateSectionMutation?.isPending || generateChapterMutation.isPending || generateProjectMutation.isPending;
-    const canGenerate = !isAnythingGenerating; // Credits handled server-side
+    const canGenerate = !isAnythingGenerating;
     const creditCost = isBulkGeneration ? selectedSectionIds.length : 1;
 
     const handleCopySettings = () => {
@@ -117,7 +117,7 @@ export function SectionGenerationHUD({ section, selectedSectionIds = [], classNa
 
     return (
         <SidebarContainer
-            title={isBulkGeneration ? `Bulk Generation (${selectedSectionIds.length})` : 'Section Generation'}
+            title={isBulkGeneration ? `Bulk Synthesis (${selectedSectionIds.length})` : 'Section Synthesis'}
             icon={<Sparkles className="h-3.5 w-3.5" />}
             actions={
                 <div className="flex items-center gap-1 p-1 rounded-xl bg-background/20 border border-primary/5 backdrop-blur-md shadow-inner">
@@ -133,7 +133,7 @@ export function SectionGenerationHUD({ section, selectedSectionIds = [], classNa
                                     <Copy className="h-3.5 w-3.5" />
                                 </Button>
                             </TooltipTrigger>
-                            <TooltipContent side="bottom" className="text-[9px] font-black uppercase tracking-widest bg-background/95 backdrop-blur-md border-primary/20 mt-2">
+                            <TooltipContent side="bottom" className="text-[9px] font-black uppercase tracking-[0.2em] bg-background/95 backdrop-blur-md border-primary/20 mt-3">
                                 Copy Logic
                             </TooltipContent>
                         </Tooltip>
@@ -150,7 +150,7 @@ export function SectionGenerationHUD({ section, selectedSectionIds = [], classNa
                                     <ClipboardPaste className="h-3.5 w-3.5" />
                                 </Button>
                             </TooltipTrigger>
-                            <TooltipContent side="bottom" className="text-[9px] font-black uppercase tracking-widest bg-background/95 backdrop-blur-md border-primary/20 mt-2">
+                            <TooltipContent side="bottom" className="text-[9px] font-black uppercase tracking-[0.2em] bg-background/95 backdrop-blur-md border-primary/20 mt-3">
                                 Paste Logic
                             </TooltipContent>
                         </Tooltip>
@@ -162,10 +162,10 @@ export function SectionGenerationHUD({ section, selectedSectionIds = [], classNa
                 {/* Node Identity Zone */}
                 <div className="flex flex-col gap-5">
                     <div className="space-y-1.5 px-1">
-                        <span className="text-[9px] font-black uppercase tracking-[0.25em] text-primary/60">
+                        <span className="text-[9px] font-black uppercase tracking-[0.3em] text-primary/60">
                             {isBulkGeneration ? 'Integrated Cluster' : 'Synthesis Target'}
                         </span>
-                        <h3 className="text-[13px] font-black uppercase truncate tracking-widest text-foreground/90 tabular-nums">
+                        <h3 className="text-[13px] font-black uppercase truncate tracking-[0.15em] text-foreground/90 tabular-nums leading-tight">
                             {isBulkGeneration ? 'Multiple Section Block' : section.title}
                         </h3>
                     </div>
@@ -185,7 +185,7 @@ export function SectionGenerationHUD({ section, selectedSectionIds = [], classNa
                         </div>
                     )}
 
-                    <TooltipProvider>
+                    <TooltipProvider delayDuration={200}>
                         <Tooltip>
                             <TooltipTrigger asChild>
                                 <Button
@@ -193,7 +193,7 @@ export function SectionGenerationHUD({ section, selectedSectionIds = [], classNa
                                     disabled={!canGenerate && !isBulkGenerating && !isGenerating}
                                     variant={(isBulkGenerating || (isGenerating && !isBulkGeneration)) ? "destructive" : "default"}
                                     className={cn(
-                                        "w-full font-black h-12 gap-2.5 shadow-2xl shadow-primary/15 rounded-2xl uppercase tracking-[0.2em] text-[10px] relative overflow-hidden group/gen",
+                                        "w-full font-black h-12 gap-2.5 shadow-2xl shadow-primary/15 rounded-2xl uppercase tracking-[0.2em] text-[10px] relative overflow-hidden group/gen transition-all duration-500 ease-[0.22,1,0.36,1]",
                                         !(isBulkGenerating || (isGenerating && !isBulkGeneration)) && "bg-primary hover:opacity-90 ring-1 ring-inset ring-white/20"
                                     )}
                                 >
@@ -220,7 +220,7 @@ export function SectionGenerationHUD({ section, selectedSectionIds = [], classNa
                                     <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/15 to-white/0 -translate-x-full group-hover/gen:translate-x-full transition-transform duration-1000 ease-in-out" />
                                 </Button>
                             </TooltipTrigger>
-                            <TooltipContent side="bottom" className="text-[9px] font-black uppercase tracking-widest bg-background/95 backdrop-blur-md border-primary/20 mt-3">
+                            <TooltipContent side="bottom" className="text-[9px] font-black uppercase tracking-[0.2em] bg-background/95 backdrop-blur-md border-primary/20 mt-3">
                                 {isBulkGenerating ? 'Stop current pipeline' : `Neural Cost: ${creditCost} Energy`}
                             </TooltipContent>
                         </Tooltip>
@@ -253,10 +253,10 @@ export function SectionGenerationHUD({ section, selectedSectionIds = [], classNa
             {/* Stable Version Footer */}
             <div className="absolute bottom-0 left-0 right-0 px-6 py-3 border-t border-primary/10 bg-background/40 backdrop-blur-xl flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                    <div className="h-1 w-1 rounded-full bg-primary/30" />
-                    <span className="text-[8px] font-black uppercase tracking-widest text-muted-foreground/40">Neural Synthesis Manifest</span>
+                    <div className="h-1 w-1 rounded-full bg-primary/30 shadow-[0_0_8px_rgba(var(--primary),0.4)]" />
+                    <span className="text-[8px] font-black uppercase tracking-[0.3em] text-muted-foreground/40">Synthesis Manifest</span>
                 </div>
-                <span className="text-[8px] font-bold text-muted-foreground/20 tabular-nums">v2.4.0-STABLE</span>
+                <span className="text-[8px] font-bold text-muted-foreground/20 tabular-nums tracking-widest uppercase">v2.4.0-STABLE</span>
             </div>
         </SidebarContainer>
     );

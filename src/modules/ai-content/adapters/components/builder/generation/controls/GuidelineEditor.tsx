@@ -72,14 +72,19 @@ export function GuidelineEditor({ itemId, selectedIds }: GuidelineEditorProps) {
   };
 
   return (
-    <div className="space-y-8 pt-2">
+    <div className="space-y-8 pt-2 relative">
+      {/* Dot-grid atmosphere — Standardized Workspace Alignment (28px) */}
+      <div
+        className="absolute inset-0 opacity-[0.02] dark:opacity-[0.04] bg-[radial-gradient(circle_at_center,_var(--primary)_1px,_transparent_1px)] bg-[size:28px_28px] pointer-events-none"
+      />
+
       {/* HUD Header Group */}
-      <div className="space-y-1.5 px-1">
-        <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-primary/70 flex items-center gap-2.5">
+      <div className="space-y-1.5 px-1 relative z-10">
+        <h4 className="text-[10px] font-black uppercase tracking-[0.3em] text-primary/70 flex items-center gap-2.5">
             <ListChecks className="h-3.5 w-3.5" />
             Neural Guidelines
         </h4>
-        <p className="text-[9px] text-muted-foreground italic font-medium uppercase tracking-widest text-muted-foreground/60">
+        <p className="text-[9px] text-muted-foreground italic font-medium uppercase tracking-[0.2em] opacity-60">
             Define architectural logic and technical constraints.
         </p>
       </div>
@@ -157,7 +162,7 @@ export function GuidelineEditor({ itemId, selectedIds }: GuidelineEditorProps) {
                   guidelines.map((guideline, index) => (
                     <div 
                         key={index} 
-                        className="flex items-start justify-between text-[11px] p-3.5 rounded-xl border border-primary/5 bg-background/60 backdrop-blur-md gap-4 group shadow-sm hover:border-primary/20 transition-all"
+                        className="flex items-start justify-between text-[11px] p-3.5 rounded-xl border border-primary/5 bg-background/60 backdrop-blur-md gap-4 group shadow-sm hover:border-primary/20 hover:bg-background/80 transition-all duration-500 ease-[0.22,1,0.36,1]"
                     >
                       <div className="flex items-center gap-3.5 flex-1 min-w-0">
                          <div className="h-1.5 w-1.5 rounded-full bg-primary/40 group-hover:bg-primary transition-colors shrink-0 mt-1.5 shadow-[0_0_6px_rgba(var(--primary),0.2)]" />

@@ -69,7 +69,7 @@ export const BuilderHeader = React.forwardRef<HTMLDivElement, BuilderHeaderProps
                 className
             )}
         >
-            {/* Dot-grid atmosphere — aligned with BuilderCanvas (28px, 1.5px center) */}
+            {/* Dot-grid atmosphere — Standardized Workspace Alignment (28px) */}
             <div
                 className="absolute inset-0 opacity-[0.02] dark:opacity-[0.04] pointer-events-none"
                 style={{
@@ -93,7 +93,7 @@ export const BuilderHeader = React.forwardRef<HTMLDivElement, BuilderHeaderProps
                 <div className="flex flex-col gap-0.5 min-w-0">
                     <div className="relative group/input">
                         <Input
-                            className="h-7 px-1 py-0 text-[13px] font-black uppercase tracking-[0.05em] bg-transparent border-none focus-visible:ring-0 focus-visible:ring-offset-0 min-w-[200px] max-w-[320px] text-foreground/90 truncate transition-all duration-300"
+                            className="h-7 px-1 py-0 text-[13px] font-black uppercase tracking-[0.1em] bg-transparent border-none focus-visible:ring-0 focus-visible:ring-offset-0 min-w-[200px] max-w-[320px] text-foreground/90 truncate transition-all duration-300"
                             value={projectName}
                             onChange={(e) => onProjectNameChange(e.target.value)}
                             onBlur={onProjectNameBlur}

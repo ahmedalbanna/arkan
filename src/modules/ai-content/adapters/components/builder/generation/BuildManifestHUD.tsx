@@ -66,7 +66,9 @@ export function BuildManifestHUD({
         
         {/* Production Manifest Header */}
         <header className="px-10 py-8 border-b border-primary/10 bg-primary/[0.02] relative overflow-hidden shrink-0">
-            <div className="absolute inset-0 opacity-[0.02] bg-[radial-gradient(circle_at_center,_var(--primary)_1px,_transparent_1px)] bg-[size:28px_28px] pointer-events-none" />
+            {/* Dot-grid atmosphere — Standardized Workspace Alignment (28px) */}
+            <div className="absolute inset-0 opacity-[0.02] dark:opacity-[0.04] bg-[radial-gradient(circle_at_center,_var(--primary)_1px,_transparent_1px)] bg-[size:28px_28px] pointer-events-none" />
+            
             <div className="flex items-center gap-6 relative z-10">
                 <div className="h-14 w-14 rounded-[22px] bg-primary/10 flex items-center justify-center border border-primary/20 shadow-inner relative group/logo">
                     <div className="absolute inset-0 bg-primary/5 blur-lg group-hover:blur-xl transition-all" />
@@ -76,7 +78,7 @@ export function BuildManifestHUD({
                     <DialogTitle className="text-[22px] font-black uppercase tracking-tight text-foreground/90">Build Manifest</DialogTitle>
                     <div className="flex items-center gap-2.5">
                         <div className="h-1.5 w-1.5 rounded-full bg-primary animate-pulse shadow-[0_0_8px_rgba(var(--primary),0.6)]" />
-                        <p className="text-[10px] font-black uppercase tracking-[0.25em] text-primary/70">Production Pipeline Engaged</p>
+                        <p className="text-[10px] font-black uppercase tracking-[0.3em] text-primary/70">Production Pipeline Engaged</p>
                     </div>
                 </div>
             </div>
@@ -97,7 +99,7 @@ export function BuildManifestHUD({
                             <div className="space-y-4">
                                 <div className="flex items-center gap-2.5 px-1 group/label">
                                     <Database className="h-3.5 w-3.5 text-primary/40 group-hover/label:text-primary transition-colors" />
-                                    <Label className="text-[10px] font-black uppercase tracking-[0.3em] text-muted-foreground/60">Logic Source Matrix</Label>
+                                    <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/60">Logic Source Matrix</Label>
                                 </div>
                                 <div className="rounded-[24px] border border-primary/10 bg-muted/5 shadow-inner overflow-hidden relative">
                                     <div className="p-6 space-y-5">
@@ -119,7 +121,7 @@ export function BuildManifestHUD({
                             <div className="space-y-4">
                                 <div className="flex items-center gap-2.5 px-1 group/label">
                                     <Zap className="h-3.5 w-3.5 text-primary/40 group-hover/label:text-primary transition-colors" />
-                                    <Label className="text-[10px] font-black uppercase tracking-[0.3em] text-muted-foreground/60">Neural Energy Estimate</Label>
+                                    <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/60">Neural Energy Estimate</Label>
                                 </div>
                                 <div className="p-6 rounded-[24px] border border-primary/10 bg-primary/[0.03] shadow-sm relative group/energy">
                                     <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover/energy:opacity-100 transition-opacity" />
@@ -129,7 +131,7 @@ export function BuildManifestHUD({
                                             <p className="text-[8px] text-muted-foreground font-bold uppercase tracking-widest opacity-60 italic">Multi-Node Concurrent Processing</p>
                                         </div>
                                         <div className="flex items-center gap-2">
-                                            <Badge variant="outline" className="h-8 text-[14px] font-black text-primary bg-primary/5 border-primary/20 shadow-inner px-4 rounded-xl tabular-nums tracking-tight">
+                                            <Badge variant="outline" className="h-8 text-[14px] font-black text-primary bg-primary/5 border-primary/20 shadow-inner px-4 rounded-xl tabular-nums tracking-tight ring-1 ring-primary/10">
                                                 {totalSections} CREDITS
                                             </Badge>
                                         </div>
@@ -150,7 +152,7 @@ export function BuildManifestHUD({
                             <div className="flex items-center justify-between px-1">
                                 <div className="flex items-center gap-2.5 group/label">
                                     <Layers className="h-3.5 w-3.5 text-primary/40 group-hover/label:text-primary transition-colors" />
-                                    <Label className="text-[10px] font-black uppercase tracking-[0.3em] text-muted-foreground/60">Synthesis Plan</Label>
+                                    <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/60">Synthesis Plan</Label>
                                 </div>
                                 <span className="text-[9px] font-bold text-primary/40 uppercase tracking-widest tabular-nums">{totalSections} VECTORS READY</span>
                             </div>
@@ -187,8 +189,8 @@ export function BuildManifestHUD({
         {/* Stable Production Footer */}
         <footer className="px-10 py-6 border-t border-primary/10 bg-background/40 backdrop-blur-xl flex items-center justify-between shrink-0">
             <div className="flex items-center gap-3">
-                <div className="h-1 w-1 rounded-full bg-primary/30" />
-                <p className="text-[9px] text-muted-foreground/40 font-black uppercase tracking-[0.25em]">
+                <div className="h-1 w-1 rounded-full bg-primary/30 shadow-[0_0_8px_rgba(var(--primary),0.4)]" />
+                <p className="text-[9px] text-muted-foreground/40 font-black uppercase tracking-[0.3em]">
                     Build Pipeline · Stable Core v2.4
                 </p>
             </div>
@@ -201,7 +203,7 @@ export function BuildManifestHUD({
                 <Button 
                     onClick={onGenerateProject} 
                     disabled={isLoading || chaptersToBuild.length === 0}
-                    className="h-10 px-8 text-[10px] font-black uppercase tracking-[0.2em] shadow-2xl shadow-primary/20 bg-primary hover:opacity-90 gap-2.5 rounded-xl transition-all hover:scale-105 active:scale-95 ring-1 ring-inset ring-white/20"
+                    className="h-10 px-8 text-[10px] font-black uppercase tracking-[0.3em] shadow-2xl shadow-primary/20 bg-primary hover:opacity-90 gap-2.5 rounded-xl transition-all hover:scale-105 active:scale-95 ring-1 ring-inset ring-white/20"
                 >
                     {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Binary className="h-4 w-4" />}
                     Initialize Synthesis

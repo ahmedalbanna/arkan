@@ -28,7 +28,7 @@ const ChapterGenerationHUD = lazy(() => import('@/modules/ai-content/adapters/co
 const ProjectConsultantHUD = lazy(() => import('@/modules/ai-content/adapters/components/builder/chat/ProjectConsultantHUD').then(m => ({ default: m.ProjectConsultantHUD })));
 const SnapshotHistoryPanel = lazy(() => import('@/modules/projects/adapters/components/SnapshotHistoryPanel'));
 const SidebarNavigator = lazy(() => import('@/modules/ai-content/adapters/components/builder/SidebarNavigator').then(m => ({ default: m.SidebarNavigator })));
-const GenerationNavigator = lazy(() => import('@/modules/ai-content/adapters/components/builder/generation/GenerationNavigator').then(m => ({ default: m.GenerationNavigator })));
+// GenerationNavigator removed
 const UploadManager = lazy(() => import('@/modules/ai-content/adapters/components/builder/file-manager/UploadManager').then(m => ({ default: m.UploadManager })));
 
 interface UseSidebarPanelsProps {
@@ -92,19 +92,6 @@ export function useSidebarPanels({
                 : 'Section Synthesis';
 
         return [
-            {
-                key: 'generate',
-                title: 'AI Production',
-                icon: <Terminal className="h-4 w-4" />,
-                content: (
-                    <GenerationNavigator
-                        selectedSectionIds={selectedSectionIds}
-                        onActiveSectionChange={onActiveSectionChange}
-                        onActiveChapterChange={onActiveChapterChange}
-                        activeChapterId={activeChapterId}
-                    />
-                ),
-            },
             {
                 key: 'section',
                 title: sectionTitle,

@@ -55,10 +55,10 @@ export function PromptInspector({ isOpen, onOpenChange, section }: PromptInspect
             </div>
             <div className="min-w-0">
               <div className="flex items-center gap-3 mb-1">
-                <DialogTitle className="text-[15px] font-black uppercase tracking-[0.2em]">AI Instruction Matrix</DialogTitle>
+                <DialogTitle className="text-[15px] font-black uppercase tracking-[0.3em]">AI Instruction Matrix</DialogTitle>
                 <div className="flex items-center gap-2 px-2 py-0.5 rounded-full bg-primary/5 border border-primary/10">
                   <div className="h-1.5 w-1.5 rounded-full bg-primary animate-pulse shadow-[0_0_8px_rgba(var(--primary),0.6)]" />
-                  <span className="text-[9px] font-black uppercase tracking-[0.2em] text-primary/70 tabular-nums">
+                  <span className="text-[9px] font-black uppercase tracking-[0.3em] text-primary/70 tabular-nums">
                     {(fullPrompt.length / 1024).toFixed(1)} KB DATA
                   </span>
                 </div>
@@ -113,7 +113,7 @@ export function PromptInspector({ isOpen, onOpenChange, section }: PromptInspect
         <footer className="px-8 py-4 border-t border-primary/10 bg-background/40 backdrop-blur-xl flex items-center justify-between shrink-0">
           <div className="flex items-center gap-3">
             <FileCode className="h-3.5 w-3.5 text-muted-foreground/30" />
-            <p className="text-[9px] text-muted-foreground/40 font-black uppercase tracking-[0.25em]">
+            <p className="text-[9px] text-muted-foreground/40 font-black uppercase tracking-[0.3em]">
                 Arkan AI Engine · Instruction Pipeline
             </p>
           </div>

@@ -40,9 +40,9 @@ export const BuilderCanvas = React.forwardRef<HTMLDivElement, BuilderCanvasProps
                 className
             )}
         >
-            {/* Subtle dot-grid atmosphere — Aligned with Intelligence Suite standard */}
+            {/* Subtle dot-grid atmosphere — Standardized Workspace Alignment (28px) */}
             <div
-                className="absolute inset-0 opacity-[0.03] dark:opacity-[0.05] pointer-events-none"
+                className="absolute inset-0 opacity-[0.02] dark:opacity-[0.04] pointer-events-none"
                 style={{
                     backgroundImage: 'radial-gradient(circle at 1.5px 1.5px, hsl(var(--primary)) 1px, transparent 0)',
                     backgroundSize: '28px 28px',
@@ -56,7 +56,7 @@ export const BuilderCanvas = React.forwardRef<HTMLDivElement, BuilderCanvasProps
             {/* Inner vignette viewport framing */}
             <div
                 className="absolute inset-0 pointer-events-none z-[15] rounded-[inherit]"
-                style={{ boxShadow: 'inset 0 0 80px 0 hsl(var(--background) / 0.35)' }}
+                style={{ boxShadow: 'inset 0 0 80px 0 hsl(var(--background) / 0.25)' }}
             />
 
             {toolbar && (
@@ -82,7 +82,7 @@ export const BuilderCanvas = React.forwardRef<HTMLDivElement, BuilderCanvasProps
             </main>
 
             {/* Zoom HUD — Unified control at the bottom */}
-            <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-40 transition-all duration-500 opacity-60 hover:opacity-100 focus-within:opacity-100">
+            <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-[40] transition-all duration-500 ease-[0.22,1,0.36,1] opacity-60 hover:opacity-100 focus-within:opacity-100">
                 <TooltipProvider delayDuration={200}>
                     <div
                         className="flex items-center gap-1 px-2 py-1.5 bg-background/70 backdrop-blur-3xl border border-primary/10 rounded-full shadow-[0_8px_32px_rgba(0,0,0,0.12)] ring-1 ring-inset ring-white/10"

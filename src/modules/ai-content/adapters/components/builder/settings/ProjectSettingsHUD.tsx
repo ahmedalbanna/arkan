@@ -77,9 +77,9 @@ export function ProjectSettingsHUD() {
   return (
     <div className="h-full flex flex-col space-y-6 pt-2 animate-in fade-in slide-in-from-right-2 duration-300">
       <div className="space-y-1 px-1">
-        <h4 className="text-[10px] font-black uppercase tracking-[0.3em] text-primary/70">Metadata Manifest</h4>
-        <p className="text-[9px] text-muted-foreground italic font-medium opacity-60 uppercase tracking-wider">
-          Establish the core identity and academic parameters.
+        <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-primary/70">Project Settings</h4>
+        <p className="text-[9px] text-muted-foreground italic font-medium uppercase tracking-[0.1em] opacity-60">
+          Configure project identity and academic context.
         </p>
       </div>
 
@@ -88,7 +88,7 @@ export function ProjectSettingsHUD() {
           <ScrollArea className="flex-grow pr-4 -mr-4">
             <div className="space-y-8 pb-24 relative px-1">
               {/* Depth architectural line */}
-              <div className="absolute left-[-1.25rem] top-0 bottom-0 w-px bg-gradient-to-b from-primary/30 via-primary/5 to-transparent" />
+              <div className="absolute left-[-1.25rem] top-0 bottom-0 w-px bg-gradient-to-b from-border/60 via-border/20 to-transparent" />
               
               <div className="space-y-5">
                 <FormField 
@@ -96,13 +96,13 @@ export function ProjectSettingsHUD() {
                   name="name" 
                   render={({ field }) => (
                     <FormItem className="space-y-1.5">
-                      <FormLabel className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/60">Project Title</FormLabel>
+                      <FormLabel className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/60">Title</FormLabel>
                       <FormControl>
                         <Input 
                           {...field} 
                           onBlur={handleBlur} 
-                          placeholder="Untitled Project..."
-                          className="h-10 text-[11px] bg-muted/5 border-primary/10 focus-visible:ring-primary/20 rounded-xl shadow-inner transition-all font-bold uppercase tracking-widest"
+                          placeholder="Project Title..."
+                          className="h-10 text-[11px] bg-muted/5 border-border/40 focus-visible:ring-primary/20 rounded-xl shadow-inner transition-all"
                         />
                       </FormControl>
                       <FormMessage className="text-[10px]" />
@@ -115,14 +115,14 @@ export function ProjectSettingsHUD() {
                   name="projectDescription" 
                   render={({ field }) => (
                     <FormItem className="space-y-1.5">
-                      <FormLabel className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/60">Neural Brief</FormLabel>
+                      <FormLabel className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/60">Description</FormLabel>
                       <FormControl>
                         <Textarea 
                           {...field} 
                           rows={4} 
                           onBlur={handleBlur} 
-                          className="min-h-[100px] text-[11px] bg-muted/5 border-primary/10 focus-visible:ring-primary/20 rounded-2xl shadow-inner transition-all resize-none p-4 leading-relaxed font-serif italic" 
-                          placeholder="Describe the intellectual scope of this manifest..."
+                          className="min-h-[100px] text-[11px] bg-muted/5 border-border/40 focus-visible:ring-primary/20 rounded-2xl shadow-inner transition-all resize-none p-4 leading-relaxed font-serif italic" 
+                          placeholder="Describe the scope of this project..."
                         />
                       </FormControl>
                       <FormMessage className="text-[10px]" />
@@ -134,7 +134,7 @@ export function ProjectSettingsHUD() {
               <div className="space-y-5">
                 <div className="flex items-center gap-3 group/header">
                     <div className="h-4 w-1 bg-primary/40 rounded-full group-hover:h-6 transition-all duration-300" />
-                    <span className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/80">Academic Matrix</span>
+                    <span className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/80">Academic Context</span>
                 </div>
 
                 <div className="grid gap-5">
@@ -143,7 +143,7 @@ export function ProjectSettingsHUD() {
                     name="projectType"
                     render={({ field }) => (
                       <FormItem className="space-y-1.5">
-                        <FormLabel className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/60">Document Vector</FormLabel>
+                        <FormLabel className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/60">Document Type</FormLabel>
                         <FormControl>
                           <CustomSelect
                             value={field.value || ''}
@@ -152,8 +152,8 @@ export function ProjectSettingsHUD() {
                               handleBlur();
                             }}
                             options={documentTypeOptions}
-                            placeholder="Select classification..."
-                            className="h-10 text-[11px] bg-muted/5 border-primary/10 focus:ring-primary/20 rounded-xl"
+                            placeholder="Select type..."
+                            className="h-10 text-[11px] bg-muted/5 border-border/40 focus:ring-primary/20 rounded-xl"
                           />
                         </FormControl>
                         <FormMessage />
@@ -166,7 +166,7 @@ export function ProjectSettingsHUD() {
                       name="specialization"
                       render={({ field }) => (
                           <FormItem className="space-y-1.5">
-                              <FormLabel className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/60">Intellectual Field</FormLabel>
+                              <FormLabel className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/60">Specialization</FormLabel>
                               <FormControl>
                                   <CustomSelect
                                       value={field.value || ''}
@@ -176,7 +176,7 @@ export function ProjectSettingsHUD() {
                                       }}
                                       options={specializationOptions}
                                       placeholder="Select specialization..."
-                                      className="h-10 text-[11px] bg-muted/5 border-primary/10 focus:ring-primary/20 rounded-xl"
+                                      className="h-10 text-[11px] bg-muted/5 border-border/40 focus:ring-primary/20 rounded-xl"
                                   />
                               </FormControl>
                               <FormMessage />
@@ -190,7 +190,7 @@ export function ProjectSettingsHUD() {
                         name="educationalLevel"
                         render={({ field }) => (
                             <FormItem className="space-y-1.5">
-                                <FormLabel className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/60">Level</FormLabel>
+                                <FormLabel className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/60">Educational Level</FormLabel>
                                 <FormControl>
                                     <CustomSelect
                                         value={field.value || ''}
@@ -200,7 +200,7 @@ export function ProjectSettingsHUD() {
                                         }}
                                         options={educationalLevelOptions}
                                         placeholder="Target level..."
-                                        className="h-10 text-[11px] bg-muted/5 border-primary/10 focus:ring-primary/20 rounded-xl"
+                                        className="h-10 text-[11px] bg-muted/5 border-border/40 focus:ring-primary/20 rounded-xl"
                                     />
                                 </FormControl>
                                 <FormMessage />
@@ -213,7 +213,7 @@ export function ProjectSettingsHUD() {
                         name="citationStyle"
                         render={({ field }) => (
                         <FormItem className="space-y-1.5">
-                            <FormLabel className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/60">Standard</FormLabel>
+                            <FormLabel className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/60">Citation Style</FormLabel>
                             <FormControl>
                             <CustomSelect
                                 value={field.value || ''}
@@ -222,8 +222,8 @@ export function ProjectSettingsHUD() {
                                 handleBlur();
                                 }}
                                 options={citationStyleOptions}
-                                placeholder="Citation..."
-                                className="h-10 text-[11px] bg-muted/5 border-primary/10 focus:ring-primary/20 rounded-xl"
+                                placeholder="Citation style..."
+                                className="h-10 text-[11px] bg-muted/5 border-border/40 focus:ring-primary/20 rounded-xl"
                             />
                             </FormControl>
                             <FormMessage />
@@ -237,7 +237,7 @@ export function ProjectSettingsHUD() {
                       name="university"
                       render={({ field }) => (
                           <FormItem className="space-y-1.5">
-                              <FormLabel className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/60">Institution</FormLabel>
+                              <FormLabel className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/60">University / Organization</FormLabel>
                               <FormControl>
                                   <CustomSelect
                                       value={field.value || ''}
@@ -246,8 +246,8 @@ export function ProjectSettingsHUD() {
                                           handleBlur();
                                       }}
                                       options={universityOptions}
-                                      placeholder="Map institution..."
-                                      className="h-10 text-[11px] bg-muted/5 border-primary/10 focus:ring-primary/20 rounded-xl"
+                                      placeholder="Institution name..."
+                                      className="h-10 text-[11px] bg-muted/5 border-border/40 focus:ring-primary/20 rounded-xl"
                                   />
                               </FormControl>
                               <FormMessage />

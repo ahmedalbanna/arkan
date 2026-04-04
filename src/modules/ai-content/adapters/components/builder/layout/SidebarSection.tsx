@@ -47,7 +47,7 @@ export function SidebarSection({
         />
         
         {/* Technical Label */}
-        <span className="text-[9px] font-black uppercase tracking-[0.25em] text-muted-foreground/70 flex-1 group-hover/section:text-primary/80 transition-colors">
+        <span className="text-[9px] font-black uppercase tracking-[0.3em] text-muted-foreground/70 flex-1 group-hover/section:text-primary/80 transition-colors">
           {title}
         </span>
 
@@ -69,7 +69,7 @@ export function SidebarSection({
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: 'auto', opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+            transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
             className="overflow-hidden"
           >
             <div className="p-4 flex flex-col gap-4 relative">
