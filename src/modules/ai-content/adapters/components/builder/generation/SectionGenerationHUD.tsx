@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useCallback } from 'react';
 import { ClipboardPaste, Copy, Sparkles, Square, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
@@ -31,9 +31,11 @@ interface SectionGenerationHUDProps {
 
 export function SectionGenerationHUD({ section, selectedSectionIds = [], className }: SectionGenerationHUDProps) {
     const { t } = useLocalization();
-    const { project, updateProject } = useBuilderStore();
+    const project = useBuilderStore(state => state.project);
+    const updateProject = useBuilderStore(state => state.updateProject);
     const { generateSectionMutation, generateChapterMutation, generateProjectMutation } = useAiActions();
-    const { clipboard, copySettings } = useGenerationUIStore();
+    const clipboard = useGenerationUIStore(state => state.clipboard);
+    const copySettings = useGenerationUIStore(state => state.copySettings);
 
     const estimatedRemaining = React.useMemo(() => {
         if (!generateProjectMutation.isPending && !generateChapterMutation.isPending) return null;
@@ -49,6 +51,53 @@ export function SectionGenerationHUD({ section, selectedSectionIds = [], classNa
         if (seconds < 60) return `~${seconds} seconds remaining`;
         return `~${Math.ceil(seconds / 60)} minutes remaining`;
     }, [generateProjectMutation, generateChapterMutation]);
+
+    const isBulkGeneration = selectedSectionIds.length > 1;
+    const isGenerating = isBulkGeneration
+        ? generateProjectMutation.isPending || generateChapterMutation.isPending
+        : section ? generateSectionMutation.isPending && (generateSectionMutation.variables as any) === section.id : false;
+
+    const isAnythingGenerating = generateSectionMutation?.isPending || generateChapterMutation.isPending || generateProjectMutation.isPending;
+    const canGenerate = !isAnythingGenerating;
+    const creditCost = isBulkGeneration ? selectedSectionIds.length : 1;
+
+    const handleCopySettings = useCallback(() => {
+        if (!section) return;
+        copySettings({
+            controls: { ...section.controls },
+            context: { ...section.context },
+            guidelines: [...section.guidelines]
+        });
+    }, [copySettings, section]);
+
+    const handlePasteSettings = useCallback(() => {
+        if (!section || !clipboard) return;
+        const targets = selectedSectionIds && selectedSectionIds.length > 1 ? selectedSectionIds : [section.id];
+        updateProject(p => {
+            targets.forEach(id => {
+                p.updateSection(id, s => s.withProps({
+                    controls: { ...(clipboard.controls as any) },
+                    context: { ...(clipboard.context as any) },
+                    guidelines: [...(clipboard.guidelines || [])]
+                }));
+            });
+        });
+    }, [clipboard, selectedSectionIds, section, updateProject]);
+
+    const bulkProgress = generateProjectMutation.isPending ? (generateProjectMutation.variables as any)?.project?.getStats().completed ?? 0 : (generateChapterMutation.variables as any)?.chapter?.getStats().completed ?? 0;
+    const bulkTotal = isBulkGeneration ? selectedSectionIds.length : 1;
+    const isBulkGenerating = (generateProjectMutation.isPending || generateChapterMutation.isPending) && isBulkGeneration;
+
+    const handleGenerateClick = useCallback(() => {
+        if (!section) return;
+        if (isBulkGenerating || isGenerating) return;
+
+        if (isBulkGeneration) {
+            generateProjectMutation.mutate({ project: project!, selectedSectionIds: new Set(selectedSectionIds) });
+        } else {
+            generateSectionMutation.mutate(section.id);
+        }
+    }, [generateProjectMutation, generateSectionMutation, isBulkGeneration, isBulkGenerating, isGenerating, project, section, selectedSectionIds]);
 
     if (!section) {
         return (
@@ -67,53 +116,6 @@ export function SectionGenerationHUD({ section, selectedSectionIds = [], classNa
             </SidebarContainer>
         );
     }
-
-    const isBulkGeneration = selectedSectionIds.length > 1;
-    const isGenerating = isBulkGeneration
-        ? generateProjectMutation.isPending || generateChapterMutation.isPending
-        : generateSectionMutation.isPending && (generateSectionMutation.variables as any) === section.id;
-
-    const isAnythingGenerating = generateSectionMutation?.isPending || generateChapterMutation.isPending || generateProjectMutation.isPending;
-    const canGenerate = !isAnythingGenerating;
-    const creditCost = isBulkGeneration ? selectedSectionIds.length : 1;
-
-    const handleCopySettings = () => {
-        if (!section) return;
-        copySettings({
-            controls: { ...section.controls },
-            context: { ...section.context },
-            guidelines: [...section.guidelines]
-        });
-    };
-
-    const handlePasteSettings = () => {
-        if (!section || !clipboard) return;
-        const targets = isBulkGeneration ? selectedSectionIds : [section.id];
-        updateProject(p => {
-            targets.forEach(id => {
-                p.updateSection(id, s => s.withProps({
-                    controls: { ...(clipboard.controls as any) },
-                    context: { ...(clipboard.context as any) },
-                    guidelines: [...(clipboard.guidelines || [])]
-                }));
-            });
-        });
-    };
-
-    const bulkProgress = generateProjectMutation.isPending ? (generateProjectMutation.variables as any)?.project?.getStats().completed ?? 0 : (generateChapterMutation.variables as any)?.chapter?.getStats().completed ?? 0;
-    const bulkTotal = isBulkGeneration ? selectedSectionIds.length : 1;
-    const isBulkGenerating = (generateProjectMutation.isPending || generateChapterMutation.isPending) && isBulkGeneration;
-
-    const handleGenerateClick = () => {
-        if (!section) return;
-        if (isBulkGenerating || isGenerating) return;
-
-        if (isBulkGeneration) {
-            generateProjectMutation.mutate({ project: project!, selectedSectionIds: new Set(selectedSectionIds) });
-        } else {
-            generateSectionMutation.mutate(section.id);
-        }
-    };
 
     return (
         <SidebarContainer

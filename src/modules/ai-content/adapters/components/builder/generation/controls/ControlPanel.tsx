@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useCallback } from 'react';
 import { SlidersHorizontal, Zap, Target, Layout, PenTool } from 'lucide-react';
 import { Label } from '@/components/ui/label';
 import { Slider } from '@/components/ui/slider';
@@ -33,11 +33,11 @@ const toneOptions = ToneSchema.options.map(tone => ({
     label: tone.charAt(0).toUpperCase() + tone.slice(1)
 }));
 
-export function ControlPanel({ section, selectedIds }: ControlPanelProps) {
+const ControlPanelComponent = ({ section, selectedIds }: ControlPanelProps) => {
     const { updateProject } = useBuilderStore();
 
-    const handleUpdate = (updates: Partial<GenerationControlState>) => {
-        const targets = selectedIds && selectedIds.length > 0 ? selectedIds : [section.id];
+    const handleUpdate = useCallback((updates: Partial<GenerationControlState>) => {
+        const targets = selectedIds && selectedIds.length > 1 ? selectedIds : [section.id];
         updateProject((project) => {
             return targets.reduce((currentProject, id) => {
                 return currentProject.updateSection(id, (sectionToUpdate) =>
@@ -47,9 +47,9 @@ export function ControlPanel({ section, selectedIds }: ControlPanelProps) {
                 );
             }, project);
         });
-    };
+    }, [selectedIds, section.id, updateProject]);
 
-    const handleDetectFormats = () => {
+    const handleDetectFormats = useCallback(() => {
         if (!section.content) return;
         const lines = section.content.split('\n');
         const detected: GenerationControlState['outputStyle'] = {
@@ -62,7 +62,7 @@ export function ControlPanel({ section, selectedIds }: ControlPanelProps) {
             math: lines.some(l => l.includes('$')),
         };
         handleUpdate({ outputStyle: detected });
-    };
+    }, [handleUpdate, section.content]);
 
     return (
         <div className="space-y-8 pt-2 relative">
@@ -215,4 +215,8 @@ export function ControlPanel({ section, selectedIds }: ControlPanelProps) {
             </div>
         </div>
     );
-}
+};
+
+export const ControlPanel = React.memo(ControlPanelComponent);
+
+ControlPanel.displayName = 'ControlPanel';

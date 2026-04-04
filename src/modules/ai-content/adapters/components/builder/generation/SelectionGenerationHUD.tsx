@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useCallback } from 'react';
 import { Sparkles, Wand2, Expand, RefreshCcw, ChevronDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
@@ -14,9 +14,14 @@ interface SelectionGenerationHUDProps {
     className?: string;
 }
 
-export const SelectionGenerationHUD = ({ viewMode, className }: SelectionGenerationHUDProps) => {
+const SelectionGenerationHUDComponent = ({ viewMode, className }: SelectionGenerationHUDProps) => {
     const selection = useEditorStore((state) => state.selection);
     const { isProcessing, handleAiAction, rewriteStyles } = useAiActions();
+
+    const handleSummarize = useCallback(() => handleAiAction('summarize'), [handleAiAction]);
+    const handleExpand = useCallback(() => handleAiAction('expand'), [handleAiAction]);
+    const handleGrammar = useCallback(() => handleAiAction('grammar'), [handleAiAction]);
+    const handleRewrite = useCallback((style: string) => handleAiAction('rewrite', { style }), [handleAiAction]);
 
     if (viewMode !== 'edit' || !selection.hasSelection) return null;
 
@@ -46,7 +51,7 @@ export const SelectionGenerationHUD = ({ viewMode, className }: SelectionGenerat
                         size="sm"
                         className="h-8 text-[9px] font-black uppercase tracking-[0.2em] rounded-lg border border-primary/10 hover:bg-primary/5 hover:text-primary"
                         disabled={isProcessing}
-                        onClick={() => handleAiAction('summarize')}
+                        onClick={handleSummarize}
                     >
                         <Wand2 className="h-3.5 w-3.5" />
                         Summarize
@@ -56,7 +61,7 @@ export const SelectionGenerationHUD = ({ viewMode, className }: SelectionGenerat
                         size="sm"
                         className="h-8 text-[9px] font-black uppercase tracking-[0.2em] rounded-lg border border-primary/10 hover:bg-primary/5 hover:text-primary"
                         disabled={isProcessing}
-                        onClick={() => handleAiAction('expand')}
+                        onClick={handleExpand}
                     >
                         <Expand className="h-3.5 w-3.5" />
                         Expand
@@ -84,7 +89,7 @@ export const SelectionGenerationHUD = ({ viewMode, className }: SelectionGenerat
                                 <DropdownMenuItem
                                     key={style}
                                     className="text-[10px] font-black uppercase tracking-[0.2em]"
-                                    onSelect={() => handleAiAction('rewrite', { style })}
+                                    onSelect={() => handleRewrite(style)}
                                     disabled={isProcessing}
                                 >
                                     {label}
@@ -101,7 +106,7 @@ export const SelectionGenerationHUD = ({ viewMode, className }: SelectionGenerat
                                     size="icon"
                                     className="h-8 w-8 rounded-lg border border-border/40"
                                     disabled={isProcessing}
-                                    onClick={() => handleAiAction('grammar')}
+                                    onClick={handleGrammar}
                                     aria-label="Fix grammar"
                                 >
                                     <Sparkles className="h-3.5 w-3.5" />
@@ -117,3 +122,7 @@ export const SelectionGenerationHUD = ({ viewMode, className }: SelectionGenerat
         </div>
     );
 };
+
+export const SelectionGenerationHUD = React.memo(SelectionGenerationHUDComponent);
+
+SelectionGenerationHUD.displayName = 'SelectionGenerationHUD';

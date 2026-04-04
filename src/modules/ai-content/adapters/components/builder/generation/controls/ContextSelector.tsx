@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useMemo } from 'react';
+import React, { useMemo, useCallback } from 'react';
 import { Database, FileText, Link as LinkIcon, Sparkles } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Label } from '@/components/ui/label';
@@ -18,7 +18,7 @@ interface ContextSelectorProps {
   selectedSectionIds?: string[];
 }
 
-export function ContextSelector({ sectionId, selectedSectionIds }: ContextSelectorProps) {
+const ContextSelectorComponent = ({ sectionId, selectedSectionIds }: ContextSelectorProps) => {
   const { project, updateProject } = useBuilderStore();
 
   const section = useMemo(() => project?.getSection(sectionId), [project, sectionId]);
@@ -28,11 +28,13 @@ export function ContextSelector({ sectionId, selectedSectionIds }: ContextSelect
     return reportSections.filter(s => s.id !== sectionId);
   }, [reportSections, sectionId]);
 
-  const handleUpdateContext = (type: 'sections' | 'externalContext', id: string, enabled: boolean) => {
-    const targets = selectedSectionIds && selectedSectionIds.length > 0 ? selectedSectionIds : [sectionId];
+  const handleUpdateContext = useCallback((type: 'sections' | 'externalContext', id: string, enabled: boolean) => {
+    // If multiple sections are selected, we perform a bulk update.
+    // However, if we are in single-section focus within a chapter view, we only target the current section.
+    const targets = selectedSectionIds && selectedSectionIds.length > 1 ? selectedSectionIds : [sectionId];
 
     updateProject((project) => {
-      const updatedProject = targets.reduce((currentProject, targetId) => {
+      return targets.reduce((currentProject, targetId) => {
         return currentProject.updateSection(targetId, (sectionToUpdate) => {
           const currentContext = { ...(sectionToUpdate.context || {}) };
           const subContext = { ...(currentContext[type] || {}) };
@@ -48,10 +50,8 @@ export function ContextSelector({ sectionId, selectedSectionIds }: ContextSelect
           });
         });
       }, project);
-
-      return updatedProject;
     });
-  };
+  }, [selectedSectionIds, sectionId, updateProject]);
 
   const handleCopyContext = () => {
     if (!section) return;
@@ -181,4 +181,8 @@ export function ContextSelector({ sectionId, selectedSectionIds }: ContextSelect
       </div>
     </div>
   );
-}
+};
+
+export const ContextSelector = React.memo(ContextSelectorComponent);
+
+ContextSelector.displayName = 'ContextSelector';

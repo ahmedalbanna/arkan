@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useMemo, useCallback } from 'react';
 import { Copy, Check, Terminal, FileCode } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -22,18 +22,21 @@ interface PromptInspectorProps {
 }
 
 export function PromptInspector({ isOpen, onOpenChange, section }: PromptInspectorProps) {
-  const { project } = useBuilderStore();
+  const project = useBuilderStore(state => state.project);
   const [copied, setCopied] = React.useState(false);
 
   if (!project) return null;
 
-  const fullPrompt = container.resolve(PromptBuilder).buildSectionPrompt(section, project);
+  const fullPrompt = useMemo(
+    () => container.resolve(PromptBuilder).buildSectionPrompt(section, project),
+    [project, section]
+  );
 
-  const handleCopy = async () => {
+  const handleCopy = useCallback(async () => {
     await navigator.clipboard.writeText(fullPrompt);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
-  };
+  }, [fullPrompt]);
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { Trash2, Plus, StickyNote, ListChecks } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -22,7 +22,7 @@ interface GuidelineEditorProps {
   selectedIds?: string[];
 }
 
-export function GuidelineEditor({ itemId, selectedIds }: GuidelineEditorProps) {
+const GuidelineEditorComponent = ({ itemId, selectedIds }: GuidelineEditorProps) => {
   const { updateProject } = useBuilderStore();
   const {
     section,
@@ -36,11 +36,11 @@ export function GuidelineEditor({ itemId, selectedIds }: GuidelineEditorProps) {
 
   if (!section) return null;
 
-  const handleAddGuideline = () => {
+  const handleAddGuideline = useCallback(() => {
     if (!newGuideline.trim()) return;
     const g = newGuideline.trim();
     
-    if (selectedIds && selectedIds.length > 0) {
+    if (selectedIds && selectedIds.length > 1) {
       updateProject(p => {
         selectedIds.forEach(id => {
           p.updateSection(id, s => s.withProps({
@@ -49,14 +49,18 @@ export function GuidelineEditor({ itemId, selectedIds }: GuidelineEditorProps) {
         });
       });
     } else {
-      setGuidelines([...guidelines, g]);
+      updateProject(p => {
+        p.updateSection(itemId, s => s.withProps({
+          guidelines: [...(s.guidelines || []), g]
+        }));
+      });
     }
     setNewGuideline('');
-  };
+  }, [itemId, newGuideline, updateProject]);
 
-  const handleRemoveGuideline = (index: number) => {
-    if (selectedIds && selectedIds.length > 0) {
-      const gToRemove = guidelines[index];
+  const handleRemoveGuideline = useCallback((index: number) => {
+    const gToRemove = guidelines[index];
+    if (selectedIds && selectedIds.length > 1) {
       updateProject(p => {
         selectedIds.forEach(id => {
           p.updateSection(id, s => s.withProps({
@@ -65,11 +69,13 @@ export function GuidelineEditor({ itemId, selectedIds }: GuidelineEditorProps) {
         });
       });
     } else {
-      const updatedGuidelines = [...guidelines];
-      updatedGuidelines.splice(index, 1);
-      setGuidelines(updatedGuidelines);
+      updateProject(p => {
+        p.updateSection(itemId, s => s.withProps({
+          guidelines: (s.guidelines || []).filter(g => g !== gToRemove)
+        }));
+      });
     }
-  };
+  }, [guidelines, itemId, selectedIds, updateProject]);
 
   return (
     <div className="space-y-8 pt-2 relative">
@@ -196,4 +202,8 @@ export function GuidelineEditor({ itemId, selectedIds }: GuidelineEditorProps) {
       </div>
     </div>
   );
-}
+};
+
+export const GuidelineEditor = React.memo(GuidelineEditorComponent);
+
+GuidelineEditor.displayName = 'GuidelineEditor';

@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useCallback } from 'react';
 import { Edit, Link as LinkIcon, Loader2, Layout, PlusCircle, Wand2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Form } from '@/components/ui/form';
@@ -44,6 +44,9 @@ export function ChapterGenerationHUD({ chapter, className, onClose }: ChapterGen
         styles,
     } = chapterActions;
 
+    const handleSubmit = useCallback(onSubmit, [onSubmit]);
+    const handleApply = useCallback(handleApplyToNewSection, [handleApplyToNewSection]);
+
     if (!chapter) {
         return (
             <SidebarContainer title="Chapter Neural Core" icon={<Layout className="h-3.5 w-3.5" />}>
@@ -78,7 +81,7 @@ export function ChapterGenerationHUD({ chapter, className, onClose }: ChapterGen
                     </div>
 
                     <Form {...form}>
-                        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-3.5">
+                        <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-3.5">
                             <Button
                                 type="submit"
                                 disabled={isProcessing}
@@ -97,7 +100,7 @@ export function ChapterGenerationHUD({ chapter, className, onClose }: ChapterGen
                                 <Button
                                     type="button"
                                     variant="outline"
-                                    onClick={handleApplyToNewSection}
+                                    onClick={handleApply}
                                     className="w-full font-black h-10 gap-2 border border-primary/20 bg-primary/5 text-primary hover:bg-primary/10 rounded-xl uppercase tracking-widest text-[9px] transition-all hover:scale-[1.02] active:scale-[0.98]"
                                 >
                                     <PlusCircle className="h-3.5 w-3.5" />
@@ -215,7 +218,10 @@ export function ChapterGenerationHUD({ chapter, className, onClose }: ChapterGen
                                         Define the context hierarchy for all sections within this chapter.
                                     </p>
                                 </div>
-                                <ContextSelector sectionId={chapter.id || ''} />
+                                <ContextSelector 
+                                    sectionId={chapter.id || ''} 
+                                    selectedSectionIds={chapter.sections.map(s => s.id)}
+                                />
                             </div>
                         </TabsContent>
                     </div>
