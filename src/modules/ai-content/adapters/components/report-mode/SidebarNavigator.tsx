@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { ChevronRight, FolderOpen, Map, MoreHorizontal } from 'lucide-react';
 import { cn } from '@/infrastructure/utils/cn';
-import { SidebarOutlineManager } from './outline/SidebarOutlineManager';
+import { SidebarOutlineManager } from '../builder/outline/SidebarOutlineManager';
 import { SidebarFileManager } from './file-manager/SidebarFileManager';
 
 // ---------------------------------------------------------------------------

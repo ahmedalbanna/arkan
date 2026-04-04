@@ -14,231 +14,21 @@ import {
 import { 
   SortableContext, 
   sortableKeyboardCoordinates, 
-  verticalListSortingStrategy,
-  useSortable
+  verticalListSortingStrategy
 } from '@dnd-kit/sortable';
-import { CSS } from '@dnd-kit/utilities';
-import { cn } from '@/infrastructure/utils/cn';
-import { 
-  GripVertical, 
-  ChevronRight, 
-  ChevronDown, 
-  Search, 
-  X, 
-  Trash2, 
-  Check, 
-  Pencil, 
-  Plus, 
-} from 'lucide-react';
+import { Search, X, Plus } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Project } from '@/modules/projects/domain/entities/Project';
 import { Chapter } from '@/modules/ai-content/domain/entities/Chapter';
 import { Section } from '@/modules/ai-content/domain/entities/Section';
+import { SortableOutlineItem } from './SortableOutlineItem';
+import { useOutlineOperations } from './useOutlineOperations';
 
 /**
  * ProjectOutlineHUD — A high-fidelity, interactive document map for the Intelligence Suite.
- * Provides drag-and-drop structural management, inline editing, and rapid navigation.
+ * Positioned as a floating layer for rapid navigation and structural management.
  */
-
-interface SortableOutlineItemProps {
-  id: string;
-  index: number;
-  title: string;
-  isActive: boolean;
-  isChapter?: boolean;
-  isExpanded?: boolean;
-  hasContent?: boolean;
-  onActivate: () => void;
-  onToggleExpand?: () => void;
-  onUpdateTitle?: (newTitle: string) => void;
-  onDelete?: () => void;
-  children?: React.ReactNode;
-}
-
-/**
- * Individual item within the sortable outline.
- * Handles its own drag state, inline editing, and selection styling.
- */
-const SortableOutlineItem = ({ 
-  id, 
-  index, 
-  title, 
-  isActive, 
-  isChapter, 
-  isExpanded, 
-  hasContent,
-  onActivate, 
-  onToggleExpand,
-  onUpdateTitle,
-  onDelete,
-  children 
-}: SortableOutlineItemProps) => {
-  const [isEditing, setIsEditing] = useState(false);
-  const [editValue, setEditValue] = useState(title);
-
-  const {
-    attributes,
-    listeners,
-    setNodeRef,
-    transform,
-    transition,
-    isDragging,
-  } = useSortable({ id, disabled: isEditing });
-
-  const style = {
-    transform: CSS.Transform.toString(transform),
-    transition,
-    zIndex: isDragging ? 50 : 'auto',
-  };
-
-  const handleStartEdit = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    setIsEditing(true);
-    setEditValue(title);
-  };
-
-  const handleFinishEdit = () => {
-    if (editValue.trim() && editValue !== title) {
-        onUpdateTitle?.(editValue.trim());
-    }
-    setIsEditing(false);
-  };
-
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') handleFinishEdit();
-    if (e.key === 'Escape') {
-        setIsEditing(false);
-        setEditValue(title);
-    }
-  };
-
-  return (
-    <div ref={setNodeRef} style={style} className={cn("group/item select-none", isChapter ? "mb-2" : "mb-1 ml-4")}>
-      <div 
-        className={cn(
-            "flex items-center gap-2 p-1.5 rounded-xl transition-all duration-300 cursor-pointer border",
-            isActive
-                ? "bg-primary/10 border-primary/20 shadow-[0_2px_8px_rgba(var(--primary),0.08)]" 
-                : "bg-transparent border-transparent hover:bg-muted/10",
-        )}
-        onDoubleClick={handleStartEdit}
-      >
-        {/* Drag Handle — High-sensitivity indicator */}
-        <div 
-          {...attributes} 
-          {...listeners} 
-          className={cn(
-            "p-0.5 transition-all duration-300 opacity-0 group-hover/item:opacity-40 cursor-grab active:cursor-grabbing hover:opacity-100"
-          )}
-        >
-          <GripVertical className="h-3 w-3" />
-        </div>
-
-        {/* Content Area — Logic and Navigation */}
-        <div 
-          className="flex-1 flex items-center gap-2.5 min-w-0"
-          onClick={(e) => {
-            e.stopPropagation();
-            onActivate();
-          }}
-        >
-          {isChapter && !isEditing && (
-            <button 
-              onClick={(e) => {
-                e.stopPropagation();
-                onToggleExpand?.();
-              }}
-              className="p-1 hover:bg-primary/10 rounded-lg transition-all active:scale-90"
-            >
-              {isExpanded ? <ChevronDown className="h-3 w-3" /> : <ChevronRight className="h-3 w-3 text-primary/40" />}
-            </button>
-          )}
-
-          {/* Status Dot — High-density content awareness */}
-          {!isEditing && (
-            <div className={cn(
-                "h-1.5 w-1.5 rounded-full shrink-0 transition-colors duration-500",
-                hasContent ? "bg-green-500 shadow-[0_0_6px_rgba(34,197,94,0.4)]" : "bg-amber-500/40"
-            )} />
-          )}
-
-          {/* Technical Index */}
-          {!isEditing && (
-            <span className={cn(
-                "text-[9px] font-black tabular-nums opacity-40 uppercase tracking-[0.15em] shrink-0",
-                isActive && "opacity-100 text-primary",
-            )}>
-                {(index + 1).toString().padStart(2, '0')}
-            </span>
-          )}
-
-          {/* Title / Editor — Specialized typography */}
-          {isEditing ? (
-            <div className="flex-1 flex items-center gap-1.5">
-                <Input 
-                    autoFocus
-                    value={editValue}
-                    onChange={(e) => setEditValue(e.target.value)}
-                    onBlur={handleFinishEdit}
-                    onKeyDown={handleKeyDown}
-                    className="h-6 text-[10px] py-0 px-2 bg-background border-primary/20 rounded-lg font-bold uppercase tracking-widest focus-visible:ring-primary/20"
-                />
-                <Button variant="ghost" size="icon" className="h-6 w-6 text-green-600 shrink-0" onClick={handleFinishEdit}>
-                    <Check className="h-3 w-3" />
-                </Button>
-            </div>
-          ) : (
-            <span className={cn(
-                "text-[10px] font-bold uppercase tracking-widest truncate transition-colors duration-300",
-                isActive ? "text-primary" : "text-muted-foreground group-hover/item:text-foreground",
-                isChapter && "font-black tracking-[0.18em]",
-            )}>
-                {title || (isChapter ? 'Untitled Chapter' : 'Untitled Section')}
-            </span>
-          )}
-        </div>
-
-        {/* Action HUD — Contextual operations */}
-        {!isEditing && (
-            <div className="flex items-center gap-1 opacity-0 group-hover/item:opacity-100 transition-opacity">
-                <Button 
-                    variant="ghost" 
-                    size="icon" 
-                    className="h-6 w-6 rounded-lg hover:bg-primary/10 text-muted-foreground hover:text-primary transition-all" 
-                    onClick={handleStartEdit}
-                >
-                    <Pencil className="h-2.5 w-2.5" />
-                </Button>
-                <Button 
-                    variant="ghost" 
-                    size="icon" 
-                    className="h-6 w-6 rounded-lg hover:bg-red-500/10 text-muted-foreground hover:text-red-600 transition-all" 
-                    onClick={(e) => { e.stopPropagation(); onDelete?.(); }}
-                >
-                    <Trash2 className="h-2.5 w-2.5" />
-                </Button>
-            </div>
-        )}
-      </div>
-      
-      {/* Recursion / Nested Content */}
-      <AnimatePresence>
-        {isChapter && isExpanded && (
-            <motion.div 
-                initial={{ opacity: 0, height: 0 }}
-                animate={{ opacity: 1, height: 'auto' }}
-                exit={{ opacity: 0, height: 0 }}
-                transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
-                className="mt-1 border-l border-primary/10 ml-[13px] pl-1 overflow-hidden"
-            >
-            {children}
-            </motion.div>
-        )}
-      </AnimatePresence>
-    </div>
-  );
-};
 
 interface ProjectOutlineHUDProps {
   isVisible: boolean;
@@ -247,21 +37,8 @@ interface ProjectOutlineHUDProps {
   selectedSectionIds: string[];
   onActiveChapterChange: (id: string | null) => void;
   onActiveSectionChange: (id: string | null) => void;
-  onMoveItem: (activeId: string, overId: string) => void;
-  onUpdateTitle: (id: string, newTitle: string, isChapter: boolean) => void;
-  onDeleteItem: (id: string, isChapter: boolean) => void;
-  onAddChapter: () => void;
-  onAddSection: (chapterId: string) => void;
-  onDuplicateItem: (id: string, isChapter: boolean) => void;
-  onUndo: () => void;
-  onCopyItem: (id: string, isChapter: boolean) => void;
-  onPasteItem: (targetId: string, isChapter: boolean) => void;
 }
 
-/**
- * ProjectOutlineHUD — Primary workspace navigator.
- * Aligned with the Intelligence Suite HUD architecture.
- */
 export const ProjectOutlineHUD = ({
   isVisible,
   project,
@@ -269,25 +46,29 @@ export const ProjectOutlineHUD = ({
   selectedSectionIds,
   onActiveChapterChange,
   onActiveSectionChange,
-  onMoveItem,
-  onUpdateTitle,
-  onDeleteItem,
-  onAddChapter,
-  onAddSection,
-  onDuplicateItem,
-  onUndo,
-  onCopyItem,
-  onPasteItem
 }: ProjectOutlineHUDProps) => {
   const [expandedChapters, setExpandedChapters] = useState<Set<string>>(new Set());
   const [searchQuery, setSearchQuery] = useState('');
   
+  const {
+    handleMoveItem,
+    handleUpdateTitle,
+    handleDeleteItem,
+    handleAddChapter,
+    handleAddSection,
+    handleDuplicateItem,
+    handleCopyItem,
+    handlePasteItem,
+    undo,
+    clipboard
+  } = useOutlineOperations(project);
+
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
   );
 
-  // Global Keyboard Shortcuts for High-Density Workflow
+  // High-Density Workflow Keyboard Shortcuts
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
         if (!isVisible) return;
@@ -298,28 +79,28 @@ export const ProjectOutlineHUD = ({
 
         if (isMod && e.key === 'z') {
             e.preventDefault();
-            onUndo();
+            undo();
         }
 
         if (activeId) {
             if (isMod && e.key === 'd') {
                 e.preventDefault();
-                onDuplicateItem(activeId, isChapter);
+                handleDuplicateItem(activeId, isChapter);
             }
             if (isMod && e.key === 'c') {
                 e.preventDefault();
-                onCopyItem(activeId, isChapter);
+                handleCopyItem(activeId, isChapter);
             }
             if (isMod && e.key === 'v') {
                 e.preventDefault();
-                onPasteItem(activeId, isChapter);
+                handlePasteItem(activeId, isChapter);
             }
         }
     };
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isVisible, activeChapterId, selectedSectionIds, onUndo, onDuplicateItem, onCopyItem, onPasteItem]);
+  }, [isVisible, activeChapterId, selectedSectionIds, undo, handleDuplicateItem, handleCopyItem, handlePasteItem]);
 
   const toggleChapter = (id: string) => {
     setExpandedChapters(prev => {
@@ -337,7 +118,7 @@ export const ProjectOutlineHUD = ({
         onActiveSectionChange(id);
     }
 
-    // Scroll coordination with document canvas
+    // Coordinate scroll state with the document canvas
     setTimeout(() => {
         const element = document.getElementById(`item-${id}`);
         if (element) {
@@ -349,13 +130,13 @@ export const ProjectOutlineHUD = ({
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
     if (over && active.id !== over.id) {
-      onMoveItem(active.id.toString(), over.id.toString());
+      handleMoveItem(active.id.toString(), over.id.toString());
     }
   };
 
   if (!project) return null;
 
-  // Search Logic — Specialized for structural filtering
+  // Tactical Structural Filtering
   const filteredChapters = useMemo(() => {
     if (!searchQuery.trim()) return project.chapters as readonly Chapter[];
 
@@ -407,14 +188,14 @@ export const ProjectOutlineHUD = ({
                         variant="ghost" 
                         size="icon" 
                         className="h-7 w-7 rounded-xl bg-primary/10 text-primary border border-primary/20 hover:bg-primary/20 transition-all hover:scale-110 active:scale-95 shadow-sm"
-                        onClick={(e) => { e.stopPropagation(); onAddChapter(); }}
+                        onClick={(e) => { e.stopPropagation(); handleAddChapter(); }}
                     >
                         <Plus className="h-4 w-4" />
                     </Button>
                 </div>
             </div>
 
-            {/* Tactical Search Interface */}
+            {/* Tactical Search HUD */}
             <div className="relative group/search">
                 <Input 
                     value={searchQuery}
@@ -434,7 +215,7 @@ export const ProjectOutlineHUD = ({
             </div>
           </div>
 
-          {/* Primary Outline Logic */}
+          {/* Primary Outline Control Layer */}
           <div className="flex-1 overflow-auto px-2 py-3 custom-scrollbar">
             <DndContext 
               sensors={sensors}
@@ -457,8 +238,8 @@ export const ProjectOutlineHUD = ({
                     hasContent={chapter.sections.some((s: Section) => !!s.content)}
                     onActivate={() => handleItemClick(chapter.id, true)}
                     onToggleExpand={() => toggleChapter(chapter.id)}
-                    onUpdateTitle={(newTitle) => onUpdateTitle(chapter.id, newTitle, true)}
-                    onDelete={() => onDeleteItem(chapter.id, true)}
+                    onUpdateTitle={(newTitle) => handleUpdateTitle(chapter.id, newTitle, true)}
+                    onDelete={() => handleDeleteItem(chapter.id, true)}
                   >
                     {(chapter.sections as Section[])
                       .filter(s => !searchQuery.trim() || s.title.toLowerCase().includes(searchQuery.toLowerCase()) || chapter.title.toLowerCase().includes(searchQuery.toLowerCase()))
@@ -471,14 +252,14 @@ export const ProjectOutlineHUD = ({
                         isActive={selectedSectionIds.includes(section.id)}
                         hasContent={!!section.content}
                         onActivate={() => handleItemClick(section.id, false)}
-                        onUpdateTitle={(newTitle) => onUpdateTitle(section.id, newTitle, false)}
-                        onDelete={() => onDeleteItem(section.id, false)}
+                        onUpdateTitle={(newTitle) => handleUpdateTitle(section.id, newTitle, false)}
+                        onDelete={() => handleDeleteItem(section.id, false)}
                       />
                     ))}
                     {!searchQuery && (
                         <div 
                             className="ml-4 mt-2 mb-3 px-3 py-2 flex items-center gap-2.5 rounded-xl border border-dashed border-primary/20 bg-primary/[0.02] hover:bg-primary/[0.05] transition-all cursor-pointer group/add active:scale-[0.98]"
-                            onClick={(e) => { e.stopPropagation(); onAddSection(chapter.id); }}
+                            onClick={(e) => { e.stopPropagation(); handleAddSection(chapter.id); }}
                         >
                             <div className="h-5 w-5 rounded-lg bg-primary/5 flex items-center justify-center border border-primary/10 group-hover/add:border-primary/30 transition-all">
                                 <Plus className="h-3 w-3 text-primary/40 group-hover/add:text-primary transition-colors" />
@@ -492,17 +273,17 @@ export const ProjectOutlineHUD = ({
             </DndContext>
           </div>
 
-          {/* Persistent Metadata Footer */}
+          {/* HUD Metadata Footer */}
           <div className="px-5 py-2.5 bg-background/40 border-t border-primary/10 flex items-center justify-between backdrop-blur-2xl">
              <div className="flex items-center gap-2">
                  <div className="h-1.5 w-1.5 rounded-full bg-primary/20" />
                  <p className="text-[9px] font-black uppercase tracking-[0.2em] text-muted-foreground/40">
-                    Manifest Outline
+                    Structure Manifest
                  </p>
              </div>
              <div className="flex items-center gap-2 px-2 py-0.5 rounded-full bg-green-500/5 border border-green-500/10">
                 <div className="h-1 w-1 rounded-full bg-green-500 animate-pulse" />
-                <p className="text-[9px] font-black uppercase tracking-[0.15em] text-green-600/60">Live Mode</p>
+                <p className="text-[9px] font-black uppercase tracking-[0.15em] text-green-600/60">Active Core</p>
              </div>
           </div>
         </motion.div>

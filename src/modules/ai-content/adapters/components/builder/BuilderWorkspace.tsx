@@ -18,7 +18,7 @@ import { BuilderCanvas } from './layout/BuilderCanvas';
 import { DocumentToolbar } from './toolbar/DocumentToolbar';
 import { DocumentRenderer } from './renderer/DocumentRenderer';
 import { CoverPageSettingsHUD } from './hud/CoverPageSettingsHUD';
-import { ProjectOutlineHUD } from './hud/ProjectOutlineHUD';
+import { ProjectOutlineHUD } from './outline/ProjectOutlineHUD';
 
 interface BuilderWorkspaceProps {
     initialProject?: ProjectProperties | null;
