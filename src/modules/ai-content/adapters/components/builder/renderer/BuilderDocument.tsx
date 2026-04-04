@@ -215,7 +215,7 @@ export const BuilderDocument = ({
                                                 variant="ghost" size="sm"
                                                 disabled={isSummarizing}
                                                 className="h-8 px-3 text-[10px] font-black uppercase tracking-[0.2em] gap-1.5 hover:bg-primary/10 hover:text-primary rounded-xl"
-                                                onClick={() => summarizeMutation?.mutate({ text: item.content, sectionId: item.id } as any)}
+                                                onClick={() => summarizeMutation?.mutate?.({ text: item.content, sectionId: item.id } as any)}
                                             >
                                                 {isSummarizing ? <RefreshCw className="h-3.5 w-3.5 animate-spin" /> : <AlignLeft className="h-3.5 w-3.5" />}
                                                 Summarize
@@ -224,7 +224,7 @@ export const BuilderDocument = ({
                                                 variant="ghost" size="sm"
                                                 disabled={isExpanding}
                                                 className="h-8 px-3 text-[10px] font-black uppercase tracking-[0.2em] gap-1.5 hover:bg-primary/10 hover:text-primary rounded-xl"
-                                                onClick={() => expandMutation?.mutate({ text: item.content, sectionId: item.id } as any)}
+                                                onClick={() => expandMutation?.mutate?.({ text: item.content, sectionId: item.id } as any)}
                                             >
                                                 {isExpanding ? <RefreshCw className="h-3.5 w-3.5 animate-spin" /> : <ZoomIn className="h-3.5 w-3.5" />}
                                                 Expand
@@ -245,7 +245,7 @@ export const BuilderDocument = ({
                                                         <DropdownMenuItem
                                                             key={style}
                                                             className="text-[10px] font-black uppercase tracking-[0.2em] cursor-pointer"
-                                                            onSelect={() => rewriteMutation?.mutate({ text: item.content, style, sectionId: item.id } as any)}
+                                                            onSelect={() => rewriteMutation?.mutate?.({ text: item.content, style, sectionId: item.id } as any)}
                                                         >
                                                             {label}
                                                         </DropdownMenuItem>

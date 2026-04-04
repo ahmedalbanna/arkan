@@ -40,12 +40,14 @@ export function ControlPanel({ section, selectedIds }: ControlPanelProps) {
 
     const handleUpdate = (updates: Partial<GenerationControlState>) => {
         const targets = selectedIds && selectedIds.length > 0 ? selectedIds : [section.id];
-        updateProject(p => {
-            targets.forEach(id => {
-                p.updateSection(id, s => s.withProps({
-                    controls: { ...s.controls, ...updates }
-                }));
-            });
+        updateProject((project) => {
+            return targets.reduce((currentProject, id) => {
+                return currentProject.updateSection(id, (sectionToUpdate) =>
+                    sectionToUpdate.withProps({
+                        controls: { ...sectionToUpdate.controls, ...updates },
+                    })
+                );
+            }, project);
         });
     };
 

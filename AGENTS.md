@@ -356,6 +356,7 @@ FIREBASE_ADMIN_PRIVATE_KEY=
 
 ## Notes
 
+- **Zustand Project Updates Must Return New Instances**: When using `updateProject` in builder/editor controls, always return the updated `Project` instance from the callback (e.g., via `reduce` chaining). Mutating inside `forEach` without returning the new project causes selection/controls to revert.
 - When converting function-based modules (especially `adapters/api-client/*`) to class-based DI services, treat it as a 3-part refactor: update the module, register it in `src/infrastructure/di/container.ts`, then update every consumer/import in hooks, stores, and components. Skipping the consumer sweep leaves the codebase in a mixed pattern.
 - **`update_todo` field name**: The `update_todo` tool requires `content` (not `title`) as the field name for each todo item. Always use `content` when creating or updating todos.
 - **File Deletion Tool Discipline**: Always use `delete_file` to remove files — never shell `rm` commands. The bash tool is explicitly disallowed for file deletion in this workspace.

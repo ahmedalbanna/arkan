@@ -6,9 +6,9 @@ import { useLocalization } from '@/context/LocalizationContext';
 import { SidebarPanelConfig } from '@/modules/ai-content/adapters/components/builder/layout/types';
 
 // Lazy load components
-const ProjectSettingsPanel = lazy(() => import('@/modules/ai-content/adapters/components/report-mode/settings/ProjectSettingsPanel'));
+const ProjectSettingsHUD = lazy(() => import('@/modules/ai-content/adapters/components/builder/settings/ProjectSettingsHUD').then(m => ({ default: m.ProjectSettingsHUD })));
 const ApplyTemplatePanel = lazy(() => import('@/modules/ai-content/adapters/components/report-mode/templates/ApplyTemplatePanel'));
-const GlobalProjectControls = lazy(() => import('@/modules/ai-content/adapters/components/report-mode/settings/GlobalProjectControls').then(m => ({ default: m.GlobalProjectControls })));
+const GlobalIntelligenceHUD = lazy(() => import('@/modules/ai-content/adapters/components/builder/settings/GlobalIntelligenceHUD').then(m => ({ default: m.GlobalIntelligenceHUD })));
 const SectionGenerationHUD = lazy(() => import('@/modules/ai-content/adapters/components/builder/generation/SectionGenerationHUD').then(m => ({ default: m.SectionGenerationHUD })));
 const ChapterGenerationHUD = lazy(() => import('@/modules/ai-content/adapters/components/builder/generation/ChapterGenerationHUD').then(m => ({ default: m.ChapterGenerationHUD })));
 const ProjectChat = lazy(() => import('@/modules/ai-content/adapters/components/report-mode/chat/ProjectChat').then(m => ({ default: m.ProjectChat })));
@@ -37,9 +37,9 @@ export function useSidebarPanels({
     const leftPanels = useMemo<SidebarPanelConfig[]>(() => [
         {
             key: 'settings',
-            title: 'Project Settings',
+            title: 'Metadata Manifest',
             icon: <Settings className="h-4 w-4" />,
-            content: <ProjectSettingsPanel />,
+            content: <ProjectSettingsHUD />,
         },
         {
             key: 'templates',
@@ -88,9 +88,9 @@ export function useSidebarPanels({
             },
             {
                 key: 'global',
-                title: 'Global Settings',
+                title: 'Intelligence Matrix',
                 icon: <SlidersHorizontal className="h-4 w-4" />,
-                content: <GlobalProjectControls />,
+                content: <GlobalIntelligenceHUD />,
             },
             {
                 key: 'chat',

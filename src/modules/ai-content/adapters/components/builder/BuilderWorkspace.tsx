@@ -68,7 +68,7 @@ export const BuilderWorkspace: React.FC<BuilderWorkspaceProps> = ({ initialProje
     const comparisonSnapshotId = useBuilderStore(state => state.comparisonSnapshotId);
     const setComparisonSnapshotId = useBuilderStore(state => state.setComparisonSnapshotId);
     const { snapshots } = useSnapshots(project?.id);
-    const comparisonSnapshot = snapshots.find((s: any) => s.id === comparisonSnapshotId);
+    const comparisonSnapshot = snapshots.find((s) => s.id === comparisonSnapshotId) ?? null;
 
     const handleToggleFullscreen = () => {
         if (!containerRef.current) return;

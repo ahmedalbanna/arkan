@@ -4,7 +4,7 @@ import React from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { CoverPageSettingsPanel } from '@/modules/ai-content/adapters/components/report-mode/settings/CoverPageSettingsPanel';
+import { CoverPageHUD } from '../settings/CoverPageHUD';
 
 interface CoverPageSettingsHUDProps {
     isOpen: boolean;
@@ -44,10 +44,7 @@ export const CoverPageSettingsHUD: React.FC<CoverPageSettingsHUDProps> = ({
 
                         {/* Settings Content — Aligned with Intelligence Suite typography */}
                         <div className="flex-1 overflow-auto p-4 custom-scrollbar">
-                            <CoverPageSettingsPanel
-                                isOpen={true}
-                                onClose={onClose}
-                            />
+                            <CoverPageHUD />
                         </div>
                         
                         {/* HUD Footer */}
