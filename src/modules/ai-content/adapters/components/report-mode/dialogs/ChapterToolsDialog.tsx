@@ -23,7 +23,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Form } from '@/components/ui/form';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
-import { SectionContextSelector } from '../section-controls/SectionContextSelector';
+import { ContextSelector } from '../../builder/generation/controls/ContextSelector';
 import { useAuth } from '@/context/AuthContext';
 
 interface ChapterToolsDialogProps {
@@ -163,7 +163,7 @@ export function ChapterToolsDialog({ isOpen, onOpenChange, chapter }: ChapterToo
                   )}
                 </TabsContent>
                 <TabsContent value="context" className="flex-1 mt-4">
-                   <SectionContextSelector
+                   <ContextSelector
                         sectionId={chapter.id || ''}
                     />
                 </TabsContent>

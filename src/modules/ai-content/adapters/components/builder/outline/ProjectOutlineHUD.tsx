@@ -37,31 +37,49 @@ interface ProjectOutlineHUDProps {
   selectedSectionIds: string[];
   onActiveChapterChange: (id: string | null) => void;
   onActiveSectionChange: (id: string | null) => void;
+  onMoveItem: (activeId: string, overId: string) => void;
+  onUpdateTitle: (id: string, newTitle: string, isChapter: boolean) => void;
+  onDeleteItem: (id: string, isChapter: boolean) => void;
+  onAddChapter: () => void;
+  onAddSection: (chapterId: string) => void;
+  onDuplicateItem: (id: string, isChapter: boolean) => void;
+  onUndo: () => void;
+  onCopyItem: (id: string, isChapter: boolean) => void;
+  onPasteItem: (targetId: string, isChapter: boolean) => void;
 }
 
-export const ProjectOutlineHUD = ({
-  isVisible,
-  project,
-  activeChapterId,
-  selectedSectionIds,
-  onActiveChapterChange,
-  onActiveSectionChange,
-}: ProjectOutlineHUDProps) => {
+export const ProjectOutlineHUD = (props: ProjectOutlineHUDProps) => {
+  const {
+    isVisible,
+    project,
+    activeChapterId,
+    selectedSectionIds,
+    onActiveChapterChange,
+    onActiveSectionChange,
+    onMoveItem,
+    onUpdateTitle,
+    onDeleteItem,
+    onAddChapter,
+    onAddSection,
+    onDuplicateItem,
+    onUndo,
+    onCopyItem,
+    onPasteItem
+  } = props;
+
   const [expandedChapters, setExpandedChapters] = useState<Set<string>>(new Set());
   const [searchQuery, setSearchQuery] = useState('');
   
-  const {
-    handleMoveItem,
-    handleUpdateTitle,
-    handleDeleteItem,
-    handleAddChapter,
-    handleAddSection,
-    handleDuplicateItem,
-    handleCopyItem,
-    handlePasteItem,
-    undo,
-    clipboard
-  } = useOutlineOperations(project);
+  // Consolidating logic into Workspace props
+  const handleMoveItem = onMoveItem;
+  const handleUpdateTitle = onUpdateTitle;
+  const handleDeleteItem = onDeleteItem;
+  const handleAddChapter = onAddChapter;
+  const handleAddSection = onAddSection;
+  const handleDuplicateItem = onDuplicateItem;
+  const handleCopyItem = onCopyItem;
+  const handlePasteItem = onPasteItem;
+  const undo = onUndo;
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),

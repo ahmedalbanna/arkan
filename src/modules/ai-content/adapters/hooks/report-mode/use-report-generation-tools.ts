@@ -66,6 +66,11 @@ export function useReportGenerationTools() {
         toast({ title: "Chapter Created", description: `A new untitled chapter has been added.` });
     }, [updateProject]);
 
+    const handleAddSection = useCallback((chapterId: string) => {
+        updateProject(p => p.addSectionToChapter(chapterId, uuidv4(), 'Untitled Section'));
+        toast({ title: "Section Created", description: `A new section has been added to the chapter.` });
+    }, [updateProject]);
+
     const handleDragEnd = useCallback((event: DragEndEvent) => {
         const { active, over } = event;
         if (!over || !project) return;
@@ -107,5 +112,6 @@ export function useReportGenerationTools() {
         onGenerateProject,
         projectMutation: generateProjectMutation,
         chaptersToBuild,
+        handleAddSection,
     };
 }

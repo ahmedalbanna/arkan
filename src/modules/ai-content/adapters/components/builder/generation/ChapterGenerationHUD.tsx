@@ -13,7 +13,7 @@ import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { Chapter } from '@/modules/ai-content/domain/entities/Chapter';
 import { useChapterActions } from '@/modules/ai-content/adapters/hooks/report-mode/use-chapter-actions';
-import { SectionContextSelector } from '@/modules/ai-content/adapters/components/report-mode/section-controls/SectionContextSelector';
+import { ContextSelector } from './controls/ContextSelector';
 import { SidebarContainer } from '../layout/SidebarContainer';
 
 /**
@@ -215,7 +215,7 @@ export function ChapterGenerationHUD({ chapter, className, onClose }: ChapterGen
                                         Define the context hierarchy for all sections within this chapter.
                                     </p>
                                 </div>
-                                <SectionContextSelector sectionId={chapter.id || ''} />
+                                <ContextSelector sectionId={chapter.id || ''} />
                             </div>
                         </TabsContent>
                     </div>

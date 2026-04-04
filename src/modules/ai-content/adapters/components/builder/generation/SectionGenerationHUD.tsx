@@ -13,9 +13,9 @@ import { useBuilderStore } from '@/hooks';
 import { useGenerationUIStore } from '@/modules/ai-content/adapters/state/useGenerationUIStore';
 import { useAiActions } from '@/modules/ai-content/adapters/hooks/report-mode/use-ai-actions';
 import { Section } from '@/modules/ai-content/domain/entities/Section';
-import { GuidelineEditor } from '@/modules/ai-content/adapters/components/report-mode/section-controls/SectionGuidelineEditor';
-import { SectionContextSelector } from '@/modules/ai-content/adapters/components/report-mode/section-controls/SectionContextSelector';
-import { SectionGenerationControls } from '@/modules/ai-content/adapters/components/report-mode/section-controls/SectionGenerationControls';
+import { GuidelineEditor } from './controls/GuidelineEditor';
+import { ContextSelector } from './controls/ContextSelector';
+import { ControlPanel } from './controls/ControlPanel';
 import { SidebarContainer } from '../layout/SidebarContainer';
 
 /**
@@ -248,7 +248,7 @@ export function SectionGenerationHUD({ section, selectedSectionIds = [], classNa
                         <TabsContent value="context" className="m-0 focus-visible:ring-0 animate-in fade-in slide-in-from-right-4 duration-500">
                             <div className="space-y-5">
                                 <span className="text-[9px] font-black uppercase tracking-widest text-muted-foreground/60 px-1">Source Matrices</span>
-                                <SectionContextSelector
+                                <ContextSelector
                                     sectionId={section.id}
                                     selectedSectionIds={selectedSectionIds.length > 1 ? selectedSectionIds : undefined}
                                 />
@@ -258,17 +258,17 @@ export function SectionGenerationHUD({ section, selectedSectionIds = [], classNa
                             <div className="space-y-5">
                                 <span className="text-[9px] font-black uppercase tracking-widest text-muted-foreground/60 px-1">Neural Instructions</span>
                                 <GuidelineEditor
-                                    itemKey={section.id}
-                                    selectedSectionIds={selectedSectionIds.length > 1 ? selectedSectionIds : undefined}
+                                    itemId={section.id}
+                                    selectedIds={selectedSectionIds.length > 1 ? selectedSectionIds : undefined}
                                 />
                             </div>
                         </TabsContent>
                         <TabsContent value="controls" className="m-0 focus-visible:ring-0 animate-in fade-in slide-in-from-right-4 duration-500">
                             <div className="space-y-5">
                                 <span className="text-[9px] font-black uppercase tracking-widest text-muted-foreground/60 px-1">Structural Vector</span>
-                                <SectionGenerationControls
+                                <ControlPanel
                                     section={section}
-                                    selectedSectionIds={selectedSectionIds.length > 1 ? selectedSectionIds : undefined}
+                                    selectedIds={selectedSectionIds.length > 1 ? selectedSectionIds : undefined}
                                 />
                             </div>
                         </TabsContent>
