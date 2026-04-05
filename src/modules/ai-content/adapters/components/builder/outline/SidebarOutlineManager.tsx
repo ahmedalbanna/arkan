@@ -43,18 +43,18 @@ import { useOutlineOperations } from './useOutlineOperations';
 
 interface SidebarOutlineManagerProps {
   activeChapterId: string | null;
-  onSelectChapter: (id: string) => void;
+  onActiveChapterChange: (id: string | null) => void;
   selectedSectionIds: string[];
-  onToggleSectionSelection: (id: string) => void;
-  viewMode: 'edit' | 'preview';
+  onActiveSectionChange: (id: string | null, multiSelect?: boolean) => void;
+  viewMode?: 'edit' | 'preview';
 }
 
 export function SidebarOutlineManager({
   activeChapterId,
-  onSelectChapter,
+  onActiveChapterChange,
   selectedSectionIds,
-  onToggleSectionSelection,
-  viewMode,
+  onActiveSectionChange,
+  viewMode = 'preview',
 }: SidebarOutlineManagerProps) {
   const project = useBuilderStore(state => state.project);
   
@@ -70,8 +70,8 @@ export function SidebarOutlineManager({
     handlePasteItem,
     clipboard
   } = useOutlineOperations(project, {
-    onSelectChapter,
-    onSelectSection: (id) => onToggleSectionSelection(id || ''),
+    onSelectChapter: onActiveChapterChange,
+    onSelectSection: onActiveSectionChange,
   });
 
   const [searchQuery, setSearchQuery] = useState('');
@@ -228,7 +228,7 @@ export function SidebarOutlineManager({
                         isExpanded={isExpanded}
                         sectionCount={isChapter ? item.sections.length : undefined}
                         onToggleExpand={() => isChapter && toggleChapter(item.id)}
-                        onClick={() => isChapter ? onSelectChapter(item.id) : onToggleSectionSelection(item.id)}
+                        onClick={() => isChapter ? onActiveChapterChange(item.id) : onActiveSectionChange(item.id)}
                         onUpdateTitle={(title) => handleUpdateTitle(item.id, title, isChapter)}
                         onDelete={() => handleDeleteItem(item.id, isChapter)}
                         onDuplicate={() => handleDuplicateItem(item.id, isChapter)}
@@ -247,7 +247,7 @@ export function SidebarOutlineManager({
                               title={section.title}
                               isChapter={false}
                               isActive={selectedSectionIds.includes(section.id)}
-                              onClick={() => onToggleSectionSelection(section.id)}
+                              onClick={() => onActiveSectionChange(section.id)}
                               onUpdateTitle={(title) => handleUpdateTitle(section.id, title, false)}
                               onDelete={() => handleDeleteItem(section.id, false)}
                               onDuplicate={() => handleDuplicateItem(section.id, false)}
