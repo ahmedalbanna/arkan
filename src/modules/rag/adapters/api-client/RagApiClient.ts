@@ -13,7 +13,17 @@ export interface RetrieveContextResponse {
     fileName: string;
     score: number;
     text: string;
+    type?: string;
   }[];
+  telemetry?: {
+    totalTimeMs: number;
+    cacheLookupMs: number;
+    embeddingTimeMs: number;
+    searchTimeMs: number;
+    rerankTimeMs: number;
+    isCached: boolean;
+    rerankSkipped: boolean;
+  };
 }
 
 export interface IndexDocumentInput {

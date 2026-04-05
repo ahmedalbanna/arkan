@@ -3,13 +3,15 @@
 import { useAuth } from '@/context/AuthContext';
 import { container } from '@/infrastructure/di/container';
 import { RagApiClient, RetrieveContextResponse } from '@/modules/rag/adapters/api-client/RagApiClient';
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 
 export function useRagRetrieval() {
-  const { user } = useAuth();
+  const { userProfile: user } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
+  const [results, setResults] = useState<RetrieveContextResponse | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
-  const retrieveContext = async (
+  const retrieve = useCallback(async (
     query: string, 
     projectId?: string, 
     options: { topK?: number; minScore?: number } = {}
@@ -17,6 +19,7 @@ export function useRagRetrieval() {
     if (!query.trim()) return null;
 
     setIsLoading(true);
+    setError(null);
     try {
       const client = container.resolve(RagApiClient);
       const result = await client.retrieveContext({
@@ -27,17 +30,24 @@ export function useRagRetrieval() {
       });
 
       if (result.isFailure) throw result.error;
-      return result.getValue();
-    } catch (error) {
-      console.error('RAG Retrieval failed:', error);
+      
+      const data = result.getValue();
+      setResults(data);
+      return data;
+    } catch (err: any) {
+      console.error('RAG Retrieval failed:', err);
+      const msg = err?.message || 'The retrieval core encountered an unrecoverable error.';
+      setError(msg);
       return null;
     } finally {
       setIsLoading(false);
     }
-  };
+  }, []);
 
   return {
-    retrieveContext,
+    retrieve,
+    results,
     isLoading,
+    error,
   };
 }

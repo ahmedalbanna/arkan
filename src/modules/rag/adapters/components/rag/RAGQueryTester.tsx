@@ -1,253 +1,228 @@
 'use client';
 
-import React, { useMemo, useState } from 'react';
-import { Loader2, Search } from 'lucide-react';
-
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Badge } from '@/components/ui/badge';
+import React, { useMemo, useState, useCallback } from 'react';
+import { 
+    Search, 
+    Zap, 
+    ShieldCheck, 
+    Database, 
+    Clock, 
+    Cpu, 
+    Layers, 
+    Binary, 
+    FileText,
+    ArrowRight,
+    AlertCircle,
+    ChevronRight,
+    Loader2
+} from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Slider } from '@/components/ui/slider';
-import { apiService } from '@/infrastructure/api/ApiService';
-import { Separator } from '@/components/ui/separator';
+import { Badge } from '@/components/ui/badge';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { Separator } from '@/components/ui/separator';
+import { Progress } from '@/components/ui/progress';
+import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
+import { useRagRetrieval } from '@/modules/rag/adapters/hooks/use-rag-retrieval';
+import { cn } from '@/infrastructure/utils/cn';
 
-interface SearchResult {
-  content: string;
+/**
+ * RAGQueryTester — High-fidelity auditor for neural retrieval vectors.
+ * Allows deep inspection of retrieval latency, cache vectors, and result precision.
+ * 
+ * DEFENSIVE MEASURES:
+ * 1. Telemetry Inspection: Visualizes per-phase timing (Embedding, Search, Rerank).
+ * 2. Vector Context: Displays match scores and source metadata with high precision.
+ * 3. Cache Feedback: Explicitly badges results resolved from the LRU matrix.
+ * 4. UX Integrity: Responsive dot-grids and technical typography.
+ */
+
+interface SearchSource {
+  text: string;
   score: number;
-  sourceFile?: string;
-  projectId?: string;
-  chunkIndex: number;
-}
-
-interface RetrievalResponse {
-  sources?: SearchResult[];
+  fileName?: string;
+  type?: string;
 }
 
 export function RAGQueryTester(): React.JSX.Element {
   const [query, setQuery] = useState('');
-  const [projectId, setProjectId] = useState('');
-  const [topK, setTopK] = useState(5);
-  const [minScore, setMinScore] = useState(0.5);
-  const [results, setResults] = useState<SearchResult[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [searchTime, setSearchTime] = useState<number | null>(null);
-  const [hasSearched, setHasSearched] = useState(false);
+  const { retrieve, results, isLoading, error } = useRagRetrieval();
 
-  const formattedMinScore = useMemo(() => minScore.toFixed(2), [minScore]);
+  // Derived Telemetry stats from the results payload
+  const telemetry = useMemo(() => results?.telemetry, [results]);
 
-  const handleSearch = async (): Promise<void> => {
-    if (!query.trim()) {
-      setError('Please enter a query');
-      setHasSearched(false);
-      return;
-    }
-
-    setLoading(true);
-    setError(null);
-    setHasSearched(false);
-    const startTime = Date.now();
-
-    try {
-      const data = await apiService<
-        { query: string; projectId?: string; topK: number; minScore: number },
-        RetrievalResponse
-      >({
-        endpoint: '/api/rag/retrieve-context',
-        method: 'POST',
-        data: {
-          query,
-          projectId: projectId || undefined,
-          topK,
-          minScore,
-        },
-      });
-
-      setResults(data.sources ?? []);
-      setSearchTime(Date.now() - startTime);
-      setHasSearched(true);
-    } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'Failed to retrieve context');
-      setResults([]);
-      setSearchTime(null);
-      setHasSearched(true);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const handleRunQuery = useCallback(async () => {
+    if (!query.trim()) return;
+    await retrieve(query);
+  }, [query, retrieve]);
 
   return (
-    <Card className="border-none shadow-2xl shadow-primary/5 bg-card overflow-hidden rounded-[32px] animate-in fade-in duration-700">
-      <header className="px-8 py-6 border-b bg-muted/5 flex items-center justify-between">
-        <div className="flex items-center gap-3">
-            <div className="h-2 w-2 rounded-full bg-primary animate-pulse" />
-            <h3 className="text-[10px] font-bold uppercase tracking-[0.3em] text-muted-foreground">
-                Diagnostic Query Lab
-            </h3>
-        </div>
-        <div className="flex items-center gap-2">
-            {searchTime !== null && (
-                <Badge variant="outline" className="h-5 text-[9px] uppercase tracking-widest font-bold border-primary/20 text-primary bg-primary/5">
-                    Retrieval: {searchTime}ms
-                </Badge>
-            )}
+    <div className="space-y-10 animate-in fade-in duration-1000 relative">
+      {/* 28px Dot-grid Background Atmospheric Layer */}
+      <div 
+        className="absolute inset-0 opacity-[0.02] dark:opacity-[0.04] bg-[radial-gradient(circle_at_center,_var(--primary)_1px,_transparent_1px)] bg-[size:28px_28px] pointer-events-none -m-10" 
+        style={{ backgroundSize: '28px 28px' }}
+      />
+
+      <header className="flex flex-col md:flex-row md:items-end justify-between gap-6 px-1 relative z-10">
+        <div className="space-y-4">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/20">
+              <Badge variant="outline" className="h-5 text-[9px] uppercase tracking-widest font-black border-primary/20 text-primary bg-background">Vector Auditor</Badge>
+              <div className="h-3 w-px bg-primary/20" />
+              <span className="text-[10px] font-black uppercase tracking-widest text-primary/80">Retrieval Simulation</span>
+          </div>
+          <div className="space-y-1">
+            <h1 className="text-4xl font-bold tracking-tighter text-foreground flex items-center gap-4">
+              <Search className="w-10 h-10 text-primary" />
+              Query Inspector
+            </h1>
+            <p className="text-lg text-muted-foreground italic font-serif opacity-80 max-w-2xl leading-relaxed">
+                Execute spectral searches to validate retrieval precision and inspect neural telemetry vectors.
+            </p>
+          </div>
         </div>
       </header>
 
-      <CardContent className="p-8 md:p-10 space-y-10">
-        <div className="grid gap-8 lg:grid-cols-[1fr_350px]">
-            {/* Search HUD */}
-            <div className="space-y-8">
-                <div className="space-y-3">
-                    <Label htmlFor="query" className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground/60 ml-1">Search Logic</Label>
-                    <div className="flex gap-2">
-                        <Input
-                            id="query"
-                            placeholder="Enter system query..."
-                            value={query}
-                            onChange={(event) => setQuery(event.target.value)}
-                            onKeyDown={(event) => {
-                                if (event.key === 'Enter' && !loading) {
-                                    void handleSearch();
-                                }
-                            }}
-                            disabled={loading}
-                            className="h-12 text-xs bg-muted/5 border-none shadow-inner focus-visible:ring-1 rounded-xl"
-                        />
-                        <Button
-                            onClick={() => void handleSearch()}
-                            disabled={loading}
-                            className="h-12 w-12 rounded-xl shadow-lg shadow-primary/20"
-                        >
-                            {loading ? <Loader2 className="h-5 w-5 animate-spin" /> : <Search className="h-5 w-5" />}
-                        </Button>
-                    </div>
+      {/* Input Sector — High-Density Search Control */}
+      <Card className="border-none shadow-2xl shadow-primary/5 bg-card overflow-hidden rounded-[40px] relative z-10">
+        <div className="absolute inset-0 opacity-[0.02] pointer-events-none bg-[radial-gradient(circle_at_center,_var(--primary)_1px,_transparent_1px)] bg-[size:28px_28px]" />
+        <CardContent className="p-10">
+            <div className="flex flex-col md:flex-row gap-4">
+                <div className="flex-1 relative group">
+                    <Input
+                        placeholder="SCAN_TARGET_QUERY..."
+                        value={query}
+                        onChange={(e) => setQuery(e.target.value)}
+                        onKeyDown={(e) => e.key === 'Enter' && handleRunQuery()}
+                        className="h-14 pl-12 text-[13px] font-bold bg-muted/5 border-primary/10 focus-visible:ring-primary/20 rounded-2xl shadow-inner transition-all uppercase tracking-widest"
+                    />
+                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-primary/40 group-focus-within:text-primary transition-colors" />
+                </div>
+                <Button 
+                    onClick={handleRunQuery} 
+                    disabled={isLoading || !query.trim()}
+                    className="h-14 px-10 text-[11px] font-black uppercase tracking-[0.25em] gap-3 shadow-2xl shadow-primary/20 bg-primary hover:opacity-90 rounded-2xl transition-all hover:scale-105 active:scale-95 ring-1 ring-inset ring-white/20"
+                >
+                    {isLoading ? <Loader2 className="h-5 w-5 animate-spin" /> : <Zap className="h-5 w-5" />}
+                    Initialize Audit
+                </Button>
+            </div>
+        </CardContent>
+      </Card>
+
+      {results && (
+        <div className="grid lg:grid-cols-3 gap-8 animate-in slide-in-from-bottom-4 duration-700 relative z-10">
+            {/* Telemetry Sector — Timing & Cache Status */}
+            <div className="space-y-6">
+                <div className="flex items-center gap-2.5 px-1 group/label">
+                    <Binary className="h-3.5 w-3.5 text-primary/40 group-hover/label:text-primary transition-colors" />
+                    <span className="text-[10px] font-black uppercase tracking-[0.3em] text-muted-foreground/60">Neural Telemetry</span>
                 </div>
 
-                <div className="space-y-6">
-                    <div className="flex items-center gap-3 px-1">
-                        <div className="h-1.5 w-1.5 rounded-full bg-primary/40" />
-                        <h4 className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Derived Content</h4>
+                <div className="p-8 rounded-[32px] border border-border/60 bg-background/60 backdrop-blur-xl space-y-8 shadow-xl">
+                    {/* Overall Status */}
+                    <div className="flex items-center justify-between">
+                        <div className="space-y-1">
+                            <span className="text-[9px] font-black uppercase tracking-widest text-primary/60">Total Cycle Time</span>
+                            <div className="text-3xl font-black tracking-tighter tabular-nums">{telemetry?.totalTimeMs.toFixed(1)}ms</div>
+                        </div>
+                        {telemetry?.isCached && (
+                            <Badge className="bg-green-500/10 text-green-500 border-green-500/20 px-3 py-1 text-[10px] font-black uppercase tracking-widest animate-pulse">
+                                Cached Node
+                            </Badge>
+                        )}
                     </div>
 
-                    <ScrollArea className="h-[500px] rounded-3xl border bg-background/50 shadow-inner relative group">
-                        <div className="p-6 space-y-6">
-                            {loading ? (
-                                <div className="flex flex-col items-center justify-center py-32 space-y-4 opacity-40">
-                                    <Loader2 className="h-10 w-10 animate-spin text-primary" />
-                                    <p className="text-[10px] font-bold uppercase tracking-[0.2em]">Executing Semantic Probe</p>
+                    <Separator className="bg-primary/5" />
+
+                    {/* Phase Breakdown */}
+                    <div className="space-y-5">
+                        {[
+                            { label: 'Embedding Generation', val: telemetry?.embeddingTimeMs, max: 200, icon: <Binary /> },
+                            { label: 'Vector Matrix Search', val: telemetry?.searchTimeMs, max: 100, icon: <Database /> },
+                            { label: 'Neural Reranking', val: telemetry?.rerankTimeMs, max: 1000, icon: <Layers />, skipped: telemetry?.rerankSkipped }
+                        ].map((phase, i) => (
+                            <div key={i} className="space-y-2">
+                                <div className="flex justify-between items-center text-[9px] font-black uppercase tracking-widest">
+                                    <span className="text-muted-foreground/60 flex items-center gap-2">
+                                        {React.isValidElement(phase.icon) && React.cloneElement(phase.icon as React.ReactElement, { className: 'h-3 w-3 opacity-40' })}
+                                        {phase.label}
+                                    </span>
+                                    <span className={cn(phase.skipped ? "text-green-500" : "text-primary/80")}>
+                                        {phase.skipped ? 'OPTIMIZED' : `${phase.val?.toFixed(1)}ms`}
+                                    </span>
                                 </div>
-                            ) : results.length > 0 ? (
-                                results.map((result, index) => (
-                                    <div key={index} className="group relative flex flex-col p-6 rounded-2xl border border-border/40 bg-card hover:border-primary/40 transition-all duration-500 shadow-sm hover:shadow-xl">
-                                        <div className="flex justify-between items-start mb-4">
-                                            <div className="flex items-center gap-2">
-                                                <span className="text-[10px] font-bold bg-muted/50 text-muted-foreground w-5 h-5 rounded flex items-center justify-center border">{index + 1}</span>
-                                                <Badge variant="secondary" className="h-4.5 text-[9px] font-bold tracking-tighter">
-                                                    Score: {result.score.toFixed(3)}
-                                                </Badge>
-                                            </div>
-                                            <div className="flex gap-1.5">
-                                                {result.sourceFile && <Badge variant="outline" className="h-4 text-[8px] uppercase tracking-tighter border-border/60">{result.sourceFile}</Badge>}
-                                            </div>
-                                        </div>
-                                        <p className="text-[11px] text-muted-foreground italic leading-relaxed font-serif">
-                                            "{result.content}"
-                                        </p>
-                                    </div>
-                                ))
-                            ) : (
-                                <div className="flex flex-col items-center justify-center py-32 text-center opacity-40 space-y-4">
-                                    <div className="h-16 w-16 rounded-2xl border-2 border-dashed border-primary/40 flex items-center justify-center">
-                                        <Search className="h-8 w-8 text-primary/60" />
-                                    </div>
-                                    <div className="space-y-1">
-                                        <h3 className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Probe Pending</h3>
-                                        <p className="text-[10px] italic max-w-[200px] mx-auto leading-relaxed">Initialize a query above to begin semantic retrieval.</p>
-                                    </div>
-                                </div>
-                            )}
-                        </div>
-                    </ScrollArea>
+                                <Progress value={phase.skipped ? 0 : (phase.val || 0) / phase.max * 100} className="h-1 bg-muted/20" />
+                            </div>
+                        ))}
+                    </div>
                 </div>
             </div>
 
-            {/* Parameter Sidebar */}
-            <div className="space-y-8">
-                <div className="space-y-4">
-                    <Label className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground/60 ml-1">Logic Constraints</Label>
-
-                    <div className="space-y-6">
-                        <div className="p-5 rounded-2xl border bg-muted/5 space-y-4">
-                            <Label htmlFor="project-id" className="text-[10px] font-bold uppercase opacity-40">Project Filter</Label>
-                            <Input
-                                id="project-id"
-                                placeholder="Identifier..."
-                                value={projectId}
-                                onChange={(event) => setProjectId(event.target.value)}
-                                disabled={loading}
-                                className="h-8 text-[11px] bg-background border-none shadow-sm"
-                            />
-                        </div>
-
-                        <div className="p-5 rounded-2xl border bg-muted/5 space-y-6">
-                            <div className="space-y-4">
-                                <div className="flex justify-between items-center px-1">
-                                    <Label className="text-[10px] font-bold uppercase tracking-tighter text-muted-foreground/60">Top Results</Label>
-                                    <Badge variant="secondary" className="h-4.5 text-[9px]">{topK}</Badge>
-                                </div>
-                                <Slider
-                                    min={1}
-                                    max={10}
-                                    step={1}
-                                    value={[topK]}
-                                    onValueChange={(value) => setTopK(value[0] ?? 5)}
-                                    disabled={loading}
-                                />
-                            </div>
-
-                            <Separator className="bg-border/40" />
-
-                            <div className="space-y-4">
-                                <div className="flex justify-between items-center px-1">
-                                    <Label className="text-[10px] font-bold uppercase tracking-tighter text-muted-foreground/60">Min Relevance</Label>
-                                    <Badge variant="secondary" className="h-4.5 text-[9px]">{formattedMinScore}</Badge>
-                                </div>
-                                <Slider
-                                    min={0}
-                                    max={1}
-                                    step={0.05}
-                                    value={[minScore]}
-                                    onValueChange={(value) => setMinScore(value[0] ?? 0.5)}
-                                    disabled={loading}
-                                />
-                            </div>
-                        </div>
+            {/* Retrieval Matrix Sector — Actual Sources */}
+            <div className="lg:col-span-2 space-y-6">
+                <div className="flex items-center justify-between px-1">
+                    <div className="flex items-center gap-2.5 group/label">
+                        <Database className="h-3.5 w-3.5 text-primary/40 group-hover/label:text-primary transition-colors" />
+                        <span className="text-[10px] font-black uppercase tracking-[0.3em] text-muted-foreground/60">Retrieval Manifest</span>
                     </div>
+                    <span className="text-[9px] font-black text-primary/40 uppercase tracking-widest tabular-nums">
+                        {results.sources?.length || 0} Vectors Resolved
+                    </span>
                 </div>
 
-                <div className="p-4 rounded-2xl border bg-primary/[0.02] border-dashed text-center space-y-2">
-                    <p className="text-[9px] text-muted-foreground italic leading-relaxed">
-                        Query results are derived from the Qdrant vector store using semantic similarity.
-                    </p>
-                </div>
+                <ScrollArea className="h-[600px] rounded-[40px] border border-border/60 bg-background/40 backdrop-blur-xl shadow-inner">
+                    <div className="p-8 space-y-6">
+                        {results.sources?.map((source: SearchSource, idx: number) => (
+                            <div key={idx} className="group relative p-6 rounded-[28px] border border-primary/5 bg-background/60 hover:border-primary/20 transition-all duration-500 hover:shadow-xl">
+                                <div className="flex items-center justify-between mb-4">
+                                    <div className="flex items-center gap-3">
+                                        <span className="text-[10px] font-black bg-primary/10 text-primary w-6 h-6 rounded-lg flex items-center justify-center tabular-nums">
+                                            {idx + 1}
+                                        </span>
+                                        <Badge variant="outline" className="h-5 text-[9px] font-black border-primary/20 text-primary/60 bg-primary/5 px-2 uppercase tracking-widest">
+                                            {(source.score * 100).toFixed(1)}% Match
+                                        </Badge>
+                                    </div>
+                                    <div className="flex items-center gap-2 text-[9px] font-black uppercase tracking-widest text-muted-foreground/40 group-hover:text-primary/60 transition-colors">
+                                        <FileText className="h-3 w-3" />
+                                        {source.fileName || 'Unknown Node'}
+                                    </div>
+                                </div>
+                                <p className="text-[12px] text-foreground/80 font-serif italic leading-relaxed line-clamp-4 group-hover:line-clamp-none transition-all duration-700">
+                                    "{source.text.trim()}"
+                                </p>
+                                <div className="mt-4 pt-4 border-t border-primary/5 flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                    <span className="text-[8px] font-black uppercase tracking-[0.2em] text-primary">Spectral Vector {source.type}</span>
+                                    <ChevronRight className="h-2.5 w-2.5 text-primary" />
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </ScrollArea>
             </div>
         </div>
-      </CardContent>
+      )}
 
-      <footer className="px-8 py-4 border-t bg-muted/5 flex items-center justify-between">
-          <p className="text-[9px] text-muted-foreground font-medium uppercase tracking-widest">
-              Arkan Retrieval Engine • Probe Node V1.0
-          </p>
-          <div className="flex items-center gap-2">
-              <Badge variant="outline" className="h-4 text-[8px] uppercase tracking-tighter text-muted-foreground/60 border-border/60">
-                  Vector Topology Verified
-              </Badge>
+      {error && (
+        <Alert variant="destructive" className="rounded-3xl border-destructive/20 bg-destructive/5 relative z-10">
+          <AlertCircle className="h-4 w-4" />
+          <AlertTitle className="text-[10px] font-black uppercase tracking-widest">Spectral Inversion Failure</AlertTitle>
+          <AlertDescription className="text-[11px] italic font-medium">{error}</AlertDescription>
+        </Alert>
+      )}
+
+      {/* Stable Version Footer */}
+      <footer className="px-1 py-12 flex items-center justify-between opacity-40 relative z-10">
+          <div className="flex items-center gap-3">
+              <div className="h-1 w-1 rounded-full bg-primary/60 shadow-[0_0_8px_rgba(var(--primary),0.6)]" />
+              <p className="text-[9px] font-black uppercase tracking-[0.3em]">
+                  Arkan Audit Core • Stable Build 2.4
+              </p>
           </div>
+          <span className="text-[9px] font-bold tabular-nums uppercase tracking-widest">AUDIT_VECTOR_ENCRYPTED</span>
       </footer>
-    </Card>
+    </div>
   );
 }

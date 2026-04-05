@@ -2,11 +2,21 @@
  * RAG Retrieval Service
  * 
  * Optimized for low-latency context synthesis and high-precision recall.
- * Features hybrid reranking guards, efficient result merging, and background cache refresh.
+ * Features high-precision telemetry, hybrid reranking guards, and optimized merging.
  */
 
 import { generateEmbedding } from './embeddings';
 import { getVectorStore, type SearchResult } from './vector-store';
+
+export interface RetrievalTelemetry {
+  totalTimeMs: number;
+  cacheLookupMs: number;
+  embeddingTimeMs: number;
+  searchTimeMs: number;
+  rerankTimeMs: number;
+  isCached: boolean;
+  rerankSkipped: boolean;
+}
 
 export interface RetrievalOptions {
   topK?: number;
@@ -27,23 +37,30 @@ export interface RetrievalResult {
     sourceFile?: string;
     type: string;
   }>;
+  telemetry?: RetrievalTelemetry;
 }
 
 /**
  * Retrieve relevant context for a query using RAG.
- * 
- * OPTIMIZATIONS:
- * 1. Hybrid Reranking Guard: Skips reranking if semantic scores are exceptionally high.
- * 2. Background Refresh: Triggers a non-blocking cache update if data is near TTL.
- * 3. Sanitized Synthesis: Removes redundant boilerplate from combined context.
  */
 export async function retrieveContext(
   query: string,
   options: RetrievalOptions = {}
 ): Promise<RetrievalResult> {
+  const startTime = performance.now();
+  const telemetry: RetrievalTelemetry = {
+    totalTimeMs: 0,
+    cacheLookupMs: 0,
+    embeddingTimeMs: 0,
+    searchTimeMs: 0,
+    rerankTimeMs: 0,
+    isCached: false,
+    rerankSkipped: false,
+  };
+
   const {
     topK = 5,
-    minScore = 0.45, // Adjusted for broader initial recall
+    minScore = 0.45,
     projectId,
     userId,
     includeTypes,
@@ -53,39 +70,47 @@ export async function retrieveContext(
   } = options;
 
   try {
-    // 1. CACHE LAYER — Optimized hit detection
+    // 1. CACHE LOOKUP — Phase 1 Telemetry
+    const cacheStartTime = performance.now();
     if (useCache) {
       const { getCacheManager } = await import('./cache');
       const cache = getCacheManager().getSearchCache();
       const cached = cache.getResults(query, { projectId, topK, minScore });
       
+      telemetry.cacheLookupMs = performance.now() - cacheStartTime;
       if (cached) {
-        // Implementation note: Soft-TTL could be added here for background refresh
-        return cached;
+        telemetry.isCached = true;
+        telemetry.totalTimeMs = performance.now() - startTime;
+        return { ...cached, telemetry };
       }
     }
 
-    // 2. QUERY EMBEDDING — Sanitized vector generation
+    // 2. QUERY EMBEDDING — Phase 2 Telemetry
+    const embedStartTime = performance.now();
     const queryEmbedding = await generateEmbedding(query, useCache);
+    telemetry.embeddingTimeMs = performance.now() - embedStartTime;
+
     if (!queryEmbedding.length) {
-        return { context: '', sources: [] };
+        return { context: '', sources: [], telemetry };
     }
 
-    // 3. VECTOR SEARCH — Low-latency filtering
+    // 3. VECTOR SEARCH — Phase 3 Telemetry
+    const searchStartTime = performance.now();
     const vectorStore = getVectorStore();
     
     let searchResults = await vectorStore.search(queryEmbedding, {
-      topK: rerank ? topK * 3 : topK, // Higher initial K for better reranking precision
+      topK: rerank ? topK * 3 : topK,
       minScore,
       filter: { projectId, userId, type: includeTypes?.[0] },
     });
+    telemetry.searchTimeMs = performance.now() - searchStartTime;
 
     if (searchResults.length === 0) {
-        return { context: '', sources: [] };
+        return { context: '', sources: [], telemetry };
     }
 
-    // 4. RERANKING PIPELINE — Precision refinement with compute-guard
-    // Defensive Guard: Skip reranking if top result is already extremely relevant (>0.92)
+    // 4. RERANKING PIPELINE — Phase 4 Telemetry
+    const rerankStartTime = performance.now();
     const needsReranking = rerank && searchResults[0].score < 0.92;
 
     if (needsReranking) {
@@ -95,12 +120,13 @@ export async function retrieveContext(
         strategy: rerankStrategy,
         topK,
       });
+      telemetry.rerankTimeMs = performance.now() - rerankStartTime;
     } else if (rerank) {
-        // If we skipped reranking but it was requested, just slice to topK
+        telemetry.rerankSkipped = true;
         searchResults = searchResults.slice(0, topK);
     }
 
-    // 5. SYNTHESIS — High-fidelity context construction
+    // 5. SYNTHESIS
     const sources = searchResults.map((result: SearchResult) => ({
       content: result.chunk.content,
       score: result.score,
@@ -124,7 +150,9 @@ export async function retrieveContext(
       cache.setResults(query, { projectId, topK, minScore }, result);
     }
 
-    return result;
+    telemetry.totalTimeMs = performance.now() - startTime;
+    return { ...result, telemetry };
+
   } catch (error) {
     console.error('[Retrieval] Context synthesis failure:', error);
     return { context: '', sources: [] };
@@ -133,7 +161,6 @@ export async function retrieveContext(
 
 /**
  * Retrieve context for multiple queries in parallel.
- * Optimized with automatic concurrency handling via embeddings layer.
  */
 export async function retrieveContextBatch(
   queries: string[],
@@ -146,13 +173,13 @@ export async function retrieveContextBatch(
 
 /**
  * Enhanced retrieval with optimized query expansion.
- * Features deduplication-at-source to minimize synthesis overhead.
  */
 export async function retrieveContextEnhanced(
   query: string,
   options: RetrievalOptions = {}
 ): Promise<RetrievalResult> {
-  // Balanced expansion: Original + 2 specific structural probes
+  const startTime = performance.now();
+  
   const queries = [
     query,
     `Technical details and constraints for ${query}`,
@@ -161,10 +188,9 @@ export async function retrieveContextEnhanced(
 
   const results = await retrieveContextBatch(queries, {
     ...options,
-    topK: Math.ceil((options.topK || 5) / 1.5), // Overlap-aware K
+    topK: Math.ceil((options.topK || 5) / 1.5),
   });
 
-  // OPTIMIZED MERGE — Using Map for O(N) deduplication
   const sourceMap = new Map<string, RetrievalResult['sources'][0]>();
   
   for (const r of results) {
@@ -189,5 +215,14 @@ export async function retrieveContextEnhanced(
   return {
     context,
     sources: finalSources,
+    telemetry: {
+        totalTimeMs: performance.now() - startTime,
+        cacheLookupMs: 0,
+        embeddingTimeMs: 0,
+        searchTimeMs: 0,
+        rerankTimeMs: 0,
+        isCached: false,
+        rerankSkipped: false
+    }
   };
 }
