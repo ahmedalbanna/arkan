@@ -12,7 +12,7 @@ Arkan serves as an intelligent writing assistant that combines cutting-edge AI t
 - **Comprehensive Writing Support**: Provide 23+ AI-powered writing tools.
 - **Retrieval-Augmented Generation (RAG)**: Enhance AI responses with grounded context from a vector database.
 - **Professional Document Generation**: Support high-fidelity report, proposal, and presentation synthesis.
-- **Multi-language Support**: Full Arabic and English support with native RTL capabilities.
+- **Full Observability**: Maintain real-time telemetry for neural retrieval and system health.
 - **Production Resilience**: Maintain 100% type safety and architectural robustness under Next.js 15.
 
 ## Core Features
@@ -21,19 +21,20 @@ Arkan serves as an intelligent writing assistant that combines cutting-edge AI t
 - Content Generation, Manipulation, and Quality Assurance.
 
 ### Advanced Capabilities
-- **RAG System**: Qdrant-powered semantic search and context retrieval.
+- **RAG System**: Qdrant-powered semantic search, context retrieval, and real-time performance monitoring.
 - **Manifest Document Engine**: Multi-node document synthesis with DOCX/PPTX export.
 - **Spectral Analysis**: Deep decomposition of source matrices into structural intelligence.
 
 ### Platform Features
 - **Admin Dashboard**: System-wide oversight, user management, and broadcast protocols.
+- **Mission Control**: Heartbeat-based health monitoring and analytical performance hubs.
 - **Identity & Billing**: Secure authentication with hardware fingerprinting and credit-based acquisition.
 
 ## Success Metrics
-- MAU, guest-to-user conversion, RAG relevance scores, and document synthesis volume.
+- MAU, retention, retrieval latency (sub-100ms goal), and RAG relevance scores.
 
 ## Technology Foundation
-- **Next.js 15 / React 19**, TypeScript, Google Genkit, Qdrant, SQLite (Drizzle), Tailwind CSS.
+- **Next.js 15 / React 19**, TypeScript, Google Genkit, Qdrant, Ollama, Recharts, SQLite.
 
 ## Current Status
-Arkan is a **production-hardened**, high-performance application. Following a massive robustness refactor in April 2026, the project has reached 100% Clean Architecture compliance and zero-tolerance type safety. The current focus is on performance scaling, RAG retrieval optimization, and expanding test coverage.
+Arkan is a **production-hardened**, high-performance application. Following a massive robustness and performance refactor in April 2026, the project has reached 100% Clean Architecture compliance and zero-tolerance type safety. The system features a sophisticated telemetry layer for real-time AI monitoring.

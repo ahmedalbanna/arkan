@@ -13,52 +13,41 @@
 
 ### 3. Client-Server DI Bridging Pattern
 **Purpose**: Enabling high-weight services (e.g., Document Export) to be invoked from the client while executing on the server.
-- **Implementation**: Lightweight `ExportApiClient` proxies registered for browser environments that delegate to server API routes, while full infrastructure services remain isolated on the server.
+- **Implementation**: Lightweight `ExportApiClient` proxies registered for browser environments that delegate to server API routes.
 
-### 4. Standardized Domain Property Pattern
-**Purpose**: Enforcing type safety and predictable state management for domain entities.
-- **Pattern**: Entities utilize `toProperties()`, `toStateObject()`, and `withProps()`.
+### 4. Browser-Only Dynamic Synthesis Pattern
+**Purpose**: Handling libraries with mandatory DOM dependencies (e.g., `pptxgenjs`) within a Next.js 15 environment.
+- **Implementation**: Moving synthesis logic entirely to client hooks (e.g., `useExport`) using dynamic `import()` to prevent server-side reference errors.
 
 ## State Management Patterns
 
-### 1. Zustand Store Pattern (Client-side)
-**Purpose**: Lightweight global state management for UI and session data.
-- **Usage**: Manages active projects and application status. Uses atomic selectors to minimize re-renders.
+### 1. Atomic State Transformation Pattern
+**Purpose**: Ensuring state consistency during multi-node updates.
+- **Implementation**: Using functional reduction (e.g., `targets.reduce(...)`) within a single `updateProject` callback.
 
-### 2. Atomic State Transformation Pattern
-**Purpose**: Preventing race conditions and ensuring state consistency during multi-node updates.
-- **Implementation**: Using functional reduction (e.g., `targets.reduce((p, id) => p.updateSection(id, ...), project)`) within a single `updateProject` callback.
-
-### 3. React Query Pattern (Server-side Cache)
-**Purpose**: Server state management with caching and optimistic updates.
+### 2. Neural Telemetry & Monitoring Pattern
+**Purpose**: Real-time observability of AI pipeline performance.
+- **Implementation**: High-precision timing (`performance.now()`) instrumentation across Embedding, Search, and Reranking phases, transmitted via structured `telemetry` metadata.
 
 ## Robustness & Resilience Patterns
 
-### 1. Unified Existence Guard Pattern
-**Purpose**: Preventing runtime crashes on partially hydrated or null state.
-- **Implementation**: Explicit `if (!project || !userProfile) return` patterns in all interaction handlers.
+### 1. Hybrid Reranking Guard Pattern
+**Purpose**: Optimizing compute by bypassing expensive reranking steps when initial results meet high confidence thresholds (Score > 0.92).
 
 ### 2. Neural Error Boundary Pattern
-**Purpose**: Containing rendering failures within specific UI zones to prevent full-page crashes.
+**Purpose**: Containing rendering failures within specific UI zones.
 - **Implementation**: `RendererErrorBoundary` wrapped around the document canvas and analysis hubs.
 
 ### 3. Selection Recovery Pattern
 **Purpose**: Synchronizing structural shifts with UI interaction states.
-- **Implementation**: "Selection Recovery" sweeps that automatically clear or update active focuses when nodes are deleted.
+- **Implementation**: Automated sweeps that clear or update active focuses when nodes are deleted.
 
-### 4. Persistence Containment Pattern
-**Purpose**: Ensuring unhandled errors in async pipelines don't compromise session stability.
-- **Implementation**: Mandatory `try-catch` blocks around all project mutations, external service calls, and AST transformations.
+## UI/UX & Aesthetics
 
-## UI/UX & Architecture Patterns
+### 1. Intelligence Suite Aesthetic
+**Purpose**: Professional technical "IDE-style" interaction model.
+- **Standard**: 28px dot-grids, high-density labels (`text-[10px]`, `font-black`, `uppercase`), and glassmorphism.
 
-### 1. 3-Zone Workspace Architecture (IDE Pattern)
-**Purpose**: Maximizing focus for complex document production.
-
-### 2. Manifest Interaction Model
-**Purpose**: Professional technical manifests for multi-step operations (Build, Export, Acquisition).
-- **Aesthetic**: 28px dot-grids, glassmorphism, and active status pulses.
-
-### 3. Stable Manifest Footer
-**Purpose**: Providing version context and operational status to the user.
-- **Pattern**: Standardized footers (`v2.4.0-STABLE`) across all HUD panels.
+### 2. Stable Manifest Footer
+**Purpose**: Providing version context and operational status.
+- **Pattern**: Standardized footers (`v2.4.0-STABLE`) across all HUD and monitoring panels.

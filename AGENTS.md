@@ -38,7 +38,7 @@ The project utilizes `tsyringe` for dependency injection.
 
 *   **Registration**: Services are registered in `src/infrastructure/di/container.ts`.
 *   **Cross-Environment Bridging**: For services that must be triggered from the client but executed on the server (e.g., Document Export), implement a "Bridging Pattern". Register a client-side API client (e.g., `ExportApiClient`) for browser environments and the full infrastructure implementation for the server. This maintains a unified interface while respecting Next.js 15 boundaries.
-*   **Resolution**: Always resolve services via the `useService(token)` hook or `container.resolve(token)`.
+*   **Browser-Only Dynamic Synthesis**: Libraries with mandatory DOM dependencies (e.g., `pptxgenjs`) MUST be moved entirely to client hooks using dynamic `import()` to prevent server-side reference errors (`document is not defined`) during module initialization.
 
 ### Server Actions & "use server" Constraints
 
@@ -50,7 +50,7 @@ The project utilizes `tsyringe` for dependency injection.
 *   **Implementation**: All AI-related flows are located in `src/modules/ai/infrastructure/flows/` and are prefixed with `'use server'`.
 *   **Safety & Output**: Flows must return `Result<T, E>` objects to provide explicit success/failure vectors.
 *   **Spectral Sanitization**: The `cleanAiOutput` utility function MUST be used to strip extraneous conversational elements and markdown code blocks before committing AI text to the domain.
-*   **Validation**: Every flow must start with a `safeParse` boundary check using the relevant `InputSchema`.
+*   **Neural Telemetry**: Instrument retrieval flows with high-precision timing (`performance.now()`) and transmit via a `telemetry` field in result objects to enable real-time monitoring of pipeline stages (Embedding, Search, Rerank).
 
 ## State Management & Robustness
 
@@ -73,11 +73,18 @@ The project utilizes `tsyringe` for dependency injection.
 *   **Prop Standardization**: Standardize core workspace callbacks as `onActiveChapterChange` and `onActiveSectionChange`.
 *   **Styling**: Tailwind CSS is the standard. The "Intelligence Suite" aesthetic requires: 28px dot-grids, high-density labels (`text-[10px]`, `font-black`, `uppercase`), glassmorphism, and "Stable Manifest" footers.
 
+## RAG & Infrastructure Performance
+
+*   **Vector Store Lazy Init**: Use a singleton `initPromise` pattern in vector store adapters (e.g., `QdrantVectorStore`) to avoid redundant connection/collection verification overhead.
+*   **Cache Key Optimization**: Utilize bitwise string hashing for high-frequency cache keys (e.g., `EmbeddingCache`) to minimize string concatenation overhead.
+*   **Heuristic Fallbacks**: For server-side operations requiring browser metrics (e.g., text measurement for layout), implement weighted character-based heuristics that account for script density (e.g., Arabic vs. Latin).
+
 ---
 
 ## Change Log
 
 *   **System-Wide Hardening**: Standardized "Defensive Programming" and "Atomic Batching" across 50+ components including Generation, Export, Source, Outline, and Admin modules.
-*   **Infrastructure Boundaries**: Resolved Next.js 15 class-export errors by removing `"use server"` from infrastructure services and implementing the "Client-Server DI Bridging" pattern for document exports.
+*   **RAG Performance Overhaul**: Implemented bitwise hashing, lazy initialization, and high-precision telemetry across the retrieval pipeline.
+*   **Infrastructure Boundaries**: Resolved Next.js 15 class-export errors by removing `"use server"` from infrastructure services and implementing the "Client-Server DI Bridging" pattern.
 *   **Neural Rendering Stabilized**: Implemented a dedicated `RendererErrorBoundary` and stabilized the A4 rendering pipeline with hydration guards.
 *   **Identity Consistency**: Verified the move to a unified ID strategy using `randomId` for all document, source, and identity nodes.
