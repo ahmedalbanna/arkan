@@ -22,9 +22,20 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import type { Notification } from '@/modules/users/domain/entities/Notification';
+import { type Notification } from '@/modules/users/domain/entities/Notification';
 import { formatDistanceToNow } from 'date-fns';
 import { cn } from '@/infrastructure/utils/cn';
+
+/**
+ * NotificationDropdown — High-fidelity signal center for system-wide alerts.
+ * Orchestrates user-specific notifications with real-time status pulses.
+ * 
+ * DEFENSIVE MEASURES:
+ * 1. Type Integrity: Removes all 'any' casts and enforces strict Notification domain typing.
+ * 2. Safe Time Formatting: Wraps date-fns logic in try-catch to prevent malformed timestamp crashes.
+ * 3. Existence Guards: Checks for notification data presence before mapping.
+ * 4. Technical Aesthetic: Standardized 28px dot-grids and technical typography.
+ */
 
 function NotificationIcon({ icon }: { icon: Notification['icon'] }) {
   switch (icon) {
@@ -47,21 +58,27 @@ export function NotificationDropdown() {
   const { userProfile } = useAuth();
   const { notifications, markAsRead, clearNotifications } = useNotifications();
 
-  const unreadCount = (notifications as any[])?.filter((n: any) => !n.isRead).length ?? 0;
+  // 1. DATA DERIVATION — Guarded count calculation
+  const safeNotifications = Array.isArray(notifications) ? (notifications as Notification[]) : [];
+  const unreadCount = safeNotifications.filter(n => !n.isRead).length;
 
-  function handleNotificationClick(notification: any) {
-    if (!notification.isRead) {
-      markAsRead([notification.id]);
-    }
-    if (notification.link) {
-      router.push(notification.link);
+  function handleNotificationClick(notification: Notification) {
+    try {
+        if (!notification.isRead) {
+          markAsRead([notification.id]);
+        }
+        if (notification.link) {
+          router.push(notification.link);
+        }
+    } catch (error) {
+        console.error('[NotificationSignal] Selection vector failed:', error);
     }
   }
 
   function handleClearAll(e: React.MouseEvent) {
     e.stopPropagation();
-    if (notifications && (notifications as any[]).length > 0) {
-      const notificationIds = (notifications as any[]).map((n: any) => n.id);
+    if (safeNotifications.length > 0) {
+      const notificationIds = safeNotifications.map(n => n.id);
       clearNotifications(notificationIds);
     }
   }
@@ -77,7 +94,7 @@ export function NotificationDropdown() {
         >
           <Bell className="h-4 w-4 group-hover:rotate-12 transition-transform" />
           {unreadCount > 0 && (
-            <Badge variant="destructive" className="absolute -top-1 -right-1 h-3.5 min-w-[0.875rem] justify-center p-0 text-[8px] font-black border-2 border-background animate-in zoom-in-50 rounded-full">
+            <Badge variant="destructive" className="absolute -top-1 -right-1 h-3.5 min-w-[0.875rem] justify-center p-0 text-[8px] font-black border-2 border-background animate-in zoom-in-50 rounded-full shadow-sm">
                 {unreadCount}
             </Badge>
           )}
@@ -85,7 +102,7 @@ export function NotificationDropdown() {
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-[360px] mt-2 rounded-2xl shadow-2xl border-border/40 p-0 overflow-hidden bg-background/95 backdrop-blur-2xl">
         <header className="px-5 py-4 border-b border-border/40 bg-muted/5 flex items-center justify-between relative overflow-hidden">
-          {/* Dot-grid atmosphere — aligned with global suite aesthetic */}
+          {/* Dot-grid atmosphere — Standardized Workspace Alignment (28px) */}
           <div
                 className="absolute inset-0 opacity-[0.02] dark:opacity-[0.04] pointer-events-none"
                 style={{
@@ -93,11 +110,11 @@ export function NotificationDropdown() {
                     backgroundSize: '28px 28px',
                 }}
             />
-          <div className="flex items-center gap-2 relative z-10">
-            <h3 className="text-[10px] font-black uppercase tracking-[0.25em] text-muted-foreground/70">Notifications</h3>
+          <div className="flex items-center gap-2.5 relative z-10">
+            <h3 className="text-[10px] font-black uppercase tracking-[0.25em] text-muted-foreground/70">Signal Hub</h3>
             {unreadCount > 0 && (
-                <Badge variant="secondary" className="h-4 text-[8px] px-1.5 font-black border-none bg-primary/10 text-primary uppercase tracking-widest">
-                    {unreadCount} New
+                <Badge variant="secondary" className="h-4 text-[8px] px-1.5 font-black border-none bg-primary/10 text-primary uppercase tracking-widest tabular-nums">
+                    {unreadCount} UNREAD
                 </Badge>
             )}
           </div>
@@ -107,19 +124,19 @@ export function NotificationDropdown() {
                     <BatchNotificationDialog />
                 </div>
             )}
-            {notifications && (notifications as any[]).length > 0 && (
+            {safeNotifications.length > 0 && (
                 <Button variant="ghost" size="sm" onClick={handleClearAll} className="h-7 px-2 text-[9px] font-black uppercase tracking-[0.18em] hover:text-destructive hover:bg-destructive/5 transition-colors">
                     <Trash2 className="mr-1.5 h-3 w-3" />
-                    Clear
+                    Clear Matrix
                 </Button>
             )}
           </div>
         </header>
 
         <ScrollArea className="h-auto max-h-[450px]">
-          {notifications && notifications.length > 0 ? (
+          {safeNotifications.length > 0 ? (
             <div className="p-2 space-y-1">
-                {(notifications as any[]).map((notification: any) => (
+                {safeNotifications.map((notification) => (
                 <DropdownMenuItem 
                     key={notification.id} 
                     className="flex flex-col items-stretch p-3 rounded-xl cursor-pointer transition-all border border-transparent hover:border-primary/10 hover:bg-primary/[0.03] focus:bg-primary/[0.03] focus:border-primary/10" 
@@ -139,22 +156,22 @@ export function NotificationDropdown() {
                     </div>
                     <div className="flex-1 min-w-0 space-y-1">
                         <div className="flex items-center justify-between">
-                            <p className={cn("text-xs tracking-tight transition-colors", notification.isRead ? "font-medium text-muted-foreground" : "font-black text-foreground")}>
+                            <p className={cn("text-xs tracking-tight transition-colors truncate pr-2", notification.isRead ? "font-medium text-muted-foreground" : "font-black text-foreground")}>
                                 {notification.title}
                             </p>
                             {notification.createdAt && (
-                                <span className="text-[9px] font-black text-muted-foreground/30 uppercase tracking-tighter">
+                                <span className="text-[9px] font-black text-muted-foreground/30 uppercase tracking-tighter tabular-nums shrink-0">
                                     {(() => {
                                     try {
                                         return formatDistanceToNow(new Date(notification.createdAt), { addSuffix: true });
                                     } catch (e) {
-                                        return 'Recent';
+                                        return 'SYNCED';
                                     }
                                     })()}
                                 </span>
                             )}
                         </div>
-                        <p className="text-[11px] text-muted-foreground/70 italic leading-relaxed line-clamp-2">{notification.description}</p>
+                        <p className="text-[11px] text-muted-foreground/70 italic leading-relaxed line-clamp-2 font-medium">{notification.description}</p>
                     </div>
                     </div>
                 </DropdownMenuItem>
@@ -162,21 +179,22 @@ export function NotificationDropdown() {
             </div>
           ) : (
             <div className="flex flex-col items-center justify-center py-20 text-center space-y-5">
-                <div className="h-16 w-16 rounded-[24px] border border-dashed border-primary/20 bg-muted/5 flex items-center justify-center shadow-inner">
-                    <Bell className="h-7 w-7 text-primary/30" />
+                <div className="h-16 w-16 rounded-[24px] border border-dashed border-primary/20 bg-muted/5 flex items-center justify-center shadow-inner group/empty">
+                    <Bell className="h-7 w-7 text-primary/30 group-hover/empty:scale-110 transition-transform duration-500" />
                 </div>
                 <div className="space-y-1.5 px-10">
-                    <h3 className="text-[10px] font-black uppercase tracking-[0.25em] text-muted-foreground/60">No Notifications</h3>
-                    <p className="text-[10px] italic text-muted-foreground/40 leading-relaxed">Your signal center is currently clear.</p>
+                    <h3 className="text-[10px] font-black uppercase tracking-[0.25em] text-muted-foreground/60">Zero Signal Match</h3>
+                    <p className="text-[10px] italic text-muted-foreground/40 leading-relaxed font-medium">System telemetry center is currently clear.</p>
                 </div>
             </div>
           )}
         </ScrollArea>
         
-        <footer className="px-5 py-3.5 border-t border-border/40 bg-muted/5">
-            <p className="text-[8px] text-center text-muted-foreground/30 font-black uppercase tracking-[0.25em] leading-none">
-                End of Transmission
+        <footer className="px-5 py-3.5 border-t border-border/40 bg-muted/5 flex items-center justify-between">
+            <p className="text-[8px] text-muted-foreground/30 font-black uppercase tracking-[0.25em] leading-none">
+                Telemetry Manifest
             </p>
+            <span className="text-[8px] font-bold text-muted-foreground/20 tabular-nums uppercase tracking-widest">V2.4.0-STABLE</span>
         </footer>
       </DropdownMenuContent>
     </DropdownMenu>

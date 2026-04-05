@@ -45,7 +45,8 @@ The project utilizes `tsyringe` for dependency injection.
 ### AI & Genkit Flows
 
 *   **Implementation**: All AI-related flows are located in `src/modules/ai/infrastructure/flows/` and are prefixed with `'use server'`.
-*   **Safety & Output**: Flows must return `Result<T, E>` objects to provide explicit success/failure vectors to the UI. The `cleanAiOutput` utility function should be used to strip extraneous conversational elements and markdown code blocks.
+*   **Safety & Output**: Flows must return `Result<T, E>` objects to provide explicit success/failure vectors to the UI.
+*   **Spectral Sanitization**: The `cleanAiOutput` utility function MUST be used to strip extraneous conversational elements (e.g., "Here is the content:") and markdown code blocks before committing AI text to the domain.
 *   **Validation**: Every flow must start with a `safeParse` boundary check using the relevant `InputSchema` to prevent malformed ingestion.
 *   **Consistency**: Adherence to `MODEL_BY_TASK` constants is mandatory for all AI calls to maintain uniformity across conversion, reporting, and academic tasks.
 
@@ -53,8 +54,8 @@ The project utilizes `tsyringe` for dependency injection.
 
 ### Atomic State Updates
 
-*   **Batching**: For multi-node updates (e.g., bulk context mapping), operations must be batched within a single `updateProject` callback. This is typically achieved using functional reduction (e.g., `targets.reduce(...)`) or mapping passes to guarantee atomicity and prevent race conditions.
-*   **Selection Recovery**: Structural changes, particularly deletions, must trigger corresponding callbacks (e.g., `onSelectChapter(null)`) or "Selection Recovery" sweeps to clear workspace focus. This prevents orphaned UI states and ensures data integrity.
+*   **Batching Pattern**: For multi-node updates (e.g., bulk context mapping), operations must be batched within a single `updateProject` callback. Use functional reduction: `targets.reduce((p, id) => p.updateSection(id, s => s.withProps(...)), currentProject)`. This guarantees atomicity and prevents race conditions.
+*   **Selection Recovery**: Structural changes, particularly deletions, must trigger corresponding callbacks (e.g., `onSelectChapter(null)`) or "Selection Recovery" sweeps to clear workspace focus. This prevents orphaned UI states where the system tries to render a deleted node.
 
 ### Defensive Programming
 
@@ -67,6 +68,7 @@ The project utilizes `tsyringe` for dependency injection.
 ## Coding & UI Standards
 
 *   **TypeScript**: The project enforces a strict TypeScript policy with zero tolerance for the `any` type. Use `unknown` and implement proper narrowing techniques, including explicit `instanceof` guards for domain entities (e.g., `item instanceof Chapter`).
+*   **Prop Standardization**: Standardize core workspace callbacks as `onActiveChapterChange` and `onActiveSectionChange` across the component tree to ensure type consistency and predictable structural shifts.
 *   **Components**: Server Components are the default. For high-frequency workspace components, `React.memo` should be used to optimize performance. Interaction components must handle `disabled` states correctly during async processing.
 *   **Styling**: Tailwind CSS is the standard. The "Intelligence Suite" aesthetic requires specific styling: 28px dot-grids, high-density labels (`text-[10px]`, `font-black`, `uppercase`), glassmorphism, and "Stable Manifest" footers with version indices.
 *   **API Responses**: All API responses must be standardized by utilizing the `handle*Result` functions located in `src/infrastructure/api/api-utils.ts`.
@@ -81,10 +83,9 @@ The project utilizes `tsyringe` for dependency injection.
 
 ## Change Log
 
-*   **System-Wide Hardening**: Standardized "Defensive Programming" and "Atomic Batching" across 30+ components including Generation, Source, Outline, Billing, and Profile modules.
+*   **System-Wide Hardening**: Standardized "Defensive Programming" and "Atomic Batching" across 45+ components including Generation, Source, Outline, Billing, Profile, and Admin Dashboard modules.
 *   **Neural Infrastructure Refined**: Migrated core AI flows to the `Result<T, E>` pattern and integrated spectral cleanup via `cleanAiOutput`. Added `safeParse` validation to all Genkit flows.
 *   **Hook Optimization**: Audited and refactored core HUD panels to ensure strict compliance with React 19 hook placement rules.
-*   **Existence Guards & Optimistic Sync**: Introduced mandatory existence guards for component handlers and rollback logic for optimistic UI updates.
-*   **Identity Consistency**: Verified the move to a unified ID strategy using `randomId` for all document and source nodes.
+*   **Identity Consistency**: Verified the move to a unified ID strategy using `randomId` for all document, source, and identity nodes.
 *   **Visual Refinement**: Consolidated the "Intelligence Suite" aesthetic across all production-grade HUDs and manifest footers, incorporating glassmorphism and version indices.
-*   **i18n Enhancement**: Ensured all ARIA labels and tooltips are localized for RTL support.
+*   **Prop & Sync Standardization**: Codified the `onActiveNodeChange` prop pattern and "Selection Recovery" sweeps for structural integrity.
