@@ -58,15 +58,15 @@ export function FileNodeItem({
 
     return (
         <div className={cn(
-            "group/item relative p-3.5 rounded-2xl border border-border/40 bg-card/40 transition-all duration-300 hover:translate-x-0.5 hover:border-primary/20 hover:bg-muted/5 shadow-sm",
+            "group/item relative p-3.5 rounded-2xl border border-primary/5 bg-muted/[0.03] transition-all duration-300 hover:border-primary/20 hover:bg-muted/5",
             className
         )}>
             <div className="flex flex-col gap-3">
                 {/* Identity Header */}
                 <div className="flex items-start justify-between gap-3">
                     <div className="flex items-center gap-3 min-w-0">
-                        <div className="h-9 w-9 rounded-xl bg-primary/5 border border-primary/10 flex items-center justify-center shrink-0 group-hover/item:border-primary/30 transition-colors shadow-inner">
-                            <FileText className="h-4.5 w-4.5 text-primary/60 group-hover/item:text-primary transition-all group-hover/item:scale-110" />
+                        <div className="h-9 w-9 rounded-xl bg-primary/5 border border-primary/10 flex items-center justify-center shrink-0 group-hover/item:border-primary/20 transition-colors">
+                            <FileText className="h-4.5 w-4.5 text-primary/40 group-hover/item:text-primary/70 transition-all group-hover/item:scale-110" />
                         </div>
                         <div className="min-w-0">
                             <h4 className="text-[12px] font-bold text-foreground/90 truncate uppercase tracking-tight">
@@ -74,7 +74,7 @@ export function FileNodeItem({
                             </h4>
                             <div className="flex items-center gap-2 mt-0.5">
                                 <div className="flex items-center gap-1 opacity-40">
-                                    <div className="h-1 w-1 rounded-full bg-green-500 shadow-[0_0_6px_rgba(34,197,94,0.4)]" />
+                                    <div className="h-1 w-1 rounded-full bg-green-500" />
                                     <span className="text-[8px] font-black uppercase tracking-widest tabular-nums">{stats.sizeInKb} KB</span>
                                 </div>
                                 <span className="text-[8px] text-muted-foreground/30 font-black">•</span>
@@ -83,7 +83,7 @@ export function FileNodeItem({
                         </div>
                     </div>
 
-                    <div className="flex items-center gap-1 opacity-0 group-hover/item:opacity-100 transition-opacity">
+                    <div className="flex items-center gap-1 lg:opacity-0 group-hover/item:opacity-100 transition-opacity">
                         {onView && (
                             <Button 
                                 variant="ghost" 

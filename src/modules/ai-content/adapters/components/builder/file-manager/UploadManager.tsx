@@ -193,7 +193,7 @@ export function UploadManager() {
         return (
             <SidebarContainer title="Context Dashboard" icon={<LayoutGrid className="h-3.5 w-3.5" />}>
                 <div className="flex flex-col items-center justify-center h-64 text-center space-y-4 opacity-40">
-                    <div className="p-5 rounded-[24px] bg-primary/5 border border-primary/10 shadow-inner">
+                    <div className="p-5 rounded-[24px] bg-primary/5 border border-primary/10">
                         <ShieldAlert className="h-8 w-8 text-primary/40" />
                     </div>
                     <div className="space-y-1.5 px-6">
@@ -213,11 +213,11 @@ export function UploadManager() {
             icon={<LayoutGrid className="h-3.5 w-3.5" />}
         >
             <Tabs defaultValue="files" className="w-full flex flex-col gap-8 pt-2 animate-in fade-in slide-in-from-right-4 duration-500">
-                <TabsList className="grid w-full grid-cols-2 h-11 rounded-2xl bg-muted/20 p-1 gap-1 border border-border/40 backdrop-blur-md">
-                    <TabsTrigger value="files" className="text-[10px] font-black uppercase tracking-[0.15em] data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:shadow-lg px-2 transition-all rounded-xl">
+                <TabsList className="flex flex-wrap sm:grid sm:grid-cols-2 w-full h-auto sm:h-11 rounded-2xl bg-muted/20 p-1 gap-1 border border-border/40">
+                    <TabsTrigger value="files" className="flex-1 text-[10px] font-black uppercase tracking-[0.15em] data-[state=active]:bg-background data-[state=active]:text-primary px-2 py-2 sm:py-0 transition-all rounded-xl">
                         Source Core
                     </TabsTrigger>
-                    <TabsTrigger value="analyst" className="gap-2 text-[10px] font-black uppercase tracking-[0.15em] data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:shadow-lg px-2 transition-all rounded-xl">
+                    <TabsTrigger value="analyst" className="flex-1 gap-2 text-[10px] font-black uppercase tracking-[0.15em] data-[state=active]:bg-background data-[state=active]:text-primary px-2 py-2 sm:py-0 transition-all rounded-xl">
                         <AtomIcon className="h-3.5 w-3.5 shrink-0" />
                         Analyst
                     </TabsTrigger>
@@ -237,7 +237,7 @@ export function UploadManager() {
 
                             <TabsContent value="upload" className="mt-5 m-0 focus-visible:ring-0">
                                 <div {...getRootProps()} className={cn(
-                                    "border-2 border-dashed rounded-3xl p-8 text-center cursor-pointer transition-all duration-500 group bg-muted/5 shadow-inner relative overflow-hidden",
+                                    "border-2 border-dashed rounded-3xl p-8 text-center cursor-pointer transition-all duration-500 group bg-muted/5 relative overflow-hidden",
                                     isDragActive ? "border-primary bg-primary/[0.03] ring-4 ring-primary/5" : "border-primary/10 hover:border-primary/30 hover:bg-muted/8"
                                 )}>
                                     <input {...getInputProps()} />
@@ -353,7 +353,7 @@ export function UploadManager() {
 
                                 {filteredContext.length === 0 && (
                                     <div className="flex flex-col items-center justify-center py-16 text-center space-y-4 opacity-30">
-                                        <div className="p-5 rounded-full bg-muted/20 border border-dashed border-muted-foreground/40 shadow-inner">
+                                        <div className="p-5 rounded-full bg-muted/20 border border-dashed border-muted-foreground/40">
                                             <Database className="h-10 w-10 text-muted-foreground stroke-[1]" />
                                         </div>
                                         <p className="text-[10px] font-black uppercase tracking-[0.2em] px-10 leading-relaxed">No Intel Vectors Found</p>
@@ -376,9 +376,9 @@ export function UploadManager() {
             />
 
             {/* Stable Version Footer */}
-            <div className="absolute bottom-0 left-0 right-0 px-6 py-3 border-t border-primary/10 bg-background/40 backdrop-blur-xl flex items-center justify-between">
+            <div className="absolute bottom-0 left-0 right-0 px-6 py-3 border-t border-primary/10 bg-background flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                    <div className="h-1 w-1 rounded-full bg-primary/30 shadow-[0_0_8px_rgba(var(--primary),0.3)]" />
+                    <div className="h-1 w-1 rounded-full bg-primary/30" />
                     <span className="text-[8px] font-black uppercase tracking-widest text-muted-foreground/40">Context Dashboard</span>
                 </div>
                 <span className="text-[8px] font-bold text-muted-foreground/20 tabular-nums">v2.2.0-STABLE</span>

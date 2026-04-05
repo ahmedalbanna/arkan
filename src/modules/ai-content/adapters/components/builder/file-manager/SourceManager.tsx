@@ -213,7 +213,7 @@ export function SourceManager() {
     if (!project) {
         return (
             <div className="flex flex-col items-center justify-center h-64 text-center space-y-4 opacity-40">
-                <div className="p-5 rounded-[24px] bg-primary/5 border border-primary/10 shadow-inner">
+                <div className="p-5 rounded-[24px] bg-primary/5 border border-primary/10">
                     <Database className="h-8 w-8 text-primary/40" />
                 </div>
                 <div className="space-y-1.5 px-6">
@@ -239,7 +239,7 @@ export function SourceManager() {
             </div>
 
             {/* Quick Ingestion Hub */}
-            <div className="grid grid-cols-2 gap-2.5">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                 <div {...getRootProps()}>
                     <input {...getInputProps()} />
                     <Button
@@ -283,7 +283,7 @@ export function SourceManager() {
                                     <SelectTrigger className="h-6 w-auto min-w-[90px] border-none bg-primary/5 hover:bg-primary/10 text-[8px] font-black uppercase tracking-widest text-primary/60 transition-all px-2 rounded-lg focus:ring-0">
                                         <SelectValue />
                                     </SelectTrigger>
-                                    <SelectContent className="rounded-xl border-primary/10 shadow-2xl backdrop-blur-3xl">
+                                    <SelectContent className="rounded-xl border-primary/10 bg-background">
                                         {FILE_TYPES.map(t => (
                                             <SelectItem key={t} value={t} className="text-[9px] font-black uppercase tracking-widest py-2">
                                                 {t}
@@ -308,9 +308,9 @@ export function SourceManager() {
             </div>
 
             {/* Stable Environment Footer */}
-            <div className="absolute bottom-0 left-0 right-0 px-6 py-3 border-t border-primary/10 bg-background/40 backdrop-blur-xl flex items-center justify-between">
+            <div className="absolute bottom-0 left-0 right-0 px-6 py-3 border-t border-primary/10 bg-background flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                    <div className="h-1 w-1 rounded-full bg-primary/30 shadow-[0_0_8px_rgba(var(--primary),0.3)]" />
+                    <div className="h-1 w-1 rounded-full bg-primary/30" />
                     <span className="text-[8px] font-black uppercase tracking-widest text-muted-foreground/40">Vector Control</span>
                 </div>
                 <span className="text-[8px] font-bold text-muted-foreground/20 tabular-nums">v1.1.0-STABLE</span>

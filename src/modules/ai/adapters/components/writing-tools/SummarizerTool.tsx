@@ -18,7 +18,8 @@ import {
     Layers,
     ShieldCheck,
     Zap,
-    AlertCircle
+    AlertCircle,
+    Plus
 } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';

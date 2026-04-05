@@ -222,9 +222,8 @@ export function IntelligenceAnalyst() {
                     )}
                 </div>
 
-                <div className="flex-1 relative group">
-                    <div className="absolute -inset-1 bg-gradient-to-br from-primary/10 to-transparent rounded-[28px] blur opacity-40" />
-                    <ScrollArea className="absolute inset-0 rounded-[24px] border border-primary/10 bg-black/5 dark:bg-white/[0.02] shadow-inner p-6 custom-scrollbar relative z-10">
+                <div className="flex-1 relative">
+                    <ScrollArea className="absolute inset-0 rounded-[24px] border border-primary/10 bg-muted/5 p-6 custom-scrollbar relative z-10">
                         {result ? (
                             <div className="animate-in fade-in zoom-in-95 duration-700">
                                 <ReactJson
@@ -239,7 +238,7 @@ export function IntelligenceAnalyst() {
                             </div>
                         ) : (
                             <div className="flex flex-col items-center justify-center h-full text-center space-y-4 opacity-30">
-                                <div className="p-5 rounded-full bg-muted/20 border border-dashed border-muted-foreground/40 shadow-inner">
+                                <div className="p-5 rounded-full bg-muted/20 border border-dashed border-muted-foreground/40">
                                     <FileJson className="h-8 w-8 text-muted-foreground stroke-[1]" />
                                 </div>
                                 <div className="space-y-1">
@@ -252,7 +251,7 @@ export function IntelligenceAnalyst() {
                 </div>
             </div>
 
-            <div className="p-5 rounded-[24px] border border-dashed border-primary/10 bg-primary/[0.02] text-center space-y-2 group/info hover:bg-primary/[0.04] transition-all">
+            <div className="p-5 rounded-[24px] border border-primary/10 bg-muted/5 text-center space-y-2 group/info hover:bg-muted/10 transition-all">
                 <p className="text-[9px] text-primary/40 italic leading-relaxed font-medium uppercase tracking-widest group-hover:text-primary/60 transition-colors px-4">
                     Neural Analyst uses structural inference to identify critical data patterns within the Source Matrix.
                 </p>

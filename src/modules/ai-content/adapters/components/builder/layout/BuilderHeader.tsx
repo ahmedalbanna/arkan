@@ -65,7 +65,7 @@ export const BuilderHeader = React.forwardRef<HTMLDivElement, BuilderHeaderProps
         <header
             ref={ref}
             className={cn(
-                "h-16 flex items-center justify-between gap-8 px-6 bg-background/40 backdrop-blur-3xl border border-primary/10 shadow-2xl transition-all duration-700 ease-[0.22,1,0.36,1] relative overflow-hidden pointer-events-auto",
+                "h-16 flex items-center justify-between gap-8 px-6 bg-background border-b border-primary/10 transition-all duration-700 ease-[0.22,1,0.36,1] relative overflow-hidden pointer-events-auto",
                 className
             )}
         >
@@ -78,15 +78,12 @@ export const BuilderHeader = React.forwardRef<HTMLDivElement, BuilderHeaderProps
                 }}
             />
 
-            {/* Inner highlights for premium glass feel */}
-            <div className="absolute inset-0 pointer-events-none ring-1 ring-inset ring-white/10 dark:ring-white/5 rounded-[inherit]" />
-
             {/* Left — brand + project identity */}
             <div className="flex items-center gap-4 relative z-10 min-w-0">
                 {/* Logo HUD */}
-                <div className="h-9 w-9 bg-primary/10 rounded-xl flex items-center justify-center border border-primary/20 shadow-[inset_0_0_12px_rgba(var(--primary),0.1)] group/logo overflow-hidden relative transition-all duration-500 hover:border-primary/30 shrink-0">
-                    <div className="absolute inset-0 bg-gradient-to-br from-primary/10 to-transparent opacity-0 group-hover/logo:opacity-100 transition-opacity duration-500" />
-                    <BookOpenText className="h-4.5 w-4.5 text-primary relative z-10 transition-transform duration-500 group-hover/logo:scale-110" />
+                <div className="h-9 w-9 bg-primary/5 rounded-xl flex items-center justify-center border border-primary/10 group/logo overflow-hidden relative transition-all duration-500 hover:border-primary/30 shrink-0">
+                    <div className="absolute inset-0 bg-primary/[0.02] opacity-0 group-hover/logo:opacity-100 transition-opacity duration-500" />
+                    <BookOpenText className="h-4.5 w-4.5 text-primary/60 relative z-10 transition-transform duration-500 group-hover/logo:scale-110" />
                 </div>
 
                 {/* Project name + metadata */}
@@ -111,7 +108,7 @@ export const BuilderHeader = React.forwardRef<HTMLDivElement, BuilderHeaderProps
                             v2.4
                         </Badge>
                         <div className="flex items-center gap-1 opacity-40">
-                            <div className="h-1 w-1 bg-green-500 rounded-full animate-pulse shadow-[0_0_8px_rgba(34,197,94,0.4)]" />
+                            <div className="h-1 w-1 bg-green-500 rounded-full animate-pulse" />
                             <span className="text-[8px] font-black uppercase tracking-[0.18em] text-muted-foreground">Active Hub</span>
                         </div>
                     </div>
@@ -121,8 +118,8 @@ export const BuilderHeader = React.forwardRef<HTMLDivElement, BuilderHeaderProps
             {/* Right — session actions */}
             <div className="flex items-center gap-3 relative z-10 shrink-0">
                 <TooltipProvider delayDuration={200}>
-                    {/* Action pill — a nested floating-style container */}
-                    <div className="flex items-center gap-1 bg-background/20 backdrop-blur-md p-1 rounded-2xl border border-white/10 shadow-inner shadow-black/5 dark:shadow-white/5 transition-all duration-500 hover:border-primary/15">
+                    {/* Action pill — a nested flat container */}
+                    <div className="flex items-center gap-1 bg-muted/5 p-1 rounded-2xl border border-primary/5 transition-all duration-500 hover:border-primary/15">
                         <input
                             type="file"
                             ref={fileInputRef}
@@ -182,7 +179,7 @@ export const BuilderHeader = React.forwardRef<HTMLDivElement, BuilderHeaderProps
                                     className={cn(
                                         "h-8 px-4 gap-2 text-[9px] font-black uppercase tracking-[0.22em] transition-all duration-500 rounded-xl",
                                         hasUnsavedChanges && !isSaving
-                                            ? "shadow-[0_0_24px_rgba(var(--primary),0.3)] bg-primary hover:bg-primary/90 hover:scale-[1.03] active:scale-[0.98] ring-1 ring-inset ring-white/20"
+                                            ? "bg-primary text-primary-foreground hover:bg-primary/90 hover:scale-[1.03] active:scale-[0.98]"
                                             : "hover:bg-primary/10 hover:text-primary opacity-50 hover:opacity-100 text-muted-foreground"
                                     )}
                                 >
@@ -192,7 +189,7 @@ export const BuilderHeader = React.forwardRef<HTMLDivElement, BuilderHeaderProps
                                         <div className="relative shrink-0">
                                             <Save className="h-4 w-4" />
                                             {hasUnsavedChanges && !isSaving && (
-                                                <div className="absolute -top-1.5 -right-1.5 h-2 w-2 bg-white rounded-full animate-ping shadow-[0_0_8px_rgba(255,255,255,0.8)]" />
+                                                <div className="absolute -top-1.5 -right-1.5 h-2 w-2 bg-primary rounded-full animate-pulse" />
                                             )}
                                         </div>
                                     )}

@@ -3,10 +3,16 @@
 import React from 'react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { cn } from '@/infrastructure/utils/cn';
+import { Binary } from 'lucide-react';
 
 /**
  * SidebarContainer — A modular high-fidelity wrapper for sidebar panels.
  * Implements glassmorphism, technical headers, and atmospheric backgrounds.
+ * 
+ * DEFENSIVE MEASURES:
+ * 1. Visual Fidelity: 28px dot-grids and high-density technical labels.
+ * 2. Layout Resilience: Handles varied content volumes with standardized scroll areas.
+ * 3. Atmospheric Detail: Tactical accent lines and premium lighting gradients.
  */
 
 interface SidebarContainerProps {
@@ -28,7 +34,7 @@ export const SidebarContainer = ({
 }: SidebarContainerProps) => {
     return (
         <div className={cn(
-            "flex flex-col h-full bg-background/40 backdrop-blur-3xl relative overflow-hidden",
+            "flex flex-col h-full bg-background relative overflow-hidden",
             className
         )}>
             {/* Dot-grid atmosphere — Standardized Workspace Alignment (28px) */}
@@ -40,11 +46,8 @@ export const SidebarContainer = ({
                 }}
             />
 
-            {/* Inner premium highlights */}
-            <div className="absolute inset-0 pointer-events-none ring-1 ring-inset ring-white/10 dark:ring-white/5 rounded-none" />
-
             {/* Sticky Technical Header — Intelligence Suite standard */}
-            <header className="h-12 shrink-0 px-5 flex items-center justify-between border-b border-primary/10 bg-background/50 backdrop-blur-2xl relative z-20 overflow-hidden group/header transition-all duration-500">
+            <header className="h-12 shrink-0 px-5 flex items-center justify-between border-b border-primary/10 bg-background relative z-20 overflow-hidden group/header transition-all duration-500">
                 {/* Tactical left accent line */}
                 <div className="absolute left-0 inset-y-2.5 w-[2.5px] rounded-full bg-primary/30 group-hover/header:bg-primary/60 transition-all duration-500" aria-hidden />
 
@@ -72,15 +75,13 @@ export const SidebarContainer = ({
                     {children}
                 </div>
             ) : (
-                <ScrollArea className="flex-1 min-h-0 relative z-10">
-                    <div className="p-5 flex flex-col gap-6 pb-20">
+                <ScrollArea className="flex-1 min-h-0 relative z-10 custom-scrollbar">
+                    <div className="p-5 flex flex-col gap-6 pb-24 w-max min-w-full">
                         {children}
                     </div>
                 </ScrollArea>
             )}
 
-            {/* Bottom ambient fade */}
-            <div className="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-background/60 to-transparent pointer-events-none z-20" />
-        </div>
+            </div>
     );
 };

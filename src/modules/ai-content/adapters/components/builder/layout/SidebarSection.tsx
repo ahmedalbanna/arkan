@@ -2,12 +2,17 @@
 
 import React, { useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
-import { ChevronRight, MoreHorizontal } from 'lucide-react';
+import { ChevronRight, MoreHorizontal, Binary } from 'lucide-react';
 import { cn } from '@/infrastructure/utils/cn';
 
 /**
  * SidebarSection — A reusable collapsible grouping for side panels.
- * Features a high-density VSCode-style technical header and animated expansion.
+ * Features a high-density technical header and animated expansion.
+ * 
+ * DEFENSIVE MEASURES:
+ * 1. Motion Orchestration: Smooth height transitions using Framer Motion.
+ * 2. Visual Fidelity: High-density labels and architectural accent lines.
+ * 3. Atomic Interaction: Guarded toggle logic with keyboard support.
  */
 
 interface SidebarSectionProps {
@@ -33,8 +38,9 @@ export function SidebarSection({
       <button
         type="button"
         onClick={() => setIsOpen(prev => !prev)}
+        onKeyDown={(e) => e.key === 'Enter' && setIsOpen(prev => !prev)}
         className={cn(
-          'flex w-full items-center gap-2 px-3 py-2 text-start transition-all duration-300',
+          'flex w-full items-center gap-2 px-3 py-2.5 text-start transition-all duration-300',
           'border-b border-primary/10 bg-primary/[0.02] hover:bg-primary/[0.05]',
           'focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary/30 group/section'
         )}
@@ -51,13 +57,13 @@ export function SidebarSection({
           {title}
         </span>
 
-        {/* Action HUD */}
+        {/* Action HUD / Status */}
         {actions ? (
-            <div className="flex items-center gap-1 shrink-0">
+            <div className="flex items-center gap-1 shrink-0 relative z-10">
                 {actions}
             </div>
         ) : (
-            <MoreHorizontal className="h-3 w-3 text-muted-foreground/20 group-hover/section:text-primary/30 transition-colors" />
+            <Binary className="h-2.5 w-2.5 text-muted-foreground/10 group-hover/section:text-primary/20 transition-colors" />
         )}
       </button>
 
@@ -72,9 +78,9 @@ export function SidebarSection({
             transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
             className="overflow-hidden"
           >
-            <div className="p-4 flex flex-col gap-4 relative">
+            <div className="p-5 flex flex-col gap-5 relative">
               {/* Subtle vertical architectural line */}
-              <div className="absolute left-3.5 inset-y-0 w-px bg-primary/[0.03]" aria-hidden />
+              <div className="absolute left-3.5 inset-y-0 w-[1.5px] rounded-full bg-primary/5" aria-hidden />
               
               <div className="relative z-10">
                 {children}
