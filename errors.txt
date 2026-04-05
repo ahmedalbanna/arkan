@@ -1,30 +1,21 @@
-[Converter:PPTX] Critical generation crash: ReferenceError: document is not defined
-    at getCanvasContext (src/modules/templates/infrastructure/exporters/pptx/text-measurement.ts:29:19)
-    at calculateLineCount (src/modules/templates/infrastructure/exporters/pptx/text-measurement.ts:55:18)
-    at splitRunsByHeight (src/modules/templates/infrastructure/exporters/pptx/slide-layout-engine.ts:371:37)
-    at processParagraphNode (src/modules/templates/infrastructure/exporters/pptx/slide-layout-engine.ts:514:9)
-    at async renderContentGroup (src/modules/templates/infrastructure/exporters/pptx/slide-layout-engine.ts:744:16)
-    at async createSlidesWithContent (src/modules/templates/infrastructure/exporters/pptx/slide-layout-engine.ts:809:28)
-    at async convertMarkdownToPptx (.next/server/chunks/src_modules_4d080e6b._.js:5836:9)
-    at async PptxExportService.export (src/modules/ai-content/infrastructure/exporters/PptxExportService.ts:56:28)
-    at async Proxy.execute (src/modules/ai-content/application/use-cases/ExportProjectUseCase.ts:42:32)
-    at async POST (src/app/api/export/pptx/route.ts:29:20)
-  27 |     const heuristic: MeasurableContext = {
-  28 |         measureText: (text: string) => {
-> 29 |             const length = text ? String(text).length : 0;
-     |                   ^
-  30 |             const hasArabic = /[\u0600-\u06FF]/.test(text || '');
-  31 |             const multiplier = hasArabic ? 0.7 : 0.55;
-  32 |             return { width: length * fontSize * multiplier };
-[Export:PPTX] Slide synthesis pipeline failure: Error: Slide synthesis pipeline halted: document is not defined
-    at convertMarkdownToPptx (src/modules/templates/infrastructure/exporters/pptx/markdown-to-pptx-converter.ts:145:5)
-    at async PptxExportService.export (src/modules/ai-content/infrastructure/exporters/PptxExportService.ts:56:28)
-    at async Proxy.execute (src/modules/ai-content/application/use-cases/ExportProjectUseCase.ts:42:32)
-    at async POST (src/app/api/export/pptx/route.ts:29:20)
-  143 |         console.error('[Converter:PPTX] Critical generation crash:', error);
-  144 |         throw new Error(`Slide synthesis pipeline halted: ${error instanceof Error ? error.message : 'Unknown neural error'}`);
-> 145 |     }
-      |     ^
-  146 | }
-  147 |
- POST /api/export/pptx 500 in 849ms
+## Error Type
+Runtime Error
+
+## Error Message
+React.Children.only expected to receive a single React element child.
+
+
+    at _c (src/components/ui/button.tsx:46:7)
+    at HomePageContent (src/components/home/HomePageContent.tsx:153:25)
+    at Home (src/app/page.tsx:6:9)
+
+## Code Frame
+  44 |     const Comp = asChild ? Slot : "button"
+  45 |     return (
+> 46 |       <Comp
+     |       ^
+  47 |         className={cn(buttonVariants({ variant, size, className }))}
+  48 |         ref={ref}
+  49 |         {...props}
+
+Next.js version: 15.5.9 (Turbopack)
