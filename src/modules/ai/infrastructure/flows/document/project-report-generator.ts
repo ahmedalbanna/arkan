@@ -1,11 +1,6 @@
-/**
- * @fileOverview Project Report Generator Flow
- *
- * Generates comprehensive project status reports with metrics,
- * achievements, challenges, and recommendations.
- */
+'use server';
 
-import { ai, OLLAMA_MODELS } from '@/modules/ai/infrastructure/services/Genkit';
+import { ai, OLLAMA_MODELS, MODEL_BY_TASK } from '@/modules/ai/infrastructure/services/Genkit';
 import { projectReportPrompt } from '@/modules/ai/infrastructure/prompts/project-documentation';
 import {
     ProjectReportSchema,
@@ -17,8 +12,20 @@ import {
     createProgressTimelineTool,
     generateStatusReportTool,
 } from '@/modules/ai/infrastructure/tools/reporting-and-metrics';
-import {z} from 'zod';
-// ==================== INPUT/OUTPUT SCHEMAS ====================
+import { z } from 'zod';
+import { Result } from '@/infrastructure/utils/result';
+import { cleanAiOutput } from '@/infrastructure/utils/sanitizer';
+
+/**
+ * projectReportGenerator — High-fidelity document orchestration for project status reports.
+ * Sequentially invokes analytical tools to synthesize achievements, metrics, and roadmap status.
+ * 
+ * DEFENSIVE MEASURES:
+ * 1. Tool Resilience: Wraps multi-step tool invocations in try-catch containment.
+ * 2. Schema Guard: Enforces strict input validation for reporting periods and pathing.
+ * 3. Sanitization: Post-processes final report markdown to ensure stylistic purity.
+ * 4. Observability: Structured logging for production lifecycle tracing.
+ */
 
 const ProjectReportInputSchema = z.object({
     projectPath: z.string().describe('Path to the project'),
@@ -33,13 +40,16 @@ const ProjectReportInputSchema = z.object({
     format: z.enum(['markdown', 'html', 'json']).default('markdown'),
 });
 
+type ProjectReportInput = z.infer<typeof ProjectReportInputSchema>;
+type ProjectReportOutput = z.infer<typeof ProjectReportSchema>;
+
 const projectReportGeneratorFlow = ai.defineFlow(
     {
         name: 'projectReportGenerator',
         inputSchema: ProjectReportInputSchema,
         outputSchema: ProjectReportSchema,
     },
-    async (input: z.infer<typeof ProjectReportInputSchema>) => {
+    async (input: ProjectReportInput) => {
         const {
             projectPath,
             projectName,
@@ -50,76 +60,87 @@ const projectReportGeneratorFlow = ai.defineFlow(
             targetAudience,
         } = input;
 
-        console.log(`📊 Generating ${reportPeriod} report for: ${projectName}`);
+        console.log(`[Flow:ReportGen] Initializing ${reportPeriod} synthesis for: ${projectName}`);
 
-        // Step 1: Calculate project metrics
+        // Step 1: Calculate project metrics — Guarded Execution
         let metrics;
         if (includeMetrics) {
-            console.log('📈 Step 1/4: Calculating project metrics...');
-            metrics = await calculateProjectMetricsTool({
-                projectPath,
-                includeTestCoverage: true,
-                includeQualityMetrics: true,
-            });
+            try {
+                metrics = await calculateProjectMetricsTool({
+                    projectPath,
+                    includeTestCoverage: true,
+                    includeQualityMetrics: true,
+                });
+            } catch (e) {
+                console.warn(`[Flow:ReportGen] Metrics tool failure:`, e);
+            }
         }
 
-        // Step 2: Analyze git history
+        // Step 2: Analyze git history — Guarded Execution
         let gitHistory;
         if (includeGitStats) {
-            console.log('🔍 Step 2/4: Analyzing git history...');
-            gitHistory = await analyzeGitHistoryTool({
-                projectPath,
-                limitCommits: 100,
-                analyzeContributors: true,
-            });
+            try {
+                gitHistory = await analyzeGitHistoryTool({
+                    projectPath,
+                    limitCommits: 100,
+                    analyzeContributors: true,
+                });
+            } catch (e) {
+                console.warn(`[Flow:ReportGen] Git analysis tool failure:`, e);
+            }
         }
 
-        // Step 3: Create progress timeline
+        // Step 3: Create progress timeline — Guarded Execution
         let timeline;
         if (includeTimeline) {
-            console.log('📅 Step 3/4: Creating progress timeline...');
-            timeline = await createProgressTimelineTool({
-                projectPath,
-                format: 'mermaid',
-                granularity: reportPeriod === 'daily' ? 'daily' : reportPeriod === 'weekly' ? 'weekly' : 'monthly',
-                maxEvents: 30,
-            });
+            try {
+                timeline = await createProgressTimelineTool({
+                    projectPath,
+                    format: 'mermaid',
+                    granularity: reportPeriod === 'daily' ? 'daily' : reportPeriod === 'weekly' ? 'weekly' : 'monthly',
+                    maxEvents: 30,
+                });
+            } catch (e) {
+                console.warn(`[Flow:ReportGen] Timeline tool failure:`, e);
+            }
         }
 
-        // Step 4: Generate comprehensive report
-        console.log('📝 Step 4/4: Generating comprehensive report...');
+        // Step 4: Generate status report metadata
+        let statusReport = { executiveSummary: 'System report status pending.' };
+        try {
+            statusReport = await generateStatusReportTool({
+                projectPath,
+                reportPeriod,
+                startDate: input.startDate,
+                endDate: input.endDate,
+                includeRecommendations: true,
+            });
+        } catch (e) {
+            console.warn(`[Flow:ReportGen] Status report tool failure:`, e);
+        }
 
+        // Step 5: Document Synthesis — Neural Integration
         const reportData = {
             projectName,
             reportPeriod,
             metrics: metrics ? {
-                commits: metrics.activity.commitsLastMonth,
-                contributors: metrics.general.activeContributors,
-                linesOfCode: metrics.code.linesOfCode,
-                filesChanged: 0, // Will be calculated from git history
+                commits: metrics.activity?.commitsLastMonth || 0,
+                contributors: metrics.general?.activeContributors || 0,
+                linesOfCode: metrics.code?.linesOfCode || 0,
+                filesChanged: 0,
             } : undefined,
             achievements: gitHistory ? [
-                `${gitHistory.totalCommits} commits made`,
-                `${gitHistory.contributors.length} active contributors`,
-                ...gitHistory.recentCommits.slice(0, 5).map((c: any) => c.message),
+                `${gitHistory.totalCommits || 0} commits identified`,
+                `${gitHistory.contributors?.length || 0} active nodes`,
+                ...(Array.isArray(gitHistory.recentCommits) ? gitHistory.recentCommits.slice(0, 5).map((c: any) => c.message) : []),
             ] : undefined,
             targetAudience,
         };
 
         const reportPromptResult = await projectReportPrompt(reportData);
 
-        // Use the status report tool for additional insights
-        const statusReport = await generateStatusReportTool({
-            projectPath,
-            reportPeriod,
-            startDate: input.startDate,
-            endDate: input.endDate,
-            includeRecommendations: true,
-        });
-
-        // Combine all information
         const fullReport = await ai.generate({
-            model: OLLAMA_MODELS.LLAMA3_8B,
+            model: MODEL_BY_TASK.ACADEMIC, // High-quality reasoning model
             prompt: `Create a comprehensive ${reportPeriod} project report for ${projectName}.
 
 Target Audience: ${targetAudience}
@@ -136,8 +157,8 @@ ${metrics ? JSON.stringify(metrics, null, 2) : 'Not available'}
 Git Statistics:
 ${gitHistory ? `
 - Total Commits: ${gitHistory.totalCommits}
-- Contributors: ${gitHistory.contributors.length}
-- Recent Activity: ${gitHistory.recentCommits.length} commits analyzed
+- Contributors: ${gitHistory.contributors?.length}
+- Recent Activity: ${gitHistory.recentCommits?.length} commits analyzed
 ` : 'Not available'}
 
 ${timeline ? `
@@ -158,12 +179,33 @@ Format: Markdown with tables and visual indicators (✅ ⚠️ ❌ 📈 📉)`,
             output: { schema: ProjectReportSchema },
         });
 
-        console.log('✅ Report generation complete!');
+        if (!fullReport.output) {
+            throw new Error('Neural core failed to synthesize final report manifest.');
+        }
 
-        return fullReport.output!;
+        // Final spectral cleanup pass
+        const finalReport = fullReport.output;
+        if (finalReport.content) {
+            finalReport.content = cleanAiOutput(finalReport.content);
+        }
+
+        console.log(`[Flow:ReportGen] Synthesis finalized for: ${projectName}`);
+        return finalReport;
     }
 );
 
-export async function projectReportGenerator(input: z.infer<typeof ProjectReportInputSchema>): Promise<z.infer<typeof ProjectReportSchema>> {
-    return projectReportGeneratorFlow(input);
+export async function projectReportGenerator(input: ProjectReportInput): Promise<Result<ProjectReportOutput, Error>> {
+    // Schema guard at the boundary
+    const validation = ProjectReportInputSchema.safeParse(input);
+    if (!validation.success) {
+        return Result.fail(new Error(`Invalid report parameters: ${validation.error.message}`));
+    }
+
+    try {
+        const result = await projectReportGeneratorFlow(validation.data);
+        return Result.ok(result);
+    } catch (error) {
+        console.error('[Flow:ReportGen] Orchestration pipeline failure:', error);
+        return Result.fail(error instanceof Error ? error : new Error('Unknown report generation failure'));
+    }
 }

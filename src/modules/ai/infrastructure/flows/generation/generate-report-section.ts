@@ -1,28 +1,46 @@
-
-
 'use server';
 
+import { ai, OLLAMA_MODELS, MODEL_BY_TASK } from '@/modules/ai/infrastructure/services/Genkit';
+import { 
+    GenerateSectionInputSchema, 
+    type GenerateSectionInput, 
+    type GenerateSectionOutput 
+} from '@/modules/ai/domain/schemas';
+import { Result } from '@/infrastructure/utils/result';
+import { cleanAiOutput } from '@/infrastructure/utils/sanitizer';
+
 /**
- * @fileOverview A generic AI agent for generating any section of a project report.
- * - generateReportSection
+ * generateReportSection — Context-aware neural synthesis for project report nodes.
+ * Intelligently integrates RAG, external context, and multi-node dependencies.
+ * 
+ * DEFENSIVE MEASURES:
+ * 1. Input Validation: Strict schema parsing to prevent malformed ingestion.
+ * 2. Model Standardization: Enforces MODEL_BY_TASK.REPORTS for structural consistency.
+ * 3. Sanitization: Uses cleanAiOutput to strip conversational filler and artifacts.
+ * 4. Containment: Returns Result<T, E> to provide safe error contexts to the UI.
  */
 
-import { ai, OLLAMA_MODELS } from '@/modules/ai/infrastructure/services/Genkit';
-import { GenerateSectionInputSchema, type GenerateSectionInput, type GenerateSectionOutput } from '@/modules/ai/domain/schemas';
+export async function generateReportSection(input: GenerateSectionInput): Promise<Result<GenerateSectionOutput, Error>> {
+    // 1. SCHEMA VALIDATION — Entry guard
+    const validation = GenerateSectionInputSchema.safeParse(input);
+    if (!validation.success) {
+        console.error('[Flow:ReportSection] Input validation failed:', validation.error.message);
+        return Result.fail(new Error(`Invalid parameters for synthesis: ${validation.error.message}`));
+    }
 
-export async function generateReportSection(input: GenerateSectionInput): Promise<GenerateSectionOutput> {
+    const validData = validation.data;
 
-  const systemPrompt = `${input.prompt}
+    try {
+        const systemPrompt = `${validData.prompt}
 
 You are also an expert analyst. Before you begin writing, you must first review all the provided context sections (proposal, project plan, other report sections, diagrams, etc.). From this context, intelligently identify and synthesize only the most relevant information needed to create the requested report section. Do not simply list information; integrate it into a well-written, coherent narrative.`;
 
-  const reportSectionPrompt = ai.definePrompt({
-    name: 'generateReportSectionPrompt', // Static name
-    input: { schema: GenerateSectionInputSchema },
-    // No output schema - model returns plain text
-    model: OLLAMA_MODELS.GEMMA_2B,
-    system: systemPrompt,
-    prompt: `
+        const reportSectionPrompt = ai.definePrompt({
+            name: 'generateReportSectionPrompt',
+            input: { schema: GenerateSectionInputSchema },
+            model: MODEL_BY_TASK.REPORTS, // Standardized production model
+            system: systemPrompt,
+            prompt: `
 Write the requested section: '{{sectionToGenerate}}'. Your writing style should be natural and engaging, not robotic.
 
 Output ONLY the markdown content for this section. Do NOT wrap it in JSON or any other format. Just write the section content directly.
@@ -75,24 +93,32 @@ You have access to the following documents. Review them and use the most relevan
 ---
 {{/if}}
 `,
-    config: {
-      temperature: 0.3,
-    },
-  });
+            config: {
+                temperature: 0.3,
+                maxOutputTokens: 2048,
+            },
+        });
 
-  // Call the AI and get plain text response
-  const result = await reportSectionPrompt(input);
+        // 2. NEURAL INFERENCE — Guarded execution
+        const result = await reportSectionPrompt(validData);
+        
+        // 3. SPECTRAL CLEANUP — Post-processing
+        const rawContent = result.text || result.output || '';
+        const sanitizedContent = cleanAiOutput(rawContent);
 
-  // Wrap the plain text in the expected output structure
-  const output: GenerateSectionOutput = {
-    sectionName: input.sectionToGenerate,
-    content: result.text || result.output || '' // Handle different response formats
-  };
+        if (!sanitizedContent || sanitizedContent.trim().length === 0) {
+            throw new Error(`AI failed to generate substantive content for section: ${validData.sectionToGenerate}`);
+        }
 
-  if (!output.content || output.content.trim().length === 0) {
-    console.error(`AI failed to generate content for section: ${input.sectionToGenerate}`);
-    throw new Error(`The AI failed to generate a response for the '${input.sectionToGenerate}' section. Please try again.`);
-  }
+        const output: GenerateSectionOutput = {
+            sectionName: validData.sectionToGenerate,
+            content: sanitizedContent
+        };
 
-  return output;
+        return Result.ok(output);
+
+    } catch (error) {
+        console.error('[Flow:ReportSection] Neural synthesis failed:', error);
+        return Result.fail(error instanceof Error ? error : new Error('Unknown synthesis error'));
+    }
 }
