@@ -9,79 +9,51 @@ To democratize access to professional-grade writing tools by leveraging cutting-
 ## Target Market & Audience
 
 ### Primary Segments
-- **Academic Researchers & Students**
-- **Business Professionals**
-- **Educational Institutions**
+- **Academic Researchers & Students**: Focus on citation stability, structural logic, and research synthesis.
+- **Business Professionals**: Focus on report production, executive summaries, and presentation synthesis.
+- **Educational Institutions**: Focus on lecture generation and assignment solving.
 
 ### Geographic Markets
-- **Primary**: Middle East & North Africa (MENA)
-- **Secondary**: International English-speaking markets
+- **Primary**: Middle East & North Africa (MENA) with native Arabic/RTL support.
+- **Secondary**: International English-speaking markets.
 
 ## Core Product Features
 
 ### AI Writing Tools Suite (23+ Tools)
-- Content Generation, Enhancement, Quality Assurance, Academic, and Technical tools.
+- Flagship tools: Summarizer, Researcher, Stylist, and Document Writer.
 
 ### Document Generation System
-- **Report Generation**: Section-based, template-driven, AI-powered content.
-- **Presentation Builder**: AI slide generation with PPTX export.
-- **Document Processing**: PDF analysis, handwriting recognition.
+- **Report Mode**: Multi-node, template-driven synthesis with high-fidelity DOCX export.
+- **Presentation Builder**: AI slide generation with PPTX production manifest.
+- **Spectral Analysis**: Deep decomposition of source data into manageable structural intelligence.
 
-### **New: Retrieval-Augmented Generation (RAG) System**
-- **Semantic Search**: Find relevant information across all indexed documents using natural language.
-- **Context-Aware Generation**: AI flows automatically retrieve context from the vector store to produce more accurate and informed content.
-- **Knowledge Base**: Centralized knowledge base for all projects, supporting PDF, DOCX, TXT, and MD files.
-- **Admin Tooling**: Document indexer, query tester, and health monitor.
+### Retrieval-Augmented Generation (RAG)
+- **Context-Aware Generation**: Grounded AI responses using the centralized Knowledge Base.
+- **Admin Oversight**: Document indexer, query tester, and system health monitoring.
 
 ## Product Differentiation
 
 ### Unique Value Propositions
-1. **Comprehensive & Integrated Tool Suite**
-2. **Academic & Research Focus**
-3. **Cultural Adaptation (Arabic/RTL)**
-4. **Professional Quality & Enterprise-Ready**
-5. **Context-Aware AI**: RAG system provides grounded, accurate, and up-to-date responses.
+1. **Intelligence Suite Aesthetic**: A professional, technical "IDE-style" interaction model.
+2. **Production Robustness**: Zero-tolerance for runtime errors via defensive programming and neural error boundaries.
+3. **Cultural Adaptation**: Native support for Arabic and RTL layouts.
+4. **State Integrity**: Atomic synchronization of document manifests across multi-step processes.
 
 ### Competitive Advantages
 
 #### Technology Stack
-- **AI Models**: Google Gemini 2.5 Flash Lite, Ollama (Gemma 2B, Phi-3 Mini, Llama 3.1), Nomic Embed Text.
-- **Vector Database**: Qdrant for high-performance semantic search.
-- **Performance Optimization**: Sub-100ms search latency, advanced caching.
-- **Type Safety**: Fully typed codebase with TypeScript and Zod.
+- **Next.js 15 / React 19**: Utilizing the latest concurrent features and server-side optimizations.
+- **Qdrant Vector Store**: Sub-100ms search latency for high-scale context retrieval.
+- **Resilient AI Flows**: Tiered fallback logic and structured Result vectors.
 
 #### User Experience
-- **Intuitive Interface**: Clean, modern design with excellent usability.
-- **Guest Mode**: Allows users to try core features before registering.
-- **State Management**: Stable, reliable state management with unsaved changes protection.
-- **Accessibility**: WCAG 2.1 AA compliance target.
+- **IDE Pattern**: 3-zone workspace optimized for complex document production.
+- **Manifest Interaction Model**: Technical, multi-step manifests for critical operations (Build, Export, Acquisition).
+- **Stable Manifests**: Operational feedback via pulsing status nodes and versioned manifest footers.
 
 ## Business Model
-
-### Revenue Streams
-1. **Credit-Based System (Primary)**: Pay-per-use for AI operations.
-2. **Subscription Tiers (Secondary)**
-3. **Enterprise Solutions**
-
-### Pricing Strategy
-- Flexible credit packages for different usage levels.
-- Free tier with limited monthly credits.
-- Premium and Pro subscription plans.
-
-## Product Development Strategy
-
-### Feature Prioritization
-- High Impact, Low Effort -> Priority 1
-- High Impact, High Effort -> Priority 2
-- User feedback and usage analytics drive prioritization.
-
-### Roadmap
-- **Short-term**: Enhance test coverage, UI/UX polish, performance monitoring.
-- **Medium-term**: Real-time collaboration, advanced analytics, third-party integrations.
-- **Long-term**: Custom AI model training, industry-specific solutions.
+- **Primary**: Credit-based acquisition for advanced AI operations.
+- **Secondary**: Subscription tiers for institutional access.
 
 ## Success Metrics & KPIs
-- **User Metrics**: MAU, Retention, Session Duration, Guest-to-User Conversion.
-- **Business Metrics**: MRR, CAC, LTV.
-- **Product Metrics**: Tool usage, document generation volume, RAG query success rate.
-- **Technical Metrics**: System uptime, AI response time, RAG latency, test coverage.
+- MAU, retention, credit acquisition volume, and RAG relevance scores.

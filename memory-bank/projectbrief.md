@@ -10,53 +10,30 @@ Arkan serves as an intelligent writing assistant that combines cutting-edge AI t
 
 ### Primary Goals
 - **Comprehensive Writing Support**: Provide 23+ AI-powered writing tools.
-- **Retrieval-Augmented Generation (RAG)**: Enhance AI responses with relevant, up-to-date context from a vector database.
-- **Professional Document Generation**: Support report, proposal, and presentation creation.
-- **Multi-language Support**: Full Arabic and English support with RTL capabilities.
-- **Enterprise-Ready**: Scalable platform with user management, payment processing, and analytics.
+- **Retrieval-Augmented Generation (RAG)**: Enhance AI responses with grounded context from a vector database.
+- **Professional Document Generation**: Support high-fidelity report, proposal, and presentation synthesis.
+- **Multi-language Support**: Full Arabic and English support with native RTL capabilities.
+- **Production Resilience**: Maintain 100% type safety and architectural robustness under Next.js 15.
 
 ## Core Features
 
 ### AI Writing Tools (23+ Tools)
-- Content Generation & Manipulation
-- Quality Assurance (Grammar, Plagiarism)
-- Academic Tools (Citation, Research)
+- Content Generation, Manipulation, and Quality Assurance.
 
 ### Advanced Capabilities
-- **RAG System**: Semantic search and context retrieval to ground AI responses.
-- **Knowledge Base**: Centralized document store (PDF, DOCX, TXT) for RAG.
-- **Template-Driven Reports**: Section-based report generation.
-- **Document Processing**: PDF parsing and conversion.
-- **Export Functions**: DOCX, PPTX, PDF generation.
+- **RAG System**: Qdrant-powered semantic search and context retrieval.
+- **Manifest Document Engine**: Multi-node document synthesis with DOCX/PPTX export.
+- **Spectral Analysis**: Deep decomposition of source matrices into structural intelligence.
 
 ### Platform Features
-- **User Authentication**: Secure authentication with guest mode support.
-- **Payment System**: Credit-based pricing.
-- **Admin Dashboard**: Comprehensive analytics, user management, and RAG monitoring.
-- **State Management**: Stable client-side state with unsaved changes protection.
-
-## Target Audience
-- Academic Researchers, Students, Business Professionals, Educators.
-
-## Business Model
-- **Freemium Model**: Basic features free with premium AI tools requiring credits.
-- **Credit System**: Pay-per-use for advanced AI operations.
+- **Admin Dashboard**: System-wide oversight, user management, and broadcast protocols.
+- **Identity & Billing**: Secure authentication with hardware fingerprinting and credit-based acquisition.
 
 ## Success Metrics
-- **User Engagement**: MAU, session duration, guest-to-user conversion.
-- **Content Quality**: User satisfaction, RAG relevance scores.
-- **Platform Growth**: New user acquisition, retention rates.
-- **Revenue**: Credit purchases, subscription conversions.
+- MAU, guest-to-user conversion, RAG relevance scores, and document synthesis volume.
 
 ## Technology Foundation
-- **Frontend**: Next.js 15 with React 18 and TypeScript.
-- **AI Engine**: Google Genkit with Gemini, Ollama (Gemma, Phi-3, Llama 3.1).
-- **RAG System**:
-  - **Embedding Model**: Ollama with `nomic-embed-text`.
-  - **Vector Database**: Qdrant.
-- **Backend**: SQLite (Drizzle ORM), Local File Storage, Node.js.
-- **UI Framework**: Radix UI with Tailwind CSS.
-- **State Management**: Zustand and React Query (TanStack).
+- **Next.js 15 / React 19**, TypeScript, Google Genkit, Qdrant, SQLite (Drizzle), Tailwind CSS.
 
 ## Current Status
-Arkan is a stable, production-ready application with a full suite of AI writing tools and an advanced RAG system. The current focus is on increasing test coverage, refining the user experience, and monitoring performance.
+Arkan is a **production-hardened**, high-performance application. Following a massive robustness refactor in April 2026, the project has reached 100% Clean Architecture compliance and zero-tolerance type safety. The current focus is on performance scaling, RAG retrieval optimization, and expanding test coverage.

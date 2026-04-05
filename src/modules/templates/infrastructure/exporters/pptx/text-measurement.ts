@@ -2,120 +2,108 @@ import { POINTS_PER_INCH } from './constants';
 
 /**
  * A minimal interface for a 2D rendering context, sufficient for text measurement.
- * This helps avoid using `any` in non-browser environments.
  */
 interface MeasurableContext {
     measureText(text: string): { width: number };
 }
 
 /**
- * A cache for canvas contexts to avoid recreating them for every measurement.
- * The key is a combination of font face and size.
+ * A cache for measurable contexts to avoid re-allocation.
  */
-const canvasContextCache: { [key: string]: MeasurableContext } = {};
+const measurableContextCache: { [key: string]: MeasurableContext } = {};
 
 /**
- * Gets a cached or new 2D canvas rendering context for text measurement.
- * @param fontFace The font family.
- * @param fontSize The font size in points.
- * @returns A 2D canvas rendering context.
+ * Gets a MeasurableContext using a pure heuristic approach.
+ * This module is designed to run safely on both client and server.
+ * Canvas-based measurement is intentionally excluded to prevent
+ * "document is not defined" errors in server-side environments.
  */
-function getCanvasContext(fontFace: string, fontSize: number): MeasurableContext {
+function getMeasurableContext(fontFace: string, fontSize: number): MeasurableContext {
     const key = `${fontFace}-${fontSize}`;
-    if (canvasContextCache[key]) {
-        return canvasContextCache[key];
+    if (measurableContextCache[key]) {
+        return measurableContextCache[key];
     }
 
-    // This code is intended for the client-side where document is available.
-    const canvas = document.createElement('canvas');
-    const context = canvas.getContext('2d');
-    if (!context) {
-        // Fallback for non-browser environments, though this is client-side code.
-        // This is a very rough estimate, similar to the old logic.
-        console.warn('Canvas context not available for text measurement. Falling back to rough estimate.');
-        return {
-            measureText: (text: string) => ({ width: text.length * fontSize * 0.5 }),
-        };
-    }
-    context.font = `${fontSize}pt "${fontFace}"`;
-    canvasContextCache[key] = context;
-    return context;
+    const heuristic: MeasurableContext = {
+        measureText: (text: string) => {
+            const length = text ? String(text).length : 0;
+            const hasArabic = /[\u0600-\u06FF]/.test(text || '');
+            const multiplier = hasArabic ? 0.7 : 0.55;
+            return { width: length * fontSize * multiplier };
+        }
+    };
+
+    measurableContextCache[key] = heuristic;
+    return heuristic;
 }
 
 /**
  * Calculates the number of lines a given text will occupy with word wrapping.
- * @param text The text content.
- * @param fontFace The font family.
- * @param fontSize The font size in points.
- * @param maxWidthInches The maximum width available for the text in inches.
- * @returns The number of lines.
  */
 export function calculateLineCount(text: string, fontFace: string, fontSize: number, maxWidthInches: number): number {
-    if (!text.trim()) {
-        return 1; // An empty paragraph still takes up one line.
-    }
+    if (!text || !String(text).trim()) return 1;
 
-    const context = getCanvasContext(fontFace, fontSize);
-    const maxWidthPx = maxWidthInches * POINTS_PER_INCH; // Convert inches to points
+    try {
+        const context = getMeasurableContext(fontFace, fontSize);
+        const maxWidthPx = maxWidthInches * POINTS_PER_INCH;
 
-    const paragraphs = text.split('\n');
-    let totalLines = 0;
+        const paragraphs = String(text).split('\n');
+        let totalLines = 0;
 
-    for (const paragraph of paragraphs) {
-        if (!paragraph.trim()) {
-            totalLines++; // Count empty lines between paragraphs
-            continue;
-        }
-        const words = paragraph.split(' ');
-        let lineCount = 1;
-        let currentLine = '';
-
-        for (const word of words) {
-            const testLine = currentLine ? `${currentLine} ${word}` : word;
-            const metrics = context.measureText(testLine);
-            if (metrics.width > maxWidthPx && currentLine) {
-                lineCount++;
-                currentLine = word;
-            } else {
-                currentLine = testLine;
+        for (const paragraph of paragraphs) {
+            const trimmed = paragraph.trim();
+            if (!trimmed) {
+                totalLines++;
+                continue;
             }
-        }
-        totalLines += lineCount;
-    }
+            const words = trimmed.split(/\s+/);
+            let lineCount = 1;
+            let currentLine = '';
 
-    return Math.max(1, totalLines); // A non-empty text should always have at least one line.
+            for (const word of words) {
+                const testLine = currentLine ? `${currentLine} ${word}` : word;
+                const metrics = context.measureText(testLine);
+                if (metrics.width > maxWidthPx && currentLine) {
+                    lineCount++;
+                    currentLine = word;
+                } else {
+                    currentLine = testLine;
+                }
+            }
+            totalLines += lineCount;
+        }
+
+        return Math.max(1, totalLines);
+    } catch (e) {
+        return 1;
+    }
 }
 
 /**
  * Calculates the number of lines a code block will occupy.
- * It considers both explicit newlines and wrapping of long lines.
- * @param text The text content of the code block.
- * @param fontFace The font family.
- * @param fontSize The font size in points.
- * @param maxWidthInches The maximum width available for the text in inches.
- * @returns The number of lines.
  */
 export function calculateCodeLineCount(text: string, fontFace: string, fontSize: number, maxWidthInches: number): number {
-    if (!text) {
+    if (!text) return 1;
+
+    try {
+        const context = getMeasurableContext(fontFace, fontSize);
+        const maxWidthPx = maxWidthInches * POINTS_PER_INCH;
+
+        const lines = String(text).split('\n');
+        let totalLines = 0;
+
+        for (const line of lines) {
+            if (line === '') {
+                totalLines++;
+                continue;
+            }
+            const metrics = context.measureText(line);
+            const lineWraps = Math.ceil(metrics.width / maxWidthPx);
+            totalLines += Math.max(1, lineWraps);
+        }
+
+        return Math.max(1, totalLines);
+    } catch (e) {
         return 1;
     }
-
-    const context = getCanvasContext(fontFace, fontSize);
-    const maxWidthPx = maxWidthInches * POINTS_PER_INCH; // Convert inches to points
-
-    const lines = text.split('\n');
-    let totalLines = 0;
-
-    for (const line of lines) {
-        // Even an empty line in a code block takes up one line of vertical space.
-        if (line === '') {
-            totalLines++;
-            continue;
-        }
-        const metrics = context.measureText(line);
-        const lineWraps = Math.ceil(metrics.width / maxWidthPx);
-        totalLines += Math.max(1, lineWraps); // A line is at least 1 line high.
-    }
-
-    return Math.max(1, totalLines);
 }

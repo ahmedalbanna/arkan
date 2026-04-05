@@ -49,6 +49,7 @@ import { AuthApiClient } from "@/modules/users/adapters/api-client/AuthApiClient
 import { DeviceTokenApiClient } from "@/modules/users/adapters/api-client/DeviceTokenApiClient";
 import { NotificationApiClient } from "@/modules/users/adapters/api-client/NotificationApiClient";
 import { RagApiClient } from "@/modules/rag/adapters/api-client/RagApiClient";
+import { DocxExportApiClient, PptxExportApiClient } from "@/modules/ai-content/adapters/api-client/ExportApiClient";
 import { CreditService } from "@/modules/billing/application/services/CreditService";
 import { LocalProjectService } from "@/modules/projects/adapters/local-storage/LocalProjectService";
 import { PromptBuilder } from "@/modules/ai-content/domain/services/PromptBuilder";
@@ -84,6 +85,8 @@ container.register(AuthApiClient, { useClass: AuthApiClient }, { lifecycle: Life
 container.register(DeviceTokenApiClient, { useClass: DeviceTokenApiClient }, { lifecycle: Lifecycle.Singleton });
 container.register(NotificationApiClient, { useClass: NotificationApiClient }, { lifecycle: Lifecycle.Singleton });
 container.register(RagApiClient, { useClass: RagApiClient }, { lifecycle: Lifecycle.Singleton });
+container.register(IDocxExportServiceToken, { useClass: DocxExportApiClient }, { lifecycle: Lifecycle.Singleton });
+container.register(IPptxExportServiceToken, { useClass: PptxExportApiClient }, { lifecycle: Lifecycle.Singleton });
 
 // Server-side registration (Conditional).
 // require() is used for all server-only modules to prevent static bundling.

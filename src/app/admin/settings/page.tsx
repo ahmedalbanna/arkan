@@ -28,55 +28,28 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useLocalization } from '@/context/LocalizationContext';
 import { useSettings, useUpdateSettings } from '@/modules/admin/adapters/hooks/use-settings';
-import { AppSettings, PaymentMethod } from '@/modules/admin/domain/entities/Settings';
+import { AppSettings } from '@/modules/admin/domain/entities/Settings';
+import { type PaymentMethod, paymentMethodSchema } from '@/modules/billing/domain/entities/PaymentMethod';
 import { useToast } from '@/hooks';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
 import { cn } from '@/infrastructure/utils/cn';
-import { Result } from '@/infrastructure/utils/result';
 
 /**
  * AdminSettingsPage — Global system configuration manifest.
  * Manages neural quotas, settlement protocols, and system-wide operational parameters.
  * 
  * DEFENSIVE MEASURES:
- * 1. Result Pattern: Transitions update pipeline to return structured Result vectors.
+ * 1. Schema Alignment: Synchronized with AppSettings domain properties (newUserCredits).
  * 2. Atomic Mapping: Selectively updates nested payment nodes to prevent corruption.
  * 3. Lifecycle Integrity: Correctly handles form resets during background refetch cycles.
  * 4. UX Safety: Integrated error badges and neural sync pulses for production observability.
  */
 
-// ── Validation Schemas ────────────────────────────────────────────────────────
-
-const bankTransferDetailsSchema = z.object({
-  iban: z.string().optional(),
-  accountNumber: z.string().optional(),
-  swiftCode: z.string().optional(),
-  bankAddress: z.string().optional(),
-});
-
-const walletDetailsSchema = z.object({
-  provider: z.string().optional(),
-  accountNumber: z.string().optional(),
-  phoneNumber: z.string().optional(),
-});
-
-const paymentMethodSchema = z.object({
-  id: z.string(),
-  name: z.string().min(1, 'Identity identifier is required.'),
-  type: z.enum(['bank', 'crypto', 'wallet', 'other']),
-  isActive: z.boolean(),
-  details: z.record(z.any()).optional(),
-  instructions: z.string().optional(),
-});
-
 const settingsSchema = z.object({
-  creditPrice: z.coerce.number().min(0.01, 'Minimum energy cost is $0.01'),
-  minimumCredits: z.coerce.number().min(10, 'Minimum quota node is 10'),
+  newUserCredits: z.coerce.number().int().min(0, 'Minimum initial quota is 0'),
   paymentMethods: z.array(paymentMethodSchema),
-  allowGuestAccess: z.boolean(),
-  maintenanceMode: z.boolean(),
 });
 
 type SettingsFormValues = z.infer<typeof settingsSchema>;
@@ -84,8 +57,7 @@ type SettingsFormValues = z.infer<typeof settingsSchema>;
 function getPaymentMethodIcon(type: string) {
   switch (type) {
     case 'bank': return <Banknote className="h-4 w-4" />;
-    case 'wallet': return <Smartphone className="h-4 w-4" />;
-    case 'crypto': return <Gem className="h-4 w-4" />;
+    case 'e-wallet': return <Smartphone className="h-4 w-4" />;
     default: return <CreditCard className="h-4 w-4" />;
   }
 }
@@ -101,11 +73,8 @@ export default function AdminSettingsPage() {
   const form = useForm<SettingsFormValues>({
     resolver: zodResolver(settingsSchema),
     defaultValues: {
-      creditPrice: 0.1,
-      minimumCredits: 100,
+      newUserCredits: 100,
       paymentMethods: [],
-      allowGuestAccess: true,
-      maintenanceMode: false,
     },
   });
 
@@ -118,11 +87,8 @@ export default function AdminSettingsPage() {
   useEffect(() => {
     if (settings && !form.formState.isDirty) {
       form.reset({
-        creditPrice: settings.creditPrice,
-        minimumCredits: settings.minimumCredits,
+        newUserCredits: settings.newUserCredits ?? 100,
         paymentMethods: settings.paymentMethods || [],
-        allowGuestAccess: settings.allowGuestAccess,
-        maintenanceMode: settings.maintenanceMode,
       });
     }
   }, [settings, form]);
@@ -130,9 +96,9 @@ export default function AdminSettingsPage() {
   // 2. SUBMISSION VECTOR — Guarded persistence
   const onSubmit = async (values: SettingsFormValues) => {
     try {
-        const updateData: Partial<AppSettings> = {
-            ...values,
-            paymentMethods: values.paymentMethods as any, // Cast for API compatibility
+        const updateData: AppSettings = {
+            newUserCredits: values.newUserCredits,
+            paymentMethods: values.paymentMethods as any,
         };
         
         await updateMutation.mutateAsync(updateData);
@@ -209,46 +175,31 @@ export default function AdminSettingsPage() {
                 </div>
                 <div>
                     <h3 className="text-[18px] font-black uppercase tracking-tight text-foreground/90 leading-none">Neural Economics</h3>
-                    <p className="text-[10px] font-black uppercase tracking-[0.25em] text-primary/70 mt-2.5">Quota and Energy Parameters</p>
+                    <p className="text-[10px] font-black uppercase tracking-[0.25em] text-primary/70 mt-2.5">Initial Quota Parameters</p>
                 </div>
             </header>
-            <CardContent className="p-10 grid md:grid-cols-2 gap-12 relative z-10">
-                <FormField
-                    control={form.control}
-                    name="creditPrice"
-                    render={({ field }) => (
-                        <FormItem className="space-y-3">
-                            <FormLabel className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/60 ml-1">Energy Unit Price (USD)</FormLabel>
-                            <FormControl>
-                                <div className="relative group">
-                                    <Input type="number" step="0.01" {...field} className="h-12 pl-12 text-sm font-black bg-muted/5 border-primary/10 focus-visible:ring-primary/20 rounded-2xl shadow-inner tabular-nums" />
-                                    <div className="absolute left-4 top-1/2 -translate-y-1/2 text-primary/40 font-black">$</div>
-                                </div>
-                            </FormControl>
-                            <FormDescription className="text-[10px] italic font-medium">Define the dollar value for a single neural credit.</FormDescription>
-                            <FormMessage className="text-[10px] font-bold italic text-destructive/80" />
-                        </FormItem>
-                    )}
-                />
-                <FormField
-                    control={form.control}
-                    name="minimumCredits"
-                    render={({ field }) => (
-                        <FormItem className="space-y-3">
-                            <FormLabel className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/60 ml-1">Minimum Acquisition Node</FormLabel>
-                            <FormControl>
-                                <div className="relative group">
-                                    <Input type="number" {...field} className="h-12 pl-12 text-sm font-black bg-muted/5 border-primary/10 focus-visible:ring-primary/20 rounded-2xl shadow-inner tabular-nums" />
-                                    <div className="absolute left-4 top-1/2 -translate-y-1/2 text-primary/40">
-                                        <Database className="h-4 w-4" />
+            <CardContent className="p-10 relative z-10">
+                <div className="max-w-md">
+                    <FormField
+                        control={form.control}
+                        name="newUserCredits"
+                        render={({ field }) => (
+                            <FormItem className="space-y-3">
+                                <FormLabel className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/60 ml-1">New User Neural Energy</FormLabel>
+                                <FormControl>
+                                    <div className="relative group">
+                                        <Input type="number" {...field} className="h-12 pl-12 text-sm font-black bg-muted/5 border-primary/10 focus-visible:ring-primary/20 rounded-2xl shadow-inner tabular-nums" />
+                                        <div className="absolute left-4 top-1/2 -translate-y-1/2 text-primary/40">
+                                            <Database className="h-4 w-4" />
+                                        </div>
                                     </div>
-                                </div>
-                            </FormControl>
-                            <FormDescription className="text-[10px] italic font-medium">Minimum credits allowed per procurement transaction.</FormDescription>
-                            <FormMessage className="text-[10px] font-bold italic text-destructive/80" />
-                        </FormItem>
-                    )}
-                />
+                                </FormControl>
+                                <CardDescription className="text-[10px] italic font-medium">Initial credits granted to new system entities upon registration.</CardDescription>
+                                <FormMessage className="text-[10px] font-bold italic text-destructive/80" />
+                            </FormItem>
+                        )}
+                    />
+                </div>
             </CardContent>
           </Card>
 
@@ -269,7 +220,14 @@ export default function AdminSettingsPage() {
                     type="button" 
                     variant="outline" 
                     size="sm" 
-                    onClick={() => append({ id: Math.random().toString(36).substr(2, 9), name: '', type: 'bank', isActive: true, details: {}, instructions: '' })}
+                    onClick={() => append({ 
+                        id: Math.random().toString(36).substr(2, 9), 
+                        name: '', 
+                        displayName: '',
+                        type: 'bank', 
+                        isActive: true,
+                        isActiveInternal: true
+                    } as any)}
                     className="h-10 px-6 rounded-xl border-primary/20 bg-primary/5 text-primary hover:bg-primary/10 font-black uppercase tracking-widest text-[9px] gap-2 transition-all hover:scale-105 active:scale-95"
                 >
                     <Plus className="h-3.5 w-3.5" /> Initialize Node
@@ -285,10 +243,10 @@ export default function AdminSettingsPage() {
                                 <div className="flex-1 grid md:grid-cols-3 gap-6">
                                     <FormField
                                         control={form.control}
-                                        name={`paymentMethods.${index}.name`}
+                                        name={`paymentMethods.${index}.displayName`}
                                         render={({ field }) => (
                                             <FormItem className="space-y-2">
-                                                <FormLabel className="text-[9px] font-black uppercase tracking-widest text-muted-foreground/60 ml-1">Node Identifier</FormLabel>
+                                                <FormLabel className="text-[9px] font-black uppercase tracking-widest text-muted-foreground/60 ml-1">Display Identifier</FormLabel>
                                                 <FormControl>
                                                     <Input {...field} placeholder="Bank Name / Provider" className="h-10 text-[11px] font-bold bg-muted/5 border-primary/10 rounded-xl" />
                                                 </FormControl>
@@ -308,11 +266,11 @@ export default function AdminSettingsPage() {
                                                             <SelectValue />
                                                         </SelectTrigger>
                                                     </FormControl>
-                                                    <SelectContent className="rounded-xl border-primary/10 shadow-2xl">
+                                                    <SelectContent className="rounded-2xl border-primary/10 shadow-2xl">
                                                         <SelectItem value="bank" className="text-[10px] font-black uppercase">Bank Node</SelectItem>
-                                                        <SelectItem value="wallet" className="text-[10px] font-black uppercase">Wallet Node</SelectItem>
-                                                        <SelectItem value="crypto" className="text-[10px] font-black uppercase">Crypto Node</SelectItem>
-                                                        <SelectItem value="other" className="text-[10px] font-black uppercase">Other Matrix</SelectItem>
+                                                        <SelectItem value="e-wallet" className="text-[10px] font-black uppercase">Wallet Node</SelectItem>
+                                                        <SelectItem value="local-transfer" className="text-[10px] font-black uppercase">Local Matrix</SelectItem>
+                                                        <SelectItem value="international-transfer" className="text-[10px] font-black uppercase">Global Vector</SelectItem>
                                                     </SelectContent>
                                                 </Select>
                                                 <FormMessage />
@@ -356,7 +314,7 @@ export default function AdminSettingsPage() {
                                     <FormItem className="space-y-2 relative z-10">
                                         <FormLabel className="text-[9px] font-black uppercase tracking-widest text-muted-foreground/60 ml-1">Linguistic Instructions</FormLabel>
                                         <FormControl>
-                                            <Textarea {...field} rows={3} placeholder="Define procurement steps for the user..." className="text-[11px] font-serif italic bg-muted/5 border-primary/10 rounded-2xl resize-none p-4" />
+                                            <Textarea {...field} value={field.value || ''} rows={3} placeholder="Define procurement steps for the user..." className="text-[11px] font-serif italic bg-muted/5 border-primary/10 rounded-2xl resize-none p-4" />
                                         </FormControl>
                                         <FormMessage />
                                     </FormItem>
@@ -370,54 +328,6 @@ export default function AdminSettingsPage() {
                             <p className="text-[11px] font-black uppercase tracking-[0.3em]">Zero Active Settlement Nodes</p>
                         </div>
                     )}
-                </div>
-            </CardContent>
-          </Card>
-
-          {/* Sector 3: System Access */}
-          <Card className="border-none shadow-2xl shadow-primary/5 bg-card overflow-hidden rounded-[40px] relative">
-            <div className="absolute inset-0 opacity-[0.02] pointer-events-none bg-[radial-gradient(circle_at_center,_var(--primary)_1px,_transparent_1px)] bg-[size:28px_28px]" />
-            <header className="px-10 py-8 border-b border-primary/10 bg-primary/[0.02] flex items-center gap-5 relative z-10">
-                <div className="h-12 w-12 rounded-[22px] bg-primary/10 flex items-center justify-center border border-primary/20 shadow-inner">
-                    <Database className="h-6 w-6 text-primary" />
-                </div>
-                <div>
-                    <h3 className="text-[18px] font-black uppercase tracking-tight text-foreground/90 leading-none">Infiltration Control</h3>
-                    <p className="text-[10px] font-black uppercase tracking-[0.25em] text-primary/70 mt-2.5">Global Access Parameters</p>
-                </div>
-            </header>
-            <CardContent className="p-10 space-y-10 relative z-10">
-                <div className="grid md:grid-cols-2 gap-8">
-                    <FormField
-                        control={form.control}
-                        name="allowGuestAccess"
-                        render={({ field }) => (
-                            <FormItem className="flex items-center justify-between p-6 rounded-[28px] border border-border/60 bg-background/40 backdrop-blur-xl group">
-                                <div className="space-y-1">
-                                    <FormLabel className="text-sm font-black uppercase tracking-tight text-foreground/80 group-hover:text-primary transition-colors">Anonymous Node Access</FormLabel>
-                                    <p className="text-[10px] text-muted-foreground italic leading-relaxed font-medium">Permit system entry for unregistered entities.</p>
-                                </div>
-                                <FormControl>
-                                    <Switch checked={field.value} onCheckedChange={field.onChange} className="data-[state=checked]:bg-primary scale-90" />
-                                </FormControl>
-                            </FormItem>
-                        )}
-                    />
-                    <FormField
-                        control={form.control}
-                        name="maintenanceMode"
-                        render={({ field }) => (
-                            <FormItem className="flex items-center justify-between p-6 rounded-[28px] border border-destructive/20 bg-destructive/[0.02] group">
-                                <div className="space-y-1">
-                                    <FormLabel className="text-sm font-black uppercase tracking-tight text-destructive/80">Global Lockdown</FormLabel>
-                                    <p className="text-[10px] text-destructive/60 italic leading-relaxed font-medium">Terminate all non-administrative neural channels.</p>
-                                </div>
-                                <FormControl>
-                                    <Switch checked={field.value} onCheckedChange={field.onChange} className="data-[state=checked]:bg-destructive scale-90" />
-                                </FormControl>
-                            </FormItem>
-                        )}
-                    />
                 </div>
             </CardContent>
           </Card>

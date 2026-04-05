@@ -1,6 +1,5 @@
 
 
-'use server';
 
 
 import { container } from '@/infrastructure/di/container';

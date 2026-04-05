@@ -1,5 +1,6 @@
 
 import type { Project, ProjectContent } from '@/modules/projects/domain/entities/Project';
+import { Result } from '@/infrastructure/utils/result';
 
 export interface ExportOptions {
     template?: string;
@@ -11,8 +12,8 @@ export interface ExportOptions {
 }
 
 export interface IExportService {
-    export(project: Project, content: ProjectContent, options: ExportOptions): Promise<Blob | Buffer>;
-    exportFromMarkdown(markdown: string, fileName: string, options: ExportOptions): Promise<Blob | Buffer>;
+    export(project: Project, content: ProjectContent, options: ExportOptions): Promise<Result<Blob | Buffer, Error>>;
+    exportFromMarkdown(markdown: string, fileName: string, options: ExportOptions): Promise<Result<Blob | Buffer, Error>>;
 }
 
 export const IDocxExportServiceToken = Symbol('IDocxExportService');

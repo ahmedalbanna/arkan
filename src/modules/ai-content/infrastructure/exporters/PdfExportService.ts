@@ -1,19 +1,28 @@
-
 import { injectable } from "tsyringe";
 import { 
     IExportService, 
     ExportOptions 
 } from "@/modules/ai-content/domain/services/IExportService";
 import { Project, ProjectContent } from "@/modules/projects/domain/entities/Project";
+import { Result } from "@/infrastructure/utils/result";
+
+/**
+ * PdfExportService — Document synthesis for PDF formats.
+ * Currently serves as a placeholder for server-side PDF generation logic.
+ * 
+ * DEFENSIVE MEASURES:
+ * 1. Result Pattern: Complies with IExportService result vectors.
+ * 2. Fallback Logic: Explicitly directs consumers to client-side rendering for PDF.
+ */
 
 @injectable()
 export class PdfExportService implements IExportService {
-    async export(project: Project, content: ProjectContent, options: ExportOptions): Promise<Blob | Buffer> {
-        throw new Error("Method not implemented. PDF export currently uses element-based rendering on client.");
+    async export(project: Project, content: ProjectContent, options: ExportOptions): Promise<Result<Blob | Buffer, Error>> {
+        return Result.fail(new Error("PDF export currently requires client-side element-based rendering."));
     }
 
-    async exportFromMarkdown(markdown: string, fileName: string, options: ExportOptions): Promise<Blob | Buffer> {
-        throw new Error("Method not implemented. PDF export currently uses element-based rendering on client.");
+    async exportFromMarkdown(markdown: string, fileName: string, options: ExportOptions): Promise<Result<Blob | Buffer, Error>> {
+        return Result.fail(new Error("PDF export currently requires client-side element-based rendering."));
     }
 
     async exportFromElement(element: HTMLElement, filename: string): Promise<void> {
@@ -54,7 +63,7 @@ export class PdfExportService implements IExportService {
             pdf.addImage(imgData, 'PNG', x, y, newCanvasWidth, newCanvasHeight);
             pdf.save(filename);
         } catch (error) {
-            console.error("Error generating PDF:", error);
+            console.error("[Export:PDF] Client-side generation failed:", error);
             throw error;
         }
     }

@@ -39,24 +39,24 @@ export class ExportProjectUseCase {
             
             if (input.project && input.selectedContent) {
                 // Handle project-based export
-                const buffer = await service.export(input.project, input.selectedContent, input.options);
-                return Result.ok(buffer);
+                const result = await service.export(input.project, input.selectedContent, input.options);
+                if (result.isFailure) {
+                    return Result.fail(AIContentError.internal(result.error?.message || 'Synthesis failed'));
+                }
+                return Result.ok(result.getValue());
             } else if (input.markdown && input.fileName) {
                 // Handle direct markdown export
-                // Note: Only docxService currently has exportFromMarkdown, others might need it too
-                if (input.format === 'docx' && 'exportFromMarkdown' in (this.docxService as any)) {
-                    const buffer = await (this.docxService as any).exportFromMarkdown(input.markdown, input.fileName, input.options);
-                    return Result.ok(buffer);
+                const result = await service.exportFromMarkdown(input.markdown, input.fileName, input.options);
+                if (result.isFailure) {
+                    return Result.fail(AIContentError.internal(result.error?.message || 'Transformation failed'));
                 }
-                
-                // Fallback for others (might need implementation)
-                return Result.fail(AIContentError.validation(`Direct markdown export not yet implemented for ${input.format}`));
+                return Result.ok(result.getValue());
             }
 
             return Result.fail(AIContentError.validation("Invalid export input: missing project/content or markdown/fileName"));
         } catch (error: any) {
             console.error(`ExportProjectUseCase Error (${input.format}):`, error);
-            return Result.fail(AIContentError.internal(`Export failed: ${error.message}`));
+            return Result.fail(AIContentError.internal(`Export pipeline failure: ${error.message}`));
         }
     }
 

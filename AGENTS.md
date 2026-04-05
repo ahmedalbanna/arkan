@@ -21,8 +21,6 @@ Tasks can be delegated to specialized agents located in `.rovodev/subagents/` us
 | Code Review/Best Practices   | Security audits, refactoring, code quality, consistency. |
 | Scalability Advisor          | RAG/Qdrant optimization, API bottleneck analysis.    |
 
-A common pattern for delegating new features is to split tasks among: **AI Dev** (for core logic), **shadcn/ui** (for component implementation), and **Server Actions** (for form handling).
-
 ## Architecture & Logic
 
 ### Clean Architecture (DDD)
@@ -34,58 +32,52 @@ Modules within `src/modules/` adhere to a four-layer structure:
 3.  **`adapters/`**: Includes API clients, controllers, and localized Zustand stores, acting as bridges to external services.
 4.  **`infrastructure/`**: Provides concrete implementations for services like Genkit, SQLite/Drizzle, and Qdrant.
 
-### Dependency Injection (DI)
+### Dependency Injection (DI) & Execution Boundaries
 
 The project utilizes `tsyringe` for dependency injection.
 
-*   **Registration**: Services are registered using `@injectable()` and `@inject()` decorators, with all registrations centralized in `src/infrastructure/di/container.ts`.
-*   **Server-Only Enforcement**: To prevent client-side contamination, server-only modules are loaded using `require()` within a `typeof window === 'undefined'` check in `container.ts`.
-*   **Resolution**: Services should not be instantiated directly using `new`. Instead, resolve them using the `useService(token)` hook.
+*   **Registration**: Services are registered in `src/infrastructure/di/container.ts`.
+*   **Cross-Environment Bridging**: For services that must be triggered from the client but executed on the server (e.g., Document Export), implement a "Bridging Pattern". Register a client-side API client (e.g., `ExportApiClient`) for browser environments and the full infrastructure implementation for the server. This maintains a unified interface while respecting Next.js 15 boundaries.
+*   **Resolution**: Always resolve services via the `useService(token)` hook or `container.resolve(token)`.
+
+### Server Actions & "use server" Constraints
+
+*   **Logic Isolation**: The `"use server"` directive should be applied to specific async functions (Actions) or dedicated action files, *not* to classes or infrastructure services.
+*   **Class Restriction**: Exporting classes from a `"use server"` file is prohibited if they contain non-async properties or methods. Infrastructure services should remain directive-free and be consumed by Actions or API Routes.
 
 ### AI & Genkit Flows
 
 *   **Implementation**: All AI-related flows are located in `src/modules/ai/infrastructure/flows/` and are prefixed with `'use server'`.
-*   **Safety & Output**: Flows must return `Result<T, E>` objects to provide explicit success/failure vectors to the UI.
-*   **Spectral Sanitization**: The `cleanAiOutput` utility function MUST be used to strip extraneous conversational elements (e.g., "Here is the content:") and markdown code blocks before committing AI text to the domain.
-*   **Validation**: Every flow must start with a `safeParse` boundary check using the relevant `InputSchema` to prevent malformed ingestion.
-*   **Consistency**: Adherence to `MODEL_BY_TASK` constants is mandatory for all AI calls to maintain uniformity across conversion, reporting, and academic tasks.
+*   **Safety & Output**: Flows must return `Result<T, E>` objects to provide explicit success/failure vectors.
+*   **Spectral Sanitization**: The `cleanAiOutput` utility function MUST be used to strip extraneous conversational elements and markdown code blocks before committing AI text to the domain.
+*   **Validation**: Every flow must start with a `safeParse` boundary check using the relevant `InputSchema`.
 
 ## State Management & Robustness
 
 ### Atomic State Updates
 
 *   **Batching Pattern**: For multi-node updates (e.g., bulk context mapping), operations must be batched within a single `updateProject` callback. Use functional reduction: `targets.reduce((p, id) => p.updateSection(id, s => s.withProps(...)), currentProject)`. This guarantees atomicity and prevents race conditions.
-*   **Selection Recovery**: Structural changes, particularly deletions, must trigger corresponding callbacks (e.g., `onSelectChapter(null)`) or "Selection Recovery" sweeps to clear workspace focus. This prevents orphaned UI states where the system tries to render a deleted node.
+*   **Selection Recovery**: Structural changes, particularly deletions, must trigger corresponding callbacks (e.g., `onSelectChapter(null)`) or "Selection Recovery" sweeps to clear workspace focus.
 
 ### Defensive Programming
 
-*   **Hook Compliance**: All hooks (including `useMemo`, `useCallback`, and `useAiActions`) must be placed at the top level of a component, *before* any conditional rendering or early returns. This is a strict requirement for React 19 stability.
-*   **Existence Guards**: Unified `if (!project)` or `if (!userProfile)` guards must be applied to all interaction and lifecycle handlers to handle partial hydration and rapid state shifts.
-*   **Error Containment**: Mutations, external service calls (export, generation), and complex async pipelines (file reading, TOC parsing) must be wrapped in `try-catch` blocks. High-fidelity UI feedback (toast, error badges, Error Boundaries) must be provided.
-*   **Optimistic Sync**: When using optimistic updates (e.g., security toggles), a robust rollback logic must be implemented to restore consistent state if the API vector fails.
-*   **ID Standardization**: The `@/infrastructure/utils/randomId` utility must be used exclusively for generating entity IDs. Avoid using `uuidv4` or timestamps to ensure consistency across snapshots and persistence cycles.
+*   **Hook Compliance**: All hooks must be placed at the top level of a component, *before* any conditional rendering or early returns. This is a strict requirement for React 19 stability.
+*   **Existence Guards**: Unified `if (!project)` or `if (!userProfile)` guards must be applied to all interaction and lifecycle handlers.
+*   **Error Containment**: Mutations and external service calls must be wrapped in `try-catch` blocks. Use localized Error Boundaries for high-risk rendering pipelines (e.g., `DocumentRenderer`).
+*   **Optimistic Sync**: When using optimistic updates, a robust rollback logic must be implemented to restore consistent state if the API vector fails.
+*   **ID Standardization**: The `@/infrastructure/utils/randomId` utility must be used exclusively for generating entity IDs.
 
 ## Coding & UI Standards
 
-*   **TypeScript**: The project enforces a strict TypeScript policy with zero tolerance for the `any` type. Use `unknown` and implement proper narrowing techniques, including explicit `instanceof` guards for domain entities (e.g., `item instanceof Chapter`).
-*   **Prop Standardization**: Standardize core workspace callbacks as `onActiveChapterChange` and `onActiveSectionChange` across the component tree to ensure type consistency and predictable structural shifts.
-*   **Components**: Server Components are the default. For high-frequency workspace components, `React.memo` should be used to optimize performance. Interaction components must handle `disabled` states correctly during async processing.
-*   **Styling**: Tailwind CSS is the standard. The "Intelligence Suite" aesthetic requires specific styling: 28px dot-grids, high-density labels (`text-[10px]`, `font-black`, `uppercase`), glassmorphism, and "Stable Manifest" footers with version indices.
-*   **API Responses**: All API responses must be standardized by utilizing the `handle*Result` functions located in `src/infrastructure/api/api-utils.ts`.
-
-## RAG & Infrastructure
-
-*   **Vector Store**: The project utilizes Qdrant as its vector store, with a collection named `arkan_vectors` and dimensions set to 768.
-*   **Storage**: Local file storage is managed via `storage/uploads/`. Robust path-traversal protection is a mandatory security requirement for this directory.
-*   **Internationalization (i18n)**: Support for both Left-to-Right (LTR) and Right-to-Left (RTL) layouts is provided through the `LanguageDirectionManager`. Ensure all ARIA labels and tooltips are localized.
+*   **TypeScript**: Strict policy with zero tolerance for the `any` type. Use `unknown` and explicit type guards.
+*   **Prop Standardization**: Standardize core workspace callbacks as `onActiveChapterChange` and `onActiveSectionChange`.
+*   **Styling**: Tailwind CSS is the standard. The "Intelligence Suite" aesthetic requires: 28px dot-grids, high-density labels (`text-[10px]`, `font-black`, `uppercase`), glassmorphism, and "Stable Manifest" footers.
 
 ---
 
 ## Change Log
 
-*   **System-Wide Hardening**: Standardized "Defensive Programming" and "Atomic Batching" across 45+ components including Generation, Source, Outline, Billing, Profile, and Admin Dashboard modules.
-*   **Neural Infrastructure Refined**: Migrated core AI flows to the `Result<T, E>` pattern and integrated spectral cleanup via `cleanAiOutput`. Added `safeParse` validation to all Genkit flows.
-*   **Hook Optimization**: Audited and refactored core HUD panels to ensure strict compliance with React 19 hook placement rules.
+*   **System-Wide Hardening**: Standardized "Defensive Programming" and "Atomic Batching" across 50+ components including Generation, Export, Source, Outline, and Admin modules.
+*   **Infrastructure Boundaries**: Resolved Next.js 15 class-export errors by removing `"use server"` from infrastructure services and implementing the "Client-Server DI Bridging" pattern for document exports.
+*   **Neural Rendering Stabilized**: Implemented a dedicated `RendererErrorBoundary` and stabilized the A4 rendering pipeline with hydration guards.
 *   **Identity Consistency**: Verified the move to a unified ID strategy using `randomId` for all document, source, and identity nodes.
-*   **Visual Refinement**: Consolidated the "Intelligence Suite" aesthetic across all production-grade HUDs and manifest footers, incorporating glassmorphism and version indices.
-*   **Prop & Sync Standardization**: Codified the `onActiveNodeChange` prop pattern and "Selection Recovery" sweeps for structural integrity.

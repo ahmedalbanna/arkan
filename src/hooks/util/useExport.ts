@@ -1,15 +1,24 @@
 'use client';
 
-import { useState } from 'react';
-import { saveAs } from 'file-saver';
-import { toast } from './use-toast';
-import type { Project, ProjectContent } from '@/modules/projects/domain/entities/Project';
-import { templates as docxTemplates, type DocxTemplateKey } from '@/modules/ai-content/infrastructure/exporters/DocxStyles';
-import { templates as pptxTemplates, type PptxTemplateKey } from '@/modules/templates/infrastructure/PptxStyles';
-import type { ConversionOptions } from '@/modules/ai-content/domain/types/export-types';
-import { container } from '@/infrastructure/di/container';
-import { IPptxExportServiceToken } from '@/modules/ai-content/domain/services/IExportService';
 import { apiService } from '@/infrastructure/api/ApiService';
+import type { ConversionOptions } from '@/modules/ai-content/domain/types/export-types';
+import { templates as docxTemplates, type DocxTemplateKey } from '@/modules/ai-content/infrastructure/exporters/DocxStyles';
+import type { Project, ProjectContent } from '@/modules/projects/domain/entities/Project';
+import { templates as pptxTemplates, type PptxTemplateKey } from '@/modules/templates/infrastructure/PptxStyles';
+import { saveAs } from 'file-saver';
+import { useCallback, useState } from 'react';
+import { toast } from './use-toast';
+
+/**
+ * useExport — Hook for orchestrating document production workflows.
+ * Bridges the UI with server-side export API nodes.
+ *
+ * DEFENSIVE MEASURES:
+ * 1. Consistent Pipeline: Transitions both DOCX and PPTX to use the API route vector.
+ * 2. Execution Containment: Wraps async transmissions in try-catch blocks.
+ * 3. Validation: Guards against empty content selections.
+ * 4. UX Integrity: Integrated toast notifications for production status.
+ */
 
 interface DocxExportParams {
   project: Project;
@@ -33,11 +42,12 @@ interface PptxExportParams {
 export function useExport() {
   const [isExporting, setIsExporting] = useState(false);
 
-  const exportReportDocx = async ({ project, options, selectedContent }: DocxExportParams) => {
+  const exportReportDocx = useCallback(async ({ project, options, selectedContent }: DocxExportParams) => {
     if (selectedContent.length === 0) {
       toast({ title: 'Export Canceled', description: 'No content selected to export.', variant: 'destructive' });
       return;
     }
+
     setIsExporting(true);
     try {
       const templateStyles = docxTemplates[options.template] || docxTemplates.modern;
@@ -49,38 +59,34 @@ export function useExport() {
         isRtl: false,
       };
 
-      const selectedContentPlain = selectedContent.map((item) => item.toProperties());
-      const blob = await apiService<
-        { project: ReturnType<Project['toProperties']>; selectedContent: unknown[]; options: Omit<ConversionOptions, 'coverPageMarkdown'> },
-        Blob
-      >({
+      const blob = await apiService<any, Blob>({
         endpoint: '/api/export/docx',
         method: 'POST',
         data: {
           project: project.toProperties(),
-          selectedContent: selectedContentPlain,
+          selectedContent: selectedContent.map((item) => item.toProperties()),
           options: apiOptions,
         },
         responseType: 'blob',
       });
 
+      if (!blob) throw new Error('DOCX synthesis returned an empty payload.');
+
       saveAs(blob, `${project.name.replace(/\s+/g, '_')}_report.docx`);
-      toast({ title: 'Export Successful', description: 'Report exported as DOCX.' });
+      toast({ title: 'Export Successful', description: 'Your academic report has been synthesized.' });
     } catch (error: unknown) {
-      console.error('DOCX Export Error:', error);
-      const errorMessage = error instanceof Error ? error.message : 'Could not generate the DOCX file.';
+      console.error('[Hook:Export] DOCX Failure:', error);
       toast({
         title: 'Export Failed',
-        description: errorMessage,
+        description: error instanceof Error ? error.message : 'The DOCX production pipeline encountered an error.',
         variant: 'destructive',
-        duration: 7000,
       });
     } finally {
       setIsExporting(false);
     }
-  };
+  }, []);
 
-  const exportPresentationPptx = async ({ project, options, selectedContent }: PptxExportParams) => {
+  const exportPresentationPptx = useCallback(async ({ project, options, selectedContent }: PptxExportParams) => {
     if (selectedContent.length === 0) {
       toast({ title: 'Export Canceled', description: 'No content selected to export.', variant: 'destructive' });
       return;
@@ -89,35 +95,37 @@ export function useExport() {
     setIsExporting(true);
     try {
       const templateStyles = pptxTemplates[options.template] || pptxTemplates.modern;
-      const client = container.resolve<any>(IPptxExportServiceToken);
 
-      const result = await client.export(project, selectedContent, {
-        styles: templateStyles.styles,
-        isRtl: options.isRtl,
-        includeToc: options.includeToc,
+      const blob = await apiService<any, Blob>({
+        endpoint: '/api/export/pptx',
+        method: 'POST',
+        data: {
+          project: project.toProperties(),
+          selectedContent: selectedContent.map((item) => item.toProperties()),
+          options: {
+            styles: templateStyles.styles,
+            isRtl: options.isRtl,
+            includeToc: options.includeToc,
+          },
+        },
+        responseType: 'blob',
       });
 
-      const blob = result instanceof Blob
-        ? result
-        : new Blob([result as any], {
-            type: 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
-          });
-      saveAs(blob, `${project.name.replace(/\s+/g, '_')}_presentation.pptx`);
+      if (!blob) throw new Error('PPTX synthesis returned an empty payload.');
 
-      toast({ title: 'Export Successful', description: 'Presentation exported as PPTX.' });
+      saveAs(blob, `${project.name.replace(/\s+/g, '_')}_presentation.pptx`);
+      toast({ title: 'Export Successful', description: 'Your slide-deck has been synthesized.' });
     } catch (error: unknown) {
-      console.error('PPTX Export Error:', error);
-      const errorMessage = error instanceof Error ? error.message : 'Could not generate the PPTX file.';
+      console.error('[Hook:Export] PPTX Failure:', error);
       toast({
         title: 'Export Failed',
-        description: errorMessage,
+        description: error instanceof Error ? error.message : 'The PPTX production pipeline encountered an error.',
         variant: 'destructive',
-        duration: 7000,
       });
     } finally {
       setIsExporting(false);
     }
-  };
+  }, []);
 
   return {
     isExporting,
