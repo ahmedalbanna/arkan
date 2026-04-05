@@ -12,10 +12,59 @@ import './globals.css';
 import { AppProviders } from '@/components/shared/AppProviders';
 
 export const metadata: Metadata = {
-  title: 'Arkan - Intelligent Writing & Production Suite',
+  metadataBase: new URL('https://arkan.io'),
+  title: {
+    default: 'Arkan - Intelligent Writing & Production Suite',
+    template: '%s | Arkan'
+  },
   description: 'Professional grade document architecture, research synthesis, and AI-driven production protocols.',
+  keywords: ['AI Writing', 'Research Synthesis', 'Document Architecture', 'Academic Tools', 'Professional Reports', 'RAG'],
+  authors: [{ name: 'Arkan Intelligence' }],
+  creator: 'Arkan Intelligence',
+  publisher: 'Arkan Intelligence',
+  formatDetection: {
+    email: false,
+    address: false,
+    telephone: false,
+  },
+  openGraph: {
+    type: 'website',
+    locale: 'en_US',
+    url: 'https://arkan.io',
+    siteName: 'Arkan Intelligence',
+    title: 'Arkan - Intelligent Writing & Production Suite',
+    description: 'Professional grade document architecture, research synthesis, and AI-driven production protocols.',
+    images: [
+      {
+        url: '/images/og-image.png',
+        width: 1200,
+        height: 630,
+        alt: 'Arkan Intelligence Suite',
+      }
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Arkan - Intelligent Writing & Production Suite',
+    description: 'Professional grade document architecture, research synthesis, and AI-driven production protocols.',
+    creator: '@arkan_intel',
+    images: ['/images/twitter-image.png'],
+  },
   icons: {
+    icon: '/favicon.ico',
     apple: '/icons/icon-192x192.png',
+  },
+  manifest: '/manifest.json',
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-video-preview': -1,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+    },
   },
 };
 
