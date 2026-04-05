@@ -114,10 +114,29 @@ To provide users with a real-time, context-aware AI assistant that can answer qu
 - **Implementation**: `src/modules/[domain]/adapters/state/`
 - **Usage**: Manages the active project, application status (`loading`, `dirty`, `saving`), and user settings. Stores are co-located with their domain.
 
-### 2. React Query Pattern (Server-side Cache)
+### 2. Atomic State Transformation Pattern
+**Purpose**: Preventing race conditions and ensuring state consistency during complex multi-node updates.
+- **Implementation**: Using `targets.reduce((p, id) => p.updateSection(id, ...), project)` within a single `updateProject` callback.
+- **Benefits**: Ensures that bulk operations (like updating 10 sections at once) result in a single, atomic mutation of the project manifest.
+
+### 3. React Query Pattern (Server-side Cache)
 **Purpose**: Server state management with caching, refetching, and synchronization.
 - **Implementation**: Domain-specific hooks in `src/modules/[domain]/adapters/hooks/`.
 - **Benefits**: Reduces redundant API calls, provides optimistic updates, handles background refetching. Uses centralized key factory in `src/infrastructure/api/query-keys.ts`.
+
+## Robustness & Resilience Patterns
+
+### 1. Unified Existence Guard Pattern
+**Purpose**: Standardizing defensive checks to prevent runtime crashes on partially hydrated or null state.
+- **Implementation**: Explicit `if (!project || !updateProject) return` patterns in all lifecycle and interaction handlers.
+
+### 2. Neural Error Boundary Pattern
+**Purpose**: Containing failures within specific UI zones (like the document renderer or AI analyst) to prevent full-page crashes.
+- **Implementation**: Localized `RendererErrorBoundary` components wrapped around high-risk rendering pipelines.
+
+### 3. Selection Recovery Pattern
+**Purpose**: Synchronizing structural shifts with UI interaction states to prevent "orphaned" focuses.
+- **Implementation**: Structural deletion methods trigger callbacks (`onSelectChapter(null)`) to clear workspace focus if the active node is removed.
 
 ## UI/UX & Architecture Patterns
 

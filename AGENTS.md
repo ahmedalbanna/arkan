@@ -51,10 +51,9 @@ patterns in this project (cn() utility, CVA variants, forwardRef).
 - **Framework:** Next.js 15 (App Router, Server Actions, PWA via `@ducanh2912/next-pwa`)
 - **React version:** React 18 (with strict mode enabled)
 - **AI backend:** Google Genkit 1.x with Ollama models (Gemma 2B, Phi4-Mini, Llama 2 7B)
-- **Database/Auth:** SQLite (Drizzle ORM) for data and local auth; Firebase Admin SDK (server-side only) for legacy support and FCM.
+- **Database/Auth:** SQLite (Drizzle ORM) for data and local auth
 - **File Storage:** Local filesystem-based storage (`storage/uploads/`).
 - **Vector store:** Qdrant (for RAG) via `@qdrant/js-client-rest`.
-- **No Client-side Firebase**: The project is fully independent of client-side Firebase SDKs. Authentication is local (SQLite + JWT), and files are served locally. Do not re-introduce `firebase/auth`, `firebase/app`, or `firebase/firestore` in client components.
 - **UI library:** shadcn/ui (Radix UI primitives) + Tailwind CSS
 - **State management:** Zustand (client store) + TanStack Query (server state)
 - **Forms:** React Hook Form + Zod validation
@@ -137,7 +136,6 @@ Each module in `src/modules/` follows the same four-layer structure:
 1. **`domain/`** — Entities, repository interfaces, service interfaces (no framework deps)
 2. **`application/`** — Use cases that orchestrate domain logic
 3. **`adapters/`** — API clients (browser-facing) and controllers
-4. **`infrastructure/`** — Firebase repository implementations, external service adapters
 
 - Domain interfaces use token-based injection, e.g. `IUserRepositoryToken`
 - Server-side implementations are registered in `src/infrastructure/di/container.ts` using `tsyringe`, conditionally on `typeof window === 'undefined'`
@@ -231,18 +229,6 @@ Each module in `src/modules/` follows the same four-layer structure:
 - Return consistent JSON responses by using the `handle*Result` helpers (e.g., `handleAiResult`, `handleUserResult`) from `@/infrastructure/api/api-utils`. This ensures a unified error structure, correct HTTP status codes, and automatic telemetry logging.
 - **Centralized Entity Serialization**: If a module returns domain entities from controllers/use cases, teach the shared `handle*Result` helper to serialize both single entities and arrays via `.toStateObject()` / `.toJSON()` rather than manually calling `Response.json(...)` in each route. This keeps route handlers thin and prevents mixed response shapes within the same domain.
 
----
-
-## Firebase & Security
-
-- **Firestore rules** are in `firestore.rules` — always deny by default, whitelist explicitly
-- User roles: `'admin'` and `'user'` — check role before any privileged operation
-- User profile fields editable by users are explicitly allowlisted in database schemas.
-- Firebase Admin SDK is server-only — never import `firebase-admin` in client components.
-- **No Client-side Firebase**: The project has been fully purged of client-side Firebase SDKs. Do not re-introduce `firebase/auth`, `firebase/app`, or `firebase/firestore` in client components.
-- **Local File Storage**: Firebase Cloud Storage is no longer used. Files are stored locally in `storage/uploads/` and served via `/api/storage/[...path]`.
-- Session management uses HTTP-only cookies set via `/api/auth/session`.
-- Server-side Firebase initialization (Admin SDK only) is in `src/infrastructure/firebase/server-init.ts`. Firestore initialization is currently disabled.
 
 ---
 
@@ -274,7 +260,7 @@ Each module in `src/modules/` follows the same four-layer structure:
 - Hook tests: `src/hooks/core/__tests__/`
 - RAG tests: `src/modules/rag/infrastructure/__tests__/`
 - Use `jest.config.js` aliases — import from `@/infrastructure/`, `@/modules/`, `@/components/`, `@/hooks/`
-- Mocking: use `jest-fetch-mock` for fetch; mock Firebase with manual mocks
+- Mocking: use `jest-fetch-mock` for fetch
 - Run type checking before tests: `npm run typecheck && npm test`
 
 ---
@@ -283,19 +269,14 @@ Each module in `src/modules/` follows the same four-layer structure:
 
 | File | Purpose |
 |------|---------|
-| `src/ai/genkit.ts` | Genkit instance, Ollama model constants, `MODEL_BY_TASK` |
-| `src/ai/schemas/index.ts` | Central barrel export for all AI Zod schemas |
-| `src/ai/flows/index.ts` | Barrel export for all AI flows |
+| `src/modules/ai/infrastructure/services/Genkit` | Genkit instance, Ollama model constants, `MODEL_BY_TASK` |
+| `src/modules/ai/domain/schemas/index.ts` | Central barrel export for all AI Zod schemas |
+| `src/modules/ai/infrastructure/flows/index.ts` | Barrel export for all AI flows |
 | `src/infrastructure/di/container.ts` | tsyringe DI registrations (client + server) |
-| `src/lib/query-keys.ts` | TanStack Query key factory |
-| `src/lib/utils/cn.ts` | Tailwind class merging utility |
-| `src/lib/types.ts` | Shared application-level TypeScript types |
-| `src/context/AuthContext.tsx` | Auth state, Firebase user, user profile context |
-| `firestore.rules` | Firestore security rules |
-| `firebase.json` | Firebase project configuration |
+| `src/infrastructure/api/query-keys` | TanStack Query key factory |
+| `src/infrastructure/utils/cn` | Tailwind class merging utility |
 | `docker-compose.yml` | Qdrant local development setup |
 | `src/modules/rag/infrastructure/config.ts` | RAG/Qdrant/Ollama configuration |
-
 ---
 
 ## Environment Variables (key ones)
@@ -312,25 +293,12 @@ QDRANT_API_KEY=
 QDRANT_COLLECTION_NAME=arkan_vectors
 EMBEDDING_DIMENSION=768
 
-# Firebase (client)
-NEXT_PUBLIC_FIREBASE_API_KEY=
-NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=
-NEXT_PUBLIC_FIREBASE_PROJECT_ID=
-NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=
-NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=
-NEXT_PUBLIC_FIREBASE_APP_ID=
 
-# Firebase Admin (server)
-FIREBASE_ADMIN_PROJECT_ID=
-FIREBASE_ADMIN_CLIENT_EMAIL=
-FIREBASE_ADMIN_PRIVATE_KEY=
-```
 
 ---
 
 ## Common Pitfalls
 
-- Do not import `firebase-admin` or any server-only module in client components or hooks
 - Do not use `new` to instantiate services — always resolve via `container.resolve()`
 - All Genkit flow files must declare `'use server'` at the top
 - **Client-Server SDK Decoupling**: AI model names and task constants (`AiModels.ts`) must be located in a dependency-free domain folder. Importing them from server-only SDK entry points (like `Genkit.ts`) pulls heavy Node.js dependencies into the browser bundle, causing Turbopack errors.
@@ -338,7 +306,7 @@ FIREBASE_ADMIN_PRIVATE_KEY=
 - **Turbopack `resolveAlias` paths**: When setting `turbopack.resolveAlias` for browser stubs in `next.config.ts`, use the `{ browser: './path/to/stub' }` syntax with a **relative path** (starting with `./`). This ensures the alias applies only to the client bundle and resolves correctly in Turbopack. Using absolute paths or global strings can cause server-side crashes (e.g., `path.join is not a function`).
 - Server-only DI registrations must be inside the `typeof window === 'undefined'` guard in `container.ts`
 - **Isolated Modules and Decorators**: In classes using `tsyringe` decorators (like `@injectable()`), always import domain interfaces using `import type` (e.g., `import { type IUserRepository } ...`). This prevents "type referenced in a decorated signature" errors when `isolatedModules` and `emitDecoratorMetadata` are enabled.
-- **Infrastructure Purity**: Ensure Domain Repository Interfaces (e.g., `IIndexedDocumentRepository.ts`) do not import infrastructure-specific types (like Firebase `Timestamp`). Use native JS types (`Date`, `string`) and handle conversions in the infrastructure implementation.
+- **Infrastructure Purity**: Ensure Domain Repository Interfaces (e.g., `IIndexedDocumentRepository.ts`) 
 - **Hook Order Safety**: Never return early from a React component if there are hooks (useState, useEffect, etc.) defined below that return. This causes "Rendered fewer hooks than expected" errors. Always call all hooks at the top level before any conditional logic.
 - **Keyboard Shortcut Pattern**: For IDE-style interfaces, centralize shortcut logic in a module-specific hook (e.g., `src/modules/*/adapters/hooks/useKeyboardShortcuts.ts`). This hook should handle platform-specific modifiers (Cmd vs Ctrl) and prevent default browser behavior for common shortcuts like `Cmd+S`.
 - **Subagent Delegation**: Even for localized UI enhancements or hook implementations, strictly follow the delegation policy. Use the **Next.js 15 AI Development Assistant** for hook logic and **shadcn/ui Component Builder Assistant** for extending toolbar components. This ensures consistency with the latest framework patterns.
@@ -371,14 +339,13 @@ FIREBASE_ADMIN_PRIVATE_KEY=
 - If a large route/module needs a structural rewrite and targeted replacements keep failing, prefer reading the full file and then replacing the whole file in one controlled edit instead of stacking many brittle partial replacements.
 - Keep heavy export/conversion logic out of hooks and route handlers. Prefer thin hooks/routes that delegate to infrastructure services; wrap existing converter libraries/utilities behind injectable services instead of duplicating conversion logic in UI code.
 - Do not use `any` as the first fix for `tsyringe` / `TypeInfo not known for "undefined"` errors. Fix the root cause instead: centralize metadata setup, use `@inject(delay(() => ...))` for controller constructor params, and verify import paths / initialization order.
-- When sweeping for direct Firebase usage, distinguish active code from commented-out legacy snippets before planning refactors. Commented imports/usages are not architectural violations and should not drive new work.
 - If a service module grows into a data-access concern (for example document tracking in RAG), promote it into an explicit repository interface + infrastructure implementation rather than leaving it as a free-floating helper.
 - When converting frontend API clients or service adapters to return `Result` objects, do the consumer sweep in the same pass: update TanStack Query hooks, mutations, and route callers to unwrap success values and `throw result.error` on failure so existing `onError`/error-boundary flows keep working.
 - Preserve existing public API response shapes during Result-pattern migrations unless you are also updating every caller. Some endpoints (especially auth/session/signup flows) may intentionally return nested payloads that the frontend already depends on, so swapping them to a generic `handle*Result(...)` response can introduce subtle breakage.
 - When adding Jest coverage in this repo, prefer mocking repositories to return `Result.ok(...)` / `Result.fail(...)` directly rather than constructing heavy domain objects unless the entity behavior is what you are testing. Also verify Jest path aliases cover `@/modules/*`, and keep `jest.setup.js` CommonJS-compatible in the current setup.
 - For large architecture migrations, prefer staged compatibility shims before deleting old barrels. A temporary re-export layer (for example in `src/lib/types.ts`) can keep the app compiling while imports are migrated module-by-module.
 - Avoid repo-wide path rewrites or broad shell replacements until you have verified the exact import patterns with targeted searches. Large `sed`/mass-replace passes can silently create widespread breakage, especially across `src/modules/**/adapters/api-client`, scripts, tests, and case-sensitive file names.
-- After moving shared infrastructure such as API clients, Firebase initialization, or RAG utilities, immediately sweep for old import roots and run `npm run typecheck` and `npm run lint` early. These migrations tend to fail from stale imports more than from business-logic bugs.
+- After moving shared infrastructure such as API clients, or RAG utilities, immediately sweep for old import roots and run `npm run typecheck` and `npm run lint` early. These migrations tend to fail from stale imports more than from business-logic bugs.
 - When moving files between folders with naming changes, standardize internal imports in the same pass (for example `./Template` vs `./template`, or moved exporter/helper paths). Case mismatches are easy to miss and show up late as type or lint failures.
 - Keep domain entities free of framework/browser concerns and avoid circular class dependencies between entities. When two entities need to reference each other, prefer a lightweight `*Properties` interface or ID-based reference rather than importing the full class both ways.
 - After overwriting critical files or doing bulk moves, reopen the changed files immediately to verify the actual content on disk. Large automated edits can leave incorrect placeholders, stale imports, or partial content that is not obvious from the write step alone.
@@ -410,7 +377,6 @@ FIREBASE_ADMIN_PRIVATE_KEY=
 - When tightening TanStack Query key design, avoid placeholder scopes like shared detail keys if the data is actually user-scoped. Update invalidation/removal call sites in the same pass so cache behavior stays coherent.
 - For Jest in this repo, React hook/context tests may need environment support beyond the default config: ensure the `@/` alias is mapped, JSX in `.tsx` tests is transformed correctly, `.next/` is ignored to avoid haste collisions, and `reflect-metadata` is loaded before code that imports `tsyringe`.
 - When a hook/unit test pulls in a heavy domain entity with ESM-only or parser-heavy transitive imports, prefer mocking that entity/module at the test boundary rather than widening Jest transforms to chase unrelated runtime dependencies.
-- For small authenticated client-side mutations that do not yet justify a dedicated API client abstraction, prefer `apiService({ firebaseUser, ... })` over hand-written `getIdToken()` + `fetch(...)` logic. It keeps auth/header/error handling consistent and makes later migrations easier.
 - In Jest, make mocks match the exact import path used by the module under test. If the hook imports `../../core/useBuilderStore`, mocking a different alias or relative path will not intercept the dependency and can lead to confusing failures.
 - When `find_and_replace_code` reports multiple matches inside the same file, stop retrying the same short snippet. Reopen or expand the file and anchor the replacement with adjacent unique context such as the surrounding method signature or neighboring lines.
 - **Pruned Tool Results / Large File Reading**: When opening multiple large files simultaneously with `open_files` or `expand_code_chunks`, tool results may be pruned from message history before you can act on them. To avoid losing file content mid-task: open only one large file at a time when you need to immediately reference its content, or batch all reading into a single iteration before any editing begins. If results were pruned, re-open the specific file rather than proceeding from memory.
@@ -464,17 +430,15 @@ FIREBASE_ADMIN_PRIVATE_KEY=
     - After changing the database provider, immediately update the DI container (`src/infrastructure/di/container.ts`) and run `npm run typecheck` to catch method signature or argument order mismatches.
     - **Repository Interface Verification**: Before implementing new repositories during a technology switch, always cross-reference the exact method signatures in the Domain Repository Interfaces (`src/modules/*/domain/repositories/*.ts`). SQL and NoSQL repository implementations often differ in argument order or data mapping, and catching these early saves time during the typecheck/fix cycle.
     - **API Client Synchronization**: When updating domain interfaces (e.g., adding dashboard metrics), remember to update the corresponding interface in the `api-client` adapter. Unlike a direct repository change, the frontend often relies on these client-side interface definitions, and missing them causes `tsc` failures in components.
-    - **Local Auth Transition**: Replacing Firebase Auth with local SQLite auth is a "full-slice" migration. It requires: 1) Backend storage (password hashes), 2) Sign-in logic (JWT/bcrypt), 3) API routes (`/login`, `/signup`, `/me`), 4) `AuthContext` refactoring to use local `/me` instead of SDK listeners like `onAuthStateChanged`.
     - **Session Flow**: Local auth relies on HTTP-only cookies. After successful login/signup, the API should set the cookie, and the frontend should typically perform a `window.location.href` refresh to ensure `AuthContext` re-runs its initialization flow and picks up the new user state.
     - **Authentication Fallback**: The `withAuth` middleware (`src/lib/utils/api-utils.ts`) supports both `Authorization: Bearer <token>` headers and `__session` cookies. This provides compatibility between standard API clients (token-based) and direct browser-based component calls (cookie-based). If a route returns "Missing token", ensure the client is either passing a token to `apiService` or the user has a valid session cookie.
     - **Client-side Hook Requirements**: When using `useSearchParams` or similar client-side hooks in Next.js App Router (especially in shared layouts or direct pages), always wrap the component in a `<Suspense>` boundary to prevent hydration mismatches or build-time errors.
     - **JSON Field Handling**: In SQLite repositories, handle JSON fields (arrays/objects) by using `JSON.stringify` on save and `JSON.parse` on read. This maintains compatibility with domain entities originally designed for NoSQL stores like Firestore.
     - **Relational Aggregations**: After migrating to SQL, leverage `JOIN`, `GROUP BY`, and `HAVING` clauses for dashboard reports (e.g., user retention, account sharing) instead of performing client-side or application-level filtering. This significantly reduces data transfer and improves performance.
     - Prefer `drizzle-kit push` for rapid schema iteration in development before committing to migrations.
-    - Create specialized seeding scripts (`sqlite-seed.ts`) when moving away from Firebase, as legacy seeding logic often relies on Firebase-specific batching or initialization.
+    - Create specialized seeding scripts (`sqlite-seed.ts`)
     - **Manual Schema Synchronization**: If automated tools like `drizzle-kit push` cannot handle schema changes in a non-interactive environment (e.g., due to data loss prompts), use direct SQL `ALTER TABLE` commands via the database driver to synchronize the physical file with the code schema.
     - During infrastructure cleanup, perform a full sweep to delete stale repositories and initialization logic (e.g., in `server-init.ts`). For example, remove `admin.database()` calls if RTDB is no longer used, as they can trigger runtime errors if configuration URLs are missing. Carefully preserve shared services like Auth, Storage, or Notifications if they are still required.
-    - **Shared Utility Sweeps**: After a major technology shift (like removing Firebase), perform a dedicated sweep of shared utilities (`ApiService.ts`, `errorUtils.ts`, etc.) to remove deprecated types and logic. These "quiet" dependencies can leak old architectural patterns into new code if not removed.
     - **Dependency Injection for New Services**: When introducing new cross-cutting services (like `IEmailService`), define a domain-level interface and use a unique `Symbol` token for registration in the DI container. This maintains loose coupling even when implementation details (like SMTP vs. API-based email) change.
     - **Module-Based Frontend Migration**: When relocating components/hooks to module adapters, immediately update `tailwind.config.ts` to include the new directory in the `content` array. Failing to do so will result in missing CSS utility styles for those components.
     - **Mass Import Refactoring**: For large-scale file moves, use `sed` or `grep/xargs` with absolute path aliases (`@/modules/...`) to update imports repo-wide. This is significantly more efficient than individual `find_and_replace_code` calls but requires careful regex validation.
@@ -484,11 +448,9 @@ FIREBASE_ADMIN_PRIVATE_KEY=
     - **JSON Field Serialization**: In SQLite repositories, handle JSON fields (arrays/objects) by using `JSON.stringify` on save and `JSON.parse` on read. This maintains compatibility with domain entities originally designed for NoSQL stores like Firestore.
     - **Relational Aggregations**: After migrating to SQL, leverage `JOIN`, `GROUP BY`, and `HAVING` clauses for dashboard reports (e.g., user retention, account sharing) instead of performing client-side or application-level filtering. This significantly reduces data transfer and improves performance.
     - **Isolated Modules and Decorators**: In classes using `tsyringe` decorators (like `@injectable()`), always import domain interfaces using `import type` (e.g., `import { type IUserRepository } ...`). This prevents "type referenced in a decorated signature" errors when `isolatedModules` and `emitDecoratorMetadata` are enabled.
-    - **Infrastructure Purity**: Ensure Domain Repository Interfaces (e.g., `IIndexedDocumentRepository.ts`) do not import infrastructure-specific types (like Firebase `Timestamp`). Use native JS types (`Date`, `string`) and handle conversions in the infrastructure implementation.
     - **Injectable Utilities**: Cross-cutting utilities (Cache, Cookie, Session management) should be promoted to injectable services with domain-level interfaces. This allows for clean dependency injection, better test mocking, and consistent architectural patterns across the application.
     - **Repository Interface Verification**: Before implementing new repositories during a technology switch, always cross-reference the exact method signatures in the Domain Repository Interfaces (`src/modules/*/domain/repositories/*.ts`). SQL and NoSQL repository implementations often differ in argument order or data mapping, and catching these early saves time during the typecheck/fix cycle.
     - **API Client Synchronization**: When updating domain interfaces (e.g., adding dashboard metrics), remember to update the corresponding interface in the `api-client` adapter. Unlike a direct repository change, the frontend often relies on these client-side interface definitions, and missing them causes `tsc` failures in components.
-    - **Local Auth Transition**: Replacing Firebase Auth with local SQLite auth is a "full-slice" migration. It requires: 1) Backend storage (password hashes), 2) Sign-in logic (JWT/bcrypt), 3) API routes (`/login`, `/signup`, `/me`), 4) `AuthContext` refactoring to use local `/me` instead of SDK listeners like `onAuthStateChanged`.
     - **Session Flow**: Local auth relies on HTTP-only cookies. After successful login/signup, the API should set the cookie, and the frontend should typically perform a `window.location.href` refresh to ensure `AuthContext` re-runs its initialization flow and picks up the new user state.
     - **Authentication Fallback**: The `withAuth` middleware (`src/lib/utils/api-utils.ts`) supports both `Authorization: Bearer <token>` headers and `__session` cookies. This provides compatibility between standard API clients (token-based) and direct browser-based component calls (cookie-based). If a route returns "Missing token", ensure the client is either passing a token to `apiService` or the user has a valid session cookie.
     - **Client-side Hook Requirements**: When using `useSearchParams` or similar client-side hooks in Next.js App Router (especially in shared layouts or direct pages), always wrap the component in a `<Suspense>` boundary to prevent hydration mismatches or build-time errors.
@@ -502,10 +464,9 @@ FIREBASE_ADMIN_PRIVATE_KEY=
     - **JSON Field Handling**: In SQLite repositories, handle JSON fields (arrays/objects) by using `JSON.stringify` on save and `JSON.parse` on read. This maintains compatibility with domain entities originally designed for NoSQL stores like Firestore.
     - **Relational Aggregations**: After migrating to SQL, leverage `JOIN`, `GROUP BY`, and `HAVING` clauses for dashboard reports (e.g., user retention, account sharing) instead of performing client-side or application-level filtering. This significantly reduces data transfer and improves performance.
     - Prefer `drizzle-kit push` for rapid schema iteration in development before committing to migrations.
-    - Create specialized seeding scripts (`sqlite-seed.ts`) when moving away from Firebase, as legacy seeding logic often relies on Firebase-specific batching or initialization.
+    - Create specialized seeding scripts (`sqlite-seed.ts`)
     - **Manual Schema Synchronization**: If automated tools like `drizzle-kit push` cannot handle schema changes in a non-interactive environment (e.g., due to data loss prompts), use direct SQL `ALTER TABLE` commands via the database driver to synchronize the physical file with the code schema.
     - During infrastructure cleanup, perform a full sweep to delete stale repositories and initialization logic (e.g., in `server-init.ts`). For example, remove `admin.database()` calls if RTDB is no longer used, as they can trigger runtime errors if configuration URLs are missing. Carefully preserve shared services like Auth, Storage, or Notifications if they are still required.
-    - **Shared Utility Sweeps**: After a major technology shift (like removing Firebase), perform a dedicated sweep of shared utilities (`ApiService.ts`, `errorUtils.ts`, etc.) to remove deprecated types and logic. These "quiet" dependencies can leak old architectural patterns into new code if not removed.
     - **Dependency Injection for New Services**: When introducing new cross-cutting services (like `IEmailService`), define a domain-level interface and use a unique `Symbol` token for registration in the DI container. This maintains loose coupling even when implementation details (like SMTP vs. API-based email) change.
     - **Module-Based Frontend Migration**: When relocating components/hooks to module adapters, immediately update `tailwind.config.ts` to include the new directory in the `content` array. Failing to do so will result in missing CSS utility styles for those components.
     - **Mass Import Refactoring**: For large-scale file moves, use `sed` or `grep/xargs` with absolute path aliases (`@/modules/...`) to update imports repo-wide. This is significantly more efficient than individual `find_and_replace_code` calls but requires careful regex validation.
@@ -513,12 +474,10 @@ FIREBASE_ADMIN_PRIVATE_KEY=
     - **State Management Localization**: Move domain-specific Zustand stores from `src/hooks/core/` to their respective module's `adapters/state/` directory. This ensures that state is encapsulated alongside the logic and components that use it.
     - **API Standardization**: Ensure all API clients in `adapters/api-client/` follow the `Result<T, ApiError>` pattern. This provides consistent error handling and type safety across the frontend. Refactor any raw `fetch` or `Promise<T>` calls to use the `ApiService` wrapper.
     - **Backend-Agnostic API Clients**: When moving to cookie-based authentication, refactor all API clients to remove explicit `token` parameters simultaneously. This prevents "Missing token" (401) errors in the frontend. Ensure every method returns a `Result<T, ApiError>` for consistent error handling in TanStack Query hooks.
-    - **Type Mismatch Cleanup**: After removing properties from shared utilities (like `firebaseUser` from `apiService`), perform a project-wide search to remove stale property passing in components and hooks to avoid "Property does not exist on type" errors.
     - **Query Key Factory Completeness**: Before refactoring a large set of hooks, verify that the `src/lib/query-keys.ts` factory includes all required patterns (especially `lists(type)` and `detail(type, id)` for varied entities). Missing keys are a common cause of build-time failures during architectural shifts.
     - **Preserving Domain Logic**: During full-file overwrites of domain entities (e.g., `User.ts`), ensure utility methods like `getInitials()` or `getFormattedDate()` are preserved. These are often missed if the focus is purely on schema/property updates.
     - **Entity Instantiation in Repositories**: In SQLite repositories, always return full domain entity instances (e.g., `new User(data)`) instead of raw database objects. This ensures frontend components can access essential utility methods like `getFormattedDate()` and `getInitials()` without manual casting or re-instantiation.
     - **Class Import Awareness**: When a component needs to instantiate a domain entity (e.g., `new Transaction(t)`), ensure the class is imported as a value, not just a type. Using `import type { Transaction }` will cause "Transaction cannot be used as a value" errors when attempting to call the constructor.
-    - **Type Mismatch Cleanup**: After removing properties from shared utilities (like `firebaseUser` from `apiService`), perform a project-wide search to remove stale property passing in components and hooks to avoid "Property does not exist on type" errors.
     - **Defensive UI Data Handling**: Always wrap external data formatting (e.g., `new Date(createdAt)` or `formatDistanceToNow`) in defensive checks or `try-catch` blocks. This prevents runtime crashes (like `Invalid time value`) if the backend returns malformed data or if a hook is temporarily using a placeholder.
     - **`withAuth` User Object is a Domain Entity**: The `user` object passed into `withAuth` handlers is a fully resolved SQLite `User` entity (from `userRepo.getById()`), which has `.id` — NOT `.uid`. Never use `user.uid` inside a `withAuth` handler; it will be `undefined` and silently cause queries to return empty results or update nothing. Only use `user.uid` on the raw JWT-decoded token (e.g., in the login route before the User entity is loaded).
     - **Class Instance Hydration After API Round-trips**: Domain entities with methods (e.g., `Transaction.getFormattedPrice()`, `User.getInitials()`) are serialized to plain objects during JSON API responses. When the frontend receives them, they must be re-hydrated into class instances before rendering: `items.map(t => t instanceof MyClass ? t : new MyClass(t))`. Apply this in the component or hook that first receives the data (e.g., the list component), not deep inside child components.
@@ -554,7 +513,7 @@ FIREBASE_ADMIN_PRIVATE_KEY=
     - **Git Corrupt History Recovery**: When `git push` fails due to missing/corrupted objects deep in history, create `.git/shallow` containing the SHA of the last accessible commit. This tells git to treat that commit as a root (no parents), allowing push of all accessible history without the missing objects.
 - **Variable Shadowing in React**: When using `useAuth()`, prefer naming the destructured variable `user: authUser` if the component already uses a local `user` property (e.g., in a list or prop). This prevents "Duplicate identifier" errors and improves clarity.
 - **Controlled Input Fallbacks**: To avoid "changing a controlled input to be uncontrolled" errors, always provide a fallback value (e.g., `value={val || ''}`) for text inputs if the underlying state might be initially `null` or `undefined`.
-- **Local File Storage Transition**: Replaced Firebase Cloud Storage with a local filesystem-based solution. The `LocalFileStorageService` saves files to `storage/uploads/` and returns relative API URLs (`/api/storage/uploads/...`).
+- **Local File Storage**: a local filesystem-based solution. The `LocalFileStorageService` saves files to `storage/uploads/` and returns relative API URLs (`/api/storage/uploads/...`).
 - **Secure File Serving**: The dynamic route `src/app/api/storage/[...path]/route.ts` serves local files. It MUST include path traversal protection (`relativePath.includes('..')`) and use `mime-types` for correct `Content-Type` headers.
 - **Isolated Modules and Decorators**: In classes using `tsyringe` decorators (like `@injectable()`), always import domain interfaces using `import type` (e.g., `import { type IUserRepository } ...`). This prevents "type referenced in a decorated signature" errors when `isolatedModules` and `emitDecoratorMetadata` are enabled.
 - **Fullscreen IDE Layouts**: When building fullscreen IDE-style pages (like the Builder), set the root container height to `h-[calc(100vh-64px)]` to account for the sticky global Header. This prevents double scrollbars and ensures the workspace fills the viewport perfectly.
@@ -654,12 +613,10 @@ FIREBASE_ADMIN_PRIVATE_KEY=
 - **Hybrid Preview/Edit Pattern**: Maintain a structural `MarkdownViewer` map for "Preview Mode" while using a unified editor for "Edit Mode". This balances the need for a hierarchical review with the flexibility of a cohesive document editor.
 - **Clean Component Integration**: Ensure shared components like `MarkdownViewer` support optional flags (e.g., `noScroll`) to integrate seamlessly into high-fidelity canvas layouts like `A4Page` without redundant scrollbars or UI clutter.
 - **Backend-Agnostic API Clients**: When moving to cookie-based authentication, refactor all API clients to remove explicit `token` parameters simultaneously. This prevents "Missing token" (401) errors in the frontend. Ensure every method returns a `Result<T, ApiError>` for consistent error handling in TanStack Query hooks.
-- **Type Mismatch Cleanup**: After removing properties from shared utilities (like `firebaseUser` from `apiService`), perform a project-wide search to remove stale property passing in components and hooks to avoid "Property does not exist on type" errors.
 - **Query Key Factory Completeness**: Before refactoring a large set of hooks, verify that the `src/lib/query-keys.ts` factory includes all required patterns (especially `lists(type)` and `detail(type, id)` for varied entities). Missing keys are a common cause of build-time failures during architectural shifts.
 - **Preserving Domain Logic**: During full-file overwrites of domain entities (e.g., `User.ts`), ensure utility methods like `getInitials()` or `getFormattedDate()` are preserved. These are often missed if the focus is purely on schema/property updates.
 - **Entity Instantiation in Repositories**: In SQLite repositories, always return full domain entity instances (e.g., `new User(data)`) instead of raw database objects. This ensures frontend components can access essential utility methods like `getFormattedDate()` and `getInitials()` without manual casting or re-instantiation.
 - **Class Import Awareness**: When a component needs to instantiate a domain entity (e.g., `new Transaction(t)`), ensure the class is imported as a value, not just a type. Using `import type { Transaction }` will cause "Transaction cannot be used as a value" errors when attempting to call the constructor.
-- **Type Mismatch Cleanup**: After removing properties from shared utilities (like `firebaseUser` from `apiService`), perform a project-wide search to remove stale property passing in components and hooks to avoid "Property does not exist on type" errors.
 - **Defensive UI Data Handling**: Always wrap external data formatting (e.g., `new Date(createdAt)` or `formatDistanceToNow`) in defensive checks or `try-catch` blocks. This prevents runtime crashes (like `Invalid time value`) if the backend returns malformed data or if a hook is temporarily using a placeholder.
 - **Admin UI Guards**: When adding administrative features to shared/global components (like the Notification Dropdown or Header), always wrap them in explicit role checks (e.g., `userProfile?.role === 'admin'`) to ensure they are hidden from standard users.
 - **SQLite Transaction Pattern**: In `better-sqlite3`, transactions are synchronous. When using Drizzle's `db.transaction()`, use synchronous methods (`.get()`, `.run()`, `.all()`) inside the block. Avoid `await` for inner queries to ensure consistent transaction behavior and prevent "transaction already in progress" errors.

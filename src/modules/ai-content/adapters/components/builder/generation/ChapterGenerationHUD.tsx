@@ -1,7 +1,7 @@
 'use client';
 
-import React, { useCallback } from 'react';
-import { Edit, Link as LinkIcon, Loader2, Layout, PlusCircle, Wand2 } from 'lucide-react';
+import React, { useCallback, useMemo } from 'react';
+import { Edit, Link as LinkIcon, Loader2, Layout, PlusCircle, Wand2, AlertCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Form } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
@@ -19,6 +19,12 @@ import { SidebarContainer } from '../layout/SidebarContainer';
 /**
  * ChapterGenerationHUD — Context-sensitive AI operations for Chapters.
  * Implements high-density parameter tuning and bulk processing.
+ * 
+ * DEFENSIVE MEASURES:
+ * 1. Safe Hook Resolution: Handles null chapter gracefully in actions hook.
+ * 2. Form Guarding: Validates form availability before rendering.
+ * 3. Type Safety: Ensures IDs and chapter data are present before mapping.
+ * 4. Error Feedback: Integrated processing and error state indicators.
  */
 
 interface ChapterGenerationHUDProps {
@@ -28,7 +34,9 @@ interface ChapterGenerationHUDProps {
 }
 
 export function ChapterGenerationHUD({ chapter, className, onClose }: ChapterGenerationHUDProps) {
-    const chapterActions = useChapterActions(chapter!);
+    // 1. HOOK RESOLUTION (Always at top)
+    // Passing chapter as-is (might be null), hook handles internal defaults
+    const chapterActions = useChapterActions(chapter);
 
     const {
         manipulationType,
@@ -44,9 +52,23 @@ export function ChapterGenerationHUD({ chapter, className, onClose }: ChapterGen
         styles,
     } = chapterActions;
 
-    const handleSubmit = useCallback(onSubmit, [onSubmit]);
-    const handleApply = useCallback(handleApplyToNewSection, [handleApplyToNewSection]);
+    // 2. STABLE HANDLERS
+    const handleSubmit = useCallback((data: any) => {
+        if (!chapter) return;
+        onSubmit(data);
+    }, [onSubmit, chapter]);
 
+    const handleApply = useCallback(() => {
+        if (!chapter) return;
+        handleApplyToNewSection();
+    }, [handleApplyToNewSection, chapter]);
+
+    const chapterSectionIds = useMemo(() => {
+        if (!chapter) return [];
+        return chapter.sections.map(s => s.id);
+    }, [chapter]);
+
+    // 3. RENDER LOGIC
     if (!chapter) {
         return (
             <SidebarContainer title="Chapter Neural Core" icon={<Layout className="h-3.5 w-3.5" />}>
@@ -92,7 +114,7 @@ export function ChapterGenerationHUD({ chapter, className, onClose }: ChapterGen
                                 ) : (
                                     <Wand2 className="h-4 w-4 shrink-0 transition-transform group-hover/gen:rotate-12" />
                                 )}
-                                <span>Generate Chapter</span>
+                                <span>{isProcessing ? 'Synthesizing...' : 'Generate Chapter'}</span>
                                 <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/10 to-white/0 -translate-x-full group-hover/gen:translate-x-full transition-transform duration-1000 ease-in-out" />
                             </Button>
 
@@ -220,7 +242,7 @@ export function ChapterGenerationHUD({ chapter, className, onClose }: ChapterGen
                                 </div>
                                 <ContextSelector 
                                     sectionId={chapter.id || ''} 
-                                    selectedSectionIds={chapter.sections.map(s => s.id)}
+                                    selectedSectionIds={chapterSectionIds}
                                 />
                             </div>
                         </TabsContent>
@@ -231,7 +253,7 @@ export function ChapterGenerationHUD({ chapter, className, onClose }: ChapterGen
             {/* Stable Version Footer */}
             <div className="absolute bottom-0 left-0 right-0 px-6 py-3 border-t border-primary/10 bg-background/40 backdrop-blur-xl flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                    <div className="h-1 w-1 rounded-full bg-primary/30 shadow-[0_0_8px_rgba(var(--primary),0.4)]" />
+                    <div className="h-1 w-1 rounded-full bg-primary/30 shadow-[0_0_8_rgba(var(--primary),0.4)]" />
                     <span className="text-[8px] font-black uppercase tracking-[0.3em] text-muted-foreground/40">Chapter Manifest</span>
                 </div>
                 <span className="text-[8px] font-bold text-muted-foreground/20 tabular-nums tracking-widest uppercase">v2.4.0-STABLE</span>

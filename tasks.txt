@@ -1,8 +1,21 @@
-I need to perform a comprehensive refactoring of my project codebase. Please perform the following steps:
- 
-1. **Audit Naming Conventions:** Audit all file names and function names for consistency and clarity (use camelCase for functions and PascalCase for components). Suggest improvements following clean code principles.
-2. **Refactor & Relink:** Rename the files and functions based on your suggestions. Update all import/export statements and internal references throughout the project to ensure the code remains functional.
-3. **Cleanup:** Identify and remove any redundant, obsolete, or orphaned files/functions that are no longer referenced after the renaming process.
-4. **Output:** Provide a 'Before vs. After' change log, the updated file structure, and the modified code blocks for the affected files.
+I need to perform Robustness Refactoring on these components. My goal is to harden the logic, improve error handling, and ensure the components behave predictably under all circumstances.
+Please analyze the provided code and apply the following Defensive Programming principles:
+Input Validation: Add robust checks for props, function arguments, and external data sources. Ensure the component doesn't crash if it receives null, undefined, or unexpected data types.
+Error Handling: Implement try/catch blocks where necessary, and add graceful fallback UI/logic for when processes fail (e.g., loading states, error states, or default values).
+Edge Case Handling: Identify and cover potential edge cases (e.g., empty lists, API timeout simulation, out-of-bounds inputs).
+State Integrity: Ensure the component state remains consistent even during rapid user interactions or race conditions.
+Optimization: While hardening the logic, identify any bottlenecks or inefficient state updates and optimize them.
+Please output the refactored code with clear comments explaining the added safety measures and the logic behind each validation step.
 
-Please ensure that all module dependencies are updated to reflect these changes correctly.
+ 1 Run npm run typecheck to verify the full-slice type safety of the refactored components.
+ 2 Investigate other HUD panels (e.g., ProjectSettingsHUD or TemplateLibraryHUD) for similar refactoring.
+ 3 Perform a code review of the changes using the Code Review Checklist Agent.
+
+  1 Run npm run typecheck to verify module-wide type safety.
+ 2 Finalize and prepare a summary report of all Robustness Refactoring completed in this session.
+ 3 Move to Admin Dashboard components for similar hardening.
+
+
+ 1 Run a full system Type Check (npm run typecheck) to verify the hardening across all modules.
+ 2 Explore refactoring the User Profile or Billing modules for similar robustness.
+ 3 Perform a final UI walkthrough of the hardened Builder components.

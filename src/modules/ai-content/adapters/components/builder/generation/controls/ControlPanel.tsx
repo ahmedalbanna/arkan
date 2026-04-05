@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useCallback } from 'react';
-import { SlidersHorizontal, Zap, Target, Layout, PenTool } from 'lucide-react';
+import { SlidersHorizontal, Zap, Target, Layout, PenTool, AlertCircle } from 'lucide-react';
 import { Label } from '@/components/ui/label';
 import { Slider } from '@/components/ui/slider';
 import { Badge } from '@/components/ui/badge';
@@ -16,10 +16,16 @@ import { GenerationControlState } from '@/modules/ai-content/domain/entities/Con
 /**
  * ControlPanel — Low-level neural parameter tuning HUD.
  * Manages Tone, Complexity, Formality, and Output Formats for AI generation.
+ * 
+ * DEFENSIVE MEASURES:
+ * 1. Prop Validation: Handles missing section gracefully with error state.
+ * 2. Atomic Batching: Updates multiple target sections in a single reduce pass.
+ * 3. Safe Schema Mapping: Uses schema-defined options for selects.
+ * 4. Error Containment: Wraps complex heuristic logic (Auto-Sync) in try-catch.
  */
 
 interface ControlPanelProps {
-    section: Section;
+    section: Section | null;
     selectedIds?: string[];
 }
 
@@ -33,42 +39,70 @@ const toneOptions = ToneSchema.options.map(tone => ({
     label: tone.charAt(0).toUpperCase() + tone.slice(1)
 }));
 
-const ControlPanelComponent = ({ section, selectedIds }: ControlPanelProps) => {
+const ControlPanelComponent = ({ section, selectedIds = [] }: ControlPanelProps) => {
     const { updateProject } = useBuilderStore();
 
     const handleUpdate = useCallback((updates: Partial<GenerationControlState>) => {
-        const targets = selectedIds && selectedIds.length > 1 ? selectedIds : [section.id];
-        updateProject((project) => {
-            return targets.reduce((currentProject, id) => {
-                return currentProject.updateSection(id, (sectionToUpdate) =>
-                    sectionToUpdate.withProps({
-                        controls: { ...sectionToUpdate.controls, ...updates },
-                    })
-                );
-            }, project);
-        });
-    }, [selectedIds, section.id, updateProject]);
+        if (!section || !updateProject) return;
+        
+        const targets = selectedIds.length > 1 ? selectedIds : [section.id];
+        
+        try {
+            updateProject((project) => {
+                if (!project) return project;
+
+                // Atomic Batch Update
+                return targets.reduce((currentProject, id) => {
+                    const targetSection = currentProject.getSection(id);
+                    if (!targetSection) return currentProject;
+
+                    return currentProject.updateSection(id, (s) =>
+                        s.withProps({
+                            controls: { ...s.controls, ...updates },
+                        })
+                    );
+                }, project);
+            });
+        } catch (error) {
+            console.error('[ControlPanel] Failed to update neural controls:', error);
+        }
+    }, [selectedIds, section?.id, updateProject]);
 
     const handleDetectFormats = useCallback(() => {
-        if (!section.content) return;
-        const lines = section.content.split('\n');
-        const detected: GenerationControlState['outputStyle'] = {
-            heading: lines.some(l => l.trim().startsWith('#')),
-            paragraph: lines.some(l => l.trim() && !l.startsWith('#') && !l.startsWith('-') && !l.startsWith('|')),
-            list: lines.some(l => l.trim().startsWith('- ') || l.trim().startsWith('* ') || /^\d+\./.test(l.trim())),
-            table: lines.some(l => l.includes('|')),
-            code: lines.some(l => l.startsWith('```')),
-            diagram: lines.some(l => l.includes('mermaid')),
-            math: lines.some(l => l.includes('$')),
-        };
-        handleUpdate({ outputStyle: detected });
-    }, [handleUpdate, section.content]);
+        if (!section?.content) return;
+        
+        try {
+            const lines = section.content.split('\n');
+            const detected: GenerationControlState['outputStyle'] = {
+                heading: lines.some(l => l.trim().startsWith('#')),
+                paragraph: lines.some(l => l.trim() && !l.startsWith('#') && !l.startsWith('-') && !l.startsWith('|')),
+                list: lines.some(l => l.trim().startsWith('- ') || l.trim().startsWith('* ') || /^\d+\./.test(l.trim())),
+                table: lines.some(l => l.includes('|')),
+                code: lines.some(l => l.startsWith('```')),
+                diagram: lines.some(l => l.includes('mermaid')),
+                math: lines.some(l => l.includes('$')),
+            };
+            handleUpdate({ outputStyle: detected });
+        } catch (error) {
+            console.error('[ControlPanel] Auto-sync heuristic failed:', error);
+        }
+    }, [handleUpdate, section?.content]);
+
+    if (!section) {
+        return (
+            <div className="p-5 rounded-[24px] border border-dashed border-primary/10 bg-primary/[0.02] flex items-center gap-3 text-muted-foreground/40 italic">
+                <AlertCircle className="h-4 w-4" />
+                <span className="text-[10px] font-black uppercase tracking-widest">Controls Offline</span>
+            </div>
+        );
+    }
 
     return (
         <div className="space-y-8 pt-2 relative">
             {/* Dot-grid atmosphere — Standardized Workspace Alignment (28px) */}
             <div
                 className="absolute inset-0 opacity-[0.02] dark:opacity-[0.04] bg-[radial-gradient(circle_at_center,_var(--primary)_1px,_transparent_1px)] bg-[size:28px_28px] pointer-events-none"
+                style={{ backgroundSize: '28px 28px' }}
             />
 
             {/* HUD Header */}

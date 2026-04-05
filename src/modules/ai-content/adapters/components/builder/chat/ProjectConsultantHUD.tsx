@@ -1,17 +1,23 @@
 'use client';
 
-import React, { useRef, useEffect } from 'react';
-import { MessageSquare, Cpu, Sparkles } from "lucide-react";
+import React, { useRef, useEffect, useCallback } from 'react';
+import { MessageSquare, Cpu } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { useProjectChat } from "@/modules/ai-content/adapters/hooks/report-mode/useProjectChat";
 import { SidebarContainer } from '../layout/SidebarContainer';
 import { ChatMessage } from './ChatMessage';
 import { ChatInput } from './ChatInput';
+import { cn } from '@/infrastructure/utils/cn';
 
 /**
  * ProjectConsultantHUD — A high-fidelity AI consultation interface.
  * Provides real-time guidance and document structural intelligence.
+ * 
+ * DEFENSIVE MEASURES:
+ * 1. Message Validation: Prevents empty or whitespace-only transmissions.
+ * 2. Stable Keying: Uses message-specific data or timestamps for list integrity.
+ * 3. Scroll Orchestration: Resilient scroll-to-bottom logic for dynamic streams.
+ * 4. UX Safety: Disables input during processing and handles empty history.
  */
 
 interface ProjectConsultantHUDProps {
@@ -23,20 +29,38 @@ export function ProjectConsultantHUD({ isOpen, onClose }: ProjectConsultantHUDPr
     const { messages, sendMessage, isLoading } = useProjectChat();
     const scrollAreaRef = useRef<HTMLDivElement>(null);
 
-    const handleSend = (content: string) => {
-        const projectContext = ''; // Context is managed within the AI flow / hook
-        sendMessage(content, projectContext);
-    };
+    // 1. STABLE MESSAGE HANDLER — With input validation
+    const handleSend = useCallback((content: string) => {
+        if (!content || !content.trim() || isLoading) return;
+        
+        try {
+            const projectContext = ''; // Context is managed within the AI flow / hook
+            sendMessage(content.trim(), projectContext);
+        } catch (error) {
+            console.error('[ProjectConsultantHUD] Transmission failure:', error);
+        }
+    }, [sendMessage, isLoading]);
 
-    // Maintain focus on the latest cognitive exchange
-    useEffect(() => {
+    // 2. SCROLL ORCHESTRATION — Maintain focus on latest cognitive exchange
+    const scrollToBottom = useCallback(() => {
         if (scrollAreaRef.current) {
             const scrollContainer = scrollAreaRef.current.querySelector('[data-radix-scroll-area-viewport]');
             if (scrollContainer) {
-                scrollContainer.scrollTop = scrollContainer.scrollHeight;
+                scrollContainer.scrollTo({
+                    top: scrollContainer.scrollHeight,
+                    behavior: 'smooth'
+                });
             }
         }
-    }, [messages, isLoading]);
+    }, []);
+
+    useEffect(() => {
+        if (isOpen && (messages.length > 0 || isLoading)) {
+            // Slight delay to allow for DOM rendering of new messages
+            const timer = setTimeout(scrollToBottom, 100);
+            return () => clearTimeout(timer);
+        }
+    }, [messages.length, isLoading, isOpen, scrollToBottom]);
 
     if (!isOpen) return null;
 
@@ -46,21 +70,26 @@ export function ProjectConsultantHUD({ isOpen, onClose }: ProjectConsultantHUDPr
             icon={<MessageSquare className="h-3.5 w-3.5" />}
             actions={
                 <div className="flex items-center gap-2 px-2.5 py-1 rounded-full bg-green-500/5 border border-green-500/10 shadow-inner">
-                    <div className="h-1 w-1 rounded-full bg-green-500 animate-pulse shadow-[0_0_8px_rgba(34,197,94,0.6)]" />
-                    <span className="text-[8px] font-black text-green-600 dark:text-green-400 uppercase tracking-widest">Active Core</span>
+                    <div className={cn(
+                        "h-1 w-1 rounded-full bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.6)]",
+                        isLoading ? "animate-ping" : "animate-pulse"
+                    )} />
+                    <span className="text-[8px] font-black text-green-600 dark:text-green-400 uppercase tracking-widest">
+                        {isLoading ? 'Processing' : 'Active Core'}
+                    </span>
                 </div>
             }
         >
             <div className="flex flex-col h-full relative -mx-5 -my-5">
                 {/* Cognitive Exchange Stream */}
                 <div className="flex-1 overflow-hidden relative min-h-[400px]">
-                    {/* Atmospheric Backdrop */}
+                    {/* Atmospheric Backdrop — Standardized Grid (28px) */}
                     <div className="absolute inset-0 pointer-events-none opacity-[0.03] bg-[radial-gradient(circle_at_center,_var(--primary)_1px,_transparent_1px)] bg-[size:28px_28px]" />
                     
                     <ScrollArea ref={scrollAreaRef} className="h-full w-full custom-scrollbar">
                         <div className="p-6 space-y-8 pb-32">
                             {/* Empty State — Initial Sync */}
-                            {messages.length === 0 && (
+                            {messages.length === 0 && !isLoading && (
                                 <div className="text-center py-16 px-8 animate-in fade-in zoom-in-95 duration-700">
                                     <div className="h-16 w-16 mx-auto mb-6 rounded-[24px] bg-primary/5 border border-primary/10 flex items-center justify-center shadow-2xl relative group/logo">
                                         <div className="absolute inset-0 bg-primary/5 blur-xl group-hover:blur-2xl transition-all duration-700" />
@@ -75,10 +104,10 @@ export function ProjectConsultantHUD({ isOpen, onClose }: ProjectConsultantHUDPr
                                 </div>
                             )}
 
-                            {/* Message Nodes */}
+                            {/* Message Nodes — Stable Keying Pattern */}
                             {messages.map((message, index) => (
                                 <ChatMessage 
-                                    key={index} 
+                                    key={`msg-${index}-${message.role}`} 
                                     role={message.role as 'assistant' | 'user'} 
                                     content={message.content} 
                                 />

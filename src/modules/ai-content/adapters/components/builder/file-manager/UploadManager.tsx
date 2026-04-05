@@ -2,26 +2,26 @@
 
 import React, { useState, useCallback, useMemo } from 'react';
 import { useDropzone } from 'react-dropzone';
-import { v4 as uuidv4 } from 'uuid';
-import { 
-    AtomIcon, 
-    FileText, 
-    Loader2, 
-    Plus, 
-    UploadCloud, 
-    X, 
-    Database, 
+import {
+    AtomIcon,
+    FileText,
+    Loader2,
+    Plus,
+    UploadCloud,
+    X,
+    Database,
     Search,
     Filter,
     Layers,
     LayoutGrid,
-    Eye
+    Eye,
+    ShieldAlert
 } from 'lucide-react';
-import { 
-    Dialog, 
-    DialogContent, 
-    DialogHeader, 
-    DialogTitle 
+import {
+    Dialog,
+    DialogContent,
+    DialogHeader,
+    DialogTitle
 } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
@@ -30,35 +30,31 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { 
-    Select, 
-    SelectContent, 
-    SelectItem, 
-    SelectTrigger, 
-    SelectValue 
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue
 } from "@/components/ui/select";
 import { useLocalization } from "@/context/LocalizationContext";
 import { useBuilderStore, useToast } from '@/hooks';
 import { cn } from "@/infrastructure/utils/cn";
+import { generateRandomId } from '@/infrastructure/utils/randomId';
 import { ExternalContextType } from '@/modules/ai-content/domain/entities/ControlTypes';
 import { SidebarContainer } from '../layout/SidebarContainer';
-// import { FileContentViewer } from '@/modules/ai-content/adapters/components/report-mode/file-manager/FileContentViewer'; // File deleted during cleanup
-function FileContentViewer({ fileName, content }: { fileName: string, content: string }) {
-    return (
-        <div className="space-y-4">
-            <h3 className="text-lg font-bold">{fileName}</h3>
-            <pre className="p-4 bg-muted rounded-lg overflow-auto max-h-[60vh] text-sm font-mono">
-                {content}
-            </pre>
-        </div>
-    );
-}
 import { FileNodeItem } from './FileNodeItem';
 import { IntelligenceAnalyst } from './IntelligenceAnalyst';
 
 /**
  * UploadManager — A high-density dashboard for mass context management.
  * Consolidates file ingestion, raw text entry, and data analysis hubs.
+ * 
+ * DEFENSIVE MEASURES:
+ * 1. Ingestion Guards: Robust FileReader error handling with unified toast reporting.
+ * 2. ID Standardization: Replaces uuidv4 with project-standard generateRandomId().
+ * 3. Atomic State Logic: Verifies project and updateProject presence for all mutations.
+ * 4. High-Fidelity HUD: Standardized dot grids and stable version footers.
  */
 
 // ── Context Inspector HUD ──────────────────────────────────────────────────────
@@ -80,17 +76,22 @@ function ContextInspectorHUD({ item, isOpen, onClose }: { item: { fileName: stri
                 </DialogHeader>
                 <div className="flex-1 overflow-hidden relative group">
                     {/* Atmospheric decoration */}
-                    <div className="absolute inset-0 pointer-events-none opacity-[0.02] bg-[radial-gradient(circle_at_center,_var(--primary)_1px,_transparent_1px)] bg-[size:24px_24px]" />
-                    
+                    <div className="absolute inset-0 pointer-events-none opacity-[0.02] bg-[radial-gradient(circle_at_center,_var(--primary)_1px,_transparent_1px)] bg-[size:28px_28px]" />
+
                     <ScrollArea className="h-full w-full custom-scrollbar">
                         <div className="p-10">
-                            <FileContentViewer fileName={item.fileName} content={item.content} />
+                            <div className="space-y-6">
+                                <h3 className="text-[16px] font-black uppercase tracking-tight text-foreground/80">{item.fileName}</h3>
+                                <pre className="p-8 bg-muted/30 border border-primary/10 rounded-3xl overflow-auto max-h-[60vh] text-[12px] font-serif leading-relaxed italic shadow-inner">
+                                    {item.content || 'Zero payload detected in source vector.'}
+                                </pre>
+                            </div>
                         </div>
                     </ScrollArea>
                 </div>
                 <div className="px-8 py-4 bg-primary/[0.02] border-t border-primary/10 flex justify-between items-center shrink-0">
-                    <span className="text-[9px] font-black uppercase tracking-widest text-muted-foreground/40">Context Vector Analysis Pipeline</span>
-                    <Button variant="ghost" onClick={onClose} className="text-[10px] font-black uppercase tracking-widest rounded-xl h-9 px-6">Close Inspector</Button>
+                    <span className="text-[8px] font-black uppercase tracking-widest text-muted-foreground/40">Context Vector Analysis Pipeline</span>
+                    <Button variant="ghost" onClick={onClose} className="text-[10px] font-black uppercase tracking-widest rounded-xl h-9 px-6 transition-all hover:bg-red-500/5 hover:text-red-500">Close Inspector</Button>
                 </div>
             </DialogContent>
         </Dialog>
@@ -100,8 +101,8 @@ function ContextInspectorHUD({ item, isOpen, onClose }: { item: { fileName: stri
 export function UploadManager() {
     const { t } = useLocalization();
     const { toast } = useToast();
-    const { project, updateProject, selectedFileId, selectFile } = useBuilderStore();
-    
+    const { project, updateProject, selectedFileId } = useBuilderStore();
+
     const [isLoading, setIsLoading] = useState(false);
     const [textInput, setTextInput] = useState('');
     const [textFileName, setTextFileName] = useState('');
@@ -109,20 +110,44 @@ export function UploadManager() {
     const [inspectItem, setInspectItem] = useState<{ fileName: string, content: string } | null>(null);
 
     const onDrop = useCallback((acceptedFiles: File[]) => {
+        if (!project || !updateProject) return;
+
         setIsLoading(true);
-        acceptedFiles.forEach(file => {
-            const reader = new FileReader();
-            reader.onerror = () => toast({ title: t('builder.files.toasts.fileReadError'), variant: 'destructive' });
-            reader.onload = () => {
-                const content = reader.result as string;
-                updateProject(p => p.addExternalContext({ fileName: file.name, content, type: 'context' }, uuidv4()));
-                toast({ title: "Vector Integrated", description: `${file.name} successfully mapped to source core.` });
-            };
-            if (file.type.startsWith('text/') || file.name.endsWith('.md')) reader.readAsText(file);
-            else reader.readAsDataURL(file);
-        });
-        setIsLoading(false);
-    }, [updateProject, toast, t]);
+        try {
+            acceptedFiles.forEach(file => {
+                const reader = new FileReader();
+                reader.onerror = () => {
+                    console.error('[UploadManager] FileReader Error:', file.name);
+                    toast({ title: t('builder.files.toasts.fileReadError'), variant: 'destructive' });
+                };
+                reader.onload = () => {
+                    try {
+                        const content = reader.result as string;
+                        updateProject(p => p.addExternalContext({
+                            fileName: file.name,
+                            content: content || '',
+                            type: 'context'
+                        }, generateRandomId()));
+                        toast({ title: "Vector Integrated", description: `${file.name} successfully mapped to source core.` });
+                    } catch (e) {
+                        console.error('[UploadManager] Update Persistence Failure:', e);
+                        toast({ title: "Sync Error", description: "Failed to incorporate source vector into project manifest.", variant: 'destructive' });
+                    }
+                };
+
+                if (file.type.startsWith('text/') || file.name.endsWith('.md')) {
+                    reader.readAsText(file);
+                } else {
+                    reader.readAsDataURL(file);
+                }
+            });
+        } catch (error) {
+            console.error('[UploadManager] Ingestion pipeline failure:', error);
+            toast({ title: "Pipeline Crash", description: "The ingestion core encountered an unrecoverable error.", variant: 'destructive' });
+        } finally {
+            setIsLoading(false);
+        }
+    }, [updateProject, project, toast, t]);
 
     const { getRootProps, getInputProps, isDragActive } = useDropzone({
         onDrop,
@@ -139,26 +164,48 @@ export function UploadManager() {
         }
     });
 
-    const handleAddPastedText = () => {
-        if (!textInput.trim() || !textFileName.trim()) return;
-        updateProject(p => p.addExternalContext({
-            fileName: `${textFileName.trim()}.md`,
-            content: textInput,
-            type: 'context',
-        }, uuidv4()));
-        setTextInput('');
-        setTextFileName('');
-        toast({ title: "Logic Integrated", description: "Raw text node successfully synthesized." });
-    };
+    const handleAddPastedText = useCallback(() => {
+        if (!textInput.trim() || !textFileName.trim() || !updateProject) return;
+
+        try {
+            updateProject(p => p.addExternalContext({
+                fileName: `${textFileName.trim()}.md`,
+                content: textInput,
+                type: 'context',
+            }, generateRandomId()));
+            setTextInput('');
+            setTextFileName('');
+            toast({ title: "Logic Integrated", description: "Raw text node successfully synthesized." });
+        } catch (error) {
+            console.error('[UploadManager] Raw ingestion failure:', error);
+            toast({ title: "System Error", description: "Failed to materialize raw logic node.", variant: 'destructive' });
+        }
+    }, [textInput, textFileName, updateProject, toast]);
 
     const externalContext = project?.externalContext || [];
-    const filteredContext = useMemo(() => 
+    const filteredContext = useMemo(() =>
         externalContext.filter(item => item.fileName.toLowerCase().includes(searchQuery.toLowerCase())),
-    [externalContext, searchQuery]);
+        [externalContext, searchQuery]);
 
     const fileTypes: ExternalContextType[] = ['context', 'example', 'question', 'textbook', 'guidelines'];
 
-    if (!project) return null;
+    if (!project) {
+        return (
+            <SidebarContainer title="Context Dashboard" icon={<LayoutGrid className="h-3.5 w-3.5" />}>
+                <div className="flex flex-col items-center justify-center h-64 text-center space-y-4 opacity-40">
+                    <div className="p-5 rounded-[24px] bg-primary/5 border border-primary/10 shadow-inner">
+                        <ShieldAlert className="h-8 w-8 text-primary/40" />
+                    </div>
+                    <div className="space-y-1.5 px-6">
+                        <p className="text-[10px] font-black uppercase tracking-[0.3em] text-muted-foreground">Dashboard Offline</p>
+                        <p className="text-[11px] font-medium leading-relaxed italic text-muted-foreground/60 max-w-[200px]">
+                            Connect a project manifest to initialize context ingestion hubs.
+                        </p>
+                    </div>
+                </div>
+            </SidebarContainer>
+        );
+    }
 
     return (
         <SidebarContainer
@@ -227,7 +274,7 @@ export function UploadManager() {
                                         <Textarea value={textInput} onChange={(e) => setTextInput(e.target.value)} rows={5} placeholder="INPUT_DATA..." className="text-[11px] bg-muted/5 border-primary/10 focus-visible:ring-primary/20 rounded-2xl resize-none p-4 font-serif italic shadow-inner" />
                                     </div>
                                 </div>
-                                <Button onClick={handleAddPastedText} disabled={!textInput.trim() || !textFileName.trim()} className="w-full h-11 text-[10px] font-black uppercase tracking-[0.2em] gap-2.5 shadow-xl shadow-primary/15 rounded-xl bg-primary hover:opacity-90 ring-1 ring-inset ring-white/20 transition-all">
+                                <Button onClick={handleAddPastedText} disabled={!textInput.trim() || !textFileName.trim() || isLoading} className="w-full h-11 text-[10px] font-black uppercase tracking-[0.2em] gap-2.5 shadow-xl shadow-primary/15 rounded-xl bg-primary hover:opacity-90 ring-1 ring-inset ring-white/20 transition-all">
                                     <Plus className="h-4 w-4" />
                                     Materialize Node
                                 </Button>
@@ -236,7 +283,7 @@ export function UploadManager() {
 
                         {/* Search & Filter Matrix */}
                         <div className="relative group/search pt-2">
-                            <Input 
+                            <Input
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
                                 placeholder="SCAN SOURCE CORE..."
@@ -261,21 +308,33 @@ export function UploadManager() {
                                     {externalContext.length} NODES
                                 </Badge>
                             </div>
-                            
+
                             <div className="space-y-3">
                                 {filteredContext.map((item, index) => (
-                                    <div key={item.id} className="space-y-2.5">
-                                        <FileNodeItem 
-                                            item={item} 
+                                    <div key={item.id} className="space-y-2.5 animate-in fade-in slide-in-from-bottom-2 duration-300">
+                                        <FileNodeItem
+                                            item={item}
                                             onView={() => setInspectItem(item)}
-                                            onDelete={() => updateProject(p => p.removeExternalContext(index))}
+                                            onDelete={() => {
+                                                try {
+                                                    updateProject(p => p.removeExternalContext(index));
+                                                } catch (e) {
+                                                    console.error('[UploadManager] Vector removal failure:', e);
+                                                }
+                                            }}
                                             className={selectedFileId === item.id ? 'border-primary/30 bg-primary/[0.03] ring-1 ring-primary/10' : ''}
                                         />
                                         <div className="flex items-center gap-2 pl-4">
                                             <div className="h-px w-3 bg-primary/20" />
-                                            <Select 
-                                                value={item.type} 
-                                                onValueChange={(v: ExternalContextType) => updateProject(p => p.updateExternalContextType(index, v))}
+                                            <Select
+                                                value={item.type}
+                                                onValueChange={(v: ExternalContextType) => {
+                                                    try {
+                                                        updateProject(p => p.updateExternalContextType(index, v));
+                                                    } catch (e) {
+                                                        console.error('[UploadManager] Type classification failure:', e);
+                                                    }
+                                                }}
                                             >
                                                 <SelectTrigger className="h-6 w-auto min-w-[100px] border-none bg-primary/5 hover:bg-primary/10 text-[8px] font-black uppercase tracking-widest text-primary/60 transition-all px-2.5 rounded-lg focus:ring-0">
                                                     <SelectValue />
@@ -291,10 +350,10 @@ export function UploadManager() {
                                         </div>
                                     </div>
                                 ))}
-                                
+
                                 {filteredContext.length === 0 && (
                                     <div className="flex flex-col items-center justify-center py-16 text-center space-y-4 opacity-30">
-                                        <div className="p-5 rounded-full bg-muted/20 border border-dashed border-muted-foreground/40">
+                                        <div className="p-5 rounded-full bg-muted/20 border border-dashed border-muted-foreground/40 shadow-inner">
                                             <Database className="h-10 w-10 text-muted-foreground stroke-[1]" />
                                         </div>
                                         <p className="text-[10px] font-black uppercase tracking-[0.2em] px-10 leading-relaxed">No Intel Vectors Found</p>
@@ -310,19 +369,19 @@ export function UploadManager() {
                 </TabsContent>
             </Tabs>
 
-            <ContextInspectorHUD 
-                item={inspectItem} 
-                isOpen={inspectItem !== null} 
-                onClose={() => setInspectItem(null)} 
+            <ContextInspectorHUD
+                item={inspectItem}
+                isOpen={inspectItem !== null}
+                onClose={() => setInspectItem(null)}
             />
 
             {/* Stable Version Footer */}
             <div className="absolute bottom-0 left-0 right-0 px-6 py-3 border-t border-primary/10 bg-background/40 backdrop-blur-xl flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                    <div className="h-1 w-1 rounded-full bg-primary/30" />
-                    <span className="text-[8px] font-black uppercase tracking-widest text-muted-foreground/40">Source Dashboard</span>
+                    <div className="h-1 w-1 rounded-full bg-primary/30 shadow-[0_0_8px_rgba(var(--primary),0.3)]" />
+                    <span className="text-[8px] font-black uppercase tracking-widest text-muted-foreground/40">Context Dashboard</span>
                 </div>
-                <span className="text-[8px] font-bold text-muted-foreground/20 tabular-nums">v2.1.4-STABLE</span>
+                <span className="text-[8px] font-bold text-muted-foreground/20 tabular-nums">v2.2.0-STABLE</span>
             </div>
         </SidebarContainer>
     );

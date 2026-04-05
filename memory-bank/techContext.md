@@ -25,8 +25,6 @@
   - **Database**: SQLite with Drizzle ORM for all application data.
   - **Authentication**: Local JWT-based auth with bcrypt password hashing.
   - **File Storage**: Local filesystem storage for user uploads (`storage/uploads`).
-- **Firebase (Legacy/Bridge)**:
-  - **Admin SDK**: Used server-side for FCM and legacy auth integration.
 - **Qdrant**: High-performance vector database for the RAG system.
 
 ### UI Framework & Components
@@ -71,7 +69,6 @@ src/
 ### Data Flow Patterns
 - **Server Actions**: For form submissions and mutations.
 - **API Routes**: For client-server communication and external integrations.
-- **Real-time Updates**: Firebase real-time subscriptions for notifications.
 - **Optimistic Updates**: For a smoother user experience on data mutations.
 
 ## Development Environment
@@ -82,7 +79,6 @@ src/
 - **Jest & React Testing Library**: Unit and component testing.
 
 ### Local Development
-- **Firebase Emulators**: Full local Firebase suite for offline development.
 - **Docker Compose**: For running local instances of Qdrant.
 - **Ollama**: For running local LLMs and embedding models.
 
@@ -118,9 +114,9 @@ src/
 ## Deployment & Infrastructure
 
 ### Hosting
-- **Vercel / Firebase Hosting**: For deploying the Next.js frontend.
-- **Firebase**: For backend services (Auth, Firestore, Functions).
-- **Self-hosted / Cloud VM**: For running Qdrant and Ollama services.
+- **Contabo Hosting**: For deploying the Next.js frontend.
+- **PostgreSQL**: For backend services (Auth, Firestore, Functions).
+- **Self-hosted / openrouter.ai**: For running Qdrant and Ollama services.
 
 ### Environment Management
 - **Environment Variables**: Centralized and validated configuration (`src/lib/config.ts`).

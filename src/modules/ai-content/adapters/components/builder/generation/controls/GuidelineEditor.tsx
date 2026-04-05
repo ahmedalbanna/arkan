@@ -1,7 +1,7 @@
 'use client';
 
-import React, { useState, useCallback } from 'react';
-import { Trash2, Plus, StickyNote, ListChecks } from 'lucide-react';
+import React, { useState, useCallback, useMemo } from 'react';
+import { Trash2, Plus, StickyNote, ListChecks, AlertCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -15,6 +15,12 @@ import { useGuidelineEditor } from '@/modules/ai-content/adapters/hooks/report-m
 /**
  * GuidelineEditor — Context-sensitive AI behavioral and technical constraint editor.
  * Manages the "Primary Vector" (prompt) and "Constraint Matrix" (guidelines).
+ * 
+ * DEFENSIVE MEASURES:
+ * 1. Existence Checks: Verifies section presence before rendering/updates.
+ * 2. Atomic Batching: Updates multiple targets in a single project mutation.
+ * 3. Immutable Guideline Logic: Safely filters/appends to guideline arrays.
+ * 4. Error Logging: Captures state update failures.
  */
 
 interface GuidelineEditorProps {
@@ -22,7 +28,7 @@ interface GuidelineEditorProps {
   selectedIds?: string[];
 }
 
-const GuidelineEditorComponent = ({ itemId, selectedIds }: GuidelineEditorProps) => {
+const GuidelineEditorComponent = ({ itemId, selectedIds = [] }: GuidelineEditorProps) => {
   const { updateProject } = useBuilderStore();
   const {
     section,
@@ -34,54 +40,87 @@ const GuidelineEditorComponent = ({ itemId, selectedIds }: GuidelineEditorProps)
   
   const [newGuideline, setNewGuideline] = useState('');
 
-  if (!section) return null;
+  // 1. INPUT VALIDATION & DERIVED TARGETS
+  const targets = useMemo(() => 
+    selectedIds.length > 1 ? selectedIds : [itemId],
+  [selectedIds, itemId]);
 
   const handleAddGuideline = useCallback(() => {
-    if (!newGuideline.trim()) return;
+    if (!newGuideline.trim() || !updateProject) return;
     const g = newGuideline.trim();
     
-    if (selectedIds && selectedIds.length > 1) {
-      updateProject(p => {
-        selectedIds.forEach(id => {
-          p.updateSection(id, s => s.withProps({
-            guidelines: [...(s.guidelines || []), g]
-          }));
+    try {
+        updateProject(p => {
+            if (!p) return p;
+            return targets.reduce((currentProject, id) => {
+                const target = currentProject.getSection(id);
+                if (!target) return currentProject;
+
+                return currentProject.updateSection(id, s => s.withProps({
+                    guidelines: [...(s.guidelines || []), g]
+                }));
+            }, p);
         });
-      });
-    } else {
-      updateProject(p => {
-        p.updateSection(itemId, s => s.withProps({
-          guidelines: [...(s.guidelines || []), g]
-        }));
-      });
+        setNewGuideline('');
+    } catch (error) {
+        console.error('[GuidelineEditor] Failed to add guideline:', error);
     }
-    setNewGuideline('');
-  }, [itemId, newGuideline, updateProject]);
+  }, [targets, newGuideline, updateProject]);
 
   const handleRemoveGuideline = useCallback((index: number) => {
     const gToRemove = guidelines[index];
-    if (selectedIds && selectedIds.length > 1) {
-      updateProject(p => {
-        selectedIds.forEach(id => {
-          p.updateSection(id, s => s.withProps({
-            guidelines: (s.guidelines || []).filter(g => g !== gToRemove)
-          }));
+    if (!gToRemove || !updateProject) return;
+
+    try {
+        updateProject(p => {
+            if (!p) return p;
+            return targets.reduce((currentProject, id) => {
+                const target = currentProject.getSection(id);
+                if (!target) return currentProject;
+
+                return currentProject.updateSection(id, s => s.withProps({
+                    guidelines: (s.guidelines || []).filter(g => g !== gToRemove)
+                }));
+            }, p);
         });
-      });
-    } else {
-      updateProject(p => {
-        p.updateSection(itemId, s => s.withProps({
-          guidelines: (s.guidelines || []).filter(g => g !== gToRemove)
-        }));
-      });
+    } catch (error) {
+        console.error('[GuidelineEditor] Failed to remove guideline:', error);
     }
-  }, [guidelines, itemId, selectedIds, updateProject]);
+  }, [guidelines, targets, updateProject]);
+
+  const handlePromptBlur = useCallback((e: React.FocusEvent<HTMLTextAreaElement>) => {
+    const val = e.target.value;
+    if (!updateProject) return;
+
+    try {
+        updateProject(p => {
+            if (!p) return p;
+            return targets.reduce((currentProject, id) => {
+                const target = currentProject.getSection(id);
+                if (!target) return currentProject;
+                return currentProject.updateSection(id, s => s.withProps({ prompt: val }));
+            }, p);
+        });
+    } catch (error) {
+        console.error('[GuidelineEditor] Failed to update prompt directive:', error);
+    }
+  }, [targets, updateProject]);
+
+  if (!section) {
+    return (
+        <div className="p-5 rounded-[24px] border border-dashed border-primary/10 bg-primary/[0.02] flex items-center gap-3 text-muted-foreground/40 italic">
+            <AlertCircle className="h-4 w-4" />
+            <span className="text-[10px] font-black uppercase tracking-widest">Directives Offline</span>
+        </div>
+    );
+  }
 
   return (
     <div className="space-y-8 pt-2 relative">
       {/* Dot-grid atmosphere — Standardized Workspace Alignment (28px) */}
       <div
         className="absolute inset-0 opacity-[0.02] dark:opacity-[0.04] bg-[radial-gradient(circle_at_center,_var(--primary)_1px,_transparent_1px)] bg-[size:28px_28px] pointer-events-none"
+        style={{ backgroundSize: '28px 28px' }}
       />
 
       {/* HUD Header Group */}
@@ -110,18 +149,7 @@ const GuidelineEditorComponent = ({ itemId, selectedIds }: GuidelineEditorProps)
             <Textarea
                 id={`prompt-${itemId}`}
                 defaultValue={prompt}
-                onBlur={(e) => {
-                    const val = e.target.value;
-                    if (selectedIds && selectedIds.length > 0) {
-                        updateProject(p => {
-                            selectedIds.forEach(id => {
-                                p.updateSection(id, s => s.withProps({ prompt: val }));
-                            });
-                        });
-                    } else {
-                        setPrompt(val);
-                    }
-                }}
+                onBlur={handlePromptBlur}
                 rows={5}
                 className="relative min-h-[140px] w-full text-[11px] bg-muted/5 border-primary/10 focus-visible:ring-primary/20 leading-relaxed resize-none p-4 rounded-2xl shadow-inner font-serif italic transition-all hover:bg-muted/8"
                 placeholder="Initialize primary AI instructions for this node..."
@@ -167,7 +195,7 @@ const GuidelineEditorComponent = ({ itemId, selectedIds }: GuidelineEditorProps)
                 {guidelines.length > 0 ? (
                   guidelines.map((guideline, index) => (
                     <div 
-                        key={index} 
+                        key={`${guideline}-${index}`} 
                         className="flex items-start justify-between text-[11px] p-3.5 rounded-xl border border-primary/5 bg-background/60 backdrop-blur-md gap-4 group shadow-sm hover:border-primary/20 hover:bg-background/80 transition-all duration-500 ease-[0.22,1,0.36,1]"
                     >
                       <div className="flex items-center gap-3.5 flex-1 min-w-0">

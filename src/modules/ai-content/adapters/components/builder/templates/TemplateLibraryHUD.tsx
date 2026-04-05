@@ -1,18 +1,18 @@
 'use client';
 
-import React, { useMemo, useState } from 'react';
-import { v4 as uuidv4 } from 'uuid';
-import { 
-    AlertCircle, 
-    FileText, 
-    Loader2, 
-    Search, 
-    ArrowLeft, 
-    LayoutTemplate, 
-    CheckCircle2, 
-    ChevronRight, 
+import React, { useMemo, useState, useCallback } from 'react';
+import {
+    AlertCircle,
+    FileText,
+    Loader2,
+    Search,
+    ArrowLeft,
+    LayoutTemplate,
+    CheckCircle2,
+    ChevronRight,
     BookOpen,
-    Layers
+    Layers,
+    Binary
 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
@@ -21,16 +21,22 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
 import { Label } from '@/components/ui/label';
 import { cn } from '@/infrastructure/utils/cn';
-import { useLocalization } from '@/context/LocalizationContext';
-import { useBuilderStore } from '@/hooks';
+import { generateRandomId } from '@/infrastructure/utils/randomId';
 import { MarkdownViewer } from '@/components/shared/MarkdownViewer';
 import { useApplyReportTemplate, useReportTemplates } from '@/modules/templates/adapters/hooks/use-templates';
 import { ReportTemplateProperties } from '@/modules/templates/domain/entities/ReportTemplate';
 import { SidebarContainer } from '../layout/SidebarContainer';
+import { useBuilderStore } from '@/hooks';
 
 /**
  * TemplateLibraryHUD — Immersive catalog for structural blueprints.
  * Allows rapid initialization of document hierarchies from expert-defined matrices.
+ * 
+ * DEFENSIVE MEASURES:
+ * 1. Error Containment: Wraps complex TOC parsing in try-catch.
+ * 2. Id Standardization: Replaces uuidv4 with project-standard randomId.
+ * 3. Existence Guards: Verifies template content before processing.
+ * 4. UI Feedback: Enhanced error and loading states for blueprint application.
  */
 
 interface TemplateCardProps {
@@ -40,10 +46,10 @@ interface TemplateCardProps {
 
 function TemplateCard({ template, onSelect }: TemplateCardProps) {
     const chapterCount = Array.isArray(template.content) ? template.content.length : 0;
-    
+
     return (
-        <div 
-            className="group relative p-4 rounded-2xl border border-border/40 bg-card/40 hover:border-primary/30 transition-all duration-300 cursor-pointer shadow-sm hover:translate-x-0.5 hover:bg-muted/5"
+        <div
+            className="group relative p-4 rounded-2xl border border-primary/10 bg-card/40 hover:border-primary/30 transition-all duration-300 cursor-pointer shadow-sm hover:translate-x-0.5 hover:bg-muted/5"
             onClick={onSelect}
             onKeyDown={(e) => e.key === 'Enter' && onSelect()}
             role="button"
@@ -63,7 +69,7 @@ function TemplateCard({ template, onSelect }: TemplateCardProps) {
                     {chapterCount} CH
                 </Badge>
             </div>
-            
+
             <p className="text-[11px] text-muted-foreground/80 line-clamp-2 leading-relaxed italic mb-3">
                 {template.description}
             </p>
@@ -86,10 +92,15 @@ interface TemplatePreviewProps {
 
 function TemplatePreview({ template, onApply, onBack, isLoading }: TemplatePreviewProps) {
     const tocMarkdown = useMemo(() => {
-        if (!template.content || !Array.isArray(template.content)) return '';
-        return template.content.map(chapter => 
-            `# ${chapter.title}\n${(chapter.sections || []).map(section => `  - ${section.title}`).join('\n')}`
-        ).join('\n\n');
+        try {
+            if (!template.content || !Array.isArray(template.content)) return '';
+            return template.content.map(chapter =>
+                `# ${chapter.title}\n${(chapter.sections || []).map(section => `  - ${section.title}`).join('\n')}`
+            ).join('\n\n');
+        } catch (e) {
+            console.error('[TemplateLibraryHUD] Failed to generate TOC preview:', e);
+            return '';
+        }
     }, [template]);
 
     return (
@@ -107,7 +118,7 @@ function TemplatePreview({ template, onApply, onBack, isLoading }: TemplatePrevi
 
             <div className="space-y-6 relative flex-1 flex flex-col min-h-0">
                 <div className="absolute left-[-1.25rem] top-0 bottom-0 w-px bg-gradient-to-b from-primary/30 via-primary/5 to-transparent" />
-                
+
                 <div className="space-y-2 px-1">
                     <h3 className="text-[16px] font-black uppercase tracking-tight leading-tight text-foreground/90">{template.name}</h3>
                     <p className="text-[11px] text-muted-foreground/70 leading-relaxed italic font-medium">{template.description}</p>
@@ -120,7 +131,7 @@ function TemplatePreview({ template, onApply, onBack, isLoading }: TemplatePrevi
                         <BookOpen className="h-3.5 w-3.5 text-primary/40 group-hover/label:text-primary transition-colors" />
                         <Label className="text-[10px] font-black uppercase tracking-[0.3em] text-muted-foreground/60">Architectural Matrix</Label>
                     </div>
-                    
+
                     <ScrollArea className="flex-1 rounded-[24px] border border-primary/10 bg-muted/5 shadow-inner">
                         <div className="p-6 pb-12 relative overflow-hidden">
                             {/* Visual background atmospheric grid */}
@@ -132,13 +143,13 @@ function TemplatePreview({ template, onApply, onBack, isLoading }: TemplatePrevi
             </div>
 
             <div className="pt-6 mt-auto border-t border-primary/10 bg-background/40 backdrop-blur-xl -mx-5 px-5 pb-2">
-                <Button 
-                    onClick={onApply} 
-                    disabled={isLoading} 
-                    className="w-full h-12 text-[10px] font-black uppercase tracking-[0.2em] gap-2.5 shadow-2xl shadow-primary/20 rounded-2xl transition-all hover:scale-[1.01] active:scale-[0.98] ring-1 ring-inset ring-white/20"
+                <Button
+                    onClick={onApply}
+                    disabled={isLoading}
+                    className="w-full h-12 text-[10px] font-black uppercase tracking-[0.2em] gap-2.5 shadow-2xl shadow-primary/20 rounded-2xl transition-all hover:scale-[1.01] active:scale-[0.98] ring-1 ring-inset ring-white/20 bg-primary"
                 >
                     {isLoading ? (
-                        <Loader2 className="h-4 w-4 animate-spin"/>
+                        <Loader2 className="h-4 w-4 animate-spin" />
                     ) : (
                         <>
                             <CheckCircle2 className="h-4 w-4" />
@@ -147,7 +158,7 @@ function TemplatePreview({ template, onApply, onBack, isLoading }: TemplatePrevi
                     )}
                 </Button>
                 <div className="flex items-center justify-center gap-2 mt-4 opacity-40">
-                    <div className="h-1 w-1 rounded-full bg-amber-500" />
+                    <div className="h-1 w-1 rounded-full bg-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.4)]" />
                     <p className="text-[8px] text-muted-foreground text-center italic font-black uppercase tracking-widest">
                         Applying will reset current manifest structure.
                     </p>
@@ -163,6 +174,8 @@ export function TemplateLibraryHUD() {
     const { data: templates, isLoading, isError, error } = useReportTemplates();
     const [searchQuery, setSearchQuery] = useState('');
     const [previewTemplate, setPreviewTemplate] = useState<ReportTemplateProperties | null>(null);
+    const [localError, setLocalError] = useState<string | null>(null);
+
     const { updateProject, project } = useBuilderStore();
     const { handleSelectTemplate, isApplyingTemplate } = useApplyReportTemplate();
 
@@ -174,28 +187,50 @@ export function TemplateLibraryHUD() {
                 t.description.toLowerCase().includes(searchQuery.toLowerCase())
         );
     }, [templates, searchQuery]);
-    
+
+    const handleApplyBlueprint = useCallback(() => {
+        if (!previewTemplate || !updateProject) return;
+
+        try {
+            const content = Array.isArray(previewTemplate.content) ? previewTemplate.content : [];
+            const tocMarkdown = content.map(chapter =>
+                `# ${chapter.title}\n${(chapter.sections || []).map(section => `  - ${section.title}`).join('\n')}`
+            ).join('\n\n');
+
+            if (!tocMarkdown) {
+                setLocalError('Blueprint contains no valid structural nodes.');
+                return;
+            }
+
+            updateProject(p => {
+                // Defensive check: ensure the project object is valid
+                if (!p) return p;
+
+                // Use standard randomId instead of uuidv4
+                const newContent = p.parseAndSetContentFromToc(tocMarkdown, generateRandomId);
+                return p.withProps({ content: [...newContent] });
+            });
+
+            if (project?.id) {
+                handleSelectTemplate(previewTemplate.id, project.id);
+                setPreviewTemplate(null);
+                setLocalError(null);
+            }
+        } catch (e) {
+            console.error('[TemplateLibraryHUD] Blueprint application failed:', e);
+            setLocalError('An internal error occurred while initializing the blueprint.');
+        }
+    }, [previewTemplate, updateProject, project?.id, handleSelectTemplate]);
+
     if (previewTemplate) {
         return (
-            <TemplatePreview 
+            <TemplatePreview
                 template={previewTemplate}
-                onApply={() => {
-                    const content = Array.isArray(previewTemplate.content) ? previewTemplate.content : [];
-                    const tocMarkdown = content.map(chapter => 
-                        `# ${chapter.title}\n${(chapter.sections || []).map(section => `  - ${section.title}`).join('\n')}`
-                    ).join('\n\n');
-                    if (tocMarkdown) {
-                        updateProject(p => {
-                            const newContent = p.parseAndSetContentFromToc(tocMarkdown, uuidv4);
-                            return p.withProps({ content: [...newContent] });
-                        });
-                    }
-                    if (project?.id) {
-                        handleSelectTemplate(previewTemplate.id, project.id);
-                        setPreviewTemplate(null);
-                    }
+                onApply={handleApplyBlueprint}
+                onBack={() => {
+                    setPreviewTemplate(null);
+                    setLocalError(null);
                 }}
-                onBack={() => setPreviewTemplate(null)}
                 isLoading={isApplyingTemplate}
             />
         );
@@ -229,7 +264,14 @@ export function TemplateLibraryHUD() {
                         <div className="space-y-4 pb-24 relative px-1">
                             {/* Depth architectural line */}
                             <div className="absolute left-[-1.25rem] top-0 bottom-0 w-px bg-gradient-to-b from-primary/30 via-primary/5 to-transparent" />
-                            
+
+                            {localError && (
+                                <div className="flex items-center gap-2 p-3.5 rounded-xl bg-destructive/5 border border-destructive/10 text-destructive text-[10px] font-bold uppercase tracking-wider mb-4 animate-in zoom-in-95">
+                                    <AlertCircle className="h-3.5 w-3.5 shrink-0" />
+                                    <span>{localError}</span>
+                                </div>
+                            )}
+
                             {isLoading ? (
                                 <div className="flex flex-col justify-center items-center h-64 space-y-4 opacity-40">
                                     <Loader2 className="h-8 w-8 animate-spin text-primary/40" />
@@ -243,9 +285,9 @@ export function TemplateLibraryHUD() {
                                 </div>
                             ) : filteredTemplates.length > 0 ? (
                                 filteredTemplates.map(t => (
-                                    <TemplateCard 
-                                        key={t.id} 
-                                        template={t} 
+                                    <TemplateCard
+                                        key={t.id}
+                                        template={t}
                                         onSelect={() => setPreviewTemplate(t)}
                                     />
                                 ))
@@ -268,10 +310,10 @@ export function TemplateLibraryHUD() {
                 {/* Stable Version Footer */}
                 <div className="absolute bottom-0 left-0 right-0 px-6 py-3 border-t border-primary/10 bg-background/40 backdrop-blur-xl flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                        <div className="h-1 w-1 rounded-full bg-primary/30" />
+                        <div className="h-1 w-1 rounded-full bg-primary/30 shadow-[0_0_8px_rgba(var(--primary),0.3)]" />
                         <span className="text-[8px] font-black uppercase tracking-widest text-muted-foreground/40">Blueprint System</span>
                     </div>
-                    <span className="text-[8px] font-bold text-muted-foreground/20 tabular-nums">v1.4.2-STABLE</span>
+                    <span className="text-[8px] font-bold text-muted-foreground/20 tabular-nums tracking-widest">v1.4.2-STABLE</span>
                 </div>
             </div>
         </SidebarContainer>

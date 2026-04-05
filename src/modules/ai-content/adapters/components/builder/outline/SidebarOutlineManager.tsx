@@ -1,53 +1,64 @@
 'use client';
 
-import React, { useMemo, useState, useEffect } from 'react';
-import { 
-  DndContext, 
-  closestCenter, 
-  KeyboardSensor, 
-  PointerSensor, 
-  useSensor, 
+import React, { useMemo, useState, useEffect, useCallback } from 'react';
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
   useSensors,
   DragEndEvent,
+  DragOverlay,
+  DragStartEvent,
+  defaultDropAnimationSideEffects,
 } from '@dnd-kit/core';
-import { 
-  SortableContext, 
-  sortableKeyboardCoordinates, 
-  verticalListSortingStrategy
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
-import { Search, X, Plus } from 'lucide-react';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
-import { ScrollArea } from '@/components/ui/scroll-area';
+import { Search, X, Plus, Layers, AlertCircle, Binary } from 'lucide-react';
 import { useBuilderStore } from '@/hooks';
 import { Chapter } from '@/modules/ai-content/domain/entities/Chapter';
 import { Section } from '@/modules/ai-content/domain/entities/Section';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { cn } from '@/infrastructure/utils/cn';
 import { SortableOutlineItem } from './SortableOutlineItem';
 import { useOutlineOperations } from './useOutlineOperations';
 
 /**
  * SidebarOutlineManager — A docked structural navigator for the side panel.
- * Refactored to use shared outline primitives and consolidated project logic.
+ * Orchestrates the document hierarchy via drag-and-drop and rapid mutations.
+ * 
+ * DEFENSIVE MEASURES:
+ * 1. Dnd-Kit Safety: Validates node existence before triggering move operations.
+ * 2. Search Resilience: Efficiently filters chapters and sections with null-safety.
+ * 3. Atomic State Logic: Synchronizes local expansion with project mutations.
+ * 4. UX Integrity: Enhanced feedback for empty states and search misses.
  */
 
 interface SidebarOutlineManagerProps {
   activeChapterId: string | null;
+  onSelectChapter: (id: string) => void;
   selectedSectionIds: string[];
-  onActiveChapterChange: (id: string | null) => void;
-  onActiveSectionChange: (id: string | null, multiSelect?: boolean) => void;
+  onToggleSectionSelection: (id: string) => void;
+  viewMode: 'edit' | 'preview';
 }
 
 export function SidebarOutlineManager({
   activeChapterId,
+  onSelectChapter,
   selectedSectionIds,
-  onActiveChapterChange,
-  onActiveSectionChange,
+  onToggleSectionSelection,
+  viewMode,
 }: SidebarOutlineManagerProps) {
-  const { project, syncProjectStructure } = useBuilderStore(state => ({
-    project: state.project,
-    syncProjectStructure: state.syncProjectStructure,
-  }));
-
+  const project = useBuilderStore(state => state.project);
+  
+  // 1. OPERATION RESOLUTION — Standardized mutations
   const {
     handleMoveItem,
     handleUpdateTitle,
@@ -57,226 +68,239 @@ export function SidebarOutlineManager({
     handleDuplicateItem,
     handleCopyItem,
     handlePasteItem,
-    undo
-  } = useOutlineOperations(project);
+    clipboard
+  } = useOutlineOperations(project, {
+    onSelectChapter,
+    onSelectSection: (id) => onToggleSectionSelection(id || ''),
+  });
 
-  // Sync structural cache on mount
-  useEffect(() => {
-    syncProjectStructure();
-  }, [syncProjectStructure]);
-
-  const [expandedChapters, setExpandedChapters] = useState<Set<string>>(new Set());
   const [searchQuery, setSearchQuery] = useState('');
+  const [expandedChapters, setExpandedChapters] = useState<Set<string>>(new Set());
+  const [activeDragId, setActiveDragId] = useState<string | null>(null);
 
+  // 2. SEARCH & FILTER LOGIC — Defensive and memoized
+  const filteredContent = useMemo(() => {
+    if (!project?.content) return [];
+    if (!searchQuery.trim()) return project.content;
+
+    const query = searchQuery.toLowerCase().trim();
+    return project.content.filter(item => {
+      const title = item.title?.toLowerCase() || '';
+      if (title.includes(query)) return true;
+      
+      if (item instanceof Chapter) {
+        return item.sections.some(s => s.title?.toLowerCase().includes(query));
+      }
+      return false;
+    });
+  }, [project?.content, searchQuery]);
+
+  // Expand chapters automatically when searching
+  useEffect(() => {
+    if (searchQuery.trim() && project) {
+      const toExpand = new Set<string>();
+      project.content.forEach(item => {
+        if (item instanceof Chapter) {
+          const hasMatch = item.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                           item.sections.some(s => s.title?.toLowerCase().includes(searchQuery.toLowerCase()));
+          if (hasMatch) toExpand.add(item.id);
+        }
+      });
+      setExpandedChapters(prev => new Set([...prev, ...toExpand]));
+    }
+  }, [searchQuery, project]);
+
+  // 3. DND ORCHESTRATION
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
   );
 
-  // Integrated Keyboard Logic for Sidebar
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      const isMod = e.metaKey || e.ctrlKey;
-      const activeId = activeChapterId || (selectedSectionIds.length > 0 ? selectedSectionIds[0] : null);
-      const isChapter = !!activeChapterId;
+  const handleDragStart = useCallback((event: DragStartEvent) => {
+    setActiveDragId(String(event.active.id));
+  }, []);
 
-      if (isMod && e.key === 'z') {
-        e.preventDefault();
-        undo();
+  const handleDragEnd = useCallback((event: DragEndEvent) => {
+    const { active, over } = event;
+    setActiveDragId(null);
+
+    if (over && active.id !== over.id) {
+      // Defensive: Ensure both nodes still exist in project
+      const activeExists = project?.content.some(item => 
+        item.id === active.id || (item instanceof Chapter && item.sections.some(s => s.id === active.id))
+      );
+      const overExists = project?.content.some(item => 
+        item.id === over.id || (item instanceof Chapter && item.sections.some(s => s.id === over.id))
+      );
+
+      if (activeExists && overExists) {
+        handleMoveItem(String(active.id), String(over.id));
       }
+    }
+  }, [project, handleMoveItem]);
 
-      if (!activeId) return;
-
-      if (isMod && e.key === 'd') {
-        e.preventDefault();
-        handleDuplicateItem(activeId, isChapter);
-      }
-      if (isMod && e.key === 'c') {
-        e.preventDefault();
-        handleCopyItem(activeId, isChapter);
-      }
-      if (isMod && e.key === 'v') {
-        e.preventDefault();
-        handlePasteItem(activeId, isChapter);
-      }
-    };
-
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [activeChapterId, selectedSectionIds, undo, handleDuplicateItem, handleCopyItem, handlePasteItem]);
-
-  const toggleChapter = (id: string) => {
+  const toggleChapter = useCallback((id: string) => {
     setExpandedChapters(prev => {
       const next = new Set(prev);
       if (next.has(id)) next.delete(id);
       else next.add(id);
       return next;
     });
-  };
+  }, []);
 
-  const handleItemClick = (id: string, isChapter: boolean) => {
-    if (isChapter) {
-      onActiveChapterChange(id);
-    } else {
-      onActiveSectionChange(id);
-    }
-    setTimeout(() => {
-      const element = document.getElementById(`item-${id}`);
-      if (element) element.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }, 100);
-  };
+  // 4. RENDER GUARDS
+  if (!project) {
+    return (
+      <div className="flex flex-col items-center justify-center h-64 text-center space-y-4 opacity-40 animate-in fade-in duration-500">
+        <div className="p-5 rounded-[24px] bg-primary/5 border border-primary/10 shadow-inner">
+          <Layers className="h-8 w-8 text-primary/40" />
+        </div>
+        <p className="text-[10px] font-black uppercase tracking-[0.3em] text-muted-foreground px-10 leading-relaxed">
+          Structural Core Offline
+        </p>
+      </div>
+    );
+  }
 
-  const handleDragEnd = (event: DragEndEvent) => {
-    const { active, over } = event;
-    if (over && active.id !== over.id) {
-      handleMoveItem(active.id.toString(), over.id.toString());
-    }
-  };
-
-  if (!project) return null;
-
-  // Optimized Search for High-Density Sidebar
-  const filteredChapters = useMemo(() => {
-    if (!searchQuery.trim()) return project.chapters as readonly Chapter[];
-    const query = searchQuery.toLowerCase();
-    return (project.chapters as readonly Chapter[]).filter(chapter => {
-      return (
-        chapter.title.toLowerCase().includes(query) ||
-        chapter.sections.some(s => s.title.toLowerCase().includes(query))
-      );
-    });
-  }, [project.chapters, searchQuery]);
-
-  const allSortableIds = useMemo(() => {
-    const ids: string[] = [];
-    filteredChapters.forEach(c => {
-      ids.push(c.id);
-      if (expandedChapters.has(c.id) || searchQuery.trim()) {
-        c.sections.forEach(s => {
-          if (
-            !searchQuery.trim() ||
-            s.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            c.title.toLowerCase().includes(searchQuery.toLowerCase())
-          ) {
-            ids.push(s.id);
-          }
-        });
-      }
-    });
-    return ids;
-  }, [filteredChapters, expandedChapters, searchQuery]);
+  const allNodeIds = project.content.flatMap(item => 
+    item instanceof Chapter ? [item.id, ...item.sections.map(s => s.id)] : [item.id]
+  );
 
   return (
-    <div className="flex flex-col h-full gap-4">
-      {/* Sidebar HUD Header */}
-      <div className="space-y-3">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <div className="h-1 w-1 rounded-full bg-primary/40 shadow-[0_0_8px_rgba(var(--primary),0.4)]" />
-            <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-primary/80">
-              Outline
-            </h3>
-          </div>
-          <div className="flex items-center gap-3">
-            <span className="text-[8px] font-bold text-muted-foreground/30 uppercase tracking-widest tabular-nums">
-              {project.sections.length} Units
-            </span>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-6 w-6 rounded-lg bg-primary/5 text-primary/60 border border-primary/10 hover:bg-primary/10 transition-all hover:scale-105"
-              onClick={(e) => {
-                e.stopPropagation();
-                handleAddChapter();
-              }}
-            >
-              <Plus className="h-3.5 w-3.5" />
-            </Button>
-          </div>
+    <div className="flex flex-col h-full gap-6 pt-2">
+      <div className="flex items-center justify-between px-1">
+        <div className="space-y-1">
+          <h4 className="text-[10px] font-black uppercase tracking-[0.3em] text-primary/70">Structural Hub</h4>
+          <p className="text-[9px] text-muted-foreground italic font-medium opacity-60 uppercase tracking-widest">
+            Manage document vectors.
+          </p>
         </div>
-
-        {/* Dense Search HUD */}
-        <div className="relative group/search">
-          <Input
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="SCAN OUTLINE..."
-            className="h-8 pl-8 pr-8 text-[9px] bg-muted/5 border-primary/5 focus-visible:ring-primary/10 focus-visible:border-primary/20 rounded-xl transition-all font-bold uppercase tracking-widest"
-          />
-          <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3 w-3 text-muted-foreground/30 group-focus-within/search:text-primary transition-colors" />
-          {searchQuery && (
-            <button
-              onClick={() => setSearchQuery('')}
-              className="absolute right-2.5 top-1/2 -translate-y-1/2 hover:text-primary transition-colors text-muted-foreground/40"
-            >
-              <X className="h-3 w-3" />
-            </button>
-          )}
-        </div>
+        <Button 
+          variant="ghost" 
+          size="icon" 
+          onClick={() => handleAddChapter()}
+          className="h-8 w-8 rounded-xl bg-primary/5 hover:bg-primary/10 text-primary transition-all border border-primary/10"
+        >
+          <Plus className="h-4 w-4" />
+        </Button>
       </div>
 
-      {/* Main Navigator List — Independent ScrollArea */}
-      <ScrollArea className="flex-1 min-h-0 -mx-1 px-1">
-        <DndContext
-          sensors={sensors}
-          collisionDetection={closestCenter}
-          onDragEnd={handleDragEnd}
-        >
-          <SortableContext items={allSortableIds} strategy={verticalListSortingStrategy}>
-            {filteredChapters.map((chapter, cIdx) => (
-              <SortableOutlineItem
-                key={chapter.id}
-                id={chapter.id}
-                index={cIdx}
-                title={chapter.title}
-                isActive={activeChapterId === chapter.id}
-                isChapter={true}
-                isExpanded={expandedChapters.has(chapter.id) || !!searchQuery.trim()}
-                hasContent={chapter.sections.some((s: Section) => !!s.content)}
-                onActivate={() => handleItemClick(chapter.id, true)}
-                onToggleExpand={() => toggleChapter(chapter.id)}
-                onUpdateTitle={(newTitle) => handleUpdateTitle(chapter.id, newTitle, true)}
-                onDelete={() => handleDeleteItem(chapter.id, true)}
-              >
-                {(chapter.sections as Section[])
-                  .filter(
-                    s =>
-                      !searchQuery.trim() ||
-                      s.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                      chapter.title.toLowerCase().includes(searchQuery.toLowerCase())
-                  )
-                  .map((section, sIdx) => (
-                    <SortableOutlineItem
-                      key={section.id}
-                      id={section.id}
-                      index={sIdx}
-                      title={section.title}
-                      isActive={selectedSectionIds.includes(section.id)}
-                      hasContent={!!section.content}
-                      onActivate={() => handleItemClick(section.id, false)}
-                      onUpdateTitle={(newTitle) => handleUpdateTitle(section.id, newTitle, false)}
-                      onDelete={() => handleDeleteItem(section.id, false)}
-                    />
-                  ))}
-                {!searchQuery && (
-                  <div
-                    className="ml-4 mt-1 mb-2 px-2 py-1.5 flex items-center gap-2 rounded-xl border border-dashed border-primary/10 bg-primary/[0.01] hover:bg-primary/[0.03] transition-all cursor-pointer group/add active:scale-[0.98]"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleAddSection(chapter.id);
-                    }}
-                  >
-                    <Plus className="h-3 w-3 text-primary/30 group-hover/add:text-primary transition-colors" />
-                    <span className="text-[9px] font-black uppercase tracking-[0.2em] text-primary/30 group-hover/add:text-primary transition-colors">
-                      Integrate Node
-                    </span>
+      <div className="relative group/search px-1">
+        <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground/30 group-focus-within/search:text-primary transition-colors" />
+        <Input
+          placeholder="SEARCH ARCHITECTURE..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className="h-10 pl-10 pr-10 text-[10px] bg-muted/5 border-primary/5 focus-visible:border-primary/20 rounded-xl transition-all uppercase font-bold tracking-widest"
+        />
+        {searchQuery && (
+          <button onClick={() => setSearchQuery('')} className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground/40 hover:text-primary transition-colors">
+            <X className="h-3.5 w-3.5" />
+          </button>
+        )}
+      </div>
+
+      <div className="flex-1 relative min-h-0">
+        {/* Depth architectural line */}
+        <div className="absolute left-[-1.25rem] top-0 bottom-0 w-px bg-gradient-to-b from-primary/30 via-primary/5 to-transparent" />
+        
+        <ScrollArea className="h-full pr-4 -mr-4">
+          <div className="pb-24 space-y-1">
+            <DndContext
+              sensors={sensors}
+              collisionDetection={closestCenter}
+              onDragStart={handleDragStart}
+              onDragEnd={handleDragEnd}
+            >
+              <SortableContext items={allNodeIds} strategy={verticalListSortingStrategy}>
+                {filteredContent.map((item) => {
+                  const isChapter = item instanceof Chapter;
+                  const isExpanded = expandedChapters.has(item.id);
+                  const isActive = activeChapterId === item.id;
+
+                  return (
+                    <div key={item.id} className="space-y-1">
+                      <SortableOutlineItem
+                        id={item.id}
+                        title={item.title}
+                        isChapter={isChapter}
+                        isActive={isActive}
+                        isExpanded={isExpanded}
+                        sectionCount={isChapter ? item.sections.length : undefined}
+                        onToggleExpand={() => isChapter && toggleChapter(item.id)}
+                        onClick={() => isChapter ? onSelectChapter(item.id) : onToggleSectionSelection(item.id)}
+                        onUpdateTitle={(title) => handleUpdateTitle(item.id, title, isChapter)}
+                        onDelete={() => handleDeleteItem(item.id, isChapter)}
+                        onDuplicate={() => handleDuplicateItem(item.id, isChapter)}
+                        onCopy={() => handleCopyItem(item.id, isChapter)}
+                        onPaste={() => handlePasteItem(item.id, isChapter)}
+                        canPaste={!!clipboard}
+                        onAddSection={isChapter ? () => handleAddSection(item.id) : undefined}
+                      />
+
+                      {isChapter && isExpanded && item.sections.length > 0 && (
+                        <div className="pl-4 space-y-1 border-l border-primary/10 ml-4.5 my-1">
+                          {item.sections.map((section) => (
+                            <SortableOutlineItem
+                              key={section.id}
+                              id={section.id}
+                              title={section.title}
+                              isChapter={false}
+                              isActive={selectedSectionIds.includes(section.id)}
+                              onClick={() => onToggleSectionSelection(section.id)}
+                              onUpdateTitle={(title) => handleUpdateTitle(section.id, title, false)}
+                              onDelete={() => handleDeleteItem(section.id, false)}
+                              onDuplicate={() => handleDuplicateItem(section.id, false)}
+                              onCopy={() => handleCopyItem(section.id, false)}
+                              onPaste={() => handlePasteItem(section.id, false)}
+                              canPaste={!!clipboard}
+                            />
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </SortableContext>
+
+              {/* High-Fidelity Drag Overlay */}
+              <DragOverlay dropAnimation={{ sideEffects: defaultDropAnimationSideEffects({ styles: { active: { opacity: '0.4' } } }) }}>
+                {activeDragId ? (
+                  <div className="opacity-80 scale-105 transition-transform">
+                    <div className="p-3.5 rounded-xl border border-primary/30 bg-background/95 backdrop-blur-md shadow-2xl flex items-center gap-3">
+                        <div className="h-6 w-1 bg-primary rounded-full shadow-[0_0_8px_rgba(var(--primary),0.4)]" />
+                        <span className="text-[11px] font-black uppercase tracking-widest text-primary truncate max-w-[180px]">
+                            Realigning Vector...
+                        </span>
+                    </div>
                   </div>
-                )}
-              </SortableOutlineItem>
-            ))}
-          </SortableContext>
-        </DndContext>
-      </ScrollArea>
+                ) : null}
+              </DragOverlay>
+            </DndContext>
+
+            {filteredContent.length === 0 && (
+              <div className="flex flex-col items-center justify-center py-20 text-center space-y-4 opacity-30">
+                <div className="p-5 rounded-full bg-muted/20 border border-dashed border-muted-foreground/40">
+                  <AlertCircle className="h-8 w-8 text-muted-foreground" />
+                </div>
+                <p className="text-[10px] font-black uppercase tracking-[0.2em] px-10 leading-relaxed">No Structural Match</p>
+              </div>
+            )}
+          </div>
+        </ScrollArea>
+      </div>
+
+      {/* Stable Manifest Footer */}
+      <div className="absolute bottom-0 left-0 right-0 px-6 py-3 border-t border-primary/10 bg-background/40 backdrop-blur-xl flex items-center justify-between">
+          <div className="flex items-center gap-2">
+              <div className="h-1 w-1 rounded-full bg-primary/30 shadow-[0_0_8px_rgba(var(--primary),0.3)]" />
+              <span className="text-[8px] font-black uppercase tracking-widest text-muted-foreground/40">Navigator Core</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <Binary className="h-2.5 w-2.5 text-muted-foreground/20" />
+            <span className="text-[8px] font-bold text-muted-foreground/20 tabular-nums">v2.1.4-STABLE</span>
+          </div>
+      </div>
     </div>
   );
 }

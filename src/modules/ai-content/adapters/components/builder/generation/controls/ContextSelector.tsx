@@ -11,6 +11,12 @@ import { cn } from '@/infrastructure/utils/cn';
 /**
  * ContextSelector — High-fidelity HUD for mapping AI context.
  * Allows linking sections and external files as neural input for generation.
+ * 
+ * DEFENSIVE MEASURES:
+ * 1. Existence Checks: Verifies project and section exist before calculation.
+ * 2. Atomic Updates: Performs batch updates in a single reduce pass outside the setter.
+ * 3. Error Handling: Wraps complex context logic in try-catch to prevent crash.
+ * 4. Empty State Fallbacks: Handles cases with no available sections or files.
  */
 
 interface ContextSelectorProps {
@@ -18,45 +24,59 @@ interface ContextSelectorProps {
   selectedSectionIds?: string[];
 }
 
-const ContextSelectorComponent = ({ sectionId, selectedSectionIds }: ContextSelectorProps) => {
+const ContextSelectorComponent = ({ sectionId, selectedSectionIds = [] }: ContextSelectorProps) => {
   const { project, updateProject } = useBuilderStore();
 
-  const section = useMemo(() => project?.getSection(sectionId), [project, sectionId]);
+  const section = useMemo(() => {
+    if (!project || !sectionId) return null;
+    return project.getSection(sectionId);
+  }, [project, sectionId]);
+
   const reportSections = useMemo(() => project?.sections || [], [project]);
 
   const otherSections = useMemo(() => {
+    if (!sectionId) return reportSections;
     return reportSections.filter(s => s.id !== sectionId);
   }, [reportSections, sectionId]);
 
   const handleUpdateContext = useCallback((type: 'sections' | 'externalContext', id: string, enabled: boolean) => {
-    // If multiple sections are selected, we perform a bulk update.
-    // However, if we are in single-section focus within a chapter view, we only target the current section.
-    const targets = selectedSectionIds && selectedSectionIds.length > 1 ? selectedSectionIds : [sectionId];
+    if (!project || !updateProject) return;
 
-    updateProject((project) => {
-      return targets.reduce((currentProject, targetId) => {
-        return currentProject.updateSection(targetId, (sectionToUpdate) => {
-          const currentContext = { ...(sectionToUpdate.context || {}) };
-          const subContext = { ...(currentContext[type] || {}) };
+    // Determine target nodes for the update
+    const targets = selectedSectionIds.length > 1 ? selectedSectionIds : [sectionId];
+    if (targets.length === 0) return;
 
-          if (enabled) {
-            subContext[id] = 'true';
-          } else {
-            delete subContext[id];
-          }
+    try {
+        updateProject((currentProject) => {
+            // Defensive check: ensure the project object is valid
+            if (!currentProject) return currentProject;
 
-          return sectionToUpdate.withProps({
-            context: { ...currentContext, [type]: subContext },
-          });
+            // Atomic Batch Update: Update each target section in a single pass
+            return targets.reduce((p, targetId) => {
+                // Verify section exists in current project state before updating
+                const targetSection = p.getSection(targetId);
+                if (!targetSection) return p;
+
+                return p.updateSection(targetId, (s) => {
+                    const currentContext = { ...(s.context || {}) };
+                    const subContext = { ...(currentContext[type] || {}) };
+
+                    if (enabled) {
+                        subContext[id] = 'context'; // Using 'context' as standard value
+                    } else {
+                        delete subContext[id];
+                    }
+
+                    return s.withProps({
+                        context: { ...currentContext, [type]: subContext },
+                    });
+                });
+            }, currentProject);
         });
-      }, project);
-    });
-  }, [selectedSectionIds, sectionId, updateProject]);
-
-  const handleCopyContext = () => {
-    if (!section) return;
-    // Implementation for cross-section sync if needed
-  };
+    } catch (error) {
+        console.error('[ContextSelector] Failed to update context:', error);
+    }
+  }, [selectedSectionIds, sectionId, updateProject, project]);
 
   const sectionOptions = useMemo(() => otherSections.map(s => ({
     label: s.title || 'Untitled Section',
@@ -68,7 +88,15 @@ const ContextSelectorComponent = ({ sectionId, selectedSectionIds }: ContextSele
     value: f.id,
   })), [project?.externalContext]);
 
-  if (!section) return null;
+  if (!section) {
+    return (
+        <div className="p-4 rounded-2xl bg-muted/5 border border-dashed border-primary/10 text-center">
+            <p className="text-[10px] text-muted-foreground italic uppercase tracking-widest">
+                Source mapping unavailable.
+            </p>
+        </div>
+    );
+  }
 
   const activeSections = Object.keys(section.context?.sections || {});
   const activeFiles = Object.keys(section.context?.externalContext || {});
@@ -78,6 +106,7 @@ const ContextSelectorComponent = ({ sectionId, selectedSectionIds }: ContextSele
       {/* Dot-grid atmosphere — Standardized Workspace Alignment (28px) */}
       <div
         className="absolute inset-0 opacity-[0.02] dark:opacity-[0.04] bg-[radial-gradient(circle_at_center,_var(--primary)_1px,_transparent_1px)] bg-[size:28px:28px] pointer-events-none"
+        style={{ backgroundSize: '28px 28px' }}
       />
 
       {/* HUD Header */}
