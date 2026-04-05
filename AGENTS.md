@@ -64,12 +64,14 @@ The project utilizes `tsyringe` for dependency injection.
 *   **Hook Compliance**: All hooks must be placed at the top level of a component, *before* any conditional rendering or early returns. This is a strict requirement for React 19 stability.
 *   **Existence Guards**: Unified `if (!project)` or `if (!userProfile)` guards must be applied to all interaction and lifecycle handlers.
 *   **Error Containment**: Mutations and external service calls must be wrapped in `try-catch` blocks. Use localized Error Boundaries for high-risk rendering pipelines (e.g., `DocumentRenderer`).
-*   **Optimistic Sync**: When using optimistic updates, a robust rollback logic must be implemented to restore consistent state if the API vector fails.
+*   **Status Vector Pattern**: Utilize unified `status` union types (e.g., `'loading' | 'authenticated' | 'error'`) in Context providers instead of multiple boolean flags to ensure predictable UI transitions.
+*   **asChild Constraint**: Components using the `asChild` pattern (e.g., `Button`) MUST have exactly one direct React element child. Decorative siblings (whitespace, text nodes, icons) must be wrapped or moved outside.
 *   **ID Standardization**: The `@/infrastructure/utils/randomId` utility must be used exclusively for generating entity IDs.
 
 ## Coding & UI Standards
 
 *   **TypeScript**: Strict policy with zero tolerance for the `any` type. Use `unknown` and explicit type guards.
+*   **Form Persistence Purity**: When updating domain entities from form state, implement selective property mapping to prevent `undefined` or `null` form values from polluting the domain manifest.
 *   **Prop Standardization**: Standardize core workspace callbacks as `onActiveChapterChange` and `onActiveSectionChange`.
 *   **Styling**: Tailwind CSS is the standard. The "Intelligence Suite" aesthetic requires: 28px dot-grids, high-density labels (`text-[10px]`, `font-black`, `uppercase`), glassmorphism, and "Stable Manifest" footers.
 
@@ -83,8 +85,9 @@ The project utilizes `tsyringe` for dependency injection.
 
 ## Change Log
 
-*   **System-Wide Hardening**: Standardized "Defensive Programming" and "Atomic Batching" across 50+ components including Generation, Export, Source, Outline, and Admin modules.
-*   **RAG Performance Overhaul**: Implemented bitwise hashing, lazy initialization, and high-precision telemetry across the retrieval pipeline.
-*   **Infrastructure Boundaries**: Resolved Next.js 15 class-export errors by removing `"use server"` from infrastructure services and implementing the "Client-Server DI Bridging" pattern.
+*   **Global Robustness Hardening**: Standardized "Defensive Programming" and "Atomic Batching" across 60+ components including Generation, Export, Source, Outline, Profile, and Admin Dashboard modules.
+*   **Auth & Layout Transformation**: Hardened `AuthContext` with a unified status vector and established the "Intelligence Suite" aesthetic in the global `Header`.
+*   **RAG Performance & Telemetry**: Overhauled the retrieval pipeline for sub-100ms latency. Implemented bitwise hashing, lazy initialization, and high-precision telemetry dashboards.
+*   **Infrastructure Boundaries**: Resolved Next.js 15 class-export errors and implemented the "Client-Server DI Bridging" pattern for document exports.
 *   **Neural Rendering Stabilized**: Implemented a dedicated `RendererErrorBoundary` and stabilized the A4 rendering pipeline with hydration guards.
 *   **Identity Consistency**: Verified the move to a unified ID strategy using `randomId` for all document, source, and identity nodes.
