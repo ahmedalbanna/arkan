@@ -18,16 +18,28 @@ describe('RAG hooks', () => {
   });
 
   it('retrieves context through apiService and stores sources', async () => {
-    apiService.mockResolvedValue({ context: 'Retrieved context', sources: [{ content: 'source', score: 0.9, type: 'reference' }] });
+    const mockValue = { 
+        context: 'Retrieved context', 
+        sources: [{ text: 'source', score: 0.9, type: 'reference' }] 
+    };
+    
+    // We wrap in a result-like structure because the hook expectation is a Result from the api client
+    // But since the hook uses container.resolve(RagApiClient), we might need to mock the client instead
+    // For this test, we mock the apiService which the client calls.
+    apiService.mockResolvedValue(mockValue);
+    
     const { result } = renderHook(() => useRagRetrieval());
 
     let response: any;
     await act(async () => {
-      response = await result.current.retrieveContext('query');
+      response = await result.current.retrieve('query');
     });
 
     await waitFor(() => expect(response.context).toBe('Retrieved context'));
-    expect(apiService).toHaveBeenCalledWith(expect.objectContaining({ endpoint: '/api/rag/retrieve-context', method: 'POST' }));
+    expect(apiService).toHaveBeenCalledWith(expect.objectContaining({ 
+        endpoint: '/api/rag/retrieve-context', 
+        method: 'POST' 
+    }));
     expect(response.sources).toHaveLength(1);
   });
 

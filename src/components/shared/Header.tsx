@@ -16,6 +16,16 @@ import { MobileNav } from './MobileNav';
 import { UserProfileDropdown } from './UserProfileDropdown';
 import { NotificationDropdown } from './NotificationDropdown';
 
+/**
+ * Global Header — Primary navigation and status orchestrator.
+ * 
+ * DEFENSIVE MEASURES:
+ * 1. Atmospheric Grid: Unified 28px dot-grid aligned with workspace canvas.
+ * 2. Existence Guards: Checks for userProfile before rendering HUD dependencies.
+ * 3. Hydration Sync: Optimized isClient pattern to prevent cumulative layout shift.
+ * 4. Fallback Labels: Safe localization resolution with hardcoded defaults.
+ */
+
 interface NavLink {
   href: string;
   label: string;
@@ -32,14 +42,18 @@ const navLinks: NavLink[] = [
 function NavLinks() {
   const pathname = usePathname();
   const { t } = useLocalization();
-  const { user } = useAuth();
+  const { status } = useAuth();
+
+  const isAuthenticated = status === 'authenticated' || status === 'guest';
 
   return (
-    <nav className="hidden md:flex flex-wrap items-center justify-center gap-1 mx-auto bg-muted/20 p-1 rounded-xl border border-border/40 backdrop-blur-sm">
+    <nav className="hidden md:flex flex-wrap items-center justify-center gap-1 mx-auto bg-muted/20 p-1 rounded-xl border border-border/40 backdrop-blur-sm relative z-10">
       {navLinks
-        .filter(link => link.auth === 'any' || (link.auth && !!user))
+        .filter(link => link.auth === 'any' || (link.auth && isAuthenticated))
         .map((link) => {
           const isActive = pathname === link.href;
+          const label = t(link.label) || 'NAVIGATION_NODE';
+          
           return (
             <Button
               key={link.href}
@@ -54,7 +68,7 @@ function NavLinks() {
             >
               <Link href={link.href}>
                 <link.icon className={cn("h-3.5 w-3.5 mr-2", isActive ? "text-primary" : "text-muted-foreground/60")} />
-                {t(link.label)}
+                {label}
               </Link>
             </Button>
           );
@@ -65,12 +79,16 @@ function NavLinks() {
 
 function AuthActions() {
   const { t } = useLocalization();
-  const { userProfile } = useAuth();
+  const { userProfile, status } = useAuth();
 
-  const hasNoCredits = userProfile?.credits === 0;
+  // Guard: Early return if profile is not yet materialized
+  if (!userProfile && status !== 'guest') return <Skeleton className="h-9 w-32 rounded-xl" />;
+
+  const credits = userProfile?.credits ?? 0;
+  const hasNoCredits = credits === 0;
 
   return (
-    <div className="flex items-center gap-2 bg-muted/20 p-1 rounded-xl border border-border/40 backdrop-blur-sm">
+    <div className="flex items-center gap-2 bg-muted/20 p-1 rounded-xl border border-border/40 backdrop-blur-sm relative z-10">
       <PurchaseCreditsDialog
         trigger={
           <Button
@@ -84,7 +102,7 @@ function AuthActions() {
             )}
           >
             <Gem className="h-3.5 w-3.5" />
-            <span>{userProfile?.credits ?? 0} {t('header.credits')}</span>
+            <span>{credits} {t('header.credits') || 'QUOTA'}</span>
           </Button>
         }
       />
@@ -100,10 +118,10 @@ function AuthActions() {
 function GuestActions() {
   const { t } = useLocalization();
   return (
-    <Button asChild size="sm" className="h-9 px-5 font-black uppercase tracking-[0.2em] text-[10px] shadow-lg shadow-primary/20 gap-2 rounded-xl">
+    <Button asChild size="sm" className="h-9 px-5 font-black uppercase tracking-[0.2em] text-[10px] shadow-lg shadow-primary/20 gap-2 rounded-xl relative z-10 ring-1 ring-inset ring-white/10">
       <Link href="/login">
         <LogIn className="h-3.5 w-3.5" />
-        {t('login.pageTitle')}
+        {t('login.pageTitle') || 'SYSTEM_ENTRY'}
       </Link>
     </Button>
   );
@@ -111,17 +129,20 @@ function GuestActions() {
 
 export function Header() {
   const { t } = useLocalization();
-  const { user, isLoading } = useAuth();
+  const { status } = useAuth();
   const [isClient, setIsClient] = useState(false);
 
   useEffect(() => {
     setIsClient(true);
   }, []);
 
+  const titleLabel = isClient ? (t('header.title') || 'ARKAN') : '...';
+  const isAuthenticated = status === 'authenticated' || status === 'guest';
+
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/60 backdrop-blur-2xl transition-all duration-700 ease-in-out group/header">
       <div className="flex h-16 items-center px-6 justify-between mx-auto relative overflow-hidden">
-        {/* Animated Intelligence Grid Background — aligned with BuilderCanvas (28px) */}
+        {/* Animated Intelligence Grid — Aligned with Builder standards (28px) */}
         <div 
             className="absolute inset-0 z-[-1] opacity-[0.03] dark:opacity-[0.05] pointer-events-none" 
             style={{ 
@@ -131,7 +152,7 @@ export function Header() {
         />
         <div className="absolute left-0 bottom-0 w-full h-px bg-gradient-to-r from-transparent via-primary/20 to-transparent opacity-0 group-hover/header:opacity-100 transition-opacity duration-1000" />
 
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-4 relative z-10">
           <MobileNav navLinks={navLinks} />
           <Link href="/" className="flex items-center gap-4 group/logo">
             <div className="relative">
@@ -142,8 +163,8 @@ export function Header() {
                 </div>
             </div>
             <div className="flex flex-col">
-              <span className="font-headline text-[1.1rem] font-black tracking-tight text-foreground leading-none">
-                {isClient ? t('header.title') : <Skeleton className="h-5 w-24" />}
+              <span className="font-headline text-[1.1rem] font-black tracking-tight text-foreground leading-none uppercase">
+                {titleLabel}
               </span>
               <div className="flex items-center gap-1.5 mt-1.5">
                  <div className="h-1 w-1 rounded-full bg-primary animate-pulse shadow-[0_0_5px_rgba(var(--primary),0.8)]" />
@@ -155,26 +176,19 @@ export function Header() {
           </Link>
         </div>
 
-        {isClient && <NavLinks />}
+        {isClient && status !== 'loading' && <NavLinks />}
 
-        <div className="flex items-center gap-5">
+        <div className="flex items-center gap-5 relative z-10">
           <div className="flex items-center gap-2">
-            {isClient ? (
-              isLoading ? (
+            {!isClient || status === 'loading' ? (
                 <div className="flex items-center gap-3">
                   <Skeleton className="h-9 w-28 rounded-xl" />
                   <Skeleton className="h-10 w-10 rounded-full" />
                 </div>
-              ) : user ? (
+            ) : isAuthenticated ? (
                 <AuthActions />
-              ) : (
-                <GuestActions />
-              )
             ) : (
-              <div className="flex items-center gap-3">
-                <Skeleton className="h-9 w-28 rounded-xl" />
-                <Skeleton className="h-10 w-10 rounded-full" />
-              </div>
+                <GuestActions />
             )}
           </div>
 

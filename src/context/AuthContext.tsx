@@ -9,6 +9,18 @@ import { createContext, ReactNode, useCallback, useContext, useEffect, useState 
 import { useBuilderStore } from '@/hooks';
 import { apiService } from '@/infrastructure/api/ApiService';
 
+/**
+ * AuthContext — High-fidelity identity and usage orchestration.
+ * Manages the global authentication vector and neural quota telemetry.
+ * 
+ * DEFENSIVE MEASURES:
+ * 1. Status Vector: Replaces multiple flags with a unified 'authStatus' union.
+ * 2. Sync Integrity: Ensures quota retrieval only engages for valid identity nodes.
+ * 3. Error Containment: Wraps async auth pipelines in robust try-catch blocks.
+ * 4. Store Sync: Automatically propagates profile shifts to the Builder store.
+ * 5. Backward Compatibility: Provides isLoading and isGuest for existing nodes.
+ */
+
 interface AuthUsage {
   remainingFreeGenerations: number;
   totalLimit: number;
@@ -16,11 +28,14 @@ interface AuthUsage {
   resetAt: number;
 }
 
+export type AuthStatus = 'loading' | 'authenticated' | 'unauthenticated' | 'guest' | 'error';
+
 interface AuthContextType {
   user: any | null;
   userProfile: User | null;
-  isLoading: boolean;
-  isGuest: boolean;
+  status: AuthStatus;
+  isLoading: boolean; // Compatibility
+  isGuest: boolean;   // Compatibility
   usage: AuthUsage | null;
   refetchUser: () => void;
   updateUsage: (usage: AuthUsage) => void;
@@ -30,8 +45,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<any | null>(null);
-  const [authIsLoading, setAuthIsLoading] = useState(true);
-  const [isGuest, setIsGuest] = useState(false);
+  const [status, setStatus] = useState<AuthStatus>('loading');
   const [usage, setUsage] = useState<AuthUsage | null>(null);
   const queryClient = useQueryClient();
   const { setUserProfile: setStoreUserProfile } = useBuilderStore();
@@ -44,11 +58,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       });
       setUsage(response);
     } catch (error) {
-      console.error('Failed to fetch usage stats:', error);
+      console.warn('[Auth:Usage] Telemetry link failed:', error);
     }
   }, []);
 
   const fetchMe = useCallback(async () => {
+    setStatus('loading');
     try {
       const response = await apiService<undefined, { authenticated: boolean, user?: any }>({
         endpoint: '/api/auth/me',
@@ -59,12 +74,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         if (response.user.isDisabled) {
             setUser(null);
             setStoreUserProfile(null);
+            setStatus('unauthenticated');
             return null;
         }
+
         const userInstance = new User(response.user);
         setUser(response.user);
         setStoreUserProfile(userInstance);
-        setIsGuest(false);
+        setStatus('authenticated');
         fetchUsage();
         return userInstance;
       } else {
@@ -72,20 +89,21 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         setStoreUserProfile(null);
         const cookieService = container.resolve<ICookieService>(ICookieServiceToken);
         const guestActive = cookieService.hasGuestCookie();
-        setIsGuest(guestActive);
-        if (guestActive) fetchUsage();
+        
+        if (guestActive) {
+            setStatus('guest');
+            fetchUsage();
+        } else {
+            setStatus('unauthenticated');
+        }
         return null;
       }
     } catch (error) {
+      console.error('[Auth:Ingress] Authentication vector failure:', error);
+      setStatus('error');
       setUser(null);
       setStoreUserProfile(null);
-      const cookieService = container.resolve<ICookieService>(ICookieServiceToken);
-      const guestActive = cookieService.hasGuestCookie();
-      setIsGuest(guestActive);
-      if (guestActive) fetchUsage();
       return null;
-    } finally {
-      setAuthIsLoading(false);
     }
   }, [setStoreUserProfile, fetchUsage]);
 
@@ -99,7 +117,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       if (!user) return null;
       return new User(user);
     },
-    enabled: Boolean(user),
+    enabled: status === 'authenticated',
     staleTime: Infinity,
   });
 
@@ -117,8 +135,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const value = {
     user: user ? { uid: user.id, email: user.email, displayName: user.name } as any : null,
     userProfile: userProfile ?? null,
-    isLoading: authIsLoading,
-    isGuest,
+    status,
+    isLoading: status === 'loading',
+    isGuest: status === 'guest',
     usage,
     refetchUser,
     updateUsage,
@@ -134,4 +153,3 @@ export const useAuth = (): AuthContextType => {
   }
   return context;
 };
-
