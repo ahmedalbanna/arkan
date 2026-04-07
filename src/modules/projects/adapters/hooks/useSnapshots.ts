@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { container } from '@/infrastructure/di/container';
 import { ProjectApiClient } from '../api-client/ProjectApiClient';
+import { Project } from '../../domain/entities/Project';
 import { toast } from '@/hooks/util/use-toast';
 import { type ProjectProperties } from '../../domain/entities/Project';
 
@@ -13,8 +14,8 @@ export function useSnapshots(projectId: string | undefined) {
         queryFn: async () => {
             if (!projectId) return [];
             const result = await apiClient.fetchSnapshots(projectId);
-            if (result.isSuccess) return result.getValue();
-            throw result.error;
+            if (result.isFailure) throw result.error;
+            return result.getValue();
         },
         enabled: !!projectId,
     });
@@ -23,8 +24,8 @@ export function useSnapshots(projectId: string | undefined) {
         mutationFn: async ({ name, snapshotData }: { name: string; snapshotData: ProjectProperties }) => {
             if (!projectId) throw new Error('Project ID is required');
             const result = await apiClient.createSnapshot(projectId, name, snapshotData);
-            if (result.isSuccess) return result.getValue();
-            throw result.error;
+            if (result.isFailure) throw result.error;
+            return result.getValue();
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['projects', projectId, 'snapshots'] });
@@ -38,8 +39,8 @@ export function useSnapshots(projectId: string | undefined) {
     const deleteSnapshotMutation = useMutation({
         mutationFn: async (snapshotId: string) => {
             const result = await apiClient.deleteSnapshot(snapshotId);
-            if (result.isSuccess) return result.getValue();
-            throw result.error;
+            if (result.isFailure) throw result.error;
+            return result.getValue();
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['projects', projectId, 'snapshots'] });

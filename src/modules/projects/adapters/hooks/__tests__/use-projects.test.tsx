@@ -62,7 +62,7 @@ const { Project } = require('@/modules/projects/domain/entities/Project') as {
   Project: new (...args: unknown[]) => { id?: string; name?: string; toStateObject: () => unknown };
 };
 
-const { LocalProjectService } = require('@/modules/projects/adapters/local-storage/LocalProjectService') as {
+const { LocalProjectService } = require('@/modules/projects/infrastructure/storage/LocalProjectService') as {
   LocalProjectService: unknown;
 };
 

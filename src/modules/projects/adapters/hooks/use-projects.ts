@@ -5,10 +5,11 @@ import { projectKeys } from '@/infrastructure/api/query-keys';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useBuilderStore } from '@/modules/projects/adapters/state/useBuilderStore';
 import { useAuth } from '@/context/AuthContext';
-import { LocalProjectService } from '@/modules/projects/adapters/local-storage/LocalProjectService';
+import { LocalProjectService } from '@/modules/projects/infrastructure/storage/LocalProjectService';
 import { ProjectApiClient } from '@/modules/projects/adapters/api-client/ProjectApiClient';
 import { Project, type ProjectProperties } from '@/modules/projects/domain/entities/Project';
 import { container } from '@/infrastructure/di/container';
+import { ProjectSyncService } from '../api-client/ProjectSyncService';
 
 export function useProjects() {
   const { user } = useAuth();
@@ -17,30 +18,13 @@ export function useProjects() {
   const { data, ...rest } = useQuery<Project[]>({
     queryKey: projectKeys.lists(projectScope),
     queryFn: async () => {
-      if (!user) {
-        return [];
-      }
-
-      try {
-        const client = container.resolve(ProjectApiClient);
-        const result = await client.fetchProjects();
-        if (result.isFailure) throw result.error;
-        
-        const serverProjects = result.getValue();
-        const localService = container.resolve(LocalProjectService);
-        const mergedProjects = serverProjects.map((project) => new Project(project));
-
-        mergedProjects.forEach((project) => {
-          localService.saveProject(project.toStateObject());
-        });
-
-        return mergedProjects;
-      } catch (error) {
-        console.warn('Could not sync with server, using local projects.', error);
-        const localService = container.resolve(LocalProjectService);
-        const localProjects = await localService.getAllProjects();
-        return localProjects.map((project: ProjectProperties) => new Project(project));
-      }
+      if (!user) return [];
+      
+      const syncService = container.resolve(ProjectSyncService);
+      const result = await syncService.syncProjects();
+      
+      if (result.isFailure) throw result.error;
+      return result.getValue();
     },
     enabled: Boolean(user),
   });

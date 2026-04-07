@@ -1,20 +1,8 @@
-I will now create a plan to enable both vertical and horizontal scrolling in the SidebarContainer by updating the ScrollArea component and adjusting the
-layout within SidebarContainer.tsx.
+ 1 Validation: Run tests to verify the refactored projects module.
+ 2 Expansion: Standardize another module (e.g., templates or billing) using these same patterns.
+ 3 Documentation: Update the Architecture Clarity section in AGENTS.md with these specific examples.
 
-                                                     Enable Bi-directional Scrolling in SidebarContainer
 
-                                                               1. Update ScrollArea Component
-
- • Modify src/components/ui/scroll-area.tsx to include both a vertical and a horizontal ScrollBar within the ScrollArea component. Radix UI's ScrollArea
-   handles the visibility of these bars automatically based on content overflow.
-
-                                                                 2. Update SidebarContainer
-
- • Modify src/modules/ai-content/adapters/components/builder/layout/SidebarContainer.tsx:
-    • Ensure the inner content wrapper (the div inside ScrollArea) can expand horizontally if its children require it (e.g., using w-fit or min-w-full).
-    • Remove or adjust the flex flex-col if it's strictly forcing a vertical-only layout, or ensure the container allows for horizontal overflow of its
-      children.
-
-                                                                       3. Verification
-
- • Verify that the SidebarContainer now displays scrollbars in both directions when the content exceeds its dimensions.
+  1 Module Refactoring: Apply these patterns to the templates or billing modules.
+ 2 Testing: Create unit tests for the new ProjectSyncService.
+ 3 Documentation: Update the technical documentation to reflect these architectural changes.

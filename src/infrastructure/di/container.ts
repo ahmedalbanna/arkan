@@ -51,7 +51,7 @@ import { NotificationApiClient } from "@/modules/users/adapters/api-client/Notif
 import { RagApiClient } from "@/modules/rag/adapters/api-client/RagApiClient";
 import { DocxExportApiClient, PptxExportApiClient } from "@/modules/ai-content/adapters/api-client/ExportApiClient";
 import { CreditService } from "@/modules/billing/application/services/CreditService";
-import { LocalProjectService } from "@/modules/projects/adapters/local-storage/LocalProjectService";
+import { LocalProjectService } from "@/modules/projects/infrastructure/storage/LocalProjectService";
 import { PromptBuilder } from "@/modules/ai-content/domain/services/PromptBuilder";
 import { CookieManager } from "@/modules/users/infrastructure/services/CookieManager";
 import { SessionManager } from "@/modules/users/infrastructure/services/SessionManager";

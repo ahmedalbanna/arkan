@@ -5,7 +5,7 @@ import { Chapter } from '@/modules/ai-content/domain/entities/Chapter';
 import { Section } from '@/modules/ai-content/domain/entities/Section';
 import { User } from '@/modules/users/domain/entities/User';
 import { TocSection } from '@/modules/ai-content/domain/entities/TOC';;
-import { LocalProjectService } from '@/modules/projects/adapters/local-storage/LocalProjectService';
+import { LocalProjectService } from '@/modules/projects/infrastructure/storage/LocalProjectService';
 import { container } from '@/infrastructure/di/container';
 import { useEffect } from 'react';
 import { create } from 'zustand';
