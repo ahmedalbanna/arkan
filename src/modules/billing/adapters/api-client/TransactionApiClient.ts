@@ -18,14 +18,14 @@ const toApiError = (error: unknown): ApiError => {
 
 @injectable()
 export class TransactionApiClient {
-  async fetchTransactions(options: { status?: string; limit?: number; lastVisibleId?: string } = {}): Promise<Result<any, ApiError>> {
+  async fetchTransactions(options: { status?: string; limit?: number; lastVisibleId?: string } = {}): Promise<Result<{ transactions: TransactionProperties[], hasNextPage: boolean, lastVisibleId: string | null }, ApiError>> {
     try {
       const query = new URLSearchParams();
       if (options.status) query.append('status', options.status);
       if (options.limit) query.append('limit', options.limit.toString());
       if (options.lastVisibleId) query.append('lastVisibleId', options.lastVisibleId);
 
-      const data = await apiService<never, any>({ 
+      const data = await apiService<never, { transactions: TransactionProperties[], hasNextPage: boolean, lastVisibleId: string | null }>({ 
         endpoint: `/api/admin/transactions?${query.toString()}`
       });
       return Result.ok(data);

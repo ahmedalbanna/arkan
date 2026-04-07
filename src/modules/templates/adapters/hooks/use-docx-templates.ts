@@ -11,11 +11,11 @@ import { container } from '@/infrastructure/di/container';
 export function useDocxStyles() {
   const { data: templates, ...rest } = useQuery<Record<string, DocxTemplateProperties>>({
     queryKey: templateKeys.docx(),
-    queryFn: async () => {
+    queryFn: async (): Promise<Record<string, DocxTemplateProperties>> => {
         const result = await container.resolve(TemplateApiClient).fetchDocxTemplates();
         if (result.isFailure) throw result.error;
         const list = result.getValue();
-        return list.reduce((acc: Record<string, DocxTemplateProperties>, t: DocxTemplateProperties) => ({ ...acc, [t.id]: t }), {});
+        return list.reduce((acc, t) => ({ ...acc, [t.id]: t as DocxTemplateProperties }), {} as Record<string, DocxTemplateProperties>);
     },
     staleTime: 1000 * 60 * 60,
   });

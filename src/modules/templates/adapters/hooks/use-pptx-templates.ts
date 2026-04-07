@@ -11,11 +11,11 @@ import { container } from '@/infrastructure/di/container';
 export function usePptxStyles() {
   const { data: templates, ...rest } = useQuery<Record<string, PptxTemplateProperties>>({
     queryKey: templateKeys.pptx(),
-    queryFn: async () => {
+    queryFn: async (): Promise<Record<string, PptxTemplateProperties>> => {
         const result = await container.resolve(TemplateApiClient).fetchPptxTemplates();
         if (result.isFailure) throw result.error;
         const list = result.getValue();
-        return list.reduce((acc: Record<string, PptxTemplateProperties>, t: PptxTemplateProperties) => ({ ...acc, [t.id]: t }), {});
+        return list.reduce((acc, t) => ({ ...acc, [t.id]: t as PptxTemplateProperties }), {} as Record<string, PptxTemplateProperties>);
     },
     staleTime: 1000 * 60 * 60,
   });

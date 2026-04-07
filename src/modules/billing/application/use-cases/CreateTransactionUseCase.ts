@@ -14,9 +14,11 @@ export class CreateTransactionUseCase {
     ) {}
 
     async execute(data: Omit<TransactionProperties, 'id' | 'createdAt'>): Promise<Result<TransactionProperties, BillingError>> {
-        return this.transactionRepository.save({
+        const transaction: TransactionProperties = {
             ...data,
+            id: "", // Will be set by the repository
             createdAt: new Date().toISOString()
-        } as any);
+        };
+        return this.transactionRepository.save(transaction);
     }
 }
