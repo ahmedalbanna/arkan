@@ -1,7 +1,7 @@
 
 import { z } from 'zod';
 
-export const NotificationIconSchema = z.enum(['credit-card', 'bot', 'file-text', 'user-plus', 'default', 'gem']).default('default');
+export const NotificationIconSchema = z.enum(['credit-card', 'bot', 'file-text', 'user-plus', 'default', 'gem', 'bell']).default('default');
 
 export const NotificationPropertiesSchema = z.object({
   id: z.string(),

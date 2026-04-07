@@ -40,7 +40,10 @@ export const POST = withAuth(async ({ request }) => {
     }
     
     const controller = container.resolve(UserController);
-    const result = await controller.createUser(validation.data);
+    const result = await controller.createUser({
+      ...validation.data,
+      role: 'user' // Default role for new users via this endpoint
+    });
     
     return handleUserResult(result);
   } catch (error) {

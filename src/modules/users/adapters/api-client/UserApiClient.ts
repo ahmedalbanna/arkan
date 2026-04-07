@@ -117,9 +117,9 @@ export class UserApiClient {
     }
   }
 
-  async createUser(data: any): Promise<Result<CreateUserResponse, ApiError>> {
+  async createUser(data: CreateUserInput): Promise<Result<CreateUserResponse, ApiError>> {
     try {
-      const response = await apiService<any, CreateUserResponse>({
+      const response = await apiService<CreateUserInput, CreateUserResponse>({
         endpoint: '/api/admin/users',
         method: 'POST',
         data,
@@ -143,13 +143,13 @@ export class UserApiClient {
     }
   }
 
-  async deleteUser(id: string): Promise<Result<{ message: string }, ApiError>> {
+  async deleteUser(id: string): Promise<Result<void, ApiError>> {
     try {
-      const response = await apiService<never, { message: string }>({
+      await apiService<never, { message: string }>({
         endpoint: `/api/admin/users/${id}`,
         method: 'DELETE',
       });
-      return Result.ok(response);
+      return Result.ok();
     } catch (error: unknown) {
       return Result.fail(toApiError(error));
     }

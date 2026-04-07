@@ -3,7 +3,7 @@ import {
     type NotificationPropertiesType as NotificationProperties 
 } from "../schemas/NotificationSchema";
 
-export type NotificationIcon = 'credit-card' | 'bot' | 'file-text' | 'user-plus' | 'default' | 'gem';
+export type NotificationIcon = 'credit-card' | 'bot' | 'file-text' | 'user-plus' | 'default' | 'gem' | 'bell';
 export type { NotificationProperties };
 
 export class Notification implements NotificationProperties {

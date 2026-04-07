@@ -54,7 +54,7 @@ export function useCreateUser(options?: { onSuccess?: () => void }) {
   const { toast } = useToast();
 
   return useMutation({
-    mutationFn: async (data: any) => {
+    mutationFn: async (data: { email: string, name: string, role: 'admin' | 'user', password?: string, credits?: number }) => {
       const client = container.resolve(UserApiClient);
       const result = await client.createUser(data);
       if (result.isFailure) throw result.error;
@@ -65,7 +65,9 @@ export function useCreateUser(options?: { onSuccess?: () => void }) {
       toast({ title: 'Success', description: 'User created successfully.' });
       options?.onSuccess?.();
     },
-    onError: (error: any) => handleErrorUtility(error, 'Failed to create user'),
+    onError: (error: any) => {
+      toast({ title: 'Error', description: error.message || 'Failed to create user', variant: 'destructive' });
+    },
   });
 }
 
@@ -85,7 +87,9 @@ export function useUpdateUser() {
       queryClient.invalidateQueries({ queryKey: userKeys.all() });
       toast({ title: 'Success', description: 'User updated successfully.' });
     },
-    onError: (error: any) => handleErrorUtility(error, 'Failed to update user'),
+    onError: (error: any) => {
+      toast({ title: 'Error', description: error.message || 'Failed to update user', variant: 'destructive' });
+    },
   });
 }
 
@@ -105,7 +109,9 @@ export function useAdminUpdateUser() {
       queryClient.invalidateQueries({ queryKey: userKeys.all() });
       toast({ title: 'Success', description: 'User updated successfully.' });
     },
-    onError: (error: any) => handleErrorUtility(error, 'Failed to update user'),
+    onError: (error: any) => {
+      toast({ title: 'Error', description: error.message || 'Failed to update user', variant: 'destructive' });
+    },
   });
 }
 
@@ -124,6 +130,8 @@ export function useDeleteUser() {
       queryClient.invalidateQueries({ queryKey: userKeys.all() });
       toast({ title: 'Success', description: 'User deleted successfully.' });
     },
-    onError: (error: any) => handleErrorUtility(error, 'Failed to delete user'),
+    onError: (error: any) => {
+      toast({ title: 'Error', description: error.message || 'Failed to delete user', variant: 'destructive' });
+    },
   });
 }

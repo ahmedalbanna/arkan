@@ -13,10 +13,13 @@ Arkan is a sophisticated AI-powered platform designed for writing and document g
 *   **Backend:** SQLite with Drizzle ORM. Firebase is used only for Storage and FCM (Notifications).
 *   **UI Framework:** Radix UI components with custom theming.
 *   **State Management:** Zustand combined with React Query for efficient data management.
+*   **Result Pattern:** Mandatory `Result<T, E>` pattern across application and adapter layers for robust error handling.
 
-### Code Organization
+### Code Organization (Clean Architecture / DDD)
 
-*   The codebase exhibits an excellent modular structure with a clear separation of concerns.
+*   The codebase follows a strict 4-layer DDD structure: `domain`, `application`, `adapters`, and `infrastructure`.
+*   **Adapters Layer Triad**: Standardized `controllers` (Server), `hooks` (Client), and `state` (Client) separation.
+*   Barrel exports are employed for streamlined import paths (e.g., `src/ai/flows/index.ts`).
 *   Barrel exports are employed for streamlined import paths (e.g., `src/ai/flows/index.ts`).
 *   AI flows are type-safe through the use of Zod schemas.
 *   Consistent naming conventions and file organization are maintained throughout the project.
@@ -104,6 +107,8 @@ Arkan maintains **100% type safety** in all source code. The following documenta
 - ✅ Immutable state management patterns
 - ✅ Type-safe AI flows with Zod validation
 - ✅ Fully typed React components and hooks
+- ✅ Mandatory Result Pattern Compliance (`Result<T, E>`)
+- ✅ Strict Clean Architecture Boundary Enforcement
 - ✅ Comprehensive type coverage (99%+)
 - ✅ Clear type organization and exports
 

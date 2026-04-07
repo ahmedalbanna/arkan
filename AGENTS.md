@@ -29,11 +29,11 @@ Modules within `src/modules/` adhere to a four-layer structure:
 
 1.  **`domain/`**: Contains pure entities, repository interfaces, and Zod schemas. This layer is free from external dependencies.
 2.  **`application/`**: Houses use cases that orchestrate domain logic.
-3.  **`adapters/`**: Acts as a bridge to external systems and the UI. It is subdivided into:
-    *   **`controllers/`**: (Server) Mediators that inject use cases and are consumed by API routes.
-    *   **`hooks/`**: (Client) React hooks (Query/Mutation) for data lifecycle and UI orchestration.
-    *   **`state/`**: (Client) Localized Zustand stores for ephemeral UI state (e.g., editor selection, panel visibility).
-    *   **`api-client/`**: (Client) Services used by hooks to communicate with server-side API routes.
+3.  **`adapters/`**: Acts as a bridge to external systems and the UI. It follows a mandatory 4-subdir structure:
+    *   **`controllers/`**: (Server) Pure mediators that inject Use Cases and are consumed by API routes. Every method MUST return `Promise<Result<T, E>>`.
+    *   **`hooks/`**: (Client) React hooks (Query/Mutation) for data lifecycle. Hooks MUST handle `result.isFailure` and use the standardized `useToast` pattern.
+    *   **`state/`**: (Client) Localized Zustand stores for ephemeral UI state.
+    *   **`api-client/`**: (Client) Services used by hooks to communicate with API routes. Includes data-sync orchestration (e.g., `ProjectSyncService`).
 4.  **`infrastructure/`**: Provides concrete implementations for services like Genkit, SQLite/Drizzle, and Qdrant.
 
 ### Dependency Injection (DI) & Execution Boundaries
@@ -74,7 +74,8 @@ The project's AI capabilities are managed through a flexible orchestration layer
 *   **RAG-Enhanced Endpoints**: Dedicated API routes (`/api/generate/chapter-rag`, `/api/generate/section-rag`) bypass local AIGenkit flows to directly invoke n8n RAG agents with full project context.
 *   **n8n Connection Architecture**: Each specialized agent requires three specific connections: (1) `Route Flow` -> Agent (main), (2) `OpenRouter Chat Model` -> Agent (ai_languageModel), and (3) Agent -> `Prepare Response` (main). Missing any connection leads to silent failures.
 *   **n8n API Deployment Standards**: When updating workflows via the n8n Public API (`PUT /workflows/:id`), the JSON body must strictly contain only schema-valid keys (`name`, `nodes`, `connections`, `settings`). Including properties like `id`, `versionId`, `meta`, or `pinData` will result in a 400 error.
-*   **Safety & Output**: All generation methods and flows must return `Result<T, E>` objects to provide explicit success/failure vectors to the UI.
+*   **Safety & Output**: All generation methods, application Use Cases, and Controller methods MUST return `Result<T, E>` objects to provide explicit success/failure vectors throughout the entire stack.
+*   **Infrastructure Isolation**: Concerns like SQLite/Drizzle repositories or IndexedDB storage (e.g., `LocalProjectService`) MUST reside in `infrastructure/`, while the logic to sync them with the server resides in `adapters/api-client/`.
 *   **Spectral Sanitization**: The `cleanAiOutput` utility function MUST be used to strip extraneous conversational elements (e.g., "Here is the content:") and markdown code blocks before committing AI text to the domain.
 *   **Neural Telemetry**: Instrument retrieval flows with high-precision timing (`performance.now()`) and transmit via a `telemetry` field in result objects to enable real-time monitoring of pipeline stages (Embedding, Search, Rerank).
 
@@ -124,5 +125,8 @@ The project's AI capabilities are managed through a flexible orchestration layer
 *   **n8n Workflow Architecture**: The "Arkan AI Integration Workflow" (`n8n_ai_workflow.json`) uses a Switch node routing 5 action types: `generateText`, `runFlow`, `retrieveContext`, `generateChapterWithRAG`, `generateSectionWithRAG`. Specialized RAG agents handle chapter and section generation with Qdrant-based retrieval.
 *   **n8n Protocol Hardening**: Synchronized naming conventions across 32 specialized agents. Resolved a global routing mismatch by updating `N8N_FLOW_MAP` to translate Registry `kebab-case` tool IDs to n8n-native `camelCase` agent names. Ensured correct connection architecture and API deployment standards for n8n workflows.
 *   **RAG UI Integration**: Implemented "Synthesize with RAG" toggles across Section and Chapter HUDs, enabling users to opt-in to enhanced retrieval-based generation via the new n8n-backed API routes. Optimized n8n timeout to 300s to support complex generation.
-*   **Architecture Clarity & Standardization**: Explicitly defined the triad within the `adapters/` layer (Controllers/Hooks/State) and their respective execution boundaries (Server/Client). Standardized core workspace callbacks to `onActiveNodeChange` and enforced the `asChild` constraint.
+*   **Modular Standardization Wave**: Successfully refactored 6 core modules (`ai-content`, `projects`, `templates`, `billing`, `rag`, `users`) to follow the standardized Adapter Triad and Result Pattern.
+*   **Infrastructure Alignment**: Relocated local storage services to the infrastructure layer and implemented dedicated sync services in the API client layer for offline-first resilience.
+*   **Protocol Hardening**: Unified all 40+ user management methods and 10+ RAG methods under strict TypeScript contracts and explicit result vectors.
+*   **Architecture Clarity & Standardization**: Explicitly defined the mandatory 4-subdir structure within the `adapters/` layer (Controllers/Hooks/State/Api-Client). Standardized core workspace callbacks to `onActiveNodeChange` and enforced the `asChild` constraint.
 *   **i18n Enhancement**: Ensured all ARIA labels and tooltips are localized for RTL support.
