@@ -1,6 +1,6 @@
 
 import { delay, inject, injectable } from "tsyringe";
-import type { RagIndexingOptions, RagRetrievalOptions } from "../../domain/repositories/IRagRepository";
+import type { RagIndexingOptions, RagIndexingResult, RagRetrievalOptions, RagRetrievalResult } from "../../domain/repositories/IRagRepository";
 import type { IndexedDocumentRecord } from "../../domain/repositories/IIndexedDocumentRepository";
 import { RetrieveContextUseCase } from "../../application/use-cases/RetrieveContextUseCase";
 import { IndexDocumentUseCase } from "../../application/use-cases/IndexDocumentUseCase";
@@ -12,6 +12,8 @@ import { CheckRagSearchCacheHitUseCase } from "../../application/use-cases/Check
 import { CompareRerankingUseCase } from "../../application/use-cases/CompareRerankingUseCase";
 import { GetIndexedDocumentsUseCase } from "../../application/use-cases/GetIndexedDocumentsUseCase";
 import { DeleteIndexedDocumentUseCase } from "../../application/use-cases/DeleteIndexedDocumentUseCase";
+import { Result } from "@/infrastructure/utils/result";
+import { RagError } from "../../domain/errors/RagErrors";
 
 @injectable()
 export class RagController {
@@ -38,47 +40,47 @@ export class RagController {
         private deleteIndexedDocumentUseCase: DeleteIndexedDocumentUseCase
     ) {}
 
-    async retrieveContext(query: string, options: RagRetrievalOptions) {
+    async retrieveContext(query: string, options: RagRetrievalOptions): Promise<Result<RagRetrievalResult, RagError>> {
         return this.retrieveContextUseCase.execute(query, options);
     }
 
-    async indexDocument(content: string, options: RagIndexingOptions) {
+    async indexDocument(content: string, options: RagIndexingOptions): Promise<Result<RagIndexingResult, RagError>> {
         return this.indexDocumentUseCase.execute(content, options);
     }
 
-    async getStats() {
+    async getStats(): Promise<Result<any, RagError>> {
         return this.getRagStatsUseCase.execute();
     }
 
-    async getHealthStatus() {
+    async getHealthStatus(): Promise<Result<any, RagError>> {
         return this.getRagHealthStatusUseCase.execute();
     }
 
-    async getCacheStats() {
+    async getCacheStats(): Promise<Result<any, RagError>> {
         return this.getRagCacheStatsUseCase.execute();
     }
 
-    async clearCache() {
+    async clearCache(): Promise<Result<void, RagError>> {
         return this.clearRagCacheUseCase.execute();
     }
 
-    async isSearchCacheHit(query: string, options?: { projectId?: string; topK?: number; minScore?: number }) {
+    async isSearchCacheHit(query: string, options?: { projectId?: string; topK?: number; minScore?: number }): Promise<Result<boolean, RagError>> {
         return this.checkRagSearchCacheHitUseCase.execute(query, options);
     }
 
-    async compareReranking(query: string, strategy?: 'cross-encoder' | 'bm25' | 'hybrid' | 'reciprocal-rank-fusion' | 'all') {
+    async compareReranking(query: string, strategy?: 'cross-encoder' | 'bm25' | 'hybrid' | 'reciprocal-rank-fusion' | 'all'): Promise<Result<any, RagError>> {
         return this.compareRerankingUseCase.execute(query, strategy);
     }
 
-    async getIndexedDocuments(limit?: number) {
+    async getIndexedDocuments(limit?: number): Promise<Result<IndexedDocumentRecord[], RagError>> {
         return this.getIndexedDocumentsUseCase.execute(limit);
     }
 
-    async deleteIndexedDocument(options: { projectId?: string, sourceFile?: string }) {
+    async deleteIndexedDocument(options: { projectId?: string, sourceFile?: string }): Promise<Result<void, RagError>> {
         return this.deleteIndexedDocumentUseCase.execute(options);
     }
 
-    async recordFailedIndexing(data: Pick<IndexedDocumentRecord, 'projectId' | 'userId' | 'sourceFile' | 'fileSize' | 'type' | 'errorMessage'>) {
+    async recordFailedIndexing(data: Pick<IndexedDocumentRecord, 'projectId' | 'userId' | 'sourceFile' | 'fileSize' | 'type' | 'errorMessage'>): Promise<Result<string, RagError>> {
         return this.indexDocumentUseCase.recordFailed(data);
     }
 }

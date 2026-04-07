@@ -1,6 +1,7 @@
 import { injectable } from 'tsyringe';
 import { apiService, ApiError } from '@/infrastructure/api/ApiService';
 import { Result } from '@/infrastructure/utils/result';
+import { type IndexedDocumentRecord } from '../../domain/repositories/IIndexedDocumentRepository';
 
 export interface IndexDocumentResponse {
   message: string;
@@ -66,6 +67,78 @@ export class RagApiClient {
         endpoint: '/api/rag/retrieve-context',
         method: 'POST',
         data,
+      });
+      return Result.ok(response);
+    } catch (error: unknown) {
+      return Result.fail(toApiError(error));
+    }
+  }
+
+  async getStats(): Promise<Result<any, ApiError>> {
+    try {
+      const response = await apiService<never, any>({ endpoint: '/api/rag/stats' });
+      return Result.ok(response);
+    } catch (error: unknown) {
+      return Result.fail(toApiError(error));
+    }
+  }
+
+  async getHealthStatus(): Promise<Result<any, ApiError>> {
+    try {
+      const response = await apiService<never, any>({ endpoint: '/api/rag/health' });
+      return Result.ok(response);
+    } catch (error: unknown) {
+      return Result.fail(toApiError(error));
+    }
+  }
+
+  async getCacheStats(): Promise<Result<any, ApiError>> {
+    try {
+      const response = await apiService<never, any>({ endpoint: '/api/rag/cache-stats' });
+      return Result.ok(response);
+    } catch (error: unknown) {
+      return Result.fail(toApiError(error));
+    }
+  }
+
+  async clearCache(): Promise<Result<void, ApiError>> {
+    try {
+      await apiService<never, void>({ endpoint: '/api/rag/clear-cache', method: 'POST' });
+      return Result.ok();
+    } catch (error: unknown) {
+      return Result.fail(toApiError(error));
+    }
+  }
+
+  async getIndexedDocuments(limit?: number): Promise<Result<IndexedDocumentRecord[], ApiError>> {
+    try {
+      const endpoint = limit ? `/api/rag/documents?limit=${limit}` : '/api/rag/documents';
+      const response = await apiService<never, IndexedDocumentRecord[]>({ endpoint });
+      return Result.ok(response);
+    } catch (error: unknown) {
+      return Result.fail(toApiError(error));
+    }
+  }
+
+  async deleteIndexedDocument(options: { projectId?: string, sourceFile?: string }): Promise<Result<void, ApiError>> {
+    try {
+      await apiService<any, void>({
+        endpoint: '/api/rag/delete-document',
+        method: 'DELETE',
+        data: options,
+      });
+      return Result.ok();
+    } catch (error: unknown) {
+      return Result.fail(toApiError(error));
+    }
+  }
+
+  async compareReranking(query: string, strategy?: string): Promise<Result<any, ApiError>> {
+    try {
+      const response = await apiService<any, any>({
+        endpoint: '/api/rag/compare-reranking',
+        method: 'POST',
+        data: { query, strategy },
       });
       return Result.ok(response);
     } catch (error: unknown) {
