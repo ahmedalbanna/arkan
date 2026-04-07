@@ -1,11 +1,13 @@
 'use client';
 
-import React, { useCallback, useMemo } from 'react';
-import { ClipboardPaste, Copy, Sparkles, Square, Loader2, AlertCircle } from 'lucide-react';
+import React, { useCallback, useMemo, useState } from 'react';
+import { ClipboardPaste, Copy, Sparkles, Square, Loader2, AlertCircle, Database } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Badge } from '@/components/ui/badge';
+import { Switch } from '@/components/ui/switch';
+import { Label } from '@/components/ui/label';
 import { cn } from '@/infrastructure/utils/cn';
 import { useLocalization } from '@/context/LocalizationContext';
 import { useBuilderStore } from '@/hooks';
@@ -39,7 +41,13 @@ export function SectionGenerationHUD({ section, selectedSectionIds = [], classNa
     const { t } = useLocalization();
     const project = useBuilderStore(state => state.project);
     const updateProject = useBuilderStore(state => state.updateProject);
-    const { generateSectionMutation, generateChapterMutation, generateProjectMutation } = useAiActions();
+    const { 
+        generateSectionMutation, 
+        generateSectionWithRAGMutation,
+        generateChapterMutation, 
+        generateProjectMutation 
+    } = useAiActions();
+    const [useRAG, setUseRAG] = useState(false);
     const clipboard = useGenerationUIStore(state => state.clipboard);
     const copySettings = useGenerationUIStore(state => state.copySettings);
 
@@ -83,9 +91,9 @@ export function SectionGenerationHUD({ section, selectedSectionIds = [], classNa
         return generateSectionMutation.isPending && (getSafeVariables(generateSectionMutation) === section.id);
     }, [isBulkGeneration, generateProjectMutation.isPending, generateChapterMutation.isPending, generateSectionMutation.isPending, generateSectionMutation.variables, section]);
 
-    const isAnythingGenerating = generateSectionMutation.isPending || generateChapterMutation.isPending || generateProjectMutation.isPending;
+    const isAnythingGenerating = generateSectionMutation.isPending || generateSectionWithRAGMutation.isPending || generateChapterMutation.isPending || generateProjectMutation.isPending;
     const canGenerate = !isAnythingGenerating && !!section;
-    const creditCost = isBulkGeneration ? selectedSectionIds.length : 1;
+    const creditCost = (isBulkGeneration ? selectedSectionIds.length : 1) * (useRAG ? 2 : 1);
 
     // 2. STABLE EVENT HANDLERS
     const handleCopySettings = useCallback(() => {
@@ -125,11 +133,15 @@ export function SectionGenerationHUD({ section, selectedSectionIds = [], classNa
         // Final validation before trigger
         if (isBulkGeneration) {
             if (selectedSectionIds.length === 0) return;
-            generateProjectMutation.mutate({ project, selectedSectionIds: new Set(selectedSectionIds) });
+            generateProjectMutation.mutate({ project, selectedSectionIds: new Set(selectedSectionIds), useRAG });
         } else {
-            generateSectionMutation.mutate(section.id);
+            if (useRAG) {
+                generateSectionWithRAGMutation.mutate(section.id);
+            } else {
+                generateSectionMutation.mutate(section.id);
+            }
         }
-    }, [generateProjectMutation, generateSectionMutation, isBulkGeneration, isGenerating, project, section, selectedSectionIds]);
+    }, [generateProjectMutation, generateSectionMutation, generateSectionWithRAGMutation, isBulkGeneration, isGenerating, project, section, selectedSectionIds, useRAG]);
 
     const bulkProgress = useMemo(() => {
         if (!isGenerating || !isBulkGeneration) return 0;
@@ -252,11 +264,15 @@ export function SectionGenerationHUD({ section, selectedSectionIds = [], classNa
                                         </>
                                     ) : (
                                         <>
-                                            <Sparkles className="h-4 w-4 shrink-0 transition-transform group-hover/gen:scale-110" />
+                                            {useRAG ? (
+                                                <Database className="h-4 w-4 shrink-0 transition-transform group-hover/gen:scale-110" />
+                                            ) : (
+                                                <Sparkles className="h-4 w-4 shrink-0 transition-transform group-hover/gen:scale-110" />
+                                            )}
                                             <span>
                                                 {isBulkGeneration
                                                     ? `Generate ${selectedSectionIds.length} Nodes`
-                                                    : 'Synthesize Section'}
+                                                    : (useRAG ? 'Synthesize with RAG' : 'Synthesize Section')}
                                             </span>
                                         </>
                                     )}
@@ -269,8 +285,25 @@ export function SectionGenerationHUD({ section, selectedSectionIds = [], classNa
                         </Tooltip>
                     </TooltipProvider>
 
+                    {!isBulkGeneration && (
+                        <div className="flex items-center justify-between px-3 py-2 rounded-xl bg-muted/30 border border-border/50">
+                            <div className="flex items-center gap-2">
+                                <Database className={`h-3.5 w-3.5 ${useRAG ? 'text-primary' : 'text-muted-foreground'}`} />
+                                <Label htmlFor="rag-toggle" className="text-[9px] font-black uppercase tracking-wider cursor-pointer">
+                                    Enhanced Retrieval (RAG)
+                                </Label>
+                            </div>
+                            <Switch 
+                                id="rag-toggle" 
+                                checked={useRAG} 
+                                onCheckedChange={setUseRAG}
+                                disabled={isAnythingGenerating}
+                            />
+                        </div>
+                    )}
+
                     {/* Error Feedback State (Mock - can be expanded with real error from useAiActions) */}
-                    {(generateSectionMutation.isError || generateProjectMutation.isError) && (
+                    {(generateSectionMutation.isError || generateSectionWithRAGMutation.isError || generateProjectMutation.isError) && (
                         <div className="flex items-center gap-2 p-3 rounded-xl bg-destructive/5 border border-destructive/10 text-destructive text-[10px] font-bold uppercase tracking-wider animate-in fade-in zoom-in-95">
                             <AlertCircle className="h-3.5 w-3.5 shrink-0" />
                             <span>System synthesis failed. Check neural source.</span>

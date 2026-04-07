@@ -29,7 +29,11 @@ Modules within `src/modules/` adhere to a four-layer structure:
 
 1.  **`domain/`**: Contains pure entities, repository interfaces, and Zod schemas. This layer is free from external dependencies.
 2.  **`application/`**: Houses use cases that orchestrate domain logic.
-3.  **`adapters/`**: Includes API clients, controllers, and localized Zustand stores, acting as bridges to external services.
+3.  **`adapters/`**: Acts as a bridge to external systems and the UI. It is subdivided into:
+    *   **`controllers/`**: (Server) Mediators that inject use cases and are consumed by API routes.
+    *   **`hooks/`**: (Client) React hooks (Query/Mutation) for data lifecycle and UI orchestration.
+    *   **`state/`**: (Client) Localized Zustand stores for ephemeral UI state (e.g., editor selection, panel visibility).
+    *   **`api-client/`**: (Client) Services used by hooks to communicate with server-side API routes.
 4.  **`infrastructure/`**: Provides concrete implementations for services like Genkit, SQLite/Drizzle, and Qdrant.
 
 ### Dependency Injection (DI) & Execution Boundaries
@@ -67,6 +71,8 @@ The project utilizes `tsyringe` for dependency injection.
     *   **Generation**: `generateUIDescription`, `generateSessionPlan`, `generateProjectBlueprint`, `generateProjectDoc`, `writeTechSpec`, `createPresentation`
     *   **Media**: `generatePlantUML`, `imageToText`
 *   **n8n Protocol Alignment**: The UI/Registry uses `kebab-case` IDs (e.g., `grammar-checker`), while the n8n workflow expects `camelCase` (e.g., `grammarCheck`). The `N8N_FLOW_MAP` in `N8nAiService.ts` must maintain an explicit mapping to prevent silent fallbacks to local Genkit flows.
+*   **n8n Timeout Optimization**: RAG-enhanced generation (chapter/section) often exceeds standard 2-minute API limits. The `N8nAiService` utilizes a 5-minute (300s) timeout to accommodate deep retrieval and multi-agent processing in the n8n workflow.
+*   **RAG-Enhanced Endpoints**: Dedicated endpoints (`/api/generate/chapter-rag`, `/api/generate/section-rag`) have been established to bypass standard local flows and directly trigger n8n RAG agents with full project context.
 *   **n8n Connection Architecture**: Each specialized agent requires 3 connections: (1) `Route Flow` → Agent (main), (2) `OpenRouter Chat Model` → Agent (ai_languageModel), (3) Agent → `Prepare Response` (main). Missing any one of these causes silent failures.
 *   **n8n API Deployment**: When updating workflows via the n8n Public API (`PUT /workflows/:id`), the JSON body must strictly contain only schema-valid keys (`name`, `nodes`, `connections`, `settings`). Additional properties like `id`, `versionId`, `meta`, or `pinData` will cause a 400 error.
 *   **Safety & Output**: All generation methods and flows must return `Result<T, E>` objects to provide explicit success/failure vectors.
@@ -115,3 +121,5 @@ The project utilizes `tsyringe` for dependency injection.
 *   **n8n Full Integration**: Fully implemented `N8nAiService.ts` as a drop-in `IAiService` replacement. The DI container now auto-selects between `N8nAiService` (when `N8N_AI_WEBHOOK_URL` is set) and `GenkitAiService` (fallback). The n8n workflow covers all 5 IAiService methods with dedicated agents and code nodes.
 *   **n8n Workflow Architecture**: The "Arkan AI Integration Workflow" (`n8n_ai_workflow.json`) uses a Switch node routing 5 action types: `generateText`, `runFlow`, `retrieveContext`, `generateChapterWithRAG`, `generateSectionWithRAG`. Specialized RAG agents handle chapter and section generation with Qdrant-based retrieval.
 *   **n8n Protocol Hardening**: Synchronized naming conventions across 32 agents. Resolved a global routing mismatch by updating `N8N_FLOW_MAP` to translate Registry `kebab-case` tool IDs to n8n-native `camelCase` agent names.
+*   **RAG UI Integration**: Implemented "Synthesize with RAG" toggles across Section and Chapter HUDs, enabling users to opt-in to enhanced retrieval-based generation via the new n8n-backed API routes. Optimized n8n timeout to 300s to support complex generation.
+*   **Architecture Clarity**: Explicitly defined the triad within the `adapters/` layer (Controllers/Hooks/State) and their respective execution boundaries (Server/Client) to maintain Clean Architecture integrity.

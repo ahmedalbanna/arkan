@@ -26,7 +26,7 @@ import type { RetrievalOptions, RetrievalResult } from "../../domain/services/IR
 export class N8nAiService implements IAiService {
 
     private readonly webhookUrl: string;
-    private readonly timeoutMs: number = 120_000; // 2 minutes
+    private readonly timeoutMs: number = 300_000; // 5 minutes
 
     constructor() {
         this.webhookUrl = process.env.N8N_AI_WEBHOOK_URL || '';
@@ -44,7 +44,7 @@ export class N8nAiService implements IAiService {
     private async callN8n<T>(payload: Record<string, unknown>): Promise<Result<T, AiError>> {
         const startTime = performance.now();
         const action = String(payload.action || 'unknown');
-        
+
         try {
             const controller = new AbortController();
             const timeout = setTimeout(() => controller.abort(), this.timeoutMs);
@@ -78,11 +78,11 @@ export class N8nAiService implements IAiService {
         } catch (error: unknown) {
             const duration = (performance.now() - startTime).toFixed(2);
             const message = error instanceof Error ? error.message : String(error);
-            
+
             console.error(`[N8nAiService] ${action} system error (${duration}ms): ${message}`);
 
             if (message.includes('abort') || message.includes('timeout')) {
-                return Result.fail(AiError.generationFailed('n8n request timed out after 2 minutes'));
+                return Result.fail(AiError.generationFailed('n8n request timed out after 5 minutes'));
             }
             return Result.fail(AiError.generationFailed(message));
         }
@@ -128,14 +128,14 @@ export class N8nAiService implements IAiService {
         'write-document': 'writeDocument',
         'manipulate-text': 'manipulateText',
         'text-stylist': 'textStyleTune',
-        
+
         // Analysis Tools
         'ai-detector': 'detectAi',
         'bias-checker': 'biasCheck',
         'fact-checker': 'factCheck',
         'plagiarism-checker': 'plagiarismCheck',
         'sentence-structure-checker': 'sentenceStructureCheck',
-        
+
         // Academic Tools
         'ai-researcher': 'aiResearch',
         'lecture-generator': 'generateLecture',
@@ -144,7 +144,7 @@ export class N8nAiService implements IAiService {
         'generate-quiz': 'quiz',
         'solve-assignments': 'solveAssignments',
         'theoretical-lecture': 'generateTheoreticalLecture',
-        
+
         // Generation Tools
         'generate-ideas': 'generateIdeas',
         'generate-toc': 'generateTOC',
@@ -156,6 +156,8 @@ export class N8nAiService implements IAiService {
         'generate-plant-uml': 'generatePlantUML',
         'question-answering': 'questionAnswering',
         'fact-retrieval': 'factRetrieval',
+        'generate-section': 'generateSectionWithRAG',
+        'generate-chapter-content': 'generateChapterWithRAG',
 
         // Document Level Specialized Agents (Used directly via flowName)
         'proofreadDocument': 'proofreadDocument',

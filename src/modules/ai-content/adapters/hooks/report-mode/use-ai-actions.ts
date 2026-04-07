@@ -201,6 +201,37 @@ export function useAiActions({ editor: initialEditor }: AiActionsProps = {}) {
     },
   });
 
+  const generateSectionWithRAGMutation = useMutation({
+    mutationKey: ['generateSectionWithRAG'],
+    mutationFn: async (sectionId: string) => {
+      useBuilderStore.getState().syncProjectStructure();
+      const currentProject = useBuilderStore.getState().project;
+      if (!currentProject || !user) throw new Error('Project or user not found.');
+
+      const section = currentProject.getSection(sectionId);
+      if (!section) throw new Error('Section not found.');
+
+      const body = {
+        projectId: currentProject.id,
+        sectionId: section.id,
+        prompt: section.buildActionPrompt(),
+        guidelines: section.guidelines,
+      };
+
+      const result = await runAuthenticatedResultCall(user, WritingToolsApiClient, (client, token) =>
+        client.writingToolApi<any, { content: string }>('/api/generate/section-rag', { data: body, token }),
+      );
+
+      return result;
+    },
+    onSuccess: (data, sectionId) => {
+      updateProject((currentProject) => currentProject.updateSection(sectionId, (section) => section.withProps({ content: data.content })));
+      refetchUser();
+      toast({ title: 'RAG Generation Successful', description: 'Content generated with project sources.' });
+    },
+    onError: (error: any) => handleError(error, 'RAG Section Generation Error'),
+  });
+
   const generateChapterMutation = useMutation({
     mutationKey: ['generateChapterContent'],
     mutationFn: async (variables: { chapterId: string; sectionIds: string[] }) => {
@@ -249,9 +280,47 @@ export function useAiActions({ editor: initialEditor }: AiActionsProps = {}) {
     onError: (error: any) => handleError(error, 'Chapter Generation Error'),
   });
 
+  const generateChapterWithRAGMutation = useMutation({
+    mutationKey: ['generateChapterWithRAG'],
+    mutationFn: async (variables: { chapterId: string; sectionIds: string[] }) => {
+      useBuilderStore.getState().syncProjectStructure();
+      const { chapterId, sectionIds } = variables;
+      const currentProject = useBuilderStore.getState().project;
+      if (!currentProject || !user) throw new Error('User or project not found.');
+
+      const chapter = currentProject.getChapter(chapterId);
+      if (!chapter) throw new Error('Chapter not found.');
+
+      const body = {
+        projectId: currentProject.id,
+        chapterId: chapter.id,
+        sectionIds,
+      };
+
+      const result = await runAuthenticatedResultCall(user, WritingToolsApiClient, (client, token) =>
+        client.writingToolApi<any, { content: string }>('/api/generate/chapter-rag', { data: body, token }),
+      );
+
+      return { chapterId, content: result.content };
+    },
+    onSuccess: (data) => {
+      updateProject((currentProject) => {
+        const parsedContent = parseMarkdownToContent(data.content, currentProject.content);
+        const newChapter = parsedContent[0];
+        if (newChapter instanceof Chapter) {
+          return currentProject.updateChapter(data.chapterId, (chapter) => chapter.withProps({ sections: newChapter.sections.map(s => s.toProperties()) }));
+        }
+        return currentProject;
+      });
+      refetchUser();
+      toast({ title: 'RAG Chapter Generated', description: 'Chapter generated with project sources.' });
+    },
+    onError: (error: any) => handleError(error, 'RAG Chapter Generation Error'),
+  });
+
   const generateProjectMutation = useMutation({
     mutationKey: ['generateProjectContent'],
-    mutationFn: async ({ project, selectedSectionIds }: { project: Project; selectedSectionIds: Set<string> }) => {
+    mutationFn: async ({ project, selectedSectionIds, useRAG = false }: { project: Project; selectedSectionIds: Set<string>; useRAG?: boolean }) => {
       if (!user) throw new Error('User not found.');
       if (selectedSectionIds.size === 0) throw new Error('No sections were selected for generation.');
 
@@ -265,7 +334,13 @@ export function useAiActions({ editor: initialEditor }: AiActionsProps = {}) {
             toast({ title: 'Generation Stopped', description: 'Bulk generation was canceled by user.' });
             break;
           }
-          await generateSectionMutation.mutateAsync(sectionId);
+          
+          if (useRAG) {
+            await generateSectionWithRAGMutation.mutateAsync(sectionId);
+          } else {
+            await generateSectionMutation.mutateAsync(sectionId);
+          }
+          
           incrementProgress();
         }
       } finally {
@@ -294,7 +369,9 @@ export function useAiActions({ editor: initialEditor }: AiActionsProps = {}) {
     handleAiAction,
     rewriteStyles,
     generateSectionMutation,
+    generateSectionWithRAGMutation,
     generateChapterMutation,
+    generateChapterWithRAGMutation,
     generateProjectMutation,
   };
 }

@@ -1,8 +1,9 @@
 'use client';
 
-import React, { useCallback, useMemo } from 'react';
-import { Edit, Link as LinkIcon, Loader2, Layout, PlusCircle, Wand2, AlertCircle } from 'lucide-react';
+import React, { useCallback, useMemo, useState } from 'react';
+import { Edit, Link as LinkIcon, Loader2, Layout, PlusCircle, Wand2, AlertCircle, Database } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Switch } from '@/components/ui/switch';
 import { Form } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -13,6 +14,7 @@ import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { Chapter } from '@/modules/ai-content/domain/entities/Chapter';
 import { useChapterActions } from '@/modules/ai-content/adapters/hooks/report-mode/use-chapter-actions';
+import { useAiActions } from '@/modules/ai-content/adapters/hooks/report-mode/use-ai-actions';
 import { ContextSelector } from './controls/ContextSelector';
 import { SidebarContainer } from '../layout/SidebarContainer';
 
@@ -37,6 +39,8 @@ export function ChapterGenerationHUD({ chapter, className, onClose }: ChapterGen
     // 1. HOOK RESOLUTION (Always at top)
     // Passing chapter as-is (might be null), hook handles internal defaults
     const chapterActions = useChapterActions(chapter);
+    const { generateChapterWithRAGMutation } = useAiActions();
+    const [useRAG, setUseRAG] = useState(false);
 
     const {
         manipulationType,
@@ -55,8 +59,15 @@ export function ChapterGenerationHUD({ chapter, className, onClose }: ChapterGen
     // 2. STABLE HANDLERS
     const handleSubmit = useCallback((data: any) => {
         if (!chapter) return;
-        onSubmit(data);
-    }, [onSubmit, chapter]);
+        if (useRAG) {
+            generateChapterWithRAGMutation.mutate({ 
+                chapterId: chapter.id, 
+                sectionIds: chapter.sections.map(s => s.id) 
+            });
+        } else {
+            onSubmit(data);
+        }
+    }, [onSubmit, chapter, useRAG, generateChapterWithRAGMutation]);
 
     const handleApply = useCallback(() => {
         if (!chapter) return;
@@ -103,18 +114,37 @@ export function ChapterGenerationHUD({ chapter, className, onClose }: ChapterGen
                     </div>
 
                     <Form {...form}>
-                        <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-3.5">
+                        <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
+                            <div className="flex items-center justify-between px-3 py-2 rounded-xl bg-muted/30 border border-border/50">
+                                <div className="flex items-center gap-2">
+                                    <Database className={`h-3.5 w-3.5 ${useRAG ? 'text-primary' : 'text-muted-foreground'}`} />
+                                    <Label htmlFor="chapter-rag-toggle" className="text-[9px] font-black uppercase tracking-wider cursor-pointer">
+                                        RAG Synthesis
+                                    </Label>
+                                </div>
+                                <Switch 
+                                    id="chapter-rag-toggle" 
+                                    checked={useRAG} 
+                                    onCheckedChange={setUseRAG}
+                                    disabled={isProcessing || generateChapterWithRAGMutation.isPending}
+                                />
+                            </div>
+
                             <Button
                                 type="submit"
-                                disabled={isProcessing}
-                                className="w-full font-black h-12 gap-2.5 shadow-xl shadow-primary/10 rounded-2xl uppercase tracking-[0.2em] text-[10px] relative overflow-hidden group/gen transition-all duration-500 ease-[0.22,1,0.36,1]"
+                                disabled={isProcessing || generateChapterWithRAGMutation.isPending}
+                                className={`w-full font-black h-12 gap-2.5 shadow-xl shadow-primary/10 rounded-2xl uppercase tracking-[0.2em] text-[10px] relative overflow-hidden group/gen transition-all duration-500 ease-[0.22,1,0.36,1] ${useRAG ? 'ring-2 ring-primary ring-offset-2 ring-offset-background' : ''}`}
                             >
-                                {isProcessing ? (
+                                {isProcessing || generateChapterWithRAGMutation.isPending ? (
                                     <Loader2 className="h-4 w-4 animate-spin shrink-0" />
                                 ) : (
-                                    <Wand2 className="h-4 w-4 shrink-0 transition-transform group-hover/gen:rotate-12" />
+                                    useRAG ? <Database className="h-4 w-4 shrink-0" /> : <Wand2 className="h-4 w-4 shrink-0 transition-transform group-hover/gen:rotate-12" />
                                 )}
-                                <span>{isProcessing ? 'Synthesizing...' : 'Generate Chapter'}</span>
+                                <span>
+                                    {isProcessing || generateChapterWithRAGMutation.isPending 
+                                        ? 'Synthesizing...' 
+                                        : (useRAG ? 'Synthesize with RAG' : 'Generate Chapter')}
+                                </span>
                                 <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/10 to-white/0 -translate-x-full group-hover/gen:translate-x-full transition-transform duration-1000 ease-in-out" />
                             </Button>
 
