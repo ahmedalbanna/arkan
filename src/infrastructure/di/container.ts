@@ -99,7 +99,11 @@ if (typeof window === 'undefined') {
   const { SQLiteNotificationService } = require("@/modules/users/infrastructure/services/SQLiteNotificationService");
   const { SQLiteGenerationLogRepository } = require("@/modules/ai/infrastructure/repositories/SQLiteGenerationLogRepository");
   const { SQLiteAgentRepository } = require("@/modules/ai/infrastructure/repositories/SQLiteAgentRepository");
-  const { GenkitAiService } = require("@/modules/ai/infrastructure/services/GenkitAiService");
+  // Use N8nAiService when N8N_AI_WEBHOOK_URL is set, otherwise fall back to GenkitAiService
+  const useN8n = Boolean(process.env.N8N_AI_WEBHOOK_URL);
+  const AiServiceImpl = useN8n
+    ? require("@/modules/ai/infrastructure/services/N8nAiService").N8nAiService
+    : require("@/modules/ai/infrastructure/services/GenkitAiService").GenkitAiService;
   const { WritingToolRegistry } = require("@/modules/ai/application/services/WritingToolRegistry");
   const { SQLiteAdminStatsRepository } = require("@/modules/admin/infrastructure/repositories/SQLiteAdminStatsRepository");
   const { SQLiteFeatureRepository } = require("@/modules/admin/infrastructure/repositories/SQLiteFeatureRepository");
@@ -128,7 +132,7 @@ if (typeof window === 'undefined') {
   container.register(INotificationServiceToken, { useClass: SQLiteNotificationService }, { lifecycle: Lifecycle.Singleton });
   container.register(IGenerationLogRepositoryToken, { useClass: SQLiteGenerationLogRepository }, { lifecycle: Lifecycle.Singleton });
   container.register(IAgentRepositoryToken, { useClass: SQLiteAgentRepository }, { lifecycle: Lifecycle.Singleton });
-  container.register(IAiServiceToken, { useClass: GenkitAiService }, { lifecycle: Lifecycle.Singleton });
+  container.register(IAiServiceToken, { useClass: AiServiceImpl }, { lifecycle: Lifecycle.Singleton });
   container.register(IDocxExportServiceToken, { useClass: DocxExportService }, { lifecycle: Lifecycle.Singleton });
   container.register(IPptxExportServiceToken, { useClass: PptxExportService }, { lifecycle: Lifecycle.Singleton });
   container.register(IPdfExportServiceToken, { useClass: PdfExportService }, { lifecycle: Lifecycle.Singleton });

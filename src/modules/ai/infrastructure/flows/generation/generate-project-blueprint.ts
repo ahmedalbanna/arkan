@@ -8,7 +8,7 @@ import { ai } from '@/modules/ai/infrastructure/services/Genkit';
 import { GenerateProjectBlueprintInputSchema, GenerateProjectBlueprintOutputSchema, type GenerateProjectBlueprintInput, type GenerateProjectBlueprintOutput } from '@/modules/ai/domain/schemas';
 
 const generateProjectBlueprintFlow = ai.defineFlow({
-    name: 'generateProjectBlueprintFlow',
+    name: 'generateProjectBlueprint',
     inputSchema: GenerateProjectBlueprintInputSchema,
     outputSchema: GenerateProjectBlueprintOutputSchema
 }, async (input: GenerateProjectBlueprintInput) => {

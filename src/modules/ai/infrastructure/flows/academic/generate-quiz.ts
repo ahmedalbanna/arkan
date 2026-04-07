@@ -77,7 +77,7 @@ const directQuestionQuizPrompt = ai.definePrompt({
 });
 
 const generateQuizFlow = ai.defineFlow({
-    name: 'generateQuizFlow',
+    name: 'quiz',
     inputSchema: GenerateQuizInputSchema,
     outputSchema: GenerateQuizOutputSchema,
 }, async (input: GenerateQuizInput) => {

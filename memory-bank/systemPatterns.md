@@ -8,8 +8,14 @@
 
 ### 2. Modular AI & Schema Pattern
 **Purpose**: Standardized approach for AI operations with unified data contracts.
-- **Standard**: All AI flows return structured `Result<T, E>` objects.
+- **Standard**: All AI flows return structured `Result<T, E>` objects. Properties: `.isSuccess`, `.error`, `.getValue()`.
 - **Spectral Sanitization**: Mandatory use of `cleanAiOutput` to strip model conversational artifacts.
+
+### 5. n8n Hybrid Orchestration Pattern
+**Purpose**: Offloading specialized AI tasks to an external n8n server while preserving local fallback execution.
+- **Implementation**: `N8nAiService` checks `N8N_FLOW_MAP` on each `runFlow` call. If the `flowName` is in the map, it delegates to n8n. Otherwise, it executes the local TypeScript function directly.
+- **Connection Rule**: Each n8n agent requires exactly 3 connections: (1) `Route Flow` → Agent (main), (2) `OpenRouter Chat Model` → Agent (ai_languageModel), (3) Agent → `Prepare Response` (main). Missing any connection causes silent failures.
+- **Deployment**: Workflows are deployed via the n8n Public API (`PUT /workflows/:id`) using only schema-valid keys: `name`, `nodes`, `connections`, `settings`.
 
 ### 3. Client-Server DI Bridging Pattern
 **Purpose**: Enabling high-weight services (e.g., Document Export) to be invoked from the client while executing on the server.

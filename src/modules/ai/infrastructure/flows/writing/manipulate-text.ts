@@ -43,7 +43,7 @@ Output ONLY the manipulated text. Do NOT include any preamble, filler, or JSON w
 
 const manipulateTextFlow = ai.defineFlow(
   {
-    name: 'manipulateTextFlow',
+    name: 'manipulateText',
     inputSchema: ManipulateTextInputSchema,
     outputSchema: ManipulateTextOutputSchema,
   },

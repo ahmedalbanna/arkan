@@ -59,10 +59,18 @@ export function useAiActions({ editor: initialEditor }: AiActionsProps = {}) {
     toast({ title: t('builder.Section.aiActionComplete') });
   };
 
-  const handleError = (error: Error) => {
+  const handleError = (error: any, title?: string) => {
+    // Attempt to extract structured error from n8n if available
+    let description = error.message || "An unexpected error occurred.";
+    if (error.response?.data?.error) {
+      description = error.response.data.error;
+    } else if (error.error?.message) {
+      description = error.error.message;
+    }
+
     toast({
-      title: t('builder.Section.aiActionFailed'),
-      description: error.message,
+      title: title || t('builder.Section.aiActionFailed'),
+      description,
       variant: 'destructive',
     });
   };
@@ -75,7 +83,7 @@ export function useAiActions({ editor: initialEditor }: AiActionsProps = {}) {
       };
     },
     onSuccess: (data: any) => handleSuccess(data.manipulatedText),
-    onError: handleError,
+    onError: (error: any) => handleError(error),
   });
 
   const translateMutation = useMutation({
@@ -84,7 +92,7 @@ export function useAiActions({ editor: initialEditor }: AiActionsProps = {}) {
       return { text: `[Translated to ${variables.targetLang}] This is a hardcoded translation for testing.` };
     },
     onSuccess: (data: any) => handleSuccess(data.text),
-    onError: handleError,
+    onError: (error: any) => handleError(error),
   });
 
   const isProcessing = aiActionMutation.isPending || translateMutation.isPending;
@@ -189,7 +197,7 @@ export function useAiActions({ editor: initialEditor }: AiActionsProps = {}) {
     },
     onError: (error: any) => {
       if (error.name === 'AbortError') return;
-      toast({ title: 'Section Generation Error', description: error.message || 'Failed to generate section', variant: 'destructive' });
+      handleError(error, 'Section Generation Error');
     },
   });
 
@@ -238,7 +246,7 @@ export function useAiActions({ editor: initialEditor }: AiActionsProps = {}) {
       refetchUser();
       toast({ title: 'Chapter Generated', description: 'The AI has generated the content for the chapter.' });
     },
-    onError: (error: any) => toast({ title: 'Chapter Generation Error', description: error.message, variant: 'destructive' }),
+    onError: (error: any) => handleError(error, 'Chapter Generation Error'),
   });
 
   const generateProjectMutation = useMutation({

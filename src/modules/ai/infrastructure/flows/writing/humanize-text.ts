@@ -32,7 +32,7 @@ Output ONLY the humanized text. Do NOT include any preamble, filler, or JSON wra
 });
 
 const humanizeTextFlow = ai.defineFlow({
-  name: 'humanizeTextFlow',
+  name: 'humanize',
   inputSchema: HumanizeTextInputSchema,
   outputSchema: HumanizeTextOutputSchema,
 }, async (input: HumanizeTextInput) => {

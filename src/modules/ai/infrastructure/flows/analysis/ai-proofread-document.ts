@@ -28,7 +28,7 @@ Proofread Document:`,
 
 const aiProofreadDocumentFlow = ai.defineFlow(
   {
-    name: 'aiProofreadDocumentFlow',
+    name: 'proofreadDocument',
     inputSchema: AiProofreadDocumentInputSchema,
     outputSchema: AiProofreadDocumentOutputSchema,
   },

@@ -1,0 +1,748 @@
+{
+    "id": "w6948340-e0e2-4468-b313-5c23b676d13c",
+    "deps": {
+        "artifacts": {
+            "metadata.json": {
+                "title": "N8N AI Automation Setup",
+                "is_manual_title": false,
+                "fork_data": null,
+                "workspace_path": "/teamspace/studios/this_studio/arkan",
+                "bookmarks": []
+            }
+        }
+    },
+    "message_history": [
+        {
+            "parts": [
+                {
+                    "content": "You are \"Rovo Dev\" - a friendly and helpful AI agent that can help software developers with their tasks. If asked what LLM you are based on, you may answer with the provider and model family but not the specific version.\n\nYou are an expert software development assistant tasked with performing operations against a workspace to resolve a problem statement. You will require multiple iterations to explore the workspace and make changes, using only the available functions.\n\nYou will be given access to the files in the workspace and a shell (bash or powershell, depending on the platform) to execute commands.\n\nGuidelines:\n- Work exclusively within the provided workspace. Do not attempt to access or modify files outside the workspace. Bash or powershell commands will automatically be executed in the workspace directory, so there is no need to change directories. DO NOT run commands like `cd /workspace && ...` - you are already in the correct directory.\n- After receiving tool results, carefully reflect on their quality and determine optimal next steps before proceeding. Use your thinking to plan and iterate based on this new information, and then take the best next action.\n- Speed up your solution by testing only the relevant parts of the code base. You do not need to fix issues and failures that are unrelated to the problem statement or your changes.\n- If you create any temporary new files, scripts, or helper files for iteration, clean up these files by removing them at the end of the task. All temporary files created for testing purposes should be named with a prefix of \"tmp_rovodev_\"\n- Please write a high quality, general purpose solution. Implement a solution that works correctly for all valid inputs, not just the test cases. Do not hard-code values or create solutions that only work for specific test inputs. Instead, implement the actual logic that solves the problem generally.\n- Focus on understanding the problem requirements and implementing the correct algorithm. Tests are there to verify correctness, not to define the solution. Provide a principled implementation that follows best practices and software design principles.\n- For maximum efficiency, whenever you need to perform multiple independent operations, invoke all relevant tools simultaneously rather than sequentially.\n- Do not use bash/powershell commands to perform actions that can be completed with the other provided functions.\n- Resolve the provided task as efficiently as possible. Make the most out of each iteration by making simultaneous tool calls as described above and by focusing on targetted testing.\n\nExplanation of available tools:\n- open_files: Opens a set of files in the workspace. Large files will be shown in a \"collapsed\" state, where the bodies of functions and methods are hidden. Smaller files will be shown in full.\n- expand_code_chunks: Shown the content of a single file with specified symbols or line ranges expanded. This function shows the exact same output as open_files for smaller files. For large files, it shows the same output as open_files but with the specified symbols or line ranges expanded in the collapsed view. DO NOT call open_files and expand_code_chunks unnecessarily on the same file if you have already viewed the expanded content.\n- grep: Searches for a pattern in the content of files in the workspace.\n- find_and_replace_code, create_file, delete_file, move_file: These functions enable you to modify the codebase. Use them instead of shell equivalents, unless otherwise instructed.\n- bash/powershell: Executes a shell command in the workspace directory. Commands will be executed at the root of the workspace by default, so there is no need to change directories.\n- MCP server tools: You may have access to additional tools via MCP servers, accessible via mcp__*__get_tool_schema and mcp__*__invoke_tool functions. These tools provide specialized functionality that may help you gather context and complete your task. Before calling mcp__*__invoke_tool, ALWAYS first call mcp__*__get_tool_schema to get important information about the tools being called.\n- Skills: You may have access to specialized skills that provide additional functionality or guidance. If you have access to a skill that is relevant to the task, you should always load the skill with get_skill when working on the\ntask.\n\nTool results and user messages may include <system-reminder> tags. <system-reminder> tags contain useful information and reminders. They are automatically added by the system, and bear no direct relation to the specific tool results or user messages in which they appear.\n\nImportant:\n- Aim to solve tasks in a \"token-efficient\" manner. This can be done by calling tools simultaneously, and avoiding calling expand_code_chunks and open_files on a file that has already been opened and expanded - you can just inspect the content of the file in the previous tool output.\n- You will be provided with the number of iterations you have consumed at each step. As a guide, here are the number of iterations you should expect to consume for different types of tasks:\n    - Simple tasks (e.g. explanation request, specific localized change that doesn't require tests): ~10 iterations or fewer.\n    - Medium tasks (e.g. implementing a new feature, fixing a bug that requires some investigation): ~20 iterations.\n    - Complex tasks (e.g. refactoring, fixing difficult bugs, implementing complex features): ~30 iterations. Never use more than 30 iterations for a single request from the user.\n    - Minor follow-up tasks (e.g., adjustments to your initial solution): ~10 iterations.\n- Based on the provided issue or request, aim to resolve the task in an appropriate number of iterations, but do not compromise on quality or end early just to save iterations. If you need more iterations than expected, that's okay.\n\nYou are currently in interactive mode. You can ask questions and additional inputs from the user when needed.\nBut before you do that, you should use the tools available to try getting the information you need by yourself.\n\nInclude a simple natural language description of your status before each logical group of actions. Make this feel like a natural part of the conversation, not a separate status update.\n\nWhen you respond to the user, always end your message with a question for what to do next, ideally with a few sensible options.\n\n## Important: Markdown File Creation Guidance\n\nDo NOT create `.md` files unless explicitly requested by the user. This applies when:\n- Documenting plans or decisions (stream to console instead)\n- Creating notes or analysis (provide directly in response)\n- Summarizing work (include in response)\n\nOnly create `.md` files when explicitly asked by the user.\nAvoid duplicating content across console output and `.md` files.",
+                    "timestamp": "2026-04-06T22:22:30.960918Z",
+                    "dynamic_ref": "system_prompt_efficient_instructions",
+                    "part_kind": "system-prompt"
+                },
+                {
+                    "content": "\n\nHere is the current workspace:\n<workspace>\nAGENTS.md\napphosting.yaml\narkan.db\narkan.db-shm\narkan.db-wal\nbuilder.png\ncomponents.json\ncontext.txt\ndatabase.rules.json\ndataconnect.yaml\ndocker-compose.yml\ndocudec-firebase-adminsdk-2maa7-d07a19d3fc.json\ndrizzle.config.ts\nerrors.txt\neslint.config.cjs\n.eslintrc.cjs\n.eslintrc.json\nfirebase.json\n.firebaserc\nfirestore.indexes.json\nfirestore.rules\n.geminiignore\ngenkit.txt\n.gitignore\n.hintrc\njest.config.js\njest.setup.js\n.modified\nnext.config.ts\n.npmrc\nonstartup.md\npackage.json\npostcss.config.mjs\nREADME.md\nstorage.rules\ntailwind.config.ts\ntasks.txt\ntsconfig.json\n\ndocs/:\nRobustness Refactoring.md\n\ndrizzle/:\n0000_new_molten_man.sql\n\ndrizzle/meta/:\n0000_snapshot.json\n_journal.json\n\n.gemini/:\nagent.json\nGEMINI.md\nsettings.json\n\n.github/:\n\n.github/prompts/:\nCleanCode.prompt.md\n\nmemory-bank/:\nactiveContext.md\nperformanceOptimizations.md\nproductContext.md\nprogress.md\nprojectbrief.md\nREADME.md\nrecentUpdates.md\nsystemPatterns.md\ntechContext.md\n\npublic/:\nfirebase-messaging-sw.js\n\npublic/fonts/: (COLLAPSED)\n\n.rovodev/:\n.agent.md\nconfig copy.yml\nconfig.yml\ninstall.sh\nmcp.json\nprompt_history\nrovodev.log\n\n.rovodev/sessions/:\n\n.rovodev/sessions/15d02dfc-509f-4278-ba90-cf9972adc159/:\nmemory\nmetadata.json\nsession_context.json\ntodos\n\n.rovodev/sessions/22c7ba71-c4a1-4c53-ac74-235e4876dc63/:\nmemory\nmetadata.json\nsession_context.json\ntodos\n\n.rovodev/sessions/2659ed75-3900-4745-89c7-ffa8073773fb/:\nmemory\nmetadata.json\nsession_context.json\ntodos\n\n.rovodev/sessions/3c10c09e-6efa-4f81-984a-d8a221d666c6/:\nmemory\nmetadata.json\nsession_context.json\n\n.rovodev/sessions/4335a7c4-f47f-43e2-b100-10a424781cbd/:\nmemory\nmetadata.json\nsession_context.json\ntodos\n\n.rovodev/sessions/458989cb-6b34-45e1-9415-50229a4e2f3c/:\nmemory\nmetadata.json\nsession_context.json\ntodos\n\n.rovodev/sessions/4ee63ad5-bdbf-4934-bb87-a6e44e046a95/:\nmemory\nmetadata.json\nsession_context.json\ntodos\n\n.rovodev/sessions/50b5bf65-28e4-443d-b426-d12ee7e547d3/:\nmemory\nmetadata.json\nsession_context.json\ntodos\n\n.rovodev/sessions/59aa9555-b9b5-4df1-8da6-88d640bc496a/:\nmemory\nmetadata.json\nsession_context.json\ntodos\n\n.rovodev/sessions/6330c163-93ca-4d64-9885-5bb12ee66ece/:\nmemory\nsession_context.json\n\n.rovodev/sessions/6ddbe17b-a431-4d58-9c7f-814444af560f/:\nmemory\nmetadata.json\nsession_context.json\ntodos\n\n.rovodev/sessions/74c56eae-d0d4-4c1b-96f4-c4549bfc3353/:\nmemory\nmetadata.json\nsession_context.json\ntodos\n\n.rovodev/sessions/7ced4cb9-d747-45b8-9744-8fc2c505b94f/:\nmemory\nmetadata.json\nsession_context.json\n\n.rovodev/sessions/8e1ddb94-102c-40f8-a575-cdec949449c8/:\nmemory\nmetadata.json\nsession_context.json\ntodos\n\n.rovodev/sessions/99db0693-508f-4cac-8b22-36a9df6cc9f6/:\nmemory\nmetadata.json\nsession_context.json\ntodos\n\n.rovodev/sessions/9ad49b01-0006-4b6c-aba8-e44c318966c9/:\nmemory\nmetadata.json\nsession_context.json\ntodos\n\n.rovodev/sessions/9f6b9834-1d76-4a98-965b-64205ea9d912/:\nmemory\nmetadata.json\nsession_context.json\n\n.rovodev/sessions/a27a33d6-d88b-458e-93ce-2b8e81c461ad/:\nmemory\nmetadata.json\nsession_context.json\ntodos\n\n.rovodev/sessions/ace1b75c-a703-44b7-8925-de55fa536287/:\nmemory\nmetadata.json\nsession_context.json\ntodos\n\n.rovodev/sessions/aee493f9-78ee-4fed-b5a3-9d121651d506/:\nmemory\nmetadata.json\nsession_context.json\ntodos\n\n.rovodev/sessions/b51fb722-c35b-465e-9784-ca11858d982e/:\nmemory\nsession_context.json\n\n.rovodev/sessions/c88faba2-a4db-4f4b-95c7-dc68bf87d892/:\nmemory\nmetadata.json\nsession_context.json\ntodos\n\n.rovodev/sessions/cbfb6c1a-2ce7-4068-aac6-0339d7c18963/:\nmemory\nmetadata.json\nsession_context.json\ntodos\n\n.rovodev/sessions/cbfbaa53-e65c-454e-a64a-c35d533b64bf/:\nmemory\nmetadata.json\nsession_context.json\ntodos\n\n.rovodev/sessions/ccaf1073-3582-4e04-b8a1-e35665d989ec/:\nmemory\nmetadata.json\nsession_context.json\ntodos\n\n.rovodev/sessions/cd9ac9ab-060a-44c1-bae6-90a0f554d235/:\nmemory\nmetadata.json\nsession_context.json\n\n.rovodev/sessions/d05e6d23-d31e-4fea-a146-7300fed528df/:\nmemory\nmetadata.json\nsession_context.json\ntodos\n\n.rovodev/sessions/d7097ea7-92db-493e-90f8-114ba9d9c99d/:\nmemory\nmetadata.json\nsession_context.json\ntodos\n\n.rovodev/sessions/e423af04-deed-4156-9ee3-35c31ed8646a/:\nmemory\nmetadata.json\nsession_context.json\ntodos\n\n.rovodev/sessions/ec6f6c18-e2d3-44ea-9e98-395aec8440eb/:\nmemory\nmetadata.json\nsession_context.json\ntodos\n\n.rovodev/sessions/f0e1ecd0-4dd5-4139-8f7c-20cb04dfd214/:\nmemory\nmetadata.json\nsession_context.json\ntodos\n\n.rovodev/sessions/fbcb82f8-f516-44f2-b1bb-c93d87aaacdf/:\nmemory\nmetadata.json\nsession_context.json\ntodos\n\n.rovodev/sessions/w6948340-0388-45e8-b4d1-30401cd3d35a/:\nmetadata.json\nsession_context.json\n\n.rovodev/sessions/w6948340-0423-47c2-b0a5-fa5319b832f2/:\nmetadata.json\nsession_context.json\n\n.rovodev/sessions/w6948340-04ab-41b3-bbed-f35623adcc70/:\nmetadata.json\nsession_context.json\n\n.rovodev/sessions/w6948340-04b3-4bb5-a610-6861dc12bbfe/:\nmetadata.json\nsession_context.json\n\n.rovodev/sessions/w6948340-04b8-405e-899d-70e2f1359318/:\nmetadata.json\nsession_context.json\n\n.rovodev/sessions/w6948340-095d-43d3-ad31-96226e21b291/:\nmetadata.json\nsession_context.json\n\n.rovodev/sessions/w6948340-0bb5-4479-9576-f377b16b1426/:\nmetadata.json\nsession_context.json\n\n.rovodev/sessions/w6948340-0c05-4aad-a71d-dfc20e1d71fc/:\nmetadata.json\nsession_context.json\n\n.rovodev/sessions/w6948340-1127-44b9-96b9-0853cfe527b6/:\nmetadata.json\nsession_context.json\n\n.rovodev/sessions/w6948340-1309-4547-8af9-12e160f75c14/:\nmetadata.json\nsession_context.json\n\n.rovodev/sessions/w6948340-171f-4e2e-a911-c6dfce28e5a8/:\nmetadata.json\nsession_context.json\n\n.rovodev/sessions/w6948340-17ec-4d8d-94e3-bf054923c367/:\nmetadata.json\nsession_context.json\n\n.rovodev/sessions/w6948340-19ec-4b2f-b637-3f0f6d1024e7/:\nmetadata.json\nsession_context.json\n\n.rovodev/sessions/w6948340-1efc-4a9e-9a8c-ed312cb289e8/:\nmetadata.json\nsession_context.json\n\n.rovodev/sessions/w6948340-2572-46a0-97ce-d3ac8a50fc1b/:\nmetadata.json\nsession_context.json\n\n.rovodev/sessions/w6948340-2676-4988-be7a-d110224ce9cf/:\nmetadata.json\nsession_context.json\n\n.rovodev/sessions/w6948340-271e-4389-a962-7576518626c9/:\nmetadata.json\nsession_context.json\n\n.rovodev/sessions/w6948340-2777-4668-aca8-a22091239474/:\nmetadata.json\nsession_context.json\n\n.rovodev/sessions/w6948340-2999-4bc5-af7a-6e467a33bfba/:\nmetadata.json\nsession_context.json\n\n.rovodev/sessions/w6948340-2c40-4d3e-a90d-26f7c9c2e5fc/:\nmetadata.json\nsession_context.json\n\n.rovodev/sessions/w6948340-3017-4dab-967e-32024f0f8ca1/:\nmetadata.json\nsession_context.json\n\n.rovodev/sessions/w6948340-320a-4779-8e54-c5b819286f75/:\nmetadata.json\nsession_context.json\n\n.rovodev/sessions/w6948340-324e-4a67-82bb-afcff9cf12fd/:\nmetadata.json\nsession_context.json\n\n.rovodev/sessions/w6948340-32e0-4231-91c2-d39ea77c1a73/:\nmetadata.json\nsession_context.json\n\n.rovodev/sessions/w6948340-331b-497e-aa29-7197dbc794d5/:\nmetadata.json\nsession_context.json\n\n.rovodev/sessions/w6948340-3474-40b3-9d3a-a59427920893/:\nmetadata.json\nsession_context.json\n\n.rovodev/sessions/w6948340-34aa-4822-9102-2ee4896062e6/:\nmetadata.json\nsession_context.json\n\n.rovodev/sessions/w6948340-36b9-4aaf-b8f4-09831ffb134a/:\nmetadata.json\nsession_context.json\n\n.rovodev/sessions/w6948340-3791-4978-b302-377d59fcc14b/:\nmetadata.json\nsession_context.json\n\n.rovodev/sessions/w6948340-37c1-47ab-ab70-0b4aa61790af/:\nmetadata.json\nsession_context.json\n\n.rovodev/sessions/w6948340-37d9-470a-9702-ab5f5844ba2b/:\nmetadata.json\nsession_context.json\n\n.rovodev/sessions/w6948340-3972-4944-9c25-2ec148030f5f/:\nmetadata.json\nsession_context.json\n\n.rovodev/sessions/w6948340-3a38-46a4-a01c-373c9feeec25/:\nmetadata.json\nsession_context.json\n\n.rovodev/sessions/w6948340-3c03-4849-900a-677dccfc91d0/:\nmetadata.json\nsession_context.json\n\n.rovodev/sessions/w6948340-3d28-4dda-905f-915280f292b0/:\nmetadata.json\nsession_context.json\n\n.rovodev/sessions/w6948340-3d3c-4648-acde-7ea3c2a7760a/:\nmetadata.json\nsession_context.json\n\n.rovodev/sessions/w6948340-3d90-4ce8-aa35-52c7c7d2feff/:\nmetadata.json\nsession_context.json\n\n.rovodev/sessions/w6948340-41d1-4951-b15f-aa61998ca6ed/:\nmetadata.json\nsession_context.json\n\n.rovodev/sessions/w6948340-4370-4774-b2ce-a61518879495/:\nmetadata.json\nsession_context.json\n\n.rovodev/sessions/w6948340-4491-4186-a42d-f4a4a5edd672/:\nmetadata.json\nsession_context.json\n\n.rovodev/sessions/w6948340-49cb-4c12-b216-5d593568d283/:\nmetadata.json\nsession_context.json\n\n.rovodev/sessions/w6948340-49d9-43a6-bb45-5c0d56501d42/:\nmetadata.json\nsession_context.json\n\n.rovodev/sessions/w6948340-4f7b-4d13-adc0-6427494ce958/:\nmetadata.json\nsession_context.json\n\n.rovodev/sessions/w6948340-4fee-4d39-a059-1b84b71da9ea/:\nmetadata.json\nsession_context.json\n\n.rovodev/sessions/w6948340-51ce-4b6b-9c48-d967a209e63b/:\nmetadata.json\nsession_context.json\n\n.rovodev/sessions/w6948340-56cb-43b8-8f8e-61dfc24be8f2/:\nmetadata.json\nsession_context.json\n\n.rovodev/sessions/w6948340-5b73-4bbc-93ab-7ddcf7f9cb60/:\nmetadata.json\nsession_context.json\n\n.rovodev/sessions/w6948340-5c9e-49b5-a12c-ad8c661aeb22/:\nmetadata.json\nsession_context.json\n\n.rovodev/sessions/w6948340-5e94-4510-9e99-fd8ecb623bd5/:\nmetadata.json\nsession_context.json\n\n.rovodev/sessions/w6948340-607c-45c8-b283-54877f641584/:\nmetadata.json\nsession_context.json\n\n.rovodev/sessions/w6948340-6620-48f9-bb6b-97573ee0f153/:\nmetadata.json\nsession_context.json\n\n.rovodev/sessions/w6948340-6842-457c-aa18-64868b736df1/:\nmetadata.json\nsession_context.json\n\n.rovodev/sessions/w6948340-6a8c-4b50-b867-02d54b4e3472/:\nmetadata.json\nsession_context.json\n\n.rovodev/sessions/w6948340-6aae-4978-9d55-3c5289d72140/:\nmetadata.json\nsession_context.json\n\n.rovodev/sessions/w6948340-6d1f-4ad0-b266-8296cc65dcf5/:\nmetadata.json\nsession_context.json\n\n.rovodev/sessions/w6948340-6fa3-4c60-9517-7f1a806fcefc/:\nmetadata.json\nsession_context.json\n\n.rovodev/sessions/w6948340-72b9-4e94-ab33-42fd4a1ed0c9/:\nmetadata.json\nsession_context.json\n\n.rovodev/sessions/w6948340-73da-4919-bec7-e29669f214d7/:\nmetadata.json\nsession_context.json\n\n.rovodev/sessions/w6948340-79d5-4a2b-bd18-caf7e6e985a7/:\nmetadata.json\nsession_context.json\n\n.rovodev/sessions/w6948340-7a38-45b2-aaa4-4d36f8c3879b/:\nmetadata.json\nsession_context.json\n\n.rovodev/sessions/w6948340-7a58-4eea-bc27-3e62a98cd42c/:\nmetadata.json\nsession_context.json\n\n.rovodev/sessions/w6948340-7b03-4d28-8c79-a1c5fa5795a6/:\nmetadata.json\nsession_context.json\n\n.rovodev/sessions/w6948340-7b60-4a1b-a647-161cfa91e22a/:\nmetadata.json\nsession_context.json\n\n.rovodev/sessions/w6948340-7e42-41d3-8461-f7e092dd44f7/:\nmetadata.json\nsession_context.json\n\n.rovodev/sessions/w6948340-8237-4bbb-91be-9609a3a45615/:\nmetadata.json\nsession_context.json\n\n.rovodev/sessions/w6948340-82f5-4676-a29e-2110e5e8b812/:\nmetadata.json\nsession_context.json\n\n.rovodev/sessions/w6948340-8347-4efe-942a-be146d406a1f/:\nmetadata.json\nsession_context.json\n\n.rovodev/sessions/w6948340-8596-42e4-a0ad-ad041459df5f/:\nmetadata.json\nsession_context.json\n\n.rovodev/sessions/w6948340-8611-462f-83e7-fd5e9786b30e/:\nmetadata.json\nsession_context.json\n\n.rovodev/sessions/w6948340-867d-495b-922a-2122a10ddac2/:\nmetadata.json\nsession_context.json\n\n.rovodev/sessions/w6948340-8814-4b18-af21-08cb143f9393/:\nmetadata.json\nsession_context.json\n\n.rovodev/sessions/w6948340-8907-42c3-9c1b-dcbee915cfe0/:\nmetadata.json\nsession_context.json\n\n.rovodev/sessions/w6948340-8989-454e-b1fb-aadbcaffdab6/:\nmetadata.json\nsession_context.json\n\n.rovodev/sessions/w6948340-8cfa-4cc8-8328-0fe1b7f90f1e/:\nmetadata.json\nsession_context.json\n\n.rovodev/sessions/w6948340-8ee2-41e1-8dcb-0d66bed86c88/:\nmetadata.json\nsession_context.json\n\n.rovodev/sessions/w6948340-8fd3-469f-a25a-7ff3bf85d389/:\nmetadata.json\nsession_context.json\n\n.rovodev/sessions/w6948340-921e-4bd3-a7c2-1c9cdc7f5809/:\nmetadata.json\nsession_context.json\n\n.rovodev/sessions/w6948340-952d-4631-9bfe-172589a0f050/:\nmetadata.json\nsession_context.json\n\n.rovodev/sessions/w6948340-9601-4f3c-a5f0-b450fa36a77f/:\nmetadata.json\nsession_context.json\n\n.rovodev/sessions/w6948340-9811-412d-b5a1-f5504f356764/:\nmetadata.json\nsession_context.json\n\n.rovodev/sessions/w6948340-9d01-444d-810b-ccb49d48e4c6/:\nmetadata.json\nsession_context.json\n\n.rovodev/sessions/w6948340-9e85-4829-9736-97aaefa0867a/:\nmetadata.json\nsession_context.json\n\n.rovodev/sessions/w6948340-9e92-489d-a1c2-2bb251bf3a06/:\nmetadata.json\nsession_context.json\n\n.rovodev/sessions/w6948340-9ec4-4d62-9d61-591bd38c5ada/:\nmetadata.json\nsession_context.json\n\n.rovodev/sessions/w6948340-a1bd-4aaa-9926-f9c1c1f6c5ee/:\nmetadata.json\nsession_context.json\n\n.rovodev/sessions/w6948340-a7fd-4a76-bf4b-5bfa019b4285/:\nmetadata.json\nsession_context.json\n\n.rovodev/sessions/w6948340-a99e-45b4-be93-f3abf96b357b/:\nmetadata.json\nsession_context.json\n\n.rovodev/sessions/w6948340-af60-4ecb-aa29-141b8c449bd7/:\nmetadata.json\nsession_context.json\n\n.rovodev/sessions/w6948340-b0ca-470a-b5ed-0a135f71e75c/:\nmetadata.json\nsession_context.json\n\n.rovodev/sessions/w6948340-b1ee-4647-bda8-873e33505f38/:\nmetadata.json\nsession_context.json\n\n.rovodev/sessions/w6948340-b33c-4412-904b-d9636c5a4a0d/:\nmetadata.json\nsession_context.json\n\n.rovodev/sessions/w6948340-bf54-41ba-af55-397bfe78a479/:\nmetadata.json\nsession_context.json\n\n.rovodev/sessions/w6948340-c053-41ed-bc42-635121b2812f/:\nmetadata.json\nsession_context.json\n\n.rovodev/sessions/w6948340-c093-4a61-a227-4cdbf5de4d48/:\nmetadata.json\nsession_context.json\n\n.rovodev/sessions/w6948340-c0ec-4e4b-bbb0-396a87ef60c3/:\nmetadata.json\nsession_context.json\n\n.rovodev/sessions/w6948340-c1a9-4eb4-911f-c0dc9c8e1b7b/:\nmetadata.json\nsession_context.json\n\n.rovodev/sessions/w6948340-c3a8-4110-8673-5970b2b7b035/:\nmetadata.json\nsession_context.json\n\n.rovodev/sessions/w6948340-c497-4234-9ad8-20d35749d079/:\nmetadata.json\nsession_context.json\n\n.rovodev/sessions/w6948340-c924-4908-bffe-00546547a41f/:\nmetadata.json\nsession_context.json\n\n.rovodev/sessions/w6948340-ca96-4f71-a692-b0aacb3425c5/:\nmetadata.json\nsession_context.json\n\n.rovodev/sessions/w6948340-cc8b-405e-881f-47b8e0bfb59a/:\nmetadata.json\nsession_context.json\n\n.rovodev/sessions/w6948340-cde2-42d1-a50a-9196459cd02f/:\nmetadata.json\nsession_context.json\n\n.rovodev/sessions/w6948340-ce8a-44be-bf99-09cd325a4ad6/:\nmetadata.json\nsession_context.json\n\n.rovodev/sessions/w6948340-d0be-4426-b13b-91eeda636327/:\nmetadata.json\nsession_context.json\n\n.rovodev/sessions/w6948340-d36a-4730-aa5f-712bb638938f/:\nmetadata.json\nsession_context.json\n\n.rovodev/sessions/w6948340-d3b9-4b44-941e-4735144866f6/:\nmetadata.json\nsession_context.json\n\n.rovodev/sessions/w6948340-d409-4d4c-95b8-d935467fa505/:\nmetadata.json\nsession_context.json\n\n.rovodev/sessions/w6948340-da29-4f49-a7a9-14a8485998ae/:\nmetadata.json\nsession_context.json\n\n.rovodev/sessions/w6948340-dcab-4d76-b3c9-1c8b3ba1fd10/:\nmetadata.json\nsession_context.json\n\n.rovodev/sessions/w6948340-df87-426d-a8dd-821ee7543581/:\nmetadata.json\nsession_context.json\n\n.rovodev/sessions/w6948340-e241-4ea0-8798-ce3d73cc5a18/:\nmetadata.json\nsession_context.json\n\n.rovodev/sessions/w6948340-e564-4260-b41b-0d6823bdbfcb/:\nmetadata.json\nsession_context.json\n\n.rovodev/sessions/w6948340-e8d4-466a-858c-bd39b9d012c0/:\nmetadata.json\nsession_context.json\n\n.rovodev/sessions/w6948340-e919-4606-8ad0-37e0a468f13a/:\nmetadata.json\nsession_context.json\n\n.rovodev/sessions/w6948340-ea73-4939-99a8-3722f4949cdc/:\nmetadata.json\nsession_context.json\n\n.rovodev/sessions/w6948340-eb28-44b3-a078-307b2dcb15fd/:\nmetadata.json\nsession_context.json\n\n.rovodev/sessions/w6948340-eb4f-4298-8b5d-138d98d35e2b/:\nmetadata.json\nsession_context.json\n\n.rovodev/sessions/w6948340-edb7-414c-bf29-e5ff2a7fc231/:\nmetadata.json\nsession_context.json\n\n.rovodev/sessions/w6948340-ee03-45d6-8f73-e2bfedf7cd99/:\nmetadata.json\nsession_context.json\n\n.rovodev/sessions/w6948340-f182-4dd1-935c-aab9b9c107b4/:\nmetadata.json\nsession_context.json\n\n.rovodev/sessions/w6948340-f310-4d3f-a793-d5b311271724/:\nmetadata.json\nsession_context.json\n\n.rovodev/sessions/w6948340-f314-419e-8dc3-5d258bca0765/:\nmetadata.json\nsession_context.json\n\n.rovodev/sessions/w6948340-f56b-46b2-b07f-b7af05e04e8f/:\nmetadata.json\nsession_context.json\n\n.rovodev/sessions/w6948340-f65d-4ea9-972d-9a7b23a1dc7b/:\nmetadata.json\nsession_context.json\n\n.rovodev/sessions/w6948340-fb9b-49c8-96d6-de60606c835d/:\nmetadata.json\nsession_context.json\n\n.rovodev/sessions/w6948340-fc37-40ea-b139-bcd1997a6a13/:\nmetadata.json\nsession_context.json\n\n.rovodev/sessions/w6948340-fe2d-4e17-a844-f3ff77e5e7c6/:\nmetadata.json\nsession_context.json\n\n.rovodev/sessions/w6948340-fe3b-4b1a-af53-3cade52a2ed6/:\nmetadata.json\nsession_context.json\n\n.rovodev/sessions/w6948340-fffd-40e2-b292-08a4a44c5832/:\nmetadata.json\nsession_context.json\n\n.rovodev/sessions/wd2c0476-d847-460f-a4cd-132c8448e9e5/:\nmetadata.json\nsession_context.json\n\n.rovodev/subagents/:\nActions-and-Registry.md\nAI-Coding-Best-Practices-Recommender-Agent.md\nAI-Software-Scalability-Advisor-Agent.md\nAnimation-+-Motion-Assistant.md\nAsync-Await-Implementation-Agent.md\nBug-Hunter.md\nChat-and-Sessions.md\nCode-Review-Checklist-Agent.md\nData-Table-+-Dashboard-Master.md\nFlows-and-Orchestration.md\nNext.js-15-AI-Development-Assistant.md\nNext.js-15-Real-time-&-WebSocket-Patterns-Master.md\nNext.js-15-Server-Actions-+-Form-Handling-Master.md\nProject-Analyst-and-Designer-Agent.md\nPurpose-and-Scope.md\nSchema-System-and-Validation.md\nshadcn-ui-Component-Builder-Assistant.md\nState-Management-with-Redux-Agent.md\nTools-and-Function-Calling.md\n\nscripts/:\nload-demo-data.ts\nmigrate-to-qdrant.ts\nqdrant-utils.ts\ntest-file-indexing.ts\ntest-qdrant-indexing.ts\n\nsrc/:\ndeclarations.d.ts\ninstrumentation.ts\n\nsrc/@types/:\nion-sound.d.ts\npdfjs-dist.d.ts\n\nsrc/app/:\nfavicon.ico\nglobals.css\nlayout.tsx\npage.tsx\nrobots.ts\nsitemap.ts\n\nsrc/app/admin/:\nlayout.tsx\n\nsrc/app/admin/account-sharing/: (COLLAPSED)\n\nsrc/app/admin/dashboard/: (COLLAPSED)\n\nsrc/app/admin/document-indexer/: (COLLAPSED)\n\nsrc/app/admin/manage-agents/: (COLLAPSED)\n\nsrc/app/admin/manage-features/: (COLLAPSED)\n\nsrc/app/admin/manage-generations/: (COLLAPSED)\n\nsrc/app/admin/manage-payments/: (COLLAPSED)\n\nsrc/app/admin/manage-sections/: (COLLAPSED)\n\nsrc/app/admin/manage-templates/: (COLLAPSED)\n\nsrc/app/admin/manage-users/: (COLLAPSED)\n\nsrc/app/admin/rag-monitor/: (COLLAPSED)\n\nsrc/app/admin/rag-tester/: (COLLAPSED)\n\nsrc/app/admin/settings/: (COLLAPSED)\n\nsrc/app/admin/writing-tools/: (COLLAPSED)\n\nsrc/app/api-docs/:\npage.tsx\n\nsrc/app/api/:\n\nsrc/app/api/actions/: (COLLAPSED)\n\nsrc/app/api/admin/: (COLLAPSED)\n\nsrc/app/api/admins/: (COLLAPSED)\n\nsrc/app/api/agent-categories/: (COLLAPSED)\n\nsrc/app/api/agents/: (COLLAPSED)\n\nsrc/app/api/auth/: (COLLAPSED)\n\nsrc/app/api/chat/: (COLLAPSED)\n\nsrc/app/api/cron/: (COLLAPSED)\n\nsrc/app/api/demo/: (COLLAPSED)\n\nsrc/app/api/export/: (COLLAPSED)\n\nsrc/app/api/fcm/: (COLLAPSED)\n\nsrc/app/api/features/: (COLLAPSED)\n\nsrc/app/api/generate/: (COLLAPSED)\n\nsrc/app/api/image-to-svg/: (COLLAPSED)\n\nsrc/app/api/notifications/: (COLLAPSED)\n\nsrc/app/api/payment/: (COLLAPSED)\n\nsrc/app/api/process-file/: (COLLAPSED)\n\nsrc/app/api/project/: (COLLAPSED)\n\nsrc/app/api/projects/: (COLLAPSED)\n\nsrc/app/api/proxy/: (COLLAPSED)\n\nsrc/app/api/rag/: (COLLAPSED)\n\nsrc/app/api/settings/: (COLLAPSED)\n\nsrc/app/api/snapshots/: (COLLAPSED)\n\nsrc/app/api/stats/: (COLLAPSED)\n\nsrc/app/api/storage/: (COLLAPSED)\n\nsrc/app/api/svg-conversion/: (COLLAPSED)\n\nsrc/app/api/templates/: (COLLAPSED)\n\nsrc/app/api/transactions/: (COLLAPSED)\n\nsrc/app/api/user-transactions/: (COLLAPSED)\n\nsrc/app/api/users/: (COLLAPSED)\n\nsrc/app/api/writing-tools/: (COLLAPSED)\n\nsrc/app/builder/:\nloading.tsx\npage.tsx\n\nsrc/app/dashboard/:\npage.tsx\n\nsrc/app/demo/:\n\nsrc/app/demo/rag/: (COLLAPSED)\n\nsrc/app/docs/:\npage.tsx\n\nsrc/app/forgot-password/:\npage.tsx\n\nsrc/app/login/:\npage.tsx\n\nsrc/app/payment-history/:\npage.tsx\n\nsrc/app/phone-auth/:\npage.tsx\n\nsrc/app/profile/:\nApiKeysForm.tsx\nApiTokenView.tsx\nChangePasswordForm.tsx\nLoginHistoryList.tsx\npage.tsx\nSecuritySettingsForm.tsx\nTrustedDevicesList.tsx\nTwoFactorSetup.tsx\nUpdateProfileForm.tsx\n\nsrc/app/profile/[id]/: (COLLAPSED)\n\nsrc/app/reset-password/:\npage.tsx\n\nsrc/app/signup/:\npage.tsx\n\nsrc/app/writing-tools/:\npage.tsx\n\nsrc/app/writing-tools/ai-detector/: (COLLAPSED)\n\nsrc/app/writing-tools/ai-image-generator/: (COLLAPSED)\n\nsrc/app/writing-tools/ai-researcher/: (COLLAPSED)\n\nsrc/app/writing-tools/assignments-solver/: (COLLAPSED)\n\nsrc/app/writing-tools/bias-checker/: (COLLAPSED)\n\nsrc/app/writing-tools/citation-generator/: (COLLAPSED)\n\nsrc/app/writing-tools/document-writer/: (COLLAPSED)\n\nsrc/app/writing-tools/fact-checker/: (COLLAPSED)\n\nsrc/app/writing-tools/generate-plantuml/: (COLLAPSED)\n\nsrc/app/writing-tools/generate-toc/: (COLLAPSED)\n\nsrc/app/writing-tools/generate-ui-description/: (COLLAPSED)\n\nsrc/app/writing-tools/grammar-checker/: (COLLAPSED)\n\nsrc/app/writing-tools/humanizer/: (COLLAPSED)\n\nsrc/app/writing-tools/idea-generator/: (COLLAPSED)\n\nsrc/app/writing-tools/image-to-pdf/: (COLLAPSED)\n\nsrc/app/writing-tools/image-to-svg/: (COLLAPSED)\n\nsrc/app/writing-tools/invisible-text-detector/: (COLLAPSED)\n\nsrc/app/writing-tools/lecture-generator/: (COLLAPSED)\n\nsrc/app/writing-tools/markdown-to-word/: (COLLAPSED)\n\nsrc/app/writing-tools/paraphraser/: (COLLAPSED)\n\nsrc/app/writing-tools/plagiarism-checker/: (COLLAPSED)\n\nsrc/app/writing-tools/pptx-convert/: (COLLAPSED)\n\nsrc/app/writing-tools/project-blueprint/: (COLLAPSED)\n\nsrc/app/writing-tools/quiz-generator/: (COLLAPSED)\n\nsrc/app/writing-tools/sentence-structure-checker/: (COLLAPSED)\n\nsrc/app/writing-tools/session-plan/: (COLLAPSED)\n\nsrc/app/writing-tools/summarizer/: (COLLAPSED)\n\nsrc/app/writing-tools/text-stylist/: (COLLAPSED)\n\nsrc/app/writing-tools/topic-explainer/: (COLLAPSED)\n\nsrc/app/writing-tools/translator/: (COLLAPSED)\n\nsrc/components/:\n\nsrc/components/api-docs/:\nApiTester.tsx\nCodeBlock.tsx\nEndpointCard.tsx\n\nsrc/components/demo/:\nCacheDemo.tsx\nPerformanceComparison.tsx\nRAGDemoInterface.tsx\nRerankingDemo.tsx\nSearchDemo.tsx\n\nsrc/components/home/:\nHomePageContent.tsx\n\nsrc/components/onboarding/:\nOnboardingGuide.tsx\n\nsrc/components/shared/:\nA4Page.tsx\nAppProviders.tsx\nCoverPage.tsx\nDiffView.tsx\nDynamicImage.tsx\nGuestAccessBanner.tsx\nGuestTierBadge.tsx\nHeader.tsx\nLanguageDirectionManager.tsx\nLanguageToggle.tsx\nMarkdownViewer.tsx\nMobileNav.tsx\nNotificationDropdown.tsx\nQueryProvider.tsx\nThemeProvider.tsx\nThemeToggle.tsx\nUserProfileDropdown.tsx\n\nsrc/components/ui/:\naccordion.tsx\nalert-dialog.tsx\nalert.tsx\napi-badge.tsx\navatar.tsx\nbadge.tsx\nbutton.tsx\ncalendar.tsx\ncard.tsx\ncarousel.tsx\nchart.tsx\ncheckbox.tsx\ncollapsible.tsx\nCollapsibleSidePanel.tsx\ncombobox.tsx\ncommand.tsx\nCustomSelect.tsx\ndialog.tsx\ndropdown-menu.tsx\nflipper.tsx\nform.tsx\ninput.tsx\nlabel.tsx\nmenubar.tsx\npopover.tsx\nprogress.tsx\nradio-group.tsx\nresizable.tsx\nscroll-area.tsx\nselect.tsx\nseparator.tsx\nsheet.tsx\nskeleton.tsx\nslider.tsx\nswitch.tsx\ntable.tsx\ntabs.tsx\ntextarea.tsx\ntoast.tsx\ntoaster.tsx\ntoggle-group.tsx\ntoggle.tsx\ntooltip.tsx\nuse-toast.ts\n\nsrc/config/:\nadmin-nav.ts\napi-docs.ts\n\nsrc/context/:\nAuthContext.tsx\nLocalizationContext.tsx\n\nsrc/hooks/:\nindex.ts\nuse-agent-store.ts\n\nsrc/hooks/__tests__/:\nuse-agent-store.test.tsx\n\nsrc/hooks/util/:\nuse-browser-speech.ts\nuse-debounce.ts\nuse-mobile.ts\nuse-service.ts\nuse-sound.ts\nuse-toast.ts\nuseCopyToClipboard.ts\nuseExport.ts\nuseFileUpload.ts\nuseMarkdownParser.ts\n\nsrc/hooks/util/__tests__/: (COLLAPSED)\n\nsrc/infrastructure/:\n\nsrc/infrastructure/api/:\napi-utils.ts\nApiService.ts\nauthenticated-client-call.ts\nerrorUtils.ts\nquery-keys.ts\n\nsrc/infrastructure/cache/:\nBrowserCache.ts\nICacheService.ts\n\nsrc/infrastructure/config/:\nconfig.ts\n\nsrc/infrastructure/db/:\nagent-database.sql\nagents.db\nagents.db-shm\nagents.db-wal\nindex.ts\nschema.ts\nsqlite-seed.ts\n\nsrc/infrastructure/db/seed-data/: (COLLAPSED)\n\nsrc/infrastructure/di/:\ncontainer.ts\ntokens.ts\n\nsrc/infrastructure/firebase/:\nerror.ts\nserver-init.ts\n\nsrc/infrastructure/i18n/:\ni18n.ts\ntranslation.ts\n\nsrc/infrastructure/security/:\nfingerprint.ts\nlocation.ts\nrate-limiter.ts\n\nsrc/infrastructure/stubs/:\nasync-hooks-stub.js\n\nsrc/infrastructure/utils/:\narrayBufferToBase64.ts\ncn.ts\nencode64.ts\nrandomId.ts\nresult.ts\nsanitizer.ts\n\nsrc/locales/:\nar.json\nen.json\n\nsrc/modules/:\n\nsrc/modules/admin/:\n\nsrc/modules/admin/adapters/: (COLLAPSED)\n\nsrc/modules/admin/application/: (COLLAPSED)\n\nsrc/modules/admin/domain/: (COLLAPSED)\n\nsrc/modules/admin/infrastructure/: (COLLAPSED)\n\nsrc/modules/ai-content/:\n\nsrc/modules/ai-content/adapters/: (COLLAPSED)\n\nsrc/modules/ai-content/application/: (COLLAPSED)\n\nsrc/modules/ai-content/domain/: (COLLAPSED)\n\nsrc/modules/ai-content/infrastructure/: (COLLAPSED)\n\nsrc/modules/ai/:\nindex.ts\n\nsrc/modules/ai/adapters/: (COLLAPSED)\n\nsrc/modules/ai/application/: (COLLAPSED)\n\nsrc/modules/ai/domain/: (COLLAPSED)\n\nsrc/modules/ai/infrastructure/: (COLLAPSED)\n\nsrc/modules/billing/:\n\nsrc/modules/billing/adapters/: (COLLAPSED)\n\nsrc/modules/billing/application/: (COLLAPSED)\n\nsrc/modules/billing/domain/: (COLLAPSED)\n\nsrc/modules/billing/infrastructure/: (COLLAPSED)\n\nsrc/modules/projects/:\n\nsrc/modules/projects/adapters/: (COLLAPSED)\n\nsrc/modules/projects/application/: (COLLAPSED)\n\nsrc/modules/projects/domain/: (COLLAPSED)\n\nsrc/modules/projects/infrastructure/: (COLLAPSED)\n\nsrc/modules/rag/:\n\nsrc/modules/rag/adapters/: (COLLAPSED)\n\nsrc/modules/rag/application/: (COLLAPSED)\n\nsrc/modules/rag/domain/: (COLLAPSED)\n\nsrc/modules/rag/infrastructure/: (COLLAPSED)\n\nsrc/modules/templates/:\n\nsrc/modules/templates/adapters/: (COLLAPSED)\n\nsrc/modules/templates/application/: (COLLAPSED)\n\nsrc/modules/templates/domain/: (COLLAPSED)\n\nsrc/modules/templates/infrastructure/: (COLLAPSED)\n\nsrc/modules/users/:\n\nsrc/modules/users/adapters/: (COLLAPSED)\n\nsrc/modules/users/application/: (COLLAPSED)\n\nsrc/modules/users/domain/: (COLLAPSED)\n\nsrc/modules/users/infrastructure/: (COLLAPSED)\n\nstorage/:\n\nstorage/uploads/:\n\nstorage/uploads/payment_proofs/:\n\nstorage/uploads/payment_proofs/admin-user-id/: (COLLAPSED)\n</workspace>",
+                    "timestamp": "2026-04-06T22:19:45.075691Z",
+                    "dynamic_ref": null,
+                    "part_kind": "system-prompt"
+                },
+                {
+                    "content": "\n## Planning\n\nYou have been provided with a create_technical_plan tool, which you should ALWAYS use before making any changes to the workspace. After you create a plan, the user will prompt you to continue or modify the plan. Don't worry about creating plans for user requests that don't require code changes, such as questions about the code. When creating a plan, ensure that the clarifyingQuestionsIfAny field is used to clarify requirements or gather information from the user.",
+                    "timestamp": "2026-04-06T22:22:30.962106Z",
+                    "dynamic_ref": "planning_prompt",
+                    "part_kind": "system-prompt"
+                },
+                {
+                    "content": "\n## Proactivity and Permission Guidelines for Jira, Confluence, and SCM Integrations\n\n**When to execute immediately (no user confirmation needed):**\n- If the user's message explicitly requests an action (e.g., \"create a ticket for X\", \"add a comment to PROJ-123\", \"create a page containing foo\")\n- Any read operations that you want to perform (e.g., getting details of a Jira ticket, fetching content from Confluence, listing open PRs in a repo)\nIn cases like these, you can perform actions immediately. You may read Jira, Confluence, and SCM data freely.\n\n**When to confirm with the user first:**\n- Whenever you want to perform a write action that the user has not explicitly requested (e.g., creating a Jira ticket, commenting on a ticket, creating a Confluence page)\n- When creating a Confluence page, unless the user gives you a specific location, verify with the user where they want the page created\n- Before performing ANY git write operations (e.g., committing, pushing, merging, stashing, etc) unless directly requested by the user\n\n## Proactive Integration Suggestions\n\nAfter completing significant work, proactively suggest relevant next steps to help users track and document their progress.\n\n**CRITICAL: Only suggest actions that are actually supported by the currently available tools.**\n- Before offering an action, verify you have the necessary tool available.\n- If the tool is not available, do NOT offer that option.\n\n**When you detect or discuss TODOs in code:**\n- If Jira tools are available, suggest creating Jira work items to track them.\n- Example: \"I noticed some TODOs in the code. Would you like me to create Jira work items to track these tasks?\"\n\n**After completing code analysis, reviews, or investigations:**\n- Suggest documenting findings in Confluence.\n- Example: \"Would you like me to create a Confluence page to document this analysis?\"\n\n**After making code changes, fixes, or implementations:**\n- If SCM/PR tools are available, suggest creating a branch or pull request.\n- Example: \"Would you like me to help create a pull request for these changes?\"\n\n**Follow this interaction pattern:**\n1. Present options based on what you can actually do with the available tools.\n2. Make intelligent guesses about context using available project information.\n3. Confirm before executing actions that require user approval.\n4. Use available MCP tools to execute the chosen action.\n5. Provide links to created/updated resources.\n\nOnly suggest these when the work feels substantial and worth tracking - not for minor edits or exploratory tasks.",
+                    "timestamp": "2026-04-06T22:19:45.077961Z",
+                    "dynamic_ref": null,
+                    "part_kind": "system-prompt"
+                },
+                {
+                    "content": "\n## Agent Memory (AGENTS.md files)\n\nThe following information is loaded from AGENTS.md files found in the current directory and its ancestors.\n\nHere are information or guidelines specific to this workspace that you should consider when resolving requests:\n<workspace_memory>\nInstructions for the current directory (these take precedence if relevant):\n\n# Arkan Project Guide\n\n## Overview\n\nArkan is an AI-powered platform for academic and professional writing. It is built using Next.js 15, TypeScript (strict mode), and Google Genkit, strictly adhering to Clean Architecture (DDD) principles for a clear separation of business logic and infrastructure.\n\n## Subagents: Specialist Delegation\n\nTasks can be delegated to specialized agents located in `.rovodev/subagents/` using the `invoke_subagents` tool. This allows for modular development and specialization.\n\n### Delegation Matrix\n\n| Subagent                     | Primary Use Cases                                    |\n| :--------------------------- | :--------------------------------------------------- |\n| Next.js 15 AI/Server Actions | App Router, data fetching, `use server` patterns, Genkit flows. |\n| shadcn/ui Builder            | UI components, Radix primitives, CVA, accessibility.   |\n| Data Table/Dashboard         | Admin dashboards, TanStack Table, Recharts.          |\n| Real-time/WebSocket          | SSE, WebSockets, streaming endpoints.                |\n| State Management             | Zustand stores (`useBuilderStore`), state architecture.   |\n| Bug Hunter                   | Reproducing bugs, analyzing `errors.txt`, detailed reporting. |\n| Code Review/Best Practices   | Security audits, refactoring, code quality, consistency. |\n| Scalability Advisor          | RAG/Qdrant optimization, API bottleneck analysis.    |\n\n## Architecture & Logic\n\n### Clean Architecture (DDD)\n\nModules within `src/modules/` adhere to a four-layer structure:\n\n1.  **`domain/`**: Contains pure entities, repository interfaces, and Zod schemas. This layer is free from external dependencies.\n2.  **`application/`**: Houses use cases that orchestrate domain logic.\n3.  **`adapters/`**: Includes API clients, controllers, and localized Zustand stores, acting as bridges to external services.\n4.  **`infrastructure/`**: Provides concrete implementations for services like Genkit, SQLite/Drizzle, and Qdrant.\n\n### Dependency Injection (DI) & Execution Boundaries\n\nThe project utilizes `tsyringe` for dependency injection.\n\n*   **Registration**: Services are registered in `src/infrastructure/di/container.ts`.\n*   **Cross-Environment Bridging**: For services that must be triggered from the client but executed on the server (e.g., Document Export), implement a \"Bridging Pattern\". Register a client-side API client (e.g., `ExportApiClient`) for browser environments and the full infrastructure implementation for the server. This maintains a unified interface while respecting Next.js 15 boundaries.\n*   **Browser-Only Dynamic Synthesis**: Libraries with mandatory DOM dependencies (e.g., `pptxgenjs`) MUST be moved entirely to client hooks using dynamic `import()` to prevent server-side reference errors (`document is not defined`) during module initialization.\n\n### Server Actions & \"use server\" Constraints\n\n*   **Logic Isolation**: The `\"use server\"` directive should be applied to specific async functions (Actions) or dedicated action files, *not* to classes or infrastructure services.\n*   **Class Restriction**: Exporting classes from a `\"use server\"` file is prohibited if they contain non-async properties or methods. Infrastructure services should remain directive-free and be consumed by Actions or API Routes.\n\n### AI & Genkit Flows\n\n*   **Implementation**: All AI-related flows are located in `src/modules/ai/infrastructure/flows/` and are prefixed with `'use server'`.\n*   **Safety & Output**: Flows must return `Result<T, E>` objects to provide explicit success/failure vectors.\n*   **Spectral Sanitization**: The `cleanAiOutput` utility function MUST be used to strip extraneous conversational elements and markdown code blocks before committing AI text to the domain.\n*   **Neural Telemetry**: Instrument retrieval flows with high-precision timing (`performance.now()`) and transmit via a `telemetry` field in result objects to enable real-time monitoring of pipeline stages (Embedding, Search, Rerank).\n\n## State Management & Robustness\n\n### Atomic State Updates\n\n*   **Batching Pattern**: For multi-node updates (e.g., bulk context mapping), operations must be batched within a single `updateProject` callback. Use functional reduction: `targets.reduce((p, id) => p.updateSection(id, s => s.withProps(...)), currentProject)`. This guarantees atomicity and prevents race conditions.\n*   **Selection Recovery**: Structural changes, particularly deletions, must trigger corresponding callbacks (e.g., `onSelectChapter(null)`) or \"Selection Recovery\" sweeps to clear workspace focus.\n\n### Defensive Programming\n\n*   **Hook Compliance**: All hooks must be placed at the top level of a component, *before* any conditional rendering or early returns. This is a strict requirement for React 19 stability.\n*   **Existence Guards**: Unified `if (!project)` or `if (!userProfile)` guards must be applied to all interaction and lifecycle handlers.\n*   **Error Containment**: Mutations and external service calls must be wrapped in `try-catch` blocks. Use localized Error Boundaries for high-risk rendering pipelines (e.g., `DocumentRenderer`).\n*   **Status Vector Pattern**: Utilize unified `status` union types (e.g., `'loading' | 'authenticated' | 'error'`) in Context providers instead of multiple boolean flags to ensure predictable UI transitions.\n*   **asChild Constraint**: Components using the `asChild` pattern (e.g., `Button`) MUST have exactly one direct React element child. Decorative siblings (whitespace, text nodes, icons) must be wrapped or moved outside.\n*   **ID Standardization**: The `@/infrastructure/utils/randomId` utility must be used exclusively for generating entity IDs.\n\n## Coding & UI Standards\n\n*   **TypeScript**: Strict policy with zero tolerance for the `any` type. Use `unknown` and explicit type guards.\n*   **Form Persistence Purity**: When updating domain entities from form state, implement selective property mapping to prevent `undefined` or `null` form values from polluting the domain manifest.\n*   **Prop Standardization**: Standardize core workspace callbacks as `onActiveChapterChange` and `onActiveSectionChange`.\n*   **Styling**: Tailwind CSS is the standard. The \"Intelligence Suite\" aesthetic requires: 28px dot-grids, high-density labels (`text-[10px]`, `font-black`, `uppercase`), glassmorphism, and \"Stable Manifest\" footers.\n\n## RAG & Infrastructure Performance\n\n*   **Vector Store Lazy Init**: Use a singleton `initPromise` pattern in vector store adapters (e.g., `QdrantVectorStore`) to avoid redundant connection/collection verification overhead.\n*   **Cache Key Optimization**: Utilize bitwise string hashing for high-frequency cache keys (e.g., `EmbeddingCache`) to minimize string concatenation overhead.\n*   **Heuristic Fallbacks**: For server-side operations requiring browser metrics (e.g., text measurement for layout), implement weighted character-based heuristics that account for script density (e.g., Arabic vs. Latin).\n\n---\n\n## Change Log\n\n*   **Global Robustness Hardening**: Standardized \"Defensive Programming\" and \"Atomic Batching\" across 60+ components including Generation, Export, Source, Outline, Profile, and Admin Dashboard modules.\n*   **Auth & Layout Transformation**: Hardened `AuthContext` with a unified status vector and established the \"Intelligence Suite\" aesthetic in the global `Header`.\n*   **RAG Performance & Telemetry**: Overhauled the retrieval pipeline for sub-100ms latency. Implemented bitwise hashing, lazy initialization, and high-precision telemetry dashboards.\n*   **Infrastructure Boundaries**: Resolved Next.js 15 class-export errors and implemented the \"Client-Server DI Bridging\" pattern for document exports.\n*   **Neural Rendering Stabilized**: Implemented a dedicated `RendererErrorBoundary` and stabilized the A4 rendering pipeline with hydration guards.\n*   **Identity Consistency**: Verified the move to a unified ID strategy using `randomId` for all document, source, and identity nodes.\n\n</workspace_memory>\n\nLocation-specific best practices, tips, and patterns may be found in subdirectories of the current workspace in AGENTS.md or AGENTS.local.md files. Before making any changes in a subdirectory, please read the contents of any memory files if present.",
+                    "timestamp": "2026-04-06T22:22:30.969422Z",
+                    "dynamic_ref": "memory_prompt",
+                    "part_kind": "system-prompt"
+                },
+                {
+                    "content": "\n## Using Your update_todo Tool\n\nYou have access to the update_todo tool to help you plan tasks and report progress. Use this tool frequently for complex tasks to ensure that you are tracking your tasks and giving the user visibility into your progress. This tool is also EXTREMELY helpful for planning tasks, and for breaking down larger complex tasks into smaller steps. If you do not use this tool when planning, you may forget to do important tasks - and that is unacceptable.\n\nInstructions for using the update_todo tool:\n- It is critical that you mark todos as completed as soon as you are done with a task. Do not batch up multiple tasks before marking them as completed.\n- When initially creating a todo list for a task, you should mark the first item you will work on as in progress - do not make another call to the tool to mark an item as in progress just after creating the list.\n- Never end an interaction with a call to update_todo - you can just finish up and the todo list will be considered complete.\n- Do not make single-step plans.\n- Never call update_todo on its own - always parallelize with other tool calls when possible.",
+                    "timestamp": "2026-04-06T22:22:30.969867Z",
+                    "dynamic_ref": "TodoListReminderCallback.todolist_system_prompt",
+                    "part_kind": "system-prompt"
+                },
+                {
+                    "content": "\n## Available Skills\n\nThe following skills can be loaded using the get_skill tool:\n<available_skills>\n  <skill>\n    <name>research</name>\n    <description>Conducts deep, thorough research on a specific query by breaking it down into distinct domains\nand delegating research to specialized subagents. Results are synthesized into a cohesive,\ntheme-organized markdown report saved in the research-reports directory.\n</description>\n    <to_load>get_skill(skill_name_or_path=\"research\")</to_load>\n  </skill>\n  <skill>\n    <name>confluence</name>\n    <description>Instructions for working with Confluence pages, spaces, and content using the Atlassian MCP tools.\nUse when you need to read, create, update, or search Confluence pages, navigate page hierarchies, or add comments.\n</description>\n    <to_load>get_skill(skill_name_or_path=\"confluence\")</to_load>\n  </skill>\n</available_skills>",
+                    "timestamp": "2026-04-06T22:22:30.970151Z",
+                    "dynamic_ref": "AgentDefinition.skill_prompt",
+                    "part_kind": "system-prompt"
+                },
+                {
+                    "content": "\n## Available MCP Toolsets\n\nThe following MCP toolsets are available via compressed tool interfaces. Each toolset exposes a number of subtools via\n`mcp__<name>__get_tool_schema` and `mcp__<name>__invoke_tool`, which you can use to discover and call the tools within that toolset.\n<available_mcp_toolsets>\n  <mcp_toolset>\n    <name>mcp__atlassian_</name>\n    <tool_count>16</tool_count>\n  </mcp_toolset>\n</available_mcp_toolsets>",
+                    "timestamp": "2026-04-06T22:22:30.970834Z",
+                    "dynamic_ref": "AgentDefinition.compressed_mcp_servers_prompt",
+                    "part_kind": "system-prompt"
+                },
+                {
+                    "content": "",
+                    "timestamp": "2026-04-06T22:22:30.971162Z",
+                    "dynamic_ref": "RovoDevAgentMixin._add_system_prompts.<locals>.<lambda>",
+                    "part_kind": "system-prompt"
+                },
+                {
+                    "content": "\nThe user's Atlassian Account ID (AAID) is 5e5860cf4befbd0c96ca5158.",
+                    "timestamp": "2026-04-06T22:19:46.142362Z",
+                    "dynamic_ref": null,
+                    "part_kind": "system-prompt"
+                },
+                {
+                    "content": "<system-reminder>The user is in ask mode; only read-only tools are available.\nIf code edits are needed, output the proposed change as assistant text for the user to copy/apply.\nDO NOT USE any file editing, creation, deletion tools.\nThese operations will fail with an error message if attempted.\nDo your best to answer using read-only tools, but if write/edit/terminal tools are required,\nor the user explicitly asks you to apply changes, let them know they're in ask mode and\nshould use the /mode command to switch to agent mode.</system-reminder>",
+                    "timestamp": "2026-04-06T22:19:46.163470Z",
+                    "part_kind": "user-prompt"
+                },
+                {
+                    "content": "<system-reminder>User has switched to AgentMode.ASK mode</system-reminder>",
+                    "timestamp": "2026-04-06T22:19:46.163455Z",
+                    "part_kind": "user-prompt"
+                },
+                {
+                    "content": "<system-reminder>\nCurrent time: Monday, 2026-04-06 22:19:46\n</system-reminder>",
+                    "timestamp": "2026-04-06T22:19:46.163717Z",
+                    "part_kind": "user-prompt"
+                },
+                {
+                    "content": "what is n8n?",
+                    "timestamp": "2026-04-06T22:19:46.142382Z",
+                    "part_kind": "user-prompt"
+                },
+                {
+                    "content": "\n\nYou have used 0 iterations.",
+                    "timestamp": "2026-04-06T22:19:46.162150Z",
+                    "part_kind": "user-prompt"
+                }
+            ],
+            "timestamp": "2026-04-06T22:19:46.166911Z",
+            "instructions": null,
+            "kind": "request",
+            "run_id": "285db465-3555-4c7a-999d-691004286e61",
+            "metadata": null
+        },
+        {
+            "parts": [
+                {
+                    "tool_name": "grep",
+                    "args": {
+                        "content_pattern": "n8n"
+                    },
+                    "tool_call_id": "pyd_ai_52ee8a6254e84fef81fb3f1263c3ad37",
+                    "id": null,
+                    "provider_name": "google-vertex",
+                    "provider_details": {
+                        "thought_signature": "CiQBjz1rXySkUXgDsZb/NZqf/RodWscMC2i+xM+TaTpsQQaY+kYKaQGPPWtf8a+d2hQ/4VrVhdWdXWtCB6X6U/zhEUmNg8J1UxhgLGeFNvIKlGgiAH25WB4FNgOS35cSR3VSAtnAOS/eton2LwGj9ZflCqno7DRlJouxm4/iotERdyonoMgd4o8C9uTLbRSHegpXAY89a1/Fu5Avsqc3gcAkx24ep390zgWRvZGETrdTdyiFOxLwIiI0C4hE38kDDG89LyAfrbyD8Hg4439utGrVLG9CTIn50R5FUYj9ylZiWai1W9FHe+WACqkBAY89a1/zGbsfeIXp2/bTdIwQR2626okz4GTsDDyBERIOcJC/qbsj6SZD0YM5m4zYCq6IE/4nrMsf/q600Ks86xQr9BAM3nGZv3HxKyvv+SCG+jO9QkWg7uUIDAgj5DBZqVLxd+x62yv7pkpSGrIzRTjx2P3IlbHVbidd5NaTD3+Y+tu8D5Ym8MjQz1sIRUd0U/hsfJ3L2SfzliWF0pYhqmd6V2n08JJGKgpaAY89a19UgJ/p7xzAeKIuX6tDkepADpTM7z6KAdJYRYt66GaKWlvw6e5ge+/ShWd1wCCf94gdt2G3/QpuxXJSl9GPgfpl9qhoV4AS87Sy9Oy7rRO7+93AMP3x"
+                    },
+                    "part_kind": "tool-call"
+                }
+            ],
+            "usage": {
+                "input_tokens": 26735,
+                "cache_write_tokens": 0,
+                "cache_read_tokens": 0,
+                "output_tokens": 97,
+                "input_audio_tokens": 0,
+                "cache_audio_read_tokens": 0,
+                "output_audio_tokens": 0,
+                "details": {
+                    "thoughts_tokens": 86,
+                    "text_prompt_tokens": 26735,
+                    "text_candidates_tokens": 11
+                }
+            },
+            "model_name": "gemini-3-flash-preview",
+            "timestamp": "2026-04-06T22:19:48.458045Z",
+            "kind": "response",
+            "provider_name": "google-vertex",
+            "provider_url": "https://api.atlassian.com/rovodev/v2/proxy/ai/v1/google/",
+            "provider_details": null,
+            "provider_response_id": null,
+            "finish_reason": null,
+            "run_id": "285db465-3555-4c7a-999d-691004286e61",
+            "metadata": {
+                "response_headers": {
+                    "X-Rovodev-Credits-Used": "7",
+                    "X-Rovodev-Credits-Remaining": "1993",
+                    "X-Rovodev-Credits-Total": "2000",
+                    "Atl-Traceid": "5a9e0c43ef434bf484526e1299e98c25",
+                    "Atl-Request-Id": "5a9e0c43-ef43-4bf4-8452-6e1299e98c25"
+                }
+            }
+        },
+        {
+            "parts": [
+                {
+                    "tool_name": "grep",
+                    "content": "No matches found for pattern 'n8n'.",
+                    "tool_call_id": "pyd_ai_52ee8a6254e84fef81fb3f1263c3ad37",
+                    "metadata": null,
+                    "timestamp": "2026-04-06T22:19:48.912930Z",
+                    "part_kind": "tool-return"
+                },
+                {
+                    "content": "\n\nYou have used 1 iterations.",
+                    "timestamp": "2026-04-06T22:19:48.965048Z",
+                    "part_kind": "user-prompt"
+                },
+                {
+                    "content": "<system-reminder>\nCurrent time: Monday, 2026-04-06 22:19:48\n</system-reminder>",
+                    "timestamp": "2026-04-06T22:19:48.966297Z",
+                    "part_kind": "user-prompt"
+                }
+            ],
+            "timestamp": "2026-04-06T22:19:48.969631Z",
+            "instructions": null,
+            "kind": "request",
+            "run_id": "285db465-3555-4c7a-999d-691004286e61",
+            "metadata": null
+        },
+        {
+            "parts": [
+                {
+                    "tool_name": "open_files",
+                    "args": {
+                        "file_paths": [
+                            "package.json"
+                        ]
+                    },
+                    "tool_call_id": "pyd_ai_54ffe004491d4613bb22b3f4150cba8b",
+                    "id": null,
+                    "provider_name": "google-vertex",
+                    "provider_details": {
+                        "thought_signature": "CiQBjz1rX4KkroIEXgpb5B6V0rhhNEyvx/RSk0B6YBPj9YAenf0KWwGPPWtflxCZA6V/OIzs5xbJHtjJ5kaHUsSEeob/MoJBvswi627oBO6WD99O6we6A20QK2zWTQi4PCmGLJU5bTGcCcd5J16SFCJPgXsUi9pjCgn+V0C2IK+UBSgKYwGPPWtf24pGZUloYBcgeeRFpIwYX2xXaQiySKWC2qBIXm2wolyLZqi/RUiNirOvzQMtd9ihpMB1gfp/wz42VQnWYL++TWqhr1QtzxYVq45n/pHEBdwpgPMpGmWwOn/Ts4HwAgq+AQGPPWtf29I9szVjeKNUN5vWhY6PxzGJLpcgKHumOOe/11tnh0akYp0YkE6rX/3PfKyl/qo7YZPYVM1Us+Dsf6zyGiGNzCcqrUB3Tk3fa4bilfn18CuGzKn+jNm7DIiDDD7X1S1C2yGibgpRXxTUxDVHPEEKEJR9jThryxZbBhgT945lXzNhGJKrP6kcaaVfnhaIH6qr2aNyztwicYODT+u7CUgcldROWmpfEcnW4ifxunBltZ7L80SLyTbWwR8KoQEBjz1rX8K5wzvPKwK//EVmIpnNKnRnMPuXBZeThuvu8ThSI8XujnU+TTqCHcZ9FS6Js3qCob/H+MNVGFzh9NhkRMGMGMiqZkmMsSelC0L9X9lQ7JN1Na4dkKlFa+3DRmx0PvLMkAx+My9u2vtfazwifUQTFbSdEQoHSD8fKB0zaFXfyRPjVuogrGOU4Dx7W90aUkl6GK2+GVQbNtXRUWBytQqHAgGPPWtfBIZr1YGafq0BFKudae0nWDRVXoXQj2smv6vzmouED/Uh7tvdXDDeb5Vk73dy5Slxvk942hDLEpc2WH/I8zgtfAaeRT8rFDXqAy9iE9bckBn9MgZx+HUonpbKRzHRQSsQ4DoN+tQg3cs6eegWxmEucqv7x5bamcDd/w+khRWqVwQ0cGqHEqMuiKRtlzQJ2Nmf4F1sxySfOX/xiVpES+RPkEOS2J5WV9AjvBFwpvXk7v5ZQBLbHQxorJa4qRa4jMjJ9P4SVXO3UJg/tINmkVr6zoNG7fjD/eAB+TrDXt4E9i1JqvImnHnl1Z516irWaVioJhe+Vj2x1mXBED+DUOuqUhHZCtYBAY89a1+Wtth3WOOCVdnd0pSSDc1xXZZyEaadKKLW8JbCP/mG8rpPykxPEd3JQuarytQVfS6X2gaxZax9JUAPAeW3hqR3/pfV/b0pE/cSoYyJ0M51thgosJj3On03+Jrmx+kG1R6AQFjFaO+2oMHbfG4XAwNaENijawKFvkxYyKlBvoK9lYOQKn4TqLCKZIlYFMTFqz/OQEa2vrn4SaUnVA98VK1/VgUQCg2DJnkd/j8WJpQof+sRPv+0uoa1w1+QkbDcUuSSv9vNG9FZ6HOZvbGJR0cR5AqMAgGPPWtfedAJ8B434c3uJURnS/CDb24BBZUWsFfFXJnwvLxf1fLC60mvtTWwNr7ITepOmcEfNXcIubm0nQ/WsXMNO90S3W1sTrz6mlhjgKKnmsY7nQJsxCNjIQrvVQl8w4D/4jZ2oBDa7vOb0DEZoe6XKmBG3Y2cQYw8sq+quY1pkzx/VAqNpXWN/6x0/PvKym3Zhlwk3lRBpRG0CEXb+4WnQ0FaSKKrrzOY0V0vruBAbkZCjKioI3og/GH8PsIUJz9qIsu8JsNp/khOxhucf6ZSuIRei5Jv8F062U/bqY32jAwNfjehqq5JKYaFRNmRPS9kwTXx2KmA1iTuxdpJv764pizUC+okZqsqPEU="
+                    },
+                    "part_kind": "tool-call"
+                }
+            ],
+            "usage": {
+                "input_tokens": 26801,
+                "cache_write_tokens": 0,
+                "cache_read_tokens": 26310,
+                "output_tokens": 273,
+                "input_audio_tokens": 0,
+                "cache_audio_read_tokens": 0,
+                "output_audio_tokens": 0,
+                "details": {
+                    "cached_content_tokens": 26310,
+                    "thoughts_tokens": 260,
+                    "text_prompt_tokens": 26801,
+                    "text_cache_tokens": 26310,
+                    "text_candidates_tokens": 13
+                }
+            },
+            "model_name": "gemini-3-flash-preview",
+            "timestamp": "2026-04-06T22:19:52.652715Z",
+            "kind": "response",
+            "provider_name": "google-vertex",
+            "provider_url": "https://api.atlassian.com/rovodev/v2/proxy/ai/v1/google/",
+            "provider_details": null,
+            "provider_response_id": null,
+            "finish_reason": null,
+            "run_id": "285db465-3555-4c7a-999d-691004286e61",
+            "metadata": {
+                "response_headers": {
+                    "X-Rovodev-Credits-Used": "7",
+                    "X-Rovodev-Credits-Remaining": "1993",
+                    "X-Rovodev-Credits-Total": "2000",
+                    "Atl-Traceid": "4c756016e3614915941b75310ff452b2",
+                    "Atl-Request-Id": "4c756016-e361-4915-941b-75310ff452b2"
+                }
+            }
+        },
+        {
+            "parts": [
+                {
+                    "tool_name": "open_files",
+                    "content": [
+                        "Successfully opened package.json:\n\n````json\n   0 {\n   1   \"name\": \"nextn\",\n...\n   4   \"scripts\": {\n   5     \"dev\": \"next dev --turbopack --port 9002\",\n...\n  30   \"dependencies\": {\n  31     \"@dnd-kit/core\": \"^6.1.0\",\n...\n 162   \"devDependencies\": {\n 163     \"@testing-library/jest-dom\": \"^6.4.6\",\n...\n 199 \n````"
+                    ],
+                    "tool_call_id": "pyd_ai_54ffe004491d4613bb22b3f4150cba8b",
+                    "metadata": null,
+                    "timestamp": "2026-04-06T22:19:52.969084Z",
+                    "part_kind": "tool-return"
+                },
+                {
+                    "content": "\n\nYou have used 2 iterations.",
+                    "timestamp": "2026-04-06T22:19:52.992285Z",
+                    "part_kind": "user-prompt"
+                },
+                {
+                    "content": "<system-reminder>\nCurrent time: Monday, 2026-04-06 22:19:52\n</system-reminder>",
+                    "timestamp": "2026-04-06T22:19:52.996311Z",
+                    "part_kind": "user-prompt"
+                }
+            ],
+            "timestamp": "2026-04-06T22:19:52.996948Z",
+            "instructions": null,
+            "kind": "request",
+            "run_id": "285db465-3555-4c7a-999d-691004286e61",
+            "metadata": null
+        },
+        {
+            "parts": [
+                {
+                    "content": "n8n (nodemation) is an **extendable workflow automation tool** that allows you to connect different software applications and automate tasks between them. It is often compared to tools like Zapier or Make (formerly Integromat), but with several key differences:\n\n### Key Features of n8n:\n1.  **Workflow Automation:** You can create complex workflows using a visual node-based editor. Each \"node\" represents an action (like \"Send an Email\" or \"Fetch data from a database\").\n2.  **Self-Hostable:** Unlike Zapier, n8n is \"fair-code\" licensed and can be self-hosted on your own servers (using Docker, npm, etc.). This provides better data privacy and lower costs for high-volume tasks.\n3.  **Extensibility:** If a node doesn't exist for a specific service, you can write custom JavaScript code within a \"Code Node\" to handle complex logic or API calls.\n4.  **AI Integration:** n8n has strong support for AI workflows, allowing you to build \"AI Agents\" that use LangChain to interact with LLMs (like OpenAI or Anthropic), vector databases, and memory.\n\n### Does it relate to this project?\nI performed a search (grep) across your workspace and checked the `package.json`, but **found no references to n8n**.\n\nIn the context of this project (**Arkan**), which uses Google Genkit and Next.js 15 for AI writing tools, n8n would typically be used as an external orchestrator—for example, to trigger a document generation flow when a new row is added to a Google Sheet, or to sync project data with an external CRM.\n\nWould you like me to:\n1.  Search for specific integration points where n8n might be intended to fit?\n2.  Explain how you might integrate n8n with this Next.js/Genkit application?\n3.  Help with something else regarding the Arkan project?",
+                    "id": null,
+                    "provider_name": "google-vertex",
+                    "provider_details": {
+                        "thought_signature": "CiQBjz1rX6nXj/0KNLEl1vSRS2UlOO3LPXf9AOAYE0AZ3icbhVAKVwGPPWtfzhX131irgrwzvmPusqSTo7PbSwW3cjmWKipMGQAq4nFpYvH8PvkL3kHwP1cdavbE1BNRQ8ey9X2a3DfeBI/jGcEX/tHtLELGNP+1xhjMtyDOPwplAY89a19UcC12syhf5e+w6Bp0Xj8OesqMOImcstT5YZvmjeMFN5JIpjubDntZrvyp8rnHkA4439xJd7DfsErGzg9zKoahIK1+QAkgZxDXuxB4iQZMYnYSjUoFtn2Glx17jVRlK98KlQEBjz1rX6fZfWufvDquH+POVTBdcfMe5xBIPkylZgF1MFYk19j1vuQaRfmSjQNNpmWBXg6VgF/lIdqn4C9dmrA2hVSdZ0jmOQ3QonM+4osJV0o4YNlI/r3W/0qcziShSVOdJxoHvjvnb9rzfKjQ7+fP94WGmF0jmJk9JkpdzEvpIRGDquGHhYFMdliPYIAcz9Yd8HkR3AqjAQGPPWtfgLbW2wt8TrhLy1kNhyddJIbUNTHmap1l6l1MhhSt/3LwWXX7LtbthUD1FDUa1fieS8EGnbByRuPcIZ9AJ+zcaUz7l6Tt378ePQg70iCTnj4WSOXH1IPUY4/TdGp8qq0KIyXvE+3SCrnHaPm90lD6VPaTo0AzRUC6zE5wrd6/Gj4x72XzNzDyQ2I++uSGIdT7tLYuSkcktFBoo7eFWlQK9QEBjz1rXwktHtMXVvybuzllwxYaCzLZvpv4ezckuqHj+USyZTrqGVf51+NEGRIvHyyDZ/MmkZ3EDFOaL/TU7IAgJ9Rc4fKe1qjwJc5a0a1wVcA5x6IOVzwVS/itj+7wsUt3Q/AqRSmpimFkMRYHbSbwEtLHi+F7cHqQjjb78cwe48f9TgKZUrUbF8FCxtrlw+ftPN/EmBuYATRZX6AWe1KzX5ETJWF33zraYoEc+adTnHkf20V4FIbU3oXtMOsYOunuD8WdQOo4u2VfMTausMT7qQN4D/sUfzk6BHkku4QI2t9SR0ndYXXNidIAe0RintMijI7UTwrvAQGPPWtfZ44bri35uw/sIioDThHG6v4grzxPLlF32Y6n80zVzmDTMJvtWVP2q3angPz+LXQ5wxC23CPbaq++5eEu3m8I8rxDN6SaGoTT7bpnnt1lgBp9x8LXyyVOuM3dfH/L+bzAObovQmLKbzzFK0c+FVVSFFdSO76ScIdtXriT7bRad7PnZoxRHEwF0xQdfCT2ycBgpMhO5DXjy99zLpUL9Ko1qwGAZ1ModviSHcjZNdFifNn8nrixefF2dq28lHIdHTDsNjAWtbhnIS87jtg85P1FaaCaytlDkg9LMRq/VWXl0uGDT4g0QElNJDZ8CoMCAY89a19n1HNi5V3xyCpj4rLpsu73MDo6cxc5rbcGpblDSGuX9HjUHnR76M94+HAbr3pJDWhU6uPaa8QhPSS69jXP7a4PcGrwdNmAaFk+G4hqJz+lc8RYkxPgTjM4S36MVa4uJ5zn6Zb1f/NmbT6DkIn1hJxj4P6ZBjE89PmofyQTvvBOtCd/+CE+AenxAQpwhSn4cp7Eo3MHT4/B07zO6edB0chEJ7pK2xq1pmPW+yamt23O2jea6FU8vq/9xDK8KegARwhIzdvNpOwbt+dqkDLPVMZ219C10i3HmCnNSVlxzMWgYVV+H2gjLOtN7dFzJsGkVqPEOlkOtnOAMLrCzddEYgqLAQGPPWtfSX1CGEpokKz9sv4kbKouWnMFogwwj8RStrfrPaJun4IxQvCVsIrfSb2eonVDzX9lxRMQnd2bx41uy8GdTqow/xMvqo0aJjbnCdIL3ZM4i7r6duuA7joe1MS0lQNSPhwkzDhWrfZC065Vdv1g3SALkyJ7Xa2bMvw8xEmy9km46hRAwpLF2MA="
+                    },
+                    "part_kind": "text"
+                }
+            ],
+            "usage": {
+                "input_tokens": 26994,
+                "cache_write_tokens": 0,
+                "cache_read_tokens": 26295,
+                "output_tokens": 712,
+                "input_audio_tokens": 0,
+                "cache_audio_read_tokens": 0,
+                "output_audio_tokens": 0,
+                "details": {
+                    "cached_content_tokens": 26295,
+                    "thoughts_tokens": 290,
+                    "text_prompt_tokens": 26994,
+                    "text_cache_tokens": 26295,
+                    "text_candidates_tokens": 422
+                }
+            },
+            "model_name": "gemini-3-flash-preview",
+            "timestamp": "2026-04-06T22:19:57.157857Z",
+            "kind": "response",
+            "provider_name": "google-vertex",
+            "provider_url": "https://api.atlassian.com/rovodev/v2/proxy/ai/v1/google/",
+            "provider_details": null,
+            "provider_response_id": null,
+            "finish_reason": null,
+            "run_id": "285db465-3555-4c7a-999d-691004286e61",
+            "metadata": {
+                "response_headers": {
+                    "X-Rovodev-Credits-Used": "7",
+                    "X-Rovodev-Credits-Remaining": "1993",
+                    "X-Rovodev-Credits-Total": "2000",
+                    "Atl-Traceid": "a1dd5b58042b49cabec0f6ed73318455",
+                    "Atl-Request-Id": "a1dd5b58-042b-49ca-bec0-f6ed73318455"
+                }
+            }
+        },
+        {
+            "parts": [
+                {
+                    "content": "<system-reminder>The user is in ask mode; only read-only tools are available.\nIf code edits are needed, output the proposed change as assistant text for the user to copy/apply.\nDO NOT USE any file editing, creation, deletion tools.\nThese operations will fail with an error message if attempted.\nDo your best to answer using read-only tools, but if write/edit/terminal tools are required,\nor the user explicitly asks you to apply changes, let them know they're in ask mode and\nshould use the /mode command to switch to agent mode.</system-reminder>",
+                    "timestamp": "2026-04-06T22:22:30.976449Z",
+                    "part_kind": "user-prompt"
+                },
+                {
+                    "content": "<system-reminder>\nCurrent time: Monday, 2026-04-06 22:22:31\n</system-reminder>",
+                    "timestamp": "2026-04-06T22:22:31.240524Z",
+                    "part_kind": "user-prompt"
+                },
+                {
+                    "content": "if we thinking about use n8n instant genkit and ollama src/modules/ai . i install n8n on docker on other server we have domain and webhook to access workspace automation generation ai",
+                    "timestamp": "2026-04-06T22:22:30.971212Z",
+                    "part_kind": "user-prompt"
+                },
+                {
+                    "content": "\n\nYou have used 0 iterations.",
+                    "timestamp": "2026-04-06T22:22:30.976034Z",
+                    "part_kind": "user-prompt"
+                }
+            ],
+            "timestamp": "2026-04-06T22:22:31.241238Z",
+            "instructions": null,
+            "kind": "request",
+            "run_id": "2b0e1bb2-b868-4475-b0d5-c40d4c8418ce",
+            "metadata": null
+        },
+        {
+            "parts": [
+                {
+                    "tool_name": "expand_folder",
+                    "args": {
+                        "folder_path": "src/modules/ai"
+                    },
+                    "tool_call_id": "pyd_ai_1924a80661f84a5da6677598023075c6",
+                    "id": null,
+                    "provider_name": "google-vertex",
+                    "provider_details": {
+                        "thought_signature": "CiQBjz1rX3c7OzGogIDndw7Oeu69x/SHf5iJqZaRBRjrJQH60MAKdAGPPWtfTyBITc0DgeOy7FPHfLH/i6PL1gkJd0+Oh2Bc6i910eNqYfLIXKiCorCNt0AbvFbyIQOwkXhC8YCkFsUxcOOWYSdqZfosodqXEl1rTnw24Q3RhmFSQoRI3e+2Ro6lXoMHrM3BCJYrQx7R1h/ShRBcClsBjz1rX54dyOn3ymkfFw/1iIM/QBO1Z1LHrWxvA2CyScPIgJR7qytrHhVLyudou1+YCz81EYwE1KpU3uIONXOJZdZcpki43dPHa+sHqRpp384L5j6oc6xp8BbyCq8BAY89a19yy1/x4OZ/Y1l5n0TcXJcsW2V78wb8G+NCC0ieqEVPvJ13OwkBqFVrkumR0NL84I3Wd3b54nNQBq5hkfXPCEPkT/wdKytk2TrISCWlE1eYAKEtiKQw8jwHtwPda3KJ+KKYHuvR/uRmkHAMHGXa314UHyrHazmpnUlWW5e1FM8t+Lie09FInCjkZixeZQYxL2CXXrrMnqKvsuLQ8meVZgOyvUT/Lxx/q7kpVQqkAQGPPWtfpYcltphshbcWcinTNqvXlyJlPqV9cfqtksR9+Q0N1rptvrx5DgNDYuafh34V7t5vIlxeXxtVmiJlqXGNPA4uxbh1EDiheJTsCtOsbMwNdb9Zib8Rg52mSivHNZsYlMu69Lhh8iFnGlqvaOZT1c0Sz6/mCVaXUCUbpeHMwUTd0ziXoBLeg8iVdGOYyumrXFCoidlIZvtcbC3SpxfcvMH+CtYBAY89a1/JCeAHpX8YaZ/TtERn7eqQMCaM483OPdDx1NRhDeCoYDLRtAq9P06z009Vry/tRKSwsnh7iOwSzisSpi4oYmKtRVZumVLaOV9w3+0npbK2HjovEXrzzgBP1s1rq6CMZh/s/fmu7Zk88M2z6DR6B34a+b1JHhFhjoH1Vwp9DRqkifsjJ/2oUq0RuuVe7s/obZdv0defyEZFDaE6DQyC0UB+1WnugHlWxuBNr8oUXZcvj+ZUjI7elz/qwpd3yqngjTtSW/WBwOVJCc9cpBsv3lQlUgq4AQGPPWtfQaQfAU9u0VzRaQCECWqVmiUpR9OxWsWae/cqI2dk5aMj31f2JQddlxaKVsqfK/f2T/Z/vmcOVVgDqKCqen+VsJfyJQZym52izFYi9aG1uARVcowKjXHyaqgRJRuUrDyI8bTTEtB8Xkw3737vpv1XU9yyTKFcmXu0NHxm1vhB+qGfll6ko7NERm4nyFmkdGMi+53UgRPMtIhRmkuVRmUBqbhvjIlMVdE4XNouqB9Xtbu/L6s="
+                    },
+                    "part_kind": "tool-call"
+                }
+            ],
+            "usage": {
+                "input_tokens": 27634,
+                "cache_write_tokens": 0,
+                "cache_read_tokens": 0,
+                "output_tokens": 213,
+                "input_audio_tokens": 0,
+                "cache_audio_read_tokens": 0,
+                "output_audio_tokens": 0,
+                "details": {
+                    "thoughts_tokens": 198,
+                    "text_prompt_tokens": 27634,
+                    "text_candidates_tokens": 15
+                }
+            },
+            "model_name": "gemini-3-flash-preview",
+            "timestamp": "2026-04-06T22:22:33.883778Z",
+            "kind": "response",
+            "provider_name": "google-vertex",
+            "provider_url": "https://api.atlassian.com/rovodev/v2/proxy/ai/v1/google/",
+            "provider_details": null,
+            "provider_response_id": null,
+            "finish_reason": null,
+            "run_id": "2b0e1bb2-b868-4475-b0d5-c40d4c8418ce",
+            "metadata": {
+                "response_headers": {
+                    "X-Rovodev-Credits-Used": "7",
+                    "X-Rovodev-Credits-Remaining": "1993",
+                    "X-Rovodev-Credits-Total": "2000",
+                    "Atl-Traceid": "f7f948e0ba4045b5a51f123bc3ecfc91",
+                    "Atl-Request-Id": "f7f948e0-ba40-45b5-a51f-123bc3ecfc91"
+                }
+            }
+        },
+        {
+            "parts": [
+                {
+                    "tool_name": "expand_folder",
+                    "content": "src/:\n\nsrc/modules/:\n\nsrc/modules/ai/:\nindex.ts\n\nsrc/modules/ai/adapters/:\n\nsrc/modules/ai/adapters/api-client/:\nAgentApiClient.ts\nGenerationLogApiClient.ts\nImageConversionApiClient.ts\nWritingToolsApiClient.ts\n\nsrc/modules/ai/adapters/api-client/__tests__/:\nWritingToolsApiClient.test.ts\n\nsrc/modules/ai/adapters/components/:\n\nsrc/modules/ai/adapters/components/admin/:\nGenerationLogViewer.tsx\n\nsrc/modules/ai/adapters/components/agent/:\nAgentPlayground.tsx\nResponseDisplay.tsx\n\nsrc/modules/ai/adapters/components/sidebar/:\nAgentDialog.tsx\nAgentGeneratorDialog.tsx\nAgentList.tsx\n\nsrc/modules/ai/adapters/components/writing-tools/:\nAIDetectorTool.tsx\nAIImageGeneratorTool.tsx\nAIResearcherTool.tsx\nAITextTune.tsx\nAIToolCard.tsx\nAssignmentsSolverTool.tsx\nBiasCheckerTool.tsx\nCitationGeneratorTool.tsx\nDocumentWriterTool.tsx\nFactCheckerTool.tsx\nFileListDisplay.tsx\nFileUploadZone.tsx\nGenerateUIDescriptionTool.tsx\nGrammarCheckerTool.tsx\nHumanizerTool.tsx\nIdeaGeneratorTool.tsx\nImageToPdfTool.tsx\nImageToSvgTool.tsx\nInvisibleTextDetector.tsx\nMarkdownToPptxTool.tsx\nMarkdownToWordTool.tsx\nParaphraserTool.tsx\nPlagiarismCheckerTool.tsx\nPlantUMLGeneratorTool.tsx\nProjectBlueprintTool.tsx\nQuizGeneratorTool.tsx\nSentenceStructureCheckerTool.tsx\nSessionPlanDisplay.tsx\nSessionPlanGenerator.tsx\nSortableImageItem.tsx\nSummarizerTool.tsx\nTopicExplainerTool.tsx\nWritingToolsDashboard.tsx\nWritingToolsPanel.tsx\n\nsrc/modules/ai/adapters/controllers/:\nAiController.ts\n\nsrc/modules/ai/adapters/hooks/:\nuse-agent-categories.ts\nuseImageUpload.ts\n\nsrc/modules/ai/adapters/hooks/writing-tools/:\nuse-ai-detector-logic.ts\nuse-ai-image-generator-logic.ts\nuse-ai-researcher-logic.ts\nuse-assignments-solver-logic.ts\nuse-bias-checker-logic.ts\nuse-citation-generator-logic.ts\nuse-document-writer-logic.ts\nuse-fact-checker-logic.ts\nuse-generate-toc-logic.ts\nuse-grammar-checker-logic.ts\nuse-humanizer-logic.ts\nuse-idea-generator-logic.ts\nuse-image-to-pdf-logic.ts\nuse-image-to-svg-logic.ts\nuse-paraphraser-logic.ts\nuse-plagiarism-checker-logic.ts\nuse-plant-uml-generator-logic.ts\nuse-presentation-outline-logic.ts\nuse-project-blueprint-logic.ts\nuse-quiz-generator-logic.ts\nuse-sentence-structure-checker-logic.ts\nuse-session-plan-generator-logic.ts\nuse-summarizer-logic.ts\nuse-text-stylist-logic.ts\nuse-topic-explainer-logic.ts\nuse-writing-tool.ts\n\nsrc/modules/ai/application/:\n\nsrc/modules/ai/application/services/:\nWritingToolRegistry.ts\n\nsrc/modules/ai/application/services/__tests__/:\nWritingToolRegistry.test.ts\n\nsrc/modules/ai/application/services/tool-providers/:\nAcademicToolProvider.ts\nGenerationToolProvider.ts\nWritingToolProvider.ts\n\nsrc/modules/ai/application/use-cases/:\nDeleteAgentUseCase.ts\nGenerateChapterWithRAGUseCase.ts\nGenerateSectionWithRAGUseCase.ts\nGetAgentByIdUseCase.ts\nGetAgentCategoriesUseCase.ts\nGetAgentsUseCase.ts\nRunAiToolUseCase.ts\nSaveAgentUseCase.ts\n\nsrc/modules/ai/application/use-cases/__tests__/:\nRunAiToolUseCase.test.ts\n\nsrc/modules/ai/domain/:\n\nsrc/modules/ai/domain/constants/:\nAiModels.ts\n\nsrc/modules/ai/domain/entities/:\nAgent.ts\nAllAgents.json\nDiagram.ts\n\nsrc/modules/ai/domain/errors/:\nAiErrors.ts\n\nsrc/modules/ai/domain/repositories/:\nIAgentRepository.ts\nIGenerationLogRepository.ts\n\nsrc/modules/ai/domain/schemas/:\nbase-schemas.ts\nenums.ts\nflows.ts\ngraduation-project.ts\nindex.ts\nlecture-generator.ts\nproject-documentation.ts\ntemplate-schemas.ts\n\nsrc/modules/ai/domain/services/:\nIAiService.ts\nIRetrievalService.ts\n\nsrc/modules/ai/domain/utils/:\nai-utils.ts\njson-output-validator.ts\nplantuml-utils.ts\nTokenManager.ts\n\nsrc/modules/ai/infrastructure/:\n\nsrc/modules/ai/infrastructure/flows/:\nindex.ts\n\nsrc/modules/ai/infrastructure/flows/__tests__/:\ngenerate-report-section.test.ts\ngrammar-checker.test.ts\nhumanize-text.test.ts\nparaphrase-text.test.ts\nsummarize-text.test.ts\n\nsrc/modules/ai/infrastructure/flows/academic/:\nacademic-literature-review.ts\nacademic-paper-quality-checker.ts\nai-researcher.ts\ncreate-lecture-unit.ts\ngenerate-citation.ts\ngenerate-quiz.ts\ngenerate-theoretical-lecture.ts\nliterature-review-generator.ts\nsolve-assignments.ts\n\nsrc/modules/ai/infrastructure/flows/analysis/:\nai-proofread-document.ts\nanalyze-context.ts\nbias-checker.ts\ndetect-ai-content.ts\nfact-checker.ts\nfact-retrieval.ts\nplagiarism-checker.ts\nsentence-structure-checker.ts\n\nsrc/modules/ai/infrastructure/flows/document/:\ngenerate-toc.ts\nimprove-report-markdown.ts\nproject-documentation-generator.ts\nproject-report-generator.ts\nrewrite-document-to-markdown.ts\nrewrite-to-markdown.ts\nsummarize-document.ts\nsummarize-text.ts\ntechnical-spec-writer.ts\n\nsrc/modules/ai/infrastructure/flows/generation/:\ngenerate-agent-config.ts\ngenerate-chapter-content-rag.ts\ngenerate-chapter-content.ts\ngenerate-ideas.ts\ngenerate-project-blueprint.ts\ngenerate-report-section-rag.ts\ngenerate-report-section.ts\ngenerate-session-plan.ts\ngenerate-ui-description.ts\ngraduation-project-generator.ts\npresentation-content-creator.ts\nproject-consultant.ts\nquestion-answering.ts\nrun-agent-flow.ts\ntopic-explainer.ts\n\nsrc/modules/ai/infrastructure/flows/media/:\ngenerate-image.ts\ngenerate-plantuml.ts\nimage-to-text.ts\n\nsrc/modules/ai/infrastructure/flows/writing/:\ngenerate-text.ts\ngrammar-checker.ts\nhumanize-text.ts\nmanipulate-text.ts\nparaphrase-text.ts\nprofessional-document-writer.ts\ntext-stylist.ts\ntranslate-text.ts\nwrite-document.ts\n\nsrc/modules/ai/infrastructure/prompts/:\nacademic-writing.ts\ncategoryFlows.md\nGeneral.ts\ngraduation-project.ts\nindex.ts\nproject-documentation.ts\n\nsrc/modules/ai/infrastructure/repositories/:\nSQLiteAgentRepository.ts\nSQLiteGenerationLogRepository.ts\n\nsrc/modules/ai/infrastructure/services/:\nGenkit.ts\nGenkitAiService.ts\nmodel-health-check.ts\nmodel-mapping.ts\nmodel-performance-monitor.ts\nmodel-request-queue.ts\nmodel-selector.ts\nTelemetry.ts\n\nsrc/modules/ai/infrastructure/tools/:\nADVANCED_PROMPT_ARCHITECT_GUIDE.md\ncitations-and-references.ts\ncomprehensive-analysis.ts\ndocument-structure.ts\ndocumentation-generation.ts\ngrammar-and-style.ts\nindex.ts\nproject-analysis.ts\nPROJECT_DOCUMENTATION_README.md\nprompt-architect.ts\nreporting-and-metrics.ts\nschemas.ts",
+                    "tool_call_id": "pyd_ai_1924a80661f84a5da6677598023075c6",
+                    "metadata": null,
+                    "timestamp": "2026-04-06T22:22:34.123605Z",
+                    "part_kind": "tool-return"
+                },
+                {
+                    "content": "\n\nYou have used 1 iterations.",
+                    "timestamp": "2026-04-06T22:22:34.130575Z",
+                    "part_kind": "user-prompt"
+                },
+                {
+                    "content": "<system-reminder>\nCurrent time: Monday, 2026-04-06 22:22:34\n</system-reminder>",
+                    "timestamp": "2026-04-06T22:22:34.131091Z",
+                    "part_kind": "user-prompt"
+                }
+            ],
+            "timestamp": "2026-04-06T22:22:34.131445Z",
+            "instructions": null,
+            "kind": "request",
+            "run_id": "2b0e1bb2-b868-4475-b0d5-c40d4c8418ce",
+            "metadata": null
+        },
+        {
+            "parts": [
+                {
+                    "tool_name": "open_files",
+                    "args": {
+                        "file_paths": [
+                            "src/modules/ai/domain/services/IAiService.ts",
+                            "src/modules/ai/infrastructure/services/GenkitAiService.ts"
+                        ]
+                    },
+                    "tool_call_id": "pyd_ai_17f1f49ecbdb40aab7c4c230dbc3b0dd",
+                    "id": null,
+                    "provider_name": "google-vertex",
+                    "provider_details": {
+                        "thought_signature": "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"
+                    },
+                    "part_kind": "tool-call"
+                }
+            ],
+            "usage": {
+                "input_tokens": 29597,
+                "cache_write_tokens": 0,
+                "cache_read_tokens": 0,
+                "output_tokens": 372,
+                "input_audio_tokens": 0,
+                "cache_audio_read_tokens": 0,
+                "output_audio_tokens": 0,
+                "details": {
+                    "thoughts_tokens": 331,
+                    "text_prompt_tokens": 29597,
+                    "text_candidates_tokens": 41
+                }
+            },
+            "model_name": "gemini-3-flash-preview",
+            "timestamp": "2026-04-06T22:22:38.693844Z",
+            "kind": "response",
+            "provider_name": "google-vertex",
+            "provider_url": "https://api.atlassian.com/rovodev/v2/proxy/ai/v1/google/",
+            "provider_details": null,
+            "provider_response_id": null,
+            "finish_reason": null,
+            "run_id": "2b0e1bb2-b868-4475-b0d5-c40d4c8418ce",
+            "metadata": {
+                "response_headers": {
+                    "X-Rovodev-Credits-Used": "7",
+                    "X-Rovodev-Credits-Remaining": "1993",
+                    "X-Rovodev-Credits-Total": "2000",
+                    "Atl-Traceid": "22771f7c9f5744a497c24752aafa8b08",
+                    "Atl-Request-Id": "22771f7c-9f57-44a4-97c2-4752aafa8b08"
+                }
+            }
+        },
+        {
+            "parts": [
+                {
+                    "tool_name": "open_files",
+                    "content": [
+                        "Successfully opened src/modules/ai/domain/services/IAiService.ts:\n\n````typescript\n   0 \n   1 import { Result } from \"@/infrastructure/utils/result\";\n   2 import { AiError } from \"../errors/AiErrors\";\n   3 import { RetrievalOptions, RetrievalResult } from \"./IRetrievalService\";\n   4 \n   5 export interface IAiService {\n   6     generateText(prompt: string, options?: any): Promise<Result<string, AiError>>;\n   7     runFlow<TInput, TOutput>(flow: (input: TInput) => Promise<TOutput>, input: TInput, flowName?: string): Promise<Result<TOutput, AiError>>;\n   8     retrieveContext(query: string, options?: RetrievalOptions): Promise<Result<RetrievalResult, AiError>>;\n   9     generateChapterWithRAG(input: any): Promise<Result<any, AiError>>;\n  10     generateSectionWithRAG(input: any): Promise<Result<any, AiError>>;\n  11 }\n  12 \n  13 export const IAiServiceToken = Symbol(\"IAiService\");\n  14 \n````",
+                        "Successfully opened src/modules/ai/infrastructure/services/GenkitAiService.ts:\n\n````typescript\n   0 if (typeof window !== 'undefined') {\n   1     throw new Error('GenkitAiService cannot be imported in the browser. It depends on server-only Genkit infrastructure.');\n   2 }\n   3 \n   4 import { injectable, inject } from \"tsyringe\";\n   5 import { IAiService } from \"../../domain/services/IAiService\";\n   6 import { ai, OLLAMA_MODELS } from \"./Genkit\";\n   7 import { executeWithQueue } from \"./model-request-queue\";\n   8 import { selectModel } from \"./model-selector\";\n   9 import { generateRequestId } from \"./model-performance-monitor\";\n  10 \n  11 import { Result } from \"@/infrastructure/utils/result\";\n  12 import { AiError } from \"../../domain/errors/AiErrors\";\n  13 import { generateChapterContentWithRAG } from \"../flows/generation/generate-chapter-content-rag\";\n  14 import { generateReportSectionWithRAG } from \"../flows/generation/generate-report-section-rag\";\n  15 import { IRetrievalServiceToken } from \"../../domain/services/IRetrievalService\";\n  16 import type { IRetrievalService, RetrievalOptions, RetrievalResult } from \"../../domain/services/IRetrievalService\";\n  17 \n  18 @injectable()\n  19 export class GenkitAiService implements IAiService {\n  20     constructor(\n  21         @inject(IRetrievalServiceToken) private retrievalService: IRetrievalService\n  22     ) {}\n  23 \n  24     async generateText(prompt: string, options?: any): Promise<Result<string, AiError>> {\n  25         try {\n  26             const result = await ai.generate({\n  27                 prompt,\n  28                 ...options\n  29             });\n  30             return Result.ok(result.text);\n  31         } catch (error: any) {\n  32             return Result.fail(AiError.generationFailed(error.message));\n  33         }\n  34     }\n  35 \n  36     /**\n  37      * Post-processes AI output to remove common conversational prefixes from small models.\n  38      */\n  39     private cleanAiOutput(text: string): string {\n  40         if (!text) return text;\n  41         \n  42         // List of common conversational prefixes used by small models like Gemma/Phi\n  43         const patterns = [\n  44             /^Sure,? (here is|here's) the [^:]+:?\\s*/i,\n  45             /^Sure,? here (is|'s) [^:]+:?\\s*/i,\n  46             /^Certainly!? [^:]+:?\\s*/i,\n  47             /^As requested,? [^:]+:?\\s*/i,\n  48             /^I have [^:]+ below:?\\s*/i,\n  49             /^The following is [^:]+:?\\s*/i,\n  50             /^Ok,? (here is|here's) [^:]+:?\\s*/i,\n  51             /^Below is the [^:]+:?\\s*/i,\n  52             /^Sure,? I can [^:]+:?\\s*/i,\n  53         ];\n  54 \n  55         let cleaned = text.trim();\n  56         // Run multiple passes to catch nested filler\n  57         for (let i = 0; i < 2; i++) {\n  58             for (const pattern of patterns) {\n  59                 cleaned = cleaned.replace(pattern, '');\n  60             }\n  61             cleaned = cleaned.trim();\n  62         }\n  63         return cleaned;\n  64     }\n  65 \n  66     async runFlow<TInput, TOutput>(flow: any, input: TInput, flowName?: string): Promise<Result<TOutput, AiError>> {\n  67         const primaryModel = flowName ? selectModel({ flowName }) : null;\n  68         const modelsToTry = primaryModel \n  69             ? [primaryModel, OLLAMA_MODELS.PHI3_MINI, OLLAMA_MODELS.GEMMA_2B] \n  70             : [null]; // null means direct execution without queue manager model selection\n  71         \n  72         // Remove duplicates while preserving order\n  73         const uniqueModels = Array.from(new Set(modelsToTry));\n  74         let lastError: any;\n  75 \n  76         for (const model of uniqueModels) {\n  77             try {\n  78                 let result: any;\n  79                 if (!model) {\n  80                     result = await flow(input);\n  81                 } else {\n  82                     result = await executeWithQueue(\n  83                         generateRequestId(),\n  84                         model,\n  85                         flowName,\n  86                         () => flow(input)\n  87                     );\n  88                 }\n  89 \n  90                 // Post-process string outputs to remove conversational filler\n  91                 if (result && typeof result === 'object') {\n  92                     for (const key in result) {\n  93                         if (typeof result[key] === 'string') {\n  94                             result[key] = this.cleanAiOutput(result[key]);\n  95                         }\n  96                     }\n  97                 } else if (typeof result === 'string') {\n  98                     result = this.cleanAiOutput(result);\n  99                 }\n 100 \n 101                 return Result.ok(result as TOutput);\n 102             } catch (error: any) {\n 103                 lastError = error;\n 104                 console.warn(`Flow execution failed for model ${model || 'default'} in ${flowName || 'unnamed flow'}. Error: ${error.message}`);\n 105                 \n 106                 // If it's a validation error or user error, don't retry with other models\n 107                 if (error.message?.includes('validation') || error.status === 400) {\n 108                     break;\n 109                 }\n 110                 \n 111                 // Continue to next model in the tiered fallback list\n 112                 continue;\n 113             }\n 114         }\n 115 \n 116         return Result.fail(AiError.generationFailed(lastError?.message || 'Flow execution failed after all fallback attempts'));\n 117     }\n 118 \n 119     async retrieveContext(query: string, options?: RetrievalOptions): Promise<Result<RetrievalResult, AiError>> {\n 120         return this.retrievalService.retrieveContext(query, options);\n 121     }\n 122 \n 123     async generateChapterWithRAG(input: any): Promise<Result<any, AiError>> {\n 124         try {\n 125             const result = await generateChapterContentWithRAG(input);\n 126             return Result.ok(result);\n 127         } catch (error: any) {\n 128             return Result.fail(AiError.generationFailed(error.message));\n 129         }\n 130     }\n 131 \n 132     async generateSectionWithRAG(input: any): Promise<Result<any, AiError>> {\n 133         try {\n 134             const result = await generateReportSectionWithRAG(input);\n 135             return Result.ok(result);\n 136         } catch (error: any) {\n 137             return Result.fail(AiError.generationFailed(error.message));\n 138         }\n 139     }\n 140 }\n 141 \n````"
+                    ],
+                    "tool_call_id": "pyd_ai_17f1f49ecbdb40aab7c4c230dbc3b0dd",
+                    "metadata": null,
+                    "timestamp": "2026-04-06T22:22:38.903338Z",
+                    "part_kind": "tool-return"
+                },
+                {
+                    "content": "\n\nYou have used 2 iterations.",
+                    "timestamp": "2026-04-06T22:22:38.918302Z",
+                    "part_kind": "user-prompt"
+                },
+                {
+                    "content": "<system-reminder>\nCurrent time: Monday, 2026-04-06 22:22:38\n</system-reminder>",
+                    "timestamp": "2026-04-06T22:22:38.922308Z",
+                    "part_kind": "user-prompt"
+                }
+            ],
+            "timestamp": "2026-04-06T22:22:38.926810Z",
+            "instructions": null,
+            "kind": "request",
+            "run_id": "2b0e1bb2-b868-4475-b0d5-c40d4c8418ce",
+            "metadata": null
+        },
+        {
+            "parts": [
+                {
+                    "tool_name": "open_files",
+                    "args": {
+                        "file_paths": [
+                            "src/infrastructure/di/container.ts",
+                            "src/infrastructure/di/tokens.ts"
+                        ]
+                    },
+                    "tool_call_id": "pyd_ai_da40a5817f324eebb65ebafe11f0f8d7",
+                    "id": null,
+                    "provider_name": "google-vertex",
+                    "provider_details": {
+                        "thought_signature": "CiQBjz1rX3FXwFBk2BRh+yQrfSvEKJzrLQ/LhPpGyKWB0LGjlUYKXgGPPWtfbCcZ/aMrYVWTJZkRyo4FfeAs5PvoJvGv4D8G2IDW+WxhlpjV+ke5MLiY4U1p8Ypbi/bzHgzLf1jwVyR75w3ypYxk3nqJs7+1DRxjI2/Giig0YKzNWWMhi80KaAGPPWtf98tWq0HsiHK3SDjokIEOH7KInbxvKd5aLdsKVW68u18E3tmloOantIAxcd5q6ErOwCFvSbjLBwyUW443rQf4K+8jkSfK1S5xeuTCUqynixTAEvjzhcHSHI+LrvN+3eJbiO83CpUBAY89a1+m/LW5PwZ+ISUjgfh/KRQWuv9pVClEnrkAc+bAyT/JV7j7RR/Sku2NtvI637qdh/GMNQP4VNWVa8d+k2PZy6W3eJA5Wf+YUxIkePXIxL+esnpqXXsy84hGlOUvQSFjBaVFKSqIFC6s74bSRbHhA8m22TpNF2oCqC2hEKczbMfjPE9JdCTzIYTD+5IMhmGFXskKpgEBjz1rXzu0omrM7nemiPNA1fQ5z8dTCSKD1Zd0Hmq43EtZGD6JgFJk4O9Drd8GjmEZ6YTdB7hCyCAaBXjcgaCndDuV0q5ihBo93PbEZSntCbFjj3e0Nvpj8BiJLdtA2udG3UcenCn5u0qrF5mzhl/H0bsxQvDPJw6UvjMvOpgC4j24KY9BBaew8Ww+YwmU0Xv0ApMBPWO/RJ8pJ7eSOLp/89yDLiFXCsIBAY89a18nsBcPTKwVExwGLZ8NJz62DzZzsQ13fDVkZYfemwmLyC8KTTtCmP1f6a1BEmqYDjo0P7eBFjpBl1yPrtQIBwgKTr/raHnQG5Bxo0cAOtC0movBXceWVKAaXrF1ePGRlz7ub8Xxs2gHeyDwQyR0g6S15DWq6tWZUBqJoe03LF3f582oBCpIWcolztlntyMxEDa6B0CBmVEkQdQHHDBro+WvJalD4NHqiAcvx4X62YztzgmiUfLPniXJRv19m8wK5QEBjz1rX84kYKHizrPxD1PlwX1fCiFb8aBJ+P4OGG/+TC8NYOoeSClDehB3ia1lwOJTV1SE0Z/1qhoknm1ywpLg5Zdq5Pjdr7/ihpnEmbmMeIQAT4RNyK1+7aSb2MEHn+lUKe+++4S1Q5st/RI7xVjTmD9YNuTd8FG0L3n9r7zRB2TcM55xy1+H3HKG96YXOmAFg0x2QN04o5vnbTckk4hrrWrpu3b4dQNT0QoEQ25/fIsMQl9tOkpW0T3Ji5TP6BYKO4pRVpzF4JRzvJkdQVkU9YUZ3PmgziT3fdjMS5pEGqR+S9rRCuUBAY89a1+CgcqjXpgQ5GzVTIaWCmiUb3IJCyFVO/DXD16ZiRw6MufZwYQDuVjHvKCkPpaxBvP7QQpNp+IGRdNEWfmrg3p7RFEjRUspf3f7hCcQVPeI5Bca8AvSx4ScuEcSrSuLAwnmAoaFsOR1MqqE4CeWlXK0JVJD9dDsqoNgTstHc4IxSXDFYoh2ziVFwyZWjMMMyVHdjs80XO2W37hdj/eDhuCBuezQHo1649RxRbHxrzPPUMKwW3FY3Bh/iNzxeu5QUoWfva64vWji2qCjfw2hGyYX+/sywHhX/qnshgGLXeJ/rArGAQGPPWtfDxaCJGjPIsbLjLdrp/Sc/WW+mbLRUj+0TT7q7Yjut7slihwn+hmOex+VjVjbeBZON+FnzQN6gKr6j/OznkgZ3ssHJXd2WXXpfs3vPFvk0B2yd0475zFiFrMNeGQwojngqGYd69T+Zn+2ekxxkvJnBOasgdOsEKrUlAXMHmpul3MEkzefBR/GzdiGXr/vDtG8UPeyyULTPszN+c8NDZ5QN202A+sQAN5g8+4uikYKSmXafpxoeoPkCUbkumt2wmNgzA=="
+                    },
+                    "part_kind": "tool-call"
+                }
+            ],
+            "usage": {
+                "input_tokens": 31882,
+                "cache_write_tokens": 0,
+                "cache_read_tokens": 0,
+                "output_tokens": 335,
+                "input_audio_tokens": 0,
+                "cache_audio_read_tokens": 0,
+                "output_audio_tokens": 0,
+                "details": {
+                    "thoughts_tokens": 307,
+                    "text_prompt_tokens": 31882,
+                    "text_candidates_tokens": 28
+                }
+            },
+            "model_name": "gemini-3-flash-preview",
+            "timestamp": "2026-04-06T22:22:42.490852Z",
+            "kind": "response",
+            "provider_name": "google-vertex",
+            "provider_url": "https://api.atlassian.com/rovodev/v2/proxy/ai/v1/google/",
+            "provider_details": null,
+            "provider_response_id": null,
+            "finish_reason": null,
+            "run_id": "2b0e1bb2-b868-4475-b0d5-c40d4c8418ce",
+            "metadata": {
+                "response_headers": {
+                    "X-Rovodev-Credits-Used": "7",
+                    "X-Rovodev-Credits-Remaining": "1993",
+                    "X-Rovodev-Credits-Total": "2000",
+                    "Atl-Traceid": "c73711c5efc549809e06e088e5b5462b",
+                    "Atl-Request-Id": "c73711c5-efc5-4980-9e06-e088e5b5462b"
+                }
+            }
+        },
+        {
+            "parts": [
+                {
+                    "tool_name": "open_files",
+                    "content": [
+                        "Successfully opened src/infrastructure/di/container.ts:\n\n````typescript\n   0 \n   1 import \"reflect-metadata\";\n   2 import { container, Lifecycle } from \"tsyringe\";\n   3 \n   4 // Tokens\n   5 import { IProjectRepositoryToken } from \"@/modules/projects/domain/repositories/IProjectRepository\";\n   6 import { IUserRepositoryToken } from \"@/modules/users/domain/repositories/IUserRepository\";\n   7 import { IAuthRepositoryToken } from \"@/modules/users/domain/repositories/IAuthRepository\";\n   8 import { INotificationServiceToken } from \"@/modules/users/domain/services/INotificationService\";\n   9 import { IGenerationLogRepositoryToken } from \"@/modules/ai/domain/repositories/IGenerationLogRepository\";\n  10 import { IAgentRepositoryToken } from \"@/modules/ai/domain/repositories/IAgentRepository\";\n  11 import { IAiServiceToken } from \"@/modules/ai/domain/services/IAiService\";\n  12 import { IRetrievalServiceToken } from \"@/modules/ai/domain/services/IRetrievalService\";\n  13 import { IEmailServiceToken } from \"@/modules/users/domain/services/IEmailService\";\n  14 import { IAdminStatsRepositoryToken } from \"@/modules/admin/domain/repositories/IAdminStatsRepository\";\n  15 import { IFeatureRepositoryToken } from \"@/modules/admin/domain/repositories/IFeatureRepository\";\n  16 import { ITransactionRepositoryToken } from \"@/modules/billing/domain/repositories/ITransactionRepository\";\n  17 import { IFileStorageServiceToken } from \"@/modules/billing/domain/services/IFileStorageService\";\n  18 import { IRagRepositoryToken } from \"@/modules/rag/domain/repositories/IRagRepository\";\n  19 import { IIndexedDocumentRepositoryToken } from \"@/modules/rag/domain/repositories/IIndexedDocumentRepository\";\n  20 import { ITemplateRepositoryToken } from \"@/modules/templates/domain/repositories/ITemplateRepository\";\n  21 import { ISectionRepositoryToken } from \"@/modules/ai-content/domain/repositories/ISectionRepository\";\n  22 import { ISettingsRepositoryToken } from \"@/modules/admin/domain/repositories/ISettingsRepository\";\n  23 import { IDocxExportServiceToken, IPptxExportServiceToken, IPdfExportServiceToken } from \"@/modules/ai-content/domain/services/IExportService\";\n  24 import { ICookieServiceToken } from \"@/modules/users/domain/services/ICookieService\";\n  25 import { ISessionServiceToken } from \"@/modules/users/domain/services/ISessionService\";\n  26 import { IPasswordServiceToken } from \"@/modules/users/domain/services/IPasswordService\";\n  27 import { ITokenServiceToken } from \"@/modules/users/domain/services/ITokenService\";\n  28 import { ICacheServiceToken } from \"@/infrastructure/cache/ICacheService\";\n  29 import { IMarkdownServiceToken } from \"@/infrastructure/di/tokens\";\n  30 \n  31 // Client-side implementations (Safe to import anywhere)\n  32 import { ProjectApiClient } from \"@/modules/projects/adapters/api-client/ProjectApiClient\";\n  33 import { UserApiClient } from \"@/modules/users/adapters/api-client/UserApiClient\";\n  34 import { TemplateApiClient } from \"@/modules/templates/adapters/api-client/TemplateApiClient\";\n  35 import { AdminApiClient } from \"@/modules/admin/adapters/api-client/AdminApiClient\";\n  36 import { AnalyticsApiClient } from \"@/modules/admin/adapters/api-client/AnalyticsApiClient\";\n  37 import { FeatureApiClient } from \"@/modules/admin/adapters/api-client/FeatureApiClient\";\n  38 import { SettingsApiClient } from \"@/modules/admin/adapters/api-client/SettingsApiClient\";\n  39 import { SectionApiClient } from \"@/modules/ai-content/adapters/api-client/SectionApiClient\";\n  40 import { DocumentProcessingApiClient } from \"@/modules/ai-content/adapters/api-client/DocumentProcessingApiClient\";\n  41 import { ReportApiClient } from \"@/modules/ai-content/adapters/api-client/ReportApiClient\";\n  42 import { WritingToolsApiClient } from \"@/modules/ai/adapters/api-client/WritingToolsApiClient\";\n  43 import { AgentApiClient } from \"@/modules/ai/adapters/api-client/AgentApiClient\";\n  44 import { GenerationLogApiClient } from \"@/modules/ai/adapters/api-client/GenerationLogApiClient\";\n  45 import { ImageConversionApiClient } from \"@/modules/ai/adapters/api-client/ImageConversionApiClient\";\n  46 import { TransactionApiClient } from \"@/modules/billing/adapters/api-client/TransactionApiClient\";\n  47 import { AuthApiClient } from \"@/modules/users/adapters/api-client/AuthApiClient\";\n  48 import { DeviceTokenApiClient } from \"@/modules/users/adapters/api-client/DeviceTokenApiClient\";\n  49 import { NotificationApiClient } from \"@/modules/users/adapters/api-client/NotificationApiClient\";\n  50 import { RagApiClient } from \"@/modules/rag/adapters/api-client/RagApiClient\";\n  51 import { DocxExportApiClient, PptxExportApiClient } from \"@/modules/ai-content/adapters/api-client/ExportApiClient\";\n  52 import { CreditService } from \"@/modules/billing/application/services/CreditService\";\n  53 import { LocalProjectService } from \"@/modules/projects/adapters/local-storage/LocalProjectService\";\n  54 import { PromptBuilder } from \"@/modules/ai-content/domain/services/PromptBuilder\";\n  55 import { CookieManager } from \"@/modules/users/infrastructure/services/CookieManager\";\n  56 import { SessionManager } from \"@/modules/users/infrastructure/services/SessionManager\";\n  57 import { BrowserCache } from \"@/infrastructure/cache/BrowserCache\";\n  58 import { TurndownMarkdownService } from \"@/modules/ai-content/infrastructure/services/TurndownMarkdownService\";\n  59 \n  60 // Register Client API Clients (always — safe for browser)\n  61 container.register(ICookieServiceToken, { useClass: CookieManager }, { lifecycle: Lifecycle.Singleton });\n  62 container.register(ISessionServiceToken, { useClass: SessionManager }, { lifecycle: Lifecycle.Singleton });\n  63 container.register(ICacheServiceToken, { useClass: BrowserCache }, { lifecycle: Lifecycle.Singleton });\n  64 container.register(IMarkdownServiceToken, { useClass: TurndownMarkdownService }, { lifecycle: Lifecycle.Singleton });\n  65 container.register(PromptBuilder, { useClass: PromptBuilder }, { lifecycle: Lifecycle.Singleton });\n  66 container.register(CreditService, { useClass: CreditService }, { lifecycle: Lifecycle.Singleton });\n  67 container.register(LocalProjectService, { useClass: LocalProjectService }, { lifecycle: Lifecycle.Singleton });\n  68 container.register(WritingToolsApiClient, { useClass: WritingToolsApiClient }, { lifecycle: Lifecycle.Singleton });\n  69 container.register(ProjectApiClient, { useClass: ProjectApiClient }, { lifecycle: Lifecycle.Singleton });\n  70 container.register(UserApiClient, { useClass: UserApiClient }, { lifecycle: Lifecycle.Singleton });\n  71 container.register(TemplateApiClient, { useClass: TemplateApiClient }, { lifecycle: Lifecycle.Singleton });\n  72 container.register(AdminApiClient, { useClass: AdminApiClient }, { lifecycle: Lifecycle.Singleton });\n  73 container.register(AnalyticsApiClient, { useClass: AnalyticsApiClient }, { lifecycle: Lifecycle.Singleton });\n  74 container.register(FeatureApiClient, { useClass: FeatureApiClient }, { lifecycle: Lifecycle.Singleton });\n  75 container.register(SettingsApiClient, { useClass: SettingsApiClient }, { lifecycle: Lifecycle.Singleton });\n  76 container.register(SectionApiClient, { useClass: SectionApiClient }, { lifecycle: Lifecycle.Singleton });\n  77 container.register(DocumentProcessingApiClient, { useClass: DocumentProcessingApiClient }, { lifecycle: Lifecycle.Singleton });\n  78 container.register(ReportApiClient, { useClass: ReportApiClient }, { lifecycle: Lifecycle.Singleton });\n  79 container.register(AgentApiClient, { useClass: AgentApiClient }, { lifecycle: Lifecycle.Singleton });\n  80 container.register(GenerationLogApiClient, { useClass: GenerationLogApiClient }, { lifecycle: Lifecycle.Singleton });\n  81 container.register(ImageConversionApiClient, { useClass: ImageConversionApiClient }, { lifecycle: Lifecycle.Singleton });\n  82 container.register(TransactionApiClient, { useClass: TransactionApiClient }, { lifecycle: Lifecycle.Singleton });\n  83 container.register(AuthApiClient, { useClass: AuthApiClient }, { lifecycle: Lifecycle.Singleton });\n  84 container.register(DeviceTokenApiClient, { useClass: DeviceTokenApiClient }, { lifecycle: Lifecycle.Singleton });\n  85 container.register(NotificationApiClient, { useClass: NotificationApiClient }, { lifecycle: Lifecycle.Singleton });\n  86 container.register(RagApiClient, { useClass: RagApiClient }, { lifecycle: Lifecycle.Singleton });\n  87 container.register(IDocxExportServiceToken, { useClass: DocxExportApiClient }, { lifecycle: Lifecycle.Singleton });\n  88 container.register(IPptxExportServiceToken, { useClass: PptxExportApiClient }, { lifecycle: Lifecycle.Singleton });\n  89 \n  90 // Server-side registration (Conditional).\n  91 // require() is used for all server-only modules to prevent static bundling.\n  92 // The async_hooks Node.js built-in is stubbed for browser builds via next.config.ts turbopack.resolveAlias.\n  93 if (typeof window === 'undefined') {\n  94   console.log(\"Registering server-side dependencies...\");\n  95   const { SQLiteProjectRepository } = require(\"@/modules/projects/infrastructure/repositories/SQLiteProjectRepository\");\n  96   const { SQLiteUserRepository } = require(\"@/modules/users/infrastructure/repositories/SQLiteUserRepository\");\n  97   const { SQLiteAuthRepository } = require(\"@/modules/users/infrastructure/repositories/SQLiteAuthRepository\");\n  98   const { SQLiteNotificationService } = require(\"@/modules/users/infrastructure/services/SQLiteNotificationService\");\n  99   const { SQLiteGenerationLogRepository } = require(\"@/modules/ai/infrastructure/repositories/SQLiteGenerationLogRepository\");\n 100   const { SQLiteAgentRepository } = require(\"@/modules/ai/infrastructure/repositories/SQLiteAgentRepository\");\n 101   const { GenkitAiService } = require(\"@/modules/ai/infrastructure/services/GenkitAiService\");\n 102   const { WritingToolRegistry } = require(\"@/modules/ai/application/services/WritingToolRegistry\");\n 103   const { SQLiteAdminStatsRepository } = require(\"@/modules/admin/infrastructure/repositories/SQLiteAdminStatsRepository\");\n 104   const { SQLiteFeatureRepository } = require(\"@/modules/admin/infrastructure/repositories/SQLiteFeatureRepository\");\n 105   const { SQLiteSettingsRepository } = require(\"@/modules/admin/infrastructure/repositories/SQLiteSettingsRepository\");\n 106   const { SQLiteTransactionRepository } = require(\"@/modules/billing/infrastructure/repositories/SQLiteTransactionRepository\");\n 107   const { LocalFileStorageService } = require(\"@/modules/billing/infrastructure/services/LocalFileStorageService\");\n 108   const { DefaultRagRepository } = require(\"@/modules/rag/infrastructure/repositories/DefaultRagRepository\");\n 109   const { SQLiteIndexedDocumentRepository } = require(\"@/modules/rag/infrastructure/repositories/SQLiteIndexedDocumentRepository\");\n 110   const { SQLiteTemplateRepository } = require(\"@/modules/templates/infrastructure/repositories/SQLiteTemplateRepository\");\n 111   const { SQLiteSectionRepository } = require(\"@/modules/ai-content/infrastructure/repositories/SQLiteSectionRepository\");\n 112   const { DocxExportService } = require(\"@/modules/ai-content/infrastructure/exporters/DocxExportService\");\n 113   const { PptxExportService } = require(\"@/modules/ai-content/infrastructure/exporters/PptxExportService\");\n 114   const { PdfExportService } = require(\"@/modules/ai-content/infrastructure/exporters/PdfExportService\");\n 115   const { NodemailerEmailService } = require(\"@/modules/users/infrastructure/services/NodemailerEmailService\");\n 116   const { TwoFactorAuthService } = require(\"@/modules/users/infrastructure/services/TwoFactorAuthService\");\n 117   const { BcryptPasswordService } = require(\"@/modules/users/infrastructure/services/BcryptPasswordService\");\n 118   const { JoseTokenService } = require(\"@/modules/users/infrastructure/services/JoseTokenService\");\n 119 \n 120   container.register(IPasswordServiceToken, { useClass: BcryptPasswordService }, { lifecycle: Lifecycle.Singleton });\n 121   container.register(ITokenServiceToken, { useClass: JoseTokenService }, { lifecycle: Lifecycle.Singleton });\n 122   container.register(IEmailServiceToken, { useClass: NodemailerEmailService }, { lifecycle: Lifecycle.Singleton });\n 123   container.register(TwoFactorAuthService, { useClass: TwoFactorAuthService }, { lifecycle: Lifecycle.Singleton });\n 124   container.register(IProjectRepositoryToken, { useClass: SQLiteProjectRepository }, { lifecycle: Lifecycle.Singleton });\n 125   container.register(IUserRepositoryToken, { useClass: SQLiteUserRepository }, { lifecycle: Lifecycle.Singleton });\n 126   container.register(IAuthRepositoryToken, { useClass: SQLiteAuthRepository }, { lifecycle: Lifecycle.Singleton });\n 127   container.register(INotificationServiceToken, { useClass: SQLiteNotificationService }, { lifecycle: Lifecycle.Singleton });\n 128   container.register(IGenerationLogRepositoryToken, { useClass: SQLiteGenerationLogRepository }, { lifecycle: Lifecycle.Singleton });\n 129   container.register(IAgentRepositoryToken, { useClass: SQLiteAgentRepository }, { lifecycle: Lifecycle.Singleton });\n 130   container.register(IAiServiceToken, { useClass: GenkitAiService }, { lifecycle: Lifecycle.Singleton });\n 131   container.register(IDocxExportServiceToken, { useClass: DocxExportService }, { lifecycle: Lifecycle.Singleton });\n 132   container.register(IPptxExportServiceToken, { useClass: PptxExportService }, { lifecycle: Lifecycle.Singleton });\n 133   container.register(IPdfExportServiceToken, { useClass: PdfExportService }, { lifecycle: Lifecycle.Singleton });\n 134   container.register(WritingToolRegistry, { useClass: WritingToolRegistry }, { lifecycle: Lifecycle.Singleton });\n 135   container.register(IAdminStatsRepositoryToken, { useClass: SQLiteAdminStatsRepository }, { lifecycle: Lifecycle.Singleton });\n 136   container.register(IFeatureRepositoryToken, { useClass: SQLiteFeatureRepository }, { lifecycle: Lifecycle.Singleton });\n 137   container.register(ISettingsRepositoryToken, { useClass: SQLiteSettingsRepository }, { lifecycle: Lifecycle.Singleton });\n 138   container.register(ITransactionRepositoryToken, { useClass: SQLiteTransactionRepository }, { lifecycle: Lifecycle.Singleton });\n 139   container.register(IFileStorageServiceToken, { useClass: LocalFileStorageService }, { lifecycle: Lifecycle.Singleton });\n 140   container.register(IRagRepositoryToken, { useClass: DefaultRagRepository }, { lifecycle: Lifecycle.Singleton });\n 141   container.register(IRetrievalServiceToken, { useClass: DefaultRagRepository }, { lifecycle: Lifecycle.Singleton });\n 142   container.register(IIndexedDocumentRepositoryToken, { useClass: SQLiteIndexedDocumentRepository }, { lifecycle: Lifecycle.Singleton });\n 143   container.register(ITemplateRepositoryToken, { useClass: SQLiteTemplateRepository }, { lifecycle: Lifecycle.Singleton });\n 144   container.register(ISectionRepositoryToken, { useClass: SQLiteSectionRepository }, { lifecycle: Lifecycle.Singleton });\n 145 }\n 146 \n 147 export { container };\n 148 \n````",
+                        "Successfully opened src/infrastructure/di/tokens.ts:\n\n````typescript\n   0 \n   1 export const FIRESTORE_TOKEN = Symbol(\"FIRESTORE_TOKEN\");\n   2 export const FIREBASE_AUTH_TOKEN = Symbol(\"FIREBASE_AUTH_TOKEN\");\n   3 export const IMarkdownServiceToken = Symbol(\"IMarkdownServiceToken\");\n   4 \n````"
+                    ],
+                    "tool_call_id": "pyd_ai_da40a5817f324eebb65ebafe11f0f8d7",
+                    "metadata": null,
+                    "timestamp": "2026-04-06T22:22:42.610032Z",
+                    "part_kind": "tool-return"
+                },
+                {
+                    "content": "\n\nYou have used 3 iterations.",
+                    "timestamp": "2026-04-06T22:22:42.618817Z",
+                    "part_kind": "user-prompt"
+                },
+                {
+                    "content": "<system_reminder>\nYou've made 5 tool calls. Consider if this task needs a todo list (3+ distinct steps warrant tracking).\n</system_reminder>",
+                    "timestamp": "2026-04-06T22:22:42.619928Z",
+                    "part_kind": "user-prompt"
+                },
+                {
+                    "content": "<system-reminder>\nCurrent time: Monday, 2026-04-06 22:22:42\n</system-reminder>",
+                    "timestamp": "2026-04-06T22:22:42.620070Z",
+                    "part_kind": "user-prompt"
+                }
+            ],
+            "timestamp": "2026-04-06T22:22:42.620407Z",
+            "instructions": null,
+            "kind": "request",
+            "run_id": "2b0e1bb2-b868-4475-b0d5-c40d4c8418ce",
+            "metadata": null
+        },
+        {
+            "parts": [
+                {
+                    "tool_name": "open_files",
+                    "args": {
+                        "file_paths": [
+                            "src/infrastructure/config/config.ts"
+                        ]
+                    },
+                    "tool_call_id": "pyd_ai_60e282ee2c6c48e4986efbf8653ddf2f",
+                    "id": null,
+                    "provider_name": "google-vertex",
+                    "provider_details": {
+                        "thought_signature": "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"
+                    },
+                    "part_kind": "tool-call"
+                }
+            ],
+            "usage": {
+                "input_tokens": 35822,
+                "cache_write_tokens": 0,
+                "cache_read_tokens": 26758,
+                "output_tokens": 533,
+                "input_audio_tokens": 0,
+                "cache_audio_read_tokens": 0,
+                "output_audio_tokens": 0,
+                "details": {
+                    "cached_content_tokens": 26758,
+                    "thoughts_tokens": 514,
+                    "text_prompt_tokens": 35822,
+                    "text_cache_tokens": 26758,
+                    "text_candidates_tokens": 19
+                }
+            },
+            "model_name": "gemini-3-flash-preview",
+            "timestamp": "2026-04-06T22:22:47.396988Z",
+            "kind": "response",
+            "provider_name": "google-vertex",
+            "provider_url": "https://api.atlassian.com/rovodev/v2/proxy/ai/v1/google/",
+            "provider_details": null,
+            "provider_response_id": null,
+            "finish_reason": null,
+            "run_id": "2b0e1bb2-b868-4475-b0d5-c40d4c8418ce",
+            "metadata": {
+                "response_headers": {
+                    "X-Rovodev-Credits-Used": "7",
+                    "X-Rovodev-Credits-Remaining": "1993",
+                    "X-Rovodev-Credits-Total": "2000",
+                    "Atl-Traceid": "a128a875565645e791203c75ffb529f9",
+                    "Atl-Request-Id": "a128a875-5656-45e7-9120-3c75ffb529f9"
+                }
+            }
+        },
+        {
+            "parts": [
+                {
+                    "tool_name": "open_files",
+                    "content": [
+                        "Successfully opened src/infrastructure/config/config.ts:\n\n````typescript\n   0 /**\n   1  * Environment Configuration Validation\n   2  *\n   3  * This module validates all required environment variables at startup\n   4  * to ensure the application has all necessary configuration.\n   5  */\n   6 \n   7 \n   8 // Export individual configs for convenience\n   9 \n  10 export const firebaseConfig = {\n  11   apiKey: \"AIzaSyDFB2d0Cx2UtglBPMyuevtCiRUWROb_fmk\",\n  12   authDomain: \"docudec.firebaseapp.com\",\n  13   databaseURL: \"https://docudec-default-rtdb.asia-southeast1.firebasedatabase.app\",\n  14   projectId: \"docudec\",\n  15   storageBucket: \"docudec.appspot.com\",\n  16   messagingSenderId: \"201859762958\",\n  17   appId: \"1:201859762958:web:602e322feffdcb11ed255f\",\n  18   measurementId: \"G-K42VXYX7NQ\"\n  19 } as const;\n  20 \n  21 export const firebaseAdminConfig = {\n  22   projectId: \"docudec\",\n  23   clientEmail: \"firebase-adminsdk-2maa7@docudec.iam.gserviceaccount.com\",\n  24   privateKey: \"-----BEGIN PRIVATE KEY-----\\nMIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQCXvtnHwHiPHIzk\\nKaIZu/DOTffYoLNZa+a0JJVq/w81Z826+BGrnF0s0ldSM1NKLM/IMMDoi6AcG81C\\nfqHleoG05B6BaxWFIU+nGozmmzhhClmmSTLFj2+Jtyvbw9UR1wy/XvEhDzKRCBef\\nDuYks3a3+VdQnhq2wd+8SpDVEJ4zaHTNLv+jHJuSVTlHHf97Q5ClT9r2BX+0UX2u\\nen1gtpqtjEBGanK8536is5y1N356jaYYGk6TZG/bZTrukLc5DshzegjCQDHNGR9k\\nZRTVLnP4qAsRY27yamsHyki8ohBqLp2kaEzNzNvjvpywspOD87WJYHYAnyT21lRI\\njB1axFOVAgMBAAECggEANa8h2d7YZ/z4RVILVKJeV4ZS7DMyMC0RweJ9cAyLQ2AV\\ncxOHINjhR9WkaeLZkRDYc6D35m1bOAaH8AHf4dEc6TOZLT0GsIIv7VThy0XXxNEG\\nFWOpECamFakVXZrjGvwjOOLsWL9JKvEbdjytpAdPtVeDkfRVTBm7vx/8LDzEUzgR\\n1DPCw+jUmhBDgcn4wi3W3yHb/9t2vGHModrGO/FQI9slfUl2udFNdUnOOvJR3Toi\\nV5Ch4YW1+Yd3fEl1XhENGw7QamsGLQ2OXMFvvU1kwxhsEASC7/Z6Kgx8O3XcpW36\\n/zzcfhcw2XJ5ynrfoTWLtM4IiyLyt8lUycGYurKM0wKBgQDVGtMvmmb9n6g2bdJs\\n3BgRci+nhktKkosIjAsrmukE1XUegGBRyYtamz5Zvfokg4Pz8H4mzYQw1XR8D9z6\\nPx0QV0/CEt7KDSeExRToQH8PAFM2rk8gntN0IYPdoGMyGyJdcz4Sj3wiKK7278+X\\nRdOnmOCZ2hKBK1of/uW9eBRpQwKBgQC2SjcfWnsaYUdirShSleke/EOdXXW2F2sD\\nPa40Y59gUEiga0Nqssz2zXioF02juffO4G6Wkk/KsxePuG2B/Ms14C2dzfc9x9dg\\nSYjus8a1JENTyegrJLhQRKe5FziAedOIL1sRCDA+D2cU4UTr0r7uCuQn8qNuS/kk\\nZ1jTV402RwKBgQCiLVb4zEWC0IVAXtWcGOeMJ10S3cXgy6NZbtJ1bd/V2OjXvJUQ\\nyRPvcWPDAiwiq5+4/pXSy+bFDz0lySC/pVZmADxnktrP47DmfuHJWoQXk4TAgWkg\\nhx6fK35iJNQ45qOBgNmFYIL0sAdvT9Oo6PAJhPOwwmAAw1BEN0T5qy/FZwKBgQCl\\nWnzV/AVe0I8oe1nwT/u/F6VdwcFdA7EWp4S2EQgpHapDmgj1aGt0FL41+615rt+S\\n0RJ/kwi+HeZpgCoVl3Hd1RSL6KE1cWl09j84B+tftR09jBEF0bE/Xoel5eJi6B9x\\nkUNSF9Nq+B3RWuZh5DE9TLPZaMfG7TN6SiTQ0MJPUQKBgAzhBdUnSakOgjtB9jax\\nNQo64DpYHvDVC3xswGZdB8swuwZjsoNT/JV4vOQ1YgxVm7KTUWKmKTdGYfWnQ9EC\\n0gdxgy7MmmEuTN6/riaer22vm63BaHYa2BN5p4jtMJuA0eg4CTJAm2ofHKv3K4JK\\nlOhAb3IjFTYr+b6iuwhMXdWz\\n-----END PRIVATE KEY-----\\n\",\n  25 };\n  26 \n  27 \n  28 export const ollamaConfig = {\n  29   serverAddress: \"http://localhost:11434\",\n  30 } as const;\n  31 \n````"
+                    ],
+                    "tool_call_id": "pyd_ai_60e282ee2c6c48e4986efbf8653ddf2f",
+                    "metadata": null,
+                    "timestamp": "2026-04-06T22:22:47.529221Z",
+                    "part_kind": "tool-return"
+                },
+                {
+                    "content": "\n\nYou have used 4 iterations.",
+                    "timestamp": "2026-04-06T22:22:47.536641Z",
+                    "part_kind": "user-prompt"
+                },
+                {
+                    "content": "<system-reminder>\nCurrent time: Monday, 2026-04-06 22:22:47\n</system-reminder>",
+                    "timestamp": "2026-04-06T22:22:47.537916Z",
+                    "part_kind": "user-prompt"
+                }
+            ],
+            "timestamp": "2026-04-06T22:22:47.538421Z",
+            "instructions": null,
+            "kind": "request",
+            "run_id": "2b0e1bb2-b868-4475-b0d5-c40d4c8418ce",
+            "metadata": null
+        },
+        {
+            "parts": [
+                {
+                    "content": "To replace the local **Genkit + Ollama** implementation with **n8n** for AI generation, we will follow a Clean Architecture approach. This allows us to swap the infrastructure layer without breaking the rest of the application.\n\n### Proposed Architecture Change\n\n1.  **New Adapter**: Create `N8nAiService.ts` implementing the `IAiService` interface.\n2.  **Configuration**: Update `config.ts` to include your n8n Webhook URL and API Key.\n3.  **Dependency Injection**: Switch the registration in `container.ts` from `GenkitAiService` to `N8nAiService`.\n\n---\n\n### Step 1: Update Configuration\nFirst, add your n8n details to `src/infrastructure/config/config.ts`.\n\n```typescript\n// src/infrastructure/config/config.ts\n\nexport const n8nConfig = {\n  webhookUrl: process.env.N8N_AI_WEBHOOK_URL || \"https://your-n8n-domain.com/webhook/ai-generation\",\n  apiKey: process.env.N8N_API_KEY || \"\",\n} as const;\n```\n\n---\n\n### Step 2: Create `N8nAiService`\nThis service will send the prompt and options to your n8n webhook and return the result.\n\n```typescript\n// src/modules/ai/infrastructure/services/N8nAiService.ts\n\nimport { injectable } from \"tsyringe\";\nimport { IAiService } from \"../../domain/services/IAiService\";\nimport { Result } from \"@/infrastructure/utils/result\";\nimport { AiError } from \"../../domain/errors/AiErrors\";\nimport { n8nConfig } from \"@/infrastructure/config/config\";\nimport { RetrievalOptions, RetrievalResult } from \"../../domain/services/IRetrievalService\";\n\n@injectable()\nexport class N8nAiService implements IAiService {\n    \n    async generateText(prompt: string, options?: any): Promise<Result<string, AiError>> {\n        try {\n            const response = await fetch(n8nConfig.webhookUrl, {\n                method: 'POST',\n                headers: {\n                    'Content-Type': 'application/json',\n                    'X-N8N-API-KEY': n8nConfig.apiKey\n                },\n                body: JSON.stringify({\n                    action: 'generateText',\n                    prompt,\n                    options\n                })\n            });\n\n            if (!response.ok) {\n                return Result.fail(AiError.generationFailed(`n8n error: ${response.statusText}`));\n            }\n\n            const data = await response.json();\n            // Assuming n8n returns { text: \"...\" }\n            return Result.ok(data.text);\n        } catch (error: any) {\n            return Result.fail(AiError.generationFailed(error.message));\n        }\n    }\n\n    async runFlow<TInput, TOutput>(flow: any, input: TInput, flowName?: string): Promise<Result<TOutput, AiError>> {\n        try {\n            const response = await fetch(n8nConfig.webhookUrl, {\n                method: 'POST',\n                headers: {\n                    'Content-Type': 'application/json',\n                    'X-N8N-API-KEY': n8nConfig.apiKey\n                },\n                body: JSON.stringify({\n                    action: 'runFlow',\n                    flowName,\n                    input\n                })\n            });\n\n            if (!response.ok) {\n                return Result.fail(AiError.generationFailed(`n8n flow error: ${response.statusText}`));\n            }\n\n            const data = await response.json();\n            return Result.ok(data as TOutput);\n        } catch (error: any) {\n            return Result.fail(AiError.generationFailed(error.message));\n        }\n    }\n\n    // You can also delegate RAG tasks to n8n if your workflow handles it\n    async generateChapterWithRAG(input: any): Promise<Result<any, AiError>> {\n        return this.runFlow(null, input, 'generateChapterWithRAG');\n    }\n\n    async generateSectionWithRAG(input: any): Promise<Result<any, AiError>> {\n        return this.runFlow(null, input, 'generateSectionWithRAG');\n    }\n\n    async retrieveContext(query: string, options?: RetrievalOptions): Promise<Result<RetrievalResult, AiError>> {\n        // Implementation for context retrieval via n8n if needed\n        return Result.fail(AiError.generationFailed(\"Retrieval not implemented via n8n yet\"));\n    }\n}\n```\n\n---\n\n### Step 3: Register in Container\nUpdate `src/infrastructure/di/container.ts` to use the new service.\n\n```typescript\n// src/infrastructure/di/container.ts\n\n// 1. Import the new service\nimport { N8nAiService } from \"@/modules/ai/infrastructure/services/N8nAiService\";\n\n// 2. In the server-side registration block (if typeof window === 'undefined')\n// Replace:\n// container.register(IAiServiceToken, { useClass: GenkitAiService }, { lifecycle: Lifecycle.Singleton });\n// With:\ncontainer.register(IAiServiceToken, { useClass: N8nAiService }, { lifecycle: Lifecycle.Singleton });\n```\n\n### Benefits of this Switch:\n1.  **Offloading**: Your Next.js server handles less CPU/RAM load.\n2.  **Centralized Logic**: You can change your AI logic in n8n (switching models, adding search tools) without redeploying your code.\n3.  **Scalability**: n8n can handle retries and complex multi-step workflows better than a single API call.\n\n**Note**: You will need to configure your n8n workflow to accept a POST request with the `action`, `prompt`, and `input` fields and return a JSON response matching the expected output.\n\nWould you like me to provide a sample **n8n JSON workflow** to match this implementation, or help with the **Environment Variables** setup?",
+                    "id": null,
+                    "provider_name": "google-vertex",
+                    "provider_details": {
+                        "thought_signature": "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"
+                    },
+                    "part_kind": "text"
+                }
+            ],
+            "usage": {
+                "input_tokens": 37510,
+                "cache_write_tokens": 0,
+                "cache_read_tokens": 26816,
+                "output_tokens": 1998,
+                "input_audio_tokens": 0,
+                "cache_audio_read_tokens": 0,
+                "output_audio_tokens": 0,
+                "details": {
+                    "cached_content_tokens": 26816,
+                    "thoughts_tokens": 622,
+                    "text_prompt_tokens": 37510,
+                    "text_cache_tokens": 26816,
+                    "text_candidates_tokens": 1376
+                }
+            },
+            "model_name": "gemini-3-flash-preview",
+            "timestamp": "2026-04-06T22:22:53.018921Z",
+            "kind": "response",
+            "provider_name": "google-vertex",
+            "provider_url": "https://api.atlassian.com/rovodev/v2/proxy/ai/v1/google/",
+            "provider_details": null,
+            "provider_response_id": null,
+            "finish_reason": null,
+            "run_id": "2b0e1bb2-b868-4475-b0d5-c40d4c8418ce",
+            "metadata": {
+                "response_headers": {
+                    "X-Rovodev-Credits-Used": "7",
+                    "X-Rovodev-Credits-Remaining": "1993",
+                    "X-Rovodev-Credits-Total": "2000",
+                    "Atl-Traceid": "3f26040dd10040d581abd1078604dd9f",
+                    "Atl-Request-Id": "3f26040d-d100-40d5-81ab-d1078604dd9f"
+                }
+            }
+        }
+    ],
+    "deferred_results": null,
+    "usage": {
+        "input_tokens": 242975,
+        "cache_write_tokens": 0,
+        "cache_read_tokens": 106179,
+        "output_tokens": 4533,
+        "input_audio_tokens": 0,
+        "cache_audio_read_tokens": 0,
+        "output_audio_tokens": 0,
+        "details": {
+            "thoughts_tokens": 2608,
+            "text_prompt_tokens": 242975,
+            "text_candidates_tokens": 1925,
+            "cached_content_tokens": 106179,
+            "text_cache_tokens": 106179
+        },
+        "requests": 8,
+        "tool_calls": 6
+    },
+    "timestamp": 1775513755,
+    "initial_prompt": "what is n8n?",
+    "prompts": [
+        "what is n8n?",
+        "if we thinking about use n8n instant genkit and ollama src/modules/ai . i install n8n on docker on other server we have domain and webhook to access workspace automation generation ai"
+    ],
+    "latest_result": "To replace the local **Genkit + Ollama** implementation with **n8n** for AI generation, we will follow a Clean Architecture approach. This allows us to swap the infrastructure layer without breaking the rest of the application.\n\n### Proposed Architecture Change\n\n1.  **New Adapter**: Create `N8nAiService.ts` implementing the `IAiService` interface.\n2.  **Configuration**: Update `config.ts` to include your n8n Webhook URL and API Key.\n3.  **Dependency Injection**: Switch the registration in `container.ts` from `GenkitAiService` to `N8nAiService`.\n\n---\n\n### Step 1: Update Configuration\nFirst, add your n8n details to `src/infrastructure/config/config.ts`.\n\n```typescript\n// src/infrastructure/config/config.ts\n\nexport const n8nConfig = {\n  webhookUrl: process.env.N8N_AI_WEBHOOK_URL || \"https://your-n8n-domain.com/webhook/ai-generation\",\n  apiKey: process.env.N8N_API_KEY || \"\",\n} as const;\n```\n\n---\n\n### Step 2: Create `N8nAiService`\nThis service will send the prompt and options to your n8n webhook and return the result.\n\n```typescript\n// src/modules/ai/infrastructure/services/N8nAiService.ts\n\nimport { injectable } from \"tsyringe\";\nimport { IAiService } from \"../../domain/services/IAiService\";\nimport { Result } from \"@/infrastructure/utils/result\";\nimport { AiError } from \"../../domain/errors/AiErrors\";\nimport { n8nConfig } from \"@/infrastructure/config/config\";\nimport { RetrievalOptions, RetrievalResult } from \"../../domain/services/IRetrievalService\";\n\n@injectable()\nexport class N8nAiService implements IAiService {\n    \n    async generateText(prompt: string, options?: any): Promise<Result<string, AiError>> {\n        try {\n            const response = await fetch(n8nConfig.webhookUrl, {\n                method: 'POST',\n                headers: {\n                    'Content-Type': 'application/json',\n                    'X-N8N-API-KEY': n8nConfig.apiKey\n                },\n                body: JSON.stringify({\n                    action: 'generateText',\n                    prompt,\n                    options\n                })\n            });\n\n            if (!response.ok) {\n                return Result.fail(AiError.generationFailed(`n8n error: ${response.statusText}`));\n            }\n\n            const data = await response.json();\n            // Assuming n8n returns { text: \"...\" }\n            return Result.ok(data.text);\n        } catch (error: any) {\n            return Result.fail(AiError.generationFailed(error.message));\n        }\n    }\n\n    async runFlow<TInput, TOutput>(flow: any, input: TInput, flowName?: string): Promise<Result<TOutput, AiError>> {\n        try {\n            const response = await fetch(n8nConfig.webhookUrl, {\n                method: 'POST',\n                headers: {\n                    'Content-Type': 'application/json',\n                    'X-N8N-API-KEY': n8nConfig.apiKey\n                },\n                body: JSON.stringify({\n                    action: 'runFlow',\n                    flowName,\n                    input\n                })\n            });\n\n            if (!response.ok) {\n                return Result.fail(AiError.generationFailed(`n8n flow error: ${response.statusText}`));\n            }\n\n            const data = await response.json();\n            return Result.ok(data as TOutput);\n        } catch (error: any) {\n            return Result.fail(AiError.generationFailed(error.message));\n        }\n    }\n\n    // You can also delegate RAG tasks to n8n if your workflow handles it\n    async generateChapterWithRAG(input: any): Promise<Result<any, AiError>> {\n        return this.runFlow(null, input, 'generateChapterWithRAG');\n    }\n\n    async generateSectionWithRAG(input: any): Promise<Result<any, AiError>> {\n        return this.runFlow(null, input, 'generateSectionWithRAG');\n    }\n\n    async retrieveContext(query: string, options?: RetrievalOptions): Promise<Result<RetrievalResult, AiError>> {\n        // Implementation for context retrieval via n8n if needed\n        return Result.fail(AiError.generationFailed(\"Retrieval not implemented via n8n yet\"));\n    }\n}\n```\n\n---\n\n### Step 3: Register in Container\nUpdate `src/infrastructure/di/container.ts` to use the new service.\n\n```typescript\n// src/infrastructure/di/container.ts\n\n// 1. Import the new service\nimport { N8nAiService } from \"@/modules/ai/infrastructure/services/N8nAiService\";\n\n// 2. In the server-side registration block (if typeof window === 'undefined')\n// Replace:\n// container.register(IAiServiceToken, { useClass: GenkitAiService }, { lifecycle: Lifecycle.Singleton });\n// With:\ncontainer.register(IAiServiceToken, { useClass: N8nAiService }, { lifecycle: Lifecycle.Singleton });\n```\n\n### Benefits of this Switch:\n1.  **Offloading**: Your Next.js server handles less CPU/RAM load.\n2.  **Centralized Logic**: You can change your AI logic in n8n (switching models, adding search tools) without redeploying your code.\n3.  **Scalability**: n8n can handle retries and complex multi-step workflows better than a single API call.\n\n**Note**: You will need to configure your n8n workflow to accept a POST request with the `action`, `prompt`, and `input` fields and return a JSON response matching the expected output.\n\nWould you like me to provide a sample **n8n JSON workflow** to match this implementation, or help with the **Environment Variables** setup?",
+    "workspace_path": "/teamspace/studios/this_studio/arkan",
+    "base_log_dir": "/teamspace/studios/this_studio/arkan/.rovodev/sessions",
+    "is_subagent": false,
+    "subagent_tool_call_id": null
+}

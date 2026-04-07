@@ -26,7 +26,7 @@ Output ONLY the fully corrected version of the text. Preserve all markdown forma
 });
 
 const grammarCheckFlow = ai.defineFlow({
-  name: 'grammarCheckFlow',
+  name: 'grammarCheck',
   inputSchema: GrammarCheckInputSchema,
   outputSchema: GrammarCheckOutputSchema,
 }, async (input: GrammarCheckInput) => {

@@ -3,17 +3,15 @@
 /**
  * @fileOverview RAG-Enhanced Report Section Generation
  * 
- * This is an enhanced version of generate-report-section.ts that uses
- * Retrieval-Augmented Generation (RAG) to retrieve relevant context
- * from the vector store before generating content.
+ * This flow delegates section generation to the N8nAiService (→ n8n Section RAG Agent).
+ * The n8n agent uses Qdrant vector search + OpenRouter LLM to produce the section content.
+ * 
+ * Falls back gracefully if N8N_AI_WEBHOOK_URL is not set.
  */
 
-import { ai, OLLAMA_MODELS } from '@/modules/ai/infrastructure/services/Genkit';
-import { GenerateSectionInputSchema, GenerateSectionOutputSchema, type GenerateSectionInput, type GenerateSectionOutput } from '@/modules/ai/domain/schemas';
+import { GenerateSectionInputSchema, type GenerateSectionInput, type GenerateSectionOutput } from '@/modules/ai/domain/schemas';
 import { container } from '@/infrastructure/di/container';
 import { IAiServiceToken } from '@/modules/ai/domain/services/IAiService';
-import { validateJsonOutput, getJsonPromptInstructions, RECOMMENDED_TEMPERATURES } from '@/modules/ai/domain/utils/json-output-validator';
-import { TokenManager, MODEL_CONTEXT_LIMITS } from '@/modules/ai/domain/utils/TokenManager';
 
 export interface GenerateSectionWithRAGInput extends GenerateSectionInput {
   projectId?: string;
@@ -22,152 +20,35 @@ export interface GenerateSectionWithRAGInput extends GenerateSectionInput {
   ragTopK?: number;
 }
 
+/**
+ * Generate a report section with RAG enhancement via N8nAiService → n8n Section RAG Agent.
+ */
 export async function generateReportSectionWithRAG(input: GenerateSectionWithRAGInput): Promise<GenerateSectionOutput> {
-  
-  // 1. RAG: Retrieve relevant context if enabled
-  let ragContext = '';
-  if (input.enableRAG !== false && (input.projectId || input.userId)) {
-    try {
-      console.log(`[RAG] Retrieving context for section: ${input.sectionToGenerate}`);
-      
-      // Create a query from section name and instructions
-      const query = `${input.sectionToGenerate}\n${input.instructionText || ''}`;
-      
-      const aiService = container.resolve<any>(IAiServiceToken);
-      const retrieval = await aiService.retrieveContext(query, {
-        projectId: input.projectId,
-        userId: input.userId,
-        topK: input.ragTopK || 5,
-        minScore: 0.5,
-        includeTypes: ['reference', 'context', 'user_upload'],
-      });
-      
-      // 1a. Truncate context based on model context limits to avoid crashes
-      const modelLimit = MODEL_CONTEXT_LIMITS.PHI3_MINI; // Default model limit
-      const maxContextTokens = Math.floor(modelLimit * 0.5); // Reserve 50% for prompt (which is large here) + completion
-      
-      ragContext = TokenManager.truncateRagContext(retrieval.context, maxContextTokens);
-      const truncated = ragContext.length < retrieval.context.length;
-
-      console.log(`[RAG] Retrieved ${retrieval.sources.length} chunks. ${truncated ? 'Truncated context for safety.' : 'Context within limits.'}`);
-    } catch (error) {
-      console.error('[RAG] Error retrieving context:', error);
-      // Continue without RAG context on error
-    }
+  const validation = GenerateSectionInputSchema.safeParse(input);
+  if (!validation.success) {
+    throw new Error(`Invalid input for generateReportSectionWithRAG: ${validation.error.message}`);
   }
 
-  // 2. Prepare system prompt
-  const systemPrompt = `${input.prompt}
+  const aiService = container.resolve<any>(IAiServiceToken);
+  const result = await aiService.generateSectionWithRAG(input);
 
-You are also an expert analyst. Before you begin writing, you must first review all the provided context sections (proposal, project plan, other report sections, diagrams, etc.). From this context, intelligently identify and synthesize only the most relevant information needed to create the requested report section. Do not simply list information; integrate it into a well-written, coherent narrative.
-
-${ragContext ? 'IMPORTANT: You have access to RAG-retrieved context which contains the most relevant information from the knowledge base. Use this information to enhance your response.' : ''}`;
-
-  // 3. Define the prompt with RAG context
-  const reportSectionPrompt = ai.definePrompt({
-    name: 'generateReportSectionPromptRAG',
-    input: { schema: GenerateSectionInputSchema },
-    output: { schema: GenerateSectionOutputSchema },
-    model: OLLAMA_MODELS.PHI3_MINI,
-    config: {
-      responseSchema: GenerateSectionOutputSchema,
-      temperature: RECOMMENDED_TEMPERATURES.BALANCED,
-    },
-
-    system: systemPrompt,
-    prompt: `
-${getJsonPromptInstructions(`{
-  "sectionName": "Name of the section being generated",
-  "content": "Complete section content in markdown format"
-}`)}
-
-CRITICAL: Your final output must be a JSON object with a single 'content' field containing the complete markdown for the section. Your writing style should be natural and engaging, not robotic.
-
-{{#if guidelines}}
---- Guidelines ---\n
-{{#each guidelines}}
-- {{{this}}}
-{{/each}}
-{{/if}}
-
-{{#if instructionText}}
---- Additional Instructions ---\n
-{{{instructionText}}}
-{{/if}}
-
-${ragContext ? `
---- RAG RETRIEVED CONTEXT (Most Relevant Information from Knowledge Base) ---\n
-${ragContext}
----\n
-` : ''}
-
---- AVAILABLE CONTEXT FROM PROJECT ---\n
-You have access to the following documents. Review them and use the most relevant information to generate the requested section.
-
-{{#if otherSections}}
---- Other Report Sections & Context ---\n
-{{#each otherSections}}
---- Context Item: {{@key}} ---\n
-{{{this}}}
----
-{{/each}}
-{{/if}}
-
-{{#if otherDiagrams}}
---- Other Generated Diagrams (PlantUML) ---\n
-{{#each otherDiagrams}}
---- Diagram: {{@key}} ---\n
-{{{this}}}
----
-{{/each}}
-{{/if}}
-
-{{#if externalContext}}
---- Additional Context Files ---\n
-{{#each externalContext}}
---- File: {{this.fileName}} (Type: {{this.type}}) ---\n
-{{{this.content}}}
----
-{{/each}}
-{{/if}}
-
-Now, generate the section content based on all the context provided above. Synthesize the information from RAG context, project sections, diagrams, and external context to create a comprehensive, well-written section.
-
-**JSON Output:**`,
-  });
-
-  // 4. Generate content with RAG context
-  try {
-    const { output } = await reportSectionPrompt(input);
-
-    if (!output) {
-      throw new Error('No output received from the model.');
-    }
-
-    const validation = validateJsonOutput({
-      schema: GenerateSectionOutputSchema,
-      output,
-      flowName: 'generateReportSectionRAG',
-      attemptRecovery: true,
-      enableLogging: true,
-      fallbackFn: (rawOutput) => {
-        if (typeof rawOutput === 'string') {
-          return {
-            sectionName: input.sectionToGenerate,
-            content: rawOutput,
-          };
-        }
-        return null;
-      },
-    });
-
-    if (!validation.success) {
-      throw new Error(validation.error || 'Failed to validate output');
-    }
-
-    return validation.data!;
-  } catch (error) {
-    console.error(`AI failed to generate content for section: ${input.sectionToGenerate}`, error);
-    throw new Error(`The AI failed to generate a response for the '${input.sectionToGenerate}' section: ${error instanceof Error ? error.message : 'Unknown error'}`);
+  if (!result.isSuccess()) {
+    throw new Error(`Section generation failed: ${result.error()?.message || 'Unknown error'}`);
   }
+
+  const output = result.getValue();
+
+  // Handle both string output (n8n text field) and structured output
+  if (typeof output === 'string') {
+    return {
+      sectionName: input.sectionToGenerate,
+      content: output,
+    } as GenerateSectionOutput;
+  }
+
+  if (output && typeof output === 'object') {
+    return output as GenerateSectionOutput;
+  }
+
+  throw new Error('Section generation returned an unexpected empty result.');
 }

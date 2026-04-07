@@ -1,0 +1,964 @@
+{
+  "name": "Arkan AI Integration Workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "ai-generation",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "c9ed06a7-8f6b-45c6-a2ba-b534b5f16e47",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [-400, 300],
+      "webhookId": "arkan-ai-webhook"
+    },
+    {
+      "parameters": {
+        "dataType": "string",
+        "value1": "={{ $json.body.action }}",
+        "rules": {
+          "rules": [
+            { "value2": "generateText" },
+            { "value2": "runFlow", "output": 1 },
+            { "value2": "retrieveContext", "output": 2 },
+            { "value2": "generateChapterWithRAG", "output": 3 },
+            { "value2": "generateSectionWithRAG", "output": 4 }
+          ]
+        }
+      },
+      "id": "8d71d626-e53f-4cd7-a0ca-c7425c7d8e04",
+      "name": "Route Action",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 1,
+      "position": [-200, 300]
+    },
+    {
+      "parameters": {
+        "dataType": "string",
+        "value1": "={{ $json.body.flowName }}",
+        "rules": {
+          "rules": [
+            { "value2": "summarize" },
+            { "value2": "grammarCheck", "output": 1 },
+            { "value2": "paraphrase", "output": 2 },
+            { "value2": "biasCheck", "output": 3 },
+            { "value2": "detectAi", "output": 4 },
+            { "value2": "translate", "output": 5 },
+            { "value2": "quiz", "output": 6 },
+            { "value2": "factCheck", "output": 7 },
+            { "value2": "plagiarismCheck", "output": 8 },
+            { "value2": "humanize", "output": 9 },
+            { "value2": "aiResearch", "output": 10 },
+            { "value2": "generatePlantUML", "output": 11 },
+            { "value2": "imageToText", "output": 12 },
+            { "value2": "generateCitation", "output": 13 },
+            { "value2": "generateTOC", "output": 14 },
+            { "value2": "generateLitReview", "output": 15 },
+            { "value2": "generateLecture", "output": 16 },
+            { "value2": "sentenceStructureCheck", "output": 17 },
+            { "value2": "explainTopic", "output": 18 },
+            { "value2": "generateIdeas", "output": 19 },
+            { "value2": "generateUIDescription", "output": 20 },
+            { "value2": "generateSessionPlan", "output": 21 },
+            { "value2": "solveAssignments", "output": 22 },
+            { "value2": "generateProjectBlueprint", "output": 23 },
+            { "value2": "proofreadDocument", "output": 24 },
+            { "value2": "analyzeContext", "output": 25 },
+            { "value2": "checkPaperQuality", "output": 26 },
+            { "value2": "improveMarkdown", "output": 27 },
+            { "value2": "generateProjectDoc", "output": 28 },
+            { "value2": "rewriteToMarkdown", "output": 29 },
+            { "value2": "writeTechSpec", "output": 30 },
+            { "value2": "createPresentation", "output": 31 }
+          ]
+        },
+        "fallbackOutput": 32
+      },
+      "id": "route-flow-id",
+      "name": "Route Flow",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 1,
+      "position": [50, 300]
+    },
+    {
+      "parameters": {
+        "options": {
+          "text": "={{ $('Route Action').item.json.body.input }}",
+          "systemMessage": "You are Arkan AI, a professional text summarizer.\n\nYour task: Summarize the given text.\n- Input: `{ text, length }` where `length` is 'short', 'medium', or 'long'.\n- short: single concise paragraph (~50-100 words)\n- medium: a few paragraphs (~150-300 words)\n- long: detailed summary (~400-600 words)\n\nOutput ONLY the summary text. No preamble, no JSON, no meta-commentary."
+        }
+      },
+      "id": "summarizer-agent-id",
+      "name": "Summarizer Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.1,
+      "position": [350, -100]
+    },
+    {
+      "parameters": {
+        "options": {
+          "text": "={{ $('Route Action').item.json.body.input }}",
+          "systemMessage": "You are Arkan AI, an expert English grammar, spelling, and punctuation checker.\n\nYour task: Analyze the provided text and correct ALL grammar, spelling, and punctuation errors.\n- Input: `{ text }` containing the text to check.\n- Preserve all markdown formatting.\n- Preserve the original meaning and structure.\n- Temperature: very low — prioritize accuracy over creativity.\n\nOutput ONLY the fully corrected version of the text. No preamble, no JSON, no meta-commentary."
+        }
+      },
+      "id": "grammar-agent-id",
+      "name": "Grammar Checker Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.1,
+      "position": [350, 50]
+    },
+    {
+      "parameters": {
+        "options": {
+          "text": "={{ $('Route Action').item.json.body.input }}",
+          "systemMessage": "You are Arkan AI, an expert paraphrasing assistant.\n\nYour task: Rewrite the given text in a fresh way while preserving its original meaning.\n- Input: `{ text, style }` where `style` may be 'academic', 'casual', 'formal', 'creative', etc.\n- Change sentence structure, word choice, and flow.\n- Do NOT change the core meaning or add new information.\n- Preserve markdown formatting.\n\nOutput ONLY the paraphrased text. No preamble, no JSON, no meta-commentary."
+        }
+      },
+      "id": "paraphrase-agent-id",
+      "name": "Paraphraser Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.1,
+      "position": [350, 200]
+    },
+    {
+      "parameters": {
+        "options": {
+          "text": "={{ $('Route Action').item.json.body.input }}",
+          "systemMessage": "You are Arkan AI, an expert in inclusive language and bias detection.\n\nYour task: Analyze the provided text for language that may exhibit bias (gender, racial, age, ability, cultural, etc.).\n- Input: `{ text }` containing the text to analyze.\n\nOutput ONLY a valid JSON object in this exact format:\n```json\n{\n  \"issues\": [{\"phrase\": \"...\", \"type\": \"...\", \"explanation\": \"...\", \"alternative\": \"...\"}],\n  \"overallAssessment\": \"...\",\n  \"inclusivityScore\": 0-100\n}\n```\nDo NOT include any text outside the JSON object."
+        }
+      },
+      "id": "bias-agent-id",
+      "name": "Bias Checker Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.1,
+      "position": [350, 350]
+    },
+    {
+      "parameters": {
+        "options": {
+          "text": "={{ $('Route Action').item.json.body.input }}",
+          "systemMessage": "You are Arkan AI, an expert AI content detector.\n\nYour task: Analyze the provided text and determine the probability that it was generated by AI.\n- Input: `{ text }` containing the text to analyze.\n- Look for patterns: overly uniform sentence lengths, lack of personal voice, generic phrasing, repetitive structures, etc.\n\nOutput ONLY a valid JSON object in this exact format:\n```json\n{\n  \"aiProbability\": 0-100,\n  \"verdict\": \"Human Written\" | \"Likely AI\" | \"AI Generated\",\n  \"indicators\": [\"indicator 1\", \"indicator 2\"],\n  \"analysis\": \"brief explanation\"\n}\n```\nDo NOT include any text outside the JSON object."
+        }
+      },
+      "id": "ai-detector-agent-id",
+      "name": "AI Detector Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.1,
+      "position": [350, 500]
+    },
+    {
+      "parameters": {
+        "options": {
+          "text": "={{ $('Route Action').item.json.body.input }}",
+          "systemMessage": "You are Arkan AI, a professional translator.\n\nYour task: Translate the given text accurately.\n- Input: `{ text, targetLanguage }` where `targetLanguage` is the target language (e.g., 'Arabic', 'French', 'Spanish').\n- Preserve the original meaning, tone, and formatting.\n- Use natural, idiomatic language in the target language.\n- If the text contains technical or academic terms, translate them accurately.\n\nOutput ONLY the translated text. No preamble, no JSON, no meta-commentary."
+        }
+      },
+      "id": "translator-agent-id",
+      "name": "Translator Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.1,
+      "position": [350, 650]
+    },
+    {
+      "parameters": {
+        "options": {
+          "text": "={{ $('Route Action').item.json.body.input }}",
+          "systemMessage": "You are Arkan AI, an expert educator and quiz creator.\n\nYour task: Generate a quiz from the provided text.\n- Input: `{ text, numQuestions, questionType }` where `questionType` is 'multiple-choice', 'true-false', or 'direct-question'.\n\nFor multiple-choice: 4 options per question, one correct.\nFor true-false: 'True' or 'False' answer.\nFor direct-question: open-ended questions with ideal answers.\n\nOutput ONLY a valid JSON array in this format:\n```json\n[\n  {\n    \"question\": \"...\",\n    \"options\": [\"A\", \"B\", \"C\", \"D\"],\n    \"answer\": \"A\",\n    \"explanation\": \"...\"\n  }\n]\n```\nDo NOT include any text outside the JSON array."
+        }
+      },
+      "id": "quiz-agent-id",
+      "name": "Quiz Generator Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.1,
+      "position": [350, 800]
+    },
+    {
+      "parameters": {
+        "options": {
+          "text": "={{ $('Route Action').item.json.body.input }}",
+          "systemMessage": "You are Arkan AI, an expert fact-checker and research analyst.\n\nYour task: Analyze the provided text, identify all verifiable factual claims, and determine their accuracy.\n- Input: `{ text }` containing the text to fact-check.\n- Use the Wikipedia tool to verify claims when possible.\n\n**Process:**\n1. Identify specific, verifiable claims (statistics, historical facts, scientific statements)\n2. Verify each claim using Wikipedia and your knowledge\n3. Rate each as 'Verified', 'False', or 'Inconclusive'\n4. Find a reliable source URL for each claim\n5. Calculate an overall accuracy score 0-100\n\nOutput ONLY valid JSON in this exact format:\n```json\n{\n  \"claims\": [{\"claim\": \"...\", \"status\": \"Verified|False|Inconclusive\", \"source\": \"domain.com\", \"explanation\": \"...\"}],\n  \"overallAccuracy\": 0-100\n}\n```\nDo NOT include any text outside the JSON object."
+        }
+      },
+      "id": "fact-checker-agent-id",
+      "name": "Fact Checker Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.1,
+      "position": [350, 950]
+    },
+    {
+      "parameters": {
+        "options": {
+          "text": "={{ $('Route Action').item.json.body.input }}",
+          "systemMessage": "You are Arkan AI, an advanced plagiarism detection engine.\n\nYour task: Analyze the provided text for originality and identify matching content from known sources.\n- Input: `{ text }` containing the text to analyze.\n- Use Wikipedia tool to verify if content appears in known sources.\n\n**Process:**\n1. Read the text carefully and identify non-original phrases, sentences, or ideas\n2. For each identified part, find the most likely original source with a real URL\n3. Estimate similarity percentage for each match\n4. Calculate an overall originality score 0-100\n\nOutput ONLY valid JSON in this exact format:\n```json\n{\n  \"matches\": [{\"source\": \"https://...\", \"title\": \"...\", \"summary\": \"...\", \"similarity\": 0-100}],\n  \"originalityScore\": 0-100\n}\n```\nDo NOT include any text outside the JSON object."
+        }
+      },
+      "id": "plagiarism-agent-id",
+      "name": "Plagiarism Checker Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.1,
+      "position": [350, 1100]
+    },
+    {
+      "parameters": {
+        "options": {
+          "text": "={{ $('Route Action').item.json.body.input }}",
+          "systemMessage": "You are Arkan AI, a world-class editor and ghostwriter specializing in making text sound authentically human.\n\nYour task: Rewrite the provided text to be indistinguishable from high-quality human writing.\n- Input: `{ text }` containing the AI-generated text to humanize.\n\n**Principles:**\n- Natural Rhythm: Mix short, punchy sentences with longer, complex ones\n- Authentic Voice: Avoid AI clichés. Use rich, varied vocabulary\n- Break Predictable Structures: Vary paragraph openings and section flow\n- Natural Cadence: Use natural contractions and smooth transitions\n- Preserve Meaning & Formatting: Maintain original intent and markdown\n- High temperature creativity: Be bold with rewrites while keeping meaning\n\nOutput ONLY the humanized text. No preamble, no JSON, no meta-commentary."
+        }
+      },
+      "id": "humanizer-agent-id",
+      "name": "Humanizer Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.1,
+      "position": [350, 1250]
+    },
+    {
+      "parameters": {
+        "options": {
+          "text": "={{ $('Route Action').item.json.body.input }}",
+          "systemMessage": "You are Arkan AI, an expert research assistant with access to comprehensive knowledge.\n\nYour task: Conduct thorough, well-structured research on the given topic.\n- Input: `{ text, depth }` where `depth` is 'basic', 'comprehensive', or 'in-depth'.\n- depth 'basic': concise overview, 3-5 key points, 3-5 sources\n- depth 'comprehensive': detailed analysis, 7-10 key points, methodology, 5-8 sources\n- depth 'in-depth': exhaustive analysis, 10+ key points, detailed methodology, findings, 8-12 sources\n\n**ALWAYS use the Wikipedia tool** to look up current information about the topic before writing.\n\n**Quality Standards:**\n- Use only reliable, authoritative sources\n- Present information objectively and accurately\n- Cite sources properly with full URLs\n\nOutput ONLY valid JSON in this format:\n```json\n{\n  \"summary\": \"...\",\n  \"keyPoints\": [\"...\"],\n  \"methodology\": \"...\",\n  \"findings\": [\"...\"],\n  \"sources\": [{\"title\": \"...\", \"url\": \"https://...\", \"description\": \"...\"}]\n}\n```\nDo NOT include any text outside the JSON object."
+        }
+      },
+      "id": "researcher-agent-id",
+      "name": "AI Researcher Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.1,
+      "position": [350, 1400]
+    },
+    {
+      "parameters": {
+        "options": {
+          "text": "={{ $('Route Action').item.json.body.input }}",
+          "systemMessage": "You are an expert systems analyst and architect specializing in PlantUML.\n\nYour task: Generate valid PlantUML code based on the user's description and diagram type.\n- Input: `{ description, diagramType }` where `diagramType` is one of: useCase, class, sequence, activity, component, archimate, er, dfd.\n\n**Process:**\n1. Identify the core elements (actors, classes, processes) from the description.\n2. Apply the correct PlantUML syntax for the requested `diagramType`.\n3. Ensure the code starts with `@startuml` and ends with `@enduml`.\n4. Output ONLY the raw PlantUML code. Do not include markdown code blocks, explanations, or comments."
+        }
+      },
+      "id": "plantuml-agent-id",
+      "name": "PlantUML Generator Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.1,
+      "position": [350, 1550]
+    },
+    {
+      "parameters": {
+        "options": {
+          "text": "={{ $('Route Action').item.json.body.input }}",
+          "systemMessage": "You are an expert OCR (Optical Character Recognition) and vision analysis tool.\n\nYour task: Extract text and structure from the provided image.\n- Input: `{ imageDataUri }` (Base64 encoded image).\n\n**Process:**\n1. Perform high-accuracy text extraction from the image.\n2. Identify the logical structure (headings, paragraphs, lists).\n3. Format the extracted content as clean, readable Markdown.\n\nOutput ONLY valid JSON in this format:\n```json\n{\n  \"extractedText\": \"...markdown content...\"\n}\n```\nDo NOT include any text outside the JSON object."
+        }
+      },
+      "id": "image-to-text-agent-id",
+      "name": "ImageToText Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.1,
+      "position": [350, 1700]
+    },
+    {
+      "parameters": {
+        "options": {
+          "text": "={{ $('Route Action').item.json.body.input }}",
+          "systemMessage": "You are an expert in academic citations and formatting.\n\nYour task: Generate a formal citation for the provided source information.\n- Input: `{ sourceData, format }` where `format` is 'APA', 'MLA', 'Chicago', 'Harvard', or 'BibTeX'.\n\n**Process:**\n1. Extract authors, year, title, publication, and URL/DOI.\n2. Apply the requested formatting style precisely.\n3. Ensure all punctuation and italics are correct for the style.\n\nOutput ONLY the formatted citation string. No preamble, no meta-commentary."
+        }
+      },
+      "id": "citation-agent-id",
+      "name": "Citation Generator Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.1,
+      "position": [350, 1850]
+    },
+    {
+      "parameters": {
+        "options": {
+          "text": "={{ $('Route Action').item.json.body.input }}",
+          "systemMessage": "You are an expert document architect.\n\nYour task: Generate a structured Table of Contents (TOC) from the provided Markdown text.\n- Input: `{ text }` containing the document content.\n\n**Process:**\n1. Identify all headings (H1 to H4).\n2. Create a nested list representing the document structure.\n3. Include anchor links or page markers if applicable.\n\nOutput ONLY the TOC in Markdown format. No preamble, no meta-commentary."
+        }
+      },
+      "id": "toc-agent-id",
+      "name": "TOC Generator Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.1,
+      "position": [350, 2000]
+    },
+    {
+      "parameters": {
+        "options": {
+          "text": "={{ $('Route Action').item.json.body.input }}",
+          "systemMessage": "You are a world-class academic researcher specializing in literature reviews.\n\nYour task: Synthesize existing research into a cohesive literature review.\n- Input: `{ topic, researchSources }` containing the topic and an array of source summaries.\n\n**Process:**\n1. Identify common themes and conflicting findings across sources.\n2. Organize the review by theme, not by source.\n3. Use formal academic language and objective synthesis.\n4. Ensure proper attribution to the provided research sources.\n\nOutput ONLY the literature review in Markdown. No preamble, no meta-commentary."
+        }
+      },
+      "id": "lit-review-agent-id",
+      "name": "Literature Review Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.1,
+      "position": [350, 2150]
+    },
+    {
+      "parameters": {
+        "options": {
+          "text": "={{ $('Route Action').item.json.body.input }}",
+          "systemMessage": "You are an expert instructional designer and lecturer.\n\nYour task: Create a comprehensive lecture unit on the given topic.\n- Input: `{ topic, duration, audience }`.\n\n**Process:**\n1. Define clear learning objectives.\n2. Structure the lecture: Introduction → Key Concepts (3-5 points) → Summary → Discussion Questions.\n3. Provide detailed teaching notes and examples for each concept.\n4. Use a clear, engaging, yet professional tone.\n\nOutput ONLY the lecture content in Markdown. No preamble, no meta-commentary."
+        }
+      },
+      "id": "lecture-agent-id",
+      "name": "Lecture Generator Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.1,
+      "position": [350, 2300]
+    },
+    {
+      "parameters": {
+        "options": {
+          "text": "={{ $('Route Action').item.json.body.input }}",
+          "systemMessage": "You are a senior editor specializing in syntax and sentence variety.\n\nYour task: Analyze the sentence structure of the provided text.\n- Input: `{ text }`.\n\n**Process:**\n1. Evaluate sentence length variety and rhythm.\n2. Identify repetitive opening words or structures.\n3. Flag passive voice usage and complex dependencies.\n4. Provide specific suggestions for improving readability and flow.\n\nOutput ONLY a valid JSON object: `{ \"analysis\": \"...\", \"suggestions\": [\"...\"], \"readabilityScore\": 0-100 }`. No text outside the JSON."
+        }
+      },
+      "id": "sentence-check-agent-id",
+      "name": "Sentence Structure Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.1,
+      "position": [350, 2450]
+    },
+    {
+      "parameters": {
+        "options": {
+          "text": "={{ $('Route Action').item.json.body.input }}",
+          "systemMessage": "You are an expert educator specializing in simplifying complex topics.\n\nYour task: Explain the provided topic or concept clearly and effectively.\n- Input: `{ topic, complexityLevel }` where `complexityLevel` is 'elementary', 'intermediate', or 'advanced'.\n\n**Process:**\n1. Define the topic simply.\n2. Use analogies and examples tailored to the complexity level.\n3. Break down complex components into digestible parts.\n4. Address common misconceptions.\n\nOutput ONLY the explanation in Markdown. No preamble, no meta-commentary."
+        }
+      },
+      "id": "explainer-agent-id",
+      "name": "Topic Explainer Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.1,
+      "position": [350, 2600]
+    },
+    {
+      "parameters": {
+        "options": {
+          "text": "={{ $('Route Action').item.json.body.input }}",
+          "systemMessage": "You are a creative consultant and brainstorming expert.\n\nYour task: Generate innovative ideas based on the provided theme or prompt.\n- Input: `{ theme, count, constraints }`.\n\n**Process:**\n1. Brainstorm diverse and original ideas related to the theme.\n2. Ensure ideas respect the provided constraints.\n3. Categorize ideas for clarity (e.g., 'Safe', 'Ambitious', 'Out-of-the-box').\n\nOutput ONLY a valid JSON array of ideas: `[ { \"idea\": \"...\", \"category\": \"...\", \"rationale\": \"...\" } ]`. No text outside the JSON."
+        }
+      },
+      "id": "ideas-agent-id",
+      "name": "Idea Generator Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.1,
+      "position": [350, 2750]
+    },
+    {
+      "parameters": {
+        "options": {
+          "text": "={{ $('Route Action').item.json.body.input }}",
+          "systemMessage": "You are an expert UI/UX designer and technical writer.\n\nYour task: Generate a comprehensive description of a user interface based on the provided requirements.\n- Input: `{ requirements, platform, style }`.\n\n**Process:**\n1. Identify key UI components and layout structure.\n2. Describe the visual style, colors, and typography.\n3. Detail the user interactions and navigation flow.\n\nOutput ONLY the UI description in Markdown. No preamble, no meta-commentary."
+        }
+      },
+      "id": "ui-desc-agent-id",
+      "name": "UI Description Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.1,
+      "position": [350, 2900]
+    },
+    {
+      "parameters": {
+        "options": {
+          "text": "={{ $('Route Action').item.json.body.input }}",
+          "systemMessage": "You are an expert facilitator and session planner.\n\nYour task: Create a detailed session plan for a workshop or meeting.\n- Input: `{ topic, duration, attendees, goals }`.\n\n**Process:**\n1. Define clear learning or session objectives.\n2. Break down the session into timed segments (e.g., Intro, Activity, Discussion, Wrap-up).\n3. Specify required materials and preparation steps.\n\nOutput ONLY the session plan in Markdown. No preamble, no meta-commentary."
+        }
+      },
+      "id": "session-plan-agent-id",
+      "name": "Session Plan Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.1,
+      "position": [350, 3050]
+    },
+    {
+      "parameters": {
+        "options": {
+          "text": "={{ $('Route Action').item.json.body.input }}",
+          "systemMessage": "You are a professional academic tutor and subject matter expert.\n\nYour task: Provide detailed solutions and explanations for the provided assignments.\n- Input: `{ assignmentText, subject, complexity }`.\n\n**Process:**\n1. Analyze the assignment questions carefully.\n2. Provide step-by-step solutions with clear logic.\n3. Explain key concepts and provide additional context for learning.\n\nOutput ONLY the assignment solutions in Markdown. No preamble, no meta-commentary."
+        }
+      },
+      "id": "assignments-agent-id",
+      "name": "Assignments Solver Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.1,
+      "position": [350, 3200]
+    },
+    {
+      "parameters": {
+        "options": {
+          "text": "={{ $('Route Action').item.json.body.input }}",
+          "systemMessage": "You are a senior project manager and strategic planner.\n\nYour task: Generate a comprehensive project blueprint or roadmap.\n- Input: `{ projectName, goals, scope, constraints }`.\n\n**Process:**\n1. Define project phases and key milestones.\n2. Identify critical tasks, dependencies, and resource requirements.\n3. Outline potential risks and mitigation strategies.\n\nOutput ONLY the project blueprint in Markdown. No preamble, no meta-commentary."
+        }
+      },
+      "id": "blueprint-agent-id",
+      "name": "Project Blueprint Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.1,
+      "position": [350, 3350]
+    },
+    {
+      "parameters": {
+        "options": {
+          "text": "={{ $('Route Action').item.json.body.input }}",
+          "systemMessage": "You are a professional academic proofreader and editor.\n\nYour task: Perform a deep proofread of the provided document.\n- Input: `{ text }`.\n\n**Process:**\n1. Correct all grammar, spelling, and punctuation errors.\n2. Improve sentence structure, clarity, and academic tone.\n3. Ensure consistency in terminology and formatting.\n\nOutput ONLY the proofread document in Markdown. No preamble, no meta-commentary."
+        }
+      },
+      "id": "proofread-agent-id",
+      "name": "Proofreader Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.1,
+      "position": [350, 3500]
+    },
+    {
+      "parameters": {
+        "options": {
+          "text": "={{ $('Route Action').item.json.body.input }}",
+          "systemMessage": "You are a senior data analyst specializing in context extraction.\n\nYour task: Analyze the provided text context and extract key information.\n- Input: `{ context }`.\n\n**Process:**\n1. Identify key entities (people, organizations, locations).\n2. Extract important events, dates, and relationships.\n3. Summarize the main themes and insights from the context.\n\nOutput ONLY a valid JSON object: `{ \"entities\": [\"...\"], \"insights\": [\"...\"], \"summary\": \"...\" }`. No text outside the JSON."
+        }
+      },
+      "id": "context-analyst-agent-id",
+      "name": "Context Analyst Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.1,
+      "position": [350, 3650]
+    },
+    {
+      "parameters": {
+        "options": {
+          "text": "={{ $('Route Action').item.json.body.input }}",
+          "systemMessage": "You are a world-class academic reviewer and quality assurance expert.\n\nYour task: Perform a rigorous quality check on the provided academic paper.\n- Input: `{ title, abstract, content, field }`.\n\n**Process:**\n1. Evaluate the logical flow and structural integrity.\n2. Assess the methodology and evidence provided.\n3. Check for clarity of arguments and academic rigor.\n4. Provide a detailed quality score and specific improvement suggestions.\n\nOutput ONLY a valid JSON object: `{ \"qualityScore\": 0-100, \"strengths\": [\"...\"], \"weaknesses\": [\"...\"], \"suggestions\": [\"...\"], \"verdict\": \"...\" }`. No text outside the JSON."
+        }
+      },
+      "id": "quality-checker-agent-id",
+      "name": "Paper Quality Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.1,
+      "position": [350, 3800]
+    },
+    {
+      "parameters": {
+        "options": {
+          "text": "={{ $('Route Action').item.json.body.input }}",
+          "systemMessage": "You are an expert Markdown architect and technical editor.\n\nYour task: Enhance and professionalize the provided Markdown report.\n- Input: `{ markdownContent, improvementGoals }`.\n\n**Process:**\n1. Improve headings and hierarchical structure.\n2. Standardize formatting (bolding, lists, tables).\n3. Enhance language clarity and professional tone.\n4. Ensure all Markdown syntax is clean and error-free.\n\nOutput ONLY the improved Markdown content. No preamble, no meta-commentary."
+        }
+      },
+      "id": "markdown-improver-agent-id",
+      "name": "Markdown Improver Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.1,
+      "position": [350, 3950]
+    },
+    {
+      "parameters": {
+        "options": {
+          "text": "={{ $('Route Action').item.json.body.input }}",
+          "systemMessage": "You are a senior technical writer and project documentarian.\n\nYour task: Generate comprehensive documentation for the provided project.\n- Input: `{ projectTitle, features, techStack, targetAudience }`.\n\n**Process:**\n1. Create a professional README or technical guide.\n2. Detail installation, usage, and API reference if applicable.\n3. Structure the document for maximum readability and usefulness.\n\nOutput ONLY the project documentation in Markdown. No preamble, no meta-commentary."
+        }
+      },
+      "id": "project-doc-agent-id",
+      "name": "Project Documentation Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.1,
+      "position": [350, 4100]
+    },
+    {
+      "parameters": {
+        "options": {
+          "text": "={{ $('Route Action').item.json.body.input }}",
+          "systemMessage": "You are an expert in content conversion and Markdown formatting.\n\nYour task: Rewrite the provided content into clean, structured Markdown.\n- Input: `{ content, structureInstructions }`.\n\n**Process:**\n1. Convert plain text or unformatted content into logical Markdown segments.\n2. Apply appropriate heading levels, lists, and emphasis.\n3. Preserve all original information while significantly improving readability.\n\nOutput ONLY the resulting Markdown. No preamble, no meta-commentary."
+        }
+      },
+      "id": "rewrite-md-agent-id",
+      "name": "Rewrite to Markdown Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.1,
+      "position": [350, 4250]
+    },
+    {
+      "parameters": {
+        "options": {
+          "text": "={{ $('Route Action').item.json.body.input }}",
+          "systemMessage": "You are a senior systems engineer and technical specification expert.\n\nYour task: Generate a detailed technical specification document.\n- Input: `{ systemTitle, requirements, architecture, constraints }`.\n\n**Process:**\n1. Define technical objectives and scope.\n2. Detail system components, data models, and API endpoints.\n3. Specify performance requirements and security considerations.\n\nOutput ONLY the technical specification in Markdown. No preamble, no meta-commentary."
+        }
+      },
+      "id": "tech-spec-agent-id",
+      "name": "Technical Spec Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.1,
+      "position": [350, 4400]
+    },
+    {
+      "parameters": {
+        "options": {
+          "text": "={{ $('Route Action').item.json.body.input }}",
+          "systemMessage": "You are a presentation design expert and slide content creator.\n\nYour task: Generate structured content for presentation slides.\n- Input: `{ topic, slideCount, targetAudience }`.\n\n**Process:**\n1. Create a logical slide-by-slide outline.\n2. For each slide, provide a Title, Key Points (bulleted), and Speaker Notes.\n3. Ensure content is engaging and optimized for visual presentation.\n\nOutput ONLY the slide content in Markdown format. No preamble, no meta-commentary."
+        }
+      },
+      "id": "presentation-agent-id",
+      "name": "Presentation Creator Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.1,
+      "position": [350, 4550]
+    },
+    {
+      "parameters": {
+        "options": {
+          "text": "={{ $('Route Action').item.json.body.input }}",
+          "systemMessage": "You are Arkan AI, a professional academic and technical writing assistant. \n- Use a professional, objective tone.\n- If the user provides context via the retrieval tool, prioritize that information.\n- Formatting: Always use clean Markdown."
+        }
+      },
+      "id": "b12dc7a4-7761-4e7d-a26b-f8d5c12e98fe",
+      "name": "Arkan AI Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.1,
+      "position": [350, 1000]
+    },
+    {
+      "parameters": {
+        "model": "openrouter/auto",
+        "options": {}
+      },
+      "id": "5e03e364-7c30-43d0-a260-aa14486ca43d",
+      "name": "OpenRouter Chat Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+      "typeVersion": 1,
+      "position": [100, 1200],
+      "credentials": {
+        "openRouterApi": {
+          "id": "5l2XC5NZppPGQv1b",
+          "name": "OpenRouter account 2"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "id": "c606aaa3-403d-4896-bd2d-a71c373b689a",
+      "name": "Window Buffer Memory",
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.1,
+      "position": [300, 1200]
+    },
+    {
+      "parameters": {
+        "name": "retriever",
+        "description": "Use this tool to search internal project documents and knowledge base for project-specific information."
+      },
+      "id": "eeb17287-5f83-4cdf-bb95-9f102c4ba93b",
+      "name": "Vector Store Retriever",
+      "type": "@n8n/n8n-nodes-langchain.retrieverVectorStore",
+      "typeVersion": 1,
+      "position": [500, 1200]
+    },
+    {
+      "parameters": {
+        "qdrantCollection": {
+          "__rl": true,
+          "value": "arkan_vectors",
+          "mode": "list",
+          "cachedResultName": "arkan_vectors"
+        },
+        "options": {}
+      },
+      "id": "28b148a1-48dc-40f5-9f63-9a53d3f4b1ab",
+      "name": "Qdrant Vector Store",
+      "type": "@n8n/n8n-nodes-langchain.vectorStoreQdrant",
+      "typeVersion": 1,
+      "position": [500, 1400],
+      "credentials": {
+        "qdrantApi": {
+          "id": "iG5FAY9BPLIlgLzb",
+          "name": "QdrantApi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": "nomic-embed-text:latest"
+      },
+      "id": "42c97ac7-94ca-493f-8376-d2ad2020a0a9",
+      "name": "Embed Ollama",
+      "type": "@n8n/n8n-nodes-langchain.embeddingsOllama",
+      "typeVersion": 1,
+      "position": [500, 1600],
+      "credentials": {
+        "ollamaApi": {
+          "id": "VDUE93q3jr564BTv",
+          "name": "Ollama account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "id": "9cb0c9fd-d3c8-421b-bdeb-64d2f07372ca",
+      "name": "Wikipedia",
+      "type": "@n8n/n8n-nodes-langchain.toolWikipedia",
+      "typeVersion": 1,
+      "position": [700, 1000]
+    },
+    {
+      "parameters": {},
+      "id": "83356311-e19b-463c-9c5e-60fbba4bcf67",
+      "name": "Calculator",
+      "type": "@n8n/n8n-nodes-langchain.toolCalculator",
+      "typeVersion": 1,
+      "position": [850, 1000]
+    },
+    {
+      "parameters": {
+        "jsCode": "// runFlow handler - returns processed flow name for reference\nconst flowName = $json.body.flowName;\nconst input = $json.body.input;\nreturn { text: `Processed flow ${flowName} with Arkan Logic Engine`, flowName, input };"
+      },
+      "id": "080f1287-5207-4c18-bf1d-b7d7e4ab126f",
+      "name": "Flow Logic",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 1,
+      "position": [50, 500]
+    },
+    {
+      "parameters": {
+        "jsCode": "// retrieveContext handler\nconst query = $json.body.prompt;\nconst options = $json.body.options || {};\nreturn { context: [], query, message: 'RAG retrieval via Qdrant', success: true };"
+      },
+      "id": "retrieve-context-id",
+      "name": "Retrieve Context",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 1,
+      "position": [50, 650]
+    },
+    {
+      "parameters": {
+        "options": {
+          "systemMessage": "You are Arkan AI, an expert academic writing assistant specializing in chapter generation.\n\n## Your Task\nGenerate a complete, well-structured **chapter** for an academic document.\n\nThe user will provide a JSON input containing:\n- `chapterTitle`: The title of the chapter\n- `sectionInstructions`: An array of sections to write, each with `title`, `prompt`, `guidelines`, `instructionText`, and `context`\n- `projectId` / `userId`: For RAG retrieval context\n\n## Process\n1. Parse the `input` JSON object from the user message.\n2. ALWAYS use the `retriever` tool to search the knowledge base using the chapterTitle and section titles as your query.\n3. For each section in `sectionInstructions`, generate content following its specific `prompt`, `guidelines`, and `instructionText`.\n4. Synthesize all retrieved context and section context into a cohesive, flowing chapter.\n\n## Output Requirements\n- Format: Clean Markdown. Start each section with ## heading matching the section title.\n- Tone: Formal, academic, evidence-based.\n- Do NOT include conversational filler. Output ONLY the chapter content.\n- The output will be used directly in an academic document."
+        }
+      },
+      "id": "chapter-agent-id",
+      "name": "Chapter RAG Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.1,
+      "position": [50, 800]
+    },
+    {
+      "parameters": {
+        "options": {
+          "systemMessage": "You are Arkan AI, an expert academic writing assistant specializing in report section generation.\n\n## Your Task\nGenerate a focused, well-written **section** of an academic report.\n\nThe user will provide a JSON input containing:\n- `sectionToGenerate`: The name of the section to write\n- `prompt`: The system-level instructions for this section\n- `instructionText`: Additional writing instructions\n- `guidelines`: An array of writing guidelines\n- `otherSections`: Context from other already-written sections\n- `externalContext`: Uploaded file content for reference\n- `projectId` / `userId`: For RAG retrieval\n\n## Process\n1. Parse the `input` JSON object from the user message.\n2. ALWAYS use the `retriever` tool first to search the knowledge base using `sectionToGenerate` and `instructionText` as your query.\n3. Carefully read `otherSections` and `externalContext` to understand what has already been written.\n4. Follow the `prompt`, `guidelines`, and `instructionText` precisely.\n5. Write ONLY the content for this specific section — do not repeat other sections.\n\n## Output Format\nReturn a JSON object: { \"sectionName\": \"...\", \"content\": \"[complete markdown content]\" }\n\nDo NOT include conversational filler, apologies, or meta-commentary."
+        }
+      },
+      "id": "section-agent-id",
+      "name": "Section RAG Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.1,
+      "position": [50, 1000]
+    },
+    {
+      "parameters": {
+        "values": {
+          "string": [
+            {
+              "name": "text",
+              "value": "={{ $json.output || $json.text }}"
+            },
+            {
+              "name": "success",
+              "value": "true"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "9f0f8a56-d62f-4c1b-bf79-c5ccd5bf4dc9",
+      "name": "Prepare Response",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 1,
+      "position": [1100, 300]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $json }}",
+        "options": {}
+      },
+      "id": "4d4c610b-bdd6-4e09-b1d3-7bedbbc4f3eb",
+      "name": "Respond to Webhook",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [1350, 300]
+    },
+    {
+      "parameters": {},
+      "id": "468ad911-e566-41fe-9f90-8e2506c7d071",
+      "name": "Error Trigger",
+      "type": "n8n-nodes-base.errorTrigger",
+      "typeVersion": 1,
+      "position": [1100, 500]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={\n  \"success\": false,\n  \"error\": \"{{ $json.execution.error.message }}\"\n}",
+        "options": {}
+      },
+      "id": "2c86cb3b-9d1a-48f8-9d24-a2dc1378b1cb",
+      "name": "Error Response",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [1350, 500]
+    }
+  ],
+  "pinData": {
+    "Webhook": [
+      {
+        "json": {
+          "body": {
+            "action": "generateText",
+            "flowName": "summarize",
+            "prompt": "Summarize this: Artificial intelligence is transforming industries worldwide.",
+            "text": "Artificial intelligence is transforming industries worldwide.",
+            "length": "short"
+          }
+        }
+      }
+    ]
+  },
+  "connections": {
+    "Webhook": {
+      "main": [[{ "node": "Route Action", "type": "main", "index": 0 }]]
+    },
+    "Route Action": {
+      "main": [
+        [{ "node": "Route Flow", "type": "main", "index": 0 }],
+        [{ "node": "Flow Logic", "type": "main", "index": 0 }],
+        [{ "node": "Retrieve Context", "type": "main", "index": 0 }],
+        [{ "node": "Chapter RAG Agent", "type": "main", "index": 0 }],
+        [{ "node": "Section RAG Agent", "type": "main", "index": 0 }]
+      ]
+    },
+    "Route Flow": {
+      "main": [
+        [{ "node": "Summarizer Agent", "type": "main", "index": 0 }],
+        [{ "node": "Grammar Checker Agent", "type": "main", "index": 0 }],
+        [{ "node": "Paraphraser Agent", "type": "main", "index": 0 }],
+        [{ "node": "Bias Checker Agent", "type": "main", "index": 0 }],
+        [{ "node": "AI Detector Agent", "type": "main", "index": 0 }],
+        [{ "node": "Translator Agent", "type": "main", "index": 0 }],
+        [{ "node": "Quiz Generator Agent", "type": "main", "index": 0 }],
+        [{ "node": "Fact Checker Agent", "type": "main", "index": 0 }],
+        [{ "node": "Plagiarism Checker Agent", "type": "main", "index": 0 }],
+        [{ "node": "Humanizer Agent", "type": "main", "index": 0 }],
+        [{ "node": "AI Researcher Agent", "type": "main", "index": 0 }],
+        [{ "node": "PlantUML Generator Agent", "type": "main", "index": 0 }],
+        [{ "node": "ImageToText Agent", "type": "main", "index": 0 }],
+        [{ "node": "Citation Generator Agent", "type": "main", "index": 0 }],
+        [{ "node": "TOC Generator Agent", "type": "main", "index": 0 }],
+        [{ "node": "Literature Review Agent", "type": "main", "index": 0 }],
+        [{ "node": "Lecture Generator Agent", "type": "main", "index": 0 }],
+        [{ "node": "Sentence Structure Agent", "type": "main", "index": 0 }],
+        [{ "node": "Topic Explainer Agent", "type": "main", "index": 0 }],
+        [{ "node": "Idea Generator Agent", "type": "main", "index": 0 }],
+        [{ "node": "UI Description Agent", "type": "main", "index": 0 }],
+        [{ "node": "Session Plan Agent", "type": "main", "index": 0 }],
+        [{ "node": "Assignments Solver Agent", "type": "main", "index": 0 }],
+        [{ "node": "Project Blueprint Agent", "type": "main", "index": 0 }],
+        [{ "node": "Proofreader Agent", "type": "main", "index": 0 }],
+        [{ "node": "Context Analyst Agent", "type": "main", "index": 0 }],
+        [{ "node": "Paper Quality Agent", "type": "main", "index": 0 }],
+        [{ "node": "Markdown Improver Agent", "type": "main", "index": 0 }],
+        [{ "node": "Project Documentation Agent", "type": "main", "index": 0 }],
+        [{ "node": "Rewrite to Markdown Agent", "type": "main", "index": 0 }],
+        [{ "node": "Technical Spec Agent", "type": "main", "index": 0 }],
+        [{ "node": "Presentation Creator Agent", "type": "main", "index": 0 }],
+        [{ "node": "Arkan AI Agent", "type": "main", "index": 0 }]
+      ]
+    },
+    "OpenRouter Chat Model": {
+      "ai_languageModel": [
+        [{ "node": "Summarizer Agent", "type": "ai_languageModel", "index": 0 }],
+        [{ "node": "Grammar Checker Agent", "type": "ai_languageModel", "index": 0 }],
+        [{ "node": "Paraphraser Agent", "type": "ai_languageModel", "index": 0 }],
+        [{ "node": "Bias Checker Agent", "type": "ai_languageModel", "index": 0 }],
+        [{ "node": "AI Detector Agent", "type": "ai_languageModel", "index": 0 }],
+        [{ "node": "Translator Agent", "type": "ai_languageModel", "index": 0 }],
+        [{ "node": "Quiz Generator Agent", "type": "ai_languageModel", "index": 0 }],
+        [{ "node": "Fact Checker Agent", "type": "ai_languageModel", "index": 0 }],
+        [{ "node": "Plagiarism Checker Agent", "type": "ai_languageModel", "index": 0 }],
+        [{ "node": "Humanizer Agent", "type": "ai_languageModel", "index": 0 }],
+        [{ "node": "AI Researcher Agent", "type": "ai_languageModel", "index": 0 }],
+        [{ "node": "PlantUML Generator Agent", "type": "ai_languageModel", "index": 0 }],
+        [{ "node": "ImageToText Agent", "type": "ai_languageModel", "index": 0 }],
+        [{ "node": "Citation Generator Agent", "type": "ai_languageModel", "index": 0 }],
+        [{ "node": "TOC Generator Agent", "type": "ai_languageModel", "index": 0 }],
+        [{ "node": "Literature Review Agent", "type": "ai_languageModel", "index": 0 }],
+        [{ "node": "Lecture Generator Agent", "type": "ai_languageModel", "index": 0 }],
+        [{ "node": "Sentence Structure Agent", "type": "ai_languageModel", "index": 0 }],
+        [{ "node": "Topic Explainer Agent", "type": "ai_languageModel", "index": 0 }],
+        [{ "node": "Idea Generator Agent", "type": "ai_languageModel", "index": 0 }],
+        [{ "node": "UI Description Agent", "type": "ai_languageModel", "index": 0 }],
+        [{ "node": "Session Plan Agent", "type": "ai_languageModel", "index": 0 }],
+        [{ "node": "Assignments Solver Agent", "type": "ai_languageModel", "index": 0 }],
+        [{ "node": "Project Blueprint Agent", "type": "ai_languageModel", "index": 0 }],
+        [{ "node": "Proofreader Agent", "type": "ai_languageModel", "index": 0 }],
+        [{ "node": "Context Analyst Agent", "type": "ai_languageModel", "index": 0 }],
+        [{ "node": "Paper Quality Agent", "type": "ai_languageModel", "index": 0 }],
+        [{ "node": "Markdown Improver Agent", "type": "ai_languageModel", "index": 0 }],
+        [{ "node": "Project Documentation Agent", "type": "ai_languageModel", "index": 0 }],
+        [{ "node": "Rewrite to Markdown Agent", "type": "ai_languageModel", "index": 0 }],
+        [{ "node": "Technical Spec Agent", "type": "ai_languageModel", "index": 0 }],
+        [{ "node": "Presentation Creator Agent", "type": "ai_languageModel", "index": 0 }],
+        [{ "node": "Arkan AI Agent", "type": "ai_languageModel", "index": 0 }],
+        [{ "node": "Chapter RAG Agent", "type": "ai_languageModel", "index": 0 }],
+        [{ "node": "Section RAG Agent", "type": "ai_languageModel", "index": 0 }]
+      ]
+    },
+    "Window Buffer Memory": {
+      "ai_memory": [
+        [{ "node": "Arkan AI Agent", "type": "ai_memory", "index": 0 }]
+      ]
+    },
+    "Vector Store Retriever": {
+      "ai_tool": [
+        [{ "node": "Arkan AI Agent", "type": "ai_tool", "index": 0 }],
+        [{ "node": "Chapter RAG Agent", "type": "ai_tool", "index": 0 }],
+        [{ "node": "Section RAG Agent", "type": "ai_tool", "index": 0 }]
+      ]
+    },
+    "Wikipedia": {
+      "ai_tool": [
+        [{ "node": "Arkan AI Agent", "type": "ai_tool", "index": 0 }],
+        [{ "node": "Fact Checker Agent", "type": "ai_tool", "index": 0 }],
+        [{ "node": "AI Researcher Agent", "type": "ai_tool", "index": 0 }]
+      ]
+    },
+    "Calculator": {
+      "ai_tool": [
+        [{ "node": "Arkan AI Agent", "type": "ai_tool", "index": 0 }]
+      ]
+    },
+    "Qdrant Vector Store": {
+      "ai_vectorStore": [
+        [{ "node": "Vector Store Retriever", "type": "ai_vectorStore", "index": 0 }]
+      ]
+    },
+    "Embed Ollama": {
+      "ai_embedding": [
+        [{ "node": "Qdrant Vector Store", "type": "ai_embedding", "index": 0 }]
+      ]
+    },
+    "Summarizer Agent": {
+      "main": [[{ "node": "Prepare Response", "type": "main", "index": 0 }]]
+    },
+    "Grammar Checker Agent": {
+      "main": [[{ "node": "Prepare Response", "type": "main", "index": 0 }]]
+    },
+    "Paraphraser Agent": {
+      "main": [[{ "node": "Prepare Response", "type": "main", "index": 0 }]]
+    },
+    "Bias Checker Agent": {
+      "main": [[{ "node": "Prepare Response", "type": "main", "index": 0 }]]
+    },
+    "AI Detector Agent": {
+      "main": [[{ "node": "Prepare Response", "type": "main", "index": 0 }]]
+    },
+    "Translator Agent": {
+      "main": [[{ "node": "Prepare Response", "type": "main", "index": 0 }]]
+    },
+    "Quiz Generator Agent": {
+      "main": [[{ "node": "Prepare Response", "type": "main", "index": 0 }]]
+    },
+    "Fact Checker Agent": {
+      "main": [[{ "node": "Prepare Response", "type": "main", "index": 0 }]]
+    },
+    "Plagiarism Checker Agent": {
+      "main": [[{ "node": "Prepare Response", "type": "main", "index": 0 }]]
+    },
+    "Humanizer Agent": {
+      "main": [[{ "node": "Prepare Response", "type": "main", "index": 0 }]]
+    },
+    "AI Researcher Agent": {
+      "main": [[{ "node": "Prepare Response", "type": "main", "index": 0 }]]
+    },
+    "PlantUML Generator Agent": {
+      "main": [[{ "node": "Prepare Response", "type": "main", "index": 0 }]]
+    },
+    "ImageToText Agent": {
+      "main": [[{ "node": "Prepare Response", "type": "main", "index": 0 }]]
+    },
+    "Citation Generator Agent": {
+      "main": [[{ "node": "Prepare Response", "type": "main", "index": 0 }]]
+    },
+    "TOC Generator Agent": {
+      "main": [[{ "node": "Prepare Response", "type": "main", "index": 0 }]]
+    },
+    "Literature Review Agent": {
+      "main": [[{ "node": "Prepare Response", "type": "main", "index": 0 }]]
+    },
+    "Lecture Generator Agent": {
+      "main": [[{ "node": "Prepare Response", "type": "main", "index": 0 }]]
+    },
+    "Sentence Structure Agent": {
+      "main": [[{ "node": "Prepare Response", "type": "main", "index": 0 }]]
+    },
+    "Topic Explainer Agent": {
+      "main": [[{ "node": "Prepare Response", "type": "main", "index": 0 }]]
+    },
+    "Idea Generator Agent": {
+      "main": [[{ "node": "Prepare Response", "type": "main", "index": 0 }]]
+    },
+    "UI Description Agent": {
+      "main": [[{ "node": "Prepare Response", "type": "main", "index": 0 }]]
+    },
+    "Session Plan Agent": {
+      "main": [[{ "node": "Prepare Response", "type": "main", "index": 0 }]]
+    },
+    "Assignments Solver Agent": {
+      "main": [[{ "node": "Prepare Response", "type": "main", "index": 0 }]]
+    },
+    "Project Blueprint Agent": {
+      "main": [[{ "node": "Prepare Response", "type": "main", "index": 0 }]]
+    },
+    "Proofreader Agent": {
+      "main": [[{ "node": "Prepare Response", "type": "main", "index": 0 }]]
+    },
+    "Context Analyst Agent": {
+      "main": [[{ "node": "Prepare Response", "type": "main", "index": 0 }]]
+    },
+    "Paper Quality Agent": {
+      "main": [[{ "node": "Prepare Response", "type": "main", "index": 0 }]]
+    },
+    "Markdown Improver Agent": {
+      "main": [[{ "node": "Prepare Response", "type": "main", "index": 0 }]]
+    },
+    "Project Documentation Agent": {
+      "main": [[{ "node": "Prepare Response", "type": "main", "index": 0 }]]
+    },
+    "Rewrite to Markdown Agent": {
+      "main": [[{ "node": "Prepare Response", "type": "main", "index": 0 }]]
+    },
+    "Technical Spec Agent": {
+      "main": [[{ "node": "Prepare Response", "type": "main", "index": 0 }]]
+    },
+    "Presentation Creator Agent": {
+      "main": [[{ "node": "Prepare Response", "type": "main", "index": 0 }]]
+    },
+    "Arkan AI Agent": {
+      "main": [[{ "node": "Prepare Response", "type": "main", "index": 0 }]]
+    },
+    "Flow Logic": {
+      "main": [[{ "node": "Prepare Response", "type": "main", "index": 0 }]]
+    },
+    "Retrieve Context": {
+      "main": [[{ "node": "Prepare Response", "type": "main", "index": 0 }]]
+    },
+    "Chapter RAG Agent": {
+      "main": [[{ "node": "Prepare Response", "type": "main", "index": 0 }]]
+    },
+    "Section RAG Agent": {
+      "main": [[{ "node": "Prepare Response", "type": "main", "index": 0 }]]
+    },
+    "Prepare Response": {
+      "main": [[{ "node": "Respond to Webhook", "type": "main", "index": 0 }]]
+    },
+    "Error Trigger": {
+      "main": [[{ "node": "Error Response", "type": "main", "index": 0 }]]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "errorWorkflow": "Error Trigger"
+  }
+}

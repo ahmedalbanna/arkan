@@ -40,7 +40,7 @@ const generateTocPrompt = ai.definePrompt({
 });
 
 const generateTocFlow = ai.defineFlow({
-  name: 'generateTocFlow',
+  name: 'generateTOC',
   inputSchema: GenerateTocInputSchema,
   outputSchema: GenerateTocOutputSchema,
 }, async (input: GenerateTocInput) => {

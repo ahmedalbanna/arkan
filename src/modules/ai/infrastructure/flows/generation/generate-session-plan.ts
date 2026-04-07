@@ -58,7 +58,7 @@ const generateSessionPlanPrompt = ai.definePrompt({
 
 const generateSessionPlanFlow = ai.defineFlow(
   {
-    name: 'generateSessionPlanFlow',
+    name: 'generateSessionPlan',
     inputSchema: GenerateSessionPlanInputSchema,
     outputSchema: GenerateSessionPlanOutputSchema
   }, async (input: GenerateSessionPlanInput) => {

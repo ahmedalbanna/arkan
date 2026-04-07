@@ -73,7 +73,7 @@ Do NOT include any explanations or additional text outside the JSON.
 });
 
 const questionAnsweringFlow = ai.defineFlow({
-  name: 'questionAnsweringFlow',
+  name: 'questionAnswering',
   inputSchema: QuestionAnsweringInputSchema,
   outputSchema: QuestionAnsweringOutputSchema,
 }, async (input: QuestionAnsweringInput) => {

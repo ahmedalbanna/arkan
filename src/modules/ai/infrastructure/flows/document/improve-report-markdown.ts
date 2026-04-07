@@ -34,7 +34,7 @@ Your tasks are to:
 });
 
 const improveReportMarkdownFlow = ai.defineFlow({
-  name: 'improveReportMarkdownFlow',
+  name: 'improveMarkdown',
   inputSchema: ImproveMarkdownInputSchema,
   outputSchema: ImproveMarkdownOutputSchema
 }, async (input: ImproveMarkdownInput) => {

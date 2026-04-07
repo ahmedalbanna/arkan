@@ -29,7 +29,7 @@ Output ONLY the analysis in markdown format. Do NOT include any preamble, filler
 });
 
 const sentenceStructureCheckFlow = ai.defineFlow({
-  name: 'sentenceStructureCheckFlow',
+  name: 'sentenceStructureCheck',
   inputSchema: SentenceStructureCheckInputSchema,
   outputSchema: SentenceStructureCheckOutputSchema,
 }, async (input: SentenceStructureCheckInput) => {

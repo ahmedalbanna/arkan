@@ -67,7 +67,7 @@ Do NOT include any explanations or additional text outside the JSON.
 });
 
 const factRetrievalFlow = ai.defineFlow({
-    name: 'factRetrievalFlow',
+    name: 'factRetrieval',
     inputSchema: FactRetrievalInputSchema,
     outputSchema: FactRetrievalOutputSchema,
 }, async (input: FactRetrievalInput) => {

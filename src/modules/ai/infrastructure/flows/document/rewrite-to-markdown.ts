@@ -15,7 +15,7 @@ export async function rewriteToMarkdown(input: RewriteToMarkdownInput): Promise<
 
 const rewriteToMarkdownFlow = ai.defineFlow(
   {
-    name: 'rewriteToMarkdownFlow',
+    name: 'rewriteToMarkdown',
     inputSchema: RewriteToMarkdownInputSchema,
     outputSchema: RewriteToMarkdownOutputSchema,
   },

@@ -37,7 +37,7 @@ const PresentationInputSchema = z.object({
 
 const presentationContentCreatorFlow = ai.defineFlow(
     {
-        name: 'presentationContentCreator',
+        name: 'createPresentation',
         inputSchema: PresentationInputSchema,
         outputSchema: PresentationContentSchema,
     },

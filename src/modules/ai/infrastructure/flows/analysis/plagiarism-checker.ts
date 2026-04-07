@@ -43,7 +43,7 @@ Do NOT include any explanations or additional text outside the JSON.
 });
 
 const plagiarismCheckFlow = ai.defineFlow({
-  name: 'plagiarismCheckFlow',
+  name: 'plagiarismCheck',
   inputSchema: PlagiarismCheckInputSchema,
   outputSchema: PlagiarismCheckOutputSchema,
 }, async (input: PlagiarismCheckInput) => {

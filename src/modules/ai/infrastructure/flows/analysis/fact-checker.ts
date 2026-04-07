@@ -36,7 +36,7 @@ const factCheckPrompt = ai.definePrompt({
 });
 
 const factCheckFlow = ai.defineFlow({
-  name: 'factCheckFlow',
+  name: 'factCheck',
   inputSchema: FactCheckInputSchema,
   outputSchema: FactCheckOutputSchema,
 }, async (input: FactCheckInput) => {

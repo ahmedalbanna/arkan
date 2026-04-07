@@ -36,7 +36,7 @@ Your output must be a valid JSON object that adheres to the defined schema.
 });
 
 const topicExplainerFlow = ai.defineFlow({
-    name: 'topicExplainerFlow',
+    name: 'explainTopic',
     inputSchema: TopicExplainerInputSchema,
     outputSchema: TopicExplainerOutputSchema
 }, async (input: TopicExplainerInput) => {

@@ -34,7 +34,7 @@ If the source material contains multiple distinct sources, generate a citation f
 });
 
 const generateCitationFlow = ai.defineFlow({
-  name: 'generateCitationFlow',
+  name: 'generateCitation',
   inputSchema: GenerateCitationInputSchema,
   outputSchema: GenerateCitationOutputSchema,
 }, async (input: GenerateCitationInput) => {

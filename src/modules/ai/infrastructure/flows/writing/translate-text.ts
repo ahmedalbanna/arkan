@@ -17,7 +17,7 @@ export async function translateText(
 
 const translateTextFlow = ai.defineFlow(
   {
-    name: 'translateTextFlow',
+    name: 'translate',
     inputSchema: TranslateTextInputSchema,
     outputSchema: TranslateTextOutputSchema,
   },

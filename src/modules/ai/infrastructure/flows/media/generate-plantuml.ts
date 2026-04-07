@@ -98,7 +98,7 @@ const diagramPromptConfig: Record<DiagramType, { system: string; prompt: string 
 };
 
 const generatePlantUMLFlow = ai.defineFlow({
-  name: 'generatePlantUMLFlow',
+  name: 'generatePlantUML',
   inputSchema: GeneratePlantUMLInputSchema,
   outputSchema: GeneratePlantUMLOutputSchema
 }, async (input: GeneratePlantUMLInput) => {

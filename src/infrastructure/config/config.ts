@@ -29,3 +29,14 @@ export const firebaseAdminConfig = {
 export const ollamaConfig = {
   serverAddress: "http://localhost:11434",
 } as const;
+
+/**
+ * n8n Orchestration Configuration
+ * 
+ * Used by N8nAiService to delegate AI generation to an external n8n server.
+ * The webhook URL should point to the "Arkan AI Integration Workflow" webhook node.
+ */
+export const n8nConfig = {
+  webhookUrl: process.env.N8N_AI_WEBHOOK_URL || '',
+  isEnabled: Boolean(process.env.N8N_AI_WEBHOOK_URL),
+} as const;

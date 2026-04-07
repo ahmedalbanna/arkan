@@ -31,7 +31,7 @@ Image:
 
 const imageToTextFlow = ai.defineFlow(
   {
-    name: 'imageToTextFlow',
+    name: 'imageToText',
     inputSchema: ImageToTextInputSchema,
     outputSchema: ImageToTextOutputSchema,
   },

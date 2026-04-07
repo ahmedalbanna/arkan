@@ -39,7 +39,7 @@ const TechnicalSpecInputSchema = z.object({
 
 const technicalSpecificationWriterFlow = ai.defineFlow(
     {
-        name: 'technicalSpecificationWriter',
+        name: 'writeTechSpec',
         inputSchema: TechnicalSpecInputSchema,
         outputSchema: TechnicalSpecificationSchema,
     },

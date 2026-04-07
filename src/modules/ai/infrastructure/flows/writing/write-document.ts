@@ -78,7 +78,7 @@ Output ONLY the document markdown. Do NOT include any preamble, filler, or JSON 
 });
 
 const writeDocumentFlow = ai.defineFlow({
-  name: 'writeDocumentFlow',
+  name: 'writeDocument',
   inputSchema: WriteDocumentInputSchema,
   outputSchema: WriteDocumentOutputSchema
 }, async (input: WriteDocumentInput) => {

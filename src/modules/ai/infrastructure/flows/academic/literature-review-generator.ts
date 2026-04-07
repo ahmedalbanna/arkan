@@ -68,7 +68,7 @@ const literatureReviewPrompt = ai.definePrompt({
 });
 
 const literatureReviewFlow = ai.defineFlow({
-  name: 'literatureReviewFlow',
+  name: 'generateLitReview',
   inputSchema: LiteratureReviewInputSchema,
   outputSchema: LiteratureReviewOutputSchema,
 }, async (input: LiteratureReviewInput) => {

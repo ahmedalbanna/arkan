@@ -8,10 +8,14 @@
 - **TypeScript**: Strict-mode type safety with 100% compliance verified via `tsc`.
 
 ### AI Integration
-- **Google Genkit**: Core AI orchestration framework.
-- **Ollama**: Local neural inference cluster.
-- **Result Pattern**: Uniform `Result<T, E>` return vectors for all flows.
-- **Telemetry**: High-precision timing instrumentation for all retrieval phases.
+- **Active Engine**: `N8nAiService` (auto-selected when `N8N_AI_WEBHOOK_URL` is set), falls back to `GenkitAiService`.
+- **n8n Server**: External orchestration on `vmi2935537.contaboserver.net`. Workflow ID: `uduvS9JJKfnunoyv`.
+- **n8n AI Stack**: OpenRouter (`openrouter/auto`) + Ollama Embeddings (`nomic-embed-text:latest`) + Qdrant RAG.
+- **n8n Agents**: 32 specialized agents + 1 general Arkan AI Agent + 2 RAG agents (Chapter/Section).
+- **Google Genkit**: Local AI orchestration framework (fallback when n8n is unavailable).
+- **Ollama**: Local inference (`nomic-embed-text` for embeddings, `gemma:2b` for local fallback).
+- **Result Pattern**: Uniform `Result<T, E>` return vectors for all flows. Access via `.isSuccess` and `.error`.
+- **Telemetry**: High-precision `performance.now()` timing in all n8n calls and retrieval phases.
 
 ### Data & Visualization
 - **Database**: SQLite with Drizzle ORM.

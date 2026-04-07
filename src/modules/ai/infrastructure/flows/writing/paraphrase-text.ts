@@ -34,7 +34,7 @@ Output ONLY the paraphrased text. Do NOT include any preamble, filler, or JSON w
 });
 
 const paraphraseTextFlow = ai.defineFlow({
-    name: 'paraphraseTextFlow',
+    name: 'paraphrase',
     inputSchema: ParaphraseInputSchema,
     outputSchema: ParaphraseOutputSchema,
 }, async (input: ParaphraseInput) => {

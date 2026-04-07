@@ -50,7 +50,7 @@ Do NOT include any explanations or additional text outside the JSON.
 });
 
 const detectAiContentFlow = ai.defineFlow({
-    name: 'detectAiContentFlow',
+    name: 'detectAi',
     inputSchema: DetectAIInputSchema,
     outputSchema: DetectAIOutputSchema,
 }, async (input: DetectAIInput) => {

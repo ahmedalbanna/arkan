@@ -22,7 +22,7 @@ export type AcademicPaperQualityCheckerOutput = z.infer<typeof AcademicPaperQual
 
 const academicPaperQualityCheckerFlow = ai.defineFlow(
     {
-        name: 'academicPaperQualityCheckerFlow',
+        name: 'checkPaperQuality',
         inputSchema: AcademicPaperQualityCheckerInputSchema,
         outputSchema: AcademicPaperQualityCheckerOutputSchema,
     },

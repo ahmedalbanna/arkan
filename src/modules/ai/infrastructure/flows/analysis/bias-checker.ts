@@ -43,7 +43,7 @@ Do NOT include any explanations or additional text outside the JSON.
 });
 
 const biasCheckFlow = ai.defineFlow({
-  name: 'biasCheckFlow',
+  name: 'biasCheck',
   inputSchema: BiasCheckInputSchema,
   outputSchema: BiasCheckOutputSchema,
 }, async (input: BiasCheckInput) => {

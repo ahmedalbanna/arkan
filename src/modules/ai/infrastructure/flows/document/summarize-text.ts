@@ -38,7 +38,7 @@ Output ONLY the summary text. Do NOT include any preamble, filler, or JSON wrapp
 });
 
 const summarizeTextFlow = ai.defineFlow({
-    name: 'summarizeTextFlow',
+    name: 'summarize',
     inputSchema: SummarizeInputSchema,
     outputSchema: SummarizeOutputSchema
 }, async (input: SummarizeInput) => {

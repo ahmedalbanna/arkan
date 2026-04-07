@@ -62,7 +62,7 @@ const researcherPrompt = ai.definePrompt({
 });
 
 const aiResearcherFlow = ai.defineFlow({
-  name: 'aiResearcherFlow',
+  name: 'aiResearch',
   inputSchema: AIResearcherInputSchema,
   outputSchema: AIResearcherOutputSchema,
 }, async (input: AIResearcherInput) => {

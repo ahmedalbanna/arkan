@@ -49,7 +49,7 @@ const ProjectDocumentationOutputSchema = z.object({
 
 const projectDocumentationGeneratorFlow = ai.defineFlow(
     {
-        name: 'projectDocumentationGenerator',
+        name: 'generateProjectDoc',
         inputSchema: ProjectDocumentationInputSchema,
         outputSchema: ProjectDocumentationOutputSchema,
     },

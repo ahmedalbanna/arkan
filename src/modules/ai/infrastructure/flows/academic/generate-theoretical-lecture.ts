@@ -62,7 +62,7 @@ const generateTheoreticalLecturePrompt = ai.definePrompt({
 
 // Define the AI Flow
 const generateTheoreticalLectureFlow = ai.defineFlow({
-  name: 'generateTheoreticalLectureFlow',
+  name: 'generateLecture',
   inputSchema: GenerateTheoreticalLectureInputSchema,
   outputSchema: GenerateTheoreticalLectureOutputSchema
 }, async (input: GenerateTheoreticalLectureInput) => {

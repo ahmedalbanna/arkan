@@ -167,7 +167,7 @@ The following files have been provided to give you more context about the desire
 });
 
 const generateAgentConfigFlow = ai.defineFlow({
-  name: 'generateAgentConfigFlow',
+  name: 'generateAgentConfig',
   inputSchema: GenerateAgentConfigInputSchema,
   outputSchema: GenerateAgentConfigOutputSchema
 }, async (input: z.infer<typeof GenerateAgentConfigInputSchema>) => {

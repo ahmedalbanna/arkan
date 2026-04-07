@@ -4,7 +4,7 @@ import { ai } from '@/modules/ai/infrastructure/services/Genkit';
 import { GenerateUIDescriptionInputSchema, GenerateUIDescriptionOutputSchema, type GenerateUIDescriptionInput, type GenerateUIDescriptionOutput } from '@/modules/ai/domain/schemas';
 
 const uiDescriptionFlow = ai.defineFlow({
-    name: 'generateUiDescriptionFlow',
+    name: 'generateUIDescription',
     inputSchema: GenerateUIDescriptionInputSchema,
     outputSchema: GenerateUIDescriptionOutputSchema,
 }, async (input: GenerateUIDescriptionInput) => {

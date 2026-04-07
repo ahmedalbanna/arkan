@@ -43,7 +43,7 @@ Output ONLY the markdown text. Do NOT include any preamble, filler, or JSON wrap
 });
 
 const generateIdeasFlow = ai.defineFlow({
-  name: 'generateIdeasFlow',
+  name: 'generateIdeas',
   inputSchema: IdeaGenerationInputSchema,
   outputSchema: IdeaGenerationOutputSchema,
 }, async (input: IdeaGenerationInput) => {

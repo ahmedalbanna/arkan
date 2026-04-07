@@ -68,7 +68,7 @@ const analysisPrompt = ai.definePrompt({
 });
 
 const analyzeContextFlow = ai.defineFlow({
-    name: 'analyzeContextFlow',
+    name: 'analyzeContext',
     inputSchema: AnalyzeContextInputSchema,
     outputSchema: AnalyzeContextOutputSchema,
 }, async (input: AnalyzeContextInput) => {

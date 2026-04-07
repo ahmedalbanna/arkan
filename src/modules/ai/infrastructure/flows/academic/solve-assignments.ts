@@ -8,7 +8,7 @@ import { ai } from '@/modules/ai/infrastructure/services/Genkit';
 import { SolveAssignmentsInputSchema, SolveAssignmentsOutputSchema, type SolveAssignmentsInput, type SolveAssignmentsOutput } from '@/modules/ai/domain/schemas';
 
 const solveAssignmentsFlow = ai.defineFlow({
-    name: 'solveAssignmentsFlow',
+    name: 'solveAssignments',
     inputSchema: SolveAssignmentsInputSchema,
     outputSchema: SolveAssignmentsOutputSchema
 }, async (input: SolveAssignmentsInput) => {
