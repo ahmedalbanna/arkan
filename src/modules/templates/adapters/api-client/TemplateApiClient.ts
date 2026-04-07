@@ -1,6 +1,7 @@
 import { injectable } from 'tsyringe';
 import { apiService, ApiError } from '@/infrastructure/api/ApiService';
 import { Result } from '@/infrastructure/utils/result';
+import { type Template } from '../../domain/repositories/ITemplateRepository';
 
 const toApiError = (error: unknown): ApiError => {
   if (error instanceof ApiError) return error;
@@ -11,29 +12,29 @@ const toApiError = (error: unknown): ApiError => {
 export class TemplateApiClient {
   // --- DOCX Templates ---
 
-  async fetchDocxTemplatesApi(): Promise<Result<any[], ApiError>> {
+  async fetchDocxTemplates(): Promise<Result<Template[], ApiError>> {
     try {
-      const data = await apiService<never, any[]>({ endpoint: '/api/templates/docx' });
+      const data = await apiService<never, Template[]>({ endpoint: '/api/templates/docx' });
       return Result.ok(data);
     } catch (error: unknown) {
       return Result.fail(toApiError(error));
     }
   }
 
-  async fetchDocxTemplateByIdApi(key: string): Promise<Result<any, ApiError>> {
+  async fetchDocxTemplateById(id: string): Promise<Result<Template, ApiError>> {
     try {
-      const data = await apiService<never, any>({ endpoint: `/api/templates/docx/${key}` });
+      const data = await apiService<never, Template>({ endpoint: `/api/templates/docx/${id}` });
       return Result.ok(data);
     } catch (error: unknown) {
       return Result.fail(toApiError(error));
     }
   }
 
-  async saveDocxTemplateApi(
-    options: { id: string; data: any }
-  ): Promise<Result<any, ApiError>> {
+  async saveDocxTemplate(
+    options: { id: string; data: Partial<Template> }
+  ): Promise<Result<Template, ApiError>> {
     try {
-      const response = await apiService<any, any>({
+      const response = await apiService<Partial<Template>, Template>({
         endpoint: `/api/templates/docx/${options.id}`,
         method: 'POST',
         data: options.data,
@@ -44,13 +45,13 @@ export class TemplateApiClient {
     }
   }
 
-  async deleteDocxTemplateApi(key: string): Promise<Result<unknown, ApiError>> {
+  async deleteDocxTemplate(id: string): Promise<Result<void, ApiError>> {
     try {
-      const response = await apiService<never, unknown>({
-        endpoint: `/api/templates/docx/${key}`,
+      await apiService<never, void>({
+        endpoint: `/api/templates/docx/${id}`,
         method: 'DELETE',
       });
-      return Result.ok(response);
+      return Result.ok();
     } catch (error: unknown) {
       return Result.fail(toApiError(error));
     }
@@ -58,29 +59,29 @@ export class TemplateApiClient {
 
   // --- PPTX Templates ---
 
-  async fetchPptxTemplatesApi(): Promise<Result<any[], ApiError>> {
+  async fetchPptxTemplates(): Promise<Result<Template[], ApiError>> {
     try {
-      const data = await apiService<never, any[]>({ endpoint: '/api/templates/pptx' });
+      const data = await apiService<never, Template[]>({ endpoint: '/api/templates/pptx' });
       return Result.ok(data);
     } catch (error: unknown) {
       return Result.fail(toApiError(error));
     }
   }
 
-  async fetchPptxTemplateByIdApi(key: string): Promise<Result<any, ApiError>> {
+  async fetchPptxTemplateById(id: string): Promise<Result<Template, ApiError>> {
     try {
-      const data = await apiService<never, any>({ endpoint: `/api/templates/pptx/${key}` });
+      const data = await apiService<never, Template>({ endpoint: `/api/templates/pptx/${id}` });
       return Result.ok(data);
     } catch (error: unknown) {
       return Result.fail(toApiError(error));
     }
   }
 
-  async savePptxTemplateApi(
-    options: { id: string; data: any }
-  ): Promise<Result<any, ApiError>> {
+  async savePptxTemplate(
+    options: { id: string; data: Partial<Template> }
+  ): Promise<Result<Template, ApiError>> {
     try {
-      const response = await apiService<any, any>({
+      const response = await apiService<Partial<Template>, Template>({
         endpoint: `/api/templates/pptx/${options.id}`,
         method: 'POST',
         data: options.data,
@@ -91,13 +92,13 @@ export class TemplateApiClient {
     }
   }
 
-  async deletePptxTemplateApi(key: string): Promise<Result<unknown, ApiError>> {
+  async deletePptxTemplate(id: string): Promise<Result<void, ApiError>> {
     try {
-      const response = await apiService<never, unknown>({
-        endpoint: `/api/templates/pptx/${key}`,
+      await apiService<never, void>({
+        endpoint: `/api/templates/pptx/${id}`,
         method: 'DELETE',
       });
-      return Result.ok(response);
+      return Result.ok();
     } catch (error: unknown) {
       return Result.fail(toApiError(error));
     }
@@ -105,29 +106,29 @@ export class TemplateApiClient {
 
   // --- Report Generation Templates ---
 
-  async fetchReportTemplatesApi(): Promise<Result<any[], ApiError>> {
+  async fetchReportTemplates(): Promise<Result<Template[], ApiError>> {
     try {
-      const data = await apiService<never, any[]>({ endpoint: '/api/templates/report' });
+      const data = await apiService<never, Template[]>({ endpoint: '/api/templates/report' });
       return Result.ok(data);
     } catch (error: unknown) {
       return Result.fail(toApiError(error));
     }
   }
 
-  async fetchReportTemplateByIdApi(templateId: string): Promise<Result<any, ApiError>> {
+  async fetchReportTemplateById(id: string): Promise<Result<Template, ApiError>> {
     try {
-      const data = await apiService<never, any>({ endpoint: `/api/templates/report/${templateId}` });
+      const data = await apiService<never, Template>({ endpoint: `/api/templates/report/${id}` });
       return Result.ok(data);
     } catch (error: unknown) {
       return Result.fail(toApiError(error));
     }
   }
 
-  async saveReportTemplateApi(
-    options: { id: string; data: any }
-  ): Promise<Result<any, ApiError>> {
+  async saveReportTemplate(
+    options: { id: string; data: Partial<Template> }
+  ): Promise<Result<Template, ApiError>> {
     try {
-      const response = await apiService<any, any>({
+      const response = await apiService<Partial<Template>, Template>({
         endpoint: `/api/templates/report/${options.id}`,
         method: 'POST',
         data: options.data,
@@ -138,13 +139,13 @@ export class TemplateApiClient {
     }
   }
 
-  async deleteReportTemplateApi(templateId: string): Promise<Result<unknown, ApiError>> {
+  async deleteReportTemplate(id: string): Promise<Result<void, ApiError>> {
     try {
-      const response = await apiService<never, unknown>({
-        endpoint: `/api/templates/report/${templateId}`,
+      await apiService<never, void>({
+        endpoint: `/api/templates/report/${id}`,
         method: 'DELETE',
       });
-      return Result.ok(response);
+      return Result.ok();
     } catch (error: unknown) {
       return Result.fail(toApiError(error));
     }
@@ -152,29 +153,29 @@ export class TemplateApiClient {
 
   // --- Presentation Outline Templates ---
 
-  async fetchPresentationTemplatesApi(): Promise<Result<any[], ApiError>> {
+  async fetchPresentationTemplates(): Promise<Result<Template[], ApiError>> {
     try {
-      const data = await apiService<never, any[]>({ endpoint: '/api/templates/presentation' });
+      const data = await apiService<never, Template[]>({ endpoint: '/api/templates/presentation' });
       return Result.ok(data);
     } catch (error: unknown) {
       return Result.fail(toApiError(error));
     }
   }
 
-  async fetchPresentationTemplateByIdApi(templateId: string): Promise<Result<any, ApiError>> {
+  async fetchPresentationTemplateById(id: string): Promise<Result<Template, ApiError>> {
     try {
-      const data = await apiService<never, any>({ endpoint: `/api/templates/presentation/${templateId}` });
+      const data = await apiService<never, Template>({ endpoint: `/api/templates/presentation/${id}` });
       return Result.ok(data);
     } catch (error: unknown) {
       return Result.fail(toApiError(error));
     }
   }
 
-  async savePresentationTemplateApi(
-    options: { id: string; data: any }
-  ): Promise<Result<any, ApiError>> {
+  async savePresentationTemplate(
+    options: { id: string; data: Partial<Template> }
+  ): Promise<Result<Template, ApiError>> {
     try {
-      const response = await apiService<any, any>({
+      const response = await apiService<Partial<Template>, Template>({
         endpoint: `/api/templates/presentation/${options.id}`,
         method: 'POST',
         data: options.data,
@@ -185,13 +186,13 @@ export class TemplateApiClient {
     }
   }
 
-  async deletePresentationTemplateApi(templateId: string): Promise<Result<unknown, ApiError>> {
+  async deletePresentationTemplate(id: string): Promise<Result<void, ApiError>> {
     try {
-      const response = await apiService<never, unknown>({
-        endpoint: `/api/templates/presentation/${templateId}`,
+      await apiService<never, void>({
+        endpoint: `/api/templates/presentation/${id}`,
         method: 'DELETE',
       });
-      return Result.ok(response);
+      return Result.ok();
     } catch (error: unknown) {
       return Result.fail(toApiError(error));
     }

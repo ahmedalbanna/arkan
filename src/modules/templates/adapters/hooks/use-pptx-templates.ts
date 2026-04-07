@@ -12,10 +12,10 @@ export function usePptxStyles() {
   const { data: templates, ...rest } = useQuery<Record<string, PptxTemplateProperties>>({
     queryKey: templateKeys.pptx(),
     queryFn: async () => {
-        const result = await container.resolve(TemplateApiClient).fetchPptxTemplatesApi();
+        const result = await container.resolve(TemplateApiClient).fetchPptxTemplates();
         if (result.isFailure) throw result.error;
         const list = result.getValue();
-        return list.reduce((acc: any, t: any) => ({ ...acc, [t.id]: t }), {});
+        return list.reduce((acc: Record<string, PptxTemplateProperties>, t: PptxTemplateProperties) => ({ ...acc, [t.id]: t }), {});
     },
     staleTime: 1000 * 60 * 60,
   });
@@ -29,7 +29,7 @@ export function useUpdatePptxTemplate() {
   return useMutation({
     mutationFn: async ({ key, styles }: { key: string; styles: unknown }) => {
         const client = container.resolve(TemplateApiClient);
-        const result = await client.savePptxTemplateApi({ id: key, data: { styles } });
+        const result = await client.savePptxTemplate({ id: key, data: { styles } });
         if (result.isFailure) throw result.error;
         return result.getValue();
     },
@@ -50,7 +50,7 @@ export function useDeletePptxTemplate() {
   return useMutation({
     mutationFn: async (key: string) => {
         const client = container.resolve(TemplateApiClient);
-        const result = await client.deletePptxTemplateApi(key);
+        const result = await client.deletePptxTemplate(key);
         if (result.isFailure) throw result.error;
         return result.getValue();
     },
@@ -71,7 +71,7 @@ export function useCreatePptxTemplate() {
   return useMutation({
     mutationFn: async (data: { id: string; name: string; description: string }) => {
         const client = container.resolve(TemplateApiClient);
-        const result = await client.savePptxTemplateApi({ id: data.id, data });
+        const result = await client.savePptxTemplate({ id: data.id, data });
         if (result.isFailure) throw result.error;
         return result.getValue();
     },

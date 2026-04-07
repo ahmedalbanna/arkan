@@ -4,7 +4,9 @@ import { GetTemplatesUseCase } from "../../application/use-cases/GetTemplatesUse
 import { GetTemplateByIdUseCase } from "../../application/use-cases/GetTemplateByIdUseCase";
 import { SaveTemplateUseCase } from "../../application/use-cases/SaveTemplateUseCase";
 import { DeleteTemplateUseCase } from "../../application/use-cases/DeleteTemplateUseCase";
-import { TemplateType } from "../../domain/repositories/ITemplateRepository";
+import { type Template, type TemplateType } from "../../domain/repositories/ITemplateRepository";
+import { Result } from "@/infrastructure/utils/result";
+import { TemplateError } from "../../domain/errors/TemplateErrors";
 
 @injectable()
 export class TemplateController {
@@ -19,19 +21,19 @@ export class TemplateController {
         private deleteTemplateUseCase: DeleteTemplateUseCase
     ) {}
 
-    async getTemplates(type: TemplateType) {
+    async getTemplates(type: TemplateType): Promise<Result<Template[], TemplateError>> {
         return this.getTemplatesUseCase.execute(type);
     }
 
-    async getTemplateById(type: TemplateType, id: string) {
+    async getTemplateById(type: TemplateType, id: string): Promise<Result<Template, TemplateError>> {
         return this.getTemplateByIdUseCase.execute(type, id);
     }
 
-    async saveTemplate(type: TemplateType, data: any) {
-        return this.saveTemplateUseCase.execute(type, data);
+    async saveTemplate(type: TemplateType, data: Partial<Template> & { id: string }): Promise<Result<Template, TemplateError>> {
+        return this.saveTemplateUseCase.execute(type, data as Template);
     }
 
-    async deleteTemplate(type: TemplateType, id: string) {
+    async deleteTemplate(type: TemplateType, id: string): Promise<Result<void, TemplateError>> {
         return this.deleteTemplateUseCase.execute(type, id);
     }
 }

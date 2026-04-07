@@ -16,9 +16,9 @@ export function useTemplates(type: 'docx' | 'pptx' | 'report') {
       if (!user) return [];
       const client = container.resolve(TemplateApiClient);
       let result;
-      if (type === 'docx') result = await client.fetchDocxTemplatesApi();
-      else if (type === 'pptx') result = await client.fetchPptxTemplatesApi();
-      else result = await client.fetchReportTemplatesApi();
+      if (type === 'docx') result = await client.fetchDocxTemplates();
+      else if (type === 'pptx') result = await client.fetchPptxTemplates();
+      else result = await client.fetchReportTemplates();
 
       if (result.isFailure) throw result.error;
       return result.getValue();
@@ -36,9 +36,9 @@ export function useTemplate(type: 'docx' | 'pptx' | 'report', id: string) {
       if (!user || !id) return null;
       const client = container.resolve(TemplateApiClient);
       let result;
-      if (type === 'docx') result = await client.fetchDocxTemplateByIdApi(id);
-      else if (type === 'pptx') result = await client.fetchPptxTemplateByIdApi(id);
-      else result = await client.fetchReportTemplateByIdApi(id);
+      if (type === 'docx') result = await client.fetchDocxTemplateById(id);
+      else if (type === 'pptx') result = await client.fetchPptxTemplateById(id);
+      else result = await client.fetchReportTemplateById(id);
 
       if (result.isFailure) throw result.error;
       return result.getValue();
@@ -55,9 +55,9 @@ export function useSaveTemplate(type: 'docx' | 'pptx' | 'report') {
     mutationFn: async ({ id, data }: { id: string; data: any }) => {
       const client = container.resolve(TemplateApiClient);
       let result;
-      if (type === 'docx') result = await client.saveDocxTemplateApi({ id, data });
-      else if (type === 'pptx') result = await client.savePptxTemplateApi({ id, data });
-      else result = await client.saveReportTemplateApi({ id, data });
+      if (type === 'docx') result = await client.saveDocxTemplate({ id, data });
+      else if (type === 'pptx') result = await client.savePptxTemplate({ id, data });
+      else result = await client.saveReportTemplate({ id, data });
 
       if (result.isFailure) throw result.error;
       return result.getValue();
@@ -83,9 +83,9 @@ export function useDeleteTemplate(type: 'docx' | 'pptx' | 'report') {
     mutationFn: async (id: string) => {
       const client = container.resolve(TemplateApiClient);
       let result;
-      if (type === 'docx') result = await client.deleteDocxTemplateApi(id);
-      else if (type === 'pptx') result = await client.deletePptxTemplateApi(id);
-      else result = await client.deleteReportTemplateApi(id);
+      if (type === 'docx') result = await client.deleteDocxTemplate(id);
+      else if (type === 'pptx') result = await client.deletePptxTemplate(id);
+      else result = await client.deleteReportTemplate(id);
 
       if (result.isFailure) throw result.error;
       return id;
