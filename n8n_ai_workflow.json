@@ -8,12 +8,48 @@
         "responseMode": "responseNode",
         "options": {}
       },
-      "id": "c9ed06a7-8f6b-45c6-a2ba-b534b5f16e47",
+      "id": "webhook-id",
       "name": "Webhook",
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 1,
-      "position": [-400, 300],
+      "position": [-550, 300],
       "webhookId": "arkan-ai-webhook"
+    },
+    {
+      "parameters": {
+        "values": {
+          "string": [
+            {
+              "name": "QDRANT_COLLECTION",
+              "value": "arkan_vectors"
+            },
+            {
+              "name": "EMBEDDING_MODEL",
+              "value": "nomic-embed-text:latest"
+            },
+            {
+              "name": "LLM_MODEL",
+              "value": "openrouter/auto"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "workflow-settings-id",
+      "name": "Workflow Settings",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 1,
+      "position": [-400, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Input Validation Logic\nconst body = $json.body;\nif (!body || !body.action) {\n  throw new Error('Missing required field: action');\n}\nif (['runFlow'].includes(body.action) && !body.flowName) {\n  throw new Error('Action runFlow requires flowName');\n}\nreturn $json;"
+      },
+      "id": "validate-input-id",
+      "name": "Validate Input",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 1,
+      "position": [-250, 300]
     },
     {
       "parameters": {
@@ -29,11 +65,11 @@
           ]
         }
       },
-      "id": "8d71d626-e53f-4cd7-a0ca-c7425c7d8e04",
+      "id": "route-action-id",
       "name": "Route Action",
       "type": "n8n-nodes-base.switch",
       "typeVersion": 1,
-      "position": [-200, 300]
+      "position": [-100, 300]
     },
     {
       "parameters": {
@@ -506,7 +542,7 @@
           "systemMessage": "You are Arkan AI, a professional academic and technical writing assistant. \n- Use a professional, objective tone.\n- If the user provides context via the retrieval tool, prioritize that information.\n- Formatting: Always use clean Markdown."
         }
       },
-      "id": "b12dc7a4-7761-4e7d-a26b-f8d5c12e98fe",
+      "id": "arkan-ai-agent-id",
       "name": "Arkan AI Agent",
       "type": "@n8n/n8n-nodes-langchain.agent",
       "typeVersion": 1.1,
@@ -517,7 +553,7 @@
         "model": "openrouter/auto",
         "options": {}
       },
-      "id": "5e03e364-7c30-43d0-a260-aa14486ca43d",
+      "id": "openrouter-model-id",
       "name": "OpenRouter Chat Model",
       "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
       "typeVersion": 1,
@@ -527,11 +563,14 @@
           "id": "5l2XC5NZppPGQv1b",
           "name": "OpenRouter account 2"
         }
+      },
+      "parameters": {
+        "model": "={{ $node[\"Workflow Settings\"].json[\"LLM_MODEL\"] }}"
       }
     },
     {
       "parameters": {},
-      "id": "c606aaa3-403d-4896-bd2d-a71c373b689a",
+      "id": "window-memory-id",
       "name": "Window Buffer Memory",
       "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
       "typeVersion": 1.1,
@@ -542,7 +581,7 @@
         "name": "retriever",
         "description": "Use this tool to search internal project documents and knowledge base for project-specific information."
       },
-      "id": "eeb17287-5f83-4cdf-bb95-9f102c4ba93b",
+      "id": "retriever-tool-id",
       "name": "Vector Store Retriever",
       "type": "@n8n/n8n-nodes-langchain.retrieverVectorStore",
       "typeVersion": 1,
@@ -552,13 +591,13 @@
       "parameters": {
         "qdrantCollection": {
           "__rl": true,
-          "value": "arkan_vectors",
+          "value": "={{ $node[\"Workflow Settings\"].json[\"QDRANT_COLLECTION\"] }}",
           "mode": "list",
           "cachedResultName": "arkan_vectors"
         },
         "options": {}
       },
-      "id": "28b148a1-48dc-40f5-9f63-9a53d3f4b1ab",
+      "id": "qdrant-store-id",
       "name": "Qdrant Vector Store",
       "type": "@n8n/n8n-nodes-langchain.vectorStoreQdrant",
       "typeVersion": 1,
@@ -572,9 +611,9 @@
     },
     {
       "parameters": {
-        "model": "nomic-embed-text:latest"
+        "model": "={{ $node[\"Workflow Settings\"].json[\"EMBEDDING_MODEL\"] }}"
       },
-      "id": "42c97ac7-94ca-493f-8376-d2ad2020a0a9",
+      "id": "ollama-embed-id",
       "name": "Embed Ollama",
       "type": "@n8n/n8n-nodes-langchain.embeddingsOllama",
       "typeVersion": 1,
@@ -606,7 +645,7 @@
       "parameters": {
         "jsCode": "// runFlow handler - returns processed flow name for reference\nconst flowName = $json.body.flowName;\nconst input = $json.body.input;\nreturn { text: `Processed flow ${flowName} with Arkan Logic Engine`, flowName, input };"
       },
-      "id": "080f1287-5207-4c18-bf1d-b7d7e4ab126f",
+      "id": "flow-logic-id",
       "name": "Flow Logic",
       "type": "n8n-nodes-base.code",
       "typeVersion": 1,
@@ -691,10 +730,10 @@
     {
       "parameters": {
         "respondWith": "json",
-        "responseBody": "={\n  \"success\": false,\n  \"error\": \"{{ $json.execution.error.message }}\"\n}",
+        "responseBody": "={\n  \"success\": false,\n  \"error\": \"{{ $json.execution.error.message }}\",\n  \"failedNode\": \"{{ $json.execution.lastNodeExecuted }}\",\n  \"timestamp\": \"{{ $now }}\"\n}",
         "options": {}
       },
-      "id": "2c86cb3b-9d1a-48f8-9d24-a2dc1378b1cb",
+      "id": "error-response-id",
       "name": "Error Response",
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1,
@@ -718,6 +757,12 @@
   },
   "connections": {
     "Webhook": {
+      "main": [[{ "node": "Workflow Settings", "type": "main", "index": 0 }]]
+    },
+    "Workflow Settings": {
+      "main": [[{ "node": "Validate Input", "type": "main", "index": 0 }]]
+    },
+    "Validate Input": {
       "main": [[{ "node": "Route Action", "type": "main", "index": 0 }]]
     },
     "Route Action": {
