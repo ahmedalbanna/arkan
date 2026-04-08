@@ -61,7 +61,7 @@ export const SidebarContainer = ({
         <div className="flex-1 relative z-10 p-5 flex flex-col gap-6">{children}</div>
       ) : (
         <ScrollArea className="flex-1 min-h-0 relative z-10 custom-scrollbar">
-          <div className="p-5 flex flex-col gap-6 pb-24 w-max min-w-full">{children}</div>
+          <div className="p-5 flex flex-col gap-6 pb-24 w-min min-w-full">{children}</div>
         </ScrollArea>
       )}
     </div>

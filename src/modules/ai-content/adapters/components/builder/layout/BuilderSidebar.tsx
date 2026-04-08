@@ -6,6 +6,7 @@ import { cn } from '@/infrastructure/utils/cn';
 import { BuilderSidebarProps } from './types';
 import { ShieldCheck } from 'lucide-react';
 import { AtmosphericGrid } from '@/components/shared/AtmosphericGrid';
+import { useMobile } from '@/hooks/util/use-mobile';
 
 /**
  * BuilderSidebar — Side panel orchestrator for the builder environment.
@@ -14,9 +15,18 @@ import { AtmosphericGrid } from '@/components/shared/AtmosphericGrid';
 
 export const BuilderSidebar = React.forwardRef<HTMLDivElement, BuilderSidebarProps>(
   ({ panels = [], activeKey, onActiveKeyChange, side, className }, ref) => {
+    const isMobile = useMobile();
     const safeActiveKey = activeKey && panels.some((p) => p.key === activeKey) ? activeKey : '';
-    const isCollapsed = !safeActiveKey;
+    const isCollapsed = !safeActiveKey || (isMobile && !activeKey);
     const isLeft = side === 'left';
+
+    // On mobile, if collapsed, we hide completely to give space to the canvas
+    const mobileWidth = isCollapsed ? 'w-0' : 'w-full fixed inset-0 z-50';
+    const desktopWidth = isCollapsed
+      ? 'w-[72px]'
+      : isLeft
+      ? 'w-[var(--sidebar-w-left,320px)]'
+      : 'w-[var(--sidebar-w,400px)]';
 
     return (
       <div
@@ -24,11 +34,7 @@ export const BuilderSidebar = React.forwardRef<HTMLDivElement, BuilderSidebarPro
         className={cn(
           'flex flex-col h-full bg-background transition-all duration-500 ease-[0.22,1,0.36,1] relative overflow-hidden z-20',
           isLeft ? 'border-r border-primary/10' : 'border-l border-primary/10',
-          isCollapsed
-            ? 'w-[72px]'
-            : isLeft
-            ? 'w-[var(--sidebar-w-left,320px)]'
-            : 'w-[var(--sidebar-w,400px)]',
+          isMobile ? mobileWidth : desktopWidth,
           className
         )}
       >

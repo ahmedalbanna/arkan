@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/infrastructure/utils/cn';
 import { PANEL_TRANSITION, SPRING_EASE } from './motion';
 import { AtmosphericGrid } from '@/components/shared/AtmosphericGrid';
+import { useMobile } from '@/hooks/util/use-mobile';
 
 /**
  * BuilderLayout — Structural foundation for the builder workspace.
@@ -26,6 +27,8 @@ export const BuilderLayout: React.FC<BuilderLayoutProps> = ({
   canvas,
   className,
 }) => {
+  const isMobile = useMobile();
+
   return (
     <div
       className={cn(
@@ -47,11 +50,14 @@ export const BuilderLayout: React.FC<BuilderLayoutProps> = ({
         <AnimatePresence mode="wait">
           {leftSidebar && (
             <motion.aside
-              initial={{ x: -24, opacity: 0 }}
-              animate={{ x: 0, opacity: 1 }}
-              exit={{ x: -24, opacity: 0 }}
+              initial={isMobile ? { opacity: 0 } : { x: -24, opacity: 0 }}
+              animate={isMobile ? { opacity: 1 } : { x: 0, opacity: 1 }}
+              exit={isMobile ? { opacity: 0 } : { x: -24, opacity: 0 }}
               transition={PANEL_TRANSITION}
-              className="flex-shrink-0 h-full relative z-20"
+              className={cn(
+                'flex-shrink-0 h-full relative z-20',
+                isMobile ? 'absolute inset-0 z-50 bg-background' : ''
+              )}
             >
               {leftSidebar}
             </motion.aside>
@@ -71,11 +77,14 @@ export const BuilderLayout: React.FC<BuilderLayoutProps> = ({
         <AnimatePresence mode="wait">
           {rightSidebar && (
             <motion.aside
-              initial={{ x: 24, opacity: 0 }}
-              animate={{ x: 0, opacity: 1 }}
-              exit={{ x: 24, opacity: 0 }}
+              initial={isMobile ? { opacity: 0 } : { x: 24, opacity: 0 }}
+              animate={isMobile ? { opacity: 1 } : { x: 0, opacity: 1 }}
+              exit={isMobile ? { opacity: 0 } : { x: 24, opacity: 0 }}
               transition={PANEL_TRANSITION}
-              className="flex-shrink-0 h-full relative z-20"
+              className={cn(
+                'flex-shrink-0 h-full relative z-20',
+                isMobile ? 'absolute inset-0 z-50 bg-background' : ''
+              )}
             >
               {rightSidebar}
             </motion.aside>

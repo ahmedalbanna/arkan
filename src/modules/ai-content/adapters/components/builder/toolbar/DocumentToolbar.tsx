@@ -28,6 +28,7 @@ import { cn } from '@/infrastructure/utils/cn';
 import { useEditorStore } from '@/modules/ai-content/adapters/state/use-editor-store';
 import { Project } from '@/modules/projects/domain/entities/Project';
 import { SPRING_EASE } from '../layout/motion';
+import { useMobile } from '@/hooks/util/use-mobile';
 
 interface DocumentToolbarProps {
   project: Project | null;
@@ -52,6 +53,7 @@ export const DocumentToolbar = ({
   suggestion,
   className,
 }: DocumentToolbarProps) => {
+  const isMobile = useMobile();
   const activeEditor = useEditorStore((state) => state.activeEditor);
   const selection = useEditorStore((state) => state.selection);
 
@@ -80,20 +82,23 @@ export const DocumentToolbar = ({
         <div className="flex items-center gap-3">
           <div className="flex items-center gap-1.5 text-[9px] text-muted-foreground font-black uppercase tracking-[0.22em] bg-background/70 px-2.5 py-1 rounded-full border border-border/30 shadow-sm">
             <span className="h-1.5 w-1.5 rounded-full bg-green-500 animate-pulse" />
-            Connected
+            {!isMobile && 'Connected'}
           </div>
 
-          <div className="w-px h-4 bg-border/40" aria-hidden />
-
-          {project?.meta.updated ? (
-            <span className="flex items-center gap-1 text-[9px] text-muted-foreground/50 font-bold uppercase tracking-[0.15em]">
-              <Clock className="h-2.5 w-2.5 opacity-50" />
-              {formatDistanceToNow(new Date(project.meta.updated), { addSuffix: true })}
-            </span>
-          ) : (
-            <span className="text-[9px] text-muted-foreground/30 font-bold uppercase tracking-[0.15em]">
-              Draft
-            </span>
+          {!isMobile && (
+            <>
+              <div className="w-px h-4 bg-border/40" aria-hidden />
+              {project?.meta.updated ? (
+                <span className="flex items-center gap-1 text-[9px] text-muted-foreground/50 font-bold uppercase tracking-[0.15em]">
+                  <Clock className="h-2.5 w-2.5 opacity-50" />
+                  {formatDistanceToNow(new Date(project.meta.updated), { addSuffix: true })}
+                </span>
+              ) : (
+                <span className="text-[9px] text-muted-foreground/30 font-bold uppercase tracking-[0.15em]">
+                  Draft
+                </span>
+              )}
+            </>
           )}
         </div>
 
@@ -171,7 +176,7 @@ export const DocumentToolbar = ({
                   className="h-7 text-[9px] font-black uppercase tracking-[0.18em] gap-1.5 px-2.5 rounded-lg hover:bg-amber-500/10 hover:text-amber-600 dark:hover:text-amber-400 text-muted-foreground transition-all duration-200"
                 >
                   <Lightbulb className="h-3 w-3 text-amber-500" />
-                  Assistant
+                  {!isMobile && 'Assistant'}
                 </Button>
               </TooltipTrigger>
               <TooltipContent
@@ -191,11 +196,15 @@ export const DocumentToolbar = ({
       </div>
 
       {viewMode === 'edit' && (
-        <div className="flex flex-wrap items-center gap-1 rounded-xl border border-border/40 bg-background/70 px-2 py-2">
-          <span className="text-[9px] font-black uppercase tracking-[0.2em] text-muted-foreground/60 px-1.5">
-            Format
-          </span>
-          <div className="w-px h-4 bg-border/40" aria-hidden />
+        <div className="flex items-center gap-1 rounded-xl border border-border/40 bg-background/70 px-2 py-2 overflow-x-auto no-scrollbar">
+          {!isMobile && (
+            <>
+              <span className="text-[9px] font-black uppercase tracking-[0.2em] text-muted-foreground/60 px-1.5">
+                Format
+              </span>
+              <div className="w-px h-4 bg-border/40" aria-hidden />
+            </>
+          )}
           <TooltipProvider delayDuration={300}>
             <Tooltip>
               <TooltipTrigger asChild>
