@@ -21,14 +21,8 @@ import { SidebarContainer } from '../layout/SidebarContainer';
 import { SidebarSection } from '../layout/SidebarSection';
 
 /**
- * SectionGenerationHUD — Context-sensitive AI operations for Sections.
- * Supports both single-focus and bulk generation modes with high-fidelity HUD styling.
- * 
- * DEFENSIVE MEASURES:
- * 1. Hook Placement: All hooks are at the top to prevent "Rules of Hooks" violations.
- * 2. Null Safety: Extensive checks for project, section, and mutation variables.
- * 3. Type Safety: Avoids unsafe "as any" where possible, using optional chaining and defaults.
- * 4. Error states: Provides fallback UI for missing data and generation errors.
+ * SectionGenerationHUD — AI generation controls for sections.
+ * Supports single and bulk generation modes with integrated project context.
  */
 
 interface SectionGenerationHUDProps {
@@ -334,13 +328,13 @@ export function SectionGenerationHUD({ section, selectedSectionIds = [], classNa
                 </div>
             </div>
 
-            {/* Stable Version Footer */}
+            {/* Panel Footer */}
             <div className="absolute bottom-0 left-0 right-0 px-6 py-3 border-t border-primary/10 bg-background/40 backdrop-blur-xl flex items-center justify-between">
                 <div className="flex items-center gap-2">
                     <div className="h-1 w-1 rounded-full bg-primary/30 shadow-[0_0_8px_rgba(var(--primary),0.4)]" />
-                    <span className="text-[8px] font-black uppercase tracking-[0.3em] text-muted-foreground/40">Synthesis Manifest</span>
+                    <span className="text-[8px] font-black uppercase tracking-[0.3em] text-muted-foreground/40">Generation Controls</span>
                 </div>
-                <span className="text-[8px] font-bold text-muted-foreground/20 tabular-nums tracking-widest uppercase">v2.4.0-STABLE</span>
+                <span className="text-[8px] font-bold text-muted-foreground/20 tabular-nums tracking-widest uppercase">v1.0</span>
             </div>
         </SidebarContainer>
     );

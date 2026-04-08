@@ -11,13 +11,7 @@ import { useAiActions } from '@/modules/ai-content/adapters/hooks/report-mode/us
 
 /**
  * SelectionGenerationHUD — Floating AI toolkit for active text selections.
- * Provides micro-manipulations (Summarize, Expand, Rewrite) with high-fidelity glassmorphism.
- * 
- * DEFENSIVE MEASURES:
- * 1. Mode Isolation: Strictly restricts rendering to 'edit' mode with active selection.
- * 2. Guarded Handlers: Prevents AI actions if selection state is stale or missing.
- * 3. Type Safety: Validates rewrite styles and handles missing action hooks gracefully.
- * 4. UX Integrity: Disables all inputs during processing and provides visual feedback.
+ * Provides micro-manipulations (Summarize, Expand, Rewrite) for selected content.
  */
 
 interface SelectionGenerationHUDProps {
@@ -61,7 +55,7 @@ const SelectionGenerationHUDComponent = ({ viewMode, className }: SelectionGener
                 className
             )}
         >
-            {/* HUD Technical Header */}
+            {/* Header */}
             <div className="flex items-center justify-between px-4 pt-3 pb-2 border-b border-border/40 bg-primary/[0.02]">
                 <div className="flex items-center gap-2">
                     <span className={cn(
@@ -69,7 +63,7 @@ const SelectionGenerationHUDComponent = ({ viewMode, className }: SelectionGener
                         isProcessing ? "bg-amber-500 animate-pulse shadow-[0_0_8px_rgba(245,158,11,0.4)]" : "bg-primary/60 shadow-[0_0_8px_rgba(var(--primary),0.2)]"
                     )} />
                     <p className="text-[9px] font-black uppercase tracking-[0.22em] text-primary/70">
-                        {isProcessing ? 'Neural Processing' : 'Selection Matrix'}
+                        {isProcessing ? 'AI Processing' : 'Selection Context'}
                     </p>
                 </div>
                 <Sparkles className={cn("h-3.5 w-3.5 transition-colors", isProcessing ? "text-amber-500" : "text-primary/60")} />
@@ -160,16 +154,16 @@ const SelectionGenerationHUDComponent = ({ viewMode, className }: SelectionGener
                                 </Button>
                             </TooltipTrigger>
                             <TooltipContent className="text-[9px] font-black uppercase tracking-[0.2em] bg-background/95 backdrop-blur-md border-primary/20">
-                                Grammar Logic
+                                Fix Grammar
                             </TooltipContent>
                         </Tooltip>
                     </TooltipProvider>
                 </div>
             </div>
 
-            {/* Stable Pipeline Footer */}
+            {/* Pipeline Status */}
             <div className="px-4 py-2 border-t border-border/40 bg-background/40 flex items-center justify-between rounded-b-2xl">
-                <span className="text-[7px] font-black uppercase tracking-[0.4em] text-muted-foreground/30 tabular-nums">Selection Pipe STABLE</span>
+                <span className="text-[7px] font-black uppercase tracking-[0.4em] text-muted-foreground/30 tabular-nums">AI Selection Pipeline</span>
                 <div className="h-1 w-1 rounded-full bg-primary/20" />
             </div>
         </div>

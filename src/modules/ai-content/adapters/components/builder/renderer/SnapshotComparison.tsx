@@ -86,7 +86,7 @@ const SnapshotComparisonComponent = ({ activeProject, comparisonSnapshot, onClos
                     </div>
                     <div>
                         <h2 className="text-[16px] font-black uppercase tracking-tight text-foreground/90 leading-none">
-                            Spectral Comparison
+                            Version Comparison
                         </h2>
                         <div className="flex items-center gap-2 mt-2">
                             <div className="h-1 w-1 rounded-full bg-primary animate-pulse shadow-[0_0_8px_rgba(var(--primary),0.6)]" />

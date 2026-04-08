@@ -299,11 +299,11 @@ export default function HomePageContent() {
                             
                             <div className="flex flex-col sm:flex-row gap-6 pt-4">
                                 <Button asChild size="lg" className="h-16 px-12 text-[11px] font-black uppercase tracking-[0.25em] rounded-2xl shadow-2xl shadow-primary/40 hover:scale-105 transition-transform bg-primary text-primary-foreground border-none ring-1 ring-inset ring-white/20">
-                                    <Link href="/signup">Establish Identity</Link>
+                                    <Link href="/signup">Get Started</Link>
                                 </Button>
                                 <Button asChild size="lg" variant="ghost" className="h-16 px-12 text-[11px] font-black uppercase tracking-[0.25em] rounded-2xl text-white/60 hover:text-white hover:bg-white/5 transition-all">
                                     <Link href="/login" className="flex items-center">
-                                        Restore Node Session <ChevronRight className="h-4 w-4 ml-2 opacity-40 group-hover:opacity-100" />
+                                        Login to Workspace <ChevronRight className="h-4 w-4 ml-2 opacity-40 group-hover:opacity-100" />
                                     </Link>
                                 </Button>
                             </div>
@@ -312,7 +312,7 @@ export default function HomePageContent() {
                 </div>
             </section>
 
-            {/* Stable Manifest Footer — High Fidelity Landing Alignment */}
+            {/* Footer */}
             <footer className="py-12 px-10 border-t border-primary/10 bg-muted/5 relative overflow-hidden">
                 <div className="absolute inset-0 opacity-[0.01] pointer-events-none bg-[radial-gradient(circle_at_center,_var(--primary)_1px,_transparent_1px)] bg-[size:20px_20px]" />
                 
@@ -320,22 +320,22 @@ export default function HomePageContent() {
                     <div className="flex flex-col items-center md:items-start gap-2">
                         <div className="flex items-center gap-3">
                             <div className="h-1.5 w-1.5 rounded-full bg-primary shadow-[0_0_8px_rgba(var(--primary),0.6)]" />
-                            <span className="text-[10px] font-black uppercase tracking-[0.3em] text-foreground/80">Arkan Intelligence Suite</span>
+                            <span className="text-[10px] font-black uppercase tracking-[0.3em] text-foreground/80">Arkan Workspace</span>
                         </div>
-                        <span className="text-[9px] font-black text-muted-foreground/40 uppercase tracking-[0.4em] ml-4.5">Stable Manifest V2.4.0</span>
+                        <span className="text-[9px] font-black text-muted-foreground/40 uppercase tracking-[0.4em] ml-4.5">Version 1.0.0</span>
                     </div>
 
                     <div className="flex items-center gap-10">
                         <div className="flex flex-col items-end gap-1">
-                            <span className="text-[8px] font-black uppercase tracking-widest text-muted-foreground/30">System Status</span>
-                            <Badge variant="outline" className="h-5 text-[8px] font-black border-green-500/20 text-green-500 bg-green-500/5 px-2 rounded-lg">ALL_NODES_OPERATIONAL</Badge>
+                            <span className="text-[8px] font-black uppercase tracking-widest text-muted-foreground/30">Status</span>
+                            <Badge variant="outline" className="h-5 text-[8px] font-black border-green-500/20 text-green-500 bg-green-500/5 px-2 rounded-lg">OPERATIONAL</Badge>
                         </div>
                         <div className="h-8 w-px bg-primary/10 hidden md:block" />
                         <div className="flex items-center gap-6">
                             {[
-                                { icon: Cpu, label: 'Core' },
-                                { icon: Database, label: 'Matrix' },
-                                { icon: Binary, label: 'Vector' }
+                                { icon: Cpu, label: 'Platform' },
+                                { icon: Database, label: 'Storage' },
+                                { icon: Binary, label: 'Analysis' }
                             ].map((node, i) => (
                                 <div key={i} className="flex flex-col items-center gap-1.5 group cursor-pointer">
                                     <node.icon className="h-3.5 w-3.5 text-muted-foreground/20 group-hover:text-primary transition-colors" />

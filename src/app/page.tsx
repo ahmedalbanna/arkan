@@ -20,7 +20,7 @@ export default function Home() {
             'Retrieval-Augmented Generation (RAG)',
             'Multi-node Project Orchestration',
             'Professional DOCX and PPTX Export',
-            'Spectral Research Analysis'
+            'Advanced Research Analysis'
         ],
         author: {
             '@type': 'Organization',

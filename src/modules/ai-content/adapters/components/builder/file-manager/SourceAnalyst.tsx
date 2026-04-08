@@ -33,22 +33,16 @@ import { generateRandomId } from '@/infrastructure/utils/randomId';
 // Dynamic import for high-weight JSON visualizer
 const ReactJson = dynamic(() => import('@microlink/react-json-view'), {
     ssr: false,
-    loading: () => <div className="h-40 flex items-center justify-center bg-muted/5 rounded-2xl animate-pulse text-[9px] font-black uppercase tracking-widest text-muted-foreground/40">Initializing Neural Visualizer...</div>
+    loading: () => <div className="h-40 flex items-center justify-center bg-muted/5 rounded-2xl animate-pulse text-[9px] font-black uppercase tracking-widest text-muted-foreground/40">Initializing Visualizer...</div>
 });
 
 /**
- * IntelligenceAnalyst — Deep spectral analysis hub for context vectors.
- * Allows structural decomposition of source data into manageable neural nodes.
- * 
- * DEFENSIVE MEASURES:
- * 1. Schema Validation: Strict Zod validation for analysis parameters.
- * 2. Error Containment: Wraps JSON transformation and dynamic visualization in try-catch.
- * 3. Execution Guard: Prevents duplicate analysis and handles malformed payloads.
- * 4. UX Safety: Implements pulse triggers and loading states for long-running AI tasks.
+ * SourceAnalyst — Automated analysis tool for project sources.
+ * Identifies patterns and extracts structured insights from external context.
  */
 
 const analysisSchema = z.object({
-    query: z.string().min(3, 'Analysis vector requires at least 3 characters'),
+    query: z.string().min(3, 'Analysis query requires at least 3 characters'),
     depth: z.enum(['shallow', 'standard', 'deep']).default('standard'),
 });
 
@@ -69,12 +63,12 @@ function jsonToMarkdown(json: any, level = 1): string {
         }
         return md;
     } catch (e) {
-        console.error('[IntelligenceAnalyst] JSON to MD conversion failed:', e);
+        console.error('[SourceAnalyst] JSON to MD conversion failed:', e);
         return 'Data serialization error encountered.';
     }
 }
 
-export function IntelligenceAnalyst() {
+export function SourceAnalyst() {
     const { project, updateProject } = useBuilderStore();
     const { toast } = useToast();
     const [isAnalyzing, setIsAnalyzing] = useState(false);
@@ -95,28 +89,27 @@ export function IntelligenceAnalyst() {
         setResult(null);
 
         try {
-            // Simulated deep spectral analysis pipeline
-            // In production, this would call a specialized analysis tool via useWritingTool
+            // Simulated analysis pipeline
             await new Promise(resolve => setTimeout(resolve, 2000));
 
             const mockAnalysis = {
                 metadata: {
-                    vector_density: '0.84',
-                    semantic_cohesion: 'high',
-                    source_nodes: project.externalContext.length,
+                    analysis_confidence: '0.84',
+                    relevance: 'high',
+                    source_count: project.externalContext.length,
                 },
                 structural_insights: [
                     { category: 'Technical Constraints', identified: 12, critical: 2 },
-                    { category: 'Thematic Patterns', identified: 5, confidence: '92%' }
+                    { category: 'Key Themes', identified: 5, confidence: '92%' }
                 ],
-                recommended_blueprints: ['technical-deep-dive', 'executive-summary-v2']
+                recommended_approaches: ['technical-deep-dive', 'executive-summary']
             };
 
             setResult(mockAnalysis);
-            toast({ title: "Analysis Synchronized", description: "Intelligence vector successfully mapped from source matrix." });
+            toast({ title: "Analysis Complete", description: "Source data successfully processed." });
         } catch (error) {
-            console.error('[IntelligenceAnalyst] Analysis failed:', error);
-            toast({ title: "System Overload", description: "The analysis core failed to process the current context window.", variant: 'destructive' });
+            console.error('[SourceAnalyst] Analysis failed:', error);
+            toast({ title: "Analysis Error", description: "Failed to process the current context sources.", variant: 'destructive' });
         } finally {
             setIsAnalyzing(false);
         }
@@ -133,10 +126,10 @@ export function IntelligenceAnalyst() {
                 type: 'guidelines'
             }, generateRandomId()));
 
-            toast({ title: "Insight Materialized", description: "Spectral data node successfully integrated into context matrix." });
+            toast({ title: "Insight Saved", description: "Analysis result successfully integrated into project sources." });
         } catch (error) {
-            console.error('[IntelligenceAnalyst] Integration failure:', error);
-            toast({ title: "Materialization Error", description: "Failed to synthesize insight node.", variant: 'destructive' });
+            console.error('[SourceAnalyst] Integration failure:', error);
+            toast({ title: "Integration Error", description: "Failed to save analysis insight.", variant: 'destructive' });
         }
     }, [result, updateProject, toast]);
 
@@ -147,10 +140,10 @@ export function IntelligenceAnalyst() {
             <div className="space-y-1.5 px-1">
                 <div className="flex items-center gap-2.5">
                     <BrainCircuit className="h-4 w-4 text-primary/70" />
-                    <h4 className="text-[10px] font-black uppercase tracking-[0.3em] text-primary/70">Neural Analyst</h4>
+                    <h4 className="text-[10px] font-black uppercase tracking-[0.3em] text-primary/70">Source Analyst</h4>
                 </div>
                 <p className="text-[9px] text-muted-foreground italic font-medium opacity-60 uppercase tracking-widest">
-                    Decompose source matrices into structural intelligence.
+                    Analyze project sources for patterns and insights.
                 </p>
             </div>
 
@@ -165,11 +158,11 @@ export function IntelligenceAnalyst() {
                             name="query"
                             render={({ field }) => (
                                 <FormItem className="space-y-2">
-                                    <FormLabel className="text-[9px] font-black uppercase tracking-[0.2em] text-primary/40 px-1">Analysis Vector</FormLabel>
+                                    <FormLabel className="text-[9px] font-black uppercase tracking-[0.2em] text-primary/40 px-1">Analysis Query</FormLabel>
                                     <FormControl>
                                         <Input
                                             {...field}
-                                            placeholder="SCAN_TARGET..."
+                                            placeholder="Enter query..."
                                             className="h-10 text-[11px] font-bold bg-muted/5 border-primary/10 focus-visible:ring-primary/20 rounded-xl uppercase tracking-widest"
                                             disabled={isAnalyzing}
                                         />
@@ -187,12 +180,12 @@ export function IntelligenceAnalyst() {
                             {isAnalyzing ? (
                                 <>
                                     <Loader2 className="h-4 w-4 animate-spin" />
-                                    <span>Processing Matrix...</span>
+                                    <span>Processing...</span>
                                 </>
                             ) : (
                                 <>
                                     <Zap className="h-4 w-4 transition-transform group-hover/run:rotate-12" />
-                                    <span>Initialize Spectral Analysis</span>
+                                    <span>Run Analysis</span>
                                 </>
                             )}
                             <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/10 to-white/0 -translate-x-full group-hover/run:translate-x-full transition-transform duration-1000 ease-in-out" />
@@ -207,7 +200,7 @@ export function IntelligenceAnalyst() {
                 <div className="flex items-center justify-between px-1">
                     <div className="flex items-center gap-2">
                         <Binary className="h-3 w-3 text-primary/40" />
-                        <span className="text-[9px] font-black uppercase tracking-widest text-muted-foreground/60">Spectrum Output</span>
+                        <span className="text-[9px] font-black uppercase tracking-widest text-muted-foreground/60">Analysis Results</span>
                     </div>
                     {result && (
                         <Button
@@ -217,7 +210,7 @@ export function IntelligenceAnalyst() {
                             className="h-7 px-3 rounded-lg text-[9px] font-black uppercase tracking-[0.2em] border border-primary/10 hover:bg-primary/5 hover:text-primary transition-all gap-1.5"
                         >
                             <Plus className="h-3 w-3" />
-                            Materialize
+                            Save Insight
                         </Button>
                     )}
                 </div>
@@ -253,7 +246,7 @@ export function IntelligenceAnalyst() {
 
             <div className="p-5 rounded-[24px] border border-primary/10 bg-muted/5 text-center space-y-2 group/info hover:bg-muted/10 transition-all">
                 <p className="text-[9px] text-primary/40 italic leading-relaxed font-medium uppercase tracking-widest group-hover:text-primary/60 transition-colors px-4">
-                    Neural Analyst uses structural inference to identify critical data patterns within the Source Matrix.
+                    Source Analyst uses pattern recognition to identify key insights within your project sources.
                 </p>
             </div>
         </div>

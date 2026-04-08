@@ -3,7 +3,7 @@ import { ReactElement, ReactNode } from 'react';
 export interface SidebarPanelConfig {
     key: string;
     title: string;
-    icon: ReactElement;
+    icon: ReactNode;
     content: ReactNode;
 }
 

@@ -58,6 +58,11 @@ a {
     --sidebar-accent-foreground: 240 5.9% 10%;
     --sidebar-border: 220 13% 91%;
     --sidebar-ring: 275 87% 26%;
+
+    /* Workspace Layout Variables */
+    --workspace-h: calc(100vh - 64px);
+    --sidebar-w: 400px;
+    --sidebar-w-left: 320px;
   }
 
   .dark {
@@ -95,6 +100,11 @@ a {
     --sidebar-accent-foreground: 0 0% 98%;
     --sidebar-border: 240 3.7% 25.9%;
     --sidebar-ring: 275 87% 76%;
+
+    /* Workspace Layout Variables (Dark) */
+    --workspace-h: calc(100vh - 64px);
+    --sidebar-w: 400px;
+    --sidebar-w-left: 320px;
   }
 }
 

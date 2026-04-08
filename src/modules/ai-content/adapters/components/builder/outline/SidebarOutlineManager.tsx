@@ -290,15 +290,15 @@ export function SidebarOutlineManager({
         </ScrollArea>
       </div>
 
-      {/* Stable Manifest Footer */}
+      {/* Panel Footer */}
       <div className="absolute bottom-0 left-0 right-0 px-6 py-3 border-t border-primary/10 bg-background/40 backdrop-blur-xl flex items-center justify-between">
           <div className="flex items-center gap-2">
               <div className="h-1 w-1 rounded-full bg-primary/30 shadow-[0_0_8px_rgba(var(--primary),0.3)]" />
-              <span className="text-[8px] font-black uppercase tracking-widest text-muted-foreground/40">Navigator Core</span>
+              <span className="text-[8px] font-black uppercase tracking-widest text-muted-foreground/40">Navigator</span>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2" aria-hidden="true">
             <Binary className="h-2.5 w-2.5 text-muted-foreground/20" />
-            <span className="text-[8px] font-bold text-muted-foreground/20 tabular-nums">v2.1.4-STABLE</span>
+            <span className="text-[8px] font-bold text-muted-foreground/20 tabular-nums">v1.0</span>
           </div>
       </div>
     </div>

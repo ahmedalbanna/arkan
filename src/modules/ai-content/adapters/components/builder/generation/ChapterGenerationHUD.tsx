@@ -19,14 +19,8 @@ import { ContextSelector } from './controls/ContextSelector';
 import { SidebarContainer } from '../layout/SidebarContainer';
 
 /**
- * ChapterGenerationHUD — Context-sensitive AI operations for Chapters.
- * Implements high-density parameter tuning and bulk processing.
- * 
- * DEFENSIVE MEASURES:
- * 1. Safe Hook Resolution: Handles null chapter gracefully in actions hook.
- * 2. Form Guarding: Validates form availability before rendering.
- * 3. Type Safety: Ensures IDs and chapter data are present before mapping.
- * 4. Error Feedback: Integrated processing and error state indicators.
+ * ChapterGenerationHUD — AI generation controls for chapters.
+ * Supports chapter-level configuration and bulk generation.
  */
 
 interface ChapterGenerationHUDProps {
@@ -280,13 +274,13 @@ export function ChapterGenerationHUD({ chapter, className, onClose }: ChapterGen
                 </Tabs>
             </div>
 
-            {/* Stable Version Footer */}
+            {/* Panel Footer */}
             <div className="absolute bottom-0 left-0 right-0 px-6 py-3 border-t border-primary/10 bg-background/40 backdrop-blur-xl flex items-center justify-between">
                 <div className="flex items-center gap-2">
                     <div className="h-1 w-1 rounded-full bg-primary/30 shadow-[0_0_8_rgba(var(--primary),0.4)]" />
-                    <span className="text-[8px] font-black uppercase tracking-[0.3em] text-muted-foreground/40">Chapter Manifest</span>
+                    <span className="text-[8px] font-black uppercase tracking-[0.3em] text-muted-foreground/40">Chapter Controls</span>
                 </div>
-                <span className="text-[8px] font-bold text-muted-foreground/20 tabular-nums tracking-widest uppercase">v2.4.0-STABLE</span>
+                <span className="text-[8px] font-bold text-muted-foreground/20 tabular-nums tracking-widest uppercase">v1.0</span>
             </div>
         </SidebarContainer>
     );

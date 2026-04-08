@@ -188,18 +188,18 @@ export function LibraryHUD({ disabled }: { disabled?: boolean }) {
                     <div className="absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-background/80 to-transparent pointer-events-none z-20" />
                 </div>
 
-                {/* Stable Manifest Footer */}
+                {/* Panel Footer */}
                 <footer className="px-10 py-6 border-t border-primary/10 bg-background/40 backdrop-blur-xl flex items-center justify-between shrink-0">
                     <div className="flex items-center gap-3">
                         <Database className="h-3.5 w-3.5 text-muted-foreground/30" />
                         <p className="text-[9px] text-muted-foreground/40 font-black uppercase tracking-[0.25em]">
-                            Global Intelligence Repository · Stable Core v2.4
+                            Project Repository · Version 1.0
                         </p>
                     </div>
                     <div className="flex items-center gap-4">
                         <DialogClose asChild>
                             <Button variant="ghost" className="text-[10px] font-black uppercase tracking-[0.2em] h-10 px-6 rounded-xl hover:bg-muted/10 transition-all">
-                                Return to Terminal
+                                Close Library
                             </Button>
                         </DialogClose>
                     </div>

@@ -50,36 +50,8 @@ export function useSidebarPanels({
 }: UseSidebarPanelsProps) {
     const { t } = useLocalization();
 
-    // Setup Utility Panels (Left Sidebar)
-    const leftPanels = useMemo<SidebarPanelConfig[]>(() => [
-        {
-            key: 'settings',
-            title: 'Metadata Manifest',
-            icon: <Settings className="h-4 w-4" />,
-            content: <ProjectSettingsHUD />,
-        },
-        {
-            key: 'templates',
-            title: 'Layout Blueprint',
-            icon: <LayoutTemplate className="h-4 w-4" />,
-            content: <TemplateLibraryHUD />,
-        },
-        {
-            key: 'navigator',
-            title: 'Architecture',
-            icon: <Layers className="h-4 w-4" />,
-            content: (
-                <SidebarNavigator
-                    activeChapterId={activeChapterId}
-                    selectedSectionIds={selectedSectionIds}
-                    onActiveChapterChange={onActiveChapterChange}
-                    onActiveSectionChange={onActiveSectionChange}
-                />
-            ),
-        },
-    ], [selectedSectionIds, activeChapterId, onActiveSectionChange, onActiveChapterChange]);
-
-    // AI & Intelligence Panels (Right Sidebar)
+    // All Panels — Merged into single right sidebar
+    // Order: Utility panels (formerly left) first, then AI & Intelligence panels (formerly right)
     const rightPanels = useMemo<SidebarPanelConfig[]>(() => {
         const activeSectionId = selectedSectionIds.length > 0 ? selectedSectionIds[0] : null;
         const activeSection = activeSectionId ? project?.getSection(activeSectionId) ?? null : null;
@@ -92,6 +64,33 @@ export function useSidebarPanels({
                 : 'Section Synthesis';
 
         return [
+            // — Utility Panels (formerly left sidebar) —
+            {
+                key: 'settings',
+                title: 'Metadata Manifest',
+                icon: <Settings className="h-4 w-4" />,
+                content: <ProjectSettingsHUD />,
+            },
+            {
+                key: 'templates',
+                title: 'Layout Blueprint',
+                icon: <LayoutTemplate className="h-4 w-4" />,
+                content: <TemplateLibraryHUD />,
+            },
+            {
+                key: 'navigator',
+                title: 'Architecture',
+                icon: <Layers className="h-4 w-4" />,
+                content: (
+                    <SidebarNavigator
+                        activeChapterId={activeChapterId}
+                        selectedSectionIds={selectedSectionIds}
+                        onActiveChapterChange={onActiveChapterChange}
+                        onActiveSectionChange={onActiveSectionChange}
+                    />
+                ),
+            },
+            // — AI & Intelligence Panels (formerly right sidebar) —
             {
                 key: 'section',
                 title: sectionTitle,
@@ -122,7 +121,7 @@ export function useSidebarPanels({
                 content: <SnapshotHistoryPanel />,
             },
         ];
-    }, [project, selectedSectionIds, activeChapterId, setActiveRightPanelKey]);
+    }, [project, selectedSectionIds, activeChapterId, onActiveSectionChange, onActiveChapterChange, setActiveRightPanelKey]);
 
-    return { leftPanels, rightPanels };
+    return { leftPanels: [], rightPanels };
 }

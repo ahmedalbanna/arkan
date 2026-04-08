@@ -162,7 +162,6 @@ export function useReportGenerator(initialProject?: ProjectProperties | null) {
     isSaving,
     handleSave,
     hasUnsavedChanges,
-    leftPanels,
     rightPanels,
     t,
     locale,

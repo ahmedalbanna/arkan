@@ -40,21 +40,16 @@ import {
 import { useLocalization } from "@/context/LocalizationContext";
 import { useBuilderStore, useToast } from '@/hooks';
 import { cn } from "@/infrastructure/utils/cn";
+import { AtmosphericGrid } from '@/components/shared/AtmosphericGrid';
 import { generateRandomId } from '@/infrastructure/utils/randomId';
 import { ExternalContextType } from '@/modules/ai-content/domain/entities/ControlTypes';
 import { SidebarContainer } from '../layout/SidebarContainer';
 import { FileNodeItem } from './FileNodeItem';
-import { IntelligenceAnalyst } from './IntelligenceAnalyst';
+import { SourceAnalyst } from './SourceAnalyst';
 
 /**
- * UploadManager — A high-density dashboard for mass context management.
- * Consolidates file ingestion, raw text entry, and data analysis hubs.
- * 
- * DEFENSIVE MEASURES:
- * 1. Ingestion Guards: Robust FileReader error handling with unified toast reporting.
- * 2. ID Standardization: Replaces uuidv4 with project-standard generateRandomId().
- * 3. Atomic State Logic: Verifies project and updateProject presence for all mutations.
- * 4. High-Fidelity HUD: Standardized dot grids and stable version footers.
+ * UploadManager — A dashboard for project source management.
+ * Consolidates file ingestion, text entry, and data analysis.
  */
 
 // ── Context Inspector HUD ──────────────────────────────────────────────────────
@@ -70,13 +65,13 @@ function ContextInspectorHUD({ item, isOpen, onClose }: { item: { fileName: stri
                         </div>
                         <div>
                             <DialogTitle className="text-[14px] font-black uppercase tracking-tight">{item.fileName}</DialogTitle>
-                            <p className="text-[10px] uppercase tracking-widest text-muted-foreground/60 font-bold">Spectral content analysis</p>
+                            <p className="text-[10px] uppercase tracking-widest text-muted-foreground/60 font-bold">Content Analysis</p>
                         </div>
                     </div>
                 </DialogHeader>
                 <div className="flex-1 overflow-hidden relative group">
                     {/* Atmospheric decoration */}
-                    <div className="absolute inset-0 pointer-events-none opacity-[0.02] bg-[radial-gradient(circle_at_center,_var(--primary)_1px,_transparent_1px)] bg-[size:28px_28px]" />
+                    <AtmosphericGrid opacity={0.02} size={28} />
 
                     <ScrollArea className="h-full w-full custom-scrollbar">
                         <div className="p-10">
@@ -90,7 +85,7 @@ function ContextInspectorHUD({ item, isOpen, onClose }: { item: { fileName: stri
                     </ScrollArea>
                 </div>
                 <div className="px-8 py-4 bg-primary/[0.02] border-t border-primary/10 flex justify-between items-center shrink-0">
-                    <span className="text-[8px] font-black uppercase tracking-widest text-muted-foreground/40">Context Vector Analysis Pipeline</span>
+                    <span className="text-[8px] font-black uppercase tracking-widest text-muted-foreground/40">Context Analysis Pipeline</span>
                     <Button variant="ghost" onClick={onClose} className="text-[10px] font-black uppercase tracking-widest rounded-xl h-9 px-6 transition-all hover:bg-red-500/5 hover:text-red-500">Close Inspector</Button>
                 </div>
             </DialogContent>
@@ -215,24 +210,24 @@ export function UploadManager() {
             <Tabs defaultValue="files" className="w-full flex flex-col gap-8 pt-2 animate-in fade-in slide-in-from-right-4 duration-500">
                 <TabsList className="flex flex-wrap sm:grid sm:grid-cols-2 w-full h-auto sm:h-11 rounded-2xl bg-muted/20 p-1 gap-1 border border-border/40">
                     <TabsTrigger value="files" className="flex-1 text-[10px] font-black uppercase tracking-[0.15em] data-[state=active]:bg-background data-[state=active]:text-primary px-2 py-2 sm:py-0 transition-all rounded-xl">
-                        Source Core
+                        Sources
                     </TabsTrigger>
                     <TabsTrigger value="analyst" className="flex-1 gap-2 text-[10px] font-black uppercase tracking-[0.15em] data-[state=active]:bg-background data-[state=active]:text-primary px-2 py-2 sm:py-0 transition-all rounded-xl">
                         <AtomIcon className="h-3.5 w-3.5 shrink-0" />
-                        Analyst
+                        Analysis
                     </TabsTrigger>
                 </TabsList>
 
                 <TabsContent value="files" className="m-0 focus-visible:ring-0 flex flex-col gap-8">
                     {/* Ingestion Matrix */}
                     <div className="space-y-6 relative px-1">
-                        {/* Depth architectural line */}
-                        <div className="absolute left-[-1.25rem] top-0 bottom-0 w-px bg-gradient-to-b from-primary/30 via-primary/5 to-transparent" />
+                        {/* Accent line */}
+                        <div className="absolute left-[-1.25rem] top-0 bottom-0 w-px bg-gradient-to-b from-primary/30 via-primary/5 to-transparent" aria-hidden="true" />
 
                         <Tabs defaultValue="upload" className="w-full">
                             <TabsList className="grid w-full grid-cols-2 h-9 rounded-xl bg-muted/10 p-1 gap-1 border border-primary/5">
-                                <TabsTrigger value="upload" className="text-[9px] font-black uppercase tracking-widest rounded-lg">Upload Matrix</TabsTrigger>
-                                <TabsTrigger value="text" className="text-[9px] font-black uppercase tracking-widest rounded-lg">Raw Payloads</TabsTrigger>
+                                <TabsTrigger value="upload" className="text-[9px] font-black uppercase tracking-widest rounded-lg">Upload Files</TabsTrigger>
+                                <TabsTrigger value="text" className="text-[9px] font-black uppercase tracking-widest rounded-lg">Paste Text</TabsTrigger>
                             </TabsList>
 
                             <TabsContent value="upload" className="mt-5 m-0 focus-visible:ring-0">
@@ -258,7 +253,7 @@ export function UploadManager() {
                                             </>
                                         )}
                                     </div>
-                                    <p className="text-[10px] font-black uppercase tracking-[0.2em]">{isDragActive ? "Infiltrate Files" : "Initialize Ingestion"}</p>
+                                    <p className="text-[10px] font-black uppercase tracking-[0.2em]">{isDragActive ? "Drop Files Here" : "Upload Content"}</p>
                                     <p className="mt-1.5 text-[9px] text-muted-foreground italic font-medium opacity-40 uppercase tracking-widest">PDF, DOCX, MD, JPG Supported</p>
                                 </div>
                             </TabsContent>
@@ -266,17 +261,17 @@ export function UploadManager() {
                             <TabsContent value="text" className="mt-5 space-y-5 m-0 focus-visible:ring-0">
                                 <div className="space-y-4">
                                     <div className="space-y-2">
-                                        <Label className="text-[9px] font-black uppercase tracking-[0.2em] text-primary/40 px-1">Node Identifier</Label>
-                                        <Input value={textFileName} onChange={(e) => setTextFileName(e.target.value)} placeholder="VECTOR_LABEL..." className="h-10 text-[11px] font-bold bg-muted/5 border-primary/10 focus-visible:ring-primary/20 rounded-xl uppercase tracking-widest" />
+                                        <Label className="text-[9px] font-black uppercase tracking-[0.2em] text-primary/40 px-1">Source Name</Label>
+                                        <Input value={textFileName} onChange={(e) => setTextFileName(e.target.value)} placeholder="Enter name..." className="h-10 text-[11px] font-bold bg-muted/5 border-primary/10 focus-visible:ring-primary/20 rounded-xl uppercase tracking-widest" />
                                     </div>
                                     <div className="space-y-2">
-                                        <Label className="text-[9px] font-black uppercase tracking-[0.2em] text-primary/40 px-1">Raw Payload</Label>
-                                        <Textarea value={textInput} onChange={(e) => setTextInput(e.target.value)} rows={5} placeholder="INPUT_DATA..." className="text-[11px] bg-muted/5 border-primary/10 focus-visible:ring-primary/20 rounded-2xl resize-none p-4 font-serif italic shadow-inner" />
+                                        <Label className="text-[9px] font-black uppercase tracking-[0.2em] text-primary/40 px-1">Content</Label>
+                                        <Textarea value={textInput} onChange={(e) => setTextInput(e.target.value)} rows={5} placeholder="Enter content..." className="text-[11px] bg-muted/5 border-primary/10 focus-visible:ring-primary/20 rounded-2xl resize-none p-4 font-serif italic shadow-inner" />
                                     </div>
                                 </div>
                                 <Button onClick={handleAddPastedText} disabled={!textInput.trim() || !textFileName.trim() || isLoading} className="w-full h-11 text-[10px] font-black uppercase tracking-[0.2em] gap-2.5 shadow-xl shadow-primary/15 rounded-xl bg-primary hover:opacity-90 ring-1 ring-inset ring-white/20 transition-all">
                                     <Plus className="h-4 w-4" />
-                                    Materialize Node
+                                    Save Source
                                 </Button>
                             </TabsContent>
                         </Tabs>
@@ -286,7 +281,7 @@ export function UploadManager() {
                             <Input
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
-                                placeholder="SCAN SOURCE CORE..."
+                                placeholder="Search sources..."
                                 className="h-10 pl-10 pr-10 text-[10px] bg-muted/5 border-primary/5 focus-visible:border-primary/20 focus-visible:ring-primary/10 rounded-2xl transition-all uppercase font-bold tracking-widest placeholder:text-muted-foreground/30"
                             />
                             <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/20 group-focus-within/search:text-primary transition-colors" />
@@ -302,10 +297,10 @@ export function UploadManager() {
                             <div className="flex items-center justify-between px-1">
                                 <h3 className="text-[9px] font-black uppercase tracking-[0.3em] text-primary/60 flex items-center gap-2">
                                     <Layers className="h-3 w-3" />
-                                    Integrated Vectors
+                                    Project Sources
                                 </h3>
                                 <Badge variant="outline" className="h-5 text-[9px] font-black border-primary/20 bg-primary/5 text-primary tabular-nums px-2.5 rounded-full shadow-inner ring-1 ring-inset ring-primary/10">
-                                    {externalContext.length} NODES
+                                    {externalContext.length} Items
                                 </Badge>
                             </div>
 
@@ -356,7 +351,7 @@ export function UploadManager() {
                                         <div className="p-5 rounded-full bg-muted/20 border border-dashed border-muted-foreground/40">
                                             <Database className="h-10 w-10 text-muted-foreground stroke-[1]" />
                                         </div>
-                                        <p className="text-[10px] font-black uppercase tracking-[0.2em] px-10 leading-relaxed">No Intel Vectors Found</p>
+                                        <p className="text-[10px] font-black uppercase tracking-[0.2em] px-10 leading-relaxed">No Sources Found</p>
                                     </div>
                                 )}
                             </div>
@@ -365,7 +360,7 @@ export function UploadManager() {
                 </TabsContent>
 
                 <TabsContent value="analyst" className="m-0 focus-visible:ring-0 min-h-0">
-                    <IntelligenceAnalyst />
+                    <SourceAnalyst />
                 </TabsContent>
             </Tabs>
 
@@ -375,13 +370,13 @@ export function UploadManager() {
                 onClose={() => setInspectItem(null)}
             />
 
-            {/* Stable Version Footer */}
+            {/* Panel Footer */}
             <div className="absolute bottom-0 left-0 right-0 px-6 py-3 border-t border-primary/10 bg-background flex items-center justify-between">
                 <div className="flex items-center gap-2">
                     <div className="h-1 w-1 rounded-full bg-primary/30" />
-                    <span className="text-[8px] font-black uppercase tracking-widest text-muted-foreground/40">Context Dashboard</span>
+                    <span className="text-[8px] font-black uppercase tracking-widest text-muted-foreground/40">Management Dashboard</span>
                 </div>
-                <span className="text-[8px] font-bold text-muted-foreground/20 tabular-nums">v2.2.0-STABLE</span>
+                <span className="text-[8px] font-bold text-muted-foreground/20 tabular-nums">v1.0</span>
             </div>
         </SidebarContainer>
     );

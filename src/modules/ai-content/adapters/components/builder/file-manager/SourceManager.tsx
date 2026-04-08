@@ -43,14 +43,7 @@ import { ExternalContextType } from '@/modules/ai-content/domain/entities/Contro
 import { FileNodeItem } from './FileNodeItem';
 
 /**
- * SourceManager — High-fidelity HUD for integrating and managing neural source context.
- * Supports file uploads, raw text ingestion, and context classification.
- * 
- * DEFENSIVE MEASURES:
- * 1. Existence Guards: Checks for project and updateProject before mutations.
- * 2. Type-Safe Mapping: Refactored updates to use explicit map without "as any".
- * 3. Id Standardization: Replaces timestamp IDs with the generateRandomId() utility.
- * 4. Persistence Error Logging: Wraps project updates in try-catch blocks.
+ * SourceManager — Dashboard for managing project sources and context.
  */
 
 const FILE_TYPES: ExternalContextType[] = ['context', 'example', 'question', 'textbook', 'guidelines'];
@@ -93,10 +86,10 @@ function SourceEditor({ isOpen, onClose, initialName = '', initialContent = '', 
                         </div>
                         <div>
                             <DialogTitle className="text-[14px] font-black uppercase tracking-tight">
-                                {mode === 'add' ? 'Integrate Source Matrix' : 'Update Cognitive Vector'}
+                                {mode === 'add' ? 'Add Project Source' : 'Edit Project Source'}
                             </DialogTitle>
                             <DialogDescription className="text-[10px] uppercase tracking-widest text-muted-foreground/60 font-bold">
-                                Raw data ingestion protocol
+                                Source configuration
                             </DialogDescription>
                         </div>
                     </div>
@@ -104,33 +97,33 @@ function SourceEditor({ isOpen, onClose, initialName = '', initialContent = '', 
 
                 <div className="p-8 space-y-6">
                     <div className="space-y-2.5">
-                        <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/60 px-1">Source Identifier</Label>
+                        <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/60 px-1">Source Name</Label>
                         <Input
                             value={name}
                             onChange={(e) => setName(e.target.value)}
-                            placeholder="e.g., Reference_Data_Matrix_01"
+                            placeholder="e.g., Reference_Document"
                             className="h-11 bg-muted/5 border-primary/10 focus-visible:ring-primary/20 rounded-xl font-bold uppercase tracking-widest placeholder:text-muted-foreground/20"
                         />
                     </div>
                     <div className="space-y-2.5">
-                        <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/60 px-1">Content Payloads</Label>
+                        <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/60 px-1">Content</Label>
                         <Textarea
                             value={content}
                             onChange={(e) => setContent(e.target.value)}
-                            placeholder="Paste raw research data, guidelines, or reference text here..."
+                            placeholder="Enter content..."
                             className="min-h-[240px] bg-muted/5 border-primary/10 focus-visible:ring-primary/20 rounded-2xl resize-none p-4 font-serif italic text-[13px] leading-relaxed shadow-inner"
                         />
                     </div>
                 </div>
 
                 <DialogFooter className="px-8 py-4 bg-primary/[0.02] border-t border-primary/10">
-                    <Button variant="ghost" onClick={onClose} className="text-[10px] font-black uppercase tracking-widest rounded-xl h-10 px-6">Abort</Button>
+                    <Button variant="ghost" onClick={onClose} className="text-[10px] font-black uppercase tracking-widest rounded-xl h-10 px-6">Cancel</Button>
                     <Button
                         onClick={handleSave}
                         disabled={!name.trim() || !content.trim()}
                         className="text-[10px] font-black uppercase tracking-[0.2em] rounded-xl h-10 px-8 shadow-xl shadow-primary/10 ring-1 ring-inset ring-white/20"
                     >
-                        {mode === 'add' ? 'Initialize Vector' : 'Commit Changes'}
+                        {mode === 'add' ? 'Save Source' : 'Save Changes'}
                     </Button>
                 </DialogFooter>
             </DialogContent>
@@ -217,9 +210,9 @@ export function SourceManager() {
                     <Database className="h-8 w-8 text-primary/40" />
                 </div>
                 <div className="space-y-1.5 px-6">
-                    <p className="text-[10px] font-black uppercase tracking-[0.3em] text-muted-foreground">Source Matrix Offline</p>
+                    <p className="text-[10px] font-black uppercase tracking-[0.3em] text-muted-foreground">Manager Offline</p>
                     <p className="text-[11px] font-medium leading-relaxed italic text-muted-foreground/60 max-w-[200px]">
-                        Initialize or load a project to map cognitive source vectors.
+                        Open a project to manage your content sources.
                     </p>
                 </div>
             </div>
@@ -231,10 +224,10 @@ export function SourceManager() {
             <div className="space-y-1.5 px-1">
                 <h4 className="text-[10px] font-black uppercase tracking-[0.3em] text-primary/70 flex items-center gap-2.5">
                     <Database className="h-3.5 w-3.5" />
-                    Context Matrix
+                    Project Sources
                 </h4>
                 <p className="text-[9px] text-muted-foreground italic font-medium opacity-60 uppercase tracking-widest">
-                    Manage the intellectual input vectors for the AI core.
+                    Manage the content and references for your project.
                 </p>
             </div>
 
@@ -247,7 +240,7 @@ export function SourceManager() {
                         className="h-14 w-full flex flex-col items-center justify-center gap-1.5 rounded-2xl border-dashed border-primary/20 bg-primary/[0.02] hover:bg-primary/5 hover:border-primary/40 transition-all group/up"
                     >
                         <UploadCloud className="h-4 w-4 text-primary/40 group-hover/up:text-primary group-hover/up:scale-110 transition-all" />
-                        <span className="text-[8px] font-black uppercase tracking-[0.2em] text-muted-foreground/60 group-hover/up:text-primary transition-colors">Import File</span>
+                        <span className="text-[8px] font-black uppercase tracking-[0.2em] text-muted-foreground/60 group-hover/up:text-primary transition-colors">Upload File</span>
                     </Button>
                 </div>
                 <Button
@@ -256,14 +249,14 @@ export function SourceManager() {
                     onClick={() => setIsAddingText(true)}
                 >
                     <Plus className="h-4 w-4 text-primary/40 group-hover/txt:text-primary group-hover/txt:scale-110 transition-all" />
-                    <span className="text-[8px] font-black uppercase tracking-[0.2em] text-muted-foreground/60 group-hover/txt:text-primary transition-colors">Raw Logic</span>
+                    <span className="text-[8px] font-black uppercase tracking-[0.2em] text-muted-foreground/60 group-hover/txt:text-primary transition-colors">Add Text</span>
                 </Button>
             </div>
 
             {/* Matrix Stack — High-Density Node List */}
             <div className="flex-1 space-y-3 relative">
-                {/* Depth architectural line */}
-                <div className="absolute left-[-1.25rem] top-0 bottom-0 w-px bg-gradient-to-b from-primary/30 via-primary/5 to-transparent" />
+                {/* Accent line */}
+                <div className="absolute left-[-1.25rem] top-0 bottom-0 w-px bg-gradient-to-b from-primary/30 via-primary/5 to-transparent" aria-hidden="true" />
 
                 {project.externalContext.length > 0 ? (
                     project.externalContext.map((item, index) => (
@@ -300,20 +293,20 @@ export function SourceManager() {
                             <Database className="h-10 w-10 text-muted-foreground stroke-[1]" />
                         </div>
                         <div className="space-y-1.5 px-6">
-                            <p className="text-[10px] font-black uppercase tracking-[0.2em]">Source Core Empty</p>
-                            <p className="text-[9px] font-medium leading-relaxed italic">Incorporate external data matrices to enhance AI neural accuracy.</p>
+                            <p className="text-[10px] font-black uppercase tracking-[0.2em]">No Sources Found</p>
+                            <p className="text-[9px] font-medium leading-relaxed italic">Add sources to provide more context for AI generations.</p>
                         </div>
                     </div>
                 )}
             </div>
 
-            {/* Stable Environment Footer */}
+            {/* Panel Footer */}
             <div className="absolute bottom-0 left-0 right-0 px-6 py-3 border-t border-primary/10 bg-background flex items-center justify-between">
                 <div className="flex items-center gap-2">
                     <div className="h-1 w-1 rounded-full bg-primary/30" />
-                    <span className="text-[8px] font-black uppercase tracking-widest text-muted-foreground/40">Vector Control</span>
+                    <span className="text-[8px] font-black uppercase tracking-widest text-muted-foreground/40">Source Control</span>
                 </div>
-                <span className="text-[8px] font-bold text-muted-foreground/20 tabular-nums">v1.1.0-STABLE</span>
+                <span className="text-[8px] font-bold text-muted-foreground/20 tabular-nums">v1.0</span>
             </div>
 
             {/* Dialogs */}

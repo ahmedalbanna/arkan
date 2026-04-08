@@ -12,6 +12,7 @@ import { useBuilderStore } from '@/hooks';
 import { useProjectFileOperations } from '@/modules/projects/adapters/hooks/useProjectFileOperations';
 import { LibraryHUD } from '../session/LibraryHUD';
 import { ExportHUD } from '../session/ExportHUD';
+import { AtmosphericGrid } from '@/components/shared/AtmosphericGrid';
 
 interface BuilderHeaderProps {
     projectName: string;
@@ -69,24 +70,18 @@ export const BuilderHeader = React.forwardRef<HTMLDivElement, BuilderHeaderProps
                 className
             )}
         >
-            {/* Dot-grid atmosphere — Standardized Workspace Alignment (28px) */}
-            <div
-                className="absolute inset-0 opacity-[0.02] dark:opacity-[0.04] pointer-events-none"
-                style={{
-                    backgroundImage: 'radial-gradient(circle at 1.5px 1.5px, hsl(var(--primary)) 1px, transparent 0)',
-                    backgroundSize: '28px 28px',
-                }}
-            />
+            {/* Background Grid */}
+            <AtmosphericGrid opacity={0.02} size={28} />
 
-            {/* Left — brand + project identity */}
+            {/* Brand and Project Identity */}
             <div className="flex items-center gap-4 relative z-10 min-w-0">
-                {/* Logo HUD */}
+                {/* Workspace Identity */}
                 <div className="h-9 w-9 bg-primary/5 rounded-xl flex items-center justify-center border border-primary/10 group/logo overflow-hidden relative transition-all duration-500 hover:border-primary/30 shrink-0">
                     <div className="absolute inset-0 bg-primary/[0.02] opacity-0 group-hover/logo:opacity-100 transition-opacity duration-500" />
                     <BookOpenText className="h-4.5 w-4.5 text-primary/60 relative z-10 transition-transform duration-500 group-hover/logo:scale-110" />
                 </div>
 
-                {/* Project name + metadata */}
+                {/* Project Identification */}
                 <div className="flex flex-col gap-0.5 min-w-0">
                     <div className="relative group/input">
                         <Input
@@ -96,7 +91,6 @@ export const BuilderHeader = React.forwardRef<HTMLDivElement, BuilderHeaderProps
                             onBlur={onProjectNameBlur}
                             placeholder="Untitled Project"
                         />
-                        {/* Animated underline on hover/focus */}
                         <div className="absolute -bottom-0.5 left-0 w-0 h-[1px] bg-primary/60 group-hover/input:w-full transition-all duration-500" />
                     </div>
 
@@ -105,20 +99,20 @@ export const BuilderHeader = React.forwardRef<HTMLDivElement, BuilderHeaderProps
                             variant="outline"
                             className="text-[8px] font-black uppercase tracking-[0.22em] py-0 h-3.5 border-primary/20 bg-primary/5 text-primary/70 px-1.5"
                         >
-                            v2.4
+                            v1.0
                         </Badge>
                         <div className="flex items-center gap-1 opacity-40">
                             <div className="h-1 w-1 bg-green-500 rounded-full animate-pulse" />
-                            <span className="text-[8px] font-black uppercase tracking-[0.18em] text-muted-foreground">Active Hub</span>
+                            <span className="text-[8px] font-black uppercase tracking-[0.18em] text-muted-foreground">Connected</span>
                         </div>
                     </div>
                 </div>
             </div>
 
-            {/* Right — session actions */}
+            {/* Session Actions */}
             <div className="flex items-center gap-3 relative z-10 shrink-0">
                 <TooltipProvider delayDuration={200}>
-                    {/* Action pill — a nested flat container */}
+                    {/* Action Toolbar */}
                     <div className="flex items-center gap-1 bg-muted/5 p-1 rounded-2xl border border-primary/5 transition-all duration-500 hover:border-primary/15">
                         <input
                             type="file"
@@ -128,7 +122,7 @@ export const BuilderHeader = React.forwardRef<HTMLDivElement, BuilderHeaderProps
                             className="hidden"
                         />
 
-                        {/* File ops group */}
+                        {/* Project Management */}
                         <Tooltip>
                             <TooltipTrigger asChild>
                                 <Button
@@ -161,14 +155,13 @@ export const BuilderHeader = React.forwardRef<HTMLDivElement, BuilderHeaderProps
                                 </Button>
                             </TooltipTrigger>
                             <TooltipContent side="bottom" className="text-[9px] font-black uppercase tracking-[0.2em] bg-background/95 backdrop-blur-md border-primary/20 mt-3">
-                                Import .arkan File
+                                Import Project
                             </TooltipContent>
                         </Tooltip>
 
-                        {/* Divider — tactical hairline */}
                         <div className="h-5 w-px bg-primary/10 mx-1" aria-hidden />
 
-                        {/* Persistence group */}
+                        {/* Persistence */}
                         <Tooltip>
                             <TooltipTrigger asChild>
                                 <Button
@@ -193,7 +186,7 @@ export const BuilderHeader = React.forwardRef<HTMLDivElement, BuilderHeaderProps
                                             )}
                                         </div>
                                     )}
-                                    <span className="hidden xl:inline">Save Project</span>
+                                    <span className="hidden xl:inline">Save</span>
                                 </Button>
                             </TooltipTrigger>
                             <TooltipContent side="bottom" className="text-[9px] font-black uppercase tracking-[0.2em] bg-background/95 backdrop-blur-md border-primary/20 mt-3">
@@ -212,15 +205,14 @@ export const BuilderHeader = React.forwardRef<HTMLDivElement, BuilderHeaderProps
                                     className="h-8 w-8 xl:w-auto xl:px-3 gap-1.5 text-[9px] font-black uppercase tracking-[0.18em] hover:bg-primary/10 hover:text-primary transition-all duration-200 rounded-xl text-muted-foreground disabled:opacity-30"
                                 >
                                     <Download className="h-4 w-4 shrink-0" />
-                                    <span className="hidden xl:inline">Export</span>
+                                    <span className="hidden xl:inline">Download</span>
                                 </Button>
                             </TooltipTrigger>
                             <TooltipContent side="bottom" className="text-[9px] font-black uppercase tracking-[0.2em] bg-background/95 backdrop-blur-md border-primary/20 mt-3">
-                                Download as .arkan
+                                Download Backup
                             </TooltipContent>
                         </Tooltip>
 
-                        {/* Divider — tactical hairline */}
                         <div className="h-5 w-px bg-primary/10 mx-1" aria-hidden />
 
                         <ExportHUD />

@@ -13,57 +13,60 @@ import { Project } from '@/modules/projects/domain/entities/Project';
 import { type ComparisonSnapshot, type RewriteStyleOption, type SectionMutation } from './types';
 import { BuilderPageSkeleton } from '@/app/builder/loading';
 
-// ── Error Boundary for Neural Rendering ────────────────────────────────────────
+// ── Error Boundary for Document Rendering ────────────────────────────────────────
 
 interface ErrorBoundaryProps {
-    children: ReactNode;
+  children: ReactNode;
 }
 
 interface ErrorBoundaryState {
-    hasError: boolean;
-    error: Error | null;
+  hasError: boolean;
+  error: Error | null;
 }
 
 class RendererErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
-    constructor(props: ErrorBoundaryProps) {
-        super(props);
-        this.state = { hasError: false, error: null };
-    }
+  constructor(props: ErrorBoundaryProps) {
+    super(props);
+    this.state = { hasError: false, error: null };
+  }
 
-    static getDerivedStateFromError(error: Error): ErrorBoundaryState {
-        return { hasError: true, error };
-    }
+  static getDerivedStateFromError(error: Error): ErrorBoundaryState {
+    return { hasError: true, error };
+  }
 
-    componentDidCatch(error: Error, errorInfo: ErrorInfo) {
-        console.error('[DocumentRenderer] Rendering pipeline crash:', error, errorInfo);
-    }
+  componentDidCatch(error: Error, errorInfo: ErrorInfo) {
+    console.error('[DocumentRenderer] Rendering pipeline crash:', error, errorInfo);
+  }
 
-    render() {
-        if (this.state.hasError) {
-            return (
-                <div className="max-w-[210mm] mx-auto my-20 p-12 rounded-[32px] border-2 border-dashed border-destructive/20 bg-destructive/5 text-center space-y-6 animate-in fade-in zoom-in-95 duration-500">
-                    <div className="h-20 w-20 mx-auto rounded-[28px] bg-destructive/10 flex items-center justify-center border border-destructive/20 shadow-2xl">
-                        <ShieldAlert className="h-10 w-10 text-destructive" />
-                    </div>
-                    <div className="space-y-2">
-                        <h3 className="text-[18px] font-black uppercase tracking-tight text-destructive">Neural Pipeline Error</h3>
-                        <p className="text-[12px] text-muted-foreground/70 italic font-medium leading-relaxed max-w-md mx-auto">
-                            The document renderer encountered an unrecoverable state while processing the project manifest.
-                        </p>
-                    </div>
-                    <Button 
-                        onClick={() => window.location.reload()} 
-                        variant="outline" 
-                        className="h-11 px-8 rounded-xl border-destructive/20 text-destructive hover:bg-destructive/10 transition-all gap-2.5 font-black uppercase tracking-widest text-[10px]"
-                    >
-                        <RefreshCcw className="h-4 w-4" />
-                        Reinitialize Pipeline
-                    </Button>
-                </div>
-            );
-        }
-        return this.props.children;
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div className="max-w-[210mm] mx-auto my-20 p-12 rounded-[32px] border-2 border-dashed border-destructive/20 bg-destructive/5 text-center space-y-6 animate-in fade-in zoom-in-95 duration-500">
+          <div className="h-20 w-20 mx-auto rounded-[28px] bg-destructive/10 flex items-center justify-center border border-destructive/20 shadow-2xl">
+            <ShieldAlert className="h-10 w-10 text-destructive" />
+          </div>
+          <div className="space-y-2">
+            <h3 className="text-[18px] font-black uppercase tracking-tight text-destructive">
+              Document Rendering Error
+            </h3>
+            <p className="text-[12px] text-muted-foreground/70 italic font-medium leading-relaxed max-w-md mx-auto">
+              The document renderer encountered an unexpected error while processing the project
+              structure.
+            </p>
+          </div>
+          <Button
+            onClick={() => window.location.reload()}
+            variant="outline"
+            className="h-11 px-8 rounded-xl border-destructive/20 text-destructive hover:bg-destructive/10 transition-all gap-2.5 font-black uppercase tracking-widest text-[10px]"
+          >
+            <RefreshCcw className="h-4 w-4" />
+            Reload Workspace
+          </Button>
+        </div>
+      );
     }
+    return this.props.children;
+  }
 }
 
 // ── Main Component ─────────────────────────────────────────────────────────────
@@ -126,7 +129,7 @@ const DocumentRendererComponent: React.FC<DocumentRendererProps> = ({
     return (
         <RendererErrorBoundary>
             <div className="flex flex-col items-center">
-                {/* Cover Page — High-fidelity animated entry/exit */}
+                {/* Cover Page */}
                 <AnimatePresence mode="wait">
                     {showCoverPage && (
                         <motion.div
