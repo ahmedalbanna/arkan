@@ -12,6 +12,14 @@ import { ContextualToolbar } from '@/modules/ai-content/infrastructure/editor/ed
 import { cn } from '@/infrastructure/utils/cn';
 import { PROSE_CLASSES } from '@/modules/ai-content/adapters/components/report-mode/markdown-styles';
 
+// Performance: prevent `nodesBetween(0, pos, ...)` from becoming O(docSize)
+// on frequent selection updates. Tune after profiling on real documents.
+const HEADING_SCAN_LOOKBACK_POS = 15000;
+
+// Correctness: when the nearest heading is outside the lookback window,
+// occasionally do a full scan (throttled) rather than giving up entirely.
+const FULL_HEADING_SCAN_COOLDOWN_MS = 800;
+
 interface MarkdownEditorProps {
   content: string;
   onChange: (markdown: string) => void;
@@ -34,6 +42,9 @@ const MarkdownEditorComponent = ({
   const markdownService = useService<IMarkdownService>(IMarkdownServiceToken);
   const bubbleMenuId = React.useId();
   const debounceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const bubbleMenuRef = useRef<HTMLDivElement>(null);
+  const lastActiveHeadingTextTrimmedRef = useRef<string | null>(null);
+  const lastFullHeadingScanAtMsRef = useRef<number>(0);
 
   const extensions = useMemo(
     () => editorExtensions(bubbleMenuId, markdownService),
@@ -59,15 +70,43 @@ const MarkdownEditorComponent = ({
         }
       }
       // Walk backwards through doc to find nearest heading before cursor
+      // (but bounded to avoid scanning the entire document on every cursor move).
       if (!headingText) {
         const pos = $anchor.pos;
-        editor.state.doc.nodesBetween(0, pos, (node) => {
+        const scanStart = Math.max(0, pos - HEADING_SCAN_LOOKBACK_POS);
+
+        editor.state.doc.nodesBetween(scanStart, pos, (node) => {
           if (node.type.name === 'heading') {
             headingText = node.textContent;
           }
         });
+
+        // If the heading is not within the lookback window, occasionally run
+        // a full scan to avoid long-lived stale active-item state.
+        if (!headingText) {
+          const nowMs = performance.now();
+          if (nowMs - lastFullHeadingScanAtMsRef.current >= FULL_HEADING_SCAN_COOLDOWN_MS) {
+            lastFullHeadingScanAtMsRef.current = nowMs;
+            editor.state.doc.nodesBetween(0, pos, (node) => {
+              if (node.type.name === 'heading') {
+                headingText = node.textContent;
+              }
+            });
+          }
+        }
       }
-      onActiveItemDetect(headingText);
+
+      const nextTrimmed = headingText?.trim() ? headingText.trim() : null;
+      // Avoid spamming parent state with identical detections.
+      if (nextTrimmed === lastActiveHeadingTextTrimmedRef.current) return;
+
+      // Focus-gate: while the user is interacting with HUD/sidebars, we don't want
+      // project context to "jump" due to selection updates caused by programmatic
+      // `setContent(...)` calls.
+      if (!editor.isFocused) return;
+
+      lastActiveHeadingTextTrimmedRef.current = nextTrimmed;
+      onActiveItemDetect(nextTrimmed);
     },
     onUpdate: ({ editor }) => {
       // Notify the store about selection/state changes
@@ -152,7 +191,11 @@ const MarkdownEditorComponent = ({
   };
 
   return (
-    <div className="relative text-base h-full">
+    <div
+      className="relative text-base h-full"
+      tabIndex={0} // Makes the div focusable
+      aria-label="Rich Text Editor" // Provides a descriptive label for screen readers
+    >
       {editor && (
         <BubbleMenu
           editor={editor}
