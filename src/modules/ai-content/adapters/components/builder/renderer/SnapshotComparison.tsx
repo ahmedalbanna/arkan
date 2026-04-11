@@ -1,40 +1,44 @@
 'use client';
 
-import React, { useMemo } from 'react';
+import { DiffView } from '@/components/shared/DiffView';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { Project } from '@/modules/projects/domain/entities/Project';
 import { computeDiff } from '@/modules/projects/domain/utils/diff';
-import { DiffView } from '@/components/shared/DiffView';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { GitCompare, X, AlertCircle, ShieldAlert } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Calendar, Check, Clock, Copy, Download, GitBranch, GitCompare, ShieldAlert, X } from 'lucide-react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { type ComparisonSnapshot } from './types';
 
-/**
- * SnapshotComparison — Visual diff interface for document version history.
- * Performs deep spectral comparison between current manifest and historical snapshots.
- * 
- * DEFENSIVE MEASURES:
- * 1. Data Validation: Verifies snapshot integrity before entity instantiation.
- * 2. Diff Containment: Wraps LCS algorithm in try-catch to prevent malformed crash.
- * 3. Existence Guards: Handles missing project content or broken snapshots gracefully.
- * 4. UX Safety: Provides explicit fallback UI for diff calculation failures.
- */
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { format } from 'date-fns';
 
 interface SnapshotComparisonProps {
     activeProject: Project;
     comparisonSnapshot: ComparisonSnapshot;
     onClose: () => void;
+    onNavigate?: (direction: 'prev' | 'next') => void;
+    hasPrev?: boolean;
+    hasNext?: boolean;
 }
 
-const SnapshotComparisonComponent = ({ activeProject, comparisonSnapshot, onClose }: SnapshotComparisonProps) => {
-    
-    // 1. DATA VALIDATION — Guarded snapshot reconstruction
+const SnapshotComparisonComponent = ({
+    activeProject,
+    comparisonSnapshot,
+    onClose,
+    onNavigate,
+    hasPrev,
+    hasNext
+}: SnapshotComparisonProps) => {
+    const [copied, setCopied] = useState(false);
+    const [showSideBySide, setShowSideBySide] = useState(false);
+    const [searchTerm, setSearchTerm] = useState('');
+
+    // Diff calculation
     const diffData = useMemo(() => {
         if (!activeProject || !comparisonSnapshot?.snapshotData) return null;
 
         try {
-            // Validate essential fields before instantiation
             const data = comparisonSnapshot.snapshotData as any;
             if (!data.id || !Array.isArray(data.content)) {
                 console.warn('[SnapshotComparison] Snapshot data integrity check failed.');
@@ -46,18 +50,69 @@ const SnapshotComparisonComponent = ({ activeProject, comparisonSnapshot, onClos
             const targetMarkdown = activeProject.fullMarkdownContent || '';
 
             const diff = computeDiff(sourceMarkdown, targetMarkdown);
-            return { diff, snapshotName: comparisonSnapshot.name || 'Historical Snapshot' };
+
+            // Calculate stats
+            const additions = diff.filter(part => part.type === 'added').reduce((acc, part) => acc + part.value.length, 0);
+            const deletions = diff.filter(part => part.type === 'removed').reduce((acc, part) => acc + part.value.length, 0);
+
+            return {
+                diff,
+                snapshotName: comparisonSnapshot.name || 'Historical Snapshot',
+                snapshotDate: comparisonSnapshot.createdAt,
+                additions,
+                deletions,
+                totalChanges: additions + deletions
+            };
         } catch (e) {
             console.error('[SnapshotComparison] Diff orchestration failure:', e);
             return null;
         }
     }, [activeProject, comparisonSnapshot]);
 
-    // 2. RENDER GUARDS — System Error Fallback
+    const handleCopyDiff = useCallback(async () => {
+        if (!diffData) return;
+        const fullText = diffData.diff.map(part => part.value).join('');
+        await navigator.clipboard.writeText(fullText);
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+    }, [diffData]);
+
+    const handleDownloadDiff = useCallback(() => {
+        if (!diffData) return;
+        const fullText = diffData.diff.map(part => part.value).join('');
+        const blob = new Blob([fullText], { type: 'text/plain' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `diff-${comparisonSnapshot.name || 'snapshot'}-${new Date().toISOString().split('T')[0]}.txt`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    }, [diffData, comparisonSnapshot.name]);
+
+    // Keyboard shortcuts
+    useEffect(() => {
+        const handleKeyDown = (e: KeyboardEvent) => {
+            if (e.key === 'ArrowLeft' && hasPrev && onNavigate) {
+                e.preventDefault();
+                onNavigate('prev');
+            } else if (e.key === 'ArrowRight' && hasNext && onNavigate) {
+                e.preventDefault();
+                onNavigate('next');
+            } else if (e.key === 'Escape') {
+                onClose();
+            }
+        };
+
+        window.addEventListener('keydown', handleKeyDown);
+        return () => window.removeEventListener('keydown', handleKeyDown);
+    }, [hasPrev, hasNext, onNavigate, onClose]);
+
     if (!diffData) {
         return (
             <div className="flex flex-col items-center justify-center h-[60vh] p-12 text-center space-y-6 animate-in fade-in zoom-in-95 duration-500">
-                <div className="h-20 w-20 rounded-[28px] bg-destructive/5 border border-dashed border-destructive/20 flex items-center justify-center">
+                <div className="h-20 w-20 rounded-2xl bg-destructive/5 border border-dashed border-destructive/20 flex items-center justify-center">
                     <ShieldAlert className="h-10 w-10 text-destructive/40" />
                 </div>
                 <div className="space-y-2">
@@ -73,76 +128,194 @@ const SnapshotComparisonComponent = ({ activeProject, comparisonSnapshot, onClos
         );
     }
 
+    const snapshotDate = diffData.snapshotDate ? new Date(diffData.snapshotDate) : null;
+    const currentDate = new Date();
+
     return (
-        <div className="flex flex-col h-full min-h-0 bg-background/40 backdrop-blur-3xl border border-border/40 rounded-[32px] overflow-hidden shadow-2xl animate-in slide-in-from-bottom-4 duration-700">
-            {/* HUD Header — High Fidelity */}
-            <div className="flex items-center justify-between px-10 py-6 border-b border-primary/10 bg-primary/[0.02] backdrop-blur-2xl relative overflow-hidden shrink-0">
-                {/* Dot-grid atmosphere — Standardized Workspace Alignment (28px) */}
-                <div className="absolute inset-0 opacity-[0.02] pointer-events-none bg-[radial-gradient(circle_at_center,_var(--primary)_1px,_transparent_1px)] bg-[size:28px_28px]" />
-                
-                <div className="flex items-center gap-6 relative z-10">
-                    <div className="h-12 w-12 rounded-2xl bg-primary/10 flex items-center justify-center border border-primary/20 shadow-inner group/icon">
-                        <GitCompare className="h-6 w-6 text-primary group-hover:rotate-12 transition-transform duration-500" />
+        <div className="flex flex-col h-full min-h-0 bg-background/95 backdrop-blur-sm border border-border/40 rounded-2xl overflow-hidden shadow-2xl animate-in slide-in-from-bottom-4 duration-700">
+            {/* Header */}
+            <div className="flex items-center justify-between px-6 py-4 border-b border-primary/10 bg-primary/[0.02] shrink-0">
+                <div className="flex items-center gap-4">
+                    <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center border border-primary/20">
+                        <GitCompare className="h-5 w-5 text-primary" />
                     </div>
                     <div>
-                        <h2 className="text-[16px] font-black uppercase tracking-tight text-foreground/90 leading-none">
+                        <h2 className="text-[14px] font-black uppercase tracking-tight">
                             Version Comparison
                         </h2>
-                        <div className="flex items-center gap-2 mt-2">
-                            <div className="h-1 w-1 rounded-full bg-primary animate-pulse shadow-[0_0_8px_rgba(var(--primary),0.6)]" />
-                            <p className="text-[10px] font-black text-muted-foreground/60 uppercase tracking-[0.25em]">
-                                Syncing current with <span className="text-primary">{diffData.snapshotName}</span>
+                        <div className="flex items-center gap-2 mt-0.5">
+                            <div className="h-1 w-1 rounded-full bg-primary animate-pulse" />
+                            <p className="text-[8px] font-black text-muted-foreground/60 uppercase tracking-[0.2em]">
+                                Comparing current with <span className="text-primary">{diffData.snapshotName}</span>
                             </p>
                         </div>
                     </div>
                 </div>
-                <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={onClose}
-                    className="h-10 px-6 text-[10px] font-black uppercase tracking-[0.2em] border-primary/10 hover:bg-red-500/5 hover:text-red-600 hover:border-red-500/20 transition-all rounded-xl gap-2 shadow-sm"
-                >
-                    <X className="h-4 w-4" />
-                    Exit Sync
-                </Button>
+
+                <div className="flex items-center gap-2">
+                    {/* Navigation Buttons */}
+                    {onNavigate && (
+                        <>
+                            <TooltipProvider>
+                                <Tooltip>
+                                    <TooltipTrigger asChild>
+                                        <Button
+                                            variant="ghost"
+                                            size="icon"
+                                            onClick={() => onNavigate('prev')}
+                                            disabled={!hasPrev}
+                                            className="h-8 w-8 rounded-lg"
+                                        >
+                                            <ArrowLeft className="h-4 w-4" />
+                                        </Button>
+                                    </TooltipTrigger>
+                                    <TooltipContent side="bottom" className="text-[8px]">
+                                        Previous snapshot • ←
+                                    </TooltipContent>
+                                </Tooltip>
+                            </TooltipProvider>
+
+                            <TooltipProvider>
+                                <Tooltip>
+                                    <TooltipTrigger asChild>
+                                        <Button
+                                            variant="ghost"
+                                            size="icon"
+                                            onClick={() => onNavigate('next')}
+                                            disabled={!hasNext}
+                                            className="h-8 w-8 rounded-lg"
+                                        >
+                                            <ArrowRight className="h-4 w-4" />
+                                        </Button>
+                                    </TooltipTrigger>
+                                    <TooltipContent side="bottom" className="text-[8px]">
+                                        Next snapshot • →
+                                    </TooltipContent>
+                                </Tooltip>
+                            </TooltipProvider>
+                        </>
+                    )}
+
+                    <TooltipProvider>
+                        <Tooltip>
+                            <TooltipTrigger asChild>
+                                <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    onClick={handleDownloadDiff}
+                                    className="h-8 w-8 rounded-lg"
+                                >
+                                    <Download className="h-4 w-4" />
+                                </Button>
+                            </TooltipTrigger>
+                            <TooltipContent side="bottom" className="text-[8px]">
+                                Download diff
+                            </TooltipContent>
+                        </Tooltip>
+                    </TooltipProvider>
+
+                    <TooltipProvider>
+                        <Tooltip>
+                            <TooltipTrigger asChild>
+                                <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    onClick={handleCopyDiff}
+                                    className="h-8 w-8 rounded-lg"
+                                >
+                                    {copied ? (
+                                        <Check className="h-4 w-4 text-green-500" />
+                                    ) : (
+                                        <Copy className="h-4 w-4" />
+                                    )}
+                                </Button>
+                            </TooltipTrigger>
+                            <TooltipContent side="bottom" className="text-[8px]">
+                                Copy diff
+                            </TooltipContent>
+                        </Tooltip>
+                    </TooltipProvider>
+
+                    <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={onClose}
+                        className="h-8 w-8 rounded-lg hover:bg-destructive/10 hover:text-destructive"
+                    >
+                        <X className="h-4 w-4" />
+                    </Button>
+                </div>
             </div>
 
-            {/* Diff Core */}
-            <ScrollArea className="flex-1 bg-background/20 relative group">
-                <div className="p-12 max-w-5xl mx-auto space-y-10 relative z-10">
-                    {/* Depth architectural line */}
-                    <div className="absolute left-0 top-0 bottom-0 w-px bg-gradient-to-b from-primary/30 via-primary/5 to-transparent" />
+            {/* Stats Bar */}
+            <div className="px-6 py-3 border-b border-primary/10 bg-muted/5 flex items-center justify-between text-[8px]">
+                <div className="flex items-center gap-4">
+                    <div className="flex items-center gap-1.5">
+                        <div className="h-2 w-2 rounded-full bg-green-500" />
+                        <span className="text-green-600 dark:text-green-400">+{diffData.additions} additions</span>
+                    </div>
+                    <div className="flex items-center gap-1.5">
+                        <div className="h-2 w-2 rounded-full bg-red-500" />
+                        <span className="text-red-600 dark:text-red-400">-{diffData.deletions} deletions</span>
+                    </div>
+                    <div className="flex items-center gap-1.5">
+                        <GitBranch className="h-3 w-3 text-muted-foreground/40" />
+                        <span className="text-muted-foreground/40">{diffData.totalChanges} total changes</span>
+                    </div>
+                </div>
 
-                    <div className="flex items-center gap-3 animate-in fade-in slide-in-from-left-4 duration-500">
-                        <Badge
-                            variant="outline"
-                            className="h-6 px-3 text-[9px] font-black tracking-[0.2em] border-green-500/30 text-green-600 dark:text-green-400 bg-green-500/5 uppercase rounded-full shadow-inner ring-1 ring-inset ring-green-500/10"
-                        >
-                            + Neural Addition
-                        </Badge>
-                        <Badge
-                            variant="outline"
-                            className="h-6 px-3 text-[9px] font-black tracking-[0.2em] border-destructive/30 text-destructive bg-destructive/5 uppercase rounded-full shadow-inner ring-1 ring-inset ring-destructive/10"
-                        >
-                            − Node Removal
-                        </Badge>
+                <div className="flex items-center gap-3">
+                    {snapshotDate && (
+                        <div className="flex items-center gap-1">
+                            <Calendar className="h-3 w-3 text-muted-foreground/40" />
+                            <span className="font-mono">
+                                Snapshot: {format(snapshotDate, 'MMM d, yyyy')}
+                            </span>
+                        </div>
+                    )}
+                    <div className="flex items-center gap-1">
+                        <Clock className="h-3 w-3 text-muted-foreground/40" />
+                        <span className="font-mono">
+                            Current: {format(currentDate, 'MMM d, yyyy')}
+                        </span>
                     </div>
-                    
-                    <div className="animate-in fade-in slide-in-from-bottom-2 duration-1000 delay-200">
-                        <DiffView diff={diffData.diff} />
+                </div>
+            </div>
+
+            {/* Diff Content */}
+            <ScrollArea className="flex-1 bg-background/20">
+                <div className="p-6 max-w-5xl mx-auto">
+                    {/* Legend */}
+                    <div className="flex items-center gap-4 mb-4 pb-3 border-b border-primary/10">
+                        <div className="flex items-center gap-2">
+                            <Badge variant="outline" className="h-5 px-2 text-[8px] font-black tracking-wider bg-green-500/5 border-green-500/20 text-green-600">
+                                + Addition
+                            </Badge>
+                            <Badge variant="outline" className="h-5 px-2 text-[8px] font-black tracking-wider bg-red-500/5 border-red-500/20 text-red-600">
+                                - Deletion
+                            </Badge>
+                            <span className="text-[8px] text-muted-foreground/40">
+                                Hover over lines to copy
+                            </span>
+                        </div>
                     </div>
+
+                    <DiffView diff={diffData.diff} showLineNumbers={true} />
                 </div>
             </ScrollArea>
 
-            {/* Stable Version Footer */}
-            <footer className="px-10 py-4 border-t border-primary/10 bg-background/40 backdrop-blur-xl flex items-center justify-between shrink-0">
-                <div className="flex items-center gap-3">
-                    <div className="h-1 w-1 rounded-full bg-primary/30 shadow-[0_0_8px_rgba(var(--primary),0.4)]" />
-                    <span className="text-[9px] font-black uppercase tracking-[0.3em] text-muted-foreground/40">Diff Engine STABLE</span>
+            {/* Footer */}
+            <footer className="px-6 py-2.5 border-t border-primary/10 bg-muted/5 flex items-center justify-between text-[7px] text-muted-foreground/40 shrink-0">
+                <div className="flex items-center gap-2">
+                    <div className="h-1 w-1 rounded-full bg-primary/30" />
+                    <span className="font-black uppercase tracking-[0.25em]">Diff Engine • Spectral LCS v2</span>
                 </div>
-                <div className="flex items-center gap-4">
-                    <span className="text-[9px] font-mono text-muted-foreground/30 uppercase tracking-widest">Algorithm: Spectral LCS v2</span>
-                    <span className="text-[9px] font-bold text-muted-foreground/20 tabular-nums uppercase">Build 2.4.0</span>
+                <div className="flex items-center gap-3">
+                    <span>← → Navigate snapshots</span>
+                    <span>•</span>
+                    <span>Esc to close</span>
+                    <span>•</span>
+                    <span>Build 2.5.0</span>
                 </div>
             </footer>
         </div>

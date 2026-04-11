@@ -1,0 +1,38 @@
+
+> nextn@0.1.0 dev
+> next dev --turbopack --port 9002
+
+   ▲ Next.js 15.5.9 (Turbopack)
+   - Local:        http://localhost:9002
+   - Network:      http://185.190.140.93:9002
+   - Environments: .env
+   - Experiments (use with caution):
+     ✓ useCache
+     · serverActions
+
+ ✓ Starting...
+ ○ Compiling instrumentation Node.js ...
+ ✓ Compiled instrumentation Node.js in 74.7s
+ ✓ Compiled instrumentation Edge in 252ms
+Registering server-side dependencies...
+Error: An error occurred while loading instrumentation hook: The module '/root/arkan/node_modules/better-sqlite3/build/Release/better_sqlite3.node'
+was compiled against a different Node.js version using
+NODE_MODULE_VERSION 115. This version of Node.js requires
+NODE_MODULE_VERSION 141. Please try re-compiling or re-installing
+the module (for instance, using `npm rebuild` or `npm install`).
+    at __TURBOPACK__module__evaluation__ (src/infrastructure/db/index.ts:18:45)
+    at __TURBOPACK__module__evaluation__ (src/modules/projects/infrastructure/repositories/SQLiteProjectRepository.ts:2:1)
+    at __TURBOPACK__module__evaluation__ (src/infrastructure/di/container.ts:96:36)
+    at __TURBOPACK__module__evaluation__ (.next/server/chunks/src_infrastructure_84b59f61._.js:996:187)
+    at <unknown> (.next/server/chunks/_45d1106c._.js:80:16)
+    at async Module.register (src/instrumentation.ts:11:9)
+  16 | };
+  17 |
+> 18 | export const sqlite = globalForDb.sqlite ?? new Database(dbPath);
+     |                                             ^
+  19 |
+  20 | if (process.env.NODE_ENV !== 'production') {
+  21 |   globalForDb.sqlite = sqlite; {
+  code: 'ERR_DLOPEN_FAILED'
+}
+[?25h

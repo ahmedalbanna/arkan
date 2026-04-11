@@ -1,18 +1,18 @@
 'use client';
 
-import React, { useRef } from 'react';
-import { BookOpenText, PlusCircle, Upload, Download, Loader2, Save } from 'lucide-react';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
+import { AtmosphericGrid } from '@/components/shared/AtmosphericGrid';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { cn } from '@/infrastructure/utils/cn';
 import { useLocalization } from '@/context/LocalizationContext';
 import { useBuilderStore } from '@/hooks';
+import { cn } from '@/infrastructure/utils/cn';
 import { useProjectFileOperations } from '@/modules/projects/adapters/hooks/useProjectFileOperations';
-import { LibraryHUD } from '../session/LibraryHUD';
+import { Download, Loader2, PlusCircle, Save, Upload } from 'lucide-react';
+import React, { useRef } from 'react';
 import { ExportHUD } from '../session/ExportHUD';
-import { AtmosphericGrid } from '@/components/shared/AtmosphericGrid';
+import { LibraryHUD } from '../session/LibraryHUD';
 
 interface BuilderHeaderProps {
     projectName: string;
@@ -75,12 +75,12 @@ export const BuilderHeader = React.forwardRef<HTMLDivElement, BuilderHeaderProps
 
             {/* Brand and Project Identity */}
             <div className="flex items-center gap-4 relative z-10 min-w-0">
-                {/* Workspace Identity */}
+                {/* Workspace Identity
                 <div className="h-9 w-9 bg-primary/5 rounded-xl flex items-center justify-center border border-primary/10 group/logo overflow-hidden relative transition-all duration-500 hover:border-primary/30 shrink-0">
                     <div className="absolute inset-0 bg-primary/[0.02] opacity-0 group-hover/logo:opacity-100 transition-opacity duration-500" />
                     <BookOpenText className="h-4.5 w-4.5 text-primary/60 relative z-10 transition-transform duration-500 group-hover/logo:scale-110" />
                 </div>
-
+*/}
                 {/* Project Identification */}
                 <div className="flex flex-col gap-0.5 min-w-0">
                     <div className="relative group/input">

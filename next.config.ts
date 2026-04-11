@@ -1,6 +1,6 @@
 
-import type { NextConfig, SizeLimit } from 'next';
 import withPWA from "@ducanh2912/next-pwa";
+import type { NextConfig, SizeLimit } from 'next';
 import path from 'path';
 
 const pwaConfig = withPWA({
@@ -83,6 +83,7 @@ const nextConfig: NextConfig = {
     return config;
   },
   turbopack: {
+    root: path.resolve(__dirname),
     resolveAlias: {
       // Node.js built-ins used by Genkit/Express/Ollama — stub them out in the browser bundle
       // Use the browser field to ensure aliases ONLY apply to the client bundle
