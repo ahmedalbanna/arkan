@@ -5,6 +5,8 @@ export interface SidebarPanelConfig {
     title: string;
     icon: ReactNode;
     content: ReactNode;
+    shortcut?: string;
+    badge?: number;
 }
 
 export type SidebarSide = 'left' | 'right';
@@ -16,5 +18,6 @@ export interface BuilderSidebarProps {
     side: SidebarSide;
     defaultSize?: number;
     className?: string;
+    isResizable?: boolean;
     onResize?: (size: number) => void;
 }

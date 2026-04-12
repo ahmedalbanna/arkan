@@ -72,15 +72,16 @@ export const BuilderSidebar = React.forwardRef<HTMLDivElement, BuilderSidebarPro
 
 
     const mobileWidth = isCollapsed ? 'w-0' : 'w-full fixed inset-0 z-50';
-    const desktopWidth = isCollapsed
-      ? 'w-[72px]'
-      : `w-[${sidebarWidth}px]`;
+    const desktopWidth = isCollapsed ? 'w-[72px]' : '';
 
     // Keyboard shortcuts for desktop
     useEffect(() => {
       if (!isDesktop) return;
 
       const handleKeyDown = (e: KeyboardEvent) => {
+        // Skip if user is typing in an input or textarea
+        if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
+
         // Close sidebar on Escape
         if (e.key === 'Escape' && !isCollapsed && !isMobile) {
           onActiveKeyChange?.('');
