@@ -16,8 +16,7 @@ export interface BuilderSidebarProps {
     activeKey: string;
     onActiveKeyChange: (key: string) => void;
     side: SidebarSide;
-    defaultSize?: number;
+    width?: number;
+    onWidthChange?: (width: number) => void;
     className?: string;
-    isResizable?: boolean;
-    onResize?: (size: number) => void;
 }
