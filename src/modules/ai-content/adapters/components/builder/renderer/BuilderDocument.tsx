@@ -6,7 +6,6 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
-import { useMobile } from '@/hooks/util/use-mobile';
 import { cn } from '@/infrastructure/utils/cn';
 import { Chapter } from '@/modules/ai-content/domain/entities/Chapter';
 import { Section } from '@/modules/ai-content/domain/entities/Section';
@@ -77,7 +76,6 @@ const ChapterPreview = React.memo(({
     onSelectChapterSections,
     handleActiveSectionChange,
 }: ChapterPreviewProps) => {
-    const isDesktop = !useMobile();
     const [isExpanded, setIsExpanded] = useState(true);
     const sectionCount = item.sections?.length || 0;
 
@@ -109,7 +107,7 @@ const ChapterPreview = React.memo(({
             <div className="border-b border-primary/10 pb-4 relative">
                 <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                        {isDesktop && isPreview && (
+                        {isPreview && (
                             <button
                                 onClick={() => setIsExpanded(!isExpanded)}
                                 className="p-0.5 rounded-md hover:bg-primary/10 transition-colors"
@@ -126,7 +124,7 @@ const ChapterPreview = React.memo(({
                             {item.title || 'Untitled Chapter'}
                         </h2>
                     </div>
-                    {isDesktop && isPreview && sectionCount > 0 && (
+                    {isPreview && sectionCount > 0 && (
                         <div className="text-[8px] font-mono text-muted-foreground/30">
                             {sectionCount} section{sectionCount !== 1 ? 's' : ''}
                         </div>
@@ -258,7 +256,6 @@ const SectionPreview = React.memo(({
     onRewrite,
     onCopyContent,
 }: SectionPreviewProps) => {
-    const isDesktop = !useMobile();
     const [copied, setCopied] = useState(false);
 
     if (!item) return null;
@@ -297,7 +294,7 @@ const SectionPreview = React.memo(({
                         </span>
                         {item.title || 'Untitled Section'}
                     </h3>
-                    {isDesktop && isPreview && item.content && (
+                    {isPreview && item.content && (
                         <TooltipProvider>
                             <Tooltip>
                                 <TooltipTrigger asChild>
@@ -454,7 +451,6 @@ export const BuilderDocument = ({
     rewriteMutation,
     rewriteStyles,
 }: DocumentProps) => {
-    const isDesktop = !useMobile();
     const [hoveredItemId, setHoveredItemId] = useState<string | null>(null);
     const [isFullWidth, setIsFullWidth] = useState(false);
     const hoverTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -586,7 +582,7 @@ export const BuilderDocument = ({
             isFullWidth && "max-w-none"
         )}>
             {/* Desktop Stats Bar */}
-            {isDesktop && viewMode === 'preview' && (
+            {viewMode === 'preview' && (
                 <div className="sticky top-0 z-30 mb-6 -mt-2 pt-2 bg-background/80 backdrop-blur-sm border-b border-primary/10">
                     <div className="flex items-center justify-between text-[8px] text-muted-foreground/40 py-1.5 px-2">
                         <div className="flex items-center gap-4">

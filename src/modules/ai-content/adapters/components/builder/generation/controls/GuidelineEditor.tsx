@@ -9,7 +9,6 @@ import { Separator } from '@/components/ui/separator';
 import { Textarea } from '@/components/ui/textarea';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { useBuilderStore } from '@/hooks';
-import { useMobile } from '@/hooks/util/use-mobile';
 import { cn } from '@/infrastructure/utils/cn';
 import { useGuidelineEditor } from '@/modules/ai-content/adapters/hooks/report-mode/use-guideline-editor';
 import {
@@ -53,8 +52,6 @@ const guidelineSuggestions: GuidelineSuggestion[] = [
 ];
 
 const GuidelineEditorComponent = ({ itemId, selectedIds = [] }: GuidelineEditorProps) => {
-  const isMobile = useMobile();
-  const isDesktop = !isMobile;
   const { updateProject } = useBuilderStore();
   const {
     section,
@@ -81,7 +78,6 @@ const GuidelineEditorComponent = ({ itemId, selectedIds = [] }: GuidelineEditorP
 
   // Desktop keyboard shortcuts
   useEffect(() => {
-    if (!isDesktop) return;
 
     const handleKeyDown = (e: KeyboardEvent) => {
       // Ctrl/Cmd + Enter to add guideline
@@ -113,7 +109,7 @@ const GuidelineEditorComponent = ({ itemId, selectedIds = [] }: GuidelineEditorP
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isDesktop, newGuideline, guidelines.length, dragIndex]);
+  }, [newGuideline, guidelines.length, dragIndex]);
 
   const handleAddGuideline = useCallback(() => {
     if (!newGuideline.trim() || !updateProject) return;
@@ -134,13 +130,13 @@ const GuidelineEditorComponent = ({ itemId, selectedIds = [] }: GuidelineEditorP
       setNewGuideline('');
 
       // Focus back on input for quick addition
-      if (isDesktop) {
+      if (true) {
         setTimeout(() => inputRef.current?.focus(), 100);
       }
     } catch (error) {
       console.error('[GuidelineEditor] Failed to add guideline:', error);
     }
-  }, [targets, newGuideline, updateProject, isDesktop]);
+  }, [targets, newGuideline, updateProject]);
 
   const handleRemoveGuideline = useCallback((index: number) => {
     const gToRemove = guidelines[index];
@@ -240,7 +236,7 @@ const GuidelineEditorComponent = ({ itemId, selectedIds = [] }: GuidelineEditorP
 
   // Auto-resize textarea on desktop
   useEffect(() => {
-    if (!isDesktop || !textareaRef.current) return;
+    if (!textareaRef.current) return;
 
     const textarea = textareaRef.current;
     const adjustHeight = () => {
@@ -251,7 +247,7 @@ const GuidelineEditorComponent = ({ itemId, selectedIds = [] }: GuidelineEditorP
     adjustHeight();
     textarea.addEventListener('input', adjustHeight);
     return () => textarea.removeEventListener('input', adjustHeight);
-  }, [isDesktop, prompt]);
+  }, [prompt]);
 
   if (!section) {
     return (
@@ -280,7 +276,7 @@ const GuidelineEditorComponent = ({ itemId, selectedIds = [] }: GuidelineEditorP
             <ListChecks className="h-3.5 w-3.5" />
             Neural Guidelines
           </h4>
-          {isBatchMode && isDesktop && (
+          {isBatchMode && (
             <Badge variant="outline" className="h-5 text-[8px] font-mono border-primary/20 bg-primary/5">
               Batch: {targets.length} sections
             </Badge>
@@ -304,7 +300,7 @@ const GuidelineEditorComponent = ({ itemId, selectedIds = [] }: GuidelineEditorP
                 Primary Directive
               </Label>
             </div>
-            {isDesktop && (
+            {(
               <TooltipProvider>
                 <Tooltip>
                   <TooltipTrigger asChild>
@@ -336,10 +332,10 @@ const GuidelineEditorComponent = ({ itemId, selectedIds = [] }: GuidelineEditorP
               id={`prompt-${itemId}`}
               defaultValue={prompt}
               onBlur={handlePromptBlur}
-              rows={isDesktop ? 4 : 5}
+              rows={4}
               className={cn(
                 "relative w-full text-[11px] bg-muted/5 border-primary/10 focus-visible:ring-primary/20 leading-relaxed resize-none p-4 rounded-2xl shadow-inner font-serif italic transition-all hover:bg-muted/8",
-                isDesktop && "min-h-[100px] max-h-[300px]"
+                "min-h-[100px] max-h-[300px]"
               )}
               placeholder="Initialize primary AI instructions for this node..."
             />
@@ -371,7 +367,7 @@ const GuidelineEditorComponent = ({ itemId, selectedIds = [] }: GuidelineEditorP
               <Badge variant="outline" className="h-5 text-[9px] font-black border-primary/20 bg-primary/5 text-primary tabular-nums px-2.5 rounded-full shadow-inner">
                 {guidelines.length} NODE{guidelines.length !== 1 ? 'S' : ''}
               </Badge>
-              {isDesktop && guidelines.length > 0 && (
+              {guidelines.length > 0 && (
                 <TooltipProvider>
                   <Tooltip>
                     <TooltipTrigger asChild>
@@ -432,7 +428,7 @@ const GuidelineEditorComponent = ({ itemId, selectedIds = [] }: GuidelineEditorP
               </div>
 
               {/* Suggestions - Desktop */}
-              {isDesktop && (
+              {(
                 <div className="space-y-2">
                   <button
                     onClick={() => setShowSuggestions(!showSuggestions)}
@@ -461,7 +457,7 @@ const GuidelineEditorComponent = ({ itemId, selectedIds = [] }: GuidelineEditorP
               {/* Guidelines List */}
               <ScrollArea className={cn(
                 "w-full rounded-xl border border-primary/10 bg-muted/5 shadow-inner",
-                isDesktop ? "max-h-[400px]" : "h-56"
+                "max-h-[400px]"
               )}>
                 <div className="p-2 space-y-1.5">
                   {guidelines.length > 0 ? (
@@ -475,7 +471,7 @@ const GuidelineEditorComponent = ({ itemId, selectedIds = [] }: GuidelineEditorP
                         )}
                       >
                         <div className="flex items-start gap-3 flex-1 min-w-0">
-                          {isDesktop && (
+                          {(
                             <div
                               className="cursor-grab active:cursor-grabbing opacity-0 group-hover:opacity-100 transition-opacity"
                               onMouseDown={() => {
@@ -547,7 +543,7 @@ const GuidelineEditorComponent = ({ itemId, selectedIds = [] }: GuidelineEditorP
                         <p className="text-[9px] text-muted-foreground font-medium italic">
                           Add guidelines to optimize AI output.
                         </p>
-                        {isDesktop && (
+                        {(
                           <p className="text-[7px] font-mono text-primary/40 mt-2">
                             Press ⌘⏎ to add quickly
                           </p>
@@ -559,7 +555,7 @@ const GuidelineEditorComponent = ({ itemId, selectedIds = [] }: GuidelineEditorP
               </ScrollArea>
 
               {/* Guidelines Stats - Desktop */}
-              {isDesktop && guidelines.length > 0 && (
+              {guidelines.length > 0 && (
                 <div className="flex items-center justify-between text-[7px] text-muted-foreground/30 pt-1">
                   <div className="flex items-center gap-2">
                     <Layers className="h-2.5 w-2.5" />
@@ -575,7 +571,7 @@ const GuidelineEditorComponent = ({ itemId, selectedIds = [] }: GuidelineEditorP
         </div>
 
         {/* Info Banner - Desktop */}
-        {isDesktop && (
+        {(
           <div className="mt-4 p-3 rounded-xl bg-primary/[0.02] border border-primary/5">
             <div className="flex items-start gap-2">
               <AlertTriangle className="h-3 w-3 text-primary/40 mt-0.5 shrink-0" />

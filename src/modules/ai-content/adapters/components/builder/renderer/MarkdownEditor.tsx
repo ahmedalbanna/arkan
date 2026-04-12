@@ -2,7 +2,6 @@
 
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { useMobile } from '@/hooks/util/use-mobile';
 import { useService } from '@/hooks/util/use-service';
 import { IMarkdownServiceToken } from '@/infrastructure/di/tokens';
 import { cn } from '@/infrastructure/utils/cn';
@@ -43,8 +42,6 @@ const MarkdownEditorComponent = ({
   readOnly = false,
   placeholder = "Start writing...",
 }: MarkdownEditorProps) => {
-  const isMobile = useMobile();
-  const isDesktop = !isMobile;
   const setActiveEditor = useEditorStore(state => state.setActiveEditor);
   const updateSelectionState = useEditorStore(state => state.updateSelectionState);
   const markdownService = useService<IMarkdownService>(IMarkdownServiceToken);
@@ -124,7 +121,7 @@ const MarkdownEditorComponent = ({
       },
       handleKeyDown: (view, event) => {
         // Desktop keyboard shortcuts
-        if (isDesktop) {
+        if (true) {
           // Ctrl/Cmd + B for bold
           if ((event.ctrlKey || event.metaKey) && event.key === 'b') {
             event.preventDefault();
@@ -292,7 +289,7 @@ const MarkdownEditorComponent = ({
 
   // Desktop keyboard shortcuts hint component
   const KeyboardShortcutsHint = () => {
-    if (!isDesktop || readOnly) return null;
+    if (readOnly) return null;
 
     return (
       <div className="absolute bottom-2 right-2 z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">
@@ -305,7 +302,7 @@ const MarkdownEditorComponent = ({
 
   // Status bar for desktop
   const StatusBar = () => {
-    if (!isDesktop || readOnly) return null;
+    if (readOnly) return null;
 
     return (
       <div className="absolute bottom-0 left-0 right-0 h-6 bg-background/80 backdrop-blur-sm border-t border-primary/10 px-3 flex items-center justify-between text-[9px] font-mono text-muted-foreground/40 z-10">

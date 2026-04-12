@@ -10,7 +10,6 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { useMobile } from '@/hooks/util/use-mobile';
 import { cn } from '@/infrastructure/utils/cn';
 import { useProjectChat } from "@/modules/ai-content/adapters/hooks/report-mode/useProjectChat";
 import { Check, Copy, Cpu, Download, MessageSquare, Settings2, Sparkles, Trash2 } from "lucide-react";
@@ -25,8 +24,6 @@ interface ProjectConsultantHUDProps {
 }
 
 export function ProjectConsultantHUD({ isOpen, onClose }: ProjectConsultantHUDProps) {
-    const isMobile = useMobile();
-    const isDesktop = !isMobile;
     const { messages, sendMessage, isLoading, clearChat, exportChat } = useProjectChat();
     const scrollAreaRef = useRef<HTMLDivElement>(null);
     const [copied, setCopied] = useState(false);
@@ -89,7 +86,7 @@ export function ProjectConsultantHUD({ isOpen, onClose }: ProjectConsultantHUDPr
 
     // Keyboard shortcuts
     useEffect(() => {
-        if (!isOpen || !isDesktop) return;
+        if (!isOpen) return;
 
         const handleKeyDown = (e: KeyboardEvent) => {
             // Ctrl/Cmd + K to clear chat
@@ -110,7 +107,7 @@ export function ProjectConsultantHUD({ isOpen, onClose }: ProjectConsultantHUDPr
 
         window.addEventListener('keydown', handleKeyDown);
         return () => window.removeEventListener('keydown', handleKeyDown);
-    }, [isOpen, isDesktop, handleClearChat, handleExportChat, onClose]);
+    }, [isOpen, handleClearChat, handleExportChat, onClose]);
 
     if (!isOpen) return null;
 
@@ -132,7 +129,7 @@ export function ProjectConsultantHUD({ isOpen, onClose }: ProjectConsultantHUDPr
                     </div>
 
                     {/* Action Buttons - Desktop */}
-                    {isDesktop && (
+                    {(
                         <TooltipProvider>
                             <DropdownMenu>
                                 <Tooltip>
@@ -178,7 +175,7 @@ export function ProjectConsultantHUD({ isOpen, onClose }: ProjectConsultantHUDPr
         >
             <div className="flex flex-col h-full relative -mx-5 -my-5">
                 {/* Chat Header Stats - Desktop */}
-                {isDesktop && messages.length > 0 && (
+                {messages.length > 0 && (
                     <div className="px-6 pt-4 pb-2 border-b border-primary/10 bg-muted/5">
                         <div className="flex items-center justify-between text-[8px] text-muted-foreground/40">
                             <div className="flex items-center gap-3">
@@ -212,7 +209,7 @@ export function ProjectConsultantHUD({ isOpen, onClose }: ProjectConsultantHUDPr
                                     <p className="text-[11px] text-muted-foreground/60 leading-relaxed max-w-[280px] mx-auto">
                                         Ask me about your document structure, get writing suggestions, or request content generation.
                                     </p>
-                                    {isDesktop && (
+                                    {(
                                         <div className="mt-6 flex flex-wrap items-center justify-center gap-2 text-[8px] text-muted-foreground/40">
                                             <span className="px-2 py-1 rounded-md bg-muted/30">Try: "Summarize this section"</span>
                                             <span className="px-2 py-1 rounded-md bg-muted/30">"Suggest improvements"</span>
@@ -262,7 +259,7 @@ export function ProjectConsultantHUD({ isOpen, onClose }: ProjectConsultantHUDPr
                 <ChatInput
                     onSend={handleSend}
                     isLoading={isLoading}
-                    placeholder={isDesktop ? "Ask about your document... (⌘⏎ to send)" : "Ask about your document..."}
+                    placeholder={"Ask about your document..."}
                 />
             </div>
         </SidebarContainer>

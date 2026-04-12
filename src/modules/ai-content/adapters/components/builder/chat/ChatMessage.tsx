@@ -2,7 +2,6 @@
 
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { useMobile } from '@/hooks/util/use-mobile';
 import { cn } from '@/infrastructure/utils/cn';
 import { markdownComponents } from '@/modules/ai-content/adapters/components/report-mode/markdown-styles';
 import { Check, Copy, Sparkles, ThumbsDown, ThumbsUp } from 'lucide-react';
@@ -18,7 +17,6 @@ interface ChatMessageProps {
 
 export function ChatMessage({ role, content, isStreaming, onFeedback }: ChatMessageProps) {
     const isAssistant = role === 'assistant';
-    const isDesktop = !useMobile();
     const [copied, setCopied] = useState(false);
     const [feedback, setFeedback] = useState<'helpful' | 'not-helpful' | null>(null);
 
@@ -34,7 +32,7 @@ export function ChatMessage({ role, content, isStreaming, onFeedback }: ChatMess
     };
 
     // Truncate long user messages for display
-    const displayContent = !isAssistant && content.length > 500 && !isDesktop
+    const displayContent = false
         ? content.substring(0, 500) + '...'
         : content;
 
@@ -80,7 +78,7 @@ export function ChatMessage({ role, content, isStreaming, onFeedback }: ChatMess
                 </div>
 
                 {/* Action Buttons - Desktop Assistant Only */}
-                {isDesktop && isAssistant && !isStreaming && (
+                {isAssistant && !isStreaming && (
                     <div className="absolute -bottom-8 right-0 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                         <TooltipProvider>
                             <Tooltip>

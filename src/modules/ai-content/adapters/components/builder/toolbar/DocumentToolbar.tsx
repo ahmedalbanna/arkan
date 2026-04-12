@@ -10,7 +10,6 @@ import {
   DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { useMobile } from '@/hooks/util/use-mobile';
 import { cn } from '@/infrastructure/utils/cn';
 import { useEditorStore } from '@/modules/ai-content/adapters/state/use-editor-store';
 import { Project } from '@/modules/projects/domain/entities/Project';
@@ -76,8 +75,6 @@ export const DocumentToolbar = ({
   onPrint,
   className,
 }: DocumentToolbarProps) => {
-  const isMobile = useMobile();
-  const isDesktop = !isMobile;
   const activeEditor = useEditorStore((state) => state.activeEditor);
   const selection = useEditorStore((state) => state.selection);
   const [showShortcuts, setShowShortcuts] = useState(false);
@@ -157,11 +154,11 @@ export const DocumentToolbar = ({
           {/* Connection Status */}
           <div className="flex items-center gap-1.5 text-[9px] text-muted-foreground font-black uppercase tracking-[0.22em] bg-background/70 px-2.5 py-1 rounded-full border border-border/30 shadow-sm">
             <span className="h-1.5 w-1.5 rounded-full bg-green-500 animate-pulse shadow-[0_0_4px_rgba(34,197,94,0.5)]" />
-            {isDesktop && 'Connected'}
+            {'Connected'}
           </div>
 
           {/* Last Saved Indicator */}
-          {isDesktop && lastSaved && (
+          {lastSaved && (
             <>
               <div className="w-px h-4 bg-border/40" aria-hidden />
               <span className="text-[9px] text-muted-foreground/40 font-mono">
@@ -171,7 +168,7 @@ export const DocumentToolbar = ({
           )}
 
           {/* Project Updated Time */}
-          {isDesktop && project?.meta.updated && (
+          {project?.meta.updated && (
             <>
               <div className="w-px h-4 bg-border/40" aria-hidden />
               <span className="flex items-center gap-1 text-[9px] text-muted-foreground/50 font-bold uppercase tracking-[0.15em]">
@@ -183,7 +180,7 @@ export const DocumentToolbar = ({
         </div>
 
         {/* Center — Document Title (Desktop) */}
-        {isDesktop && project && (
+        {project && (
           <div className="absolute left-1/2 -translate-x-1/2">
             <span className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/40">
               {project.name || 'Untitled Document'}
@@ -194,7 +191,7 @@ export const DocumentToolbar = ({
         {/* Right — Action Buttons */}
         <div className="flex items-center gap-0.5">
           {/* Save Button - Desktop */}
-          {isDesktop && onSave && viewMode === 'edit' && (
+          {onSave && viewMode === 'edit' && (
             <TooltipProvider delayDuration={300}>
               <Tooltip>
                 <TooltipTrigger asChild>
@@ -216,7 +213,7 @@ export const DocumentToolbar = ({
           )}
 
           {/* Export Dropdown - Desktop */}
-          {isDesktop && (onExport || onPrint) && (
+          {(onExport || onPrint) && (
             <DropdownMenu>
               <TooltipProvider delayDuration={300}>
                 <Tooltip>
@@ -324,7 +321,7 @@ export const DocumentToolbar = ({
                   className="h-7 text-[9px] font-black uppercase tracking-[0.18em] gap-1.5 px-2.5 rounded-lg hover:bg-amber-500/10 hover:text-amber-600 dark:hover:text-amber-400 text-muted-foreground transition-all duration-200"
                 >
                   <Lightbulb className="h-3 w-3 text-amber-500" />
-                  {isDesktop && 'Assistant'}
+                  {'Assistant'}
                 </Button>
               </TooltipTrigger>
               <TooltipContent side="bottom" className="max-w-[280px] p-4 space-y-2 bg-background/95 backdrop-blur-md border-primary/20 mt-2">
@@ -339,7 +336,7 @@ export const DocumentToolbar = ({
           </TooltipProvider>
 
           {/* Keyboard Shortcuts Toggle - Desktop */}
-          {isDesktop && (
+          {(
             <TooltipProvider delayDuration={300}>
               <Tooltip>
                 <TooltipTrigger asChild>
@@ -365,7 +362,7 @@ export const DocumentToolbar = ({
       </div>
 
       {/* Keyboard Shortcuts Panel - Desktop */}
-      {isDesktop && showShortcuts && (
+      {showShortcuts && (
         <div className="mt-2 p-3 rounded-xl bg-muted/5 border border-primary/10 animate-in slide-in-from-top-2 fade-in duration-200">
           <div className="grid grid-cols-4 gap-2">
             {shortcuts.map((shortcut, idx) => (
@@ -387,7 +384,7 @@ export const DocumentToolbar = ({
       {/* Formatting Toolbar - Edit Mode Only */}
       {viewMode === 'edit' && (
         <div className="flex items-center gap-1 rounded-xl border border-border/40 bg-background/70 px-2 py-1.5 overflow-x-auto no-scrollbar">
-          {isDesktop && (
+          {(
             <>
               <span className="text-[9px] font-black uppercase tracking-[0.2em] text-muted-foreground/60 px-1.5">
                 Format
@@ -535,7 +532,7 @@ export const DocumentToolbar = ({
             <div className="w-px h-4 bg-border/40 mx-1" aria-hidden />
 
             {/* Alignment - Desktop */}
-            {isDesktop && (
+            {(
               <>
                 <Tooltip>
                   <TooltipTrigger asChild>
@@ -623,7 +620,7 @@ export const DocumentToolbar = ({
             </Tooltip>
 
             {/* Insert Elements - Desktop */}
-            {isDesktop && (
+            {(
               <>
                 <div className="w-px h-4 bg-border/40 mx-1" aria-hidden />
 

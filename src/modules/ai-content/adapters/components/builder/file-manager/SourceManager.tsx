@@ -22,7 +22,6 @@ import {
 import { Textarea } from '@/components/ui/textarea';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { useBuilderStore } from '@/hooks';
-import { useMobile } from '@/hooks/util/use-mobile';
 import { useFileUpload } from '@/hooks/util/useFileUpload';
 import { cn } from '@/infrastructure/utils/cn';
 import { generateRandomId } from '@/infrastructure/utils/randomId';
@@ -60,7 +59,6 @@ interface SourceEditorProps {
 function SourceEditor({ isOpen, onClose, initialName = '', initialContent = '', onSave, mode }: SourceEditorProps) {
     const [name, setName] = useState(initialName);
     const [content, setContent] = useState(initialContent);
-    const isDesktop = !useMobile();
 
     useEffect(() => {
         if (isOpen) {
@@ -71,7 +69,7 @@ function SourceEditor({ isOpen, onClose, initialName = '', initialContent = '', 
 
     // Desktop keyboard shortcuts
     useEffect(() => {
-        if (!isOpen || !isDesktop) return;
+        if (!isOpen) return;
 
         const handleKeyDown = (e: KeyboardEvent) => {
             if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
@@ -88,7 +86,7 @@ function SourceEditor({ isOpen, onClose, initialName = '', initialContent = '', 
 
         window.addEventListener('keydown', handleKeyDown);
         return () => window.removeEventListener('keydown', handleKeyDown);
-    }, [isOpen, isDesktop, name, content, onSave, onClose]);
+    }, [isOpen, name, content, onSave, onClose]);
 
     const handleSave = () => {
         if (name.trim() && content.trim()) {
@@ -101,7 +99,7 @@ function SourceEditor({ isOpen, onClose, initialName = '', initialContent = '', 
         <Dialog open={isOpen} onOpenChange={onClose}>
             <DialogContent className={cn(
                 "border-primary/10 shadow-2xl rounded-[28px] bg-background/80 backdrop-blur-3xl p-0 overflow-hidden",
-                isDesktop ? "max-w-3xl" : "max-w-2xl"
+                "max-w-3xl"
             )}>
                 <DialogHeader className="px-8 py-6 border-b border-primary/10 bg-primary/5">
                     <div className="flex items-center gap-4">
@@ -113,7 +111,7 @@ function SourceEditor({ isOpen, onClose, initialName = '', initialContent = '', 
                                 {mode === 'add' ? 'Add Project Source' : 'Edit Project Source'}
                             </DialogTitle>
                             <DialogDescription className="text-[10px] uppercase tracking-widest text-muted-foreground/60 font-bold">
-                                Source configuration {isDesktop && '• ⌘⏎ to save'}
+                                Source configuration {'• ⌘⏎ to save'}
                             </DialogDescription>
                         </div>
                     </div>
@@ -142,7 +140,7 @@ function SourceEditor({ isOpen, onClose, initialName = '', initialContent = '', 
                             placeholder="Enter content..."
                             className={cn(
                                 "bg-muted/5 border-primary/10 focus-visible:ring-primary/20 rounded-2xl resize-none p-4 font-serif italic text-[13px] leading-relaxed shadow-inner",
-                                isDesktop ? "min-h-[320px]" : "min-h-[240px]"
+                                "min-h-[320px]"
                             )}
                         />
                     </div>
@@ -177,7 +175,6 @@ interface SourceGroupProps {
 
 function SourceGroup({ title, type, sources, onEdit, onDelete, onTypeChange }: SourceGroupProps) {
     const [isExpanded, setIsExpanded] = useState(true);
-    const isDesktop = !useMobile();
 
     if (sources.length === 0) return null;
 
@@ -239,8 +236,6 @@ function SourceGroup({ title, type, sources, onEdit, onDelete, onTypeChange }: S
 // Main SourceManager Component
 export function SourceManager() {
     const { project, updateProject } = useBuilderStore();
-    const isMobile = useMobile();
-    const isDesktop = !isMobile;
     const [searchQuery, setSearchQuery] = useState('');
     const [isAddingText, setIsAddingText] = useState(false);
     const [editingIndex, setEditingIndex] = useState<number | null>(null);
@@ -263,7 +258,6 @@ export function SourceManager() {
 
     // Desktop keyboard shortcuts
     useEffect(() => {
-        if (!isDesktop) return;
 
         const handleKeyDown = (e: KeyboardEvent) => {
             if ((e.ctrlKey || e.metaKey) && e.key === 'n') {
@@ -277,7 +271,7 @@ export function SourceManager() {
 
         window.addEventListener('keydown', handleKeyDown);
         return () => window.removeEventListener('keydown', handleKeyDown);
-    }, [isDesktop, editingIndex]);
+    }, [editingIndex]);
 
     // Group sources by type for desktop
     const groupedSources = useMemo(() => {
@@ -391,7 +385,7 @@ export function SourceManager() {
             </div>
 
             {/* Search Bar - Desktop */}
-            {isDesktop && (
+            {(
                 <div className="relative group/search px-1">
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3 w-3 text-muted-foreground/30" />
                     <Input
@@ -506,7 +500,7 @@ export function SourceManager() {
                                 <p className="text-[9px] font-black uppercase tracking-widest">No matching sources</p>
                             </div>
                         )
-                    ) : isDesktop ? (
+                    ) : (
                         // Desktop: Grouped by type
                         <div className="space-y-4">
                             {FILE_TYPES.map(type => {
@@ -534,37 +528,6 @@ export function SourceManager() {
                                 );
                             })}
                         </div>
-                    ) : (
-                        // Mobile: Flat list
-                        <div className="space-y-3">
-                            {project.externalContext.map((item, index) => (
-                                <div key={item.id} className="space-y-2">
-                                    <FileNodeItem
-                                        item={item}
-                                        onEdit={() => setEditingIndex(index)}
-                                        onDelete={() => removeContext(index)}
-                                    />
-                                    <div className="flex items-center gap-2 pl-3">
-                                        <ArrowRight className="h-2.5 w-2.5 text-primary/20" />
-                                        <Select
-                                            value={item.type}
-                                            onValueChange={(v) => updateContextType(index, v as ExternalContextType)}
-                                        >
-                                            <SelectTrigger className="h-6 w-auto min-w-[90px] border-none bg-primary/5 text-[8px] font-black uppercase tracking-widest text-primary/60">
-                                                <SelectValue />
-                                            </SelectTrigger>
-                                            <SelectContent>
-                                                {FILE_TYPES.map(t => (
-                                                    <SelectItem key={t} value={t} className="text-[9px] font-black uppercase">
-                                                        {t}
-                                                    </SelectItem>
-                                                ))}
-                                            </SelectContent>
-                                        </Select>
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
                     )}
 
                     {!searchQuery && project.externalContext.length === 0 && (
@@ -577,7 +540,7 @@ export function SourceManager() {
                                 <p className="text-[9px] font-medium leading-relaxed italic">
                                     Add sources to provide more context for AI generations.
                                 </p>
-                                {isDesktop && (
+                                {(
                                     <p className="text-[8px] font-mono text-primary/40 mt-2">
                                         Press ⌘N to add a new source
                                     </p>

@@ -3,7 +3,6 @@
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { useMobile } from '@/hooks/util/use-mobile';
 import { cn } from '@/infrastructure/utils/cn';
 import { Send, Sparkles, StopCircle } from 'lucide-react';
 import React, { useEffect, useRef, useState } from 'react';
@@ -17,8 +16,6 @@ interface ChatInputProps {
 }
 
 export function ChatInput({ onSend, isLoading, placeholder, className, onStop }: ChatInputProps) {
-    const isMobile = useMobile();
-    const isDesktop = !isMobile;
     const [value, setValue] = useState('');
     const [rows, setRows] = useState(1);
     const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -36,7 +33,7 @@ export function ChatInput({ onSend, isLoading, placeholder, className, onStop }:
     };
 
     const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-        if (isDesktop) {
+        if (true) {
             // Ctrl/Cmd + Enter to send
             if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
                 e.preventDefault();
@@ -69,10 +66,10 @@ export function ChatInput({ onSend, isLoading, placeholder, className, onStop }:
 
     // Focus on mount
     useEffect(() => {
-        if (isDesktop && textareaRef.current) {
+        if ( textareaRef.current) {
             textareaRef.current.focus();
         }
-    }, [isDesktop]);
+    }, []);
 
     return (
         <div className={cn(
@@ -86,14 +83,14 @@ export function ChatInput({ onSend, isLoading, placeholder, className, onStop }:
                 <div className="relative flex items-end gap-2">
                     <Textarea
                         ref={textareaRef}
-                        placeholder={placeholder || (isDesktop ? "Ask Arkan AI... (⌘⏎ to send)" : "Ask Arkan AI...")}
+                        placeholder={placeholder || ("Ask Arkan AI...")}
                         value={value}
                         onChange={(e) => setValue(e.target.value)}
                         onKeyDown={handleKeyDown}
                         rows={rows}
                         className={cn(
                             "flex-1 resize-none bg-muted/5 border-primary/10 focus-visible:ring-primary/20 rounded-xl text-[11px] font-medium leading-relaxed shadow-inner transition-all p-3 custom-scrollbar",
-                            isDesktop ? "min-h-[40px] max-h-[120px]" : "min-h-[80px] max-h-32"
+                            "min-h-[40px] max-h-[120px]"
                         )}
                         disabled={isLoading}
                     />
@@ -137,7 +134,7 @@ export function ChatInput({ onSend, isLoading, placeholder, className, onStop }:
                                         </Button>
                                     </TooltipTrigger>
                                     <TooltipContent side="top" className="text-[8px]">
-                                        Send message • {isDesktop ? '⌘⏎' : '⏎'}
+                                        Send message • {'⌘⏎'}
                                     </TooltipContent>
                                 </Tooltip>
                             </TooltipProvider>
@@ -151,10 +148,10 @@ export function ChatInput({ onSend, isLoading, placeholder, className, onStop }:
                 <div className="flex items-center gap-2 opacity-30">
                     <Sparkles className="h-2.5 w-2.5 text-primary" />
                     <p className="text-[7px] font-black uppercase tracking-[0.25em] text-muted-foreground">
-                        {isDesktop ? 'Project Intelligence Interface' : 'AI Assistant'}
+                        {'Project Intelligence Interface'}
                     </p>
                 </div>
-                {isDesktop && value && !isLoading && (
+                {value && !isLoading && (
                     <p className="text-[6px] font-mono text-muted-foreground/30">
                         {value.length} characters
                     </p>

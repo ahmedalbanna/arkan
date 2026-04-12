@@ -3,7 +3,6 @@
 import { BuilderPageSkeleton } from '@/app/builder/loading';
 import { A4Page } from '@/components/shared/A4Page';
 import { Button } from '@/components/ui/button';
-import { useMobile } from '@/hooks/util/use-mobile';
 import { cn } from '@/infrastructure/utils/cn';
 import { Project } from '@/modules/projects/domain/entities/Project';
 import { AnimatePresence, motion } from 'framer-motion';
@@ -128,7 +127,6 @@ const LoadingFallback = () => (
 
 const ScrollToTopButton = () => {
   const [isVisible, setIsVisible] = useState(false);
-  const isDesktop = !useMobile();
 
   useEffect(() => {
     const toggleVisibility = () => {
@@ -143,7 +141,7 @@ const ScrollToTopButton = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }, []);
 
-  if (!isDesktop || !isVisible) return null;
+  if (!isVisible) return null;
 
   return (
     <motion.button
@@ -194,7 +192,6 @@ const DocumentRendererComponent: React.FC<DocumentRendererProps> = ({
   rewriteMutation,
   rewriteStyles,
 }) => {
-  const isDesktop = !useMobile();
   const [errorBoundaryKey, setErrorBoundaryKey] = useState(0);
   const [renderStartTime] = useState(Date.now());
 
@@ -241,7 +238,7 @@ const DocumentRendererComponent: React.FC<DocumentRendererProps> = ({
       <RendererErrorBoundary key={`main-${errorBoundaryKey}`}>
         <div className={cn(
           "flex flex-col items-center",
-          isDesktop && "pb-16"
+          "pb-16"
         )}>
           {/* Cover Page with Animation */}
           <AnimatePresence mode="wait">
@@ -271,7 +268,7 @@ const DocumentRendererComponent: React.FC<DocumentRendererProps> = ({
               >
                 <A4Page
                   viewMode="single"
-                  showControls={isDesktop}
+                  showControls={true}
                   pageNumber={1}
                   totalPages={1}
                 >
@@ -310,7 +307,7 @@ const DocumentRendererComponent: React.FC<DocumentRendererProps> = ({
       <ScrollToTopButton />
 
       {/* Performance Indicator - Development */}
-      {process.env.NODE_ENV === 'development' && isDesktop && (
+      {process.env.NODE_ENV === 'development' && (
         <div className="fixed bottom-4 left-4 z-50 text-[8px] font-mono text-muted-foreground/30 bg-background/80 backdrop-blur-sm px-2 py-1 rounded">
           Render: {Date.now() - renderStartTime}ms
         </div>

@@ -1,7 +1,6 @@
 'use client';
 
 import { Input } from '@/components/ui/input';
-import { useMobile } from '@/hooks/util/use-mobile';
 import { debounce } from 'lodash';
 import { Search } from 'lucide-react';
 import { useCallback, useEffect, useState } from 'react';
@@ -22,7 +21,6 @@ export function SidebarNavigator({
   onActiveChapterChange,
   onActiveSectionChange,
 }: SidebarNavigatorProps) {
-  const isMobile = useMobile();
   const [searchQuery, setSearchQuery] = useState('');
   const [filteredData, setFilteredData] = useState<any>(null);
 
@@ -42,7 +40,6 @@ export function SidebarNavigator({
 
   // Desktop keyboard shortcuts for navigation
   useEffect(() => {
-    if (isMobile) return;
 
     const handleKeyDown = (e: KeyboardEvent) => {
       // Ctrl/Cmd + F to focus search
@@ -54,12 +51,12 @@ export function SidebarNavigator({
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isMobile]);
+  }, []);
 
   return (
     <div className="flex flex-col h-full overflow-y-auto custom-scrollbar -mx-5 -my-5">
       {/* Search Bar - Desktop only */}
-      {!isMobile && (
+      {(
         <div className="px-5 pt-3 pb-2 border-b border-primary/5">
           <div className="relative">
             <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-3 w-3 text-muted-foreground/40" />
@@ -78,7 +75,7 @@ export function SidebarNavigator({
         title="Source Context"
         defaultOpen={true}
         sectionId="source-context"
-        persistState={!isMobile}
+        persistState={true}
       >
         <SourceManager searchQuery={searchQuery} />
       </SidebarSection>
@@ -88,7 +85,7 @@ export function SidebarNavigator({
         title="Project Architecture"
         defaultOpen={true}
         sectionId="project-architecture"
-        persistState={!isMobile}
+        persistState={true}
       >
         <SidebarOutlineManager
           activeChapterId={activeChapterId}
@@ -100,7 +97,7 @@ export function SidebarNavigator({
       </SidebarSection>
 
       {/* Quick Stats - Desktop only */}
-      {!isMobile && (
+      {(
         <div className="mt-auto p-3 border-t border-primary/5 text-[9px] text-muted-foreground/40 font-mono">
           <div className="flex justify-between">
             <span>Selected</span>

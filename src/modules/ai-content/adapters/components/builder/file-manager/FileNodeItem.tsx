@@ -10,7 +10,6 @@ import {
     DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { useMobile } from '@/hooks/util/use-mobile';
 import { cn } from '@/infrastructure/utils/cn';
 import { ExternalContext } from '@/modules/ai-content/domain/entities/ExternalContext';
 import {
@@ -117,8 +116,6 @@ export function FileNodeItem({
     showMetadata = true,
     compact = false,
 }: FileNodeItemProps) {
-    const isMobile = useMobile();
-    const isDesktop = !isMobile;
     const [isDeleting, setIsDeleting] = useState(false);
     const [isCopied, setIsCopied] = useState(false);
 
@@ -158,7 +155,7 @@ export function FileNodeItem({
     const handleDelete = useCallback(() => {
         if (!onDelete) return;
 
-        if (isDesktop) {
+        if (true) {
             // Desktop: Show confirmation dialog
             if (window.confirm(`Delete "${item?.fileName}"? This action cannot be undone.`)) {
                 setIsDeleting(true);
@@ -169,7 +166,7 @@ export function FileNodeItem({
             // Mobile: Direct delete (will be handled by parent)
             onDelete();
         }
-    }, [onDelete, item?.fileName, isDesktop]);
+    }, [onDelete, item?.fileName]);
 
     const handleCopyName = useCallback(async () => {
         if (!item?.fileName) return;
@@ -180,7 +177,7 @@ export function FileNodeItem({
 
     // Keyboard shortcut for delete (Delete key)
     React.useEffect(() => {
-        if (!isDesktop || !item) return;
+        if (!item) return;
 
         const handleKeyDown = (e: KeyboardEvent) => {
             // Only handle if focused on this item (would need focus management)
@@ -192,7 +189,7 @@ export function FileNodeItem({
 
         window.addEventListener('keydown', handleKeyDown);
         return () => window.removeEventListener('keydown', handleKeyDown);
-    }, [isDesktop, item, handleDelete]);
+    }, [item, handleDelete]);
 
     if (!item) {
         return (
@@ -212,7 +209,7 @@ export function FileNodeItem({
             className={cn(
                 "group/item relative rounded-2xl border transition-all duration-300",
                 "border-primary/5 bg-muted/[0.03] hover:border-primary/20 hover:bg-muted/5",
-                isDesktop && "hover:shadow-md",
+                "hover:shadow-md",
                 compact ? "p-2" : "p-3.5",
                 isDeleting && "animate-pulse opacity-50",
                 className
@@ -248,14 +245,14 @@ export function FileNodeItem({
                                 <h4 className={cn(
                                     "font-bold text-foreground/90 truncate",
                                     compact ? "text-[11px]" : "text-[12px]",
-                                    isDesktop && "hover:text-primary transition-colors cursor-pointer"
+                                    "hover:text-primary transition-colors cursor-pointer"
                                 )}
                                     onClick={onView}
                                     title={item.fileName}
                                 >
                                     {item.fileName || 'Untitled Vector'}
                                 </h4>
-                                {isDesktop && (
+                                {(
                                     <TooltipProvider>
                                         <Tooltip>
                                             <TooltipTrigger asChild>
@@ -299,7 +296,7 @@ export function FileNodeItem({
                                         </span>
                                     </div>
 
-                                    {isDesktop && stats.lineCount > 0 && (
+                                    {stats.lineCount > 0 && (
                                         <>
                                             <span className="text-[7px] text-muted-foreground/20">•</span>
                                             <div className="flex items-center gap-1">
@@ -327,7 +324,7 @@ export function FileNodeItem({
                     </div>
 
                     {/* Action Buttons - Desktop */}
-                    {isDesktop && !compact && (
+                    {!compact && (
                         <div className="flex items-center gap-1 opacity-0 group-hover/item:opacity-100 transition-opacity">
                             <TooltipProvider>
                                 {onView && (
@@ -388,7 +385,7 @@ export function FileNodeItem({
                     )}
 
                     {/* Dropdown Menu for compact or mobile */}
-                    {(compact || isMobile) && (onView || onEdit || onDelete || onDuplicate || onRename) && (
+                    {(compact) && (onView || onEdit || onDelete || onDuplicate || onRename) && (
                         <DropdownMenu>
                             <DropdownMenuTrigger asChild>
                                 <Button
@@ -442,7 +439,7 @@ export function FileNodeItem({
                 </div>
 
                 {/* Additional Metadata for Desktop */}
-                {isDesktop && showMetadata && !compact && (
+                {showMetadata && !compact && (
                     <div className="flex items-center gap-3 text-[7px] text-muted-foreground/30 border-t border-primary/5 pt-2 mt-1">
                         <div className="flex items-center gap-1">
                             <Clock className="h-2.5 w-2.5" />

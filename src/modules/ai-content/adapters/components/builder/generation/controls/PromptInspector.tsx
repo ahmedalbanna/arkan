@@ -8,7 +8,6 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { useBuilderStore } from '@/hooks';
-import { useMobile } from '@/hooks/util/use-mobile';
 import { container } from '@/infrastructure/di/container';
 import { cn } from '@/infrastructure/utils/cn';
 import { Section } from '@/modules/ai-content/domain/entities/Section';
@@ -45,8 +44,6 @@ interface SearchMatch {
 }
 
 export function PromptInspector({ isOpen, onOpenChange, section }: PromptInspectorProps) {
-  const isMobile = useMobile();
-  const isDesktop = !isMobile;
   const project = useBuilderStore(state => state.project);
   const [copied, setCopied] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -213,7 +210,7 @@ export function PromptInspector({ isOpen, onOpenChange, section }: PromptInspect
 
   // Desktop keyboard shortcuts
   useEffect(() => {
-    if (!isOpen || !isDesktop) return;
+    if (!isOpen) return;
 
     const handleKeyDown = (e: KeyboardEvent) => {
       // Ctrl/Cmd + F to focus search
@@ -244,7 +241,7 @@ export function PromptInspector({ isOpen, onOpenChange, section }: PromptInspect
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isOpen, isDesktop, searchQuery, navigateMatch]);
+  }, [isOpen, searchQuery, navigateMatch]);
 
   const displayedPrompt = showLineNumbers ? promptWithLineNumbers : fullPrompt;
 
@@ -254,7 +251,7 @@ export function PromptInspector({ isOpen, onOpenChange, section }: PromptInspect
         className={cn(
           "p-0 overflow-hidden flex flex-col gap-0 border-primary/10 shadow-2xl rounded-[32px] bg-background/95 backdrop-blur-xl",
           isFullscreen ? "max-w-[98vw] max-h-[98vh] w-[98vw] h-[98vh]" : "max-w-6xl max-h-[90vh] w-[90vw]",
-          isDesktop && "min-w-[800px]"
+          "min-w-[800px]"
         )}
       >
         {/* Header */}
@@ -350,7 +347,7 @@ export function PromptInspector({ isOpen, onOpenChange, section }: PromptInspect
         </header>
 
         {/* Tabs */}
-        {isDesktop && (
+        {(
           <div className="px-6 pt-3 border-b border-primary/10">
             <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
               <TabsList className="bg-transparent h-8">
@@ -416,7 +413,7 @@ export function PromptInspector({ isOpen, onOpenChange, section }: PromptInspect
               )}
             </div>
 
-            {isDesktop && (
+            {(
               <TooltipProvider>
                 <Tooltip>
                   <TooltipTrigger asChild>
@@ -476,7 +473,7 @@ export function PromptInspector({ isOpen, onOpenChange, section }: PromptInspect
                   ref={preRef}
                   className={cn(
                     "font-mono leading-relaxed text-blue-100/80 selection:bg-primary/30 whitespace-pre-wrap",
-                    isDesktop ? "text-[13px]" : "text-[11px]"
+                    "text-[13px]"
                   )}
                   style={{ fontSize: `${fontSize}px` }}
                 >
@@ -513,7 +510,7 @@ export function PromptInspector({ isOpen, onOpenChange, section }: PromptInspect
             <span className="font-mono text-muted-foreground/40">
               {stats.lines} lines
             </span>
-            {isDesktop && (
+            {(
               <>
                 <div className="h-3 w-px bg-primary/10" />
                 <span className="font-mono text-muted-foreground/40">
@@ -523,7 +520,7 @@ export function PromptInspector({ isOpen, onOpenChange, section }: PromptInspect
             )}
           </div>
           <div className="flex items-center gap-2">
-            {isDesktop && (
+            {(
               <div className="flex items-center gap-1">
                 <Button
                   variant="ghost"

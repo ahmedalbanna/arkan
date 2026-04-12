@@ -11,7 +11,6 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Progress } from '@/components/ui/progress';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { useMobile } from '@/hooks/util/use-mobile';
 import { cn } from '@/infrastructure/utils/cn';
 import { useAiActions } from '@/modules/ai-content/adapters/hooks/report-mode/use-ai-actions';
 import { useEditorStore } from '@/modules/ai-content/adapters/state/use-editor-store';
@@ -36,8 +35,6 @@ interface SelectionGenerationHUDProps {
 }
 
 const SelectionGenerationHUDComponent = ({ viewMode, className }: SelectionGenerationHUDProps) => {
-    const isMobile = useMobile();
-    const isDesktop = !isMobile;
     const selection = useEditorStore((state) => state.selection);
     const { isProcessing, handleAiAction, rewriteStyles = [], cancelGeneration } = useAiActions();
 
@@ -51,7 +48,6 @@ const SelectionGenerationHUDComponent = ({ viewMode, className }: SelectionGener
 
     // Load saved position from localStorage
     useEffect(() => {
-        if (!isDesktop) return;
         const savedPosition = localStorage.getItem('selection-hud-position');
         if (savedPosition) {
             try {
@@ -61,11 +57,11 @@ const SelectionGenerationHUDComponent = ({ viewMode, className }: SelectionGener
                 console.error('Failed to load HUD position', e);
             }
         }
-    }, [isDesktop]);
+    }, []);
 
     // Save position when dragging ends
     useEffect(() => {
-        if (!isDesktop || !isDragging) return;
+        if (!isDragging) return;
         const handleMouseMove = (e: MouseEvent) => {
             if (!elementRef.current) return;
             const newX = position.x + (e.clientX - dragStartRef.current.x);
@@ -100,14 +96,13 @@ const SelectionGenerationHUDComponent = ({ viewMode, className }: SelectionGener
             window.removeEventListener('mousemove', handleMouseMove);
             window.removeEventListener('mouseup', handleMouseUp);
         };
-    }, [isDragging, position, isDesktop]);
+    }, [isDragging, position]);
 
     const handleDragStart = useCallback((e: React.MouseEvent) => {
-        if (!isDesktop) return;
         e.preventDefault();
         setIsDragging(true);
         dragStartRef.current = { x: e.clientX, y: e.clientY };
-    }, [isDesktop]);
+    }, []);
 
     const handleSummarize = useCallback(() => {
         if (!selection.hasSelection || !handleAiAction) return;
@@ -159,7 +154,7 @@ const SelectionGenerationHUDComponent = ({ viewMode, className }: SelectionGener
 
     // Desktop keyboard shortcuts
     useEffect(() => {
-        if (!isDesktop || !selection.hasSelection || isProcessing) return;
+        if (!selection.hasSelection || isProcessing) return;
 
         const handleKeyDown = (e: KeyboardEvent) => {
             // Alt/Option + S for summarize
@@ -196,7 +191,7 @@ const SelectionGenerationHUDComponent = ({ viewMode, className }: SelectionGener
 
         window.addEventListener('keydown', handleKeyDown);
         return () => window.removeEventListener('keydown', handleKeyDown);
-    }, [isDesktop, selection.hasSelection, isProcessing, handleSummarize, handleExpand, handleGrammar, handleHumanize, handleCancel]);
+    }, [selection.hasSelection, isProcessing, handleSummarize, handleExpand, handleGrammar, handleHumanize, handleCancel]);
 
     // Render guards
     if (viewMode !== 'edit' || !selection.hasSelection) return null;
@@ -210,20 +205,20 @@ const SelectionGenerationHUDComponent = ({ viewMode, className }: SelectionGener
         <div
             ref={elementRef}
             style={{
-                position: isDesktop ? 'fixed' : 'absolute',
-                right: isDesktop ? 'auto' : '1.5rem',
-                top: isDesktop ? position.y : '1.5rem',
-                left: isDesktop ? position.x : 'auto',
+                position: 'fixed',
+                right: 'auto',
+                top: position.y,
+                left: position.x,
             }}
             className={cn(
                 'z-50 rounded-2xl border border-border/40 bg-background/95 backdrop-blur-xl shadow-2xl animate-in fade-in zoom-in-95 duration-300',
-                isDesktop && 'cursor-default shadow-[0_20px_60px_-15px_rgba(0,0,0,0.3)]',
+                'cursor-default shadow-[0_20px_60px_-15px_rgba(0,0,0,0.3)]',
                 isDragging && 'cursor-grabbing opacity-95 transition-none',
                 className
             )}
         >
             {/* Drag Handle - Desktop only */}
-            {isDesktop && (
+            {(
                 <div
                     ref={dragHandleRef}
                     onMouseDown={handleDragStart}
@@ -236,7 +231,7 @@ const SelectionGenerationHUDComponent = ({ viewMode, className }: SelectionGener
             {/* Header */}
             <div className={cn(
                 "flex items-center justify-between px-4 pt-3 pb-2 border-b border-border/40 bg-primary/[0.02]",
-                isDesktop && "rounded-t-2xl"
+                "rounded-t-2xl"
             )}>
                 <div className="flex items-center gap-2">
                     <span className={cn(
@@ -248,7 +243,7 @@ const SelectionGenerationHUDComponent = ({ viewMode, className }: SelectionGener
                     </p>
                 </div>
                 <div className="flex items-center gap-1">
-                    {isDesktop && (
+                    {(
                         <TooltipProvider>
                             <Tooltip>
                                 <TooltipTrigger asChild>
@@ -307,7 +302,7 @@ const SelectionGenerationHUDComponent = ({ viewMode, className }: SelectionGener
                     </div>
 
                     {/* Selection Stats - Desktop only */}
-                    {isDesktop && (
+                    {(
                         <div className="flex items-center gap-3 px-1 text-[8px] font-mono text-muted-foreground/30">
                             <span>{selection.selectionLength} characters</span>
                             <span>•</span>
@@ -351,7 +346,7 @@ const SelectionGenerationHUDComponent = ({ viewMode, className }: SelectionGener
                                         Summarize
                                     </Button>
                                 </TooltipTrigger>
-                                {isDesktop && (
+                                {(
                                     <TooltipContent side="top" className="text-[9px]">
                                         Alt + S
                                     </TooltipContent>
@@ -373,7 +368,7 @@ const SelectionGenerationHUDComponent = ({ viewMode, className }: SelectionGener
                                         Expand
                                     </Button>
                                 </TooltipTrigger>
-                                {isDesktop && (
+                                {(
                                     <TooltipContent side="top" className="text-[9px]">
                                         Alt + E
                                     </TooltipContent>
@@ -383,7 +378,7 @@ const SelectionGenerationHUDComponent = ({ viewMode, className }: SelectionGener
                     </div>
 
                     {/* Secondary Actions - Desktop only */}
-                    {isDesktop && (
+                    {(
                         <div className="grid grid-cols-3 gap-1.5">
                             <Button
                                 variant="ghost"
@@ -449,7 +444,7 @@ const SelectionGenerationHUDComponent = ({ viewMode, className }: SelectionGener
                                             <span className="text-[9px] font-black uppercase tracking-[0.2em] group-hover:text-primary transition-colors">
                                                 {label}
                                             </span>
-                                            {description && isDesktop && (
+                                            {description && (
                                                 <span className="text-[7px] text-muted-foreground/40 mt-0.5">
                                                     {description}
                                                 </span>
@@ -486,7 +481,7 @@ const SelectionGenerationHUDComponent = ({ viewMode, className }: SelectionGener
                     </div>
 
                     {/* Quick Actions - Desktop only */}
-                    {isDesktop && (
+                    {(
                         <div className="flex items-center gap-2 pt-1">
                             <Button
                                 variant="ghost"
@@ -514,7 +509,7 @@ const SelectionGenerationHUDComponent = ({ viewMode, className }: SelectionGener
             )}
 
             {/* Minimized State - Desktop only */}
-            {isMinimized && isDesktop && (
+            {isMinimized && (
                 <div className="px-4 py-2 flex items-center justify-between">
                     <div className="flex items-center gap-2">
                         <span className="h-1.5 w-1.5 rounded-full bg-primary/60" />
@@ -535,7 +530,7 @@ const SelectionGenerationHUDComponent = ({ viewMode, className }: SelectionGener
                         AI Selection Pipeline
                     </span>
                     <div className="flex items-center gap-2">
-                        {isDesktop && (
+                        {(
                             <span className="text-[7px] font-mono text-muted-foreground/20">
                                 Alt+Key
                             </span>

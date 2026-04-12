@@ -10,7 +10,6 @@ import {
     DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { useMobile } from '@/hooks/util/use-mobile';
 import { cn } from '@/infrastructure/utils/cn';
 import { ProjectProperties } from '@/modules/projects/domain/entities/Project';
 import { formatDistanceToNow } from 'date-fns';
@@ -53,7 +52,6 @@ export function ProjectNodeItem({
     isLoading = false,
     className
 }: ProjectNodeItemProps) {
-    const isDesktop = !useMobile();
     const [isHovered, setIsHovered] = useState(false);
     const [isDeleting, setIsDeleting] = useState(false);
     const hoverTimeoutRef = useRef<NodeJS.Timeout>();
@@ -156,7 +154,7 @@ export function ProjectNodeItem({
                 isLoading || isDeleting
                     ? "bg-primary/[0.02] border-primary/20 opacity-70"
                     : "bg-card/40 border-border/40 hover:border-primary/30 hover:bg-muted/5 hover:shadow-md active:scale-[0.98]",
-                isDesktop && "hover:-translate-y-0.5",
+                "hover:-translate-y-0.5",
                 className
             )}
         >
@@ -176,7 +174,7 @@ export function ProjectNodeItem({
                             <div className={cn(
                                 "h-11 w-11 rounded-xl flex items-center justify-center transition-all duration-300",
                                 "bg-primary/5 border border-primary/10",
-                                isDesktop && "group-hover:border-primary/30 group-hover:bg-primary/10 group-hover:scale-105"
+                                "group-hover:border-primary/30 group-hover:bg-primary/10 group-hover:scale-105"
                             )}>
                                 <BookOpen className="h-5 w-5 text-primary/60 group-hover:text-primary transition-all" />
                             </div>
@@ -195,7 +193,7 @@ export function ProjectNodeItem({
                                 <h4 className="text-[14px] font-black uppercase tracking-tight text-foreground/90 truncate group-hover:text-primary transition-colors">
                                     {project.name || 'Untitled Project'}
                                 </h4>
-                                {isDesktop && project.version && (
+                                {project.version && (
                                     <Badge variant="outline" className="h-4 text-[7px] font-mono border-primary/20 bg-primary/5">
                                         v{project.version}
                                     </Badge>
@@ -209,7 +207,7 @@ export function ProjectNodeItem({
                                         Updated {lastUpdated}
                                     </span>
                                 </div>
-                                {isDesktop && (
+                                {(
                                     <>
                                         <div className="h-1 w-1 rounded-full bg-primary/20" />
                                         <div className="flex items-center gap-1">
@@ -225,7 +223,7 @@ export function ProjectNodeItem({
                     </div>
 
                     {/* Action Buttons - Desktop */}
-                    {isDesktop && !isLoading && !isDeleting && (
+                    {!isLoading && !isDeleting && (
                         <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
                             <TooltipProvider>
                                 <Tooltip>
@@ -328,7 +326,7 @@ export function ProjectNodeItem({
                 </div>
 
                 {/* Created Date - Desktop */}
-                {isDesktop && (
+                {(
                     <div className="flex items-center gap-1 text-[7px] text-muted-foreground/30">
                         <Calendar className="h-2.5 w-2.5" />
                         <span>Created {createdAt}</span>
@@ -347,7 +345,7 @@ export function ProjectNodeItem({
             </div>
 
             {/* Hover Border Effect - Desktop */}
-            {isDesktop && isHovered && !isLoading && !isDeleting && (
+            {isHovered && !isLoading && !isDeleting && (
                 <div className="absolute inset-0 rounded-2xl ring-1 ring-primary/20 pointer-events-none animate-in fade-in duration-200" />
             )}
         </div>

@@ -16,7 +16,6 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { useBuilderStore } from '@/hooks';
-import { useMobile } from '@/hooks/util/use-mobile';
 import { cn } from '@/infrastructure/utils/cn';
 import { Chapter } from '@/modules/ai-content/domain/entities/Chapter';
 import {
@@ -53,7 +52,6 @@ export function BuildManifestHUD({
     isLoading,
     estimatedTime = 30,
 }: BuildManifestHUDProps) {
-    const isDesktop = !useMobile();
     const project = useBuilderStore(state => state.project);
     const [expandedChapters, setExpandedChapters] = useState<Set<string>>(new Set());
     const [showDetails, setShowDetails] = useState(false);
@@ -136,7 +134,7 @@ export function BuildManifestHUD({
 
     // Keyboard shortcuts
     useEffect(() => {
-        if (!isOpen || !isDesktop) return;
+        if (!isOpen) return;
 
         const handleKeyDown = (e: KeyboardEvent) => {
             if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
@@ -152,13 +150,13 @@ export function BuildManifestHUD({
 
         window.addEventListener('keydown', handleKeyDown);
         return () => window.removeEventListener('keydown', handleKeyDown);
-    }, [isOpen, isDesktop, isValidManifest, isLoading, handleGenerateProject, onOpenChange]);
+    }, [isOpen, isValidManifest, isLoading, handleGenerateProject, onOpenChange]);
 
     return (
         <Dialog open={isOpen} onOpenChange={handleOpenChange}>
             <DialogContent className={cn(
                 "p-0 overflow-hidden flex flex-col gap-0 border-primary/10 shadow-2xl rounded-2xl bg-background/95 backdrop-blur-xl",
-                isDesktop ? "max-w-5xl h-[85vh]" : "max-w-[95vw] h-[90vh]"
+                "max-w-5xl h-[85vh]"
             )}>
                 {/* Header */}
                 <header className="px-6 py-5 border-b border-primary/10 bg-primary/[0.02] relative overflow-hidden shrink-0">
@@ -189,7 +187,7 @@ export function BuildManifestHUD({
                         </div>
 
                         {/* Stats Badges - Desktop */}
-                        {isDesktop && isValidManifest && (
+                        {isValidManifest && (
                             <div className="flex items-center gap-2">
                                 <TooltipProvider>
                                     <Tooltip>
@@ -324,7 +322,7 @@ export function BuildManifestHUD({
                                                 </Label>
                                             </div>
                                             <div className="flex items-center gap-2">
-                                                {isDesktop && (
+                                                {(
                                                     <>
                                                         <button
                                                             onClick={expandAll}
@@ -397,7 +395,7 @@ export function BuildManifestHUD({
                                     </div>
 
                                     {/* Details Toggle */}
-                                    {isDesktop && (
+                                    {(
                                         <button
                                             onClick={() => setShowDetails(!showDetails)}
                                             className="flex items-center justify-center gap-1 w-full text-[8px] font-black uppercase tracking-wider text-muted-foreground/40 hover:text-primary transition-colors py-1"
@@ -408,7 +406,7 @@ export function BuildManifestHUD({
                                     )}
 
                                     {/* Detailed Stats */}
-                                    {showDetails && isDesktop && (
+                                    {showDetails && (
                                         <div className="p-4 rounded-xl bg-muted/5 border border-primary/10 space-y-2">
                                             <div className="flex justify-between text-[8px]">
                                                 <span className="text-muted-foreground/60">Total Chapters</span>

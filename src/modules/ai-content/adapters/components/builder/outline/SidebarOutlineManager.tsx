@@ -5,7 +5,6 @@ import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { useBuilderStore } from '@/hooks';
-import { useMobile } from '@/hooks/util/use-mobile';
 import { Chapter } from '@/modules/ai-content/domain/entities/Chapter';
 import {
   closestCenter,
@@ -47,8 +46,6 @@ export function SidebarOutlineManager({
   searchQuery: externalSearchQuery = '',
 }: SidebarOutlineManagerProps) {
   const project = useBuilderStore(state => state.project);
-  const isMobile = useMobile();
-  const isDesktop = !isMobile;
   const [internalSearchQuery, setInternalSearchQuery] = useState('');
   const [expandedChapters, setExpandedChapters] = useState<Set<string>>(new Set());
   const [activeDragId, setActiveDragId] = useState<string | null>(null);
@@ -120,7 +117,6 @@ export function SidebarOutlineManager({
 
   // Desktop keyboard shortcuts
   useEffect(() => {
-    if (!isDesktop) return;
 
     const handleKeyDown = (e: KeyboardEvent) => {
       // Ctrl/Cmd + F to focus search
@@ -142,7 +138,7 @@ export function SidebarOutlineManager({
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isDesktop, handleAddChapter, toggleExpandAll]);
+  }, [handleAddChapter, toggleExpandAll]);
 
   // DND Setup
   const sensors = useSensors(
@@ -223,7 +219,7 @@ export function SidebarOutlineManager({
           </p>
         </div>
         <div className="flex items-center gap-1">
-          {isDesktop && totalChapters > 0 && (
+          {totalChapters > 0 && (
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger asChild>
@@ -271,7 +267,7 @@ export function SidebarOutlineManager({
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3 w-3 text-muted-foreground/30" />
         <Input
           ref={searchInputRef}
-          placeholder={isDesktop ? "Search architecture... (⌘F)" : "Search..."}
+          placeholder={"Search architecture..."}
           value={internalSearchQuery}
           onChange={(e) => setInternalSearchQuery(e.target.value)}
           className="h-8 pl-8 pr-8 text-[10px] bg-muted/5 border-primary/10 rounded-lg focus-visible:ring-primary/20"
@@ -319,7 +315,7 @@ export function SidebarOutlineManager({
                       onPaste={() => handlePasteItem(item.id, isChapter)}
                       canPaste={!!clipboard}
                       onAddSection={isChapter ? () => handleAddSection(item.id) : undefined}
-                      isDesktop={isDesktop}
+                      isDesktop={true}
                     />
 
                     {isChapter && isExpanded && item.sections.length > 0 && (
@@ -338,7 +334,7 @@ export function SidebarOutlineManager({
                             onCopy={() => handleCopyItem(section.id, false)}
                             onPaste={() => handlePasteItem(section.id, false)}
                             canPaste={!!clipboard}
-                            isDesktop={isDesktop}
+                            isDesktop={true}
                           />
                         ))}
                       </div>
@@ -384,7 +380,7 @@ export function SidebarOutlineManager({
                     : 'Add your first chapter to begin structuring your document.'
                   }
                 </p>
-                {!searchQuery && isDesktop && (
+                {!searchQuery && (
                   <p className="text-[8px] font-mono text-primary/40 mt-2">
                     Press ⌘N to add a chapter
                   </p>

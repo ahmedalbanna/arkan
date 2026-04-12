@@ -23,7 +23,6 @@ import { Textarea } from "@/components/ui/textarea";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { useLocalization } from "@/context/LocalizationContext";
 import { useBuilderStore, useToast } from '@/hooks';
-import { useMobile } from '@/hooks/util/use-mobile';
 import { cn } from "@/infrastructure/utils/cn";
 import { generateRandomId } from '@/infrastructure/utils/randomId';
 import { ExternalContextType } from '@/modules/ai-content/domain/entities/ControlTypes';
@@ -89,7 +88,6 @@ const formatFileSize = (bytes: number): string => {
 
 // Context Inspector Component
 function ContextInspectorHUD({ item, isOpen, onClose }: { item: { fileName: string, content: string, size?: number } | null, isOpen: boolean, onClose: () => void }) {
-    const isDesktop = !useMobile();
 
     if (!item) return null;
 
@@ -104,7 +102,7 @@ function ContextInspectorHUD({ item, isOpen, onClose }: { item: { fileName: stri
         <Dialog open={isOpen} onOpenChange={onClose}>
             <DialogContent className={cn(
                 "p-0 border-primary/10 shadow-2xl rounded-[32px] bg-background/95 backdrop-blur-xl overflow-hidden flex flex-col",
-                isDesktop ? "max-w-5xl h-[85vh]" : "max-w-[95vw] h-[90vh]"
+                "max-w-5xl h-[85vh]"
             )}>
                 <DialogHeader className="px-6 py-4 border-b border-primary/10 bg-primary/5 shrink-0">
                     <div className="flex items-center justify-between">
@@ -117,7 +115,7 @@ function ContextInspectorHUD({ item, isOpen, onClose }: { item: { fileName: stri
                                 <p className="text-[9px] uppercase tracking-widest text-muted-foreground/60 font-bold">Content Analysis</p>
                             </div>
                         </div>
-                        {isDesktop && (
+                        {(
                             <div className="flex items-center gap-3 text-[8px] text-muted-foreground/40">
                                 <span>{stats.characters.toLocaleString()} chars</span>
                                 <span>•</span>
@@ -155,8 +153,6 @@ export function UploadManager() {
     const { t } = useLocalization();
     const { toast } = useToast();
     const { project, updateProject, selectedFileId } = useBuilderStore();
-    const isMobile = useMobile();
-    const isDesktop = !isMobile;
 
     const [isLoading, setIsLoading] = useState(false);
     const [uploadProgress, setUploadProgress] = useState<Record<string, number>>({});
@@ -172,7 +168,6 @@ export function UploadManager() {
 
     // Keyboard shortcuts
     useEffect(() => {
-        if (!isDesktop) return;
 
         const handleKeyDown = (e: KeyboardEvent) => {
             // Ctrl/Cmd + F to focus search
@@ -199,7 +194,7 @@ export function UploadManager() {
 
         window.addEventListener('keydown', handleKeyDown);
         return () => window.removeEventListener('keydown', handleKeyDown);
-    }, [isDesktop, filteredContext, selectedItems]);
+    }, [filteredContext, selectedItems]);
 
     const onDrop = useCallback((acceptedFiles: File[]) => {
         if (!project || !updateProject) return;
@@ -408,7 +403,7 @@ export function UploadManager() {
 
                 <TabsContent value="files" className="m-0 focus-visible:ring-0 flex flex-col gap-6">
                     {/* Stats Bar - Desktop */}
-                    {isDesktop && (
+                    {(
                         <div className="flex items-center justify-between px-2 py-2 rounded-xl bg-muted/10 border border-primary/10">
                             <div className="flex items-center gap-4 text-[8px] text-muted-foreground/60">
                                 <div className="flex items-center gap-1.5">
@@ -464,7 +459,7 @@ export function UploadManager() {
                         className={cn(
                             "border-2 border-dashed rounded-2xl p-6 text-center cursor-pointer transition-all duration-300 group bg-muted/5 relative",
                             isDragActive ? "border-primary bg-primary/[0.03] ring-2 ring-primary/10" : "border-primary/10 hover:border-primary/30 hover:bg-muted/8",
-                            isDesktop ? "p-8" : "p-6"
+                            "p-8"
                         )}
                     >
                         <input {...getInputProps()} />
@@ -473,7 +468,7 @@ export function UploadManager() {
                                 "h-10 w-10 mx-auto transition-all duration-300",
                                 isDragActive ? "text-primary scale-110" : "text-muted-foreground/40 group-hover:text-primary/60 group-hover:scale-105"
                             )} />
-                            {!isDragActive && isDesktop && (
+                            {!isDragActive && (
                                 <div className="absolute -bottom-1 -right-1 h-5 w-5 bg-background rounded-full border border-primary/20 flex items-center justify-center shadow-lg">
                                     <Plus className="h-3 w-3 text-primary" />
                                 </div>
@@ -495,7 +490,7 @@ export function UploadManager() {
                                 ref={searchInputRef}
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
-                                placeholder={isDesktop ? "Search sources... (⌘F)" : "Search sources..."}
+                                placeholder={"Search sources..."}
                                 className="h-9 pl-9 pr-9 text-[10px] bg-muted/5 border-primary/10 rounded-lg focus-visible:ring-primary/20"
                             />
                             {searchQuery && (
@@ -509,7 +504,7 @@ export function UploadManager() {
                         </div>
 
                         {/* Filter Bar - Desktop */}
-                        {isDesktop && (
+                        {(
                             <div className="flex items-center gap-2 flex-wrap">
                                 <button
                                     onClick={() => setShowFilters(!showFilters)}
@@ -576,7 +571,7 @@ export function UploadManager() {
 
                         <ScrollArea className={cn(
                             "pr-2",
-                            isDesktop ? "max-h-[500px]" : "max-h-[400px]"
+                            "max-h-[500px]"
                         )}>
                             <div className="space-y-2">
                                 {filteredContext.map((item, index) => (
@@ -588,7 +583,7 @@ export function UploadManager() {
                                         )}
                                     >
                                         <div className="flex items-center gap-2">
-                                            {isDesktop && selectedItems.size > 0 && (
+                                            {selectedItems.size > 0 && (
                                                 <button
                                                     onClick={() => {
                                                         const newSelected = new Set(selectedItems);
@@ -625,8 +620,8 @@ export function UploadManager() {
                                                         }
                                                     }}
                                                     className={selectedFileId === item.id ? 'border-primary/30 bg-primary/[0.03] ring-1 ring-primary/10' : ''}
-                                                    showMetadata={isDesktop}
-                                                    compact={isMobile}
+                                                    showMetadata={true}
+                                                    compact={false}
                                                 />
                                             </div>
                                         </div>
@@ -684,7 +679,7 @@ export function UploadManager() {
                     </div>
 
                     {/* Text Input Tab (shown inline on desktop) */}
-                    {isDesktop && (
+                    {(
                         <div className="border-t border-primary/10 pt-4 mt-2">
                             <div className="flex items-center gap-2 mb-3">
                                 <Plus className="h-3.5 w-3.5 text-primary/60" />
@@ -741,7 +736,7 @@ export function UploadManager() {
                     </span>
                 </div>
                 <div className="flex items-center gap-2">
-                    {isDesktop && (
+                    {(
                         <span className="font-mono text-muted-foreground/20">
                             ⌘F to search • Del to delete
                         </span>
