@@ -54,6 +54,7 @@ interface SortableOutlineItemProps {
   onPaste: () => void;
   canPaste?: boolean;
   onAddSection?: () => void;
+  isDesktop?: boolean;
 }
 
 export const SortableOutlineItem = ({
