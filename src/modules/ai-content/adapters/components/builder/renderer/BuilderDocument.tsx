@@ -677,7 +677,7 @@ export const BuilderDocument = ({
                                     const isRewriting = Boolean(
                                         rewriteMutation?.isPending && rewriteMutation?.variables?.sectionId === item.id
                                     );
-                                    const isActiveSectionInEdit = !isPreview && Array.isArray(selectedSectionIds) && selectedSectionIds.includes(item.id);
+                                    const isActiveSectionInEdit = Array.isArray(selectedSectionIds) && selectedSectionIds.includes(item.id);
 
                                     return (
                                         <SectionPreview

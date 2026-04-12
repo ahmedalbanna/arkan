@@ -195,9 +195,9 @@ export function ProjectNodeItem({
                                 <h4 className="text-[14px] font-black uppercase tracking-tight text-foreground/90 truncate group-hover:text-primary transition-colors">
                                     {project.name || 'Untitled Project'}
                                 </h4>
-                                {isDesktop && project.version && (
+                                {isDesktop && project.meta?.version && (
                                     <Badge variant="outline" className="h-4 text-[7px] font-mono border-primary/20 bg-primary/5">
-                                        v{project.version}
+                                        v{project.meta.version}
                                     </Badge>
                                 )}
                             </div>

@@ -149,7 +149,7 @@ const ControlPanelComponent = ({ section, selectedIds = [] }: ControlPanelProps)
             formality: 50,
             complexity: 50,
             tone: 'professional',
-            diagramType: 'flowchart',
+            diagramType: 'activity',
             outputStyle: {
                 heading: true,
                 paragraph: true,

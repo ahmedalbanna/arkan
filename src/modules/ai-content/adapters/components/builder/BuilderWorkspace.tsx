@@ -7,7 +7,7 @@ import { cn } from '@/infrastructure/utils/cn';
 import { useReportGenerator } from '@/modules/ai-content/adapters/hooks/report-mode/useReportGenerator';
 import { useSnapshots } from '@/modules/projects/adapters/hooks/useSnapshots';
 import { ProjectProperties } from '@/modules/projects/domain/entities/Project';
-import React, { Fragment, Profiler, Suspense, useCallback, useEffect, useRef } from 'react';
+import React, { Suspense, useCallback, useEffect, useRef } from 'react';
 
 // Custom Layout Hooks
 import { useDesktopBreakpoint } from '../../hooks/builder/useDesktopBreakpoint';
@@ -120,25 +120,10 @@ export const BuilderWorkspace: React.FC<BuilderWorkspaceProps> = ({ initialProje
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [isDesktop, handleSave, toggleFullscreen, handleZoomReset, handleZoomOut, handleZoomIn, setSidebarState, sidebarState, isFullscreen]);
 
-  const handleProfilerRender = useCallback(
-    (id: string, phase: string, actualDuration: number, baseDuration: number) => {
-      if (process.env.NODE_ENV === 'development') {
-        console.info(`[Profiler:${id}]`, { phase, actualDuration, baseDuration });
-      }
-    },
-    []
-  );
-
   if (!project) return <BuilderPageSkeleton />;
 
-  const ProfilerWrapper = process.env.NODE_ENV === 'development' ? Profiler : Fragment;
-  const profilerProps =
-    process.env.NODE_ENV === 'development'
-      ? { id: 'BuilderWorkspace', onRender: handleProfilerRender }
-      : {};
-
   return (
-    <ProfilerWrapper {...profilerProps}>
+    <>
       <div
         ref={containerRef}
         className={cn(
@@ -223,6 +208,6 @@ export const BuilderWorkspace: React.FC<BuilderWorkspaceProps> = ({ initialProje
           />
         </Suspense>
       </div>
-    </ProfilerWrapper>
+    </>
   );
 };
