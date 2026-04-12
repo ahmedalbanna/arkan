@@ -7,7 +7,6 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { useBuilderStore } from '@/hooks';
-import { useMobile } from '@/hooks/util/use-mobile';
 import { cn } from '@/infrastructure/utils/cn';
 import {
   CheckCircle2,
@@ -41,8 +40,6 @@ interface ContextItem {
 }
 
 const ContextSelectorComponent = ({ sectionId, selectedSectionIds = [] }: ContextSelectorProps) => {
-  const isMobile = useMobile();
-  const isDesktop = !isMobile;
   const { project, updateProject } = useBuilderStore();
   const [searchQuery, setSearchQuery] = useState('');
   const [showOnlyActive, setShowOnlyActive] = useState(false);
@@ -63,7 +60,6 @@ const ContextSelectorComponent = ({ sectionId, selectedSectionIds = [] }: Contex
 
   // Desktop keyboard shortcuts
   useEffect(() => {
-    if (!isDesktop) return;
 
     const handleKeyDown = (e: KeyboardEvent) => {
       // Ctrl/Cmd + F to focus search
@@ -84,7 +80,7 @@ const ContextSelectorComponent = ({ sectionId, selectedSectionIds = [] }: Contex
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isDesktop, searchQuery]);
+  }, [searchQuery]);
 
   const handleUpdateContext = useCallback((type: 'sections' | 'externalContext', id: string, enabled: boolean) => {
     if (!project || !updateProject) return;
@@ -218,7 +214,7 @@ const ContextSelectorComponent = ({ sectionId, selectedSectionIds = [] }: Contex
             <Database className="h-3.5 w-3.5" />
             Neural Source Matrix
           </h4>
-          {isDesktop && totalActive > 0 && (
+          {totalActive > 0 && (
             <Badge variant="outline" className="h-5 text-[8px] font-mono border-primary/20 bg-primary/5">
               {totalActive} active
             </Badge>
@@ -230,7 +226,7 @@ const ContextSelectorComponent = ({ sectionId, selectedSectionIds = [] }: Contex
       </div>
 
       {/* Search and Filter Bar - Desktop */}
-      {isDesktop && (sectionOptions.length > 0 || fileOptions.length > 0) && (
+      {(sectionOptions.length > 0 || fileOptions.length > 0) && (
         <div className="relative group/search px-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3 w-3 text-muted-foreground/30" />
           <Input
@@ -298,7 +294,7 @@ const ContextSelectorComponent = ({ sectionId, selectedSectionIds = [] }: Contex
               <Badge variant="outline" className="h-5 text-[8px] font-black border-primary/20 bg-primary/5 text-primary tabular-nums">
                 {activeSections.size} / {sectionOptions.length}
               </Badge>
-              {isDesktop && activeSections.size > 0 && (
+              {activeSections.size > 0 && (
                 <TooltipProvider>
                   <Tooltip>
                     <TooltipTrigger asChild>
@@ -397,7 +393,7 @@ const ContextSelectorComponent = ({ sectionId, selectedSectionIds = [] }: Contex
               <Badge variant="outline" className="h-5 text-[8px] font-black border-primary/20 bg-primary/5 text-primary tabular-nums">
                 {activeFiles.size} / {fileOptions.length}
               </Badge>
-              {isDesktop && activeFiles.size > 0 && (
+              {activeFiles.size > 0 && (
                 <TooltipProvider>
                   <Tooltip>
                     <TooltipTrigger asChild>
@@ -474,7 +470,7 @@ const ContextSelectorComponent = ({ sectionId, selectedSectionIds = [] }: Contex
         </div>
 
         {/* Context Summary - Desktop */}
-        {isDesktop && (totalActive > 0 || totalAvailable > 0) && (
+        {(totalActive > 0 || totalAvailable > 0) && (
           <div className="p-3 rounded-xl bg-primary/[0.02] border border-primary/5">
             <div className="flex items-center justify-between text-[8px]">
               <span className="font-mono text-muted-foreground/40">
@@ -506,7 +502,7 @@ const ContextSelectorComponent = ({ sectionId, selectedSectionIds = [] }: Contex
           <p className="text-[10px] text-primary/40 italic leading-relaxed font-medium uppercase tracking-[0.2em] group-hover:text-primary/60 transition-colors px-4">
             Selected sources will be injected into the AI context window to ensure thematic continuity.
           </p>
-          {isDesktop && totalActive > 0 && (
+          {totalActive > 0 && (
             <p className="text-[7px] text-primary/30 font-mono mt-2">
               {totalActive} source{totalActive !== 1 ? 's' : ''} active
             </p>

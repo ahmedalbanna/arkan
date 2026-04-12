@@ -8,7 +8,6 @@ import { Label } from '@/components/ui/label';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
 import { useBuilderStore } from '@/hooks';
-import { useMobile } from '@/hooks/util/use-mobile';
 import { cn } from '@/infrastructure/utils/cn';
 import { generateRandomId } from '@/infrastructure/utils/randomId';
 import { useApplyReportTemplate, useReportTemplates } from '@/modules/templates/adapters/hooks/use-templates';
@@ -41,7 +40,6 @@ interface TemplateCardProps {
 }
 
 function TemplateCard({ template, onSelect, isFavorite, onToggleFavorite }: TemplateCardProps) {
-    const isDesktop = !useMobile();
     const chapterCount = Array.isArray(template.content) ? template.content.length : 0;
     const sectionCount = Array.isArray(template.content)
         ? template.content.reduce((acc, ch) => acc + (ch.sections?.length || 0), 0)
@@ -90,7 +88,7 @@ function TemplateCard({ template, onSelect, isFavorite, onToggleFavorite }: Temp
                 <div className="flex items-center text-[8px] text-primary font-black uppercase tracking-[0.25em] opacity-0 group-hover:opacity-100 transition-all translate-x-[-4px] group-hover:translate-x-0">
                     Initialize Blueprint <ChevronRight className="h-3 w-3 ml-1" />
                 </div>
-                {isDesktop && onToggleFavorite && (
+                {onToggleFavorite && (
                     <button
                         onClick={(e) => {
                             e.stopPropagation();
@@ -119,7 +117,6 @@ interface TemplatePreviewProps {
 }
 
 function TemplatePreview({ template, onApply, onBack, isLoading }: TemplatePreviewProps) {
-    const isDesktop = !useMobile();
     const chapterCount = Array.isArray(template.content) ? template.content.length : 0;
     const sectionCount = Array.isArray(template.content)
         ? template.content.reduce((acc, ch) => acc + (ch.sections?.length || 0), 0)
@@ -201,7 +198,7 @@ function TemplatePreview({ template, onApply, onBack, isLoading }: TemplatePrevi
 
                     <ScrollArea className={cn(
                         "rounded-2xl border border-primary/10 bg-muted/5 shadow-inner",
-                        isDesktop ? "h-[400px]" : "h-[300px]"
+                        "h-[400px]"
                     )}>
                         <div className="p-6 relative overflow-hidden">
                             <div className="absolute inset-0 opacity-[0.02] bg-[radial-gradient(circle_at_center,_var(--primary)_1px,_transparent_1px)] bg-[size:24px_24px] pointer-events-none" />
@@ -240,7 +237,6 @@ function TemplatePreview({ template, onApply, onBack, isLoading }: TemplatePrevi
 
 // Main Component
 export function TemplateLibraryHUD() {
-    const isDesktop = !useMobile();
     const { data: templates, isLoading, isError, error } = useReportTemplates();
     const [searchQuery, setSearchQuery] = useState('');
     const [previewTemplate, setPreviewTemplate] = useState<ReportTemplateProperties | null>(null);
@@ -280,7 +276,7 @@ export function TemplateLibraryHUD() {
 
     // Keyboard shortcuts
     useEffect(() => {
-        if (!isDesktop || previewTemplate) return;
+        if (previewTemplate) return;
 
         const handleKeyDown = (e: KeyboardEvent) => {
             if ((e.ctrlKey || e.metaKey) && e.key === 'f') {
@@ -294,7 +290,7 @@ export function TemplateLibraryHUD() {
 
         window.addEventListener('keydown', handleKeyDown);
         return () => window.removeEventListener('keydown', handleKeyDown);
-    }, [isDesktop, previewTemplate, searchQuery]);
+    }, [previewTemplate, searchQuery]);
 
     const filteredTemplates = useMemo(() => {
         if (!templates) return [];
@@ -384,14 +380,14 @@ export function TemplateLibraryHUD() {
                         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground/30" />
                         <Input
                             ref={searchInputRef}
-                            placeholder={isDesktop ? "Search templates... (⌘F)" : "Search templates..."}
+                            placeholder={"Search templates..."}
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
                             className="pl-9 h-9 text-[10px] bg-muted/5 border-primary/10 rounded-lg focus-visible:ring-primary/20"
                         />
                     </div>
 
-                    {isDesktop && (
+                    {(
                         <div className="flex items-center gap-1 p-1 rounded-lg bg-muted/5 border border-primary/10">
                             <button
                                 onClick={() => setViewMode('grid')}
@@ -420,7 +416,7 @@ export function TemplateLibraryHUD() {
                     <ScrollArea className="h-full pr-2 -mr-2">
                         <div className={cn(
                             "pb-24 relative px-1",
-                            viewMode === 'grid' && isDesktop ? "grid grid-cols-2 gap-3" : "space-y-3"
+                            viewMode === 'grid' ? "grid grid-cols-2 gap-3" : "space-y-3"
                         )}>
                             <div className="absolute left-[-1.25rem] top-0 bottom-0 w-px bg-gradient-to-b from-primary/30 via-primary/5 to-transparent" />
 
@@ -484,7 +480,7 @@ export function TemplateLibraryHUD() {
                             </>
                         )}
                     </div>
-                    {isDesktop && (
+                    {(
                         <div className="flex items-center gap-2">
                             <span className="font-mono text-muted-foreground/20">
                                 ⌘F to search

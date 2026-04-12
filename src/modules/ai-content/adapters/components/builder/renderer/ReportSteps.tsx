@@ -2,7 +2,6 @@
 
 import { Button } from '@/components/ui/button';
 import { useLocalization } from '@/context/LocalizationContext';
-import { useMobile } from '@/hooks/util/use-mobile';
 import { cn } from '@/infrastructure/utils/cn';
 import {
   ArrowRight,
@@ -31,7 +30,6 @@ interface Step {
 
 export const ReportSteps = () => {
   const { t } = useLocalization();
-  const isDesktop = !useMobile();
   const [activeStep, setActiveStep] = useState<number | null>(null);
   const [completedSteps, setCompletedSteps] = useState<Set<number>>(new Set());
   const [isVisible, setIsVisible] = useState(false);
@@ -153,7 +151,7 @@ export const ReportSteps = () => {
       <div className="absolute inset-x-0 top-0 h-24 bg-gradient-to-b from-background/40 via-transparent to-transparent pointer-events-none" />
 
       {/* Progress Bar - Desktop */}
-      {isDesktop && (
+      {(
         <div className="absolute top-0 left-0 right-0 h-0.5 bg-primary/10">
           <div
             className="h-full bg-gradient-to-r from-primary via-primary/60 to-primary/30 transition-all duration-500 ease-out"
@@ -178,7 +176,7 @@ export const ReportSteps = () => {
         </p>
 
         {/* Progress Stats - Desktop */}
-        {isDesktop && completedCount > 0 && (
+        {completedCount > 0 && (
           <div className="mt-4 flex items-center justify-center gap-2 text-[10px] font-mono text-muted-foreground/40">
             <span>{completedCount} of {totalSteps} steps completed</span>
             <span>•</span>
@@ -204,7 +202,7 @@ export const ReportSteps = () => {
                 className={cn(
                   "relative group/step transition-all duration-300",
                   isActive && "scale-[1.02]",
-                  isDesktop && "cursor-pointer"
+                  "cursor-pointer"
                 )}
                 onClick={() => handleStepClick(index)}
               >
@@ -216,7 +214,7 @@ export const ReportSteps = () => {
                       isCompleted
                         ? "bg-green-500/10 border-green-500/30 text-green-500"
                         : "bg-primary/10 border border-primary/20 text-primary",
-                      isDesktop && "group-hover/step:bg-primary/15 group-hover/step:border-primary/30 group-hover/step:scale-105"
+                      "group-hover/step:bg-primary/15 group-hover/step:border-primary/30 group-hover/step:scale-105"
                     )}>
                       {isCompleted ? (
                         <CheckCircle2 className="h-5 w-5" />
@@ -226,7 +224,7 @@ export const ReportSteps = () => {
                     </div>
 
                     {/* Completion toggle button - Desktop */}
-                    {isDesktop && !isCompleted && (
+                    {!isCompleted && (
                       <button
                         onClick={(e) => handleStepComplete(index, e)}
                         className="absolute -top-1 -right-1 h-5 w-5 rounded-full bg-background border border-primary/20 flex items-center justify-center opacity-0 group-hover/step:opacity-100 transition-opacity hover:bg-primary/10"
@@ -262,7 +260,7 @@ export const ReportSteps = () => {
                     </p>
 
                     {/* Action button - Desktop */}
-                    {isDesktop && step.action && !isCompleted && (
+                    {step.action && !isCompleted && (
                       <Button
                         variant="ghost"
                         size="sm"
@@ -280,7 +278,7 @@ export const ReportSteps = () => {
                   </div>
 
                   {/* Expand indicator */}
-                  {isDesktop && (
+                  {(
                     <div className="shrink-0 pt-3 opacity-0 group-hover/step:opacity-100 transition-opacity">
                       <ChevronRight className={cn(
                         "h-4 w-4 text-muted-foreground/30 transition-transform duration-300",
@@ -291,7 +289,7 @@ export const ReportSteps = () => {
                 </div>
 
                 {/* Expanded description - Desktop */}
-                {isDesktop && isActive && (
+                {isActive && (
                   <div className="mt-3 ml-16 pl-4 border-l-2 border-primary/20 animate-in slide-in-from-left-2 fade-in duration-300">
                     <div className="bg-primary/[0.02] rounded-lg p-3 text-[10px] text-muted-foreground/60 leading-relaxed">
                       <span className="font-bold text-primary/80">Pro tip:</span> {getProTip(index)}
@@ -300,7 +298,7 @@ export const ReportSteps = () => {
                 )}
 
                 {/* Connector line between steps */}
-                {!isLast && isDesktop && (
+                {!isLast && (
                   <div className="absolute left-6 top-12 bottom-0 w-px bg-gradient-to-b from-primary/10 to-transparent pointer-events-none" />
                 )}
               </div>
@@ -310,7 +308,7 @@ export const ReportSteps = () => {
       </div>
 
       {/* Completion Celebration - Desktop */}
-      {isDesktop && completedCount === totalSteps && totalSteps > 0 && (
+      {completedCount === totalSteps && totalSteps > 0 && (
         <div className="relative z-10 mx-6 mb-6 p-4 rounded-xl bg-gradient-to-r from-primary/5 via-primary/10 to-primary/5 border border-primary/20 text-center animate-in zoom-in-95 fade-in duration-500">
           <div className="flex items-center justify-center gap-3">
             <Sparkles className="h-5 w-5 text-primary animate-pulse" />
@@ -338,7 +336,7 @@ export const ReportSteps = () => {
       <div className="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-background/20 to-transparent pointer-events-none" />
 
       {/* Quick Stats - Desktop */}
-      {isDesktop && (
+      {(
         <div className="relative z-10 border-t border-primary/10 px-6 py-3 flex items-center justify-between text-[8px] text-muted-foreground/40">
           <div className="flex items-center gap-3">
             <span>Interactive guide</span>

@@ -7,7 +7,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Slider } from '@/components/ui/slider';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { useBuilderStore } from '@/hooks';
-import { useMobile } from '@/hooks/util/use-mobile';
 import { cn } from '@/infrastructure/utils/cn';
 import { GenerationControlState } from '@/modules/ai-content/domain/entities/ControlTypes';
 import { Section } from '@/modules/ai-content/domain/entities/Section';
@@ -94,8 +93,6 @@ const presets: ControlPreset[] = [
 ];
 
 const ControlPanelComponent = ({ section, selectedIds = [] }: ControlPanelProps) => {
-    const isMobile = useMobile();
-    const isDesktop = !isMobile;
     const { updateProject } = useBuilderStore();
     const [showAdvanced, setShowAdvanced] = useState(false);
     const [isResetting, setIsResetting] = useState(false);
@@ -190,7 +187,7 @@ const ControlPanelComponent = ({ section, selectedIds = [] }: ControlPanelProps)
 
     // Desktop keyboard shortcuts
     useEffect(() => {
-        if (!isDesktop || !section) return;
+        if (!section) return;
 
         const handleKeyDown = (e: KeyboardEvent) => {
             // Ctrl/Cmd + Shift + R to reset
@@ -215,7 +212,7 @@ const ControlPanelComponent = ({ section, selectedIds = [] }: ControlPanelProps)
 
         window.addEventListener('keydown', handleKeyDown);
         return () => window.removeEventListener('keydown', handleKeyDown);
-    }, [isDesktop, section, handleReset, handleDetectFormats, handleApplyPreset]);
+    }, [section, handleReset, handleDetectFormats, handleApplyPreset]);
 
     // Cleanup timeout on unmount
     useEffect(() => {
@@ -251,7 +248,7 @@ const ControlPanelComponent = ({ section, selectedIds = [] }: ControlPanelProps)
                         <SlidersHorizontal className="h-3.5 w-3.5" />
                         Cognitive Vectors
                     </h4>
-                    {isBatchMode && isDesktop && (
+                    {isBatchMode && (
                         <Badge variant="outline" className="h-5 text-[8px] font-mono border-primary/20 bg-primary/5">
                             Batch: {targetCount} sections
                         </Badge>
@@ -267,7 +264,7 @@ const ControlPanelComponent = ({ section, selectedIds = [] }: ControlPanelProps)
                 <div className="absolute left-[-1.25rem] top-0 bottom-0 w-px bg-gradient-to-b from-primary/30 via-primary/5 to-transparent" />
 
                 {/* Presets - Desktop only */}
-                {isDesktop && (
+                {(
                     <div className="space-y-3">
                         <div className="flex items-center justify-between">
                             <Label className="text-[9px] font-black uppercase tracking-[0.2em] text-muted-foreground/60 flex items-center gap-2">
@@ -337,7 +334,7 @@ const ControlPanelComponent = ({ section, selectedIds = [] }: ControlPanelProps)
                                 <Badge variant="outline" className="h-5 text-[9px] font-black border-primary/20 bg-primary/5 text-primary tabular-nums px-2 rounded-full">
                                     {section.controls.formality}%
                                 </Badge>
-                                {isDesktop && (
+                                {(
                                     <span className="text-[7px] text-muted-foreground/30 font-mono">
                                         {section.controls.formality < 30 ? 'Casual' : section.controls.formality < 70 ? 'Balanced' : 'Formal'}
                                     </span>
@@ -362,7 +359,7 @@ const ControlPanelComponent = ({ section, selectedIds = [] }: ControlPanelProps)
                                 <Badge variant="outline" className="h-5 text-[9px] font-black border-primary/20 bg-primary/5 text-primary tabular-nums px-2 rounded-full">
                                     {section.controls.complexity}%
                                 </Badge>
-                                {isDesktop && (
+                                {(
                                     <span className="text-[7px] text-muted-foreground/30 font-mono">
                                         {section.controls.complexity < 30 ? 'Simple' : section.controls.complexity < 70 ? 'Moderate' : 'Complex'}
                                     </span>
@@ -383,7 +380,7 @@ const ControlPanelComponent = ({ section, selectedIds = [] }: ControlPanelProps)
                 {/* Persona & Flow Zone */}
                 <div className={cn(
                     "grid gap-4",
-                    isDesktop ? "grid-cols-2" : "grid-cols-1"
+                    "grid-cols-2"
                 )}>
                     <div className="space-y-2.5">
                         <Label className="text-[9px] font-black uppercase tracking-[0.2em] text-muted-foreground/60 flex items-center gap-2">
@@ -402,7 +399,7 @@ const ControlPanelComponent = ({ section, selectedIds = [] }: ControlPanelProps)
                                     <SelectItem key={opt.value} value={opt.value} className="text-[10px] font-medium py-2">
                                         <div className="flex flex-col">
                                             <span>{opt.label}</span>
-                                            {isDesktop && (
+                                            {(
                                                 <span className="text-[7px] text-muted-foreground/40">{opt.description}</span>
                                             )}
                                         </div>
@@ -436,7 +433,7 @@ const ControlPanelComponent = ({ section, selectedIds = [] }: ControlPanelProps)
                 </div>
 
                 {/* Advanced Toggle - Desktop */}
-                {isDesktop && (
+                {(
                     <button
                         onClick={() => setShowAdvanced(!showAdvanced)}
                         className="flex items-center justify-between w-full pt-2 text-[8px] font-black uppercase tracking-wider text-muted-foreground/40 hover:text-primary transition-colors"
@@ -456,7 +453,7 @@ const ControlPanelComponent = ({ section, selectedIds = [] }: ControlPanelProps)
                 {/* Output Style HUD */}
                 <div className={cn(
                     "space-y-4 transition-all duration-300",
-                    !showAdvanced && isDesktop && "opacity-70"
+                    !showAdvanced && "opacity-70"
                 )}>
                     <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2.5">
@@ -486,7 +483,7 @@ const ControlPanelComponent = ({ section, selectedIds = [] }: ControlPanelProps)
 
                     <div className={cn(
                         "grid gap-2",
-                        isDesktop ? "grid-cols-4" : "grid-cols-2"
+                        "grid-cols-4"
                     )}>
                         {Object.entries(section.controls.outputStyle).map(([key, enabled]) => (
                             <TooltipProvider key={key}>
@@ -522,7 +519,7 @@ const ControlPanelComponent = ({ section, selectedIds = [] }: ControlPanelProps)
                 </div>
 
                 {/* Live Preview Indicator - Desktop */}
-                {isDesktop && (
+                {(
                     <div className="pt-2 text-center">
                         <p className="text-[7px] text-muted-foreground/30 font-mono flex items-center justify-center gap-1.5">
                             <Eye className="h-2.5 w-2.5" />

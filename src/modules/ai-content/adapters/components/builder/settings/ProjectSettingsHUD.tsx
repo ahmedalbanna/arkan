@@ -9,7 +9,6 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Textarea } from '@/components/ui/textarea';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { useBuilderStore } from '@/hooks';
-import { useMobile } from '@/hooks/util/use-mobile';
 import { cn } from '@/infrastructure/utils/cn';
 import { zodResolver } from '@hookform/resolvers/zod';
 import {
@@ -69,7 +68,6 @@ const getFieldIcon = (fieldName: string) => {
 };
 
 export function ProjectSettingsHUD() {
-  const isDesktop = !useMobile();
   const { project, updateProject } = useBuilderStore();
   const lastValuesRef = useRef<SettingsFormValues | null>(null);
   const [isDirty, setIsDirty] = useState(false);
@@ -185,7 +183,6 @@ export function ProjectSettingsHUD() {
 
   // Keyboard shortcuts
   useEffect(() => {
-    if (!isDesktop) return;
 
     const handleKeyDown = (e: KeyboardEvent) => {
       if ((e.ctrlKey || e.metaKey) && e.key === 's') {
@@ -198,7 +195,7 @@ export function ProjectSettingsHUD() {
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isDesktop, isDirty, handleManualSave]);
+  }, [isDirty, handleManualSave]);
 
   if (!project) {
     return (
@@ -226,7 +223,7 @@ export function ProjectSettingsHUD() {
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <h4 className="text-[10px] font-black uppercase tracking-[0.3em] text-primary/70">Project Settings</h4>
-            {isDesktop && (
+            {(
               <Badge variant="outline" className="h-4 text-[7px] font-mono border-primary/20">
                 {completedFields}/{totalFields} configured
               </Badge>
@@ -234,7 +231,7 @@ export function ProjectSettingsHUD() {
           </div>
 
           {/* Save Status Indicator */}
-          {isDesktop && (
+          {(
             <div className="flex items-center gap-2">
               {saveStatus === 'saving' && (
                 <div className="flex items-center gap-1.5 text-[8px] text-amber-500">
@@ -353,17 +350,17 @@ export function ProjectSettingsHUD() {
                         <FormControl>
                           <Textarea
                             {...field}
-                            rows={isDesktop ? 4 : 3}
+                            rows={4}
                             onBlur={handleFieldBlur}
                             className={cn(
                               "text-[11px] bg-muted/5 border-primary/10 focus-visible:ring-primary/20 rounded-xl shadow-inner transition-all resize-none p-4 leading-relaxed font-serif italic",
-                              isDesktop ? "min-h-[100px]" : "min-h-[80px]"
+                              "min-h-[100px]"
                             )}
                             placeholder="Describe the scope of this project..."
                           />
                         </FormControl>
                         <FormMessage className="text-[10px] text-destructive italic font-medium" />
-                        {isDesktop && field.value && field.value.length > 100 && (
+                        {field.value && field.value.length > 100 && (
                           <div className="text-[8px] text-muted-foreground/40 text-right">
                             {field.value.length} / 5000 characters
                           </div>
@@ -438,7 +435,7 @@ export function ProjectSettingsHUD() {
 
                   <div className={cn(
                     "grid gap-4",
-                    isDesktop ? "grid-cols-2" : "grid-cols-1"
+                    "grid-cols-2"
                   )}>
                     <FormField
                       control={form.control}
@@ -522,7 +519,7 @@ export function ProjectSettingsHUD() {
               </div>
 
               {/* Info Banner - Desktop */}
-              {isDesktop && (
+              {(
                 <div className="p-4 rounded-xl border border-dashed border-primary/10 bg-primary/[0.02] text-center space-y-2 group/info hover:bg-primary/[0.04] transition-all">
                   <div className="flex justify-center mb-1">
                     <Sparkles className="h-4 w-4 text-primary/30 group-hover/info:scale-110 transition-transform" />
@@ -546,7 +543,7 @@ export function ProjectSettingsHUD() {
           </span>
         </div>
         <div className="flex items-center gap-2">
-          {isDesktop && (
+          {(
             <span className="font-mono text-muted-foreground/20">
               {completedFields}/{totalFields} fields completed
             </span>
