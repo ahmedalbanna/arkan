@@ -2,19 +2,17 @@
 
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { useMobile } from '@/hooks/util/use-mobile';
 import { cn } from '@/infrastructure/utils/cn';
 import { AnimatePresence, motion } from 'framer-motion';
-import { Maximize2, Minimize2, Pin, PinOff } from 'lucide-react';
-import { type ReactElement, type ReactNode, useCallback, useEffect, useRef, useState } from 'react';
+import { type ReactElement, type ReactNode } from 'react';
 
 export interface PanelItem {
   key: string;
   title: string;
   icon: ReactElement;
   content: ReactNode;
-  shortcut?: string; // Keyboard shortcut hint
-  badge?: number; // Optional badge count
+  shortcut?: string;
+  badge?: number;
 }
 
 interface CollapsibleSidePanelProps {
@@ -23,259 +21,55 @@ interface CollapsibleSidePanelProps {
   onActiveKeyChange: (key: string) => void;
   className?: string;
   side?: 'left' | 'right';
-  defaultExpanded?: boolean;
-  onExpandedChange?: (expanded: boolean) => void;
-  persistState?: boolean;
 }
 
+/**
+ * CollapsibleSidePanel — Controlled panel orchestrator for workspace HUDs.
+ * Desktop-only. No internal state. Parent dictates visibility via activeKey.
+ */
 export function CollapsibleSidePanel({
   panels,
   activeKey,
   onActiveKeyChange,
   className,
   side = 'left',
-  defaultExpanded = true,
-  onExpandedChange,
-  persistState = true,
 }: CollapsibleSidePanelProps) {
-  const isMobile = useMobile();
-  const isDesktop = !isMobile;
   const isLeft = side === 'left';
   const isRtl = typeof document !== 'undefined' && document.documentElement.dir === 'rtl';
-
-  const [isExpanded, setIsExpanded] = useState(defaultExpanded);
-  const [isPinned, setIsPinned] = useState(true);
-  const [isHovering, setIsHovering] = useState(false);
-  const [keyboardShortcut, setKeyboardShortcut] = useState<string>('');
-  const panelRef = useRef<HTMLDivElement>(null);
-
-  // Load persisted state
-  useEffect(() => {
-    if (persistState && isDesktop) {
-      const savedExpanded = localStorage.getItem(`panel-expanded-${side}`);
-      if (savedExpanded !== null) {
-        setIsExpanded(savedExpanded === 'true');
-      }
-      const savedPinned = localStorage.getItem(`panel-pinned-${side}`);
-      if (savedPinned !== null) {
-        setIsPinned(savedPinned === 'true');
-      }
-    }
-  }, [persistState, side, isDesktop]);
-
-  // Save state changes
-  const handleExpandedChange = useCallback((expanded: boolean) => {
-    setIsExpanded(expanded);
-    onExpandedChange?.(expanded);
-    if (persistState && isDesktop) {
-      localStorage.setItem(`panel-expanded-${side}`, expanded.toString());
-    }
-  }, [onExpandedChange, persistState, side, isDesktop]);
-
-  const handlePinToggle = useCallback(() => {
-    const newPinnedState = !isPinned;
-    setIsPinned(newPinnedState);
-    if (persistState && isDesktop) {
-      localStorage.setItem(`panel-pinned-${side}`, newPinnedState.toString());
-    }
-  }, [isPinned, persistState, side, isDesktop]);
-
-  // Auto-collapse when not pinned and mouse leaves
-  useEffect(() => {
-    if (!isDesktop || isPinned) return;
-
-    const handleMouseLeave = () => {
-      if (!isHovering && isExpanded) {
-        handleExpandedChange(false);
-      }
-    };
-
-    const panel = panelRef.current;
-    if (panel) {
-      panel.addEventListener('mouseleave', handleMouseLeave);
-      return () => panel.removeEventListener('mouseleave', handleMouseLeave);
-    }
-  }, [isDesktop, isPinned, isHovering, isExpanded, handleExpandedChange]);
-
-  // Keyboard shortcuts for panel navigation
-  useEffect(() => {
-    if (!isDesktop) return;
-
-    const handleKeyDown = (e: KeyboardEvent) => {
-      // Number keys 1-9 to switch panels
-      if (e.key >= '1' && e.key <= '9') {
-        const index = parseInt(e.key, 10) - 1;
-        if (panels[index]) {
-          e.preventDefault();
-          onActiveKeyChange(panels[index].key);
-          if (!isPinned && !isExpanded) {
-            handleExpandedChange(true);
-          }
-        }
-      }
-
-      // Ctrl/Cmd + Shift + S to toggle sidebar
-      if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === 'S') {
-        e.preventDefault();
-        handleExpandedChange(!isExpanded);
-      }
-
-      // Ctrl/Cmd + Shift + P to pin/unpin
-      if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === 'P') {
-        e.preventDefault();
-        handlePinToggle();
-      }
-
-      // Escape to collapse when not pinned
-      if (e.key === 'Escape' && !isPinned && isExpanded) {
-        handleExpandedChange(false);
-      }
-    };
-
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isDesktop, panels, onActiveKeyChange, isPinned, isExpanded, handleExpandedChange, handlePinToggle]);
 
   if (!panels || panels.length === 0) return null;
 
   const activePanel = panels.find((p) => p.key === activeKey);
 
   const handlePanelToggle = (key: string) => {
-    const newActiveKey = activeKey === key ? '' : key;
-    onActiveKeyChange(newActiveKey);
-
-    // Auto-expand when opening a panel if not pinned
-    if (!isPinned && newActiveKey && !isExpanded) {
-      handleExpandedChange(true);
-    }
+    onActiveKeyChange(activeKey === key ? '' : key);
   };
 
-  // Desktop: collapsed state (icon bar only)
-  if (isDesktop && !isExpanded) {
-    return (
-      <div
-        ref={panelRef}
-        className={cn(
-          "flex h-full bg-transparent overflow-hidden transition-all duration-300",
-          isLeft ? "flex-row" : "flex-row-reverse",
-          className
-        )}
-        onMouseEnter={() => !isPinned && setIsHovering(true)}
-        onMouseLeave={() => !isPinned && setIsHovering(false)}
-      >
-        {/* Icon Bar - Collapsed */}
-        <div className={cn(
-          "flex flex-col gap-2 bg-background/95 backdrop-blur-sm p-2 relative shrink-0",
-          "border-r border-primary/10 shadow-lg",
-          isLeft ? "border-r" : "border-l"
-        )}>
-          {/* Vertical accent */}
-          <div className={cn(
-            "absolute inset-y-0 w-0.5 bg-gradient-to-b from-primary/40 via-primary/60 to-primary/40",
-            isLeft ? "right-0" : "left-0"
-          )} />
-
-          <TooltipProvider delayDuration={100}>
-            {panels.map((panel, index) => {
-              const isActive = activeKey === panel.key;
-              return (
-                <Tooltip key={panel.key} delayDuration={0}>
-                  <TooltipTrigger asChild>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => handlePanelToggle(panel.key)}
-                      aria-label={panel.title}
-                      className={cn(
-                        "h-10 w-10 rounded-lg transition-all duration-200 relative group/icon",
-                        isActive
-                          ? "bg-primary/10 text-primary shadow-sm"
-                          : "text-muted-foreground hover:bg-primary/5 hover:text-primary"
-                      )}
-                    >
-                      <div className="relative z-10 transition-transform duration-200 group-hover/icon:scale-110">
-                        {panel.icon}
-                      </div>
-                      {panel.badge && panel.badge > 0 && (
-                        <span className="absolute -top-1 -right-1 h-4 min-w-4 px-1 rounded-full bg-primary text-[8px] font-black text-primary-foreground flex items-center justify-center">
-                          {panel.badge > 9 ? '9+' : panel.badge}
-                        </span>
-                      )}
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent
-                    side={isLeft ? "right" : "left"}
-                    className="bg-background border border-primary/20 py-2 px-3 rounded-lg"
-                  >
-                    <div className="flex items-center gap-2">
-                      <span className="text-[9px] font-black uppercase tracking-[0.2em] text-primary">
-                        {panel.title}
-                      </span>
-                      {panel.shortcut && (
-                        <kbd className="text-[8px] font-mono text-muted-foreground/60 bg-muted/50 px-1 rounded">
-                          {panel.shortcut}
-                        </kbd>
-                      )}
-                      {index < 9 && (
-                        <kbd className="text-[8px] font-mono text-muted-foreground/60 bg-muted/50 px-1 rounded">
-                          {index + 1}
-                        </kbd>
-                      )}
-                    </div>
-                  </TooltipContent>
-                </Tooltip>
-              );
-            })}
-          </TooltipProvider>
-
-          {/* Pin/Expand Button */}
-          <div className="mt-auto pt-2 border-t border-primary/10">
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => handleExpandedChange(true)}
-                    className="h-8 w-8 rounded-lg text-muted-foreground/40 hover:text-primary"
-                  >
-                    <Maximize2 className="h-3.5 w-3.5" />
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent side={isLeft ? "right" : "left"} className="text-[9px]">
-                  Expand Panel • ⌘⇧S
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  // Desktop: Expanded state
   return (
     <div
-      ref={panelRef}
       className={cn(
-        "flex h-full bg-transparent overflow-hidden transition-all duration-300",
-        isLeft ? "flex-row" : "flex-row-reverse",
+        'flex h-full bg-transparent overflow-hidden',
+        isLeft ? 'flex-row' : 'flex-row-reverse',
         className
       )}
     >
       {/* Icon Bar */}
-      <div className={cn(
-        "flex flex-col gap-2 bg-background p-2 relative shrink-0",
-        isLeft ? "border-r border-primary/10" : "border-l border-primary/10"
-      )}>
+      <div
+        className={cn(
+          'flex flex-col gap-1.5 bg-background p-2 relative shrink-0',
+          isLeft ? 'border-r border-primary/10' : 'border-l border-primary/10'
+        )}
+      >
         {/* Vertical accent */}
-        <div className={cn(
-          "absolute inset-y-0 w-0.5 bg-gradient-to-b from-primary/40 via-primary/60 to-primary/40",
-          isLeft ? "right-0" : "left-0"
-        )} />
+        <div
+          className={cn(
+            'absolute inset-y-0 w-0.5 bg-gradient-to-b from-primary/30 via-primary/50 to-primary/30',
+            isLeft ? 'right-0' : 'left-0'
+          )}
+        />
 
         <TooltipProvider delayDuration={200}>
-          {panels.map((panel, index) => {
+          {panels.map((panel) => {
             const isActive = activeKey === panel.key;
             return (
               <Tooltip key={panel.key} delayDuration={0}>
@@ -286,23 +80,26 @@ export function CollapsibleSidePanel({
                     onClick={() => handlePanelToggle(panel.key)}
                     aria-label={panel.title}
                     className={cn(
-                      "h-10 w-10 rounded-lg transition-all duration-200 relative group/icon",
+                      'h-10 w-10 rounded-lg transition-all duration-200 relative group/icon',
                       isActive
-                        ? "bg-primary/10 text-primary shadow-sm"
-                        : "text-muted-foreground hover:bg-primary/5 hover:text-primary"
+                        ? 'bg-primary/10 text-primary shadow-sm'
+                        : 'text-muted-foreground hover:bg-primary/5 hover:text-primary'
                     )}
                   >
                     <div className="relative z-10 transition-transform duration-200 group-hover/icon:scale-110">
                       {panel.icon}
                     </div>
-                    {panel.badge && panel.badge > 0 && (
+                    {panel.badge != null && panel.badge > 0 && (
                       <span className="absolute -top-1 -right-1 h-4 min-w-4 px-1 rounded-full bg-primary text-[8px] font-black text-primary-foreground flex items-center justify-center">
                         {panel.badge > 9 ? '9+' : panel.badge}
                       </span>
                     )}
                   </Button>
                 </TooltipTrigger>
-                <TooltipContent side={isLeft ? "right" : "left"} className="bg-background border border-primary/20 py-2 px-3 rounded-lg">
+                <TooltipContent
+                  side={isLeft ? 'right' : 'left'}
+                  className="bg-background border border-primary/20 py-2 px-3 rounded-lg"
+                >
                   <div className="flex items-center gap-2">
                     <span className="text-[9px] font-black uppercase tracking-[0.2em] text-primary">
                       {panel.title}
@@ -318,78 +115,32 @@ export function CollapsibleSidePanel({
             );
           })}
         </TooltipProvider>
-
-        {/* Pin and Collapse Controls */}
-        <div className="mt-auto pt-2 border-t border-primary/10 space-y-1">
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={handlePinToggle}
-                  className={cn(
-                    "h-8 w-8 rounded-lg transition-all",
-                    isPinned ? "text-primary" : "text-muted-foreground/40 hover:text-primary"
-                  )}
-                >
-                  {isPinned ? (
-                    <Pin className="h-3.5 w-3.5" />
-                  ) : (
-                    <PinOff className="h-3.5 w-3.5" />
-                  )}
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent side={isLeft ? "right" : "left"} className="text-[9px]">
-                {isPinned ? 'Unpin' : 'Pin'} Panel • ⌘⇧P
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
-
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => handleExpandedChange(false)}
-                  className="h-8 w-8 rounded-lg text-muted-foreground/40 hover:text-primary"
-                >
-                  <Minimize2 className="h-3.5 w-3.5" />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent side={isLeft ? "right" : "left"} className="text-[9px]">
-                Collapse Panel • ⌘⇧S
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
-        </div>
       </div>
 
       {/* Content Area */}
       <AnimatePresence mode="wait">
-        {activeKey && (
+        {activeKey && activePanel && (
           <motion.div
             key="content-area"
             initial={{ width: 0, opacity: 0 }}
             animate={{ width: 'auto', opacity: 1 }}
             exit={{ width: 0, opacity: 0 }}
             transition={{
-              duration: 0.3,
+              duration: 0.25,
               ease: [0.22, 1, 0.36, 1],
-              opacity: { duration: 0.2 }
+              opacity: { duration: 0.15 },
             }}
             className="flex-1 overflow-hidden relative bg-background/50"
           >
             <div className="h-full w-full min-w-[320px] lg:min-w-[380px] overflow-auto custom-scrollbar">
               <motion.div
                 key={activeKey}
-                initial={{ opacity: 0, x: isLeft ? (isRtl ? 10 : -10) : (isRtl ? -10 : 10) }}
+                initial={{ opacity: 0, x: isLeft ? (isRtl ? 8 : -8) : isRtl ? -8 : 8 }}
                 animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.3, ease: "easeOut" }}
+                transition={{ duration: 0.2, ease: 'easeOut' }}
                 className="p-5 min-w-0 flex flex-col min-h-full"
               >
-                {activePanel?.content}
+                {activePanel.content}
               </motion.div>
             </div>
           </motion.div>
