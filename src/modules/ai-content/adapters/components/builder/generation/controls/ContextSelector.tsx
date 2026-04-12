@@ -133,7 +133,7 @@ const ContextSelectorComponent = ({ sectionId, selectedSectionIds = [] }: Contex
       type: 'section',
       metadata: {
         wordCount: s.content?.split(/\s+/).filter(w => w.length > 0).length || 0,
-        lastModified: s.updatedAt,
+        lastModified: (s as any).updatedAt,
       }
     }));
   }, [otherSections]);

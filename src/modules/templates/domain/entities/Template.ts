@@ -6,6 +6,8 @@ export interface BaseTemplateProperties<TContent = any> {
   name: string;
   description: string;
   content?: TContent;
+  version?: string;
+  createdAt?: string;
 }
 
 export class Template<TContent = any> implements BaseTemplateProperties<TContent> {

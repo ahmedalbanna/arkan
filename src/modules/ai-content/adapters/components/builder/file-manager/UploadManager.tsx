@@ -199,7 +199,7 @@ export function UploadManager() {
 
         window.addEventListener('keydown', handleKeyDown);
         return () => window.removeEventListener('keydown', handleKeyDown);
-    }, [isDesktop, filteredContext, selectedItems]);
+    }, [isDesktop, selectedItems]);
 
     const onDrop = useCallback((acceptedFiles: File[]) => {
         if (!project || !updateProject) return;
@@ -323,12 +323,13 @@ export function UploadManager() {
     }, [selectedItems, updateProject, project?.externalContext, toast]);
 
     const handleSelectAll = useCallback(() => {
-        if (selectedItems.size === filteredContext.length) {
+        const ctx = project?.externalContext || [];
+        if (selectedItems.size === ctx.length) {
             setSelectedItems(new Set());
         } else {
-            setSelectedItems(new Set(filteredContext.map(item => item.id)));
+            setSelectedItems(new Set(ctx.map(item => item.id)));
         }
-    }, [filteredContext, selectedItems.size]);
+    }, [selectedItems.size, project?.externalContext]);
 
     const externalContext = project?.externalContext || [];
 

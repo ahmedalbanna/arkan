@@ -201,7 +201,7 @@ function SourceGroup({ title, type, sources, onEdit, onDelete, onTypeChange }: S
             {isExpanded && (
                 <div className="space-y-3 pl-2">
                     {sources.map((item, idx) => {
-                        const originalIndex = sources === item ? -1 : 0; // Simplified for demo
+                        const originalIndex = idx;
                         return (
                             <div key={item.id} className="space-y-2 animate-in fade-in slide-in-from-bottom-2 duration-300">
                                 <FileNodeItem

@@ -39,7 +39,7 @@ const SelectionGenerationHUDComponent = ({ viewMode, className }: SelectionGener
     const isMobile = useMobile();
     const isDesktop = !isMobile;
     const selection = useEditorStore((state) => state.selection);
-    const { isProcessing, handleAiAction, rewriteStyles = [], cancelGeneration } = useAiActions();
+    const { isProcessing, handleAiAction, rewriteStyles = [] } = useAiActions();
 
     const [isDragging, setIsDragging] = useState(false);
     const [position, setPosition] = useState({ x: 20, y: 20 });
@@ -145,10 +145,8 @@ const SelectionGenerationHUDComponent = ({ viewMode, className }: SelectionGener
     }, [handleAiAction, selection.hasSelection]);
 
     const handleCancel = useCallback(() => {
-        if (isProcessing && cancelGeneration) {
-            cancelGeneration('current');
-        }
-    }, [isProcessing, cancelGeneration]);
+        // cancelGeneration not yet available in useAiActions
+    }, [isProcessing]);
 
     const handleCopySelection = useCallback(async () => {
         if (!selection.selectionText) return;
@@ -439,7 +437,7 @@ const SelectionGenerationHUDComponent = ({ viewMode, className }: SelectionGener
                                 </DropdownMenuLabel>
                                 <DropdownMenuSeparator className="bg-primary/5" />
                                 {rewriteStyles.length > 0 ? (
-                                    rewriteStyles.map(({ label, style, description }) => (
+                                    rewriteStyles.map(({ label, style }) => (
                                         <DropdownMenuItem
                                             key={style}
                                             className="flex flex-col items-start py-2 px-3 focus:bg-primary/5 focus:text-primary cursor-pointer group"
@@ -449,11 +447,7 @@ const SelectionGenerationHUDComponent = ({ viewMode, className }: SelectionGener
                                             <span className="text-[9px] font-black uppercase tracking-[0.2em] group-hover:text-primary transition-colors">
                                                 {label}
                                             </span>
-                                            {description && isDesktop && (
-                                                <span className="text-[7px] text-muted-foreground/40 mt-0.5">
-                                                    {description}
-                                                </span>
-                                            )}
+                                            
                                         </DropdownMenuItem>
                                     ))
                                 ) : (

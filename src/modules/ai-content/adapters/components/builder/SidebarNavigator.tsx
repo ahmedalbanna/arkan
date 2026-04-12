@@ -80,7 +80,7 @@ export function SidebarNavigator({
         sectionId="source-context"
         persistState={!isMobile}
       >
-        <SourceManager searchQuery={searchQuery} />
+        <SourceManager />
       </SidebarSection>
 
       {/* Structural Navigation Group */}
