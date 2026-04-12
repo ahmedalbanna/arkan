@@ -45,7 +45,7 @@ const EditableField: React.FC<{
     const handleKeyDown = (e: React.KeyboardEvent) => {
         if (e.key === 'Enter' && !e.shiftKey && tagName !== 'div') {
             e.preventDefault();
-            e.currentTarget.blur();
+            (e.currentTarget as HTMLElement).blur();
         }
         if (e.key === 'Escape') {
             setLocalHtml(html);

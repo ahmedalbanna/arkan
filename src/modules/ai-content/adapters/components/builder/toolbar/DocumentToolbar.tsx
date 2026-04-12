@@ -53,6 +53,7 @@ interface DocumentToolbarProps {
   isFullscreen: boolean;
   onToggleFullscreen: () => void;
   suggestion: string;
+  isDesktop?: boolean;
   onSave?: () => void;
   onExport?: () => void;
   onPrint?: () => void;
@@ -110,7 +111,7 @@ export const DocumentToolbar = ({
     if (!activeEditor) return;
     const url = window.prompt('Enter URL:');
     if (url) {
-      activeEditor.chain().focus().setLink({ href: url }).run();
+      (activeEditor.chain().focus() as any).setLink({ href: url }).run();
     }
   }, [activeEditor]);
 

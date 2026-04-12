@@ -318,12 +318,13 @@ export function UploadManager() {
     }, [selectedItems, updateProject, project?.externalContext, toast]);
 
     const handleSelectAll = useCallback(() => {
-        if (selectedItems.size === filteredContext.length) {
+        const ctx = project?.externalContext || [];
+        if (selectedItems.size === ctx.length) {
             setSelectedItems(new Set());
         } else {
-            setSelectedItems(new Set(filteredContext.map(item => item.id)));
+            setSelectedItems(new Set(ctx.map(item => item.id)));
         }
-    }, [filteredContext, selectedItems.size]);
+    }, [selectedItems.size, project?.externalContext]);
 
     const externalContext = project?.externalContext || [];
 

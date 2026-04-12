@@ -139,7 +139,7 @@ const MarkdownEditorComponent = ({
             event.preventDefault();
             const url = window.prompt('Enter URL:');
             if (url) {
-              editor?.chain().focus().setLink({ href: url }).run();
+              (editor?.chain().focus() as any)?.setLink({ href: url }).run();
             }
             return true;
           }

@@ -19,4 +19,5 @@ export type ComparisonSnapshot = {
     id: string;
     name: string;
     snapshotData: unknown;
+    createdAt?: string;
 };

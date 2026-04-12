@@ -77,7 +77,7 @@ export function SidebarNavigator({
         sectionId="source-context"
         persistState={true}
       >
-        <SourceManager searchQuery={searchQuery} />
+        <SourceManager />
       </SidebarSection>
 
       {/* Structural Navigation Group */}

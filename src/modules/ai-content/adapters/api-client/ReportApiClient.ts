@@ -9,6 +9,8 @@ export interface GeneratedReportSectionResponse {
 export interface ChatMessage {
   role: 'user' | 'assistant' | 'system';
   content: string;
+  timestamp?: number;
+  isStreaming?: boolean;
 }
 
 export interface ProjectChatInput {

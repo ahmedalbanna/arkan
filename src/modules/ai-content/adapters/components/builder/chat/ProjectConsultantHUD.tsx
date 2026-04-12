@@ -32,7 +32,7 @@ export function ProjectConsultantHUD({ isOpen, onClose }: ProjectConsultantHUDPr
     const handleSend = useCallback((content: string) => {
         if (!content || !content.trim() || isLoading) return;
         try {
-            sendMessage(content.trim());
+            sendMessage(content.trim(), '');
         } catch (error) {
             console.error('[ProjectConsultantHUD] Transmission failure:', error);
         }
@@ -45,8 +45,12 @@ export function ProjectConsultantHUD({ isOpen, onClose }: ProjectConsultantHUDPr
         }
     }, [clearChat, messages.length]);
 
+    const exportChatContent = useCallback(() => {
+        return messages.map(m => `${m.role}: ${m.content}`).join('\n\n');
+    }, [messages]);
+
     const handleExportChat = useCallback(async () => {
-        const content = exportChat();
+        const content = exportChatContent();
         const blob = new Blob([content], { type: 'text/plain' });
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
@@ -56,14 +60,14 @@ export function ProjectConsultantHUD({ isOpen, onClose }: ProjectConsultantHUDPr
         a.click();
         document.body.removeChild(a);
         URL.revokeObjectURL(url);
-    }, [exportChat]);
+    }, [exportChatContent]);
 
     const handleCopyChat = useCallback(async () => {
-        const content = exportChat();
+        const content = exportChatContent();
         await navigator.clipboard.writeText(content);
         setCopied(true);
         setTimeout(() => setCopied(false), 2000);
-    }, [exportChat]);
+    }, [exportChatContent]);
 
     const scrollToBottom = useCallback(() => {
         if (scrollAreaRef.current) {
@@ -221,10 +225,10 @@ export function ProjectConsultantHUD({ isOpen, onClose }: ProjectConsultantHUDPr
                             {/* Message List */}
                             {messages.map((message, index) => (
                                 <ChatMessage
-                                    key={`msg-${index}-${message.role}-${message.timestamp || index}`}
+                                    key={`msg-${index}-${message.role}-${(message as any).timestamp || index}`}
                                     role={message.role as 'assistant' | 'user'}
                                     content={message.content}
-                                    isStreaming={message.isStreaming}
+                                    isStreaming={(message as any).isStreaming}
                                 />
                             ))}
 

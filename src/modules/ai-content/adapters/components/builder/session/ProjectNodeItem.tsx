@@ -195,7 +195,7 @@ export function ProjectNodeItem({
                                 </h4>
                                 {project.version && (
                                     <Badge variant="outline" className="h-4 text-[7px] font-mono border-primary/20 bg-primary/5">
-                                        v{project.version}
+                                        v{project.meta.version}
                                     </Badge>
                                 )}
                             </div>
