@@ -1,11 +1,11 @@
 'use client';
 
-import { useState } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { container } from '@/infrastructure/di/container';
-import { ReportApiClient, ChatMessage } from '@/modules/ai-content/adapters/api-client/ReportApiClient';
+import { ChatMessage, ReportApiClient } from '@/modules/ai-content/adapters/api-client/ReportApiClient';
+import { useState } from 'react';
 
-export interface Message extends ChatMessage {}
+export interface Message extends ChatMessage { }
 
 export function useProjectChat() {
   const { user } = useAuth();
@@ -29,7 +29,7 @@ export function useProjectChat() {
       });
 
       if (result.isFailure) throw result.error;
-      
+
       const assistantMessage: Message = { role: 'assistant', content: result.getValue().response };
       setMessages([...updatedMessages, assistantMessage]);
     } catch (error) {
@@ -42,11 +42,14 @@ export function useProjectChat() {
   const clearChat = () => {
     setMessages([]);
   };
+  const exportChat = () => {
 
+  };
   return {
     messages,
     sendMessage,
     clearChat,
     isLoading,
+    exportChat,
   };
 }

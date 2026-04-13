@@ -166,6 +166,41 @@ export function UploadManager() {
     const [selectedItems, setSelectedItems] = useState<Set<string>>(new Set());
     const searchInputRef = useRef<HTMLInputElement>(null);
 
+    const externalContext = project?.externalContext || [];
+    // Apply filters and sorting
+    const filteredContext = useMemo(() => {
+        let filtered = [...externalContext];
+
+        // Apply search filter
+        if (searchQuery) {
+            const query = searchQuery.toLowerCase();
+            filtered = filtered.filter(item =>
+                item.fileName.toLowerCase().includes(query) ||
+                (item.content && item.content.toLowerCase().includes(query))
+            );
+        }
+
+        // Apply type filter
+        if (typeFilter !== 'all') {
+            filtered = filtered.filter(item => item.type === typeFilter);
+        }
+
+        // Apply sorting
+        switch (sortBy) {
+            case 'name':
+                filtered.sort((a, b) => a.fileName.localeCompare(b.fileName));
+                break;
+            case 'size':
+                filtered.sort((a, b) => (b.content?.length || 0) - (a.content?.length || 0));
+                break;
+            case 'date':
+                filtered.sort((a, b) => (b.updatedAt || b.createdAt || '').localeCompare(a.updatedAt || a.createdAt || ''));
+                break;
+        }
+
+        return filtered;
+    }, [externalContext, searchQuery, typeFilter, sortBy]);
+
     // Keyboard shortcuts
     useEffect(() => {
 
@@ -326,41 +361,8 @@ export function UploadManager() {
         }
     }, [selectedItems.size, project?.externalContext]);
 
-    const externalContext = project?.externalContext || [];
 
-    // Apply filters and sorting
-    const filteredContext = useMemo(() => {
-        let filtered = [...externalContext];
 
-        // Apply search filter
-        if (searchQuery) {
-            const query = searchQuery.toLowerCase();
-            filtered = filtered.filter(item =>
-                item.fileName.toLowerCase().includes(query) ||
-                (item.content && item.content.toLowerCase().includes(query))
-            );
-        }
-
-        // Apply type filter
-        if (typeFilter !== 'all') {
-            filtered = filtered.filter(item => item.type === typeFilter);
-        }
-
-        // Apply sorting
-        switch (sortBy) {
-            case 'name':
-                filtered.sort((a, b) => a.fileName.localeCompare(b.fileName));
-                break;
-            case 'size':
-                filtered.sort((a, b) => (b.content?.length || 0) - (a.content?.length || 0));
-                break;
-            case 'date':
-                filtered.sort((a, b) => (b.updatedAt || b.createdAt || '').localeCompare(a.updatedAt || a.createdAt || ''));
-                break;
-        }
-
-        return filtered;
-    }, [externalContext, searchQuery, typeFilter, sortBy]);
 
     const totalSize = useMemo(() => {
         return externalContext.reduce((sum, item) => sum + (item.content?.length || 0), 0);

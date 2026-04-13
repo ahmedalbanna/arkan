@@ -1,27 +1,27 @@
 'use client';
 
-import { useCallback, useMemo } from 'react';
-import { Editor } from '@tiptap/react';
-import { useToast } from '@/hooks/util/use-toast';
-import { useLocalization } from '@/context/LocalizationContext';
-import { marked } from 'marked';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '@/context/AuthContext';
-import { useBuilderStore } from '@/modules/projects/adapters/state/useBuilderStore';
-import { ReportApiClient } from '@/modules/ai-content/adapters/api-client/ReportApiClient';
+import { useLocalization } from '@/context/LocalizationContext';
+import { useToast } from '@/hooks/util/use-toast';
+import { runAuthenticatedResultCall } from '@/infrastructure/api/authenticated-client-call';
+import { projectKeys } from '@/infrastructure/api/query-keys';
 import { container } from '@/infrastructure/di/container';
-import type { SectionName } from '@/modules/ai/domain/schemas';
-import { PromptBuilder } from '@/modules/ai-content/domain/services/PromptBuilder';
-import { WritingToolsApiClient } from '@/modules/ai/adapters/api-client/WritingToolsApiClient';
-import { Chapter } from '@/modules/ai-content/domain/entities/Chapter';
-import { type Project } from '@/modules/projects/domain/entities/Project';
-import { Section } from '@/modules/ai-content/domain/entities/Section';
-import { type ExternalContextType } from '@/modules/ai-content/domain/entities/ControlTypes';
-import { parseMarkdownToContent } from '@/modules/projects/infrastructure/io/markdown-parser';
+import { ReportApiClient } from '@/modules/ai-content/adapters/api-client/ReportApiClient';
 import { useEditorStore } from '@/modules/ai-content/adapters/state/use-editor-store';
 import { useGenerationUIStore } from '@/modules/ai-content/adapters/state/useGenerationUIStore';
-import { projectKeys } from '@/infrastructure/api/query-keys';
-import { runAuthenticatedResultCall } from '@/infrastructure/api/authenticated-client-call';
+import { Chapter } from '@/modules/ai-content/domain/entities/Chapter';
+import { type ExternalContextType } from '@/modules/ai-content/domain/entities/ControlTypes';
+import { Section } from '@/modules/ai-content/domain/entities/Section';
+import { PromptBuilder } from '@/modules/ai-content/domain/services/PromptBuilder';
+import { WritingToolsApiClient } from '@/modules/ai/adapters/api-client/WritingToolsApiClient';
+import type { SectionName } from '@/modules/ai/domain/schemas';
+import { useBuilderStore } from '@/modules/projects/adapters/state/useBuilderStore';
+import { type Project } from '@/modules/projects/domain/entities/Project';
+import { parseMarkdownToContent } from '@/modules/projects/infrastructure/io/markdown-parser';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { Editor } from '@tiptap/react';
+import { marked } from 'marked';
+import { useCallback, useMemo } from 'react';
 
 interface AiActionsProps {
   editor?: Editor | null;
@@ -158,7 +158,7 @@ export function useAiActions({ editor: initialEditor }: AiActionsProps = {}) {
     mutationFn: async (sectionId: string) => {
       // Sync structure from markdown before generation to ensure correct context
       useBuilderStore.getState().syncProjectStructure();
-      
+
       const currentProject = useBuilderStore.getState().project;
       if (!currentProject || !user) throw new Error('Project or user not found.');
 
@@ -334,13 +334,13 @@ export function useAiActions({ editor: initialEditor }: AiActionsProps = {}) {
             toast({ title: 'Generation Stopped', description: 'Bulk generation was canceled by user.' });
             break;
           }
-          
+
           if (useRAG) {
             await generateSectionWithRAGMutation.mutateAsync(sectionId);
           } else {
             await generateSectionMutation.mutateAsync(sectionId);
           }
-          
+
           incrementProgress();
         }
       } finally {
@@ -348,20 +348,20 @@ export function useAiActions({ editor: initialEditor }: AiActionsProps = {}) {
       }
     },
     onSuccess: () => {
-        if (!useGenerationUIStore.getState().abortRequested) {
-            toast({ title: 'Project Build Complete', description: 'All selected sections have been successfully generated.' });
-        }
+      if (!useGenerationUIStore.getState().abortRequested) {
+        toast({ title: 'Project Build Complete', description: 'All selected sections have been successfully generated.' });
+      }
     },
     onError: (error: Error) => toast({ title: 'Project Build Failed', description: error.message, variant: 'destructive' }),
   });
 
   const rewriteStyles = useMemo(() => [
-    { label: t('writingTools.textStylist.styles.formal'), style: 'Formal' },
-    { label: t('writingTools.textStylist.styles.friendly'), style: 'Friendly' },
-    { label: t('writingTools.textStylist.styles.simple'), style: 'Simple' },
-    { label: t('writingTools.textStylist.styles.creative'), style: 'Creative' },
-    { label: t('writingTools.textStylist.styles.professional'), style: 'Professional' },
-    { label: t('writingTools.textStylist.styles.academic'), style: 'Academic' },
+    { label: t('writingTools.textStylist.styles.formal'), style: 'Formal', description: "" },
+    { label: t('writingTools.textStylist.styles.friendly'), style: 'Friendly', description: "" },
+    { label: t('writingTools.textStylist.styles.simple'), style: 'Simple', description: "" },
+    { label: t('writingTools.textStylist.styles.creative'), style: 'Creative', description: "" },
+    { label: t('writingTools.textStylist.styles.professional'), style: 'Professional', description: "" },
+    { label: t('writingTools.textStylist.styles.academic'), style: 'Academic', description: "" },
   ], [t]);
 
   return {

@@ -432,7 +432,7 @@ const SelectionGenerationHUDComponent = ({ viewMode, className }: SelectionGener
                                 </DropdownMenuLabel>
                                 <DropdownMenuSeparator className="bg-primary/5" />
                                 {rewriteStyles.length > 0 ? (
-                                    rewriteStyles.map(({ label, style }) => (
+                                    rewriteStyles.map(({ label, style, description }) => (
                                         <DropdownMenuItem
                                             key={style}
                                             className="flex flex-col items-start py-2 px-3 focus:bg-primary/5 focus:text-primary cursor-pointer group"

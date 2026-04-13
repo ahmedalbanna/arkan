@@ -163,8 +163,7 @@ export function FileNodeItem({
                 setTimeout(() => setIsDeleting(false), 500);
             }
         } else {
-            // Mobile: Direct delete (will be handled by parent)
-            onDelete();
+
         }
     }, [onDelete, item?.fileName]);
 
