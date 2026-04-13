@@ -38,8 +38,8 @@ export async function POST(request: Request) {
     // We need a temporary token or way to login the user here.
     // For now, let's assume we can generate a session token directly if 2FA passes.
     
-    const { SQLiteAuthRepository } = require("@/modules/users/infrastructure/repositories/SQLiteAuthRepository");
-    const authRepo = container.resolve(SQLiteAuthRepository);
+    const { DrizzleAuthRepository } = require("@/modules/users/infrastructure/repositories/DrizzleAuthRepository");
+    const authRepo = container.resolve(DrizzleAuthRepository);
     
     const { AuthCrypto } = require("@/modules/users/domain/utils/auth-crypto");
     const sessionToken = await AuthCrypto.createToken({ 

@@ -213,7 +213,7 @@ export function useAiActions({ editor: initialEditor }: AiActionsProps = {}) {
 
       const body = {
         projectId: currentProject.id,
-        sectionId: section.id,
+        sectionId: section.title,
         prompt: section.buildActionPrompt(),
         guidelines: section.guidelines,
       };

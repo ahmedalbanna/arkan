@@ -8,7 +8,7 @@ import { eq, desc, count, sql, like, or, and } from "drizzle-orm";
 import { v4 as uuidv4 } from "uuid";
 
 @injectable()
-export class SQLiteIndexedDocumentRepository implements IIndexedDocumentRepository {
+export class DrizzleIndexedDocumentRepository implements IIndexedDocumentRepository {
     async record(data: Omit<IndexedDocumentRecord, 'id' | 'timestamp' | 'indexedAt' | 'status'>): Promise<Result<string, RagError>> {
         try {
             const id = uuidv4();

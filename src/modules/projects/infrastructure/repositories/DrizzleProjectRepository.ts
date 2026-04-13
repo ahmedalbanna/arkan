@@ -11,7 +11,7 @@ import { Telemetry } from "@/modules/ai/infrastructure/services/Telemetry";
 import { v4 as uuidv4 } from 'uuid';
 
 @injectable()
-export class SQLiteProjectRepository implements IProjectRepository {
+export class DrizzleProjectRepository implements IProjectRepository {
   async getById(id: string): Promise<Result<Project, ProjectError>> {
     try {
       const result = await db.query.projects.findFirst({
@@ -22,7 +22,7 @@ export class SQLiteProjectRepository implements IProjectRepository {
       }
       return Result.ok(new Project(this.toDomain(result)));
     } catch (error: any) {
-      Telemetry.logFailure('SQLiteProjectRepo:getById', error);
+      Telemetry.logFailure('DrizzleProjectRepo:getById', error);
       return Result.fail(ProjectError.internal(error.message));
     }
   }
@@ -37,7 +37,7 @@ export class SQLiteProjectRepository implements IProjectRepository {
       const projectsList = results.map((result) => new Project(this.toDomain(result)));
       return Result.ok(projectsList);
     } catch (error: any) {
-      Telemetry.logFailure('SQLiteProjectRepo:getByUserId', error);
+      Telemetry.logFailure('DrizzleProjectRepo:getByUserId', error);
       return Result.fail(ProjectError.internal(error.message));
     }
   }
@@ -54,7 +54,7 @@ export class SQLiteProjectRepository implements IProjectRepository {
 
       return this.getById(id);
     } catch (error: any) {
-      Telemetry.logFailure('SQLiteProjectRepo:save', error);
+      Telemetry.logFailure('DrizzleProjectRepo:save', error);
       return Result.fail(ProjectError.saveError(error.message));
     }
   }
@@ -85,7 +85,7 @@ export class SQLiteProjectRepository implements IProjectRepository {
 
       return Result.ok(snapshot);
     } catch (error: any) {
-      Telemetry.logFailure('SQLiteProjectRepo:saveSnapshot', error);
+      Telemetry.logFailure('DrizzleProjectRepo:saveSnapshot', error);
       return Result.fail(ProjectError.saveError(error.message));
     }
   }
@@ -107,7 +107,7 @@ export class SQLiteProjectRepository implements IProjectRepository {
 
       return Result.ok(snapshots);
     } catch (error: any) {
-      Telemetry.logFailure('SQLiteProjectRepo:getSnapshots', error);
+      Telemetry.logFailure('DrizzleProjectRepo:getSnapshots', error);
       return Result.fail(ProjectError.internal(error.message));
     }
   }

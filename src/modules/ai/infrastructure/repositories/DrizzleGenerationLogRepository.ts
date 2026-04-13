@@ -7,7 +7,7 @@ import { AiError } from "../../domain/errors/AiErrors";
 import { eq, desc, and, lt } from "drizzle-orm";
 
 @injectable()
-export class SQLiteGenerationLogRepository implements IGenerationLogRepository {
+export class DrizzleGenerationLogRepository implements IGenerationLogRepository {
     async log(entry: GenerationLog): Promise<Result<void, AiError>> {
         try {
             await db.insert(generationLogs).values({

@@ -8,7 +8,7 @@ import { AdminError } from "../../domain/errors/AdminErrors";
 import { type INotificationService, INotificationServiceToken } from "@/modules/users/domain/services/INotificationService";
 
 @injectable()
-export class SQLiteAdminStatsRepository implements IAdminStatsRepository {
+export class DrizzleAdminStatsRepository implements IAdminStatsRepository {
     constructor(
         @inject(INotificationServiceToken)
         private notificationService: INotificationService

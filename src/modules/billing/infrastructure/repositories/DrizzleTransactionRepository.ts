@@ -9,7 +9,7 @@ import { eq, desc, and, gte, lte, lt } from "drizzle-orm";
 import { v4 as uuidv4 } from "uuid";
 
 @injectable()
-export class SQLiteTransactionRepository implements ITransactionRepository {
+export class DrizzleTransactionRepository implements ITransactionRepository {
     async getById(id: string): Promise<Result<Transaction, BillingError>> {
         try {
             const result = await db.query.transactions.findFirst({

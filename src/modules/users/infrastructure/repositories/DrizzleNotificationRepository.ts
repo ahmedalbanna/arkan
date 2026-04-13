@@ -8,7 +8,7 @@ import { v4 as uuidv4 } from "uuid";
 import { Notification } from "../../domain/entities/Notification";
 
 @injectable()
-export class SQLiteNotificationRepository {
+export class DrizzleNotificationRepository {
     async create(userId: string, data: any): Promise<Result<Notification, UserError>> {
         try {
             const id = uuidv4();

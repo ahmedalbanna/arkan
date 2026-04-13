@@ -10,7 +10,7 @@ import { eq, and, sql, desc } from "drizzle-orm";
 import { v4 as uuidv4 } from "uuid";
 
 @injectable()
-export class SQLiteAuthRepository implements IAuthRepository {
+export class DrizzleAuthRepository implements IAuthRepository {
     constructor(
         @inject(IPasswordServiceToken)
         private passwordService: IPasswordService,
@@ -87,7 +87,7 @@ export class SQLiteAuthRepository implements IAuthRepository {
                 return Result.fail(UserError.unauthorized("Invalid or expired token"));
             }
 
-            // SQLite specific: Check if token version matches the current user's version
+            // Drizzle specific: Check if token version matches the current user's version
             const user = await db.query.users.findFirst({
                 where: eq(users.id, payload.uid),
             });
@@ -108,7 +108,7 @@ export class SQLiteAuthRepository implements IAuthRepository {
 
     async createSessionCookie(idToken: string, options: { expiresIn: number }): Promise<Result<string, UserError>> {
         try {
-            // In our SQLite implementation, the idToken IS already our JWT or a temporary code.
+            // In our Drizzle implementation, the idToken IS already our JWT or a temporary code.
             // For simplicity, we'll verify the token first.
             const payload = await this.tokenService.verify<any>(idToken);
             if (!payload) {

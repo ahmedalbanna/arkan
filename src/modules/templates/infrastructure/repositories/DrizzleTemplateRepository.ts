@@ -7,7 +7,7 @@ import { TemplateError } from "../../domain/errors/TemplateErrors";
 import { eq, and, desc } from "drizzle-orm";
 
 @injectable()
-export class SQLiteTemplateRepository implements ITemplateRepository {
+export class DrizzleTemplateRepository implements ITemplateRepository {
     async getById(type: TemplateType, id: string): Promise<Result<Template, TemplateError>> {
         try {
             const result = await db.query.templates.findFirst({

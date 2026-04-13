@@ -12,6 +12,8 @@ import {
     SlidersHorizontal
 } from 'lucide-react';
 import { lazy, useEffect, useMemo } from 'react';
+import { Chapter } from '@/modules/ai-content/domain/entities/Chapter';
+import { Section } from '@/modules/ai-content/domain/entities/Section';
 
 // Lazy-loaded HUD components with prefetch
 const ProjectSettingsHUD = lazy(() => import('@/modules/ai-content/adapters/components/builder/settings/ProjectSettingsHUD').then(m => ({ default: m.ProjectSettingsHUD })));
@@ -58,7 +60,7 @@ export function useSidebarPanels({
     }, []);
 
     const rightPanels = useMemo<SidebarPanelConfig[]>(() => {
-        const typedProject = project as { getSection?: (id: string) => unknown; getChapter?: (id: string) => unknown } | null;
+        const typedProject = project as { getSection?: (id: string) => Section; getChapter?: (id: string) => Chapter } | null;
         const activeSectionId = selectedSectionIds.length > 0 ? selectedSectionIds[0] : null;
         const activeSection = activeSectionId ? typedProject?.getSection?.(activeSectionId) ?? null : null;
         const activeChapter = activeChapterId ? typedProject?.getChapter?.(activeChapterId) ?? null : null;

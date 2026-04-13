@@ -8,7 +8,7 @@ import { Result } from "@/infrastructure/utils/result";
 import { AdminError } from "../../domain/errors/AdminErrors";
 
 @injectable()
-export class SQLiteFeatureRepository implements IFeatureRepository {
+export class DrizzleFeatureRepository implements IFeatureRepository {
     async getAll(): Promise<Result<Feature[], AdminError>> {
         try {
             const results = await db.query.features.findMany();

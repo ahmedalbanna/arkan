@@ -7,24 +7,24 @@ import path from 'path';
 const dbPath = process.env.SQLITE_DB_PATH || path.join(process.cwd(), 'arkan.db');
 
 /**
- * Global Singleton Pattern for SQLite Connection
+ * Global Singleton Pattern for Database Connection
  * Prevents multiple connections and SIGINT listener accumulation during Next.js hot reloads.
  */
 const globalForDb = globalThis as unknown as {
-  sqlite: Database.Database | undefined;
+  database: Database.Database | undefined;
   db: ReturnType<typeof drizzle<typeof schema>> | undefined;
 };
 
-export const sqlite = globalForDb.sqlite ?? new Database(dbPath);
+export const database = globalForDb.database ?? new Database(dbPath);
 
 if (process.env.NODE_ENV !== 'production') {
-  globalForDb.sqlite = sqlite;
+  globalForDb.database = database;
 }
 
 // Enable WAL mode for better concurrency
-sqlite.pragma('journal_mode = WAL');
+database.pragma('journal_mode = WAL');
 
-export const db = globalForDb.db ?? drizzle(sqlite, { schema });
+export const db = globalForDb.db ?? drizzle(database, { schema });
 
 if (process.env.NODE_ENV !== 'production') {
   globalForDb.db = db;

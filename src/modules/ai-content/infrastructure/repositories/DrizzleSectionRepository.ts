@@ -8,7 +8,7 @@ import { eq } from "drizzle-orm";
 import { SectionProperties } from "../../domain/entities/Section";
 
 @injectable()
-export class SQLiteSectionRepository implements ISectionRepository {
+export class DrizzleSectionRepository implements ISectionRepository {
     async getAll(): Promise<Result<SectionProperties[], AIContentError>> {
         try {
             const results = await db.query.sections.findMany({

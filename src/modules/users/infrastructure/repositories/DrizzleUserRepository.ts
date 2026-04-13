@@ -8,7 +8,7 @@ import { UserError } from "../../domain/errors/UserErrors";
 import { eq, sql, desc, lt } from "drizzle-orm";
 
 @injectable()
-export class SQLiteUserRepository implements IUserRepository {
+export class DrizzleUserRepository implements IUserRepository {
     async getById(id: string): Promise<Result<User, UserError>> {
         try {
             if (!id) return Result.fail(UserError.notFound());
@@ -64,9 +64,9 @@ export class SQLiteUserRepository implements IUserRepository {
                 return Result.ok(0);
             }
 
-            // better-sqlite3 transactions are synchronous in Drizzle
-            return db.transaction((tx) => {
-                const user = tx.select().from(users).where(eq(users.id, id)).get();
+            return await db.transaction(async (tx) => {
+                const results = await tx.select().from(users).where(eq(users.id, id)).limit(1);
+                const user = results[0];
 
                 if (!user) {
                     return Result.fail(UserError.notFound("User not found"));
@@ -94,7 +94,7 @@ export class SQLiteUserRepository implements IUserRepository {
                 updates.credits = newBalance;
                 updates.updatedAt = new Date().toISOString();
 
-                tx.update(users).set(updates).where(eq(users.id, id)).run();
+                await tx.update(users).set(updates).where(eq(users.id, id));
                 return Result.ok(newBalance);
             });
         } catch (error: any) {

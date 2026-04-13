@@ -5,7 +5,7 @@ import { Result } from "@/infrastructure/utils/result";
 import { UserError } from "../../domain/errors/UserErrors";
 import { eq } from "drizzle-orm";
 import { type IAuthRepository, IAuthRepositoryToken } from "../../domain/repositories/IAuthRepository";
-import { SQLiteAuthRepository } from "../../infrastructure/repositories/SQLiteAuthRepository";
+import { DrizzleAuthRepository } from "../../infrastructure/repositories/DrizzleAuthRepository";
 import { type LogSecurityEventUseCase } from "./LogSecurityEventUseCase";
 
 @injectable()
@@ -31,7 +31,7 @@ export class DisableUserUseCase {
             });
 
             // If disabling, also force logout all devices
-            if (isDisabled && this.authRepository instanceof SQLiteAuthRepository) {
+            if (isDisabled && this.authRepository instanceof DrizzleAuthRepository) {
                 await this.authRepository.revokeAllSessions(userId);
                 
                 await this.logSecurityEventUseCase.execute({

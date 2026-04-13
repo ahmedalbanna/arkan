@@ -9,7 +9,7 @@ import { Result } from "@/infrastructure/utils/result";
 import { AdminError } from "../../domain/errors/AdminErrors";
 
 @injectable()
-export class SQLiteSettingsRepository implements ISettingsRepository {
+export class DrizzleSettingsRepository implements ISettingsRepository {
     private readonly SETTINGS_KEY = 'defaults';
 
     async get(): Promise<Result<AppSettings, AdminError>> {

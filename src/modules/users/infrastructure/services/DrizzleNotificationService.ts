@@ -8,10 +8,10 @@ import { eq, desc, and, inArray, lte } from "drizzle-orm";
 import { v4 as uuidv4 } from "uuid";
 
 @injectable()
-export class SQLiteNotificationService implements INotificationService {
+export class DrizzleNotificationService implements INotificationService {
     async send(userId: string, payload: NotificationPayload): Promise<Result<void, UserError>> {
         try {
-            // 1. Store in local SQLite database
+            // 1. Store in local Drizzle database
             await db.insert(notifications).values({
                 id: uuidv4(),
                 userId,

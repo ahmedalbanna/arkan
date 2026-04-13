@@ -93,27 +93,27 @@ container.register(IPptxExportServiceToken, { useClass: PptxExportApiClient }, {
 // The async_hooks Node.js built-in is stubbed for browser builds via next.config.ts turbopack.resolveAlias.
 if (typeof window === 'undefined') {
   console.log("Registering server-side dependencies...");
-  const { SQLiteProjectRepository } = require("@/modules/projects/infrastructure/repositories/SQLiteProjectRepository");
-  const { SQLiteUserRepository } = require("@/modules/users/infrastructure/repositories/SQLiteUserRepository");
-  const { SQLiteAuthRepository } = require("@/modules/users/infrastructure/repositories/SQLiteAuthRepository");
-  const { SQLiteNotificationService } = require("@/modules/users/infrastructure/services/SQLiteNotificationService");
-  const { SQLiteGenerationLogRepository } = require("@/modules/ai/infrastructure/repositories/SQLiteGenerationLogRepository");
-  const { SQLiteAgentRepository } = require("@/modules/ai/infrastructure/repositories/SQLiteAgentRepository");
+  const { DrizzleProjectRepository } = require("@/modules/projects/infrastructure/repositories/DrizzleProjectRepository");
+  const { DrizzleUserRepository } = require("@/modules/users/infrastructure/repositories/DrizzleUserRepository");
+  const { DrizzleAuthRepository } = require("@/modules/users/infrastructure/repositories/DrizzleAuthRepository");
+  const { DrizzleNotificationService } = require("@/modules/users/infrastructure/services/DrizzleNotificationService");
+  const { DrizzleGenerationLogRepository } = require("@/modules/ai/infrastructure/repositories/DrizzleGenerationLogRepository");
+  const { DrizzleAgentRepository } = require("@/modules/ai/infrastructure/repositories/DrizzleAgentRepository");
   // Use N8nAiService when N8N_AI_WEBHOOK_URL is set, otherwise fall back to GenkitAiService
   const useN8n = Boolean(process.env.N8N_AI_WEBHOOK_URL);
   const AiServiceImpl = useN8n
     ? require("@/modules/ai/infrastructure/services/N8nAiService").N8nAiService
     : require("@/modules/ai/infrastructure/services/GenkitAiService").GenkitAiService;
   const { WritingToolRegistry } = require("@/modules/ai/application/services/WritingToolRegistry");
-  const { SQLiteAdminStatsRepository } = require("@/modules/admin/infrastructure/repositories/SQLiteAdminStatsRepository");
-  const { SQLiteFeatureRepository } = require("@/modules/admin/infrastructure/repositories/SQLiteFeatureRepository");
-  const { SQLiteSettingsRepository } = require("@/modules/admin/infrastructure/repositories/SQLiteSettingsRepository");
-  const { SQLiteTransactionRepository } = require("@/modules/billing/infrastructure/repositories/SQLiteTransactionRepository");
+  const { DrizzleAdminStatsRepository } = require("@/modules/admin/infrastructure/repositories/DrizzleAdminStatsRepository");
+  const { DrizzleFeatureRepository } = require("@/modules/admin/infrastructure/repositories/DrizzleFeatureRepository");
+  const { DrizzleSettingsRepository } = require("@/modules/admin/infrastructure/repositories/DrizzleSettingsRepository");
+  const { DrizzleTransactionRepository } = require("@/modules/billing/infrastructure/repositories/DrizzleTransactionRepository");
   const { LocalFileStorageService } = require("@/modules/billing/infrastructure/services/LocalFileStorageService");
   const { DefaultRagRepository } = require("@/modules/rag/infrastructure/repositories/DefaultRagRepository");
-  const { SQLiteIndexedDocumentRepository } = require("@/modules/rag/infrastructure/repositories/SQLiteIndexedDocumentRepository");
-  const { SQLiteTemplateRepository } = require("@/modules/templates/infrastructure/repositories/SQLiteTemplateRepository");
-  const { SQLiteSectionRepository } = require("@/modules/ai-content/infrastructure/repositories/SQLiteSectionRepository");
+  const { DrizzleIndexedDocumentRepository } = require("@/modules/rag/infrastructure/repositories/DrizzleIndexedDocumentRepository");
+  const { DrizzleTemplateRepository } = require("@/modules/templates/infrastructure/repositories/DrizzleTemplateRepository");
+  const { DrizzleSectionRepository } = require("@/modules/ai-content/infrastructure/repositories/DrizzleSectionRepository");
   const { DocxExportService } = require("@/modules/ai-content/infrastructure/exporters/DocxExportService");
   const { PptxExportService } = require("@/modules/ai-content/infrastructure/exporters/PptxExportService");
   const { PdfExportService } = require("@/modules/ai-content/infrastructure/exporters/PdfExportService");
@@ -126,27 +126,27 @@ if (typeof window === 'undefined') {
   container.register(ITokenServiceToken, { useClass: JoseTokenService }, { lifecycle: Lifecycle.Singleton });
   container.register(IEmailServiceToken, { useClass: NodemailerEmailService }, { lifecycle: Lifecycle.Singleton });
   container.register(TwoFactorAuthService, { useClass: TwoFactorAuthService }, { lifecycle: Lifecycle.Singleton });
-  container.register(IProjectRepositoryToken, { useClass: SQLiteProjectRepository }, { lifecycle: Lifecycle.Singleton });
-  container.register(IUserRepositoryToken, { useClass: SQLiteUserRepository }, { lifecycle: Lifecycle.Singleton });
-  container.register(IAuthRepositoryToken, { useClass: SQLiteAuthRepository }, { lifecycle: Lifecycle.Singleton });
-  container.register(INotificationServiceToken, { useClass: SQLiteNotificationService }, { lifecycle: Lifecycle.Singleton });
-  container.register(IGenerationLogRepositoryToken, { useClass: SQLiteGenerationLogRepository }, { lifecycle: Lifecycle.Singleton });
-  container.register(IAgentRepositoryToken, { useClass: SQLiteAgentRepository }, { lifecycle: Lifecycle.Singleton });
+  container.register(IProjectRepositoryToken, { useClass: DrizzleProjectRepository }, { lifecycle: Lifecycle.Singleton });
+  container.register(IUserRepositoryToken, { useClass: DrizzleUserRepository }, { lifecycle: Lifecycle.Singleton });
+  container.register(IAuthRepositoryToken, { useClass: DrizzleAuthRepository }, { lifecycle: Lifecycle.Singleton });
+  container.register(INotificationServiceToken, { useClass: DrizzleNotificationService }, { lifecycle: Lifecycle.Singleton });
+  container.register(IGenerationLogRepositoryToken, { useClass: DrizzleGenerationLogRepository }, { lifecycle: Lifecycle.Singleton });
+  container.register(IAgentRepositoryToken, { useClass: DrizzleAgentRepository }, { lifecycle: Lifecycle.Singleton });
   container.register(IAiServiceToken, { useClass: AiServiceImpl }, { lifecycle: Lifecycle.Singleton });
   container.register(IDocxExportServiceToken, { useClass: DocxExportService }, { lifecycle: Lifecycle.Singleton });
   container.register(IPptxExportServiceToken, { useClass: PptxExportService }, { lifecycle: Lifecycle.Singleton });
   container.register(IPdfExportServiceToken, { useClass: PdfExportService }, { lifecycle: Lifecycle.Singleton });
   container.register(WritingToolRegistry, { useClass: WritingToolRegistry }, { lifecycle: Lifecycle.Singleton });
-  container.register(IAdminStatsRepositoryToken, { useClass: SQLiteAdminStatsRepository }, { lifecycle: Lifecycle.Singleton });
-  container.register(IFeatureRepositoryToken, { useClass: SQLiteFeatureRepository }, { lifecycle: Lifecycle.Singleton });
-  container.register(ISettingsRepositoryToken, { useClass: SQLiteSettingsRepository }, { lifecycle: Lifecycle.Singleton });
-  container.register(ITransactionRepositoryToken, { useClass: SQLiteTransactionRepository }, { lifecycle: Lifecycle.Singleton });
+  container.register(IAdminStatsRepositoryToken, { useClass: DrizzleAdminStatsRepository }, { lifecycle: Lifecycle.Singleton });
+  container.register(IFeatureRepositoryToken, { useClass: DrizzleFeatureRepository }, { lifecycle: Lifecycle.Singleton });
+  container.register(ISettingsRepositoryToken, { useClass: DrizzleSettingsRepository }, { lifecycle: Lifecycle.Singleton });
+  container.register(ITransactionRepositoryToken, { useClass: DrizzleTransactionRepository }, { lifecycle: Lifecycle.Singleton });
   container.register(IFileStorageServiceToken, { useClass: LocalFileStorageService }, { lifecycle: Lifecycle.Singleton });
   container.register(IRagRepositoryToken, { useClass: DefaultRagRepository }, { lifecycle: Lifecycle.Singleton });
   container.register(IRetrievalServiceToken, { useClass: DefaultRagRepository }, { lifecycle: Lifecycle.Singleton });
-  container.register(IIndexedDocumentRepositoryToken, { useClass: SQLiteIndexedDocumentRepository }, { lifecycle: Lifecycle.Singleton });
-  container.register(ITemplateRepositoryToken, { useClass: SQLiteTemplateRepository }, { lifecycle: Lifecycle.Singleton });
-  container.register(ISectionRepositoryToken, { useClass: SQLiteSectionRepository }, { lifecycle: Lifecycle.Singleton });
+  container.register(IIndexedDocumentRepositoryToken, { useClass: DrizzleIndexedDocumentRepository }, { lifecycle: Lifecycle.Singleton });
+  container.register(ITemplateRepositoryToken, { useClass: DrizzleTemplateRepository }, { lifecycle: Lifecycle.Singleton });
+  container.register(ISectionRepositoryToken, { useClass: DrizzleSectionRepository }, { lifecycle: Lifecycle.Singleton });
 }
 
 export { container };

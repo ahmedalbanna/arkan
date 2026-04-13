@@ -8,7 +8,7 @@ import { AiError } from "../../domain/errors/AiErrors";
 import { eq, and } from "drizzle-orm";
 
 @injectable()
-export class SQLiteAgentRepository implements IAgentRepository {
+export class DrizzleAgentRepository implements IAgentRepository {
     async getById(id: string): Promise<Result<Agent, AiError>> {
         try {
             const result = await db.query.agents.findFirst({
