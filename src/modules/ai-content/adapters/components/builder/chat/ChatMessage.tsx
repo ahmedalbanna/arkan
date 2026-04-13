@@ -1,54 +1,164 @@
 'use client';
 
-import React from 'react';
-import ReactMarkdown from 'react-markdown';
+import { Button } from '@/components/ui/button';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { cn } from '@/infrastructure/utils/cn';
 import { markdownComponents } from '@/modules/ai-content/adapters/components/report-mode/markdown-styles';
-
-/**
- * ChatMessage — A shared high-fidelity component for AI and User interactions.
- * Implements role-specific aesthetics, glassmorphism, and professional prose.
- */
+import { Check, Copy, Sparkles, ThumbsDown, ThumbsUp } from 'lucide-react';
+import { useState } from 'react';
+import ReactMarkdown from 'react-markdown';
 
 interface ChatMessageProps {
     role: 'assistant' | 'user';
     content: string;
+    isStreaming?: boolean;
+    onFeedback?: (type: 'helpful' | 'not-helpful') => void;
 }
 
-export function ChatMessage({ role, content }: ChatMessageProps) {
+export function ChatMessage({ role, content, isStreaming, onFeedback }: ChatMessageProps) {
     const isAssistant = role === 'assistant';
+    const [copied, setCopied] = useState(false);
+    const [feedback, setFeedback] = useState<'helpful' | 'not-helpful' | null>(null);
+
+    const handleCopy = async () => {
+        await navigator.clipboard.writeText(content);
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+    };
+
+    const handleFeedback = (type: 'helpful' | 'not-helpful') => {
+        setFeedback(type);
+        onFeedback?.(type);
+    };
+
+    // Truncate long user messages for display
+    const displayContent = false
+        ? content.substring(0, 500) + '...'
+        : content;
 
     return (
         <div className={cn(
-            "flex items-start gap-3 animate-in fade-in slide-in-from-bottom-2 duration-500",
+            "flex items-start gap-3 animate-in fade-in slide-in-from-bottom-2 duration-500 group",
             !isAssistant && "flex-row-reverse"
         )}>
-            {/* Avatar HUD */}
+            {/* Avatar */}
             <div className={cn(
-                "h-8 w-8 shrink-0 rounded-xl flex items-center justify-center text-[10px] shadow-md border transition-all duration-500 group-hover:scale-110",
-                isAssistant 
-                    ? "bg-primary/10 border-primary/20 text-primary" 
+                "h-8 w-8 shrink-0 rounded-xl flex items-center justify-center shadow-md border transition-all duration-500",
+                isAssistant
+                    ? "bg-primary/10 border-primary/20 text-primary"
                     : "bg-background border-border/40 text-muted-foreground font-black"
             )}>
-                {isAssistant ? '🤖' : 'U'}
+                {isAssistant ? (
+                    <Sparkles className="h-4 w-4" />
+                ) : (
+                    <span className="text-[10px] font-black">U</span>
+                )}
             </div>
 
-            {/* Message Bubble — Intelligence Suite Glassmorphism */}
+            {/* Message Bubble */}
             <div className={cn(
-                "max-w-[88%] p-4 rounded-2xl shadow-[0_4px_24px_rgba(0,0,0,0.04)] border transition-all duration-300",
+                "max-w-[85%] rounded-2xl shadow-sm transition-all duration-300 relative",
                 isAssistant
-                    ? "bg-background/60 backdrop-blur-2xl border-primary/10 rounded-tl-none font-serif italic leading-relaxed text-muted-foreground hover:text-foreground hover:border-primary/20"
-                    : "bg-primary text-primary-foreground border-primary/20 rounded-tr-none font-sans font-medium shadow-primary/10"
+                    ? "bg-background/80 backdrop-blur-sm border border-primary/10 rounded-tl-none"
+                    : "bg-primary text-primary-foreground border border-primary/20 rounded-tr-none",
+                isStreaming && "animate-pulse"
             )}>
-                <div className="prose prose-sm dark:prose-invert max-w-none">
-                    <ReactMarkdown components={markdownComponents}>{content}</ReactMarkdown>
+                <div className={cn(
+                    "p-4",
+                    isAssistant ? "font-serif" : "font-sans"
+                )}>
+                    <div className={cn(
+                        "prose prose-sm dark:prose-invert max-w-none",
+                        isAssistant && "prose-headings:text-foreground prose-p:text-muted-foreground"
+                    )}>
+                        <ReactMarkdown components={markdownComponents}>
+                            {displayContent}
+                        </ReactMarkdown>
+                    </div>
                 </div>
-                
-                {/* Meta Indicator (Assistant only) */}
-                {isAssistant && (
-                    <div className="flex items-center gap-2 mt-3 pt-2 border-t border-primary/5 opacity-40">
-                        <div className="h-1 w-1 rounded-full bg-primary animate-pulse" />
-                        <span className="text-[7px] font-black uppercase tracking-widest">Cognitive Output</span>
+
+                {/* Action Buttons - Desktop Assistant Only */}
+                {isAssistant && !isStreaming && (
+                    <div className="absolute -bottom-8 right-0 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <TooltipProvider>
+                            <Tooltip>
+                                <TooltipTrigger asChild>
+                                    <Button
+                                        variant="ghost"
+                                        size="icon"
+                                        onClick={handleCopy}
+                                        className="h-6 w-6 rounded-md"
+                                    >
+                                        {copied ? (
+                                            <Check className="h-3 w-3 text-green-500" />
+                                        ) : (
+                                            <Copy className="h-3 w-3 text-muted-foreground/40" />
+                                        )}
+                                    </Button>
+                                </TooltipTrigger>
+                                <TooltipContent side="top" className="text-[8px]">
+                                    Copy response
+                                </TooltipContent>
+                            </Tooltip>
+                        </TooltipProvider>
+
+                        {onFeedback && (
+                            <>
+                                <TooltipProvider>
+                                    <Tooltip>
+                                        <TooltipTrigger asChild>
+                                            <Button
+                                                variant="ghost"
+                                                size="icon"
+                                                onClick={() => handleFeedback('helpful')}
+                                                className={cn(
+                                                    "h-6 w-6 rounded-md",
+                                                    feedback === 'helpful' && "text-green-500"
+                                                )}
+                                            >
+                                                <ThumbsUp className="h-3 w-3" />
+                                            </Button>
+                                        </TooltipTrigger>
+                                        <TooltipContent side="top" className="text-[8px]">
+                                            Helpful
+                                        </TooltipContent>
+                                    </Tooltip>
+                                </TooltipProvider>
+
+                                <TooltipProvider>
+                                    <Tooltip>
+                                        <TooltipTrigger asChild>
+                                            <Button
+                                                variant="ghost"
+                                                size="icon"
+                                                onClick={() => handleFeedback('not-helpful')}
+                                                className={cn(
+                                                    "h-6 w-6 rounded-md",
+                                                    feedback === 'not-helpful' && "text-red-500"
+                                                )}
+                                            >
+                                                <ThumbsDown className="h-3 w-3" />
+                                            </Button>
+                                        </TooltipTrigger>
+                                        <TooltipContent side="top" className="text-[8px]">
+                                            Not helpful
+                                        </TooltipContent>
+                                    </Tooltip>
+                                </TooltipProvider>
+                            </>
+                        )}
+                    </div>
+                )}
+
+                {/* Meta Indicator for Assistant */}
+                {isAssistant && !isStreaming && (
+                    <div className="px-4 pb-3 pt-0">
+                        <div className="flex items-center gap-2 opacity-30">
+                            <div className="h-1 w-1 rounded-full bg-primary" />
+                            <span className="text-[6px] font-black uppercase tracking-widest">
+                                AI Generated
+                            </span>
+                        </div>
                     </div>
                 )}
             </div>

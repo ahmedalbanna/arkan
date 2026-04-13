@@ -1,35 +1,37 @@
 'use client';
 
-import React, { Suspense, useRef, Profiler, useCallback, Fragment } from 'react';
-import { ProjectProperties } from '@/modules/projects/domain/entities/Project';
-import { useReportGenerator } from '@/modules/ai-content/adapters/hooks/report-mode/useReportGenerator';
-import { useBuilderStore } from '@/hooks';
 import { BuilderPageSkeleton } from '@/app/builder/loading';
 import { OnboardingGuide } from '@/components/onboarding/OnboardingGuide';
-import { useSnapshots } from '@/modules/projects/adapters/hooks/useSnapshots';
+import { useBuilderStore } from '@/hooks';
 import { cn } from '@/infrastructure/utils/cn';
+import { useReportGenerator } from '@/modules/ai-content/adapters/hooks/report-mode/useReportGenerator';
+import { useSnapshots } from '@/modules/projects/adapters/hooks/useSnapshots';
+import { ProjectProperties } from '@/modules/projects/domain/entities/Project';
+import React, { Suspense, useRef } from 'react';
 
-// Custom Layout Hooks
+// Hooks
+import { useDesktopBreakpoint } from '../../hooks/builder/useDesktopBreakpoint';
+import { useDocumentSuggestion } from '../../hooks/builder/useDocumentSuggestion';
 import { useFullscreen } from '../../hooks/builder/useFullscreen';
 import { useOnboarding } from '../../hooks/builder/useOnboarding';
-import { useDocumentSuggestion } from '../../hooks/builder/useDocumentSuggestion';
 
-// Layout & Modular Components
-import { BuilderLayout } from './layout/BuilderLayout';
-import { BuilderHeader } from './layout/BuilderHeader';
-import { BuilderSidebar } from './layout/BuilderSidebar';
-import { BuilderCanvas } from './layout/BuilderCanvas';
-import { DocumentToolbar } from './toolbar/DocumentToolbar';
-import { DocumentRenderer } from './renderer/DocumentRenderer';
+// Layout Components
 import { SelectionGenerationHUD } from './generation/SelectionGenerationHUD';
+import { BuilderCanvas } from './layout/BuilderCanvas';
+import { BuilderHeader } from './layout/BuilderHeader';
+import { BuilderLayout } from './layout/BuilderLayout';
+import { BuilderSidebar } from './layout/BuilderSidebar';
+import { DocumentRenderer } from './renderer/DocumentRenderer';
+import { DocumentToolbar } from './toolbar/DocumentToolbar';
 
 interface BuilderWorkspaceProps {
   initialProject?: ProjectProperties | null;
 }
 
 /**
- * BuilderWorkspace — Root orchestrator for the builder environment.
- * Responsible for high-level state management and layout composition.
+ * BuilderWorkspace — Desktop-only async project editor.
+ * No keyboard shortcuts. Clean state management.
+ * Sidebar state is centralized in useDesktopBreakpoint hook.
  */
 export const BuilderWorkspace: React.FC<BuilderWorkspaceProps> = ({ initialProject }) => {
   const {
@@ -62,106 +64,95 @@ export const BuilderWorkspace: React.FC<BuilderWorkspaceProps> = ({ initialProje
   const { isFullscreen, toggleFullscreen } = useFullscreen(containerRef);
   const { showOnboarding, setShowOnboarding, completeOnboarding } = useOnboarding();
   const suggestion = useDocumentSuggestion(project);
+  const { sidebarState, setSidebarState, sidebarWidths, setSidebarWidth } = useDesktopBreakpoint();
 
   const comparisonSnapshotId = useBuilderStore((state) => state.comparisonSnapshotId);
   const setComparisonSnapshotId = useBuilderStore((state) => state.setComparisonSnapshotId);
   const { snapshots } = useSnapshots(project?.id);
   const comparisonSnapshot = snapshots.find((s) => s.id === comparisonSnapshotId) ?? null;
 
-  const handleProfilerRender = useCallback(
-    (id: string, phase: string, actualDuration: number, baseDuration: number) => {
-      if (process.env.NODE_ENV === 'development') {
-        console.info(`[Profiler:${id}]`, { phase, actualDuration, baseDuration });
-      }
-    },
-    []
-  );
-
   if (!project) return <BuilderPageSkeleton />;
 
-  const ProfilerWrapper = process.env.NODE_ENV === 'development' ? Profiler : Fragment;
-  const profilerProps =
-    process.env.NODE_ENV === 'development'
-      ? { id: 'BuilderWorkspace', onRender: handleProfilerRender }
-      : {};
-
   return (
-    <ProfilerWrapper {...profilerProps}>
-      <div
-        ref={containerRef}
-        className={cn(
-          'relative flex-grow flex flex-col bg-background h-[calc(100vh-64px)] overflow-hidden',
-          isFullscreen && 'fixed inset-0 z-[100] h-screen h-svh w-screen'
-        )}
-      >
-        <OnboardingGuide
-          isOpen={showOnboarding}
-          onOpenChange={setShowOnboarding}
-          onComplete={completeOnboarding}
-        />
+    <div
+      ref={containerRef}
+      className={cn(
+        'relative flex-grow flex flex-col bg-background',
+        'h-[calc(100vh-64px)] overflow-hidden select-none',
+        isFullscreen && 'fixed inset-0 z-[100] h-screen h-svh w-screen'
+      )}
+    >
+      <OnboardingGuide
+        isOpen={showOnboarding}
+        onOpenChange={setShowOnboarding}
+        onComplete={completeOnboarding}
+      />
 
-        <Suspense fallback={<BuilderPageSkeleton />}>
-          <BuilderLayout
-            header={
-              <BuilderHeader
-                projectName={project?.name || ''}
-                onProjectNameChange={updateProjectName}
-                onProjectNameBlur={() => updateProject((p) => p)}
-                isSaving={isSaving}
-                hasUnsavedChanges={hasUnsavedChanges}
-                onSave={handleSave}
-              />
-            }
-            rightSidebar={
-              <BuilderSidebar
-                side="right"
-                panels={rightPanels}
-                activeKey={activeRightPanelKey}
-                onActiveKeyChange={setActiveRightPanelKey}
-              />
-            }
-            canvas={
-              <div className="relative h-full">
-                <SelectionGenerationHUD viewMode={viewMode} />
-                <BuilderCanvas
-                  zoomLevel={zoomLevel}
-                  onZoomIn={handleZoomIn}
-                  onZoomOut={handleZoomOut}
-                  onZoomReset={handleZoomReset}
-                  containerRef={containerRef}
-                  toolbar={
-                    <DocumentToolbar
-                      project={project}
-                      viewMode={viewMode}
-                      setViewMode={setViewMode}
-                      isFullscreen={isFullscreen}
-                      onToggleFullscreen={toggleFullscreen}
-                      suggestion={suggestion}
-                    />
-                  }
-                >
-                  <DocumentRenderer
+      <Suspense fallback={<BuilderPageSkeleton />}>
+        <BuilderLayout
+          header={
+            <BuilderHeader
+              projectName={project.name || ''}
+              onProjectNameChange={updateProjectName}
+              onProjectNameBlur={() => updateProject((p) => p)}
+              isSaving={isSaving}
+              hasUnsavedChanges={hasUnsavedChanges}
+              onSave={handleSave}
+            />
+          }
+          rightSidebar={
+            <BuilderSidebar
+              side="right"
+              panels={rightPanels}
+              activeKey={activeRightPanelKey}
+              onActiveKeyChange={setActiveRightPanelKey}
+              width={sidebarWidths.right}
+              onWidthChange={(w) => setSidebarWidth('right', w)}
+            />
+          }
+          canvas={
+            <div className="relative h-full">
+              <SelectionGenerationHUD viewMode={viewMode} />
+              <BuilderCanvas
+                zoomLevel={zoomLevel}
+                onZoomIn={handleZoomIn}
+                onZoomOut={handleZoomOut}
+                onZoomReset={handleZoomReset}
+                containerRef={containerRef}
+                toolbar={
+                  <DocumentToolbar
                     project={project}
                     viewMode={viewMode}
-                    activeChapterId={activeChapterId}
-                    setActiveChapterId={setActiveChapterId}
-                    selectedSectionIds={selectedSectionIds}
-                    handleActiveSectionChange={handleActiveSectionChange}
-                    showCoverPage={true}
-                    comparisonSnapshot={comparisonSnapshot}
-                    onCloseComparison={() => setComparisonSnapshotId(null)}
-                    updateProjectFromMarkdown={useBuilderStore.getState().updateProjectFromMarkdown}
-                    summarizeMutation={summarizeMutation}
-                    expandMutation={expandMutation}
-                    rewriteMutation={rewriteMutation}
-                    rewriteStyles={rewriteStyles}
+                    setViewMode={setViewMode}
+                    isFullscreen={isFullscreen}
+                    onToggleFullscreen={toggleFullscreen}
+                    suggestion={suggestion}
                   />
-                </BuilderCanvas>
-              </div>
-            }
-          />
-        </Suspense>
-      </div>
-    </ProfilerWrapper>
+                }
+              >
+                <DocumentRenderer
+                  project={project}
+                  viewMode={viewMode}
+                  activeChapterId={activeChapterId}
+                  setActiveChapterId={setActiveChapterId}
+                  selectedSectionIds={selectedSectionIds}
+                  handleActiveSectionChange={handleActiveSectionChange}
+                  showCoverPage={true}
+                  comparisonSnapshot={comparisonSnapshot}
+                  onCloseComparison={() => setComparisonSnapshotId(null)}
+                  updateProjectFromMarkdown={useBuilderStore.getState().updateProjectFromMarkdown}
+                  summarizeMutation={summarizeMutation}
+                  expandMutation={expandMutation}
+                  rewriteMutation={rewriteMutation}
+                  rewriteStyles={rewriteStyles}
+                />
+              </BuilderCanvas>
+            </div>
+          }
+          sidebarState={sidebarState}
+          onSidebarToggle={(side) => setSidebarState(side, !sidebarState[side])}
+        />
+      </Suspense>
+    </div>
   );
 };

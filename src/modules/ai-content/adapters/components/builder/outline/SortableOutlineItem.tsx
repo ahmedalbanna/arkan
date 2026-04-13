@@ -1,40 +1,36 @@
 'use client';
 
-import React, { useState, useRef, useCallback } from 'react';
-import { useSortable } from '@dnd-kit/sortable';
-import { CSS } from '@dnd-kit/utilities';
-import { 
-    GripVertical, 
-    ChevronDown, 
-    ChevronRight, 
-    MoreVertical, 
-    Trash2, 
-    Copy, 
-    Clipboard, 
-    Plus, 
-    Check, 
-    X,
-    FileText,
-    Layout,
-    Pencil,
-    Files
-} from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuTrigger,
   DropdownMenuSeparator,
+  DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Input } from '@/components/ui/input';
-import { Badge } from '@/components/ui/badge';
 import { cn } from '@/infrastructure/utils/cn';
+import { useSortable } from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
+import {
+  ChevronDown,
+  ChevronRight,
+  Clipboard,
+  Copy,
+  Files,
+  GripVertical,
+  MoreVertical,
+  Pencil,
+  Plus,
+  Trash2
+} from 'lucide-react';
+import React, { useCallback, useRef, useState } from 'react';
 
 /**
  * SortableOutlineItem — A shared high-fidelity component for document structure nodes.
  * Used in both the ProjectOutlineHUD and SidebarOutlineManager.
- * 
+ *
  * DEFENSIVE MEASURES:
  * 1. Existence Guards: Checks for id and title before rendering interactions.
  * 2. Edit Validation: Verifies title content before committing updates.
@@ -58,6 +54,7 @@ interface SortableOutlineItemProps {
   onPaste: () => void;
   canPaste?: boolean;
   onAddSection?: () => void;
+  isDesktop?: boolean;
 }
 
 export const SortableOutlineItem = ({
@@ -98,16 +95,16 @@ export const SortableOutlineItem = ({
   // 1. INPUT VALIDATION & COMMIT — Guarded title updates
   const handleCommit = useCallback(() => {
     try {
-        const trimmed = editValue.trim();
-        if (trimmed && trimmed !== title) {
-          onUpdateTitle(trimmed);
-        } else {
-          setEditValue(title); // Reset to original if empty or unchanged
-        }
-        setIsEditing(false);
+      const trimmed = editValue.trim();
+      if (trimmed && trimmed !== title) {
+        onUpdateTitle(trimmed);
+      } else {
+        setEditValue(title); // Reset to original if empty or unchanged
+      }
+      setIsEditing(false);
     } catch (error) {
-        console.error('[OutlineItem] Title commit failure:', error);
-        setIsEditing(false);
+      console.error('[OutlineItem] Title commit failure:', error);
+      setIsEditing(false);
     }
   }, [editValue, title, onUpdateTitle]);
 
@@ -169,7 +166,7 @@ export const SortableOutlineItem = ({
           </button>
         )}
 
-        {/* Node Identity Icon */}
+        {/* Node Identity Icon
         <div className={cn(
             "flex items-center justify-center rounded-lg shrink-0 transition-all duration-500",
             isChapter ? "h-7 w-7 bg-primary/5 border border-primary/10" : "h-6 w-6 opacity-40",
@@ -181,7 +178,7 @@ export const SortableOutlineItem = ({
                 <FileText className={cn("h-3 w-3", isActive ? "text-primary" : "text-muted-foreground")} />
             )}
         </div>
-
+*/}
         {/* Title / Input Zone */}
         <div className="flex-1 min-w-0 px-1">
           {isEditing ? (
@@ -196,19 +193,19 @@ export const SortableOutlineItem = ({
             />
           ) : (
             <div className="flex items-center gap-2 group/text">
-                <span className={cn(
-                    "text-[11px] truncate uppercase tracking-[0.12em] transition-all",
-                    isChapter ? "font-black" : "font-bold text-muted-foreground",
-                    isActive ? "text-foreground" : "group-hover/text:text-primary/80"
-                )}>
-                    {title || (isChapter ? 'Untitled Chapter' : 'Untitled Section')}
-                </span>
-                <button 
-                    onClick={startEditing}
-                    className="opacity-0 group-hover:opacity-100 transition-opacity p-1 hover:text-primary"
-                >
-                    <Pencil className="h-2.5 w-2.5" />
-                </button>
+              <span className={cn(
+                "text-[11px] truncate uppercase tracking-[0.12em] transition-all",
+                isChapter ? "font-black" : "font-bold text-muted-foreground",
+                isActive ? "text-foreground" : "group-hover/text:text-primary/80"
+              )}>
+                {title || (isChapter ? 'Untitled Chapter' : 'Untitled Section')}
+              </span>
+              <button
+                onClick={startEditing}
+                className="opacity-0 group-hover:opacity-100 transition-opacity p-1 hover:text-primary"
+              >
+                <Pencil className="h-2.5 w-2.5" />
+              </button>
             </div>
           )}
         </div>

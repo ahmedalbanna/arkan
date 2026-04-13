@@ -1,24 +1,23 @@
 'use client';
 
-import { useEditorStore } from '@/modules/ai-content/adapters/state/use-editor-store';
-import { BubbleMenu, EditorContent, useEditor, type Editor } from '@tiptap/react';
-import React, { useMemo, useRef, useEffect } from 'react';
-import { editorExtensions, handleHtmlPaste, handlePlainPaste } from '@/modules/ai-content/infrastructure/editor/tiptap-extensions';
+import { Button } from '@/components/ui/button';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { useService } from '@/hooks/util/use-service';
 import { IMarkdownServiceToken } from '@/infrastructure/di/tokens';
-import { IMarkdownService } from '@/modules/ai-content/domain/services/IMarkdownService';
-import { Button } from '@/components/ui/button';
-import { ContextualToolbar } from '@/modules/ai-content/infrastructure/editor/editor/ToolBar';
 import { cn } from '@/infrastructure/utils/cn';
 import { PROSE_CLASSES } from '@/modules/ai-content/adapters/components/report-mode/markdown-styles';
+import { useEditorStore } from '@/modules/ai-content/adapters/state/use-editor-store';
+import { IMarkdownService } from '@/modules/ai-content/domain/services/IMarkdownService';
+import { ContextualToolbar } from '@/modules/ai-content/infrastructure/editor/editor/ToolBar';
+import { editorExtensions, handleHtmlPaste, handlePlainPaste } from '@/modules/ai-content/infrastructure/editor/tiptap-extensions';
+import { BubbleMenu, EditorContent, useEditor, type Editor } from '@tiptap/react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
-// Performance: prevent `nodesBetween(0, pos, ...)` from becoming O(docSize)
-// on frequent selection updates. Tune after profiling on real documents.
+// Performance constants
 const HEADING_SCAN_LOOKBACK_POS = 15000;
-
-// Correctness: when the nearest heading is outside the lookback window,
-// occasionally do a full scan (throttled) rather than giving up entirely.
 const FULL_HEADING_SCAN_COOLDOWN_MS = 800;
+const AUTO_SAVE_DELAY_MS = 2000;
+const TYPING_DEBOUNCE_MS = 100;
 
 interface MarkdownEditorProps {
   content: string;
@@ -27,6 +26,9 @@ interface MarkdownEditorProps {
   onActiveItemDetect?: (headingText: string | null) => void;
   editorClassName?: string;
   debounceMs?: number;
+  autoSave?: boolean;
+  readOnly?: boolean;
+  placeholder?: string;
 }
 
 const MarkdownEditorComponent = ({
@@ -35,16 +37,25 @@ const MarkdownEditorComponent = ({
   onDebouncedChange,
   onActiveItemDetect,
   editorClassName,
-  debounceMs = 1000
+  debounceMs = 1000,
+  autoSave = true,
+  readOnly = false,
+  placeholder = "Start writing...",
 }: MarkdownEditorProps) => {
   const setActiveEditor = useEditorStore(state => state.setActiveEditor);
   const updateSelectionState = useEditorStore(state => state.updateSelectionState);
   const markdownService = useService<IMarkdownService>(IMarkdownServiceToken);
   const bubbleMenuId = React.useId();
+
   const debounceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const autoSaveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const bubbleMenuRef = useRef<HTMLDivElement>(null);
   const lastActiveHeadingTextTrimmedRef = useRef<string | null>(null);
   const lastFullHeadingScanAtMsRef = useRef<number>(0);
+  const lastContentRef = useRef<string>(content);
+  const [isTyping, setIsTyping] = useState(false);
+  const [wordCount, setWordCount] = useState(0);
+  const [charCount, setCharCount] = useState(0);
 
   const extensions = useMemo(
     () => editorExtensions(bubbleMenuId, markdownService),
@@ -53,83 +64,44 @@ const MarkdownEditorComponent = ({
 
   const initialHtml = useMemo(() => markdownService.toHtml(content), [content, markdownService]);
 
+  // Calculate word and character count
+  const updateCounts = useCallback((markdown: string) => {
+    const words = markdown.trim().split(/\s+/).filter(w => w.length > 0).length;
+    const chars = markdown.replace(/\s/g, '').length;
+    setWordCount(words);
+    setCharCount(chars);
+  }, []);
+
+  // Handle content changes with debouncing and auto-save
+  const handleContentChange = useCallback((markdown: string) => {
+    updateCounts(markdown);
+
+    if (autoSave && autoSaveTimerRef.current) {
+      clearTimeout(autoSaveTimerRef.current);
+      autoSaveTimerRef.current = setTimeout(() => {
+        onChange(markdown);
+        lastContentRef.current = markdown;
+      }, AUTO_SAVE_DELAY_MS);
+    }
+
+    if (onDebouncedChange) {
+      if (debounceTimerRef.current) {
+        clearTimeout(debounceTimerRef.current);
+      }
+      debounceTimerRef.current = setTimeout(() => {
+        onDebouncedChange(markdown);
+      }, debounceMs);
+    }
+  }, [autoSave, onChange, onDebouncedChange, debounceMs, updateCounts]);
+
   const editor = useEditor({
     extensions,
     content: initialHtml,
-    onSelectionUpdate: ({ editor }) => {
-      updateSelectionState(editor);
-      if (!onActiveItemDetect) return;
-      // Find nearest heading node above cursor position
-      const { $anchor } = editor.state.selection;
-      let headingText: string | null = null;
-      for (let depth = $anchor.depth; depth >= 0; depth--) {
-        const node = $anchor.node(depth);
-        if (node.type.name === 'heading') {
-          headingText = node.textContent;
-          break;
-        }
-      }
-      // Walk backwards through doc to find nearest heading before cursor
-      // (but bounded to avoid scanning the entire document on every cursor move).
-      if (!headingText) {
-        const pos = $anchor.pos;
-        const scanStart = Math.max(0, pos - HEADING_SCAN_LOOKBACK_POS);
-
-        editor.state.doc.nodesBetween(scanStart, pos, (node) => {
-          if (node.type.name === 'heading') {
-            headingText = node.textContent;
-          }
-        });
-
-        // If the heading is not within the lookback window, occasionally run
-        // a full scan to avoid long-lived stale active-item state.
-        if (!headingText) {
-          const nowMs = performance.now();
-          if (nowMs - lastFullHeadingScanAtMsRef.current >= FULL_HEADING_SCAN_COOLDOWN_MS) {
-            lastFullHeadingScanAtMsRef.current = nowMs;
-            editor.state.doc.nodesBetween(0, pos, (node) => {
-              if (node.type.name === 'heading') {
-                headingText = node.textContent;
-              }
-            });
-          }
-        }
-      }
-
-      const nextTrimmed = headingText?.trim() ? headingText.trim() : null;
-      // Avoid spamming parent state with identical detections.
-      if (nextTrimmed === lastActiveHeadingTextTrimmedRef.current) return;
-
-      // Focus-gate: while the user is interacting with HUD/sidebars, we don't want
-      // project context to "jump" due to selection updates caused by programmatic
-      // `setContent(...)` calls.
-      if (!editor.isFocused) return;
-
-      lastActiveHeadingTextTrimmedRef.current = nextTrimmed;
-      onActiveItemDetect(nextTrimmed);
-    },
-    onUpdate: ({ editor }) => {
-      // Notify the store about selection/state changes
-      updateSelectionState(editor);
-
-      if (onDebouncedChange) {
-        const markdown = markdownService.toMarkdown(editor.getHTML());
-        // Simple manual debounce
-        if (debounceTimerRef.current) {
-          clearTimeout(debounceTimerRef.current);
-        }
-        debounceTimerRef.current = setTimeout(() => {
-          onDebouncedChange(markdown);
-        }, debounceMs);
-      }
-    },
-    onBlur: ({ editor }) => {
-      const markdown = markdownService.toMarkdown(editor.getHTML());
-      onChange(markdown);
-    },
+    editable: !readOnly,
     editorProps: {
       attributes: {
         class: cn(PROSE_CLASSES, editorClassName),
+        'data-placeholder': placeholder,
       },
       handlePaste: (view, event, slice): boolean => {
         const text = event.clipboardData?.getData('text/plain');
@@ -147,42 +119,167 @@ const MarkdownEditorComponent = ({
 
         return false;
       },
+      handleKeyDown: (view, event) => {
+        // Desktop keyboard shortcuts
+        if (true) {
+          // Ctrl/Cmd + B for bold
+          if ((event.ctrlKey || event.metaKey) && event.key === 'b') {
+            event.preventDefault();
+            editor?.chain().focus().toggleBold().run();
+            return true;
+          }
+          // Ctrl/Cmd + I for italic
+          if ((event.ctrlKey || event.metaKey) && event.key === 'i') {
+            event.preventDefault();
+            editor?.chain().focus().toggleItalic().run();
+            return true;
+          }
+          // Ctrl/Cmd + K for link
+          if ((event.ctrlKey || event.metaKey) && event.key === 'k') {
+            event.preventDefault();
+            const url = window.prompt('Enter URL:');
+            if (url) {
+              (editor?.chain().focus() as any)?.setLink({ href: url }).run();
+            }
+            return true;
+          }
+          // Ctrl/Cmd + Shift + 1-3 for headings
+          if ((event.ctrlKey || event.metaKey) && event.shiftKey) {
+            const level = parseInt(event.key, 10);
+            if (level >= 1 && level <= 3) {
+              event.preventDefault();
+              editor?.chain().focus().toggleHeading({ level: level as 1 | 2 | 3 }).run();
+              return true;
+            }
+          }
+          // Tab key for lists
+          if (event.key === 'Tab') {
+            if (editor?.isActive('listItem')) {
+              event.preventDefault();
+              editor.chain().focus().sinkListItem('listItem').run();
+              return true;
+            }
+          }
+          // Shift + Tab for outdent lists
+          if (event.key === 'Tab' && event.shiftKey) {
+            if (editor?.isActive('listItem')) {
+              event.preventDefault();
+              editor.chain().focus().liftListItem('listItem').run();
+              return true;
+            }
+          }
+        }
+        return false;
+      },
+    },
+    onSelectionUpdate: ({ editor }) => {
+      updateSelectionState(editor);
+      if (!onActiveItemDetect) return;
+
+      const { $anchor } = editor.state.selection;
+      let headingText: string | null = null;
+
+      for (let depth = $anchor.depth; depth >= 0; depth--) {
+        const node = $anchor.node(depth);
+        if (node.type.name === 'heading') {
+          headingText = node.textContent;
+          break;
+        }
+      }
+
+      if (!headingText) {
+        const pos = $anchor.pos;
+        const scanStart = Math.max(0, pos - HEADING_SCAN_LOOKBACK_POS);
+
+        editor.state.doc.nodesBetween(scanStart, pos, (node) => {
+          if (node.type.name === 'heading') {
+            headingText = node.textContent;
+          }
+        });
+
+        if (!headingText) {
+          const nowMs = performance.now();
+          if (nowMs - lastFullHeadingScanAtMsRef.current >= FULL_HEADING_SCAN_COOLDOWN_MS) {
+            lastFullHeadingScanAtMsRef.current = nowMs;
+            editor.state.doc.nodesBetween(0, pos, (node) => {
+              if (node.type.name === 'heading') {
+                headingText = node.textContent;
+              }
+            });
+          }
+        }
+      }
+
+      const nextTrimmed = headingText?.trim() ? headingText.trim() : null;
+      if (nextTrimmed === lastActiveHeadingTextTrimmedRef.current) return;
+      if (!editor.isFocused) return;
+
+      lastActiveHeadingTextTrimmedRef.current = nextTrimmed;
+      onActiveItemDetect(nextTrimmed);
+    },
+    onUpdate: ({ editor }) => {
+      updateSelectionState(editor);
+      const markdown = markdownService.toMarkdown(editor.getHTML());
+      setIsTyping(true);
+      handleContentChange(markdown);
+
+      // Reset typing indicator after delay
+      if (debounceTimerRef.current) {
+        clearTimeout(debounceTimerRef.current);
+      }
+      debounceTimerRef.current = setTimeout(() => {
+        setIsTyping(false);
+      }, TYPING_DEBOUNCE_MS);
+    },
+    onBlur: ({ editor }) => {
+      const markdown = markdownService.toMarkdown(editor.getHTML());
+      onChange(markdown);
+      setIsTyping(false);
+    },
+    onFocus: () => {
+      setIsTyping(false);
     },
     immediatelyRender: false,
   });
 
   // Sync external content changes
-  React.useEffect(() => {
+  useEffect(() => {
     if (!editor || editor.isDestroyed) return;
 
     const currentHtml = editor.getHTML();
     const newHtml = markdownService.toHtml(content);
 
-    // Only update if content is actually different to prevent cursor jumping
-    // and only if the change came from outside (not while typing)
-    if (newHtml !== currentHtml && !editor.isFocused) {
+    if (newHtml !== currentHtml && !editor.isFocused && content !== lastContentRef.current) {
       editor.commands.setContent(newHtml, false);
       updateSelectionState(editor);
+      updateCounts(content);
+      lastContentRef.current = content;
     }
-  }, [content, editor, markdownService, updateSelectionState]);
+  }, [content, editor, markdownService, updateSelectionState, updateCounts]);
 
-  useEffect(() => () => {
-    if (debounceTimerRef.current) {
-      clearTimeout(debounceTimerRef.current);
-      debounceTimerRef.current = null;
-    }
+  // Cleanup timers
+  useEffect(() => {
+    return () => {
+      if (debounceTimerRef.current) {
+        clearTimeout(debounceTimerRef.current);
+      }
+      if (autoSaveTimerRef.current) {
+        clearTimeout(autoSaveTimerRef.current);
+      }
+    };
   }, []);
 
-  // Set the global editor instance
-  React.useEffect(() => {
+  // Set global editor instance
+  useEffect(() => {
     if (editor) {
       setActiveEditor(editor);
       updateSelectionState(editor);
+      updateCounts(content);
     }
     return () => {
       setActiveEditor(null);
     };
-  }, [editor, setActiveEditor, updateSelectionState]);
+  }, [editor, setActiveEditor, updateSelectionState, updateCounts, content]);
 
   const handleWrapperClick = (event: React.MouseEvent<HTMLDivElement>) => {
     if (editor && event.target === event.currentTarget) {
@@ -190,50 +287,113 @@ const MarkdownEditorComponent = ({
     }
   };
 
+  // Desktop keyboard shortcuts hint component
+  const KeyboardShortcutsHint = () => {
+    if (readOnly) return null;
+
+    return (
+      <div className="absolute bottom-2 right-2 z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">
+        <div className="bg-background/80 backdrop-blur-sm rounded-md px-2 py-1 text-[9px] font-mono text-muted-foreground/60 border border-primary/10">
+          ⌘B • ⌘I • ⌘K • ⌘⇧1-3
+        </div>
+      </div>
+    );
+  };
+
+  // Status bar for desktop
+  const StatusBar = () => {
+    if (readOnly) return null;
+
+    return (
+      <div className="absolute bottom-0 left-0 right-0 h-6 bg-background/80 backdrop-blur-sm border-t border-primary/10 px-3 flex items-center justify-between text-[9px] font-mono text-muted-foreground/40 z-10">
+        <div className="flex items-center gap-3">
+          <span>{wordCount} words</span>
+          <span>{charCount} characters</span>
+        </div>
+        <div className="flex items-center gap-3">
+          {isTyping && (
+            <span className="text-primary/60 animate-pulse">Typing...</span>
+          )}
+          {autoSave && !isTyping && lastContentRef.current === content && (
+            <span className="text-green-500/60">Saved</span>
+          )}
+        </div>
+      </div>
+    );
+  };
+
   return (
-    <div
-      className="relative text-base h-full"
-      tabIndex={0} // Makes the div focusable
-      aria-label="Rich Text Editor" // Provides a descriptive label for screen readers
-    >
+    <div className="relative text-base h-full group">
       {editor && (
         <BubbleMenu
           editor={editor}
           tippyOptions={{
             duration: 200,
             placement: 'top',
-            animation: 'shift-away'
+            animation: 'shift-away',
+            zIndex: 50,
           }}
           pluginKey={bubbleMenuId}
           shouldShow={({ editor }) => !editor.state.selection.empty && !editor.isActive('image')}
         >
           {editor.isActive('table') ? (
-            <div className="flex items-center gap-1.5 rounded-2xl border border-primary/10 bg-background/60 backdrop-blur-2xl p-1.5 shadow-2xl shadow-primary/5 transition-all duration-300">
-              <div className="flex items-center gap-1 px-1">
-                <Button variant="ghost" size="sm" className="h-8 text-[9px] font-black uppercase tracking-widest px-2 rounded-lg" onClick={() => editor.chain().focus().addColumnBefore().run()}>+ Col</Button>
-                <Button variant="ghost" size="sm" className="h-8 text-[9px] font-black uppercase tracking-widest px-2 rounded-lg" onClick={() => editor.chain().focus().addRowBefore().run()}>+ Row</Button>
-              </div>
-              <div className="h-4 w-px bg-primary/10" />
-              <Button
-                variant="ghost"
-                size="sm"
-                className="h-8 text-[9px] font-black uppercase tracking-widest px-2 rounded-lg text-destructive hover:bg-destructive/10 hover:text-destructive"
-                onClick={() => editor.chain().focus().deleteTable().run()}
-              >
-                Delete Table
-              </Button>
+            <div className="flex items-center gap-1.5 rounded-xl border border-primary/20 bg-background/95 backdrop-blur-xl shadow-2xl p-1.5">
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button variant="ghost" size="sm" className="h-7 text-[9px] font-black uppercase tracking-widest px-2 rounded-md" onClick={() => editor.chain().focus().addColumnBefore().run()}>
+                      + Col
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent side="top" className="text-[9px]">Add column before</TooltipContent>
+                </Tooltip>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button variant="ghost" size="sm" className="h-7 text-[9px] font-black uppercase tracking-widest px-2 rounded-md" onClick={() => editor.chain().focus().addRowBefore().run()}>
+                      + Row
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent side="top" className="text-[9px]">Add row before</TooltipContent>
+                </Tooltip>
+                <div className="h-4 w-px bg-primary/10" />
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-7 text-[9px] font-black uppercase tracking-widest px-2 rounded-md text-destructive hover:bg-destructive/10 hover:text-destructive"
+                      onClick={() => editor.chain().focus().deleteTable().run()}
+                    >
+                      Delete
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent side="top" className="text-[9px]">Delete table</TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
             </div>
           ) : (
             <ContextualToolbar editor={editor as Editor} />
           )}
         </BubbleMenu>
       )}
+
       <div
-        className="rounded-b-lg p-0 min-h-[200px] h-full relative transition-colors duration-300"
+        className={cn(
+          "rounded-b-lg p-0 min-h-[200px] h-full relative transition-colors duration-300",
+          readOnly && "cursor-default"
+        )}
         onClick={handleWrapperClick}
       >
         <EditorContent editor={editor} className="h-full" />
+        {!editor?.isFocused && !content && !readOnly && (
+          <div className="absolute top-0 left-0 right-0 pointer-events-none text-muted-foreground/30 text-sm font-serif italic px-4 py-2">
+            {placeholder}
+          </div>
+        )}
       </div>
+
+      <KeyboardShortcutsHint />
+      <StatusBar />
     </div>
   );
 };

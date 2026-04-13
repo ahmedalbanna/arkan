@@ -1,46 +1,75 @@
 'use client';
 
-import React from 'react';
 import { CollapsibleSidePanel } from '@/components/ui/CollapsibleSidePanel';
 import { cn } from '@/infrastructure/utils/cn';
+import React, { useCallback, useState } from 'react';
 import { BuilderSidebarProps } from './types';
-import { ShieldCheck } from 'lucide-react';
-import { AtmosphericGrid } from '@/components/shared/AtmosphericGrid';
-import { useMobile } from '@/hooks/util/use-mobile';
+
+const MIN_WIDTH = { left: 240, right: 320 };
+const MAX_WIDTH = { left: 480, right: 600 };
+const DEFAULT_WIDTH = { left: 320, right: 400 };
 
 /**
- * BuilderSidebar — Side panel orchestrator for the builder environment.
- * Manages modular panels for navigation and project configuration.
+ * BuilderSidebar — Desktop-only resizable sidebar wrapper.
+ * Delegates panel rendering to CollapsibleSidePanel.
+ * Width is controlled via inline style (no dynamic Tailwind).
  */
-
 export const BuilderSidebar = React.forwardRef<HTMLDivElement, BuilderSidebarProps>(
-  ({ panels = [], activeKey, onActiveKeyChange, side, className }, ref) => {
-    const isMobile = useMobile();
-    const safeActiveKey = activeKey && panels.some((p) => p.key === activeKey) ? activeKey : '';
-    const isCollapsed = !safeActiveKey || (isMobile && !activeKey);
+  ({ panels = [], activeKey, onActiveKeyChange, side, width, onWidthChange, className }, ref) => {
     const isLeft = side === 'left';
+    const safeActiveKey = activeKey && panels.some((p) => p.key === activeKey) ? activeKey : '';
+    const isCollapsed = !safeActiveKey;
 
-    // On mobile, if collapsed, we hide completely to give space to the canvas
-    const mobileWidth = isCollapsed ? 'w-0' : 'w-full fixed inset-0 z-50';
-    const desktopWidth = isCollapsed
-      ? 'w-[72px]'
-      : isLeft
-      ? 'w-[var(--sidebar-w-left,320px)]'
-      : 'w-[var(--sidebar-w,400px)]';
+    const sidebarWidth = width ?? DEFAULT_WIDTH[side];
+    const [isResizing, setIsResizing] = useState(false);
+
+    const handleResizeStart = useCallback(
+      (e: React.MouseEvent) => {
+        e.preventDefault();
+        setIsResizing(true);
+
+        const startX = e.clientX;
+        const startWidth = sidebarWidth;
+
+        const handleMouseMove = (moveEvent: MouseEvent) => {
+          const delta = isLeft ? moveEvent.clientX - startX : startX - moveEvent.clientX;
+          const newWidth = Math.min(
+            MAX_WIDTH[side],
+            Math.max(MIN_WIDTH[side], startWidth + delta)
+          );
+          onWidthChange?.(newWidth);
+        };
+
+        const handleMouseUp = () => {
+          setIsResizing(false);
+          document.removeEventListener('mousemove', handleMouseMove);
+          document.removeEventListener('mouseup', handleMouseUp);
+          document.body.style.userSelect = '';
+          document.body.style.cursor = '';
+        };
+
+        document.body.style.userSelect = 'none';
+        document.body.style.cursor = 'ew-resize';
+        document.addEventListener('mousemove', handleMouseMove);
+        document.addEventListener('mouseup', handleMouseUp);
+      },
+      [isLeft, side, sidebarWidth, onWidthChange]
+    );
 
     return (
       <div
         ref={ref}
+        style={!isCollapsed ? { width: sidebarWidth } : undefined}
         className={cn(
-          'flex flex-col h-full bg-background transition-all duration-500 ease-[0.22,1,0.36,1] relative overflow-hidden z-20',
+          'flex flex-col h-full bg-background relative overflow-hidden z-20',
           isLeft ? 'border-r border-primary/10' : 'border-l border-primary/10',
-          isMobile ? mobileWidth : desktopWidth,
+          isCollapsed && 'w-[56px]',
+          isResizing && 'transition-none cursor-ew-resize',
+          !isResizing && 'transition-[width] duration-300 ease-[0.22,1,0.36,1]',
           className
         )}
       >
-        {/* Background Grid */}
-        <AtmosphericGrid opacity={0.02} size={28} />
-
+        {/* Panel content */}
         <div className="h-full w-full min-w-0 flex flex-col relative z-10">
           <CollapsibleSidePanel
             panels={panels}
@@ -51,28 +80,21 @@ export const BuilderSidebar = React.forwardRef<HTMLDivElement, BuilderSidebarPro
           />
         </div>
 
-        {/* Panel Footer */}
-        <footer
-          className={cn(
-            'absolute bottom-0 left-0 right-0 h-10 border-t border-primary/5 bg-muted/5 flex items-center justify-between px-5 transition-opacity duration-500',
-            isCollapsed ? 'opacity-0' : 'opacity-100'
-          )}
-        >
-          <div className="flex items-center gap-2">
-            <div className="h-1 w-1 rounded-full bg-primary/30" />
-            <span className="text-[8px] font-black uppercase tracking-[0.3em] text-muted-foreground/40 truncate">
-              {isLeft ? 'Navigation' : 'Parameters'}
-            </span>
+        {/* Resize Handle */}
+        {!isCollapsed && (
+          <div
+            className={cn(
+              'absolute top-0 bottom-0 w-1.5 cursor-ew-resize z-30 group/resize',
+              'hover:bg-primary/20 active:bg-primary/30 transition-colors',
+              isLeft ? 'right-0' : 'left-0'
+            )}
+            onMouseDown={handleResizeStart}
+            role="separator"
+            aria-label={`Resize ${side} sidebar`}
+          >
+            <div className="absolute top-1/2 -translate-y-1/2 w-0.5 h-8 rounded-full bg-primary/0 group-hover/resize:bg-primary/40 transition-all" />
           </div>
-          <div className="flex items-center gap-3">
-            <div className="flex items-center gap-1.5" aria-hidden="true">
-              <ShieldCheck className="h-2.5 w-2.5 text-primary/30" />
-              <span className="text-[8px] font-bold text-muted-foreground/20 tabular-nums">
-                Validated
-              </span>
-            </div>
-          </div>
-        </footer>
+        )}
       </div>
     );
   }

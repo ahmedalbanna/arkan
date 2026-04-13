@@ -1,16 +1,9 @@
 'use client';
 
-import React from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/infrastructure/utils/cn';
+import { AnimatePresence, motion } from 'framer-motion';
+import React from 'react';
 import { PANEL_TRANSITION, SPRING_EASE } from './motion';
-import { AtmosphericGrid } from '@/components/shared/AtmosphericGrid';
-import { useMobile } from '@/hooks/util/use-mobile';
-
-/**
- * BuilderLayout — Structural foundation for the builder workspace.
- * Orchestrates the relationship between sidebars, canvas, and project header.
- */
 
 interface BuilderLayoutProps {
   header: React.ReactNode;
@@ -18,56 +11,61 @@ interface BuilderLayoutProps {
   rightSidebar?: React.ReactNode;
   canvas: React.ReactNode;
   className?: string;
+  sidebarState?: { left: boolean; right: boolean };
+  onSidebarToggle?: (side: 'left' | 'right') => void;
 }
 
+/**
+ * BuilderLayout — Desktop-only three-column layout.
+ * Header + [LeftSidebar | Canvas | RightSidebar]
+ * No mobile conditionals. No keyboard shortcuts.
+ */
 export const BuilderLayout: React.FC<BuilderLayoutProps> = ({
   header,
   leftSidebar,
   rightSidebar,
   canvas,
   className,
+  sidebarState = { left: true, right: true },
 }) => {
-  const isMobile = useMobile();
-
   return (
     <div
       className={cn(
         'relative flex-grow flex flex-col bg-background overflow-hidden',
         'h-[var(--workspace-h,calc(100vh-64px))]',
+        'transform-gpu',
         className
       )}
     >
-      {/* 1. HEADER ZONE */}
+      {/* Header */}
       {header && (
         <header className="flex-shrink-0 z-30 relative border-b border-primary/10">
           {header}
         </header>
       )}
 
-      {/* 2. CONTENT CORE — Edge-to-Edge Integration */}
+      {/* Main Content Area */}
       <main className="flex-1 flex min-h-0 relative z-10">
         {/* Left Sidebar */}
         <AnimatePresence mode="wait">
-          {leftSidebar && (
+          {leftSidebar && sidebarState.left && (
             <motion.aside
-              initial={isMobile ? { opacity: 0 } : { x: -24, opacity: 0 }}
-              animate={isMobile ? { opacity: 1 } : { x: 0, opacity: 1 }}
-              exit={isMobile ? { opacity: 0 } : { x: -24, opacity: 0 }}
-              transition={PANEL_TRANSITION}
-              className={cn(
-                'flex-shrink-0 h-full relative z-20',
-                isMobile ? 'absolute inset-0 z-50 bg-background' : ''
-              )}
+              key="left-sidebar"
+              initial={{ x: -16, opacity: 0 }}
+              animate={{ x: 0, opacity: 1 }}
+              exit={{ x: -16, opacity: 0 }}
+              transition={{ ...PANEL_TRANSITION, duration: 0.2 }}
+              className="flex-shrink-0 h-full relative z-20 overflow-hidden"
             >
               {leftSidebar}
             </motion.aside>
           )}
         </AnimatePresence>
 
-        {/* Central Canvas */}
+        {/* Canvas */}
         <motion.div
           layout
-          transition={{ duration: 0.6, ease: SPRING_EASE }}
+          transition={{ duration: 0.3, ease: SPRING_EASE }}
           className="flex-1 min-w-0 h-full overflow-hidden relative z-10"
         >
           {canvas}
@@ -75,25 +73,20 @@ export const BuilderLayout: React.FC<BuilderLayoutProps> = ({
 
         {/* Right Sidebar */}
         <AnimatePresence mode="wait">
-          {rightSidebar && (
+          {rightSidebar && sidebarState.right && (
             <motion.aside
-              initial={isMobile ? { opacity: 0 } : { x: 24, opacity: 0 }}
-              animate={isMobile ? { opacity: 1 } : { x: 0, opacity: 1 }}
-              exit={isMobile ? { opacity: 0 } : { x: 24, opacity: 0 }}
-              transition={PANEL_TRANSITION}
-              className={cn(
-                'flex-shrink-0 h-full relative z-20',
-                isMobile ? 'absolute inset-0 z-50 bg-background' : ''
-              )}
+              key="right-sidebar"
+              initial={{ x: 16, opacity: 0 }}
+              animate={{ x: 0, opacity: 1 }}
+              exit={{ x: 16, opacity: 0 }}
+              transition={{ ...PANEL_TRANSITION, duration: 0.2 }}
+              className="flex-shrink-0 h-full relative z-20 overflow-hidden"
             >
               {rightSidebar}
             </motion.aside>
           )}
         </AnimatePresence>
       </main>
-
-      {/* Global Background Grid */}
-      <AtmosphericGrid opacity={0.01} size={40} className="z-0" />
     </div>
   );
 };

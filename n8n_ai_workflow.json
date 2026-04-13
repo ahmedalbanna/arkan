@@ -12,7 +12,10 @@
       "name": "Webhook",
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 1,
-      "position": [-550, 300],
+      "position": [
+        -550,
+        300
+      ],
       "webhookId": "arkan-ai-webhook"
     },
     {
@@ -39,7 +42,10 @@
       "name": "Workflow Settings",
       "type": "n8n-nodes-base.set",
       "typeVersion": 1,
-      "position": [-400, 300]
+      "position": [
+        -400,
+        300
+      ]
     },
     {
       "parameters": {
@@ -49,7 +55,10 @@
       "name": "Validate Input",
       "type": "n8n-nodes-base.code",
       "typeVersion": 1,
-      "position": [-250, 300]
+      "position": [
+        -250,
+        300
+      ]
     },
     {
       "parameters": {
@@ -57,11 +66,25 @@
         "value1": "={{ $json.body.action }}",
         "rules": {
           "rules": [
-            { "value2": "generateText" },
-            { "value2": "runFlow", "output": 1 },
-            { "value2": "retrieveContext", "output": 2 },
-            { "value2": "generateChapterWithRAG", "output": 3 },
-            { "value2": "generateSectionWithRAG", "output": 4 }
+            {
+              "value2": "generateText"
+            },
+            {
+              "value2": "runFlow",
+              "output": 1
+            },
+            {
+              "value2": "retrieveContext",
+              "output": 2
+            },
+            {
+              "value2": "generateChapterWithRAG",
+              "output": 3
+            },
+            {
+              "value2": "generateSectionWithRAG",
+              "output": 4
+            }
           ]
         }
       },
@@ -69,7 +92,10 @@
       "name": "Route Action",
       "type": "n8n-nodes-base.switch",
       "typeVersion": 1,
-      "position": [-100, 300]
+      "position": [
+        -100,
+        300
+      ]
     },
     {
       "parameters": {
@@ -77,38 +103,133 @@
         "value1": "={{ $json.body.flowName }}",
         "rules": {
           "rules": [
-            { "value2": "summarize" },
-            { "value2": "grammarCheck", "output": 1 },
-            { "value2": "paraphrase", "output": 2 },
-            { "value2": "biasCheck", "output": 3 },
-            { "value2": "detectAi", "output": 4 },
-            { "value2": "translate", "output": 5 },
-            { "value2": "quiz", "output": 6 },
-            { "value2": "factCheck", "output": 7 },
-            { "value2": "plagiarismCheck", "output": 8 },
-            { "value2": "humanize", "output": 9 },
-            { "value2": "aiResearch", "output": 10 },
-            { "value2": "generatePlantUML", "output": 11 },
-            { "value2": "imageToText", "output": 12 },
-            { "value2": "generateCitation", "output": 13 },
-            { "value2": "generateTOC", "output": 14 },
-            { "value2": "generateLitReview", "output": 15 },
-            { "value2": "generateLecture", "output": 16 },
-            { "value2": "sentenceStructureCheck", "output": 17 },
-            { "value2": "explainTopic", "output": 18 },
-            { "value2": "generateIdeas", "output": 19 },
-            { "value2": "generateUIDescription", "output": 20 },
-            { "value2": "generateSessionPlan", "output": 21 },
-            { "value2": "solveAssignments", "output": 22 },
-            { "value2": "generateProjectBlueprint", "output": 23 },
-            { "value2": "proofreadDocument", "output": 24 },
-            { "value2": "analyzeContext", "output": 25 },
-            { "value2": "checkPaperQuality", "output": 26 },
-            { "value2": "improveMarkdown", "output": 27 },
-            { "value2": "generateProjectDoc", "output": 28 },
-            { "value2": "rewriteToMarkdown", "output": 29 },
-            { "value2": "writeTechSpec", "output": 30 },
-            { "value2": "createPresentation", "output": 31 }
+            {
+              "value2": "summarize"
+            },
+            {
+              "value2": "grammarCheck",
+              "output": 1
+            },
+            {
+              "value2": "paraphrase",
+              "output": 2
+            },
+            {
+              "value2": "biasCheck",
+              "output": 3
+            },
+            {
+              "value2": "detectAi",
+              "output": 4
+            },
+            {
+              "value2": "translate",
+              "output": 5
+            },
+            {
+              "value2": "quiz",
+              "output": 6
+            },
+            {
+              "value2": "factCheck",
+              "output": 7
+            },
+            {
+              "value2": "plagiarismCheck",
+              "output": 8
+            },
+            {
+              "value2": "humanize",
+              "output": 9
+            },
+            {
+              "value2": "aiResearch",
+              "output": 10
+            },
+            {
+              "value2": "generatePlantUML",
+              "output": 11
+            },
+            {
+              "value2": "imageToText",
+              "output": 12
+            },
+            {
+              "value2": "generateCitation",
+              "output": 13
+            },
+            {
+              "value2": "generateTOC",
+              "output": 14
+            },
+            {
+              "value2": "generateLitReview",
+              "output": 15
+            },
+            {
+              "value2": "generateLecture",
+              "output": 16
+            },
+            {
+              "value2": "sentenceStructureCheck",
+              "output": 17
+            },
+            {
+              "value2": "explainTopic",
+              "output": 18
+            },
+            {
+              "value2": "generateIdeas",
+              "output": 19
+            },
+            {
+              "value2": "generateUIDescription",
+              "output": 20
+            },
+            {
+              "value2": "generateSessionPlan",
+              "output": 21
+            },
+            {
+              "value2": "solveAssignments",
+              "output": 22
+            },
+            {
+              "value2": "generateProjectBlueprint",
+              "output": 23
+            },
+            {
+              "value2": "proofreadDocument",
+              "output": 24
+            },
+            {
+              "value2": "analyzeContext",
+              "output": 25
+            },
+            {
+              "value2": "checkPaperQuality",
+              "output": 26
+            },
+            {
+              "value2": "improveMarkdown",
+              "output": 27
+            },
+            {
+              "value2": "generateProjectDoc",
+              "output": 28
+            },
+            {
+              "value2": "rewriteToMarkdown",
+              "output": 29
+            },
+            {
+              "value2": "writeTechSpec",
+              "output": 30
+            },
+            {
+              "value2": "createPresentation",
+              "output": 31
+            }
           ]
         },
         "fallbackOutput": 32
@@ -117,7 +238,10 @@
       "name": "Route Flow",
       "type": "n8n-nodes-base.switch",
       "typeVersion": 1,
-      "position": [50, 300]
+      "position": [
+        50,
+        300
+      ]
     },
     {
       "parameters": {
@@ -130,7 +254,10 @@
       "name": "Summarizer Agent",
       "type": "@n8n/n8n-nodes-langchain.agent",
       "typeVersion": 1.1,
-      "position": [350, -100]
+      "position": [
+        350,
+        -100
+      ]
     },
     {
       "parameters": {
@@ -143,7 +270,10 @@
       "name": "Grammar Checker Agent",
       "type": "@n8n/n8n-nodes-langchain.agent",
       "typeVersion": 1.1,
-      "position": [350, 50]
+      "position": [
+        350,
+        50
+      ]
     },
     {
       "parameters": {
@@ -156,7 +286,10 @@
       "name": "Paraphraser Agent",
       "type": "@n8n/n8n-nodes-langchain.agent",
       "typeVersion": 1.1,
-      "position": [350, 200]
+      "position": [
+        350,
+        200
+      ]
     },
     {
       "parameters": {
@@ -169,7 +302,10 @@
       "name": "Bias Checker Agent",
       "type": "@n8n/n8n-nodes-langchain.agent",
       "typeVersion": 1.1,
-      "position": [350, 350]
+      "position": [
+        350,
+        350
+      ]
     },
     {
       "parameters": {
@@ -182,7 +318,10 @@
       "name": "AI Detector Agent",
       "type": "@n8n/n8n-nodes-langchain.agent",
       "typeVersion": 1.1,
-      "position": [350, 500]
+      "position": [
+        350,
+        500
+      ]
     },
     {
       "parameters": {
@@ -195,7 +334,10 @@
       "name": "Translator Agent",
       "type": "@n8n/n8n-nodes-langchain.agent",
       "typeVersion": 1.1,
-      "position": [350, 650]
+      "position": [
+        350,
+        650
+      ]
     },
     {
       "parameters": {
@@ -208,7 +350,10 @@
       "name": "Quiz Generator Agent",
       "type": "@n8n/n8n-nodes-langchain.agent",
       "typeVersion": 1.1,
-      "position": [350, 800]
+      "position": [
+        350,
+        800
+      ]
     },
     {
       "parameters": {
@@ -221,7 +366,10 @@
       "name": "Fact Checker Agent",
       "type": "@n8n/n8n-nodes-langchain.agent",
       "typeVersion": 1.1,
-      "position": [350, 950]
+      "position": [
+        350,
+        950
+      ]
     },
     {
       "parameters": {
@@ -234,7 +382,10 @@
       "name": "Plagiarism Checker Agent",
       "type": "@n8n/n8n-nodes-langchain.agent",
       "typeVersion": 1.1,
-      "position": [350, 1100]
+      "position": [
+        350,
+        1100
+      ]
     },
     {
       "parameters": {
@@ -247,7 +398,10 @@
       "name": "Humanizer Agent",
       "type": "@n8n/n8n-nodes-langchain.agent",
       "typeVersion": 1.1,
-      "position": [350, 1250]
+      "position": [
+        350,
+        1250
+      ]
     },
     {
       "parameters": {
@@ -260,7 +414,10 @@
       "name": "AI Researcher Agent",
       "type": "@n8n/n8n-nodes-langchain.agent",
       "typeVersion": 1.1,
-      "position": [350, 1400]
+      "position": [
+        350,
+        1400
+      ]
     },
     {
       "parameters": {
@@ -273,7 +430,10 @@
       "name": "PlantUML Generator Agent",
       "type": "@n8n/n8n-nodes-langchain.agent",
       "typeVersion": 1.1,
-      "position": [350, 1550]
+      "position": [
+        350,
+        1550
+      ]
     },
     {
       "parameters": {
@@ -286,7 +446,10 @@
       "name": "ImageToText Agent",
       "type": "@n8n/n8n-nodes-langchain.agent",
       "typeVersion": 1.1,
-      "position": [350, 1700]
+      "position": [
+        350,
+        1700
+      ]
     },
     {
       "parameters": {
@@ -299,7 +462,10 @@
       "name": "Citation Generator Agent",
       "type": "@n8n/n8n-nodes-langchain.agent",
       "typeVersion": 1.1,
-      "position": [350, 1850]
+      "position": [
+        350,
+        1850
+      ]
     },
     {
       "parameters": {
@@ -312,7 +478,10 @@
       "name": "TOC Generator Agent",
       "type": "@n8n/n8n-nodes-langchain.agent",
       "typeVersion": 1.1,
-      "position": [350, 2000]
+      "position": [
+        350,
+        2000
+      ]
     },
     {
       "parameters": {
@@ -325,7 +494,10 @@
       "name": "Literature Review Agent",
       "type": "@n8n/n8n-nodes-langchain.agent",
       "typeVersion": 1.1,
-      "position": [350, 2150]
+      "position": [
+        350,
+        2150
+      ]
     },
     {
       "parameters": {
@@ -338,7 +510,10 @@
       "name": "Lecture Generator Agent",
       "type": "@n8n/n8n-nodes-langchain.agent",
       "typeVersion": 1.1,
-      "position": [350, 2300]
+      "position": [
+        350,
+        2300
+      ]
     },
     {
       "parameters": {
@@ -351,7 +526,10 @@
       "name": "Sentence Structure Agent",
       "type": "@n8n/n8n-nodes-langchain.agent",
       "typeVersion": 1.1,
-      "position": [350, 2450]
+      "position": [
+        350,
+        2450
+      ]
     },
     {
       "parameters": {
@@ -364,7 +542,10 @@
       "name": "Topic Explainer Agent",
       "type": "@n8n/n8n-nodes-langchain.agent",
       "typeVersion": 1.1,
-      "position": [350, 2600]
+      "position": [
+        350,
+        2600
+      ]
     },
     {
       "parameters": {
@@ -377,7 +558,10 @@
       "name": "Idea Generator Agent",
       "type": "@n8n/n8n-nodes-langchain.agent",
       "typeVersion": 1.1,
-      "position": [350, 2750]
+      "position": [
+        350,
+        2750
+      ]
     },
     {
       "parameters": {
@@ -390,7 +574,10 @@
       "name": "UI Description Agent",
       "type": "@n8n/n8n-nodes-langchain.agent",
       "typeVersion": 1.1,
-      "position": [350, 2900]
+      "position": [
+        350,
+        2900
+      ]
     },
     {
       "parameters": {
@@ -403,7 +590,10 @@
       "name": "Session Plan Agent",
       "type": "@n8n/n8n-nodes-langchain.agent",
       "typeVersion": 1.1,
-      "position": [350, 3050]
+      "position": [
+        350,
+        3050
+      ]
     },
     {
       "parameters": {
@@ -416,7 +606,10 @@
       "name": "Assignments Solver Agent",
       "type": "@n8n/n8n-nodes-langchain.agent",
       "typeVersion": 1.1,
-      "position": [350, 3200]
+      "position": [
+        350,
+        3200
+      ]
     },
     {
       "parameters": {
@@ -429,7 +622,10 @@
       "name": "Project Blueprint Agent",
       "type": "@n8n/n8n-nodes-langchain.agent",
       "typeVersion": 1.1,
-      "position": [350, 3350]
+      "position": [
+        350,
+        3350
+      ]
     },
     {
       "parameters": {
@@ -442,7 +638,10 @@
       "name": "Proofreader Agent",
       "type": "@n8n/n8n-nodes-langchain.agent",
       "typeVersion": 1.1,
-      "position": [350, 3500]
+      "position": [
+        350,
+        3500
+      ]
     },
     {
       "parameters": {
@@ -455,7 +654,10 @@
       "name": "Context Analyst Agent",
       "type": "@n8n/n8n-nodes-langchain.agent",
       "typeVersion": 1.1,
-      "position": [350, 3650]
+      "position": [
+        350,
+        3650
+      ]
     },
     {
       "parameters": {
@@ -468,7 +670,10 @@
       "name": "Paper Quality Agent",
       "type": "@n8n/n8n-nodes-langchain.agent",
       "typeVersion": 1.1,
-      "position": [350, 3800]
+      "position": [
+        350,
+        3800
+      ]
     },
     {
       "parameters": {
@@ -481,7 +686,10 @@
       "name": "Markdown Improver Agent",
       "type": "@n8n/n8n-nodes-langchain.agent",
       "typeVersion": 1.1,
-      "position": [350, 3950]
+      "position": [
+        350,
+        3950
+      ]
     },
     {
       "parameters": {
@@ -494,7 +702,10 @@
       "name": "Project Documentation Agent",
       "type": "@n8n/n8n-nodes-langchain.agent",
       "typeVersion": 1.1,
-      "position": [350, 4100]
+      "position": [
+        350,
+        4100
+      ]
     },
     {
       "parameters": {
@@ -507,7 +718,10 @@
       "name": "Rewrite to Markdown Agent",
       "type": "@n8n/n8n-nodes-langchain.agent",
       "typeVersion": 1.1,
-      "position": [350, 4250]
+      "position": [
+        350,
+        4250
+      ]
     },
     {
       "parameters": {
@@ -520,7 +734,10 @@
       "name": "Technical Spec Agent",
       "type": "@n8n/n8n-nodes-langchain.agent",
       "typeVersion": 1.1,
-      "position": [350, 4400]
+      "position": [
+        350,
+        4400
+      ]
     },
     {
       "parameters": {
@@ -533,7 +750,10 @@
       "name": "Presentation Creator Agent",
       "type": "@n8n/n8n-nodes-langchain.agent",
       "typeVersion": 1.1,
-      "position": [350, 4550]
+      "position": [
+        350,
+        4550
+      ]
     },
     {
       "parameters": {
@@ -546,7 +766,10 @@
       "name": "Arkan AI Agent",
       "type": "@n8n/n8n-nodes-langchain.agent",
       "typeVersion": 1.1,
-      "position": [350, 1000]
+      "position": [
+        350,
+        1000
+      ]
     },
     {
       "parameters": {
@@ -557,7 +780,10 @@
       "name": "OpenRouter Chat Model",
       "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
       "typeVersion": 1,
-      "position": [100, 1200],
+      "position": [
+        100,
+        1200
+      ],
       "credentials": {
         "openRouterApi": {
           "id": "5l2XC5NZppPGQv1b",
@@ -574,7 +800,10 @@
       "name": "Window Buffer Memory",
       "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
       "typeVersion": 1.1,
-      "position": [300, 1200]
+      "position": [
+        300,
+        1200
+      ]
     },
     {
       "parameters": {
@@ -585,7 +814,10 @@
       "name": "Vector Store Retriever",
       "type": "@n8n/n8n-nodes-langchain.retrieverVectorStore",
       "typeVersion": 1,
-      "position": [500, 1200]
+      "position": [
+        500,
+        1200
+      ]
     },
     {
       "parameters": {
@@ -601,7 +833,10 @@
       "name": "Qdrant Vector Store",
       "type": "@n8n/n8n-nodes-langchain.vectorStoreQdrant",
       "typeVersion": 1,
-      "position": [500, 1400],
+      "position": [
+        500,
+        1400
+      ],
       "credentials": {
         "qdrantApi": {
           "id": "iG5FAY9BPLIlgLzb",
@@ -617,7 +852,10 @@
       "name": "Embed Ollama",
       "type": "@n8n/n8n-nodes-langchain.embeddingsOllama",
       "typeVersion": 1,
-      "position": [500, 1600],
+      "position": [
+        500,
+        1600
+      ],
       "credentials": {
         "ollamaApi": {
           "id": "VDUE93q3jr564BTv",
@@ -631,7 +869,10 @@
       "name": "Wikipedia",
       "type": "@n8n/n8n-nodes-langchain.toolWikipedia",
       "typeVersion": 1,
-      "position": [700, 1000]
+      "position": [
+        700,
+        1000
+      ]
     },
     {
       "parameters": {},
@@ -639,7 +880,10 @@
       "name": "Calculator",
       "type": "@n8n/n8n-nodes-langchain.toolCalculator",
       "typeVersion": 1,
-      "position": [850, 1000]
+      "position": [
+        850,
+        1000
+      ]
     },
     {
       "parameters": {
@@ -649,7 +893,10 @@
       "name": "Flow Logic",
       "type": "n8n-nodes-base.code",
       "typeVersion": 1,
-      "position": [50, 500]
+      "position": [
+        50,
+        500
+      ]
     },
     {
       "parameters": {
@@ -659,7 +906,10 @@
       "name": "Retrieve Context",
       "type": "n8n-nodes-base.code",
       "typeVersion": 1,
-      "position": [50, 650]
+      "position": [
+        50,
+        650
+      ]
     },
     {
       "parameters": {
@@ -671,7 +921,10 @@
       "name": "Chapter RAG Agent",
       "type": "@n8n/n8n-nodes-langchain.agent",
       "typeVersion": 1.1,
-      "position": [50, 800]
+      "position": [
+        50,
+        800
+      ]
     },
     {
       "parameters": {
@@ -683,7 +936,10 @@
       "name": "Section RAG Agent",
       "type": "@n8n/n8n-nodes-langchain.agent",
       "typeVersion": 1.1,
-      "position": [50, 1000]
+      "position": [
+        50,
+        1000
+      ]
     },
     {
       "parameters": {
@@ -705,7 +961,10 @@
       "name": "Prepare Response",
       "type": "n8n-nodes-base.set",
       "typeVersion": 1,
-      "position": [1100, 300]
+      "position": [
+        1100,
+        300
+      ]
     },
     {
       "parameters": {
@@ -717,7 +976,10 @@
       "name": "Respond to Webhook",
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1,
-      "position": [1350, 300]
+      "position": [
+        1350,
+        300
+      ]
     },
     {
       "parameters": {},
@@ -725,7 +987,10 @@
       "name": "Error Trigger",
       "type": "n8n-nodes-base.errorTrigger",
       "typeVersion": 1,
-      "position": [1100, 500]
+      "position": [
+        1100,
+        500
+      ]
     },
     {
       "parameters": {
@@ -737,7 +1002,10 @@
       "name": "Error Response",
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1,
-      "position": [1350, 500]
+      "position": [
+        1350,
+        500
+      ]
     }
   ],
   "pinData": {
@@ -757,249 +1025,1083 @@
   },
   "connections": {
     "Webhook": {
-      "main": [[{ "node": "Workflow Settings", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Workflow Settings",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Workflow Settings": {
-      "main": [[{ "node": "Validate Input", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Validate Input",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Validate Input": {
-      "main": [[{ "node": "Route Action", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Route Action",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Route Action": {
       "main": [
-        [{ "node": "Route Flow", "type": "main", "index": 0 }],
-        [{ "node": "Flow Logic", "type": "main", "index": 0 }],
-        [{ "node": "Retrieve Context", "type": "main", "index": 0 }],
-        [{ "node": "Chapter RAG Agent", "type": "main", "index": 0 }],
-        [{ "node": "Section RAG Agent", "type": "main", "index": 0 }]
+        [
+          {
+            "node": "Route Flow",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Flow Logic",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Retrieve Context",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Chapter RAG Agent",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Section RAG Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
       ]
     },
     "Route Flow": {
       "main": [
-        [{ "node": "Summarizer Agent", "type": "main", "index": 0 }],
-        [{ "node": "Grammar Checker Agent", "type": "main", "index": 0 }],
-        [{ "node": "Paraphraser Agent", "type": "main", "index": 0 }],
-        [{ "node": "Bias Checker Agent", "type": "main", "index": 0 }],
-        [{ "node": "AI Detector Agent", "type": "main", "index": 0 }],
-        [{ "node": "Translator Agent", "type": "main", "index": 0 }],
-        [{ "node": "Quiz Generator Agent", "type": "main", "index": 0 }],
-        [{ "node": "Fact Checker Agent", "type": "main", "index": 0 }],
-        [{ "node": "Plagiarism Checker Agent", "type": "main", "index": 0 }],
-        [{ "node": "Humanizer Agent", "type": "main", "index": 0 }],
-        [{ "node": "AI Researcher Agent", "type": "main", "index": 0 }],
-        [{ "node": "PlantUML Generator Agent", "type": "main", "index": 0 }],
-        [{ "node": "ImageToText Agent", "type": "main", "index": 0 }],
-        [{ "node": "Citation Generator Agent", "type": "main", "index": 0 }],
-        [{ "node": "TOC Generator Agent", "type": "main", "index": 0 }],
-        [{ "node": "Literature Review Agent", "type": "main", "index": 0 }],
-        [{ "node": "Lecture Generator Agent", "type": "main", "index": 0 }],
-        [{ "node": "Sentence Structure Agent", "type": "main", "index": 0 }],
-        [{ "node": "Topic Explainer Agent", "type": "main", "index": 0 }],
-        [{ "node": "Idea Generator Agent", "type": "main", "index": 0 }],
-        [{ "node": "UI Description Agent", "type": "main", "index": 0 }],
-        [{ "node": "Session Plan Agent", "type": "main", "index": 0 }],
-        [{ "node": "Assignments Solver Agent", "type": "main", "index": 0 }],
-        [{ "node": "Project Blueprint Agent", "type": "main", "index": 0 }],
-        [{ "node": "Proofreader Agent", "type": "main", "index": 0 }],
-        [{ "node": "Context Analyst Agent", "type": "main", "index": 0 }],
-        [{ "node": "Paper Quality Agent", "type": "main", "index": 0 }],
-        [{ "node": "Markdown Improver Agent", "type": "main", "index": 0 }],
-        [{ "node": "Project Documentation Agent", "type": "main", "index": 0 }],
-        [{ "node": "Rewrite to Markdown Agent", "type": "main", "index": 0 }],
-        [{ "node": "Technical Spec Agent", "type": "main", "index": 0 }],
-        [{ "node": "Presentation Creator Agent", "type": "main", "index": 0 }],
-        [{ "node": "Arkan AI Agent", "type": "main", "index": 0 }]
+        [
+          {
+            "node": "Summarizer Agent",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Grammar Checker Agent",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Paraphraser Agent",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Bias Checker Agent",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "AI Detector Agent",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Translator Agent",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Quiz Generator Agent",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Fact Checker Agent",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Plagiarism Checker Agent",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Humanizer Agent",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "AI Researcher Agent",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "PlantUML Generator Agent",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "ImageToText Agent",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Citation Generator Agent",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "TOC Generator Agent",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Literature Review Agent",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Lecture Generator Agent",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Sentence Structure Agent",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Topic Explainer Agent",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Idea Generator Agent",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "UI Description Agent",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Session Plan Agent",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Assignments Solver Agent",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Project Blueprint Agent",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Proofreader Agent",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Context Analyst Agent",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Paper Quality Agent",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Markdown Improver Agent",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Project Documentation Agent",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Rewrite to Markdown Agent",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Technical Spec Agent",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Presentation Creator Agent",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Arkan AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
       ]
     },
     "OpenRouter Chat Model": {
       "ai_languageModel": [
-        [{ "node": "Summarizer Agent", "type": "ai_languageModel", "index": 0 }],
-        [{ "node": "Grammar Checker Agent", "type": "ai_languageModel", "index": 0 }],
-        [{ "node": "Paraphraser Agent", "type": "ai_languageModel", "index": 0 }],
-        [{ "node": "Bias Checker Agent", "type": "ai_languageModel", "index": 0 }],
-        [{ "node": "AI Detector Agent", "type": "ai_languageModel", "index": 0 }],
-        [{ "node": "Translator Agent", "type": "ai_languageModel", "index": 0 }],
-        [{ "node": "Quiz Generator Agent", "type": "ai_languageModel", "index": 0 }],
-        [{ "node": "Fact Checker Agent", "type": "ai_languageModel", "index": 0 }],
-        [{ "node": "Plagiarism Checker Agent", "type": "ai_languageModel", "index": 0 }],
-        [{ "node": "Humanizer Agent", "type": "ai_languageModel", "index": 0 }],
-        [{ "node": "AI Researcher Agent", "type": "ai_languageModel", "index": 0 }],
-        [{ "node": "PlantUML Generator Agent", "type": "ai_languageModel", "index": 0 }],
-        [{ "node": "ImageToText Agent", "type": "ai_languageModel", "index": 0 }],
-        [{ "node": "Citation Generator Agent", "type": "ai_languageModel", "index": 0 }],
-        [{ "node": "TOC Generator Agent", "type": "ai_languageModel", "index": 0 }],
-        [{ "node": "Literature Review Agent", "type": "ai_languageModel", "index": 0 }],
-        [{ "node": "Lecture Generator Agent", "type": "ai_languageModel", "index": 0 }],
-        [{ "node": "Sentence Structure Agent", "type": "ai_languageModel", "index": 0 }],
-        [{ "node": "Topic Explainer Agent", "type": "ai_languageModel", "index": 0 }],
-        [{ "node": "Idea Generator Agent", "type": "ai_languageModel", "index": 0 }],
-        [{ "node": "UI Description Agent", "type": "ai_languageModel", "index": 0 }],
-        [{ "node": "Session Plan Agent", "type": "ai_languageModel", "index": 0 }],
-        [{ "node": "Assignments Solver Agent", "type": "ai_languageModel", "index": 0 }],
-        [{ "node": "Project Blueprint Agent", "type": "ai_languageModel", "index": 0 }],
-        [{ "node": "Proofreader Agent", "type": "ai_languageModel", "index": 0 }],
-        [{ "node": "Context Analyst Agent", "type": "ai_languageModel", "index": 0 }],
-        [{ "node": "Paper Quality Agent", "type": "ai_languageModel", "index": 0 }],
-        [{ "node": "Markdown Improver Agent", "type": "ai_languageModel", "index": 0 }],
-        [{ "node": "Project Documentation Agent", "type": "ai_languageModel", "index": 0 }],
-        [{ "node": "Rewrite to Markdown Agent", "type": "ai_languageModel", "index": 0 }],
-        [{ "node": "Technical Spec Agent", "type": "ai_languageModel", "index": 0 }],
-        [{ "node": "Presentation Creator Agent", "type": "ai_languageModel", "index": 0 }],
-        [{ "node": "Arkan AI Agent", "type": "ai_languageModel", "index": 0 }],
-        [{ "node": "Chapter RAG Agent", "type": "ai_languageModel", "index": 0 }],
-        [{ "node": "Section RAG Agent", "type": "ai_languageModel", "index": 0 }]
+        [
+          {
+            "node": "Summarizer Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Grammar Checker Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Paraphraser Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Bias Checker Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "AI Detector Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Translator Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Quiz Generator Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Fact Checker Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Plagiarism Checker Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Humanizer Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "AI Researcher Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "PlantUML Generator Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "ImageToText Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Citation Generator Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "TOC Generator Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Literature Review Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Lecture Generator Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Sentence Structure Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Topic Explainer Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Idea Generator Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "UI Description Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Session Plan Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Assignments Solver Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Project Blueprint Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Proofreader Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Context Analyst Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Paper Quality Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Markdown Improver Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Project Documentation Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Rewrite to Markdown Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Technical Spec Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Presentation Creator Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Arkan AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Chapter RAG Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Section RAG Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
       ]
     },
     "Window Buffer Memory": {
       "ai_memory": [
-        [{ "node": "Arkan AI Agent", "type": "ai_memory", "index": 0 }]
+        [
+          {
+            "node": "Arkan AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
       ]
     },
     "Vector Store Retriever": {
       "ai_tool": [
-        [{ "node": "Arkan AI Agent", "type": "ai_tool", "index": 0 }],
-        [{ "node": "Chapter RAG Agent", "type": "ai_tool", "index": 0 }],
-        [{ "node": "Section RAG Agent", "type": "ai_tool", "index": 0 }]
+        [
+          {
+            "node": "Arkan AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Chapter RAG Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Section RAG Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
       ]
     },
     "Wikipedia": {
       "ai_tool": [
-        [{ "node": "Arkan AI Agent", "type": "ai_tool", "index": 0 }],
-        [{ "node": "Fact Checker Agent", "type": "ai_tool", "index": 0 }],
-        [{ "node": "AI Researcher Agent", "type": "ai_tool", "index": 0 }]
+        [
+          {
+            "node": "Arkan AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Fact Checker Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "AI Researcher Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
       ]
     },
     "Calculator": {
       "ai_tool": [
-        [{ "node": "Arkan AI Agent", "type": "ai_tool", "index": 0 }]
+        [
+          {
+            "node": "Arkan AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
       ]
     },
     "Qdrant Vector Store": {
       "ai_vectorStore": [
-        [{ "node": "Vector Store Retriever", "type": "ai_vectorStore", "index": 0 }]
+        [
+          {
+            "node": "Vector Store Retriever",
+            "type": "ai_vectorStore",
+            "index": 0
+          }
+        ]
       ]
     },
     "Embed Ollama": {
       "ai_embedding": [
-        [{ "node": "Qdrant Vector Store", "type": "ai_embedding", "index": 0 }]
+        [
+          {
+            "node": "Qdrant Vector Store",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
       ]
     },
     "Summarizer Agent": {
-      "main": [[{ "node": "Prepare Response", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Prepare Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Grammar Checker Agent": {
-      "main": [[{ "node": "Prepare Response", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Prepare Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Paraphraser Agent": {
-      "main": [[{ "node": "Prepare Response", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Prepare Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Bias Checker Agent": {
-      "main": [[{ "node": "Prepare Response", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Prepare Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "AI Detector Agent": {
-      "main": [[{ "node": "Prepare Response", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Prepare Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Translator Agent": {
-      "main": [[{ "node": "Prepare Response", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Prepare Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Quiz Generator Agent": {
-      "main": [[{ "node": "Prepare Response", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Prepare Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Fact Checker Agent": {
-      "main": [[{ "node": "Prepare Response", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Prepare Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Plagiarism Checker Agent": {
-      "main": [[{ "node": "Prepare Response", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Prepare Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Humanizer Agent": {
-      "main": [[{ "node": "Prepare Response", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Prepare Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "AI Researcher Agent": {
-      "main": [[{ "node": "Prepare Response", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Prepare Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "PlantUML Generator Agent": {
-      "main": [[{ "node": "Prepare Response", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Prepare Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "ImageToText Agent": {
-      "main": [[{ "node": "Prepare Response", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Prepare Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Citation Generator Agent": {
-      "main": [[{ "node": "Prepare Response", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Prepare Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "TOC Generator Agent": {
-      "main": [[{ "node": "Prepare Response", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Prepare Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Literature Review Agent": {
-      "main": [[{ "node": "Prepare Response", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Prepare Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Lecture Generator Agent": {
-      "main": [[{ "node": "Prepare Response", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Prepare Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Sentence Structure Agent": {
-      "main": [[{ "node": "Prepare Response", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Prepare Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Topic Explainer Agent": {
-      "main": [[{ "node": "Prepare Response", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Prepare Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Idea Generator Agent": {
-      "main": [[{ "node": "Prepare Response", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Prepare Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "UI Description Agent": {
-      "main": [[{ "node": "Prepare Response", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Prepare Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Session Plan Agent": {
-      "main": [[{ "node": "Prepare Response", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Prepare Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Assignments Solver Agent": {
-      "main": [[{ "node": "Prepare Response", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Prepare Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Project Blueprint Agent": {
-      "main": [[{ "node": "Prepare Response", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Prepare Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Proofreader Agent": {
-      "main": [[{ "node": "Prepare Response", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Prepare Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Context Analyst Agent": {
-      "main": [[{ "node": "Prepare Response", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Prepare Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Paper Quality Agent": {
-      "main": [[{ "node": "Prepare Response", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Prepare Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Markdown Improver Agent": {
-      "main": [[{ "node": "Prepare Response", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Prepare Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Project Documentation Agent": {
-      "main": [[{ "node": "Prepare Response", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Prepare Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Rewrite to Markdown Agent": {
-      "main": [[{ "node": "Prepare Response", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Prepare Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Technical Spec Agent": {
-      "main": [[{ "node": "Prepare Response", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Prepare Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Presentation Creator Agent": {
-      "main": [[{ "node": "Prepare Response", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Prepare Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Arkan AI Agent": {
-      "main": [[{ "node": "Prepare Response", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Prepare Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Flow Logic": {
-      "main": [[{ "node": "Prepare Response", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Prepare Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Retrieve Context": {
-      "main": [[{ "node": "Prepare Response", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Prepare Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Chapter RAG Agent": {
-      "main": [[{ "node": "Prepare Response", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Prepare Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Section RAG Agent": {
-      "main": [[{ "node": "Prepare Response", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Prepare Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Prepare Response": {
-      "main": [[{ "node": "Respond to Webhook", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Error Trigger": {
-      "main": [[{ "node": "Error Response", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Error Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "settings": {

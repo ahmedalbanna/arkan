@@ -1,25 +1,19 @@
 'use client';
 
-import React, { useMemo, lazy } from 'react';
-import { 
-    Settings, 
-    LayoutTemplate, 
-    SlidersHorizontal, 
-    MessageSquare, 
-    History as HistoryIcon, 
-    Layers, 
-    FileText,
-    Terminal
-} from 'lucide-react';
 import { useLocalization } from '@/context/LocalizationContext';
 import { SidebarPanelConfig } from '@/modules/ai-content/adapters/components/builder/layout/types';
+import {
+    FileText,
+    History as HistoryIcon,
+    Layers,
+    LayoutTemplate,
+    MessageSquare,
+    Settings,
+    SlidersHorizontal
+} from 'lucide-react';
+import { lazy, useEffect, useMemo } from 'react';
 
-/**
- * useSidebarPanels — Primary panel registration hook for the Builder workspace.
- * Manages the dynamic configuration of left and right HUD panels.
- */
-
-// Modular HUD Components — Lazy loaded for performance
+// Lazy-loaded HUD components with prefetch
 const ProjectSettingsHUD = lazy(() => import('@/modules/ai-content/adapters/components/builder/settings/ProjectSettingsHUD').then(m => ({ default: m.ProjectSettingsHUD })));
 const TemplateLibraryHUD = lazy(() => import('@/modules/ai-content/adapters/components/builder/templates/TemplateLibraryHUD').then(m => ({ default: m.TemplateLibraryHUD })));
 const GlobalIntelligenceHUD = lazy(() => import('@/modules/ai-content/adapters/components/builder/settings/GlobalIntelligenceHUD').then(m => ({ default: m.GlobalIntelligenceHUD })));
@@ -28,11 +22,9 @@ const ChapterGenerationHUD = lazy(() => import('@/modules/ai-content/adapters/co
 const ProjectConsultantHUD = lazy(() => import('@/modules/ai-content/adapters/components/builder/chat/ProjectConsultantHUD').then(m => ({ default: m.ProjectConsultantHUD })));
 const SnapshotHistoryPanel = lazy(() => import('@/modules/projects/adapters/components/SnapshotHistoryPanel'));
 const SidebarNavigator = lazy(() => import('@/modules/ai-content/adapters/components/builder/SidebarNavigator').then(m => ({ default: m.SidebarNavigator })));
-// GenerationNavigator removed
-const UploadManager = lazy(() => import('@/modules/ai-content/adapters/components/builder/file-manager/UploadManager').then(m => ({ default: m.UploadManager })));
 
 interface UseSidebarPanelsProps {
-    project: any;
+    project: unknown;
     selectedSectionIds: string[];
     activeChapterId: string | null;
     onActiveSectionChange: (id: string | null, multiSelect?: boolean) => void;
@@ -40,6 +32,10 @@ interface UseSidebarPanelsProps {
     setActiveRightPanelKey: (key: string) => void;
 }
 
+/**
+ * useSidebarPanels — Panel registration hook for Builder workspace.
+ * Desktop-only. No keyboard shortcuts. No mobile checks.
+ */
 export function useSidebarPanels({
     project,
     selectedSectionIds,
@@ -50,12 +46,22 @@ export function useSidebarPanels({
 }: UseSidebarPanelsProps) {
     const { t } = useLocalization();
 
-    // All Panels — Merged into single right sidebar
-    // Order: Utility panels (formerly left) first, then AI & Intelligence panels (formerly right)
+    // Prefetch critical panels
+    useEffect(() => {
+        const prefetchModules = async () => {
+            await Promise.all([
+                import('@/modules/ai-content/adapters/components/builder/settings/ProjectSettingsHUD'),
+                import('@/modules/ai-content/adapters/components/builder/generation/SectionGenerationHUD'),
+            ]);
+        };
+        prefetchModules();
+    }, []);
+
     const rightPanels = useMemo<SidebarPanelConfig[]>(() => {
+        const typedProject = project as { getSection?: (id: string) => unknown; getChapter?: (id: string) => unknown } | null;
         const activeSectionId = selectedSectionIds.length > 0 ? selectedSectionIds[0] : null;
-        const activeSection = activeSectionId ? project?.getSection(activeSectionId) ?? null : null;
-        const activeChapter = activeChapterId ? project?.getChapter(activeChapterId) ?? null : null;
+        const activeSection = activeSectionId ? typedProject?.getSection?.(activeSectionId) ?? null : null;
+        const activeChapter = activeChapterId ? typedProject?.getChapter?.(activeChapterId) ?? null : null;
 
         const sectionTitle = activeChapterId
             ? 'Chapter Neural Core'
@@ -64,7 +70,6 @@ export function useSidebarPanels({
                 : 'Section Synthesis';
 
         return [
-            // — Utility Panels (formerly left sidebar) —
             {
                 key: 'settings',
                 title: 'Metadata Manifest',
@@ -90,7 +95,6 @@ export function useSidebarPanels({
                     />
                 ),
             },
-            // — AI & Intelligence Panels (formerly right sidebar) —
             {
                 key: 'section',
                 title: sectionTitle,
