@@ -1,10 +1,8 @@
 import { defineConfig } from 'drizzle-kit';
-
+// here can change db connection by choose schema and dialect provider
 export default defineConfig({
-  schema: './src/infrastructure/db/schema.ts',
+  schema: './src/infrastructure/db/schema.pg.ts',
   out: './drizzle',
-  dialect: 'sqlite',
-  dbCredentials: {
-    url: process.env.SQLITE_DB_PATH || './arkan.db',
-  },
+  dialect: 'postgresql',
+  dbCredentials: { url: process.env.DATABASE_URL! },
 });

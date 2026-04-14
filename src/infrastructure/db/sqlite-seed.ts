@@ -1,23 +1,25 @@
+
+import "reflect-metadata";
+
 import { db } from "@/infrastructure/db";
-import { 
-    settings, 
-    sections, 
-    agents, 
-    agentCategories, 
-    features, 
+import {
+    agentCategories,
+    agents,
+    features,
+    sections,
+    settings,
     templates,
     users
 } from "@/infrastructure/db/schema";
-import { BcryptPasswordService } from "@/modules/users/infrastructure/services/BcryptPasswordService";
-import { defaultBankAccounts } from "./seed-data/bank-accounts";
-import { defaultPaymentMethods } from "./seed-data/payment-methods";
-import { defaultFeatures } from "./seed-data/features";
-import { defaultSections } from "./seed-data/sections";
-import { defaultAgents, defaultAgentCategories } from './seed-data/agents';
-import { defaultReportTemplates } from './seed-data/report-templates';
 import { templates as defaultDocxTemplates } from '@/modules/ai-content/infrastructure/exporters/DocxStyles';
 import { templates as defaultPptxTemplates } from '@/modules/templates/infrastructure/PptxStyles';
-
+import { BcryptPasswordService } from "@/modules/users/infrastructure/services/BcryptPasswordService";
+import { defaultAgentCategories, defaultAgents } from './seed-data/agents';
+import { defaultBankAccounts } from "./seed-data/bank-accounts";
+import { defaultFeatures } from "./seed-data/features";
+import { defaultPaymentMethods } from "./seed-data/payment-methods";
+import { defaultReportTemplates } from './seed-data/report-templates';
+import { defaultSections } from "./seed-data/sections";
 async function seed() {
     console.log("Starting SQLite seeding process...");
 
@@ -74,11 +76,13 @@ async function seed() {
             })
         }).onConflictDoUpdate({
             target: settings.key,
-            set: { value: JSON.stringify({
-                newUserCredits: 10,
-                bankAccounts: defaultBankAccounts,
-                paymentMethods: defaultPaymentMethods
-            })}
+            set: {
+                value: JSON.stringify({
+                    newUserCredits: 10,
+                    bankAccounts: defaultBankAccounts,
+                    paymentMethods: defaultPaymentMethods
+                })
+            }
         });
 
         // --- Sections ---
@@ -93,7 +97,7 @@ async function seed() {
                 model: (section as any).model
             }).onConflictDoUpdate({
                 target: sections.id,
-                set: { 
+                set: {
                     title: section.title,
                     type: (section.type as any) || 'report',
                     prompt: section.prompt,
