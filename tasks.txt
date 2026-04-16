@@ -1,116 +1,154 @@
-Now I have a thorough understanding of the entire builder layout system. Here is a professional, detailed refactoring prompt you can use:
+You are tasked with refactoring the Arkan codebase to enforce strict Clean Architecture boundaries as defined in the project's `.dependency-cruiser.js` configuration.
 
-───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+## Current State
 
-                                                                      _ Builder Layout Refactoring Prompt
+- **Modules:** 8 (`admin`, `ai`, `ai-content`, `billing`, `projects`, `rag`, `templates`, `users`)
+- **Total dependencies analyzed:** 5145
+- **Violations detected:** 287 (259 errors, 28 warnings)
 
-───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
-                                                                                    Context
+The violations primarily involve:
+1. **Domain layer importing from outer layers** (application, adapters, infrastructure).
+2. **Application layer importing from adapters or infrastructure** (e.g., use cases directly importing concrete repositories or API clients).
+3. **Adapters importing infrastructure directly** (e.g., controllers importing Drizzle repositories instead of receiving them via dependency injection).
+4. **Cross‑module imports** where one module imports domain entities or utilities from another module directly, bypassing a shared public API.
+5. **Modules importing from `src/app/`** (Next.js routes/pages), which violates the inward dependency rule.
 
-The Arkan builder workspace is composed of the following layout components located in src/modules/ai-content/adapters/components/builder/layout/:
+## Goal
 
- • BuilderWorkspace.tsx — Root orchestrator. Manages fullscreen, onboarding, zoom, and composes all layout pieces.
- • BuilderLayout.tsx — Structural shell. Three-zone flex row: left sidebar → canvas → right sidebar. Uses Framer Motion for animated entry/exit.
- • BuilderHeader.tsx — Top bar. Project name editing, save status, and actions.
- • BuilderSidebar.tsx — Collapsible side panels (left/right). Wraps CollapsibleSidePanel, drives width transitions, has a "Stable Manifest" footer.
- • BuilderCanvas.tsx — Central viewport. Zoom orchestration, scroll area, dot-grid atmosphere, crop marks, floating zoom HUD.
- • SidebarContainer.tsx — Inner panel wrapper. Dot-grid, sticky technical header, scrollable content.
- • SidebarSection.tsx — Collapsible grouping within a panel. Animated height, high-density labels.
- • types.ts — Shared prop interfaces (SidebarPanelConfig, BuilderSidebarProps).
+Achieve **zero errors** and **zero warnings** from `dependency-cruiser` while maintaining all existing functionality. The code must strictly follow the layered dependency flow:
 
-───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
-                                                                               Refactoring Goals
+```
+adapters → application → domain ← infrastructure
+```
 
-Please refactor these components to professional engineering standards with the following objectives:
+- `domain/` must have **zero** dependencies on other layers or external frameworks.
+- `application/` may depend **only** on `domain/` and shared utilities.
+- `adapters/` may depend on `application/` and `domain/`, and may import `infrastructure/` **only** through dependency injection (not directly in the file body).
+- `infrastructure/` may depend **only** on `domain/` (to implement interfaces) and external libraries.
 
-───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
-                                                                   1. 🔧 Structural & Responsibility Clarity
+## Refactoring Strategy & Priority
 
- • BuilderWorkspace.tsx is doing too much: fullscreen logic, onboarding state, snapshot lookup, profiler instrumentation, suggestion computation, and layout composition.
-   Extract each concern into a dedicated hook or sub-component:
-    • useFullscreen(ref) → handles requestFullscreen, exitFullscreen, and fullscreenchange event.
-    • useOnboarding() → handles localStorage check, showOnboarding state, and handleOnboardingComplete.
-    • Move suggestion computation into useReportGenerator or a dedicated useDocumentSuggestion(project) hook.
-    • Remove the <Profiler> wrapper in production builds (gate it with process.env.NODE_ENV === 'development').
- • BuilderLayout.tsx should accept an optional leftSidebar and correctly handle the case where neither sidebar is present (full-width canvas).
- • BuilderCanvas.tsx has two zoom-reset controls (RotateCcw and the percentage button) that both call onZoomReset. Consolidate into one canonical reset action and clarify
-   intent with distinct aria-label values.
+Execute the refactoring in **phases**, starting with the highest‑impact fixes.
 
-───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
-                                                                     2. 📐 CSS Variables & Sizing Hygiene
+### Phase 1: Fix Domain Layer Violations (Highest Priority)
 
- • The CSS variables --sidebar-w, --sidebar-w-left, and --workspace-h are defined inline on the BuilderLayout root div. Move these into the global CSS (globals.css) or a
-   dedicated design-token layer so they are available to child components without prop drilling or var() assumptions.
- • The BuilderSidebar and BuilderCanvas currently duplicate the 28px dot-grid background style inline. Extract this into a reusable Tailwind utility class or a shared
-   <AtmosphericGrid /> primitive component to eliminate duplication across 4+ components.
+**Pattern:** Domain files importing from `application/`, `adapters/`, or `infrastructure/`.
 
-───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
-                                                                     3. 🎬 Motion & Animation Consistency
+**Action:**
+- For each domain file with an outer‑layer import, identify the **reason** (e.g., a domain entity using a use case type, or a repository interface importing a concrete implementation).
+- **Solutions:**
+  - Move the imported code **into** the domain layer if it truly belongs there (e.g., type definitions, pure functions).
+  - Invert the dependency using an **interface**: define the interface in `domain/` and let the outer layer implement it.
+  - Remove the import if it is unused or can be replaced with a more abstract type.
 
- • BuilderLayout uses mode="popLayout" for sidebar AnimatePresence. Validate that this does not cause layout shifts when the right sidebar transitions between panels. Consider
-   mode="wait" if jumps occur.
- • All motion transitions use ease: [0.22, 1, 0.36, 1] (spring-like cubic bezier). Extract this into a shared constant:
-   ```ts
-   // src/modules/ai-content/adapters/components/builder/layout/motion.ts
-   export const SPRING_EASE = [0.22, 1, 0.36, 1] as const;
-   export const PANEL_TRANSITION = { duration: 0.5, ease: SPRING_EASE };
-   ```
- • SidebarSection uses duration: 0.5 for height animation. Reduce to 0.3 for snappier section toggling which is more standard for collapsible UIs.
+**Examples of expected fixes:**
+- If `domain/Project.ts` imports `application/use-cases/CreateProjectUseCase`, extract the use case's input/output types into `domain/` or define a separate `ProjectService` interface in domain.
+- If a repository interface `IProjectRepository` imports `infrastructure/DrizzleProjectRepository`, delete that import and rely on dependency inversion.
 
-───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
-                                                                       4. ♿ Accessibility Improvements
+### Phase 2: Fix Application Layer Violations
 
- • SidebarSection: The <button> already handles onClick, so the onKeyDown for Enter is redundant — native buttons fire onClick on Enter. Remove the redundant handler.
- • SidebarSection: Add aria-expanded={isOpen} and aria-controls pointing to the content id for proper screen reader announcement.
- • BuilderCanvas Zoom HUD: The <button> for zoom reset percentage is missing aria-label. Add aria-label="Reset zoom to 100%".
- • BuilderSidebar footer: The ShieldCheck icon and version label are decorative. Ensure they have aria-hidden="true".
- • SidebarContainer header: The <h2> is semantically correct, but ensure heading hierarchy is consistent with the page (should be <h2> if the page has an <h1>, otherwise
-   adjust).
+**Pattern:** Use cases or application services importing from `adapters/` or `infrastructure/`.
 
-───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
-                                                                  5. 🧩 Type Safety & Interface Completeness
+**Action:**
+- Application layer must **only** know about domain interfaces.
+- **Solutions:**
+  - Replace direct imports of concrete repositories/services with their domain interfaces (already defined in `domain/`).
+  - For imports of utility functions (e.g., `randomId`, `cn`), move those utilities to a shared `src/shared/utils/` directory that is exempt from layer checks (update `.dependency-cruiser.js` to allow this shared folder to be imported anywhere).
+  - If a use case currently creates its own dependencies, refactor to **accept them via constructor injection** (or function arguments) so the composition root can provide the concrete implementations.
 
- • BuilderCanvas: The containerRef prop type is React.RefObject<HTMLDivElement> but the component also has its own ref via forwardRef. The dual-ref pattern is confusing —
-   document when each is used or consolidate.
- • types.ts: SidebarPanelConfig.icon is typed as ReactElement but is passed directly as JSX. Widen to ReactNode for flexibility, or narrow to React.ReactElement<{ className?:
-   string }> to allow icon size overrides.
- • BuilderSidebarProps: defaultSize and onResize are defined but never consumed anywhere in BuilderSidebar.tsx. Either implement resizable sidebar logic or remove these dead
-   props.
+**Example:**
+```typescript
+// BEFORE (violation)
+import { DrizzleProjectRepository } from '../infrastructure/DrizzleProjectRepository';
+export class GetProjectsUseCase {
+  constructor() {
+    this.repo = new DrizzleProjectRepository();
+  }
+}
 
-───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
-                                                                          6. 🧹 Code Quality & Naming
+// AFTER (compliant)
+import { IProjectRepository } from '../domain/repositories/IProjectRepository';
+export class GetProjectsUseCase {
+  constructor(private readonly projectRepo: IProjectRepository) {}
+}
+```
 
- • Remove all internal HUD/military jargon from comments (Neural Matrix, Spectral Synchronization, Neural Probing Active, Registry Node 01, Stable Manifest) and replace with
-   clear, professional engineering terminology:
-    • Neural Matrix → Workspace Layout
-    • Neural Probing Active → Processing
-    • Spectral Overlay → Loading Overlay
-    • Stable Manifest Footer → Panel Footer
-    • Registry Node → Panel
- • The hardcoded version label V2.4.0-S in BuilderSidebar's footer adds no functional value. Remove it or replace with a dynamic value from package.json if needed.
- • The Binary icon imported in SidebarContainer.tsx is unused — remove it.
+### Phase 3: Adapters → Infrastructure Direct Imports (Warnings)
 
-───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
-                                                                            7. 📦 File Organization
+**Pattern:** Controllers, hooks, or API clients importing concrete infrastructure classes directly.
 
- • Create src/modules/ai-content/adapters/components/builder/layout/motion.ts for shared animation constants.
- • Create src/components/shared/AtmosphericGrid.tsx for the reusable dot-grid background primitive.
- • Ensure types.ts is the single source of truth — remove any locally re-declared prop interfaces that shadow it.
+**Action:**
+- Adapters should receive their dependencies (use cases, repositories, services) from a **composition root**.
+- **Solutions:**
+  - For **API routes** (`src/app/api/.../route.ts`), move the instantiation of concrete repositories and services into the route handler itself (or a factory function). The route acts as the composition root.
+  - For **React hooks**, they should **not** instantiate infrastructure. Instead, they should call API endpoints (via `api-client` services) or accept pre‑instantiated services via React Context.
+  - For **controllers**, ensure their constructors accept interfaces and that the instantiation happens in the route handler.
 
-───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
-                                                                              Acceptance Criteria
+**Example (API route refactor):**
+```typescript
+// BEFORE (violation in controller)
+import { DrizzleProjectRepository } from '../../infrastructure/DrizzleProjectRepository';
+class ProjectController {
+  constructor() {
+    this.getProjectsUseCase = new GetProjectsUseCase(new DrizzleProjectRepository());
+  }
+}
 
- • [ ] BuilderWorkspace.tsx is under 100 lines, with logic extracted to hooks.
- • [ ] Zero duplicated dot-grid background inline styles — use <AtmosphericGrid />.
- • [ ] All animation easing constants imported from motion.ts.
- • [ ] aria-expanded, aria-controls, and aria-label applied to all interactive elements.
- • [ ] Dead props (defaultSize, onResize) either implemented or removed.
- • [ ] No internal jargon in JSDoc/comments — professional engineering language only.
- • [ ] TypeScript strict mode: no any, no unused imports.
- • [ ] All components pass existing tests without modification.
+// AFTER (compliant, composition in route)
+// route.ts
+const repo = new DrizzleProjectRepository();
+const useCase = new GetProjectsUseCase(repo);
+const controller = new ProjectController(useCase);
+```
 
-───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+### Phase 4: Cross‑Module Imports
 
- 1 Refactor the Template Gallery to use these same professional standards?
- 2 Review and refine the Sidebar HUDs (e.g., SelectionGenerationHUD.tsx) for any remaining jargon?
- 3 Verify the layout in a specific responsive viewport
+**Pattern:** Module A importing directly from Module B (e.g., `projects` importing `UserSchema` from `users/domain`).
+
+**Action:**
+- Create a **public API** for each module via a `index.ts` file in the module root that exports only what is safe to share.
+- Update `.dependency-cruiser.js` to allow imports from `^src/modules/[^/]+/index.ts` only.
+- **If schemas need to be shared** (e.g., `UserSchema` used in `Project`), consider extracting shared schemas to a separate `@shared/schemas` package or move the schema to a common location like `src/shared/schemas/`. For this refactoring, we can temporarily allow cross‑module schema imports as defined in the current cruiser config, but the long‑term goal is to minimize such coupling.
+
+### Phase 5: No Imports from `src/app/`
+
+**Pattern:** A module file importing from `src/app/` (e.g., a hook importing a page component).
+
+**Action:**
+- These are clear violations of the dependency direction. **Remove the import entirely**.
+- If functionality is needed by the module, move that code into a shared location (e.g., `src/shared/ui/` for components, `src/shared/hooks/` for reusable hooks).
+
+## Execution Guidelines for the Agent
+
+1. **Run `npx depcruise src`** after every few changes to verify progress.
+2. **Work on one module at a time** to reduce risk. Start with a smaller module like `templates` or `billing`.
+3. **Preserve all existing functionality.** Do not change business logic; only reorganize imports and dependencies.
+4. **Use explicit type imports** (`import type { ... }`) where possible to avoid runtime circular dependencies.
+5. **Update barrel files** (`index.ts`) as needed to provide clean public interfaces.
+6. **If unsure about a specific import**, ask for clarification before removing it.
+
+## Expected Outcome
+
+After the refactoring, running:
+
+```bash
+npx depcruise src
+```
+
+Should output:
+
+```
+✔ no dependency violations found (287 violations fixed)
+```
+
+Additionally, a visual graph generated with `npx depcruise --output-type dot src | dot -T svg > deps.svg` should show clean layering with domain at the bottom and infrastructure at the top, and no arrows pointing inward.
+
+## Resources
+
+- The `.dependency-cruiser.js` configuration is already present in the project root with detailed rules.
+- A comprehensive list of violations can be obtained by running:
+  ```bash
+  npx depcruise --output-type json src > violations.json
+  ```
+
+Begin the refactoring with Phase 1 and report progress after each phase. Provide a summary of the changes made and any architectural decisions that required deviation from the standard pattern.

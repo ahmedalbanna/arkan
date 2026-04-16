@@ -185,6 +185,7 @@
     "@types/wav": "^1.0.4",
     "@typescript-eslint/eslint-plugin": "^8.46.2",
     "@typescript-eslint/parser": "^8.46.2",
+    "dependency-cruiser": "^17.3.10",
     "drizzle-kit": "^0.31.10",
     "eslint": "^9.35.0",
     "eslint-config-next": "^15.5.3",
