@@ -38,8 +38,8 @@ import { cn } from '@/infrastructure/utils/cn';
 import { Chapter } from '@/modules/ai-content/domain/entities/Chapter';
 import { Section } from '@/modules/ai-content/domain/entities/Section';
 import { ProjectContent } from '@/modules/projects/domain/entities/Project';
-import { DocxTemplateKey, templates as docxTemplates } from '@/modules/ai-content/infrastructure/exporters/DocxStyles';
-import { PptxTemplateKey, templates as pptxTemplates } from '@/modules/templates/infrastructure/PptxStyles';
+import { DocxTemplateKey, templates as docxTemplates } from '@/infrastructure/exporters/DocxStyles';
+import { PptxTemplateKey, templates as pptxTemplates } from '@/infrastructure/exporters/PptxStyles';
 import { FormatSelector } from './FormatSelector';
 
 /**

@@ -1,6 +1,6 @@
 import { z } from 'zod';
-import { type SectionProperties } from '@/modules/ai-content/domain/entities/Section';
 import { Template, type BaseTemplateProperties } from './Template';
+import type { ReportTemplateSection } from '../types/report-template';
 
 export const ReportTemplateChapterSchema = z.object({
   title: z.string(),
@@ -37,7 +37,7 @@ export interface ReportTemplateProperties extends BaseTemplateProperties {
   isDefault?: boolean;
   content?: {
     title: string;
-    sections: SectionProperties[];
+    sections: ReportTemplateSection[];
   }[];
   // Project configuration fields
   projectType?: string;
@@ -51,7 +51,7 @@ export class ReportTemplate extends Template {
   public isDefault: boolean;
   public content: {
     title: string;
-    sections: SectionProperties[];
+    sections: ReportTemplateSection[];
   }[];
 
   constructor(props: ReportTemplateProperties) {

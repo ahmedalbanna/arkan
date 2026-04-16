@@ -1,7 +1,7 @@
 
 'use client';
 
-import { projectFromFile, downloadProjectAsFile } from '@/modules/projects/infrastructure/io/io';
+import { projectFromFile, downloadProjectAsFile } from '@/hooks/util/project-file-io';
 import { useBuilderStore } from '@/modules/projects/adapters/state/useBuilderStore';
 import { useRouter } from 'next/navigation';
 import { useCallback } from 'react';

@@ -13,7 +13,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/util/use-toast';
-import { templates as pptxTemplates } from '@/modules/templates/infrastructure/PptxStyles';
+import { templates as pptxTemplates } from '@/infrastructure/exporters/PptxStyles';
 import { apiService } from '@/infrastructure/api/ApiService';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';

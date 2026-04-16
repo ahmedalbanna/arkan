@@ -5,7 +5,7 @@ import { projectKeys } from '@/infrastructure/api/query-keys';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useBuilderStore } from '@/modules/projects/adapters/state/useBuilderStore';
 import { useAuth } from '@/context/AuthContext';
-import { LocalProjectService } from '@/modules/projects/infrastructure/storage/LocalProjectService';
+import { LocalProjectService } from '@/infrastructure/storage/LocalProjectService';
 import { ProjectApiClient } from '@/modules/projects/adapters/api-client/ProjectApiClient';
 import { Project, type ProjectProperties } from '@/modules/projects/domain/entities/Project';
 import { container } from '@/infrastructure/di/container';

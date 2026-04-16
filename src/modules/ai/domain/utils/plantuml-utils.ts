@@ -1,6 +1,6 @@
 import pako from "pako";
 import { encode64 } from "@/infrastructure/utils/encode64";
-import { getProxiedImageBuffer } from "@/modules/templates/infrastructure/utils/ProxiedImage";
+import { getProxiedImageBuffer } from "@/infrastructure/utils/proxied-image";
 
 export async function processPlantUml(markdown: string): Promise<string> {
   if (typeof markdown !== 'string') {

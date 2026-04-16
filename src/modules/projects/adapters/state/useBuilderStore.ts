@@ -1,12 +1,13 @@
 'use client';
 
 import { toast } from '@/hooks/util/use-toast';
+import { parseMarkdownToContent } from '@/hooks/util/useMarkdownParser';
+import { projectFromFile } from '@/hooks/util/project-file-io';
 import { container } from '@/infrastructure/di/container';
+import { LocalProjectService } from '@/infrastructure/storage/LocalProjectService';
 import { useEditorStore } from '@/modules/ai-content/adapters/state/use-editor-store';
 import { Chapter } from '@/modules/ai-content/domain/entities/Chapter';
 import { Project, type ProjectProperties } from '@/modules/projects/domain/entities/Project';
-import { projectFromFile } from '@/modules/projects/infrastructure/io/io';
-import { LocalProjectService } from '@/modules/projects/infrastructure/storage/LocalProjectService';
 import { User } from '@/modules/users/domain/entities/User';
 import { useEffect } from 'react';
 import { v4 as uuidv4 } from 'uuid';
@@ -203,7 +204,6 @@ const useBuilderStore = create<BuilderState>()(
             },
 
             syncProjectStructure: () => {
-                const { parseMarkdownToContent } = require('@/modules/projects/infrastructure/io/markdown-parser');
                 get().updateProject(p => p.syncStructure(parseMarkdownToContent));
             },
 

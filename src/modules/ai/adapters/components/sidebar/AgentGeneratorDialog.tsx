@@ -5,7 +5,7 @@ import { Loader2, Sparkles, Wand2 } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 
-import { generateAgentConfig } from '@/modules/ai/infrastructure/flows/generation/generate-agent-config';
+import { generateAgentConfig } from '@/infrastructure/ai/agent-flows';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,

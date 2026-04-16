@@ -7,7 +7,7 @@ import { useMemo, useState, useCallback } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import type { DragEndEvent } from '@dnd-kit/core';
 import { useAiActions } from './use-ai-actions';
-import { applyReportTemplate } from '@/modules/projects/infrastructure/io/template';
+import { applyReportTemplate } from '@/infrastructure/projects/apply-report-template';
 
 export function useReportGenerationTools() {
     const { t } = useLocalization();

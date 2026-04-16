@@ -4,12 +4,12 @@ import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { useService } from '@/hooks/util/use-service';
 import { IMarkdownServiceToken } from '@/infrastructure/di/tokens';
+import { ContextualToolbar } from '@/infrastructure/editor/ToolBar';
+import { editorExtensions, handleHtmlPaste, handlePlainPaste } from '@/infrastructure/editor/tiptap-extensions';
 import { cn } from '@/infrastructure/utils/cn';
 import { PROSE_CLASSES } from '@/modules/ai-content/adapters/components/report-mode/markdown-styles';
 import { useEditorStore } from '@/modules/ai-content/adapters/state/use-editor-store';
 import { IMarkdownService } from '@/modules/ai-content/domain/services/IMarkdownService';
-import { ContextualToolbar } from '@/modules/ai-content/infrastructure/editor/editor/ToolBar';
-import { editorExtensions, handleHtmlPaste, handlePlainPaste } from '@/modules/ai-content/infrastructure/editor/tiptap-extensions';
 import { BubbleMenu, EditorContent, useEditor, type Editor } from '@tiptap/react';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 

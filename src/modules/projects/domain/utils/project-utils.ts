@@ -1,6 +1,5 @@
 
 import { Project } from '@/modules/projects/domain/entities/Project';
-import { Section } from '@/modules/ai-content/domain/entities/Section';
 
 /**
  * Extracts context names (section names and file names) from a section's context.
@@ -8,7 +7,10 @@ import { Section } from '@/modules/ai-content/domain/entities/Section';
  * @param section The section to extract context from.
  * @returns An array of context names.
  */
-export function getContextNames(project: Project, section: Section): string[] {
+export function getContextNames(
+  project: Project,
+  section: { context?: { sections?: Record<string, string>; externalContext?: Record<string, string> } } | null | undefined
+): string[] {
     if (!section) return [];
     const context = section.context;
     if (!context) return [];

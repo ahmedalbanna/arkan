@@ -1,7 +1,6 @@
 import { inject, injectable } from "tsyringe";
 import { type IAuthRepository, IAuthRepositoryToken } from "../../domain/repositories/IAuthRepository";
 import { type IEmailService, IEmailServiceToken } from "../../domain/services/IEmailService";
-import { DrizzleAuthRepository } from "../../infrastructure/repositories/DrizzleAuthRepository";
 import { Result } from "@/infrastructure/utils/result";
 import { UserError } from "../../domain/errors/UserErrors";
 
@@ -15,11 +14,6 @@ export class SendPasswordResetUseCase {
     ) {}
 
     async execute(email: string): Promise<Result<void, UserError>> {
-        // Only SQLite support for now
-        if (!(this.authRepository instanceof DrizzleAuthRepository)) {
-            return Result.fail(UserError.internal("Password reset not supported for this provider."));
-        }
-
         const tokenResult = await this.authRepository.generatePasswordResetToken(email);
         
         // Even if user not found, we don't return error for security, but we also won't send an email

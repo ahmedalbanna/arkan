@@ -13923,3 +13923,587 @@
 2026-04-16 19:42:55.254 | 2741491 (2741491) | DEBUG    | Using bundled v2 Git-AI for stats-delta: /root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai
 2026-04-16 19:42:55.256 | 2741491 (2741491) | DEBUG    | git-ai stats collection: running command ['/root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai', 'stats-delta', '--json'] with cwd=/root/arkan
 2026-04-16 19:42:55.308 | 2741491 (2741491) | DEBUG    | git-ai stats-delta returned empty list, skipping event emission
+2026-04-16 19:43:25.309 | 2741491 (2741491) | DEBUG    | Running periodic git-ai stats collection
+2026-04-16 19:43:25.313 | 2741491 (2741491) | DEBUG    | Using bundled v2 Git-AI for stats-delta: /root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai
+2026-04-16 19:43:25.314 | 2741491 (2741491) | DEBUG    | git-ai stats collection: running command ['/root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai', 'stats-delta', '--json'] with cwd=/root/arkan
+2026-04-16 19:43:25.368 | 2741491 (2741491) | DEBUG    | git-ai stats-delta returned empty list, skipping event emission
+2026-04-16 19:43:55.371 | 2741491 (2741491) | DEBUG    | Running periodic git-ai stats collection
+2026-04-16 19:43:55.372 | 2741491 (2741491) | DEBUG    | Using bundled v2 Git-AI for stats-delta: /root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai
+2026-04-16 19:43:55.374 | 2741491 (2741491) | DEBUG    | git-ai stats collection: running command ['/root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai', 'stats-delta', '--json'] with cwd=/root/arkan
+2026-04-16 19:43:55.464 | 2741491 (2741491) | DEBUG    | git-ai stats-delta returned empty list, skipping event emission
+2026-04-16 19:44:25.475 | 2741491 (2741491) | DEBUG    | Running periodic git-ai stats collection
+2026-04-16 19:44:25.477 | 2741491 (2741491) | DEBUG    | Using bundled v2 Git-AI for stats-delta: /root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai
+2026-04-16 19:44:25.477 | 2741491 (2741491) | DEBUG    | git-ai stats collection: running command ['/root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai', 'stats-delta', '--json'] with cwd=/root/arkan
+2026-04-16 19:44:25.659 | 2741491 (2741491) | DEBUG    | git-ai stats-delta returned empty list, skipping event emission
+2026-04-16 19:44:55.660 | 2741491 (2741491) | DEBUG    | Running periodic git-ai stats collection
+2026-04-16 19:44:55.660 | 2741491 (2741491) | DEBUG    | Using bundled v2 Git-AI for stats-delta: /root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai
+2026-04-16 19:44:55.661 | 2741491 (2741491) | DEBUG    | git-ai stats collection: running command ['/root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai', 'stats-delta', '--json'] with cwd=/root/arkan
+2026-04-16 19:44:55.750 | 2741491 (2741491) | DEBUG    | git-ai stats-delta returned empty list, skipping event emission
+2026-04-16 19:45:25.752 | 2741491 (2741491) | DEBUG    | Running periodic git-ai stats collection
+2026-04-16 19:45:25.753 | 2741491 (2741491) | DEBUG    | Using bundled v2 Git-AI for stats-delta: /root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai
+2026-04-16 19:45:25.754 | 2741491 (2741491) | DEBUG    | git-ai stats collection: running command ['/root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai', 'stats-delta', '--json'] with cwd=/root/arkan
+2026-04-16 19:45:25.966 | 2741491 (2741491) | DEBUG    | git-ai stats-delta returned empty list, skipping event emission
+2026-04-16 19:45:55.968 | 2741491 (2741491) | DEBUG    | Running periodic git-ai stats collection
+2026-04-16 19:45:55.975 | 2741491 (2741491) | DEBUG    | Using bundled v2 Git-AI for stats-delta: /root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai
+2026-04-16 19:45:55.976 | 2741491 (2741491) | DEBUG    | git-ai stats collection: running command ['/root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai', 'stats-delta', '--json'] with cwd=/root/arkan
+2026-04-16 19:45:56.035 | 2741491 (2741491) | DEBUG    | git-ai stats-delta returned empty list, skipping event emission
+2026-04-16 19:46:26.038 | 2741491 (2741491) | DEBUG    | Running periodic git-ai stats collection
+2026-04-16 19:46:26.040 | 2741491 (2741491) | DEBUG    | Using bundled v2 Git-AI for stats-delta: /root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai
+2026-04-16 19:46:26.047 | 2741491 (2741491) | DEBUG    | git-ai stats collection: running command ['/root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai', 'stats-delta', '--json'] with cwd=/root/arkan
+2026-04-16 19:46:26.157 | 2741491 (2741491) | DEBUG    | git-ai stats-delta returned empty list, skipping event emission
+2026-04-16 19:46:56.159 | 2741491 (2741491) | DEBUG    | Running periodic git-ai stats collection
+2026-04-16 19:46:56.166 | 2741491 (2741491) | DEBUG    | Using bundled v2 Git-AI for stats-delta: /root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai
+2026-04-16 19:46:56.166 | 2741491 (2741491) | DEBUG    | git-ai stats collection: running command ['/root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai', 'stats-delta', '--json'] with cwd=/root/arkan
+2026-04-16 19:46:56.379 | 2741491 (2741491) | DEBUG    | git-ai stats-delta returned empty list, skipping event emission
+2026-04-16 19:47:26.383 | 2741491 (2741491) | DEBUG    | Running periodic git-ai stats collection
+2026-04-16 19:47:26.395 | 2741491 (2741491) | DEBUG    | Using bundled v2 Git-AI for stats-delta: /root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai
+2026-04-16 19:47:26.397 | 2741491 (2741491) | DEBUG    | git-ai stats collection: running command ['/root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai', 'stats-delta', '--json'] with cwd=/root/arkan
+2026-04-16 19:47:26.518 | 2741491 (2741491) | DEBUG    | git-ai stats-delta returned empty list, skipping event emission
+2026-04-16 19:47:56.524 | 2741491 (2741491) | DEBUG    | Running periodic git-ai stats collection
+2026-04-16 19:47:56.572 | 2741491 (2741491) | DEBUG    | Using bundled v2 Git-AI for stats-delta: /root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai
+2026-04-16 19:47:56.572 | 2741491 (2741491) | DEBUG    | git-ai stats collection: running command ['/root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai', 'stats-delta', '--json'] with cwd=/root/arkan
+2026-04-16 19:47:56.621 | 2741491 (2741491) | DEBUG    | git-ai stats-delta returned empty list, skipping event emission
+2026-04-16 19:48:26.623 | 2741491 (2741491) | DEBUG    | Running periodic git-ai stats collection
+2026-04-16 19:48:26.633 | 2741491 (2741491) | DEBUG    | Using bundled v2 Git-AI for stats-delta: /root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai
+2026-04-16 19:48:26.640 | 2741491 (2741491) | DEBUG    | git-ai stats collection: running command ['/root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai', 'stats-delta', '--json'] with cwd=/root/arkan
+2026-04-16 19:48:26.692 | 2741491 (2741491) | DEBUG    | git-ai stats-delta returned empty list, skipping event emission
+2026-04-16 19:48:56.700 | 2741491 (2741491) | DEBUG    | Running periodic git-ai stats collection
+2026-04-16 19:48:56.707 | 2741491 (2741491) | DEBUG    | Using bundled v2 Git-AI for stats-delta: /root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai
+2026-04-16 19:48:56.707 | 2741491 (2741491) | DEBUG    | git-ai stats collection: running command ['/root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai', 'stats-delta', '--json'] with cwd=/root/arkan
+2026-04-16 19:48:56.840 | 2741491 (2741491) | DEBUG    | git-ai stats-delta returned empty list, skipping event emission
+2026-04-16 19:49:26.844 | 2741491 (2741491) | DEBUG    | Running periodic git-ai stats collection
+2026-04-16 19:49:26.854 | 2741491 (2741491) | DEBUG    | Using bundled v2 Git-AI for stats-delta: /root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai
+2026-04-16 19:49:26.855 | 2741491 (2741491) | DEBUG    | git-ai stats collection: running command ['/root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai', 'stats-delta', '--json'] with cwd=/root/arkan
+2026-04-16 19:49:26.905 | 2741491 (2741491) | DEBUG    | git-ai stats-delta returned empty list, skipping event emission
+2026-04-16 19:49:56.908 | 2741491 (2741491) | DEBUG    | Running periodic git-ai stats collection
+2026-04-16 19:49:56.912 | 2741491 (2741491) | DEBUG    | Using bundled v2 Git-AI for stats-delta: /root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai
+2026-04-16 19:49:56.921 | 2741491 (2741491) | DEBUG    | git-ai stats collection: running command ['/root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai', 'stats-delta', '--json'] with cwd=/root/arkan
+2026-04-16 19:49:57.034 | 2741491 (2741491) | DEBUG    | git-ai stats-delta returned empty list, skipping event emission
+2026-04-16 19:50:27.036 | 2741491 (2741491) | DEBUG    | Running periodic git-ai stats collection
+2026-04-16 19:50:27.046 | 2741491 (2741491) | DEBUG    | Using bundled v2 Git-AI for stats-delta: /root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai
+2026-04-16 19:50:27.062 | 2741491 (2741491) | DEBUG    | git-ai stats collection: running command ['/root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai', 'stats-delta', '--json'] with cwd=/root/arkan
+2026-04-16 19:50:27.183 | 2741491 (2741491) | DEBUG    | git-ai stats-delta returned empty list, skipping event emission
+2026-04-16 19:50:57.186 | 2741491 (2741491) | DEBUG    | Running periodic git-ai stats collection
+2026-04-16 19:50:57.187 | 2741491 (2741491) | DEBUG    | Using bundled v2 Git-AI for stats-delta: /root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai
+2026-04-16 19:50:57.188 | 2741491 (2741491) | DEBUG    | git-ai stats collection: running command ['/root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai', 'stats-delta', '--json'] with cwd=/root/arkan
+2026-04-16 19:50:57.235 | 2741491 (2741491) | DEBUG    | git-ai stats-delta returned empty list, skipping event emission
+2026-04-16 19:51:27.249 | 2741491 (2741491) | DEBUG    | Running periodic git-ai stats collection
+2026-04-16 19:51:27.260 | 2741491 (2741491) | DEBUG    | Using bundled v2 Git-AI for stats-delta: /root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai
+2026-04-16 19:51:27.269 | 2741491 (2741491) | DEBUG    | git-ai stats collection: running command ['/root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai', 'stats-delta', '--json'] with cwd=/root/arkan
+2026-04-16 19:51:27.379 | 2741491 (2741491) | DEBUG    | git-ai stats-delta returned empty list, skipping event emission
+2026-04-16 19:51:57.380 | 2741491 (2741491) | DEBUG    | Running periodic git-ai stats collection
+2026-04-16 19:51:57.381 | 2741491 (2741491) | DEBUG    | Using bundled v2 Git-AI for stats-delta: /root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai
+2026-04-16 19:51:57.382 | 2741491 (2741491) | DEBUG    | git-ai stats collection: running command ['/root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai', 'stats-delta', '--json'] with cwd=/root/arkan
+2026-04-16 19:51:57.433 | 2741491 (2741491) | DEBUG    | git-ai stats-delta returned empty list, skipping event emission
+2026-04-16 19:52:27.435 | 2741491 (2741491) | DEBUG    | Running periodic git-ai stats collection
+2026-04-16 19:52:27.437 | 2741491 (2741491) | DEBUG    | Using bundled v2 Git-AI for stats-delta: /root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai
+2026-04-16 19:52:27.437 | 2741491 (2741491) | DEBUG    | git-ai stats collection: running command ['/root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai', 'stats-delta', '--json'] with cwd=/root/arkan
+2026-04-16 19:52:27.495 | 2741491 (2741491) | DEBUG    | git-ai stats-delta returned empty list, skipping event emission
+2026-04-16 19:52:57.498 | 2741491 (2741491) | DEBUG    | Running periodic git-ai stats collection
+2026-04-16 19:52:57.509 | 2741491 (2741491) | DEBUG    | Using bundled v2 Git-AI for stats-delta: /root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai
+2026-04-16 19:52:57.511 | 2741491 (2741491) | DEBUG    | git-ai stats collection: running command ['/root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai', 'stats-delta', '--json'] with cwd=/root/arkan
+2026-04-16 19:52:57.566 | 2741491 (2741491) | DEBUG    | git-ai stats-delta returned empty list, skipping event emission
+2026-04-16 19:53:27.568 | 2741491 (2741491) | DEBUG    | Running periodic git-ai stats collection
+2026-04-16 19:53:27.570 | 2741491 (2741491) | DEBUG    | Using bundled v2 Git-AI for stats-delta: /root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai
+2026-04-16 19:53:27.571 | 2741491 (2741491) | DEBUG    | git-ai stats collection: running command ['/root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai', 'stats-delta', '--json'] with cwd=/root/arkan
+2026-04-16 19:53:27.752 | 2741491 (2741491) | DEBUG    | git-ai stats-delta returned empty list, skipping event emission
+2026-04-16 19:53:57.764 | 2741491 (2741491) | DEBUG    | Running periodic git-ai stats collection
+2026-04-16 19:53:57.765 | 2741491 (2741491) | DEBUG    | Using bundled v2 Git-AI for stats-delta: /root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai
+2026-04-16 19:53:57.765 | 2741491 (2741491) | DEBUG    | git-ai stats collection: running command ['/root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai', 'stats-delta', '--json'] with cwd=/root/arkan
+2026-04-16 19:53:57.800 | 2741491 (2741491) | DEBUG    | git-ai stats-delta returned empty list, skipping event emission
+2026-04-16 19:54:27.802 | 2741491 (2741491) | DEBUG    | Running periodic git-ai stats collection
+2026-04-16 19:54:27.812 | 2741491 (2741491) | DEBUG    | Using bundled v2 Git-AI for stats-delta: /root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai
+2026-04-16 19:54:27.815 | 2741491 (2741491) | DEBUG    | git-ai stats collection: running command ['/root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai', 'stats-delta', '--json'] with cwd=/root/arkan
+2026-04-16 19:54:27.923 | 2741491 (2741491) | DEBUG    | git-ai stats-delta returned empty list, skipping event emission
+2026-04-16 19:54:57.926 | 2741491 (2741491) | DEBUG    | Running periodic git-ai stats collection
+2026-04-16 19:54:57.930 | 2741491 (2741491) | DEBUG    | Using bundled v2 Git-AI for stats-delta: /root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai
+2026-04-16 19:54:57.930 | 2741491 (2741491) | DEBUG    | git-ai stats collection: running command ['/root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai', 'stats-delta', '--json'] with cwd=/root/arkan
+2026-04-16 19:54:58.008 | 2741491 (2741491) | DEBUG    | git-ai stats-delta returned empty list, skipping event emission
+2026-04-16 19:55:28.059 | 2741491 (2741491) | DEBUG    | Running periodic git-ai stats collection
+2026-04-16 19:55:28.061 | 2741491 (2741491) | DEBUG    | Using bundled v2 Git-AI for stats-delta: /root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai
+2026-04-16 19:55:28.061 | 2741491 (2741491) | DEBUG    | git-ai stats collection: running command ['/root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai', 'stats-delta', '--json'] with cwd=/root/arkan
+2026-04-16 19:55:28.319 | 2741491 (2741491) | DEBUG    | git-ai stats-delta returned empty list, skipping event emission
+2026-04-16 19:55:58.339 | 2741491 (2741491) | DEBUG    | Running periodic git-ai stats collection
+2026-04-16 19:55:58.354 | 2741491 (2741491) | DEBUG    | Using bundled v2 Git-AI for stats-delta: /root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai
+2026-04-16 19:55:58.368 | 2741491 (2741491) | DEBUG    | git-ai stats collection: running command ['/root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai', 'stats-delta', '--json'] with cwd=/root/arkan
+2026-04-16 19:55:58.501 | 2741491 (2741491) | DEBUG    | git-ai stats-delta returned empty list, skipping event emission
+2026-04-16 19:56:28.503 | 2741491 (2741491) | DEBUG    | Running periodic git-ai stats collection
+2026-04-16 19:56:28.520 | 2741491 (2741491) | DEBUG    | Using bundled v2 Git-AI for stats-delta: /root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai
+2026-04-16 19:56:28.520 | 2741491 (2741491) | DEBUG    | git-ai stats collection: running command ['/root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai', 'stats-delta', '--json'] with cwd=/root/arkan
+2026-04-16 19:56:28.672 | 2741491 (2741491) | DEBUG    | git-ai stats-delta returned empty list, skipping event emission
+2026-04-16 19:56:58.674 | 2741491 (2741491) | DEBUG    | Running periodic git-ai stats collection
+2026-04-16 19:56:58.682 | 2741491 (2741491) | DEBUG    | Using bundled v2 Git-AI for stats-delta: /root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai
+2026-04-16 19:56:58.682 | 2741491 (2741491) | DEBUG    | git-ai stats collection: running command ['/root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai', 'stats-delta', '--json'] with cwd=/root/arkan
+2026-04-16 19:56:58.777 | 2741491 (2741491) | DEBUG    | git-ai stats-delta returned empty list, skipping event emission
+2026-04-16 19:57:28.780 | 2741491 (2741491) | DEBUG    | Running periodic git-ai stats collection
+2026-04-16 19:57:28.781 | 2741491 (2741491) | DEBUG    | Using bundled v2 Git-AI for stats-delta: /root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai
+2026-04-16 19:57:28.781 | 2741491 (2741491) | DEBUG    | git-ai stats collection: running command ['/root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai', 'stats-delta', '--json'] with cwd=/root/arkan
+2026-04-16 19:57:29.330 | 2741491 (2741491) | DEBUG    | git-ai stats-delta returned empty list, skipping event emission
+2026-04-16 19:57:59.333 | 2741491 (2741491) | DEBUG    | Running periodic git-ai stats collection
+2026-04-16 19:57:59.334 | 2741491 (2741491) | DEBUG    | Using bundled v2 Git-AI for stats-delta: /root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai
+2026-04-16 19:57:59.334 | 2741491 (2741491) | DEBUG    | git-ai stats collection: running command ['/root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai', 'stats-delta', '--json'] with cwd=/root/arkan
+2026-04-16 19:57:59.380 | 2741491 (2741491) | DEBUG    | git-ai stats-delta returned empty list, skipping event emission
+2026-04-16 19:58:29.382 | 2741491 (2741491) | DEBUG    | Running periodic git-ai stats collection
+2026-04-16 19:58:29.383 | 2741491 (2741491) | DEBUG    | Using bundled v2 Git-AI for stats-delta: /root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai
+2026-04-16 19:58:29.384 | 2741491 (2741491) | DEBUG    | git-ai stats collection: running command ['/root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai', 'stats-delta', '--json'] with cwd=/root/arkan
+2026-04-16 19:58:29.510 | 2741491 (2741491) | DEBUG    | git-ai stats-delta returned empty list, skipping event emission
+2026-04-16 19:58:59.533 | 2741491 (2741491) | DEBUG    | Running periodic git-ai stats collection
+2026-04-16 19:58:59.559 | 2741491 (2741491) | DEBUG    | Using bundled v2 Git-AI for stats-delta: /root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai
+2026-04-16 19:58:59.568 | 2741491 (2741491) | DEBUG    | git-ai stats collection: running command ['/root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai', 'stats-delta', '--json'] with cwd=/root/arkan
+2026-04-16 19:58:59.773 | 2741491 (2741491) | DEBUG    | git-ai stats-delta returned empty list, skipping event emission
+2026-04-16 19:59:29.775 | 2741491 (2741491) | DEBUG    | Running periodic git-ai stats collection
+2026-04-16 19:59:29.784 | 2741491 (2741491) | DEBUG    | Using bundled v2 Git-AI for stats-delta: /root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai
+2026-04-16 19:59:29.793 | 2741491 (2741491) | DEBUG    | git-ai stats collection: running command ['/root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai', 'stats-delta', '--json'] with cwd=/root/arkan
+2026-04-16 19:59:29.985 | 2741491 (2741491) | DEBUG    | git-ai stats-delta returned empty list, skipping event emission
+2026-04-16 19:59:59.986 | 2741491 (2741491) | DEBUG    | Running periodic git-ai stats collection
+2026-04-16 19:59:59.990 | 2741491 (2741491) | DEBUG    | Using bundled v2 Git-AI for stats-delta: /root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai
+2026-04-16 19:59:59.990 | 2741491 (2741491) | DEBUG    | git-ai stats collection: running command ['/root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai', 'stats-delta', '--json'] with cwd=/root/arkan
+2026-04-16 20:00:00.126 | 2741491 (2741491) | DEBUG    | git-ai stats-delta returned empty list, skipping event emission
+2026-04-16 20:00:30.135 | 2741491 (2741491) | DEBUG    | Running periodic git-ai stats collection
+2026-04-16 20:00:30.261 | 2741491 (2741491) | DEBUG    | Using bundled v2 Git-AI for stats-delta: /root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai
+2026-04-16 20:00:30.262 | 2741491 (2741491) | DEBUG    | git-ai stats collection: running command ['/root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai', 'stats-delta', '--json'] with cwd=/root/arkan
+2026-04-16 20:00:30.581 | 2741491 (2741491) | DEBUG    | git-ai stats-delta returned empty list, skipping event emission
+2026-04-16 20:01:00.583 | 2741491 (2741491) | DEBUG    | Running periodic git-ai stats collection
+2026-04-16 20:01:00.585 | 2741491 (2741491) | DEBUG    | Using bundled v2 Git-AI for stats-delta: /root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai
+2026-04-16 20:01:00.585 | 2741491 (2741491) | DEBUG    | git-ai stats collection: running command ['/root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai', 'stats-delta', '--json'] with cwd=/root/arkan
+2026-04-16 20:01:01.018 | 2741491 (2741491) | DEBUG    | git-ai stats-delta returned empty list, skipping event emission
+2026-04-16 20:01:31.018 | 2741491 (2741491) | DEBUG    | Running periodic git-ai stats collection
+2026-04-16 20:01:31.025 | 2741491 (2741491) | DEBUG    | Using bundled v2 Git-AI for stats-delta: /root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai
+2026-04-16 20:01:31.029 | 2741491 (2741491) | DEBUG    | git-ai stats collection: running command ['/root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai', 'stats-delta', '--json'] with cwd=/root/arkan
+2026-04-16 20:01:31.143 | 2741491 (2741491) | DEBUG    | git-ai stats-delta returned empty list, skipping event emission
+2026-04-16 20:02:01.154 | 2741491 (2741491) | DEBUG    | Running periodic git-ai stats collection
+2026-04-16 20:02:01.204 | 2741491 (2741491) | DEBUG    | Using bundled v2 Git-AI for stats-delta: /root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai
+2026-04-16 20:02:01.207 | 2741491 (2741491) | DEBUG    | git-ai stats collection: running command ['/root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai', 'stats-delta', '--json'] with cwd=/root/arkan
+2026-04-16 20:02:01.571 | 2741491 (2741491) | DEBUG    | git-ai stats-delta returned empty list, skipping event emission
+2026-04-16 20:02:31.574 | 2741491 (2741491) | DEBUG    | Running periodic git-ai stats collection
+2026-04-16 20:02:31.582 | 2741491 (2741491) | DEBUG    | Using bundled v2 Git-AI for stats-delta: /root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai
+2026-04-16 20:02:31.589 | 2741491 (2741491) | DEBUG    | git-ai stats collection: running command ['/root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai', 'stats-delta', '--json'] with cwd=/root/arkan
+2026-04-16 20:02:31.670 | 2741491 (2741491) | DEBUG    | git-ai stats-delta returned empty list, skipping event emission
+2026-04-16 20:03:01.672 | 2741491 (2741491) | DEBUG    | Running periodic git-ai stats collection
+2026-04-16 20:03:01.673 | 2741491 (2741491) | DEBUG    | Using bundled v2 Git-AI for stats-delta: /root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai
+2026-04-16 20:03:01.673 | 2741491 (2741491) | DEBUG    | git-ai stats collection: running command ['/root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai', 'stats-delta', '--json'] with cwd=/root/arkan
+2026-04-16 20:03:01.830 | 2741491 (2741491) | DEBUG    | git-ai stats-delta returned empty list, skipping event emission
+2026-04-16 20:03:31.835 | 2741491 (2741491) | DEBUG    | Running periodic git-ai stats collection
+2026-04-16 20:03:31.836 | 2741491 (2741491) | DEBUG    | Using bundled v2 Git-AI for stats-delta: /root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai
+2026-04-16 20:03:31.836 | 2741491 (2741491) | DEBUG    | git-ai stats collection: running command ['/root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai', 'stats-delta', '--json'] with cwd=/root/arkan
+2026-04-16 20:03:31.895 | 2741491 (2741491) | DEBUG    | git-ai stats-delta returned empty list, skipping event emission
+2026-04-16 20:04:01.900 | 2741491 (2741491) | DEBUG    | Running periodic git-ai stats collection
+2026-04-16 20:04:01.940 | 2741491 (2741491) | DEBUG    | Using bundled v2 Git-AI for stats-delta: /root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai
+2026-04-16 20:04:01.962 | 2741491 (2741491) | DEBUG    | git-ai stats collection: running command ['/root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai', 'stats-delta', '--json'] with cwd=/root/arkan
+2026-04-16 20:04:02.132 | 2741491 (2741491) | DEBUG    | git-ai stats-delta returned empty list, skipping event emission
+2026-04-16 20:04:32.135 | 2741491 (2741491) | DEBUG    | Running periodic git-ai stats collection
+2026-04-16 20:04:32.140 | 2741491 (2741491) | DEBUG    | Using bundled v2 Git-AI for stats-delta: /root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai
+2026-04-16 20:04:32.150 | 2741491 (2741491) | DEBUG    | git-ai stats collection: running command ['/root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai', 'stats-delta', '--json'] with cwd=/root/arkan
+2026-04-16 20:04:32.252 | 2741491 (2741491) | DEBUG    | git-ai stats-delta returned empty list, skipping event emission
+2026-04-16 20:05:02.264 | 2741491 (2741491) | DEBUG    | Running periodic git-ai stats collection
+2026-04-16 20:05:02.265 | 2741491 (2741491) | DEBUG    | Using bundled v2 Git-AI for stats-delta: /root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai
+2026-04-16 20:05:02.265 | 2741491 (2741491) | DEBUG    | git-ai stats collection: running command ['/root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai', 'stats-delta', '--json'] with cwd=/root/arkan
+2026-04-16 20:05:02.586 | 2741491 (2741491) | DEBUG    | git-ai stats-delta returned empty list, skipping event emission
+2026-04-16 20:05:32.592 | 2741491 (2741491) | DEBUG    | Running periodic git-ai stats collection
+2026-04-16 20:05:32.595 | 2741491 (2741491) | DEBUG    | Using bundled v2 Git-AI for stats-delta: /root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai
+2026-04-16 20:05:32.596 | 2741491 (2741491) | DEBUG    | git-ai stats collection: running command ['/root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai', 'stats-delta', '--json'] with cwd=/root/arkan
+2026-04-16 20:05:32.677 | 2741491 (2741491) | DEBUG    | git-ai stats-delta returned empty list, skipping event emission
+2026-04-16 20:06:02.679 | 2741491 (2741491) | DEBUG    | Running periodic git-ai stats collection
+2026-04-16 20:06:02.680 | 2741491 (2741491) | DEBUG    | Using bundled v2 Git-AI for stats-delta: /root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai
+2026-04-16 20:06:02.680 | 2741491 (2741491) | DEBUG    | git-ai stats collection: running command ['/root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai', 'stats-delta', '--json'] with cwd=/root/arkan
+2026-04-16 20:06:03.037 | 2741491 (2741491) | DEBUG    | git-ai stats-delta returned empty list, skipping event emission
+2026-04-16 20:06:33.041 | 2741491 (2741491) | DEBUG    | Running periodic git-ai stats collection
+2026-04-16 20:06:33.046 | 2741491 (2741491) | DEBUG    | Using bundled v2 Git-AI for stats-delta: /root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai
+2026-04-16 20:06:33.047 | 2741491 (2741491) | DEBUG    | git-ai stats collection: running command ['/root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai', 'stats-delta', '--json'] with cwd=/root/arkan
+2026-04-16 20:06:33.294 | 2741491 (2741491) | DEBUG    | git-ai stats-delta returned empty list, skipping event emission
+2026-04-16 20:07:03.295 | 2741491 (2741491) | DEBUG    | Running periodic git-ai stats collection
+2026-04-16 20:07:03.309 | 2741491 (2741491) | DEBUG    | Using bundled v2 Git-AI for stats-delta: /root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai
+2026-04-16 20:07:03.313 | 2741491 (2741491) | DEBUG    | git-ai stats collection: running command ['/root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai', 'stats-delta', '--json'] with cwd=/root/arkan
+2026-04-16 20:07:03.442 | 2741491 (2741491) | DEBUG    | git-ai stats-delta returned empty list, skipping event emission
+2026-04-16 20:07:33.453 | 2741491 (2741491) | DEBUG    | Running periodic git-ai stats collection
+2026-04-16 20:07:33.463 | 2741491 (2741491) | DEBUG    | Using bundled v2 Git-AI for stats-delta: /root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai
+2026-04-16 20:07:33.463 | 2741491 (2741491) | DEBUG    | git-ai stats collection: running command ['/root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai', 'stats-delta', '--json'] with cwd=/root/arkan
+2026-04-16 20:07:33.501 | 2741491 (2741491) | DEBUG    | git-ai stats-delta returned empty list, skipping event emission
+2026-04-16 20:08:03.503 | 2741491 (2741491) | DEBUG    | Running periodic git-ai stats collection
+2026-04-16 20:08:03.506 | 2741491 (2741491) | DEBUG    | Using bundled v2 Git-AI for stats-delta: /root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai
+2026-04-16 20:08:03.506 | 2741491 (2741491) | DEBUG    | git-ai stats collection: running command ['/root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai', 'stats-delta', '--json'] with cwd=/root/arkan
+2026-04-16 20:08:03.648 | 2741491 (2741491) | DEBUG    | git-ai stats-delta returned empty list, skipping event emission
+2026-04-16 20:08:33.653 | 2741491 (2741491) | DEBUG    | Running periodic git-ai stats collection
+2026-04-16 20:08:33.660 | 2741491 (2741491) | DEBUG    | Using bundled v2 Git-AI for stats-delta: /root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai
+2026-04-16 20:08:33.660 | 2741491 (2741491) | DEBUG    | git-ai stats collection: running command ['/root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai', 'stats-delta', '--json'] with cwd=/root/arkan
+2026-04-16 20:08:33.694 | 2741491 (2741491) | DEBUG    | git-ai stats-delta returned empty list, skipping event emission
+2026-04-16 20:09:03.700 | 2741491 (2741491) | DEBUG    | Running periodic git-ai stats collection
+2026-04-16 20:09:03.706 | 2741491 (2741491) | DEBUG    | Using bundled v2 Git-AI for stats-delta: /root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai
+2026-04-16 20:09:03.706 | 2741491 (2741491) | DEBUG    | git-ai stats collection: running command ['/root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai', 'stats-delta', '--json'] with cwd=/root/arkan
+2026-04-16 20:09:03.803 | 2741491 (2741491) | DEBUG    | git-ai stats-delta returned empty list, skipping event emission
+2026-04-16 20:09:33.806 | 2741491 (2741491) | DEBUG    | Running periodic git-ai stats collection
+2026-04-16 20:09:33.838 | 2741491 (2741491) | DEBUG    | Using bundled v2 Git-AI for stats-delta: /root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai
+2026-04-16 20:09:33.844 | 2741491 (2741491) | DEBUG    | git-ai stats collection: running command ['/root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai', 'stats-delta', '--json'] with cwd=/root/arkan
+2026-04-16 20:09:33.962 | 2741491 (2741491) | DEBUG    | git-ai stats-delta returned empty list, skipping event emission
+2026-04-16 20:10:03.965 | 2741491 (2741491) | DEBUG    | Running periodic git-ai stats collection
+2026-04-16 20:10:03.966 | 2741491 (2741491) | DEBUG    | Using bundled v2 Git-AI for stats-delta: /root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai
+2026-04-16 20:10:03.966 | 2741491 (2741491) | DEBUG    | git-ai stats collection: running command ['/root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai', 'stats-delta', '--json'] with cwd=/root/arkan
+2026-04-16 20:10:04.093 | 2741491 (2741491) | DEBUG    | git-ai stats-delta returned empty list, skipping event emission
+2026-04-16 20:10:34.095 | 2741491 (2741491) | DEBUG    | Running periodic git-ai stats collection
+2026-04-16 20:10:34.109 | 2741491 (2741491) | DEBUG    | Using bundled v2 Git-AI for stats-delta: /root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai
+2026-04-16 20:10:34.109 | 2741491 (2741491) | DEBUG    | git-ai stats collection: running command ['/root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai', 'stats-delta', '--json'] with cwd=/root/arkan
+2026-04-16 20:10:34.222 | 2741491 (2741491) | DEBUG    | git-ai stats-delta returned empty list, skipping event emission
+2026-04-16 20:11:04.224 | 2741491 (2741491) | DEBUG    | Running periodic git-ai stats collection
+2026-04-16 20:11:04.225 | 2741491 (2741491) | DEBUG    | Using bundled v2 Git-AI for stats-delta: /root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai
+2026-04-16 20:11:04.225 | 2741491 (2741491) | DEBUG    | git-ai stats collection: running command ['/root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai', 'stats-delta', '--json'] with cwd=/root/arkan
+2026-04-16 20:11:04.287 | 2741491 (2741491) | DEBUG    | git-ai stats-delta returned empty list, skipping event emission
+2026-04-16 20:11:34.288 | 2741491 (2741491) | DEBUG    | Running periodic git-ai stats collection
+2026-04-16 20:11:34.289 | 2741491 (2741491) | DEBUG    | Using bundled v2 Git-AI for stats-delta: /root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai
+2026-04-16 20:11:34.306 | 2741491 (2741491) | DEBUG    | git-ai stats collection: running command ['/root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai', 'stats-delta', '--json'] with cwd=/root/arkan
+2026-04-16 20:11:34.609 | 2741491 (2741491) | DEBUG    | git-ai stats-delta returned empty list, skipping event emission
+2026-04-16 20:12:04.611 | 2741491 (2741491) | DEBUG    | Running periodic git-ai stats collection
+2026-04-16 20:12:04.624 | 2741491 (2741491) | DEBUG    | Using bundled v2 Git-AI for stats-delta: /root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai
+2026-04-16 20:12:04.630 | 2741491 (2741491) | DEBUG    | git-ai stats collection: running command ['/root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai', 'stats-delta', '--json'] with cwd=/root/arkan
+2026-04-16 20:12:04.706 | 2741491 (2741491) | DEBUG    | git-ai stats-delta returned empty list, skipping event emission
+2026-04-16 20:12:34.710 | 2741491 (2741491) | DEBUG    | Running periodic git-ai stats collection
+2026-04-16 20:12:34.712 | 2741491 (2741491) | DEBUG    | Using bundled v2 Git-AI for stats-delta: /root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai
+2026-04-16 20:12:34.712 | 2741491 (2741491) | DEBUG    | git-ai stats collection: running command ['/root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai', 'stats-delta', '--json'] with cwd=/root/arkan
+2026-04-16 20:12:34.838 | 2741491 (2741491) | DEBUG    | git-ai stats-delta returned empty list, skipping event emission
+2026-04-16 20:13:04.840 | 2741491 (2741491) | DEBUG    | Running periodic git-ai stats collection
+2026-04-16 20:13:04.841 | 2741491 (2741491) | DEBUG    | Using bundled v2 Git-AI for stats-delta: /root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai
+2026-04-16 20:13:04.841 | 2741491 (2741491) | DEBUG    | git-ai stats collection: running command ['/root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai', 'stats-delta', '--json'] with cwd=/root/arkan
+2026-04-16 20:13:04.883 | 2741491 (2741491) | DEBUG    | git-ai stats-delta returned empty list, skipping event emission
+2026-04-16 20:13:34.885 | 2741491 (2741491) | DEBUG    | Running periodic git-ai stats collection
+2026-04-16 20:13:34.903 | 2741491 (2741491) | DEBUG    | Using bundled v2 Git-AI for stats-delta: /root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai
+2026-04-16 20:13:34.905 | 2741491 (2741491) | DEBUG    | git-ai stats collection: running command ['/root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai', 'stats-delta', '--json'] with cwd=/root/arkan
+2026-04-16 20:13:34.953 | 2741491 (2741491) | DEBUG    | git-ai stats-delta returned empty list, skipping event emission
+2026-04-16 20:14:04.956 | 2741491 (2741491) | DEBUG    | Running periodic git-ai stats collection
+2026-04-16 20:14:04.957 | 2741491 (2741491) | DEBUG    | Using bundled v2 Git-AI for stats-delta: /root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai
+2026-04-16 20:14:04.957 | 2741491 (2741491) | DEBUG    | git-ai stats collection: running command ['/root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai', 'stats-delta', '--json'] with cwd=/root/arkan
+2026-04-16 20:14:04.996 | 2741491 (2741491) | DEBUG    | git-ai stats-delta returned empty list, skipping event emission
+2026-04-16 20:14:34.997 | 2741491 (2741491) | DEBUG    | Running periodic git-ai stats collection
+2026-04-16 20:14:34.998 | 2741491 (2741491) | DEBUG    | Using bundled v2 Git-AI for stats-delta: /root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai
+2026-04-16 20:14:34.998 | 2741491 (2741491) | DEBUG    | git-ai stats collection: running command ['/root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai', 'stats-delta', '--json'] with cwd=/root/arkan
+2026-04-16 20:14:35.036 | 2741491 (2741491) | DEBUG    | git-ai stats-delta returned empty list, skipping event emission
+2026-04-16 20:15:05.037 | 2741491 (2741491) | DEBUG    | Running periodic git-ai stats collection
+2026-04-16 20:15:05.043 | 2741491 (2741491) | DEBUG    | Using bundled v2 Git-AI for stats-delta: /root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai
+2026-04-16 20:15:05.051 | 2741491 (2741491) | DEBUG    | git-ai stats collection: running command ['/root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai', 'stats-delta', '--json'] with cwd=/root/arkan
+2026-04-16 20:15:05.220 | 2741491 (2741491) | DEBUG    | git-ai stats-delta returned empty list, skipping event emission
+2026-04-16 20:15:35.222 | 2741491 (2741491) | DEBUG    | Running periodic git-ai stats collection
+2026-04-16 20:15:35.237 | 2741491 (2741491) | DEBUG    | Using bundled v2 Git-AI for stats-delta: /root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai
+2026-04-16 20:15:35.248 | 2741491 (2741491) | DEBUG    | git-ai stats collection: running command ['/root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai', 'stats-delta', '--json'] with cwd=/root/arkan
+2026-04-16 20:15:35.370 | 2741491 (2741491) | DEBUG    | git-ai stats-delta returned empty list, skipping event emission
+2026-04-16 20:16:05.373 | 2741491 (2741491) | DEBUG    | Running periodic git-ai stats collection
+2026-04-16 20:16:05.376 | 2741491 (2741491) | DEBUG    | Using bundled v2 Git-AI for stats-delta: /root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai
+2026-04-16 20:16:05.376 | 2741491 (2741491) | DEBUG    | git-ai stats collection: running command ['/root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai', 'stats-delta', '--json'] with cwd=/root/arkan
+2026-04-16 20:16:05.446 | 2741491 (2741491) | DEBUG    | git-ai stats-delta returned empty list, skipping event emission
+2026-04-16 20:16:35.448 | 2741491 (2741491) | DEBUG    | Running periodic git-ai stats collection
+2026-04-16 20:16:35.452 | 2741491 (2741491) | DEBUG    | Using bundled v2 Git-AI for stats-delta: /root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai
+2026-04-16 20:16:35.452 | 2741491 (2741491) | DEBUG    | git-ai stats collection: running command ['/root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai', 'stats-delta', '--json'] with cwd=/root/arkan
+2026-04-16 20:16:35.502 | 2741491 (2741491) | DEBUG    | git-ai stats-delta returned empty list, skipping event emission
+2026-04-16 20:17:05.552 | 2741491 (2741491) | DEBUG    | Running periodic git-ai stats collection
+2026-04-16 20:17:05.572 | 2741491 (2741491) | DEBUG    | Using bundled v2 Git-AI for stats-delta: /root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai
+2026-04-16 20:17:05.572 | 2741491 (2741491) | DEBUG    | git-ai stats collection: running command ['/root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai', 'stats-delta', '--json'] with cwd=/root/arkan
+2026-04-16 20:17:08.554 | 2741491 (2741491) | DEBUG    | git-ai stats-delta returned empty list, skipping event emission
+2026-04-16 20:17:38.557 | 2741491 (2741491) | DEBUG    | Running periodic git-ai stats collection
+2026-04-16 20:17:38.562 | 2741491 (2741491) | DEBUG    | Using bundled v2 Git-AI for stats-delta: /root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai
+2026-04-16 20:17:38.562 | 2741491 (2741491) | DEBUG    | git-ai stats collection: running command ['/root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai', 'stats-delta', '--json'] with cwd=/root/arkan
+2026-04-16 20:17:38.631 | 2741491 (2741491) | DEBUG    | git-ai stats-delta returned empty list, skipping event emission
+2026-04-16 20:18:08.634 | 2741491 (2741491) | DEBUG    | Running periodic git-ai stats collection
+2026-04-16 20:18:08.650 | 2741491 (2741491) | DEBUG    | Using bundled v2 Git-AI for stats-delta: /root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai
+2026-04-16 20:18:08.654 | 2741491 (2741491) | DEBUG    | git-ai stats collection: running command ['/root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai', 'stats-delta', '--json'] with cwd=/root/arkan
+2026-04-16 20:18:08.760 | 2741491 (2741491) | DEBUG    | git-ai stats-delta returned empty list, skipping event emission
+2026-04-16 20:18:38.762 | 2741491 (2741491) | DEBUG    | Running periodic git-ai stats collection
+2026-04-16 20:18:38.763 | 2741491 (2741491) | DEBUG    | Using bundled v2 Git-AI for stats-delta: /root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai
+2026-04-16 20:18:38.763 | 2741491 (2741491) | DEBUG    | git-ai stats collection: running command ['/root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai', 'stats-delta', '--json'] with cwd=/root/arkan
+2026-04-16 20:18:38.807 | 2741491 (2741491) | DEBUG    | git-ai stats-delta returned empty list, skipping event emission
+2026-04-16 20:19:08.808 | 2741491 (2741491) | DEBUG    | Running periodic git-ai stats collection
+2026-04-16 20:19:08.810 | 2741491 (2741491) | DEBUG    | Using bundled v2 Git-AI for stats-delta: /root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai
+2026-04-16 20:19:08.811 | 2741491 (2741491) | DEBUG    | git-ai stats collection: running command ['/root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai', 'stats-delta', '--json'] with cwd=/root/arkan
+2026-04-16 20:19:08.926 | 2741491 (2741491) | DEBUG    | git-ai stats-delta returned empty list, skipping event emission
+2026-04-16 20:19:38.927 | 2741491 (2741491) | DEBUG    | Running periodic git-ai stats collection
+2026-04-16 20:19:38.928 | 2741491 (2741491) | DEBUG    | Using bundled v2 Git-AI for stats-delta: /root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai
+2026-04-16 20:19:38.928 | 2741491 (2741491) | DEBUG    | git-ai stats collection: running command ['/root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai', 'stats-delta', '--json'] with cwd=/root/arkan
+2026-04-16 20:19:39.156 | 2741491 (2741491) | DEBUG    | git-ai stats-delta returned empty list, skipping event emission
+2026-04-16 20:20:09.159 | 2741491 (2741491) | DEBUG    | Running periodic git-ai stats collection
+2026-04-16 20:20:09.169 | 2741491 (2741491) | DEBUG    | Using bundled v2 Git-AI for stats-delta: /root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai
+2026-04-16 20:20:09.169 | 2741491 (2741491) | DEBUG    | git-ai stats collection: running command ['/root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai', 'stats-delta', '--json'] with cwd=/root/arkan
+2026-04-16 20:20:09.369 | 2741491 (2741491) | DEBUG    | git-ai stats-delta returned empty list, skipping event emission
+2026-04-16 20:20:39.372 | 2741491 (2741491) | DEBUG    | Running periodic git-ai stats collection
+2026-04-16 20:20:39.376 | 2741491 (2741491) | DEBUG    | Using bundled v2 Git-AI for stats-delta: /root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai
+2026-04-16 20:20:39.378 | 2741491 (2741491) | DEBUG    | git-ai stats collection: running command ['/root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai', 'stats-delta', '--json'] with cwd=/root/arkan
+2026-04-16 20:20:39.453 | 2741491 (2741491) | DEBUG    | git-ai stats-delta returned empty list, skipping event emission
+2026-04-16 20:21:09.455 | 2741491 (2741491) | DEBUG    | Running periodic git-ai stats collection
+2026-04-16 20:21:09.463 | 2741491 (2741491) | DEBUG    | Using bundled v2 Git-AI for stats-delta: /root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai
+2026-04-16 20:21:09.463 | 2741491 (2741491) | DEBUG    | git-ai stats collection: running command ['/root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai', 'stats-delta', '--json'] with cwd=/root/arkan
+2026-04-16 20:21:09.559 | 2741491 (2741491) | DEBUG    | git-ai stats-delta returned empty list, skipping event emission
+2026-04-16 20:21:39.568 | 2741491 (2741491) | DEBUG    | Running periodic git-ai stats collection
+2026-04-16 20:21:39.583 | 2741491 (2741491) | DEBUG    | Using bundled v2 Git-AI for stats-delta: /root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai
+2026-04-16 20:21:39.592 | 2741491 (2741491) | DEBUG    | git-ai stats collection: running command ['/root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai', 'stats-delta', '--json'] with cwd=/root/arkan
+2026-04-16 20:21:39.781 | 2741491 (2741491) | DEBUG    | git-ai stats-delta returned empty list, skipping event emission
+2026-04-16 20:22:09.782 | 2741491 (2741491) | DEBUG    | Running periodic git-ai stats collection
+2026-04-16 20:22:09.783 | 2741491 (2741491) | DEBUG    | Using bundled v2 Git-AI for stats-delta: /root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai
+2026-04-16 20:22:09.783 | 2741491 (2741491) | DEBUG    | git-ai stats collection: running command ['/root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai', 'stats-delta', '--json'] with cwd=/root/arkan
+2026-04-16 20:22:09.832 | 2741491 (2741491) | DEBUG    | git-ai stats-delta returned empty list, skipping event emission
+2026-04-16 20:22:39.834 | 2741491 (2741491) | DEBUG    | Running periodic git-ai stats collection
+2026-04-16 20:22:39.835 | 2741491 (2741491) | DEBUG    | Using bundled v2 Git-AI for stats-delta: /root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai
+2026-04-16 20:22:39.835 | 2741491 (2741491) | DEBUG    | git-ai stats collection: running command ['/root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai', 'stats-delta', '--json'] with cwd=/root/arkan
+2026-04-16 20:22:39.958 | 2741491 (2741491) | DEBUG    | git-ai stats-delta returned empty list, skipping event emission
+2026-04-16 20:23:09.960 | 2741491 (2741491) | DEBUG    | Running periodic git-ai stats collection
+2026-04-16 20:23:09.963 | 2741491 (2741491) | DEBUG    | Using bundled v2 Git-AI for stats-delta: /root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai
+2026-04-16 20:23:09.963 | 2741491 (2741491) | DEBUG    | git-ai stats collection: running command ['/root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai', 'stats-delta', '--json'] with cwd=/root/arkan
+2026-04-16 20:23:10.038 | 2741491 (2741491) | DEBUG    | git-ai stats-delta returned empty list, skipping event emission
+2026-04-16 20:23:40.111 | 2741491 (2741491) | DEBUG    | Running periodic git-ai stats collection
+2026-04-16 20:23:40.121 | 2741491 (2741491) | DEBUG    | Using bundled v2 Git-AI for stats-delta: /root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai
+2026-04-16 20:23:40.122 | 2741491 (2741491) | DEBUG    | git-ai stats collection: running command ['/root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai', 'stats-delta', '--json'] with cwd=/root/arkan
+2026-04-16 20:23:40.246 | 2741491 (2741491) | DEBUG    | git-ai stats-delta returned empty list, skipping event emission
+2026-04-16 20:24:10.258 | 2741491 (2741491) | DEBUG    | Running periodic git-ai stats collection
+2026-04-16 20:24:10.287 | 2741491 (2741491) | DEBUG    | Using bundled v2 Git-AI for stats-delta: /root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai
+2026-04-16 20:24:10.289 | 2741491 (2741491) | DEBUG    | git-ai stats collection: running command ['/root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai', 'stats-delta', '--json'] with cwd=/root/arkan
+2026-04-16 20:24:10.484 | 2741491 (2741491) | DEBUG    | git-ai stats-delta returned empty list, skipping event emission
+2026-04-16 20:24:40.486 | 2741491 (2741491) | DEBUG    | Running periodic git-ai stats collection
+2026-04-16 20:24:40.487 | 2741491 (2741491) | DEBUG    | Using bundled v2 Git-AI for stats-delta: /root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai
+2026-04-16 20:24:40.487 | 2741491 (2741491) | DEBUG    | git-ai stats collection: running command ['/root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai', 'stats-delta', '--json'] with cwd=/root/arkan
+2026-04-16 20:24:40.530 | 2741491 (2741491) | DEBUG    | git-ai stats-delta returned empty list, skipping event emission
+2026-04-16 20:25:10.553 | 2741491 (2741491) | DEBUG    | Running periodic git-ai stats collection
+2026-04-16 20:25:10.554 | 2741491 (2741491) | DEBUG    | Using bundled v2 Git-AI for stats-delta: /root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai
+2026-04-16 20:25:10.554 | 2741491 (2741491) | DEBUG    | git-ai stats collection: running command ['/root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai', 'stats-delta', '--json'] with cwd=/root/arkan
+2026-04-16 20:25:11.386 | 2741491 (2741491) | DEBUG    | git-ai stats-delta returned empty list, skipping event emission
+2026-04-16 20:25:41.388 | 2741491 (2741491) | DEBUG    | Running periodic git-ai stats collection
+2026-04-16 20:25:41.389 | 2741491 (2741491) | DEBUG    | Using bundled v2 Git-AI for stats-delta: /root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai
+2026-04-16 20:25:41.389 | 2741491 (2741491) | DEBUG    | git-ai stats collection: running command ['/root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai', 'stats-delta', '--json'] with cwd=/root/arkan
+2026-04-16 20:25:41.460 | 2741491 (2741491) | DEBUG    | git-ai stats-delta returned empty list, skipping event emission
+2026-04-16 20:26:11.462 | 2741491 (2741491) | DEBUG    | Running periodic git-ai stats collection
+2026-04-16 20:26:11.466 | 2741491 (2741491) | DEBUG    | Using bundled v2 Git-AI for stats-delta: /root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai
+2026-04-16 20:26:11.467 | 2741491 (2741491) | DEBUG    | git-ai stats collection: running command ['/root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai', 'stats-delta', '--json'] with cwd=/root/arkan
+2026-04-16 20:26:11.554 | 2741491 (2741491) | DEBUG    | git-ai stats-delta returned empty list, skipping event emission
+2026-04-16 20:26:41.555 | 2741491 (2741491) | DEBUG    | Running periodic git-ai stats collection
+2026-04-16 20:26:41.562 | 2741491 (2741491) | DEBUG    | Using bundled v2 Git-AI for stats-delta: /root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai
+2026-04-16 20:26:41.563 | 2741491 (2741491) | DEBUG    | git-ai stats collection: running command ['/root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai', 'stats-delta', '--json'] with cwd=/root/arkan
+2026-04-16 20:26:41.631 | 2741491 (2741491) | DEBUG    | git-ai stats-delta returned empty list, skipping event emission
+2026-04-16 20:27:11.633 | 2741491 (2741491) | DEBUG    | Running periodic git-ai stats collection
+2026-04-16 20:27:11.639 | 2741491 (2741491) | DEBUG    | Using bundled v2 Git-AI for stats-delta: /root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai
+2026-04-16 20:27:11.639 | 2741491 (2741491) | DEBUG    | git-ai stats collection: running command ['/root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai', 'stats-delta', '--json'] with cwd=/root/arkan
+2026-04-16 20:27:11.716 | 2741491 (2741491) | DEBUG    | git-ai stats-delta returned empty list, skipping event emission
+2026-04-16 20:27:41.718 | 2741491 (2741491) | DEBUG    | Running periodic git-ai stats collection
+2026-04-16 20:27:41.719 | 2741491 (2741491) | DEBUG    | Using bundled v2 Git-AI for stats-delta: /root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai
+2026-04-16 20:27:41.721 | 2741491 (2741491) | DEBUG    | git-ai stats collection: running command ['/root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai', 'stats-delta', '--json'] with cwd=/root/arkan
+2026-04-16 20:27:41.767 | 2741491 (2741491) | DEBUG    | git-ai stats-delta returned empty list, skipping event emission
+2026-04-16 20:28:11.769 | 2741491 (2741491) | DEBUG    | Running periodic git-ai stats collection
+2026-04-16 20:28:11.772 | 2741491 (2741491) | DEBUG    | Using bundled v2 Git-AI for stats-delta: /root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai
+2026-04-16 20:28:11.773 | 2741491 (2741491) | DEBUG    | git-ai stats collection: running command ['/root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai', 'stats-delta', '--json'] with cwd=/root/arkan
+2026-04-16 20:28:11.807 | 2741491 (2741491) | DEBUG    | git-ai stats-delta returned empty list, skipping event emission
+2026-04-16 20:28:41.810 | 2741491 (2741491) | DEBUG    | Running periodic git-ai stats collection
+2026-04-16 20:28:41.811 | 2741491 (2741491) | DEBUG    | Using bundled v2 Git-AI for stats-delta: /root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai
+2026-04-16 20:28:41.811 | 2741491 (2741491) | DEBUG    | git-ai stats collection: running command ['/root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai', 'stats-delta', '--json'] with cwd=/root/arkan
+2026-04-16 20:28:41.965 | 2741491 (2741491) | DEBUG    | git-ai stats-delta returned empty list, skipping event emission
+2026-04-16 20:29:11.969 | 2741491 (2741491) | DEBUG    | Running periodic git-ai stats collection
+2026-04-16 20:29:11.995 | 2741491 (2741491) | DEBUG    | Using bundled v2 Git-AI for stats-delta: /root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai
+2026-04-16 20:29:11.995 | 2741491 (2741491) | DEBUG    | git-ai stats collection: running command ['/root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai', 'stats-delta', '--json'] with cwd=/root/arkan
+2026-04-16 20:29:12.183 | 2741491 (2741491) | DEBUG    | git-ai stats-delta returned empty list, skipping event emission
+2026-04-16 20:29:42.185 | 2741491 (2741491) | DEBUG    | Running periodic git-ai stats collection
+2026-04-16 20:29:42.186 | 2741491 (2741491) | DEBUG    | Using bundled v2 Git-AI for stats-delta: /root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai
+2026-04-16 20:29:42.186 | 2741491 (2741491) | DEBUG    | git-ai stats collection: running command ['/root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai', 'stats-delta', '--json'] with cwd=/root/arkan
+2026-04-16 20:29:42.233 | 2741491 (2741491) | DEBUG    | git-ai stats-delta returned empty list, skipping event emission
+2026-04-16 20:30:12.236 | 2741491 (2741491) | DEBUG    | Running periodic git-ai stats collection
+2026-04-16 20:30:12.241 | 2741491 (2741491) | DEBUG    | Using bundled v2 Git-AI for stats-delta: /root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai
+2026-04-16 20:30:12.241 | 2741491 (2741491) | DEBUG    | git-ai stats collection: running command ['/root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai', 'stats-delta', '--json'] with cwd=/root/arkan
+2026-04-16 20:30:12.279 | 2741491 (2741491) | DEBUG    | git-ai stats-delta returned empty list, skipping event emission
+2026-04-16 20:30:42.281 | 2741491 (2741491) | DEBUG    | Running periodic git-ai stats collection
+2026-04-16 20:30:42.282 | 2741491 (2741491) | DEBUG    | Using bundled v2 Git-AI for stats-delta: /root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai
+2026-04-16 20:30:42.283 | 2741491 (2741491) | DEBUG    | git-ai stats collection: running command ['/root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai', 'stats-delta', '--json'] with cwd=/root/arkan
+2026-04-16 20:30:42.324 | 2741491 (2741491) | DEBUG    | git-ai stats-delta returned empty list, skipping event emission
+2026-04-16 20:31:12.327 | 2741491 (2741491) | DEBUG    | Running periodic git-ai stats collection
+2026-04-16 20:31:12.328 | 2741491 (2741491) | DEBUG    | Using bundled v2 Git-AI for stats-delta: /root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai
+2026-04-16 20:31:12.328 | 2741491 (2741491) | DEBUG    | git-ai stats collection: running command ['/root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai', 'stats-delta', '--json'] with cwd=/root/arkan
+2026-04-16 20:31:12.374 | 2741491 (2741491) | DEBUG    | git-ai stats-delta returned empty list, skipping event emission
+2026-04-16 20:31:42.375 | 2741491 (2741491) | DEBUG    | Running periodic git-ai stats collection
+2026-04-16 20:31:42.377 | 2741491 (2741491) | DEBUG    | Using bundled v2 Git-AI for stats-delta: /root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai
+2026-04-16 20:31:42.377 | 2741491 (2741491) | DEBUG    | git-ai stats collection: running command ['/root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai', 'stats-delta', '--json'] with cwd=/root/arkan
+2026-04-16 20:31:42.439 | 2741491 (2741491) | DEBUG    | git-ai stats-delta returned empty list, skipping event emission
+2026-04-16 20:32:12.443 | 2741491 (2741491) | DEBUG    | Running periodic git-ai stats collection
+2026-04-16 20:32:12.452 | 2741491 (2741491) | DEBUG    | Using bundled v2 Git-AI for stats-delta: /root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai
+2026-04-16 20:32:12.453 | 2741491 (2741491) | DEBUG    | git-ai stats collection: running command ['/root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai', 'stats-delta', '--json'] with cwd=/root/arkan
+2026-04-16 20:32:12.489 | 2741491 (2741491) | DEBUG    | git-ai stats-delta returned empty list, skipping event emission
+2026-04-16 20:32:42.492 | 2741491 (2741491) | DEBUG    | Running periodic git-ai stats collection
+2026-04-16 20:32:42.494 | 2741491 (2741491) | DEBUG    | Using bundled v2 Git-AI for stats-delta: /root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai
+2026-04-16 20:32:42.512 | 2741491 (2741491) | DEBUG    | git-ai stats collection: running command ['/root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai', 'stats-delta', '--json'] with cwd=/root/arkan
+2026-04-16 20:32:42.589 | 2741491 (2741491) | DEBUG    | git-ai stats-delta returned empty list, skipping event emission
+2026-04-16 20:33:12.591 | 2741491 (2741491) | DEBUG    | Running periodic git-ai stats collection
+2026-04-16 20:33:12.592 | 2741491 (2741491) | DEBUG    | Using bundled v2 Git-AI for stats-delta: /root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai
+2026-04-16 20:33:12.592 | 2741491 (2741491) | DEBUG    | git-ai stats collection: running command ['/root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai', 'stats-delta', '--json'] with cwd=/root/arkan
+2026-04-16 20:33:12.629 | 2741491 (2741491) | DEBUG    | git-ai stats-delta returned empty list, skipping event emission
+2026-04-16 20:33:42.632 | 2741491 (2741491) | DEBUG    | Running periodic git-ai stats collection
+2026-04-16 20:33:42.633 | 2741491 (2741491) | DEBUG    | Using bundled v2 Git-AI for stats-delta: /root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai
+2026-04-16 20:33:42.662 | 2741491 (2741491) | DEBUG    | git-ai stats collection: running command ['/root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai', 'stats-delta', '--json'] with cwd=/root/arkan
+2026-04-16 20:33:42.927 | 2741491 (2741491) | DEBUG    | git-ai stats-delta returned empty list, skipping event emission
+2026-04-16 20:34:12.931 | 2741491 (2741491) | DEBUG    | Running periodic git-ai stats collection
+2026-04-16 20:34:12.935 | 2741491 (2741491) | DEBUG    | Using bundled v2 Git-AI for stats-delta: /root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai
+2026-04-16 20:34:12.935 | 2741491 (2741491) | DEBUG    | git-ai stats collection: running command ['/root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai', 'stats-delta', '--json'] with cwd=/root/arkan
+2026-04-16 20:34:12.971 | 2741491 (2741491) | DEBUG    | git-ai stats-delta returned empty list, skipping event emission
+2026-04-16 20:34:42.973 | 2741491 (2741491) | DEBUG    | Running periodic git-ai stats collection
+2026-04-16 20:34:42.977 | 2741491 (2741491) | DEBUG    | Using bundled v2 Git-AI for stats-delta: /root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai
+2026-04-16 20:34:42.978 | 2741491 (2741491) | DEBUG    | git-ai stats collection: running command ['/root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai', 'stats-delta', '--json'] with cwd=/root/arkan
+2026-04-16 20:34:43.053 | 2741491 (2741491) | DEBUG    | git-ai stats-delta returned empty list, skipping event emission
+2026-04-16 20:35:13.055 | 2741491 (2741491) | DEBUG    | Running periodic git-ai stats collection
+2026-04-16 20:35:13.056 | 2741491 (2741491) | DEBUG    | Using bundled v2 Git-AI for stats-delta: /root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai
+2026-04-16 20:35:13.056 | 2741491 (2741491) | DEBUG    | git-ai stats collection: running command ['/root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai', 'stats-delta', '--json'] with cwd=/root/arkan
+2026-04-16 20:35:13.102 | 2741491 (2741491) | DEBUG    | git-ai stats-delta returned empty list, skipping event emission
+2026-04-16 20:35:43.105 | 2741491 (2741491) | DEBUG    | Running periodic git-ai stats collection
+2026-04-16 20:35:43.114 | 2741491 (2741491) | DEBUG    | Using bundled v2 Git-AI for stats-delta: /root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai
+2026-04-16 20:35:43.114 | 2741491 (2741491) | DEBUG    | git-ai stats collection: running command ['/root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai', 'stats-delta', '--json'] with cwd=/root/arkan
+2026-04-16 20:35:43.180 | 2741491 (2741491) | DEBUG    | git-ai stats-delta returned empty list, skipping event emission
+2026-04-16 20:36:13.209 | 2741491 (2741491) | DEBUG    | Running periodic git-ai stats collection
+2026-04-16 20:36:13.210 | 2741491 (2741491) | DEBUG    | Using bundled v2 Git-AI for stats-delta: /root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai
+2026-04-16 20:36:13.211 | 2741491 (2741491) | DEBUG    | git-ai stats collection: running command ['/root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai', 'stats-delta', '--json'] with cwd=/root/arkan
+2026-04-16 20:36:13.262 | 2741491 (2741491) | DEBUG    | git-ai stats-delta returned empty list, skipping event emission
+2026-04-16 20:36:43.263 | 2741491 (2741491) | DEBUG    | Running periodic git-ai stats collection
+2026-04-16 20:36:43.264 | 2741491 (2741491) | DEBUG    | Using bundled v2 Git-AI for stats-delta: /root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai
+2026-04-16 20:36:43.264 | 2741491 (2741491) | DEBUG    | git-ai stats collection: running command ['/root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai', 'stats-delta', '--json'] with cwd=/root/arkan
+2026-04-16 20:36:43.344 | 2741491 (2741491) | DEBUG    | git-ai stats-delta returned empty list, skipping event emission
+2026-04-16 20:37:13.346 | 2741491 (2741491) | DEBUG    | Running periodic git-ai stats collection
+2026-04-16 20:37:13.352 | 2741491 (2741491) | DEBUG    | Using bundled v2 Git-AI for stats-delta: /root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai
+2026-04-16 20:37:13.352 | 2741491 (2741491) | DEBUG    | git-ai stats collection: running command ['/root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai', 'stats-delta', '--json'] with cwd=/root/arkan
+2026-04-16 20:37:13.408 | 2741491 (2741491) | DEBUG    | git-ai stats-delta returned empty list, skipping event emission
+2026-04-16 20:37:43.410 | 2741491 (2741491) | DEBUG    | Running periodic git-ai stats collection
+2026-04-16 20:37:43.412 | 2741491 (2741491) | DEBUG    | Using bundled v2 Git-AI for stats-delta: /root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai
+2026-04-16 20:37:43.412 | 2741491 (2741491) | DEBUG    | git-ai stats collection: running command ['/root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai', 'stats-delta', '--json'] with cwd=/root/arkan
+2026-04-16 20:37:43.447 | 2741491 (2741491) | DEBUG    | git-ai stats-delta returned empty list, skipping event emission
+2026-04-16 20:38:13.448 | 2741491 (2741491) | DEBUG    | Running periodic git-ai stats collection
+2026-04-16 20:38:13.449 | 2741491 (2741491) | DEBUG    | Using bundled v2 Git-AI for stats-delta: /root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai
+2026-04-16 20:38:13.449 | 2741491 (2741491) | DEBUG    | git-ai stats collection: running command ['/root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai', 'stats-delta', '--json'] with cwd=/root/arkan
+2026-04-16 20:38:13.499 | 2741491 (2741491) | DEBUG    | git-ai stats-delta returned empty list, skipping event emission
+2026-04-16 20:38:43.502 | 2741491 (2741491) | DEBUG    | Running periodic git-ai stats collection
+2026-04-16 20:38:43.509 | 2741491 (2741491) | DEBUG    | Using bundled v2 Git-AI for stats-delta: /root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai
+2026-04-16 20:38:43.509 | 2741491 (2741491) | DEBUG    | git-ai stats collection: running command ['/root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai', 'stats-delta', '--json'] with cwd=/root/arkan
+2026-04-16 20:38:43.559 | 2741491 (2741491) | DEBUG    | git-ai stats-delta returned empty list, skipping event emission
+2026-04-16 20:39:13.562 | 2741491 (2741491) | DEBUG    | Running periodic git-ai stats collection
+2026-04-16 20:39:13.563 | 2741491 (2741491) | DEBUG    | Using bundled v2 Git-AI for stats-delta: /root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai
+2026-04-16 20:39:13.563 | 2741491 (2741491) | DEBUG    | git-ai stats collection: running command ['/root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai', 'stats-delta', '--json'] with cwd=/root/arkan
+2026-04-16 20:39:13.603 | 2741491 (2741491) | DEBUG    | git-ai stats-delta returned empty list, skipping event emission
+2026-04-16 20:39:43.605 | 2741491 (2741491) | DEBUG    | Running periodic git-ai stats collection
+2026-04-16 20:39:43.629 | 2741491 (2741491) | DEBUG    | Using bundled v2 Git-AI for stats-delta: /root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai
+2026-04-16 20:39:43.630 | 2741491 (2741491) | DEBUG    | git-ai stats collection: running command ['/root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai', 'stats-delta', '--json'] with cwd=/root/arkan
+2026-04-16 20:39:43.667 | 2741491 (2741491) | DEBUG    | git-ai stats-delta returned empty list, skipping event emission
+2026-04-16 20:40:13.669 | 2741491 (2741491) | DEBUG    | Running periodic git-ai stats collection
+2026-04-16 20:40:13.681 | 2741491 (2741491) | DEBUG    | Using bundled v2 Git-AI for stats-delta: /root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai
+2026-04-16 20:40:13.682 | 2741491 (2741491) | DEBUG    | git-ai stats collection: running command ['/root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai', 'stats-delta', '--json'] with cwd=/root/arkan
+2026-04-16 20:40:13.738 | 2741491 (2741491) | DEBUG    | git-ai stats-delta returned empty list, skipping event emission
+2026-04-16 20:40:43.742 | 2741491 (2741491) | DEBUG    | Running periodic git-ai stats collection
+2026-04-16 20:40:43.751 | 2741491 (2741491) | DEBUG    | Using bundled v2 Git-AI for stats-delta: /root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai
+2026-04-16 20:40:43.754 | 2741491 (2741491) | DEBUG    | git-ai stats collection: running command ['/root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai', 'stats-delta', '--json'] with cwd=/root/arkan
+2026-04-16 20:40:43.812 | 2741491 (2741491) | DEBUG    | git-ai stats-delta returned empty list, skipping event emission
+2026-04-16 20:41:13.819 | 2741491 (2741491) | DEBUG    | Running periodic git-ai stats collection
+2026-04-16 20:41:13.821 | 2741491 (2741491) | DEBUG    | Using bundled v2 Git-AI for stats-delta: /root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai
+2026-04-16 20:41:13.821 | 2741491 (2741491) | DEBUG    | git-ai stats collection: running command ['/root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai', 'stats-delta', '--json'] with cwd=/root/arkan
+2026-04-16 20:41:13.927 | 2741491 (2741491) | DEBUG    | git-ai stats-delta returned empty list, skipping event emission
+2026-04-16 20:41:43.928 | 2741491 (2741491) | DEBUG    | Running periodic git-ai stats collection
+2026-04-16 20:41:43.929 | 2741491 (2741491) | DEBUG    | Using bundled v2 Git-AI for stats-delta: /root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai
+2026-04-16 20:41:43.930 | 2741491 (2741491) | DEBUG    | git-ai stats collection: running command ['/root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai', 'stats-delta', '--json'] with cwd=/root/arkan
+2026-04-16 20:41:43.964 | 2741491 (2741491) | DEBUG    | git-ai stats-delta returned empty list, skipping event emission
+2026-04-16 20:42:13.966 | 2741491 (2741491) | DEBUG    | Running periodic git-ai stats collection
+2026-04-16 20:42:13.967 | 2741491 (2741491) | DEBUG    | Using bundled v2 Git-AI for stats-delta: /root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai
+2026-04-16 20:42:13.969 | 2741491 (2741491) | DEBUG    | git-ai stats collection: running command ['/root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai', 'stats-delta', '--json'] with cwd=/root/arkan
+2026-04-16 20:42:14.026 | 2741491 (2741491) | DEBUG    | git-ai stats-delta returned empty list, skipping event emission
+2026-04-16 20:42:44.029 | 2741491 (2741491) | DEBUG    | Running periodic git-ai stats collection
+2026-04-16 20:42:44.031 | 2741491 (2741491) | DEBUG    | Using bundled v2 Git-AI for stats-delta: /root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai
+2026-04-16 20:42:44.031 | 2741491 (2741491) | DEBUG    | git-ai stats collection: running command ['/root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai', 'stats-delta', '--json'] with cwd=/root/arkan
+2026-04-16 20:42:44.074 | 2741491 (2741491) | DEBUG    | git-ai stats-delta returned empty list, skipping event emission
+2026-04-16 20:43:14.075 | 2741491 (2741491) | DEBUG    | Running periodic git-ai stats collection
+2026-04-16 20:43:14.079 | 2741491 (2741491) | DEBUG    | Using bundled v2 Git-AI for stats-delta: /root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai
+2026-04-16 20:43:14.079 | 2741491 (2741491) | DEBUG    | git-ai stats collection: running command ['/root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai', 'stats-delta', '--json'] with cwd=/root/arkan
+2026-04-16 20:43:14.117 | 2741491 (2741491) | DEBUG    | git-ai stats-delta returned empty list, skipping event emission
+2026-04-16 20:43:44.119 | 2741491 (2741491) | DEBUG    | Running periodic git-ai stats collection
+2026-04-16 20:43:44.131 | 2741491 (2741491) | DEBUG    | Using bundled v2 Git-AI for stats-delta: /root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai
+2026-04-16 20:43:44.138 | 2741491 (2741491) | DEBUG    | git-ai stats collection: running command ['/root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai', 'stats-delta', '--json'] with cwd=/root/arkan
+2026-04-16 20:43:44.173 | 2741491 (2741491) | DEBUG    | git-ai stats-delta returned empty list, skipping event emission
+2026-04-16 20:44:14.174 | 2741491 (2741491) | DEBUG    | Running periodic git-ai stats collection
+2026-04-16 20:44:14.176 | 2741491 (2741491) | DEBUG    | Using bundled v2 Git-AI for stats-delta: /root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai
+2026-04-16 20:44:14.177 | 2741491 (2741491) | DEBUG    | git-ai stats collection: running command ['/root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai', 'stats-delta', '--json'] with cwd=/root/arkan
+2026-04-16 20:44:14.221 | 2741491 (2741491) | DEBUG    | git-ai stats-delta returned empty list, skipping event emission
+2026-04-16 20:44:44.226 | 2741491 (2741491) | DEBUG    | Running periodic git-ai stats collection
+2026-04-16 20:44:44.228 | 2741491 (2741491) | DEBUG    | Using bundled v2 Git-AI for stats-delta: /root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai
+2026-04-16 20:44:44.228 | 2741491 (2741491) | DEBUG    | git-ai stats collection: running command ['/root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai', 'stats-delta', '--json'] with cwd=/root/arkan
+2026-04-16 20:44:44.271 | 2741491 (2741491) | DEBUG    | git-ai stats-delta returned empty list, skipping event emission
+2026-04-16 20:45:14.273 | 2741491 (2741491) | DEBUG    | Running periodic git-ai stats collection
+2026-04-16 20:45:14.274 | 2741491 (2741491) | DEBUG    | Using bundled v2 Git-AI for stats-delta: /root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai
+2026-04-16 20:45:14.274 | 2741491 (2741491) | DEBUG    | git-ai stats collection: running command ['/root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai', 'stats-delta', '--json'] with cwd=/root/arkan
+2026-04-16 20:45:14.308 | 2741491 (2741491) | DEBUG    | git-ai stats-delta returned empty list, skipping event emission
+2026-04-16 20:45:44.309 | 2741491 (2741491) | DEBUG    | Running periodic git-ai stats collection
+2026-04-16 20:45:44.310 | 2741491 (2741491) | DEBUG    | Using bundled v2 Git-AI for stats-delta: /root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai
+2026-04-16 20:45:44.310 | 2741491 (2741491) | DEBUG    | git-ai stats collection: running command ['/root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai', 'stats-delta', '--json'] with cwd=/root/arkan
+2026-04-16 20:45:44.350 | 2741491 (2741491) | DEBUG    | git-ai stats-delta returned empty list, skipping event emission
+2026-04-16 20:46:14.351 | 2741491 (2741491) | DEBUG    | Running periodic git-ai stats collection
+2026-04-16 20:46:14.356 | 2741491 (2741491) | DEBUG    | Using bundled v2 Git-AI for stats-delta: /root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai
+2026-04-16 20:46:14.357 | 2741491 (2741491) | DEBUG    | git-ai stats collection: running command ['/root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai', 'stats-delta', '--json'] with cwd=/root/arkan
+2026-04-16 20:46:14.406 | 2741491 (2741491) | DEBUG    | git-ai stats-delta returned empty list, skipping event emission
+2026-04-16 20:46:44.409 | 2741491 (2741491) | DEBUG    | Running periodic git-ai stats collection
+2026-04-16 20:46:44.411 | 2741491 (2741491) | DEBUG    | Using bundled v2 Git-AI for stats-delta: /root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai
+2026-04-16 20:46:44.411 | 2741491 (2741491) | DEBUG    | git-ai stats collection: running command ['/root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai', 'stats-delta', '--json'] with cwd=/root/arkan
+2026-04-16 20:46:44.443 | 2741491 (2741491) | DEBUG    | git-ai stats-delta returned empty list, skipping event emission
+2026-04-16 20:47:14.445 | 2741491 (2741491) | DEBUG    | Running periodic git-ai stats collection
+2026-04-16 20:47:14.450 | 2741491 (2741491) | DEBUG    | Using bundled v2 Git-AI for stats-delta: /root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai
+2026-04-16 20:47:14.450 | 2741491 (2741491) | DEBUG    | git-ai stats collection: running command ['/root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai', 'stats-delta', '--json'] with cwd=/root/arkan
+2026-04-16 20:47:14.513 | 2741491 (2741491) | DEBUG    | git-ai stats-delta returned empty list, skipping event emission
+2026-04-16 20:47:44.514 | 2741491 (2741491) | DEBUG    | Running periodic git-ai stats collection
+2026-04-16 20:47:44.515 | 2741491 (2741491) | DEBUG    | Using bundled v2 Git-AI for stats-delta: /root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai
+2026-04-16 20:47:44.515 | 2741491 (2741491) | DEBUG    | git-ai stats collection: running command ['/root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai', 'stats-delta', '--json'] with cwd=/root/arkan
+2026-04-16 20:47:44.548 | 2741491 (2741491) | DEBUG    | git-ai stats-delta returned empty list, skipping event emission
+2026-04-16 20:48:14.549 | 2741491 (2741491) | DEBUG    | Running periodic git-ai stats collection
+2026-04-16 20:48:14.553 | 2741491 (2741491) | DEBUG    | Using bundled v2 Git-AI for stats-delta: /root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai
+2026-04-16 20:48:14.553 | 2741491 (2741491) | DEBUG    | git-ai stats collection: running command ['/root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai', 'stats-delta', '--json'] with cwd=/root/arkan
+2026-04-16 20:48:14.586 | 2741491 (2741491) | DEBUG    | git-ai stats-delta returned empty list, skipping event emission
+2026-04-16 20:48:44.589 | 2741491 (2741491) | DEBUG    | Running periodic git-ai stats collection
+2026-04-16 20:48:44.594 | 2741491 (2741491) | DEBUG    | Using bundled v2 Git-AI for stats-delta: /root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai
+2026-04-16 20:48:44.595 | 2741491 (2741491) | DEBUG    | git-ai stats collection: running command ['/root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai', 'stats-delta', '--json'] with cwd=/root/arkan
+2026-04-16 20:48:44.651 | 2741491 (2741491) | DEBUG    | git-ai stats-delta returned empty list, skipping event emission
+2026-04-16 20:49:14.653 | 2741491 (2741491) | DEBUG    | Running periodic git-ai stats collection
+2026-04-16 20:49:14.655 | 2741491 (2741491) | DEBUG    | Using bundled v2 Git-AI for stats-delta: /root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai
+2026-04-16 20:49:14.655 | 2741491 (2741491) | DEBUG    | git-ai stats collection: running command ['/root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai', 'stats-delta', '--json'] with cwd=/root/arkan
+2026-04-16 20:49:14.699 | 2741491 (2741491) | DEBUG    | git-ai stats-delta returned empty list, skipping event emission
+2026-04-16 20:49:44.701 | 2741491 (2741491) | DEBUG    | Running periodic git-ai stats collection
+2026-04-16 20:49:44.703 | 2741491 (2741491) | DEBUG    | Using bundled v2 Git-AI for stats-delta: /root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai
+2026-04-16 20:49:44.703 | 2741491 (2741491) | DEBUG    | git-ai stats collection: running command ['/root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai', 'stats-delta', '--json'] with cwd=/root/arkan
+2026-04-16 20:49:44.750 | 2741491 (2741491) | DEBUG    | git-ai stats-delta returned empty list, skipping event emission
+2026-04-16 20:50:14.751 | 2741491 (2741491) | DEBUG    | Running periodic git-ai stats collection
+2026-04-16 20:50:14.753 | 2741491 (2741491) | DEBUG    | Using bundled v2 Git-AI for stats-delta: /root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai
+2026-04-16 20:50:14.753 | 2741491 (2741491) | DEBUG    | git-ai stats collection: running command ['/root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai', 'stats-delta', '--json'] with cwd=/root/arkan
+2026-04-16 20:50:14.910 | 2741491 (2741491) | DEBUG    | git-ai stats-delta returned empty list, skipping event emission
+2026-04-16 20:50:44.912 | 2741491 (2741491) | DEBUG    | Running periodic git-ai stats collection
+2026-04-16 20:50:44.916 | 2741491 (2741491) | DEBUG    | Using bundled v2 Git-AI for stats-delta: /root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai
+2026-04-16 20:50:44.917 | 2741491 (2741491) | DEBUG    | git-ai stats collection: running command ['/root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai', 'stats-delta', '--json'] with cwd=/root/arkan
+2026-04-16 20:50:45.045 | 2741491 (2741491) | DEBUG    | git-ai stats-delta returned empty list, skipping event emission
+2026-04-16 20:51:15.046 | 2741491 (2741491) | DEBUG    | Running periodic git-ai stats collection
+2026-04-16 20:51:15.054 | 2741491 (2741491) | DEBUG    | Using bundled v2 Git-AI for stats-delta: /root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai
+2026-04-16 20:51:15.054 | 2741491 (2741491) | DEBUG    | git-ai stats collection: running command ['/root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai', 'stats-delta', '--json'] with cwd=/root/arkan
+2026-04-16 20:51:15.124 | 2741491 (2741491) | DEBUG    | git-ai stats-delta returned empty list, skipping event emission
+2026-04-16 20:51:45.130 | 2741491 (2741491) | DEBUG    | Running periodic git-ai stats collection
+2026-04-16 20:51:45.134 | 2741491 (2741491) | DEBUG    | Using bundled v2 Git-AI for stats-delta: /root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai
+2026-04-16 20:51:45.135 | 2741491 (2741491) | DEBUG    | git-ai stats collection: running command ['/root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai', 'stats-delta', '--json'] with cwd=/root/arkan
+2026-04-16 20:51:45.169 | 2741491 (2741491) | DEBUG    | git-ai stats-delta returned empty list, skipping event emission
+2026-04-16 20:52:15.172 | 2741491 (2741491) | DEBUG    | Running periodic git-ai stats collection
+2026-04-16 20:52:15.178 | 2741491 (2741491) | DEBUG    | Using bundled v2 Git-AI for stats-delta: /root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai
+2026-04-16 20:52:15.178 | 2741491 (2741491) | DEBUG    | git-ai stats collection: running command ['/root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai', 'stats-delta', '--json'] with cwd=/root/arkan
+2026-04-16 20:52:15.218 | 2741491 (2741491) | DEBUG    | git-ai stats-delta returned empty list, skipping event emission
+2026-04-16 20:52:45.221 | 2741491 (2741491) | DEBUG    | Running periodic git-ai stats collection
+2026-04-16 20:52:45.222 | 2741491 (2741491) | DEBUG    | Using bundled v2 Git-AI for stats-delta: /root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai
+2026-04-16 20:52:45.222 | 2741491 (2741491) | DEBUG    | git-ai stats collection: running command ['/root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai', 'stats-delta', '--json'] with cwd=/root/arkan
+2026-04-16 20:52:45.262 | 2741491 (2741491) | DEBUG    | git-ai stats-delta returned empty list, skipping event emission
+2026-04-16 20:53:15.263 | 2741491 (2741491) | DEBUG    | Running periodic git-ai stats collection
+2026-04-16 20:53:15.267 | 2741491 (2741491) | DEBUG    | Using bundled v2 Git-AI for stats-delta: /root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai
+2026-04-16 20:53:15.268 | 2741491 (2741491) | DEBUG    | git-ai stats collection: running command ['/root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai', 'stats-delta', '--json'] with cwd=/root/arkan
+2026-04-16 20:53:15.315 | 2741491 (2741491) | DEBUG    | git-ai stats-delta returned empty list, skipping event emission
+2026-04-16 20:53:45.319 | 2741491 (2741491) | DEBUG    | Running periodic git-ai stats collection
+2026-04-16 20:53:45.320 | 2741491 (2741491) | DEBUG    | Using bundled v2 Git-AI for stats-delta: /root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai
+2026-04-16 20:53:45.320 | 2741491 (2741491) | DEBUG    | git-ai stats collection: running command ['/root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai', 'stats-delta', '--json'] with cwd=/root/arkan
+2026-04-16 20:53:45.361 | 2741491 (2741491) | DEBUG    | git-ai stats-delta returned empty list, skipping event emission
+2026-04-16 20:54:15.363 | 2741491 (2741491) | DEBUG    | Running periodic git-ai stats collection
+2026-04-16 20:54:15.365 | 2741491 (2741491) | DEBUG    | Using bundled v2 Git-AI for stats-delta: /root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai
+2026-04-16 20:54:15.369 | 2741491 (2741491) | DEBUG    | git-ai stats collection: running command ['/root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai', 'stats-delta', '--json'] with cwd=/root/arkan
+2026-04-16 20:54:15.411 | 2741491 (2741491) | DEBUG    | git-ai stats-delta returned empty list, skipping event emission
+2026-04-16 20:54:45.413 | 2741491 (2741491) | DEBUG    | Running periodic git-ai stats collection
+2026-04-16 20:54:45.420 | 2741491 (2741491) | DEBUG    | Using bundled v2 Git-AI for stats-delta: /root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai
+2026-04-16 20:54:45.421 | 2741491 (2741491) | DEBUG    | git-ai stats collection: running command ['/root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai', 'stats-delta', '--json'] with cwd=/root/arkan
+2026-04-16 20:54:45.478 | 2741491 (2741491) | DEBUG    | git-ai stats-delta returned empty list, skipping event emission
+2026-04-16 20:55:15.481 | 2741491 (2741491) | DEBUG    | Running periodic git-ai stats collection
+2026-04-16 20:55:15.483 | 2741491 (2741491) | DEBUG    | Using bundled v2 Git-AI for stats-delta: /root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai
+2026-04-16 20:55:15.484 | 2741491 (2741491) | DEBUG    | git-ai stats collection: running command ['/root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai', 'stats-delta', '--json'] with cwd=/root/arkan
+2026-04-16 20:55:15.521 | 2741491 (2741491) | DEBUG    | git-ai stats-delta returned empty list, skipping event emission
+2026-04-16 20:55:45.523 | 2741491 (2741491) | DEBUG    | Running periodic git-ai stats collection
+2026-04-16 20:55:45.524 | 2741491 (2741491) | DEBUG    | Using bundled v2 Git-AI for stats-delta: /root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai
+2026-04-16 20:55:45.524 | 2741491 (2741491) | DEBUG    | git-ai stats collection: running command ['/root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai', 'stats-delta', '--json'] with cwd=/root/arkan
+2026-04-16 20:55:45.559 | 2741491 (2741491) | DEBUG    | git-ai stats-delta returned empty list, skipping event emission
+2026-04-16 20:56:15.561 | 2741491 (2741491) | DEBUG    | Running periodic git-ai stats collection
+2026-04-16 20:56:15.562 | 2741491 (2741491) | DEBUG    | Using bundled v2 Git-AI for stats-delta: /root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai
+2026-04-16 20:56:15.562 | 2741491 (2741491) | DEBUG    | git-ai stats collection: running command ['/root/.vscode-server/data/User/workspaceStorage/b5286c0210ad09b69ddc88cab97dad22/atlassian.atlascode/atlascode-rovodev-bin/0.13.59/git-ai/v2/git-ai', 'stats-delta', '--json'] with cwd=/root/arkan
+2026-04-16 20:56:15.605 | 2741491 (2741491) | DEBUG    | git-ai stats-delta returned empty list, skipping event emission

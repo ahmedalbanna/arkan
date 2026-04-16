@@ -5,7 +5,6 @@ import { Result } from "@/infrastructure/utils/result";
 import { UserError } from "../../domain/errors/UserErrors";
 import { eq } from "drizzle-orm";
 import { type IAuthRepository, IAuthRepositoryToken } from "../../domain/repositories/IAuthRepository";
-import { DrizzleAuthRepository } from "../../infrastructure/repositories/DrizzleAuthRepository";
 import { type LogSecurityEventUseCase } from "./LogSecurityEventUseCase";
 
 @injectable()
@@ -31,8 +30,11 @@ export class DisableUserUseCase {
             });
 
             // If disabling, also force logout all devices
-            if (isDisabled && this.authRepository instanceof DrizzleAuthRepository) {
-                await this.authRepository.revokeAllSessions(userId);
+            if (isDisabled) {
+                const revokeResult = await this.authRepository.revokeAllSessions(userId);
+                if (revokeResult.isFailure) {
+                    console.warn(`Failed to revoke sessions for disabled user ${userId}:`, revokeResult.error);
+                }
                 
                 await this.logSecurityEventUseCase.execute({
                     userId,

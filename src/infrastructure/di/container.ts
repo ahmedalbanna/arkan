@@ -11,6 +11,7 @@ import { IGenerationLogRepositoryToken } from "@/modules/ai/domain/repositories/
 import { IAgentRepositoryToken } from "@/modules/ai/domain/repositories/IAgentRepository";
 import { IAiServiceToken } from "@/modules/ai/domain/services/IAiService";
 import { IRetrievalServiceToken } from "@/modules/ai/domain/services/IRetrievalService";
+import { IWritingToolRegistryToken } from "@/modules/ai/domain/services/IWritingToolRegistry";
 import { IEmailServiceToken } from "@/modules/users/domain/services/IEmailService";
 import { IAdminStatsRepositoryToken } from "@/modules/admin/domain/repositories/IAdminStatsRepository";
 import { IFeatureRepositoryToken } from "@/modules/admin/domain/repositories/IFeatureRepository";
@@ -26,6 +27,7 @@ import { ICookieServiceToken } from "@/modules/users/domain/services/ICookieServ
 import { ISessionServiceToken } from "@/modules/users/domain/services/ISessionService";
 import { IPasswordServiceToken } from "@/modules/users/domain/services/IPasswordService";
 import { ITokenServiceToken } from "@/modules/users/domain/services/ITokenService";
+import { ITwoFactorAuthServiceToken } from "@/modules/users/domain/services/ITwoFactorAuthService";
 import { ICacheServiceToken } from "@/infrastructure/cache/ICacheService";
 import { IMarkdownServiceToken } from "@/infrastructure/di/tokens";
 
@@ -51,11 +53,11 @@ import { NotificationApiClient } from "@/modules/users/adapters/api-client/Notif
 import { RagApiClient } from "@/modules/rag/adapters/api-client/RagApiClient";
 import { DocxExportApiClient, PptxExportApiClient } from "@/modules/ai-content/adapters/api-client/ExportApiClient";
 import { CreditService } from "@/modules/billing/application/services/CreditService";
-import { LocalProjectService } from "@/modules/projects/infrastructure/storage/LocalProjectService";
 import { PromptBuilder } from "@/modules/ai-content/domain/services/PromptBuilder";
 import { CookieManager } from "@/modules/users/infrastructure/services/CookieManager";
 import { SessionManager } from "@/modules/users/infrastructure/services/SessionManager";
 import { BrowserCache } from "@/infrastructure/cache/BrowserCache";
+import { LocalProjectService } from "@/infrastructure/storage/LocalProjectService";
 import { TurndownMarkdownService } from "@/modules/ai-content/infrastructure/services/TurndownMarkdownService";
 
 // Register Client API Clients (always — safe for browser)
@@ -104,7 +106,7 @@ if (typeof window === 'undefined') {
   const AiServiceImpl = useN8n
     ? require("@/modules/ai/infrastructure/services/N8nAiService").N8nAiService
     : require("@/modules/ai/infrastructure/services/GenkitAiService").GenkitAiService;
-  const { WritingToolRegistry } = require("@/modules/ai/application/services/WritingToolRegistry");
+  const { WritingToolRegistry } = require("@/modules/ai/infrastructure/services/WritingToolRegistry");
   const { DrizzleAdminStatsRepository } = require("@/modules/admin/infrastructure/repositories/DrizzleAdminStatsRepository");
   const { DrizzleFeatureRepository } = require("@/modules/admin/infrastructure/repositories/DrizzleFeatureRepository");
   const { DrizzleSettingsRepository } = require("@/modules/admin/infrastructure/repositories/DrizzleSettingsRepository");
@@ -125,7 +127,7 @@ if (typeof window === 'undefined') {
   container.register(IPasswordServiceToken, { useClass: BcryptPasswordService }, { lifecycle: Lifecycle.Singleton });
   container.register(ITokenServiceToken, { useClass: JoseTokenService }, { lifecycle: Lifecycle.Singleton });
   container.register(IEmailServiceToken, { useClass: NodemailerEmailService }, { lifecycle: Lifecycle.Singleton });
-  container.register(TwoFactorAuthService, { useClass: TwoFactorAuthService }, { lifecycle: Lifecycle.Singleton });
+  container.register(ITwoFactorAuthServiceToken, { useClass: TwoFactorAuthService }, { lifecycle: Lifecycle.Singleton });
   container.register(IProjectRepositoryToken, { useClass: DrizzleProjectRepository }, { lifecycle: Lifecycle.Singleton });
   container.register(IUserRepositoryToken, { useClass: DrizzleUserRepository }, { lifecycle: Lifecycle.Singleton });
   container.register(IAuthRepositoryToken, { useClass: DrizzleAuthRepository }, { lifecycle: Lifecycle.Singleton });
@@ -136,7 +138,7 @@ if (typeof window === 'undefined') {
   container.register(IDocxExportServiceToken, { useClass: DocxExportService }, { lifecycle: Lifecycle.Singleton });
   container.register(IPptxExportServiceToken, { useClass: PptxExportService }, { lifecycle: Lifecycle.Singleton });
   container.register(IPdfExportServiceToken, { useClass: PdfExportService }, { lifecycle: Lifecycle.Singleton });
-  container.register(WritingToolRegistry, { useClass: WritingToolRegistry }, { lifecycle: Lifecycle.Singleton });
+  container.register(IWritingToolRegistryToken, { useClass: WritingToolRegistry }, { lifecycle: Lifecycle.Singleton });
   container.register(IAdminStatsRepositoryToken, { useClass: DrizzleAdminStatsRepository }, { lifecycle: Lifecycle.Singleton });
   container.register(IFeatureRepositoryToken, { useClass: DrizzleFeatureRepository }, { lifecycle: Lifecycle.Singleton });
   container.register(ISettingsRepositoryToken, { useClass: DrizzleSettingsRepository }, { lifecycle: Lifecycle.Singleton });

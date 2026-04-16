@@ -1,6 +1,24 @@
 
-import type { Project, ProjectContent } from '@/modules/projects/domain/entities/Project';
 import { Result } from '@/infrastructure/utils/result';
+
+export interface ExportProject {
+    id: string;
+    name: string;
+    projectDescription?: string;
+    projectType?: string;
+    specialization?: string;
+    university?: string;
+    supervisor?: string;
+    course?: string;
+    educationalLevel?: string;
+    teamMembers?: readonly string[];
+    logoUrl?: string;
+    universityLogoUrl?: string;
+    tableOfContentsMarkdown?: string;
+    markdown?: string;
+}
+
+export type ExportProjectContent = readonly unknown[];
 
 export interface ExportOptions {
     template?: string;
@@ -12,7 +30,7 @@ export interface ExportOptions {
 }
 
 export interface IExportService {
-    export(project: Project, content: ProjectContent, options: ExportOptions): Promise<Result<Blob | Buffer, Error>>;
+    export(project: ExportProject, content: ExportProjectContent, options: ExportOptions): Promise<Result<Blob | Buffer, Error>>;
     exportFromMarkdown(markdown: string, fileName: string, options: ExportOptions): Promise<Result<Blob | Buffer, Error>>;
 }
 

@@ -1,7 +1,7 @@
 
 import type { IStylesOptions } from 'docx';
-import type { CustomStyles } from '@/modules/ai-content/domain/types/export-types';
 import { Template, type BaseTemplateProperties } from './Template';
+import type { CustomStyles } from '../types/docx';
 
 // Corresponds to DocxTemplateSchema
 export interface DocxTemplateProperties extends BaseTemplateProperties {

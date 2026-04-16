@@ -17,7 +17,7 @@ import { WritingToolsApiClient } from '@/modules/ai/adapters/api-client/WritingT
 import type { SectionName } from '@/modules/ai/domain/schemas';
 import { useBuilderStore } from '@/modules/projects/adapters/state/useBuilderStore';
 import { type Project } from '@/modules/projects/domain/entities/Project';
-import { parseMarkdownToContent } from '@/modules/projects/infrastructure/io/markdown-parser';
+import { parseMarkdownToContent } from '@/hooks/util/useMarkdownParser';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Editor } from '@tiptap/react';
 import { marked } from 'marked';

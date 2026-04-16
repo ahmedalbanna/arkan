@@ -5,7 +5,7 @@ import { IAiServiceToken } from "../../domain/services/IAiService";
 import type { IGenerationLogRepository } from "../../domain/repositories/IGenerationLogRepository";
 import { IGenerationLogRepositoryToken } from "../../domain/repositories/IGenerationLogRepository";
 import { DeductCreditsUseCase } from "@/modules/users/application/use-cases/DeductCreditsUseCase";
-import { WritingToolRegistry } from "../services/WritingToolRegistry";
+import { type IWritingToolRegistry, IWritingToolRegistryToken } from "../../domain/services/IWritingToolRegistry";
 import { Result } from "@/infrastructure/utils/result";
 import { AiError } from "../../domain/errors/AiErrors";
 import { rateLimiter } from "@/infrastructure/security/rate-limiter";
@@ -25,8 +25,8 @@ export class RunAiToolUseCase {
         @inject(IGenerationLogRepositoryToken)
         private generationLogRepository: IGenerationLogRepository,
         @inject(DeductCreditsUseCase) private deductCreditsUseCase: DeductCreditsUseCase,
-        @inject(WritingToolRegistry)
-        private writingToolRegistry: WritingToolRegistry
+        @inject(IWritingToolRegistryToken)
+        private writingToolRegistry: IWritingToolRegistry
     ) {}
 
     async execute<TInput, TOutput>(params: RunAiToolInput<TInput>): Promise<Result<TOutput, AiError>> {

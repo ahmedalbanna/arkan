@@ -10,8 +10,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Skeleton } from '@/components/ui/skeleton';
 import { Textarea } from '@/components/ui/textarea';
 import { useAIResearcherLogic, useAddToProjectDialogLogic, type ResearchMode } from '@/modules/ai/adapters/hooks/writing-tools/use-ai-researcher-logic';
-import { PdfExportService } from '@/modules/ai-content/infrastructure/exporters/PdfExportService';
 import { container } from '@/infrastructure/di/container';
+import { IPdfExportServiceToken, type IExportService } from '@/modules/ai-content/domain/services/IExportService';
 import { markdownComponents } from '@/modules/ai-content/adapters/components/report-mode/markdown-styles';
 import { AlertCircle, BookOpen, Bot, CheckCircle, CheckCircle2, Copy, FileDown, FileText, HelpCircle, Loader2, PlusCircle, Search, Sparkles } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
@@ -71,7 +71,8 @@ export function AIResearcherTool() {
 
   function handleExportPdf() {
     if (reportRef.current) {
-      container.resolve(PdfExportService).exportFromElement(reportRef.current, 'ai_research_report.pdf');
+      const service = container.resolve<IExportService>(IPdfExportServiceToken);
+      void service.exportFromMarkdown(markdownResult || '', 'ai_research_report', { template: 'default' });
     }
   }
 

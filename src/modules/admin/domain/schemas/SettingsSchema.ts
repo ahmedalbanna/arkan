@@ -1,10 +1,10 @@
 
 import { z } from 'zod';
-import { paymentMethodSchema } from '@/modules/billing/domain/schemas';
+import { adminPaymentMethodSchema } from './PaymentMethodSchema';
 
 export const AppSettingsSchema = z.object({
     newUserCredits: z.number().int().min(0),
-    paymentMethods: z.array(paymentMethodSchema).optional(),
+    paymentMethods: z.array(adminPaymentMethodSchema).optional(),
 });
 
 export type AppSettingsInput = z.infer<typeof AppSettingsSchema>;

@@ -1,7 +1,7 @@
 
 import { injectable } from "tsyringe";
 import { ProjectApiClient } from "./ProjectApiClient";
-import { LocalProjectService } from "../../infrastructure/storage/LocalProjectService";
+import { LocalProjectService } from "@/infrastructure/storage/LocalProjectService";
 import { Project, type ProjectProperties } from "../../domain/entities/Project";
 import { Result } from "@/infrastructure/utils/result";
 import { container } from "@/infrastructure/di/container";

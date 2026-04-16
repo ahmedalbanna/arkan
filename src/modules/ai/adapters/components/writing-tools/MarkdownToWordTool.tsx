@@ -14,7 +14,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/util/use-toast';
 import dynamic from 'next/dynamic';
-import { DocxTemplateKey, templates } from '@/modules/ai-content/infrastructure/exporters/DocxStyles';
+import { DocxTemplateKey, templates } from '@/infrastructure/exporters/DocxStyles';
 import { apiService } from '@/infrastructure/api/ApiService';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';

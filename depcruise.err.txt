@@ -1,0 +1,776 @@
+
+  warn no-orphans: src/modules/ai/infrastructure/prompts/General.ts
+  warn no-orphans: src/modules/ai/domain/utils/TokenManager.ts
+  warn no-orphans: src/modules/ai/domain/entities/Diagram.ts
+  warn no-orphans: src/modules/ai-content/infrastructure/editor/editor/MenuBar.tsx
+  warn no-orphans: src/infrastructure/stubs/async-hooks-stub.js
+  warn no-orphans: src/declarations.d.ts
+  warn no-orphans: src/app/api/templates/refresh-image/route.ts
+  warn no-orphans: src/@types/ion-sound.d.ts
+  warn adapters-must-not-depend-on-infrastructure-directly: src/modules/ai-content/adapters/components/writing-tools/MarkdownToWordTool.tsx → src/modules/ai-content/infrastructure/exporters/DocxStyles.ts
+  error no-cross-module-imports-except-shared: src/modules/users/application/use-cases/UploadProfilePictureUseCase.ts → src/modules/billing/domain/services/IFileStorageService.ts
+  error no-cross-module-imports-except-shared: src/modules/users/application/use-cases/GetUserStatsUseCase.ts → src/modules/ai/domain/repositories/IGenerationLogRepository.ts
+  error no-cross-module-imports-except-shared: src/modules/users/application/use-cases/GetUserStatsUseCase.ts → src/modules/ai/domain/repositories/IAgentRepository.ts
+  error no-cross-module-imports-except-shared: src/modules/users/adapters/components/admin/UserTableRow.tsx → src/modules/admin/adapters/api-client/AdminApiClient.ts
+  error no-cross-module-imports-except-shared: src/modules/users/adapters/components/admin/UserManagementConsole.tsx → src/modules/admin/adapters/hooks/use-user-management-console.ts
+  error no-cross-module-imports-except-shared: src/modules/users/adapters/components/admin/CreateUserDialog.tsx → src/modules/admin/adapters/hooks/use-create-user-dialog.ts
+  error no-cross-module-imports-except-shared: src/modules/templates/infrastructure/exporters/pptx/markdown-to-pptx-converter.ts → src/modules/ai/domain/utils/plantuml-utils.ts
+  error no-cross-module-imports-except-shared: src/modules/rag/infrastructure/repositories/DefaultRagRepository.ts → src/modules/ai/domain/services/IRetrievalService.ts
+  error no-cross-module-imports-except-shared: src/modules/rag/infrastructure/repositories/DefaultRagRepository.ts → src/modules/ai/domain/errors/AiErrors.ts
+  error no-cross-module-imports-except-shared: src/modules/rag/infrastructure/config.ts → src/modules/ai/domain/constants/AiModels.ts
+  error no-cross-module-imports-except-shared: src/modules/rag/adapters/components/document-indexer/DocumentIndexerInterface.tsx → src/modules/admin/adapters/hooks/useDocumentIndexing.ts
+  error no-cross-module-imports-except-shared: src/modules/projects/infrastructure/repositories/DrizzleProjectRepository.ts → src/modules/ai/infrastructure/services/Telemetry.ts
+  error no-cross-module-imports-except-shared: src/modules/projects/infrastructure/io/template.ts → src/modules/templates/domain/entities/ReportTemplate.ts
+  error no-cross-module-imports-except-shared: src/modules/projects/infrastructure/io/template.ts → src/modules/ai-content/domain/entities/Section.ts
+  error no-cross-module-imports-except-shared: src/modules/projects/infrastructure/io/template.ts → src/modules/ai-content/domain/entities/Chapter.ts
+  error no-cross-module-imports-except-shared: src/modules/projects/infrastructure/io/markdown-parser.ts → src/modules/templates/infrastructure/exporters/pptx/ast-utils.ts
+  error no-cross-module-imports-except-shared: src/modules/projects/infrastructure/io/markdown-parser.ts → src/modules/ai-content/domain/entities/Section.ts
+  error no-cross-module-imports-except-shared: src/modules/projects/infrastructure/io/markdown-parser.ts → src/modules/ai-content/domain/entities/Chapter.ts
+  error no-cross-module-imports-except-shared: src/modules/projects/adapters/state/useBuilderStore.ts → src/modules/users/domain/entities/User.ts
+  error no-cross-module-imports-except-shared: src/modules/projects/adapters/state/useBuilderStore.ts → src/modules/ai-content/domain/entities/Chapter.ts
+  error no-cross-module-imports-except-shared: src/modules/projects/adapters/state/useBuilderStore.ts → src/modules/ai-content/adapters/state/use-editor-store.ts
+  error no-cross-module-imports-except-shared: src/modules/projects/adapters/hooks/use-context-selector.ts → src/modules/ai-content/domain/entities/ControlTypes.ts
+  error no-cross-module-imports-except-shared: src/modules/projects/adapters/components/SnapshotHistoryPanel.tsx → src/modules/ai-content/adapters/components/builder/layout/SidebarContainer.tsx
+  error no-cross-module-imports-except-shared: src/modules/billing/application/use-cases/VerifyPaymentUseCase.ts → src/modules/users/domain/services/INotificationService.ts
+  error no-cross-module-imports-except-shared: src/modules/billing/application/use-cases/VerifyPaymentUseCase.ts → src/modules/users/application/use-cases/AddCreditsUseCase.ts
+  error no-cross-module-imports-except-shared: src/modules/billing/application/use-cases/SubmitPaymentRequestUseCase.ts → src/modules/users/domain/services/INotificationService.ts
+  error no-cross-module-imports-except-shared: src/modules/billing/application/use-cases/SubmitPaymentRequestUseCase.ts → src/modules/users/domain/repositories/IUserRepository.ts
+  error no-cross-module-imports-except-shared: src/modules/billing/application/services/CreditService.ts → src/modules/users/application/use-cases/DeductCreditsUseCase.ts
+  error no-cross-module-imports-except-shared: src/modules/billing/application/services/CreditService.ts → src/modules/users/application/use-cases/AddCreditsUseCase.ts
+  error no-cross-module-imports-except-shared: src/modules/billing/adapters/components/pricing/PurchaseCreditsDialog.tsx → src/modules/admin/adapters/hooks/use-settings.ts
+  error no-cross-module-imports-except-shared: src/modules/ai/application/use-cases/RunAiToolUseCase.ts → src/modules/users/application/use-cases/DeductCreditsUseCase.ts
+  error no-cross-module-imports-except-shared: src/modules/ai/application/use-cases/GenerateSectionWithRAGUseCase.ts → src/modules/users/application/use-cases/DeductCreditsUseCase.ts
+  error no-cross-module-imports-except-shared: src/modules/ai/application/use-cases/GenerateChapterWithRAGUseCase.ts → src/modules/users/application/use-cases/DeductCreditsUseCase.ts
+  error no-cross-module-imports-except-shared: src/modules/ai/adapters/hooks/writing-tools/use-text-stylist-logic.ts → src/modules/projects/domain/utils/diff.ts
+  error no-cross-module-imports-except-shared: src/modules/ai/adapters/hooks/writing-tools/use-ai-researcher-logic.ts → src/modules/projects/adapters/state/useBuilderStore.ts
+  error no-cross-module-imports-except-shared: src/modules/ai/adapters/components/agent/AgentPlayground.tsx → src/modules/users/domain/utils/authUtils.ts
+  error no-cross-module-imports-except-shared: src/modules/ai-content/infrastructure/utils/pdf-utils.ts → src/modules/templates/infrastructure/PptxStyles.ts
+  error no-cross-module-imports-except-shared: src/modules/ai-content/infrastructure/utils/pdf-utils.ts → src/modules/templates/infrastructure/exporters/pptx/markdown-to-pptx-converter.ts
+  error no-cross-module-imports-except-shared: src/modules/ai-content/infrastructure/utils/pdf-utils.ts → src/modules/templates/infrastructure/exporters/pptx/constants.ts
+  error no-cross-module-imports-except-shared: src/modules/ai-content/infrastructure/utils/pdf-utils.ts → src/modules/templates/infrastructure/exporters/pptx/ast-utils.ts
+  error no-cross-module-imports-except-shared: src/modules/ai-content/infrastructure/utils/pdf-utils.ts → src/modules/ai/domain/utils/plantuml-utils.ts
+  error no-cross-module-imports-except-shared: src/modules/ai-content/infrastructure/exporters/word-converter/inline-converter.ts → src/modules/templates/infrastructure/utils/ProxiedImage.ts
+  error no-cross-module-imports-except-shared: src/modules/ai-content/infrastructure/exporters/word-converter/ast-converter.ts → src/modules/templates/infrastructure/utils/ProxiedImage.ts
+  error no-cross-module-imports-except-shared: src/modules/ai-content/infrastructure/exporters/PptxExportService.ts → src/modules/templates/infrastructure/exporters/pptx/markdown-to-pptx-converter.ts
+  error no-cross-module-imports-except-shared: src/modules/ai-content/infrastructure/exporters/PptxExportService.ts → src/modules/projects/domain/entities/Project.ts
+  error no-cross-module-imports-except-shared: src/modules/ai-content/infrastructure/exporters/PdfExportService.ts → src/modules/projects/domain/entities/Project.ts
+  error no-cross-module-imports-except-shared: src/modules/ai-content/infrastructure/exporters/MarkdownToWordConverter.ts → src/modules/projects/domain/entities/Project.ts
+  error no-cross-module-imports-except-shared: src/modules/ai-content/infrastructure/exporters/MarkdownToWordConverter.ts → src/modules/ai/domain/utils/plantuml-utils.ts
+  error no-cross-module-imports-except-shared: src/modules/ai-content/infrastructure/exporters/DocxStyles.ts → src/modules/templates/domain/entities/DocxTemplate.ts
+  error no-cross-module-imports-except-shared: src/modules/ai-content/infrastructure/exporters/DocxExportService.ts → src/modules/projects/domain/entities/Project.ts
+  error no-cross-module-imports-except-shared: src/modules/ai-content/infrastructure/editor/tiptap-extensions.ts → src/modules/ai/domain/utils/plantuml-utils.ts
+  error no-cross-module-imports-except-shared: src/modules/ai-content/application/use-cases/ExportProjectUseCase.ts → src/modules/projects/domain/entities/Project.ts
+  error no-cross-module-imports-except-shared: src/modules/ai-content/application/use-cases/BuildProjectUseCase.ts → src/modules/projects/domain/repositories/IProjectRepository.ts
+  error no-cross-module-imports-except-shared: src/modules/ai-content/application/use-cases/BuildProjectUseCase.ts → src/modules/projects/domain/entities/Project.ts
+  error no-cross-module-imports-except-shared: src/modules/ai-content/adapters/hooks/use-guideline-editor.ts → src/modules/projects/adapters/state/useBuilderStore.ts
+  error no-cross-module-imports-except-shared: src/modules/ai-content/adapters/hooks/use-build-project.ts → src/modules/projects/domain/entities/Project.ts
+  error no-cross-module-imports-except-shared: src/modules/ai-content/adapters/hooks/use-build-project.ts → src/modules/projects/adapters/state/useBuilderStore.ts
+  error no-cross-module-imports-except-shared: src/modules/ai-content/adapters/hooks/report-mode/useReportGenerator.ts → src/modules/projects/domain/entities/Project.ts
+  error no-cross-module-imports-except-shared: src/modules/ai-content/adapters/hooks/report-mode/useReportGenerator.ts → src/modules/projects/adapters/state/useBuilderStore.ts
+  error no-cross-module-imports-except-shared: src/modules/ai-content/adapters/hooks/report-mode/useReportGenerator.ts → src/modules/projects/adapters/hooks/use-projects.ts
+  error no-cross-module-imports-except-shared: src/modules/ai-content/adapters/hooks/report-mode/useReportGenerator.ts → src/modules/projects/adapters/hooks/use-builder-page.ts
+  error no-cross-module-imports-except-shared: src/modules/ai-content/adapters/hooks/report-mode/useIntelligence.ts → src/modules/projects/adapters/state/useBuilderStore.ts
+  error no-cross-module-imports-except-shared: src/modules/ai-content/adapters/hooks/report-mode/use-guideline-editor.ts → src/modules/projects/adapters/state/useBuilderStore.ts
+  error no-cross-module-imports-except-shared: src/modules/ai-content/adapters/hooks/report-mode/use-chapter-actions.ts → src/modules/projects/domain/utils/diff.ts
+  error no-cross-module-imports-except-shared: src/modules/ai-content/adapters/hooks/report-mode/use-chapter-actions.ts → src/modules/projects/adapters/state/useBuilderStore.ts
+  error no-cross-module-imports-except-shared: src/modules/ai-content/adapters/hooks/report-mode/use-ai-actions.ts → src/modules/projects/domain/entities/Project.ts
+  error no-cross-module-imports-except-shared: src/modules/ai-content/adapters/hooks/report-mode/use-ai-actions.ts → src/modules/projects/adapters/state/useBuilderStore.ts
+  error no-cross-module-imports-except-shared: src/modules/ai-content/adapters/hooks/report-mode/use-ai-actions.ts → src/modules/ai/adapters/api-client/WritingToolsApiClient.ts
+  error no-cross-module-imports-except-shared: src/modules/ai-content/adapters/hooks/builder/useSidebarPanels.tsx → src/modules/projects/adapters/components/SnapshotHistoryPanel.tsx
+  error no-cross-module-imports-except-shared: src/modules/ai-content/adapters/hooks/builder/useDocumentSuggestion.ts → src/modules/projects/domain/entities/Project.ts
+  error no-cross-module-imports-except-shared: src/modules/ai-content/adapters/controllers/AIContentController.ts → src/modules/projects/domain/entities/Project.ts
+  error no-cross-module-imports-except-shared: src/modules/ai-content/adapters/components/report-mode/dialogs/ReportTemplateDialog.tsx → src/modules/templates/domain/entities/ReportTemplate.ts
+  error no-cross-module-imports-except-shared: src/modules/ai-content/adapters/components/report-mode/dialogs/ReportTemplateDialog.tsx → src/modules/templates/adapters/hooks/use-templates.ts
+  error no-cross-module-imports-except-shared: src/modules/ai-content/adapters/components/builder/toolbar/DocumentToolbar.tsx → src/modules/projects/domain/entities/Project.ts
+  error no-cross-module-imports-except-shared: src/modules/ai-content/adapters/components/builder/templates/TOCGenerator.tsx → src/modules/ai/adapters/hooks/writing-tools/use-generate-toc-logic.ts
+  error no-cross-module-imports-except-shared: src/modules/ai-content/adapters/components/builder/templates/TemplateLibraryHUD.tsx → src/modules/templates/domain/entities/ReportTemplate.ts
+  error no-cross-module-imports-except-shared: src/modules/ai-content/adapters/components/builder/templates/TemplateLibraryHUD.tsx → src/modules/templates/adapters/hooks/use-templates.ts
+  error no-cross-module-imports-except-shared: src/modules/ai-content/adapters/components/builder/session/ProjectNodeItem.tsx → src/modules/projects/domain/entities/Project.ts
+  error no-cross-module-imports-except-shared: src/modules/ai-content/adapters/components/builder/session/LibraryHUD.tsx → src/modules/projects/domain/entities/Project.ts
+  error no-cross-module-imports-except-shared: src/modules/ai-content/adapters/components/builder/session/LibraryHUD.tsx → src/modules/projects/adapters/hooks/useProjectsPage.ts
+  error no-cross-module-imports-except-shared: src/modules/ai-content/adapters/components/builder/session/ExportHUD.tsx → src/modules/projects/domain/entities/Project.ts
+  error no-cross-module-imports-except-shared: src/modules/ai-content/adapters/components/builder/renderer/SnapshotComparison.tsx → src/modules/projects/domain/utils/diff.ts
+  error no-cross-module-imports-except-shared: src/modules/ai-content/adapters/components/builder/renderer/SnapshotComparison.tsx → src/modules/projects/domain/entities/Project.ts
+  error no-cross-module-imports-except-shared: src/modules/ai-content/adapters/components/builder/renderer/DocumentRenderer.tsx → src/modules/projects/domain/entities/Project.ts
+  error no-cross-module-imports-except-shared: src/modules/ai-content/adapters/components/builder/renderer/BuilderDocument.tsx → src/modules/projects/domain/entities/Project.ts
+  error no-cross-module-imports-except-shared: src/modules/ai-content/adapters/components/builder/outline/useOutlineOperations.ts → src/modules/projects/domain/entities/Project.ts
+  error no-cross-module-imports-except-shared: src/modules/ai-content/adapters/components/builder/layout/BuilderHeader.tsx → src/modules/projects/adapters/hooks/useProjectFileOperations.ts
+  error no-cross-module-imports-except-shared: src/modules/ai-content/adapters/components/builder/BuilderWorkspace.tsx → src/modules/projects/domain/entities/Project.ts
+  error no-cross-module-imports-except-shared: src/modules/ai-content/adapters/components/builder/BuilderWorkspace.tsx → src/modules/projects/adapters/hooks/useSnapshots.ts
+  error no-cross-module-imports-except-shared: src/modules/ai-content/adapters/api-client/ExportApiClient.ts → src/modules/projects/domain/entities/Project.ts
+  error no-cross-module-imports-except-shared: src/modules/admin/infrastructure/repositories/DrizzleAdminStatsRepository.ts → src/modules/users/domain/services/INotificationService.ts
+  error no-cross-module-imports-except-shared: src/modules/admin/application/use-cases/GetGenerationLogsUseCase.ts → src/modules/users/domain/repositories/IUserRepository.ts
+  error no-cross-module-imports-except-shared: src/modules/admin/application/use-cases/GetGenerationLogsUseCase.ts → src/modules/ai/domain/repositories/IGenerationLogRepository.ts
+  error no-cross-module-imports-except-shared: src/modules/admin/application/use-cases/GetGenerationLogsUseCase.ts → src/modules/ai/domain/errors/AiErrors.ts
+  error no-cross-module-imports-except-shared: src/modules/admin/adapters/hooks/use-user-management-console.ts → src/modules/users/domain/entities/User.ts
+  error no-cross-module-imports-except-shared: src/modules/admin/adapters/hooks/use-user-management-console.ts → src/modules/users/adapters/api-client/UserApiClient.ts
+  error no-cross-module-imports-except-shared: src/modules/admin/adapters/hooks/use-create-user-dialog.ts → src/modules/users/adapters/hooks/use-users.ts
+  error no-cross-module-imports-except-shared: src/modules/admin/adapters/controllers/AdminController.ts → src/modules/ai/domain/errors/AiErrors.ts
+  error no-circular: src/modules/users/adapters/hooks/use-users.ts → 
+      src/infrastructure/api/errorUtils.ts →
+      src/hooks/index.ts →
+      src/modules/users/adapters/hooks/use-users.ts
+  error no-circular: src/modules/users/adapters/hooks/use-notifications.ts → 
+      src/infrastructure/api/errorUtils.ts →
+      src/hooks/index.ts →
+      src/modules/users/adapters/hooks/use-notifications.ts
+  error no-circular: src/modules/users/adapters/hooks/use-auth-mutations.ts → 
+      src/modules/users/adapters/api-client/AuthApiClient.ts →
+      src/modules/users/adapters/components/auth/SignupForm.tsx →
+      src/modules/users/adapters/hooks/use-auth-mutations.ts
+  error no-circular: src/modules/users/adapters/hooks/use-auth-mutations.ts → 
+      src/infrastructure/api/errorUtils.ts →
+      src/hooks/index.ts →
+      src/modules/users/adapters/hooks/use-auth-mutations.ts
+  error no-circular: src/modules/users/adapters/components/auth/SignupForm.tsx → 
+      src/modules/users/adapters/hooks/use-auth-mutations.ts →
+      src/modules/users/adapters/components/auth/SignupForm.tsx
+  error no-circular: src/modules/users/adapters/components/auth/SignupForm.tsx → 
+      src/hooks/index.ts →
+      src/modules/users/adapters/hooks/use-auth-mutations.ts →
+      src/modules/users/adapters/components/auth/SignupForm.tsx
+  error no-circular: src/modules/users/adapters/api-client/AuthApiClient.ts → 
+      src/modules/users/adapters/components/auth/SignupForm.tsx →
+      src/hooks/index.ts →
+      src/modules/admin/adapters/hooks/use-admin-dashboard.ts →
+      src/context/AuthContext.tsx →
+      src/infrastructure/di/container.ts →
+      src/modules/users/adapters/api-client/AuthApiClient.ts
+  error no-circular: src/modules/templates/infrastructure/exporters/pptx/pptx-renderer.ts → 
+
+      src/modules/templates/infrastructure/exporters/pptx/slide-layout-engine.ts
+      →
+      src/modules/templates/infrastructure/exporters/pptx/pptx-renderer.ts
+  error no-circular: src/modules/rag/infrastructure/qdrant-adapter.ts → 
+      src/modules/rag/infrastructure/vector-store.ts →
+      src/modules/rag/infrastructure/qdrant-adapter.ts
+  error no-circular: src/modules/rag/adapters/components/document-indexer/DocumentIndexerInterface.tsx → 
+
+      src/modules/rag/adapters/components/document-indexer/IndexingSettings.tsx
+      →
+
+      src/modules/rag/adapters/components/document-indexer/DocumentIndexerInterface.tsx
+  error no-circular: src/modules/rag/adapters/components/document-indexer/DocumentIndexerInterface.tsx → 
+      src/modules/rag/adapters/components/document-indexer/FileUploadZone.tsx →
+
+
+      src/modules/rag/adapters/components/document-indexer/DocumentIndexerInterface.tsx
+  error no-circular: src/modules/projects/adapters/hooks/useProjectsPage.ts → 
+      src/modules/projects/adapters/state/useBuilderStore.ts →
+      src/infrastructure/di/container.ts →
+      src/modules/users/adapters/api-client/AuthApiClient.ts →
+      src/modules/users/adapters/components/auth/SignupForm.tsx →
+      src/hooks/index.ts →
+      src/modules/projects/adapters/hooks/useProjectsPage.ts
+  error no-circular: src/modules/projects/adapters/hooks/use-projects.ts → 
+      src/modules/projects/adapters/state/useBuilderStore.ts →
+      src/infrastructure/di/container.ts →
+      src/modules/users/adapters/api-client/AuthApiClient.ts →
+      src/modules/users/adapters/components/auth/SignupForm.tsx →
+      src/hooks/index.ts →
+      src/modules/projects/adapters/hooks/use-projects.ts
+  error no-circular: src/modules/projects/adapters/hooks/use-projects.ts → 
+      src/context/AuthContext.tsx →
+      src/hooks/index.ts →
+      src/modules/projects/adapters/hooks/use-projects.ts
+  error no-circular: src/modules/projects/adapters/hooks/use-builder-page.ts → 
+      src/hooks/index.ts →
+      src/modules/ai-content/adapters/hooks/report-mode/useReportGenerator.ts →
+
+      src/modules/projects/adapters/hooks/use-builder-page.ts
+  error no-circular: src/modules/projects/adapters/components/SnapshotHistoryPanel.tsx → 
+      src/modules/projects/adapters/state/useBuilderStore.ts →
+      src/infrastructure/di/container.ts →
+      src/modules/users/adapters/api-client/AuthApiClient.ts →
+      src/modules/users/adapters/components/auth/SignupForm.tsx →
+      src/hooks/index.ts →
+      src/modules/ai-content/adapters/hooks/report-mode/useReportGenerator.ts →
+
+      src/modules/ai-content/adapters/hooks/builder/useSidebarPanels.tsx →
+      src/modules/projects/adapters/components/SnapshotHistoryPanel.tsx
+  error no-circular: src/modules/ai/infrastructure/services/WritingToolRegistry.ts → 
+      src/modules/ai/infrastructure/tool-providers/WritingToolProvider.ts →
+      src/modules/ai/infrastructure/flows/index.ts →
+
+      src/modules/ai/infrastructure/flows/generation/generate-chapter-content-rag.ts
+      →
+      src/infrastructure/di/container.ts →
+      src/modules/ai/infrastructure/services/WritingToolRegistry.ts
+  error no-circular: src/modules/ai/infrastructure/services/WritingToolRegistry.ts → 
+      src/modules/ai/infrastructure/tool-providers/GenerationToolProvider.ts →
+      src/modules/ai/infrastructure/flows/index.ts →
+
+      src/modules/ai/infrastructure/flows/generation/generate-chapter-content-rag.ts
+      →
+      src/infrastructure/di/container.ts →
+      src/modules/ai/infrastructure/services/WritingToolRegistry.ts
+  error no-circular: src/modules/ai/infrastructure/flows/index.ts → 
+
+      src/modules/ai/infrastructure/flows/generation/generate-report-section-rag.ts
+      →
+      src/infrastructure/di/container.ts →
+      src/modules/ai/infrastructure/services/WritingToolRegistry.ts →
+      src/modules/ai/infrastructure/tool-providers/AcademicToolProvider.ts →
+      src/modules/ai/infrastructure/flows/index.ts
+  error no-circular: src/modules/ai/infrastructure/flows/generation/generate-report-section-rag.ts → 
+      src/infrastructure/di/container.ts →
+      src/modules/ai/infrastructure/services/GenkitAiService.ts →
+
+      src/modules/ai/infrastructure/flows/generation/generate-report-section-rag.ts
+  error no-circular: src/modules/ai/infrastructure/flows/academic/create-lecture-unit.ts → 
+      src/modules/ai/infrastructure/flows/index.ts →
+      src/modules/ai/infrastructure/flows/academic/create-lecture-unit.ts
+  error no-circular: src/modules/ai/application/services/tool-providers/WritingToolProvider.ts → 
+      src/modules/ai/application/services/WritingToolRegistry.ts →
+
+      src/modules/ai/application/services/tool-providers/WritingToolProvider.ts
+  error no-circular: src/modules/ai/application/services/tool-providers/GenerationToolProvider.ts → 
+      src/modules/ai/application/services/WritingToolRegistry.ts →
+
+      src/modules/ai/application/services/tool-providers/GenerationToolProvider.ts
+  error no-circular: src/modules/ai/application/services/tool-providers/AcademicToolProvider.ts → 
+      src/modules/ai/application/services/WritingToolRegistry.ts →
+
+      src/modules/ai/application/services/tool-providers/AcademicToolProvider.ts
+  error no-circular: src/modules/ai/adapters/hooks/writing-tools/use-writing-tool.ts → 
+      src/context/AuthContext.tsx →
+      src/hooks/index.ts →
+      src/modules/ai/adapters/hooks/writing-tools/use-writing-tool.ts
+  error no-circular: src/modules/ai/adapters/hooks/writing-tools/use-summarizer-logic.ts → 
+      src/context/AuthContext.tsx →
+      src/hooks/index.ts →
+      src/modules/ai/adapters/hooks/writing-tools/use-summarizer-logic.ts
+  error no-circular: src/modules/ai/adapters/hooks/writing-tools/use-session-plan-generator-logic.ts → 
+      src/modules/ai/adapters/hooks/writing-tools/use-writing-tool.ts →
+      src/context/AuthContext.tsx →
+      src/hooks/index.ts →
+
+      src/modules/ai/adapters/hooks/writing-tools/use-session-plan-generator-logic.ts
+  error no-circular: src/modules/ai/adapters/hooks/writing-tools/use-plagiarism-checker-logic.ts → 
+      src/context/AuthContext.tsx →
+      src/hooks/index.ts →
+
+      src/modules/ai/adapters/hooks/writing-tools/use-plagiarism-checker-logic.ts
+  error no-circular: src/modules/ai/adapters/hooks/writing-tools/use-paraphraser-logic.ts → 
+      src/context/AuthContext.tsx →
+      src/hooks/index.ts →
+      src/modules/ai/adapters/hooks/writing-tools/use-paraphraser-logic.ts
+  error no-circular: src/modules/ai/adapters/hooks/writing-tools/use-grammar-checker-logic.ts → 
+      src/context/AuthContext.tsx →
+      src/hooks/index.ts →
+      src/modules/ai/adapters/hooks/writing-tools/use-grammar-checker-logic.ts
+  error no-circular: src/modules/ai/adapters/hooks/writing-tools/use-fact-checker-logic.ts → 
+      src/context/AuthContext.tsx →
+      src/hooks/index.ts →
+      src/modules/ai/adapters/hooks/writing-tools/use-fact-checker-logic.ts
+  error no-circular: src/modules/ai/adapters/hooks/writing-tools/use-bias-checker-logic.ts → 
+      src/context/AuthContext.tsx →
+      src/hooks/index.ts →
+      src/modules/ai/adapters/hooks/writing-tools/use-bias-checker-logic.ts
+  error no-circular: src/modules/ai/adapters/hooks/writing-tools/use-assignments-solver-logic.ts → 
+      src/context/AuthContext.tsx →
+      src/hooks/index.ts →
+
+      src/modules/ai/adapters/hooks/writing-tools/use-assignments-solver-logic.ts
+  error no-circular: src/modules/ai/adapters/hooks/writing-tools/use-ai-researcher-logic.ts → 
+      src/modules/projects/adapters/state/useBuilderStore.ts →
+      src/infrastructure/di/container.ts →
+      src/modules/users/adapters/api-client/AuthApiClient.ts →
+      src/modules/users/adapters/components/auth/SignupForm.tsx →
+      src/hooks/index.ts →
+      src/modules/ai/adapters/hooks/writing-tools/use-ai-researcher-logic.ts
+  error no-circular: src/modules/ai/adapters/hooks/writing-tools/use-ai-detector-logic.ts → 
+      src/modules/ai/adapters/hooks/writing-tools/use-writing-tool.ts →
+      src/context/AuthContext.tsx →
+      src/hooks/index.ts →
+      src/modules/ai/adapters/hooks/writing-tools/use-ai-detector-logic.ts
+  error no-circular: src/modules/ai/adapters/hooks/writing-tools/use-ai-detector-logic.ts → 
+      src/context/AuthContext.tsx →
+      src/hooks/index.ts →
+      src/modules/ai/adapters/hooks/writing-tools/use-ai-detector-logic.ts
+  error no-circular: src/modules/ai-content/adapters/hooks/report-mode/useReportGenerator.ts → 
+      src/modules/projects/adapters/state/useBuilderStore.ts →
+      src/infrastructure/di/container.ts →
+      src/modules/users/adapters/api-client/AuthApiClient.ts →
+      src/modules/users/adapters/components/auth/SignupForm.tsx →
+      src/hooks/index.ts →
+      src/modules/ai-content/adapters/hooks/report-mode/useReportGenerator.ts
+  error no-circular: src/modules/ai-content/adapters/hooks/report-mode/useReportGenerator.ts → 
+      src/modules/projects/adapters/hooks/use-projects.ts →
+      src/modules/projects/adapters/api-client/ProjectSyncService.ts →
+      src/infrastructure/di/container.ts →
+      src/modules/users/adapters/api-client/AuthApiClient.ts →
+      src/modules/users/adapters/components/auth/SignupForm.tsx →
+      src/hooks/index.ts →
+      src/modules/ai-content/adapters/hooks/report-mode/useReportGenerator.ts
+  error no-circular: src/modules/ai-content/adapters/hooks/report-mode/useReportGenerator.ts → 
+      src/modules/projects/adapters/hooks/use-builder-page.ts →
+      src/context/AuthContext.tsx →
+      src/hooks/index.ts →
+      src/modules/ai-content/adapters/hooks/report-mode/useReportGenerator.ts
+  error no-circular: src/modules/ai-content/adapters/hooks/report-mode/use-report-generation-tools.ts → 
+      src/modules/ai-content/adapters/hooks/report-mode/use-ai-actions.ts →
+      src/context/AuthContext.tsx →
+      src/hooks/index.ts →
+
+      src/modules/ai-content/adapters/hooks/report-mode/use-report-generation-tools.ts
+  error no-circular: src/modules/ai-content/adapters/hooks/report-mode/use-chapter-actions.ts → 
+      src/modules/projects/adapters/state/useBuilderStore.ts →
+      src/infrastructure/di/container.ts →
+      src/modules/users/adapters/api-client/AuthApiClient.ts →
+      src/modules/users/adapters/components/auth/SignupForm.tsx →
+      src/hooks/index.ts →
+      src/modules/ai-content/adapters/hooks/report-mode/use-chapter-actions.ts
+  error no-circular: src/modules/ai-content/adapters/hooks/report-mode/use-ai-actions.ts → 
+      src/modules/projects/adapters/state/useBuilderStore.ts →
+      src/infrastructure/di/container.ts →
+      src/modules/users/adapters/api-client/AuthApiClient.ts →
+      src/modules/users/adapters/components/auth/SignupForm.tsx →
+      src/hooks/index.ts →
+      src/modules/ai-content/adapters/hooks/report-mode/use-ai-actions.ts
+  error no-circular: src/modules/ai-content/adapters/hooks/report-mode/use-ai-actions.ts → 
+      src/infrastructure/api/authenticated-client-call.ts →
+      src/infrastructure/di/container.ts →
+      src/modules/users/adapters/api-client/AuthApiClient.ts →
+      src/modules/users/adapters/components/auth/SignupForm.tsx →
+      src/hooks/index.ts →
+      src/modules/ai-content/adapters/hooks/report-mode/use-ai-actions.ts
+  error no-circular: src/modules/ai-content/adapters/hooks/builder/useSidebarPanels.tsx → 
+      src/modules/projects/adapters/components/SnapshotHistoryPanel.tsx →
+      src/modules/projects/adapters/hooks/useSnapshots.ts →
+      src/infrastructure/di/container.ts →
+      src/modules/users/adapters/api-client/AuthApiClient.ts →
+      src/modules/users/adapters/components/auth/SignupForm.tsx →
+      src/hooks/index.ts →
+      src/modules/ai-content/adapters/hooks/report-mode/useReportGenerator.ts →
+
+      src/modules/ai-content/adapters/hooks/builder/useSidebarPanels.tsx
+  error no-circular: src/modules/ai-content/adapters/hooks/builder/useSidebarPanels.tsx → 
+
+      src/modules/ai-content/adapters/components/builder/templates/TemplateLibraryHUD.tsx
+      →
+      src/hooks/index.ts →
+      src/modules/ai-content/adapters/hooks/report-mode/useReportGenerator.ts →
+
+      src/modules/ai-content/adapters/hooks/builder/useSidebarPanels.tsx
+  error no-circular: src/modules/ai-content/adapters/hooks/builder/useSidebarPanels.tsx → 
+
+      src/modules/ai-content/adapters/components/builder/settings/ProjectSettingsHUD.tsx
+      →
+      src/hooks/index.ts →
+      src/modules/ai-content/adapters/hooks/report-mode/useReportGenerator.ts →
+
+      src/modules/ai-content/adapters/hooks/builder/useSidebarPanels.tsx
+  error no-circular: src/modules/ai-content/adapters/hooks/builder/useSidebarPanels.tsx → 
+
+      src/modules/ai-content/adapters/components/builder/settings/GlobalIntelligenceHUD.tsx
+      →
+      src/hooks/index.ts →
+      src/modules/ai-content/adapters/hooks/report-mode/useReportGenerator.ts →
+
+      src/modules/ai-content/adapters/hooks/builder/useSidebarPanels.tsx
+  error no-circular: src/modules/ai-content/adapters/components/builder/templates/TemplateLibraryHUD.tsx → 
+      src/modules/templates/adapters/hooks/use-templates.ts →
+      src/context/AuthContext.tsx →
+      src/hooks/index.ts →
+      src/modules/ai-content/adapters/hooks/report-mode/useReportGenerator.ts →
+
+      src/modules/ai-content/adapters/hooks/builder/useSidebarPanels.tsx →
+
+      src/modules/ai-content/adapters/components/builder/templates/TemplateLibraryHUD.tsx
+  error no-circular: src/modules/ai-content/adapters/components/builder/SidebarNavigator.tsx → 
+
+      src/modules/ai-content/adapters/components/builder/file-manager/SourceManager.tsx
+      →
+      src/hooks/index.ts →
+      src/modules/ai-content/adapters/hooks/report-mode/useReportGenerator.ts →
+
+      src/modules/ai-content/adapters/hooks/builder/useSidebarPanels.tsx →
+      src/modules/ai-content/adapters/components/builder/SidebarNavigator.tsx
+  error no-circular: src/modules/ai-content/adapters/components/builder/outline/SidebarOutlineManager.tsx → 
+
+      src/modules/ai-content/adapters/components/builder/outline/useOutlineOperations.ts
+      →
+      src/hooks/index.ts →
+      src/modules/ai-content/adapters/hooks/report-mode/useReportGenerator.ts →
+
+      src/modules/ai-content/adapters/hooks/builder/useSidebarPanels.tsx →
+      src/modules/ai-content/adapters/components/builder/SidebarNavigator.tsx →
+
+
+      src/modules/ai-content/adapters/components/builder/outline/SidebarOutlineManager.tsx
+  error no-circular: src/modules/ai-content/adapters/components/builder/generation/SectionGenerationHUD.tsx → 
+      src/modules/ai-content/adapters/hooks/report-mode/use-ai-actions.ts →
+      src/context/AuthContext.tsx →
+      src/hooks/index.ts →
+      src/modules/ai-content/adapters/hooks/report-mode/useReportGenerator.ts →
+
+      src/modules/ai-content/adapters/hooks/builder/useSidebarPanels.tsx →
+
+      src/modules/ai-content/adapters/components/builder/generation/SectionGenerationHUD.tsx
+  error no-circular: src/modules/ai-content/adapters/components/builder/generation/SectionGenerationHUD.tsx → 
+
+      src/modules/ai-content/adapters/components/builder/generation/controls/GuidelineEditor.tsx
+      →
+      src/hooks/index.ts →
+      src/modules/ai-content/adapters/hooks/report-mode/useReportGenerator.ts →
+
+      src/modules/ai-content/adapters/hooks/builder/useSidebarPanels.tsx →
+
+      src/modules/ai-content/adapters/components/builder/generation/SectionGenerationHUD.tsx
+  error no-circular: src/modules/ai-content/adapters/components/builder/generation/SectionGenerationHUD.tsx → 
+
+      src/modules/ai-content/adapters/components/builder/generation/controls/ControlPanel.tsx
+      →
+      src/hooks/index.ts →
+      src/modules/ai-content/adapters/hooks/report-mode/useReportGenerator.ts →
+
+      src/modules/ai-content/adapters/hooks/builder/useSidebarPanels.tsx →
+
+      src/modules/ai-content/adapters/components/builder/generation/SectionGenerationHUD.tsx
+  error no-circular: src/modules/ai-content/adapters/components/builder/generation/SectionGenerationHUD.tsx → 
+
+      src/modules/ai-content/adapters/components/builder/generation/controls/ContextSelector.tsx
+      →
+      src/hooks/index.ts →
+      src/modules/ai-content/adapters/hooks/report-mode/useReportGenerator.ts →
+
+      src/modules/ai-content/adapters/hooks/builder/useSidebarPanels.tsx →
+
+      src/modules/ai-content/adapters/components/builder/generation/SectionGenerationHUD.tsx
+  error no-circular: src/modules/ai-content/adapters/components/builder/generation/controls/GuidelineEditor.tsx → 
+
+      src/modules/ai-content/adapters/hooks/report-mode/use-guideline-editor.ts
+      →
+      src/modules/projects/adapters/state/useBuilderStore.ts →
+      src/infrastructure/di/container.ts →
+      src/modules/users/adapters/api-client/AuthApiClient.ts →
+      src/modules/users/adapters/components/auth/SignupForm.tsx →
+      src/hooks/index.ts →
+      src/modules/ai-content/adapters/hooks/report-mode/useReportGenerator.ts →
+
+      src/modules/ai-content/adapters/hooks/builder/useSidebarPanels.tsx →
+
+      src/modules/ai-content/adapters/components/builder/generation/SectionGenerationHUD.tsx
+      →
+
+      src/modules/ai-content/adapters/components/builder/generation/controls/GuidelineEditor.tsx
+  error no-circular: src/modules/ai-content/adapters/components/builder/generation/ChapterGenerationHUD.tsx → 
+      src/modules/ai-content/adapters/hooks/report-mode/use-chapter-actions.ts
+      →
+      src/hooks/index.ts →
+      src/modules/ai-content/adapters/hooks/report-mode/useReportGenerator.ts →
+
+      src/modules/ai-content/adapters/hooks/builder/useSidebarPanels.tsx →
+
+      src/modules/ai-content/adapters/components/builder/generation/ChapterGenerationHUD.tsx
+  error no-circular: src/modules/ai-content/adapters/components/builder/generation/ChapterGenerationHUD.tsx → 
+      src/modules/ai-content/adapters/hooks/report-mode/use-ai-actions.ts →
+      src/context/AuthContext.tsx →
+      src/hooks/index.ts →
+      src/modules/ai-content/adapters/hooks/report-mode/useReportGenerator.ts →
+
+      src/modules/ai-content/adapters/hooks/builder/useSidebarPanels.tsx →
+
+      src/modules/ai-content/adapters/components/builder/generation/ChapterGenerationHUD.tsx
+  error no-circular: src/modules/ai-content/adapters/components/builder/generation/ChapterGenerationHUD.tsx → 
+
+      src/modules/ai-content/adapters/components/builder/generation/controls/ContextSelector.tsx
+      →
+      src/hooks/index.ts →
+      src/modules/ai-content/adapters/hooks/report-mode/useReportGenerator.ts →
+
+      src/modules/ai-content/adapters/hooks/builder/useSidebarPanels.tsx →
+
+      src/modules/ai-content/adapters/components/builder/generation/ChapterGenerationHUD.tsx
+  error no-circular: src/modules/ai-content/adapters/components/builder/chat/ProjectConsultantHUD.tsx → 
+      src/modules/ai-content/adapters/hooks/report-mode/useProjectChat.ts →
+      src/context/AuthContext.tsx →
+      src/hooks/index.ts →
+      src/modules/ai-content/adapters/hooks/report-mode/useReportGenerator.ts →
+
+      src/modules/ai-content/adapters/hooks/builder/useSidebarPanels.tsx →
+
+      src/modules/ai-content/adapters/components/builder/chat/ProjectConsultantHUD.tsx
+  error no-circular: src/infrastructure/di/container.ts → 
+      src/modules/users/adapters/api-client/AuthApiClient.ts →
+      src/modules/users/adapters/components/auth/SignupForm.tsx →
+      src/hooks/index.ts →
+      src/modules/admin/adapters/hooks/use-admin-dashboard.ts →
+      src/infrastructure/di/container.ts
+  error no-circular: src/infrastructure/di/container.ts → 
+      src/modules/ai/infrastructure/services/WritingToolRegistry.ts →
+      src/modules/ai/infrastructure/tool-providers/AcademicToolProvider.ts →
+      src/modules/ai/infrastructure/flows/index.ts →
+
+      src/modules/ai/infrastructure/flows/generation/generate-chapter-content-rag.ts
+      →
+      src/infrastructure/di/container.ts
+  error no-circular: src/infrastructure/di/container.ts → 
+      src/modules/ai/infrastructure/services/GenkitAiService.ts →
+
+      src/modules/ai/infrastructure/flows/generation/generate-chapter-content-rag.ts
+      →
+      src/infrastructure/di/container.ts
+  error no-circular: src/infrastructure/api/errorUtils.ts → 
+      src/hooks/index.ts →
+      src/modules/admin/adapters/hooks/use-create-user-dialog.ts →
+      src/modules/users/adapters/hooks/use-users.ts →
+      src/infrastructure/api/errorUtils.ts
+  error no-circular: src/hooks/util/useFileUpload.ts → 
+      src/context/AuthContext.tsx →
+      src/hooks/index.ts →
+      src/modules/ai-content/adapters/hooks/report-mode/useReportGenerator.ts →
+
+      src/modules/ai-content/adapters/hooks/builder/useSidebarPanels.tsx →
+      src/modules/ai-content/adapters/components/builder/SidebarNavigator.tsx →
+
+
+      src/modules/ai-content/adapters/components/builder/file-manager/SourceManager.tsx
+      →
+      src/hooks/util/useFileUpload.ts
+  error no-circular: src/hooks/index.ts → 
+      src/modules/users/adapters/hooks/use-users.ts →
+      src/context/AuthContext.tsx →
+      src/hooks/index.ts
+  error no-circular: src/hooks/index.ts → 
+      src/modules/users/adapters/hooks/use-notifications.ts →
+      src/context/AuthContext.tsx →
+      src/hooks/index.ts
+  error no-circular: src/hooks/index.ts → 
+      src/modules/users/adapters/hooks/use-auth-mutations.ts →
+      src/context/AuthContext.tsx →
+      src/hooks/index.ts
+  error no-circular: src/hooks/index.ts → 
+      src/modules/templates/adapters/hooks/use-templates.ts →
+      src/context/AuthContext.tsx →
+      src/hooks/index.ts
+  error no-circular: src/hooks/index.ts → 
+      src/modules/templates/adapters/hooks/use-pptx-templates.ts →
+      src/context/AuthContext.tsx →
+      src/hooks/index.ts
+  error no-circular: src/hooks/index.ts → 
+      src/modules/templates/adapters/hooks/use-docx-templates.ts →
+      src/context/AuthContext.tsx →
+      src/hooks/index.ts
+  error no-circular: src/hooks/index.ts → 
+      src/modules/rag/adapters/hooks/use-rag-retrieval.ts →
+      src/context/AuthContext.tsx →
+      src/hooks/index.ts
+  error no-circular: src/hooks/index.ts → 
+      src/modules/rag/adapters/hooks/use-rag-indexing.ts →
+      src/context/AuthContext.tsx →
+      src/hooks/index.ts
+  error no-circular: src/hooks/index.ts → 
+      src/modules/projects/adapters/state/useBuilderStore.ts →
+      src/infrastructure/di/container.ts →
+      src/modules/users/adapters/api-client/AuthApiClient.ts →
+      src/modules/users/adapters/components/auth/SignupForm.tsx →
+      src/hooks/index.ts
+  error no-circular: src/hooks/index.ts → 
+      src/modules/projects/adapters/hooks/useProjectsPage.ts →
+      src/hooks/index.ts
+  error no-circular: src/hooks/index.ts → 
+      src/modules/projects/adapters/hooks/useProjectFileOperations.ts →
+      src/modules/projects/adapters/state/useBuilderStore.ts →
+      src/infrastructure/di/container.ts →
+      src/modules/users/adapters/api-client/AuthApiClient.ts →
+      src/modules/users/adapters/components/auth/SignupForm.tsx →
+      src/hooks/index.ts
+  error no-circular: src/hooks/index.ts → 
+      src/modules/projects/adapters/hooks/use-projects.ts →
+      src/modules/projects/adapters/api-client/ProjectSyncService.ts →
+      src/infrastructure/di/container.ts →
+      src/modules/users/adapters/api-client/AuthApiClient.ts →
+      src/modules/users/adapters/components/auth/SignupForm.tsx →
+      src/hooks/index.ts
+  error no-circular: src/hooks/index.ts → 
+      src/modules/projects/adapters/hooks/use-context-selector.ts →
+      src/modules/projects/adapters/state/useBuilderStore.ts →
+      src/infrastructure/di/container.ts →
+      src/modules/users/adapters/api-client/AuthApiClient.ts →
+      src/modules/users/adapters/components/auth/SignupForm.tsx →
+      src/hooks/index.ts
+  error no-circular: src/hooks/index.ts → 
+      src/modules/billing/adapters/hooks/use-transactions.ts →
+      src/context/AuthContext.tsx →
+      src/hooks/index.ts
+  error no-circular: src/hooks/index.ts → 
+      src/modules/ai/adapters/hooks/writing-tools/use-writing-tool.ts →
+      src/hooks/index.ts
+  error no-circular: src/hooks/index.ts → 
+      src/modules/ai/adapters/hooks/writing-tools/use-topic-explainer-logic.ts
+      →
+      src/hooks/index.ts
+  error no-circular: src/hooks/index.ts → 
+      src/modules/ai/adapters/hooks/writing-tools/use-text-stylist-logic.ts →
+      src/hooks/index.ts
+  error no-circular: src/hooks/index.ts → 
+      src/modules/ai/adapters/hooks/writing-tools/use-summarizer-logic.ts →
+      src/hooks/index.ts
+  error no-circular: src/hooks/index.ts → 
+
+      src/modules/ai/adapters/hooks/writing-tools/use-session-plan-generator-logic.ts
+      →
+      src/modules/ai/adapters/hooks/writing-tools/use-writing-tool.ts →
+      src/hooks/index.ts
+  error no-circular: src/hooks/index.ts → 
+
+      src/modules/ai/adapters/hooks/writing-tools/use-sentence-structure-checker-logic.ts
+      →
+      src/hooks/index.ts
+  error no-circular: src/hooks/index.ts → 
+      src/modules/ai/adapters/hooks/writing-tools/use-quiz-generator-logic.ts →
+
+      src/hooks/index.ts
+  error no-circular: src/hooks/index.ts → 
+
+      src/modules/ai/adapters/hooks/writing-tools/use-project-blueprint-logic.ts
+      →
+      src/hooks/index.ts
+  error no-circular: src/hooks/index.ts → 
+
+      src/modules/ai/adapters/hooks/writing-tools/use-presentation-outline-logic.ts
+      →
+      src/hooks/index.ts
+  error no-circular: src/hooks/index.ts → 
+
+      src/modules/ai/adapters/hooks/writing-tools/use-plant-uml-generator-logic.ts
+      →
+      src/hooks/index.ts
+  error no-circular: src/hooks/index.ts → 
+
+      src/modules/ai/adapters/hooks/writing-tools/use-plagiarism-checker-logic.ts
+      →
+      src/hooks/index.ts
+  error no-circular: src/hooks/index.ts → 
+      src/modules/ai/adapters/hooks/writing-tools/use-paraphraser-logic.ts →
+      src/hooks/index.ts
+  error no-circular: src/hooks/index.ts → 
+      src/modules/ai/adapters/hooks/writing-tools/use-image-to-svg-logic.ts →
+      src/infrastructure/di/container.ts →
+      src/modules/users/adapters/api-client/AuthApiClient.ts →
+      src/modules/users/adapters/components/auth/SignupForm.tsx →
+      src/hooks/index.ts
+  error no-circular: src/hooks/index.ts → 
+      src/modules/ai/adapters/hooks/writing-tools/use-idea-generator-logic.ts →
+
+      src/hooks/index.ts
+  error no-circular: src/hooks/index.ts → 
+      src/modules/ai/adapters/hooks/writing-tools/use-humanizer-logic.ts →
+      src/hooks/index.ts
+  error no-circular: src/hooks/index.ts → 
+      src/modules/ai/adapters/hooks/writing-tools/use-grammar-checker-logic.ts
+      →
+      src/hooks/index.ts
+  error no-circular: src/hooks/index.ts → 
+      src/modules/ai/adapters/hooks/writing-tools/use-generate-toc-logic.ts →
+      src/hooks/index.ts
+  error no-circular: src/hooks/index.ts → 
+      src/modules/ai/adapters/hooks/writing-tools/use-fact-checker-logic.ts →
+      src/hooks/index.ts
+  error no-circular: src/hooks/index.ts → 
+      src/modules/ai/adapters/hooks/writing-tools/use-document-writer-logic.ts
+      →
+      src/hooks/index.ts
+  error no-circular: src/hooks/index.ts → 
+
+      src/modules/ai/adapters/hooks/writing-tools/use-citation-generator-logic.ts
+      →
+      src/hooks/index.ts
+  error no-circular: src/hooks/index.ts → 
+      src/modules/ai/adapters/hooks/writing-tools/use-bias-checker-logic.ts →
+      src/hooks/index.ts
+  error no-circular: src/hooks/index.ts → 
+
+      src/modules/ai/adapters/hooks/writing-tools/use-assignments-solver-logic.ts
+      →
+      src/hooks/index.ts
+  error no-circular: src/hooks/index.ts → 
+      src/modules/ai/adapters/hooks/writing-tools/use-ai-researcher-logic.ts →
+      src/hooks/index.ts
+  error no-circular: src/hooks/index.ts → 
+      src/modules/ai/adapters/hooks/writing-tools/use-ai-detector-logic.ts →
+      src/modules/ai/adapters/hooks/writing-tools/use-writing-tool.ts →
+      src/hooks/index.ts
+  error no-circular: src/hooks/index.ts → 
+      src/modules/ai/adapters/hooks/use-agent-categories.ts →
+      src/context/AuthContext.tsx →
+      src/hooks/index.ts
+  error no-circular: src/hooks/index.ts → 
+      src/modules/ai-content/adapters/hooks/use-sections.ts →
+      src/context/AuthContext.tsx →
+      src/hooks/index.ts
+  error no-circular: src/hooks/index.ts → 
+      src/modules/ai-content/adapters/hooks/use-build-project.ts →
+      src/modules/projects/adapters/state/useBuilderStore.ts →
+      src/infrastructure/di/container.ts →
+      src/modules/users/adapters/api-client/AuthApiClient.ts →
+      src/modules/users/adapters/components/auth/SignupForm.tsx →
+      src/hooks/index.ts
+  error no-circular: src/hooks/index.ts → 
+      src/modules/ai-content/adapters/hooks/report-mode/useReportGenerator.ts →
+
+      src/hooks/index.ts
+  error no-circular: src/hooks/index.ts → 
+      src/modules/ai-content/adapters/hooks/report-mode/useProjectChat.ts →
+      src/context/AuthContext.tsx →
+      src/hooks/index.ts
+  error no-circular: src/hooks/index.ts → 
+
+      src/modules/ai-content/adapters/hooks/report-mode/use-report-generation-tools.ts
+      →
+      src/hooks/index.ts
+  error no-circular: src/hooks/index.ts → 
+
+      src/modules/ai-content/adapters/hooks/report-mode/use-guideline-editor.ts
+      →
+      src/modules/projects/adapters/state/useBuilderStore.ts →
+      src/infrastructure/di/container.ts →
+      src/modules/users/adapters/api-client/AuthApiClient.ts →
+      src/modules/users/adapters/components/auth/SignupForm.tsx →
+      src/hooks/index.ts
+  error no-circular: src/hooks/index.ts → 
+      src/modules/ai-content/adapters/hooks/report-mode/use-chapter-actions.ts
+      →
+      src/hooks/index.ts
+  error no-circular: src/hooks/index.ts → 
+      src/modules/ai-content/adapters/hooks/report-mode/use-ai-actions.ts →
+      src/context/AuthContext.tsx →
+      src/hooks/index.ts
+  error no-circular: src/hooks/index.ts → 
+      src/modules/admin/adapters/hooks/use-user-management-console.ts →
+      src/context/AuthContext.tsx →
+      src/hooks/index.ts
+  error no-circular: src/hooks/index.ts → 
+      src/modules/admin/adapters/hooks/use-settings.ts →
+      src/context/AuthContext.tsx →
+      src/hooks/index.ts
+  error no-circular: src/hooks/index.ts → 
+      src/modules/admin/adapters/hooks/use-features.ts →
+      src/context/AuthContext.tsx →
+      src/hooks/index.ts
+  error no-circular: src/hooks/index.ts → 
+      src/modules/admin/adapters/hooks/use-create-user-dialog.ts →
+      src/modules/users/adapters/hooks/use-users.ts →
+      src/context/AuthContext.tsx →
+      src/hooks/index.ts
+  error no-circular: src/hooks/index.ts → 
+      src/modules/admin/adapters/hooks/use-analytics.ts →
+      src/context/AuthContext.tsx →
+      src/hooks/index.ts
+  error no-circular: src/context/AuthContext.tsx → 
+      src/hooks/index.ts →
+      src/modules/admin/adapters/hooks/use-admin-dashboard.ts →
+      src/context/AuthContext.tsx
+  error no-app-router-imports-from-modules: src/modules/ai-content/adapters/components/builder/renderer/DocumentRenderer.tsx → src/app/builder/loading.tsx
+  error no-app-router-imports-from-modules: src/modules/ai-content/adapters/components/builder/BuilderWorkspace.tsx → src/app/builder/loading.tsx
+  error infrastructure-must-not-depend-on-other-layers: src/modules/ai-content/infrastructure/editor/editor/ToolBar.tsx → src/modules/ai-content/adapters/state/use-editor-store.ts
+  error infrastructure-must-not-depend-on-other-layers: src/modules/ai-content/infrastructure/editor/editor/ToolBar.tsx → src/modules/ai-content/adapters/hooks/report-mode/use-ai-actions.ts
+  error infrastructure-must-not-depend-on-other-layers: src/modules/ai-content/infrastructure/editor/editor/EditorController.ts → src/modules/ai-content/adapters/state/use-editor-store.ts
+  error application-must-not-depend-on-adapters-or-infrastructure: src/modules/ai/application/services/tool-providers/WritingToolProvider.ts → src/modules/ai/infrastructure/flows/index.ts
+  error application-must-not-depend-on-adapters-or-infrastructure: src/modules/ai/application/services/tool-providers/GenerationToolProvider.ts → src/modules/ai/infrastructure/flows/index.ts
+  error application-must-not-depend-on-adapters-or-infrastructure: src/modules/ai/application/services/tool-providers/AcademicToolProvider.ts → src/modules/ai/infrastructure/flows/index.ts
+
+x 232 dependency violations (223 errors, 9 warnings). 1056 modules, 5164 dependencies cruised.
+

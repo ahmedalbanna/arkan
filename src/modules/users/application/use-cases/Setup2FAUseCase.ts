@@ -1,15 +1,16 @@
-import { injectable } from "tsyringe";
+import { inject, injectable } from "tsyringe";
 import { db } from "@/infrastructure/db";
 import { users } from "@/infrastructure/db/schema";
 import { Result } from "@/infrastructure/utils/result";
 import { UserError } from "../../domain/errors/UserErrors";
-import { TwoFactorAuthService } from "../../infrastructure/services/TwoFactorAuthService";
+import { type ITwoFactorAuthService, ITwoFactorAuthServiceToken } from "../../domain/services/ITwoFactorAuthService";
 import { eq } from "drizzle-orm";
 
 @injectable()
 export class Setup2FAUseCase {
     constructor(
-        private tfaService: TwoFactorAuthService
+        @inject(ITwoFactorAuthServiceToken)
+        private readonly tfaService: ITwoFactorAuthService
     ) {}
 
     async execute(userId: string): Promise<Result<{ secret: string, qrCode: string }, UserError>> {

@@ -25,7 +25,7 @@ import { useLocalization } from '@/context/LocalizationContext';
 import { useToast } from '@/hooks';
 import { container } from '@/infrastructure/di/container';
 import { cn } from '@/infrastructure/utils/cn';
-import { convertMarkdownToPdf } from '@/modules/ai-content/infrastructure/utils/pdf-utils';
+import { convertMarkdownToPdf } from '@/infrastructure/exporters/pdf-utils';
 import { TransactionApiClient } from '@/modules/billing/adapters/api-client/TransactionApiClient';
 import { type TransactionProperties } from '@/modules/billing/domain/entities/Transaction';
 

@@ -1,6 +1,6 @@
 
-import type { PptxStyleOptions } from '@/modules/ai/domain/schemas/template-schemas';
 import { Template, type BaseTemplateProperties } from './Template';
+import type { PptxStyleOptions } from '../types/pptx';
 
 // Corresponds to PptxTemplateSchema from the Zod schemas
 export interface PptxTemplateProperties extends BaseTemplateProperties {

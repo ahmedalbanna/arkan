@@ -1,7 +1,21 @@
 import { injectable } from "tsyringe";
 import type { Chapter } from '@/modules/ai-content/domain/entities/Chapter';
-import type { Project } from '@/modules/projects/domain/entities/Project';
 import type { Section } from '@/modules/ai-content/domain/entities/Section';
+
+export interface PromptBuilderProject {
+    name: string;
+    projectDescription?: string;
+    projectType?: string;
+    specialization?: string;
+    university?: string;
+    course?: string;
+    educationalLevel?: string;
+    supervisor?: string;
+    teamMembers?: readonly string[];
+    chapters: readonly Chapter[];
+    externalContext?: readonly { id: string; fileName?: string; content?: string }[];
+    getSection(id: string): Section | undefined;
+}
 
 /**
  * A dedicated class for building complex AI prompts from the project structure.
@@ -14,7 +28,7 @@ export class PromptBuilder {
      * @param project - The Project object containing metadata.
      * @returns A formatted string with project information.
      */
-    private buildProjectMetadata(project: Project): string {
+    private buildProjectMetadata(project: PromptBuilderProject): string {
         const teamMemberNames = project.teamMembers?.join(', ');
 
         const metadataFields: { label: string; value: string | undefined }[] = [
@@ -50,7 +64,7 @@ ${metadataEntries}
      * @param project - The entire Project object to resolve context references.
      * @returns A string containing the formatted prompt for the section.
      */
-    public buildSectionPrompt(section: Section, project: Project): string {
+    public buildSectionPrompt(section: Section, project: PromptBuilderProject): string {
         // Build project metadata context
         const projectMetadata = this.buildProjectMetadata(project);
         
@@ -106,7 +120,7 @@ ${fullContext || 'No context provided from other items.'}
      * @param selectedSections - A Set of section IDs that should be included.
      * @returns A string containing the formatted prompt for the chapter.
      */
-    public buildChapterPrompt(chapter: Chapter, project: Project, selectedSections: Set<string>): string {
+    public buildChapterPrompt(chapter: Chapter, project: PromptBuilderProject, selectedSections: Set<string>): string {
         const sectionInstructions = chapter.sections
             .filter(s => selectedSections.has(s.id))
             .map(section => this.buildSectionPrompt(section, project))
@@ -123,7 +137,7 @@ ${fullContext || 'No context provided from other items.'}
      * @param selectedSections - A Set of all section IDs selected for generation across all chapters.
      * @returns A string representing the complete prompt for the AI.
      */
-    public buildProjectPrompt(project: Project, selectedSections: Set<string>): string {
+    public buildProjectPrompt(project: PromptBuilderProject, selectedSections: Set<string>): string {
         if (!selectedSections || selectedSections.size === 0) {
             return '';
         }
