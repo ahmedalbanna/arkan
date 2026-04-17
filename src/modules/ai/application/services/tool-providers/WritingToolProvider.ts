@@ -1,35 +1,8 @@
-import {
-    paraphraseText, summarizeText, humanizeText, grammarCheck,
-    manipulateText, textStyleTune, translateText, writeDocument,
-    rewriteText, summarizeTextWithRatio, readabilityEnhancer,
-    concisenessChecker, clarityAdvisor
-} from "@/modules/ai/infrastructure/flows";
-import {
-    ParaphraseInputSchema, SummarizeInputSchema, HumanizeTextInputSchema,
-    GrammarCheckInputSchema, ManipulateTextInputSchema,
-    StyleEditorInputSchema as TextStylistInputSchema,
-    TranslateTextInputSchema, WriteDocumentInputSchema,
-    RewriteTextInputSchema, SummarizeTextWithRatioInputSchema,
-    ReadabilityEnhancerInputSchema, ConcisenessCheckerInputSchema,
-    ClarityAdvisorInputSchema
-} from "@/modules/ai/domain/schemas";
-import { ToolConfig } from "../WritingToolRegistry";
+import type { ToolConfig } from "@/modules/ai/domain/services/IWritingToolRegistry";
 
+// Legacy shim kept for backward compatibility with imports from
+// application/services. Runtime registry composition is owned by
+// infrastructure/services/WritingToolRegistry.
 export const WritingTools: Record<string, ToolConfig> = {
-    'paraphrase': { flow: paraphraseText, schema: ParaphraseInputSchema, creditCost: 1, isFreeForGuests: true },
-    'paraphraser': { flow: paraphraseText, schema: ParaphraseInputSchema, creditCost: 1, isFreeForGuests: true },
-    'summarize': { flow: summarizeText, schema: SummarizeInputSchema, creditCost: 1, isFreeForGuests: true },
-    'summarizer': { flow: summarizeText, schema: SummarizeInputSchema, creditCost: 1, isFreeForGuests: true },
-    'humanize': { flow: humanizeText, schema: HumanizeTextInputSchema, creditCost: 1, isFreeForGuests: true },
-    'grammar-checker': { flow: grammarCheck, schema: GrammarCheckInputSchema, creditCost: 1, isFreeForGuests: true },
-    'manipulate-text': { flow: manipulateText, schema: ManipulateTextInputSchema, creditCost: 1, isFreeForGuests: true },
-    'text-stylist': { flow: textStyleTune, schema: TextStylistInputSchema, creditCost: 1, isFreeForGuests: true },
-    'rewrite-text': { flow: rewriteText, schema: RewriteTextInputSchema, creditCost: 1, isFreeForGuests: true },
-    'summarize-ratio': { flow: summarizeTextWithRatio, schema: SummarizeTextWithRatioInputSchema, creditCost: 1, isFreeForGuests: true },
-    'readability-enhancer': { flow: readabilityEnhancer, schema: ReadabilityEnhancerInputSchema, creditCost: 1, isFreeForGuests: true },
-    'conciseness-checker': { flow: concisenessChecker, schema: ConcisenessCheckerInputSchema, creditCost: 1, isFreeForGuests: true },
-    'clarity-advisor': { flow: clarityAdvisor, schema: ClarityAdvisorInputSchema, creditCost: 1, isFreeForGuests: true },
-    'translator': { flow: translateText, schema: TranslateTextInputSchema, creditCost: 1, isFreeForGuests: true },
-    'translate-text': { flow: translateText, schema: TranslateTextInputSchema, creditCost: 1, isFreeForGuests: true },
-    'write-document': { flow: writeDocument, schema: WriteDocumentInputSchema, creditCost: 2 },
+    // Intentionally empty.
 };

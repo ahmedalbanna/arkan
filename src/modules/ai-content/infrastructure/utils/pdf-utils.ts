@@ -12,7 +12,7 @@ import { PdfExportService } from '@/modules/ai-content/infrastructure/exporters/
 import { container } from '@/infrastructure/di/container';
 import { splitAstIntoSlides } from '@/modules/templates/infrastructure/exporters/pptx/ast-utils';
 import { DEFAULT_CODE_FONT, DEFAULT_FONT } from '@/modules/templates/infrastructure/exporters/pptx/constants';
-import { processPlantUml } from '@/modules/ai/domain/utils/plantuml-utils';
+import { processPlantUml } from '@/infrastructure/services/plantuml/plantuml-utils';
 
 export async function convertMarkdownToPdf(
     markdown: string,

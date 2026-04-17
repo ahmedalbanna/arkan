@@ -3,7 +3,7 @@ import { encode64 } from "@/infrastructure/utils/encode64";
 import { getProxiedImageBuffer } from "@/infrastructure/utils/proxied-image";
 
 export async function processPlantUml(markdown: string): Promise<string> {
-  if (typeof markdown !== 'string') {
+  if (typeof markdown !== "string") {
     return markdown;
   }
 
@@ -13,21 +13,20 @@ export async function processPlantUml(markdown: string): Promise<string> {
 
   for (const match of matches) {
     const plantUmlCode = match[1];
-    if (plantUmlCode.trim().startsWith('@startuml') && plantUmlCode.trim().endsWith('@enduml')) {
+    if (plantUmlCode.trim().startsWith("@startuml") && plantUmlCode.trim().endsWith("@enduml")) {
       try {
         const utf8Encoder = new TextEncoder();
         const compressed = pako.deflate(utf8Encoder.encode(plantUmlCode));
         const encoded = encode64(compressed);
         const imageUrl = `https://www.plantuml.com/plantuml/png/~1${encoded}`;
 
-        // Fetch the image and convert to a data URI
         const proxiedImage = await getProxiedImageBuffer(imageUrl);
         if (proxiedImage) {
           let base64String;
-          if (typeof Buffer !== 'undefined') {
-            base64String = Buffer.from(proxiedImage.buffer).toString('base64');
+          if (typeof Buffer !== "undefined") {
+            base64String = Buffer.from(proxiedImage.buffer).toString("base64");
           } else {
-            let binary = '';
+            let binary = "";
             const bytes = new Uint8Array(proxiedImage.buffer);
             const len = bytes.byteLength;
             for (let i = 0; i < len; i++) {
@@ -40,10 +39,8 @@ export async function processPlantUml(markdown: string): Promise<string> {
         } else {
           console.warn(`Failed to fetch and embed PlantUML image for code:\n${plantUmlCode}`);
         }
-
       } catch (error) {
         console.error("Error processing PlantUML block:", error);
-        // Leave the original block in case of an error
       }
     }
   }
@@ -52,17 +49,17 @@ export async function processPlantUml(markdown: string): Promise<string> {
 }
 
 export function editorPlantUml(markdown: string): string {
-  if (typeof markdown !== 'string') {
+  if (typeof markdown !== "string") {
     return markdown;
   }
   return markdown.replace(/```plantuml([\s\S]*?)```/g, (match, plantUmlCode) => {
-    if (plantUmlCode.trim().startsWith('@startuml') && plantUmlCode.trim().endsWith('@enduml')) {
+    if (plantUmlCode.trim().startsWith("@startuml") && plantUmlCode.trim().endsWith("@enduml")) {
       const utf8Encoder = new TextEncoder();
       const compressed = pako.deflate(utf8Encoder.encode(plantUmlCode));
       const encoded = encode64(compressed);
       const imageUrl = `https://www.plantuml.com/plantuml/png/~1${encoded}`;
       return `![Diagram](${imageUrl})`;
     }
-    return match; // Return the original block if it's not a valid PlantUML
+    return match;
   });
 }

@@ -1,6 +1,6 @@
 'use server';
 
-import { processPlantUml } from '@/modules/ai/domain/utils/plantuml-utils';
+import { processPlantUml } from '@/infrastructure/services/plantuml/plantuml-utils';
 import {
   AlignmentType,
   Document,

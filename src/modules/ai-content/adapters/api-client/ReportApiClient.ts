@@ -56,4 +56,43 @@ export class ReportApiClient {
       return Result.fail(toApiError(error));
     }
   }
+
+  async generateSectionWithRagApi(body: unknown): Promise<Result<{ content: string }, ApiError>> {
+    try {
+      const response = await apiService<unknown, { content: string }>({
+        endpoint: '/api/generate/section-rag',
+        method: 'POST',
+        data: body,
+      });
+      return Result.ok(response);
+    } catch (error: unknown) {
+      return Result.fail(toApiError(error));
+    }
+  }
+
+  async generateChapterApi(body: unknown): Promise<Result<{ markdownContent: string }, ApiError>> {
+    try {
+      const response = await apiService<unknown, { markdownContent: string }>({
+        endpoint: '/api/writing-tools/generate-chapter',
+        method: 'POST',
+        data: body,
+      });
+      return Result.ok(response);
+    } catch (error: unknown) {
+      return Result.fail(toApiError(error));
+    }
+  }
+
+  async generateChapterWithRagApi(body: unknown): Promise<Result<{ content: string }, ApiError>> {
+    try {
+      const response = await apiService<unknown, { content: string }>({
+        endpoint: '/api/generate/chapter-rag',
+        method: 'POST',
+        data: body,
+      });
+      return Result.ok(response);
+    } catch (error: unknown) {
+      return Result.fail(toApiError(error));
+    }
+  }
 }

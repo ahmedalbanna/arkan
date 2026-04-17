@@ -20,7 +20,25 @@ module.exports = {
                     '^src/modules/users/adapters/components/auth/GuestProfilePage\\.tsx$',
                     '^src/modules/users/adapters/components/auth/PhoneAuthForm\\.tsx$',
                     '^src/modules/users/domain/utils/randomPassword\\.ts$',
-                    '^src/modules/users/infrastructure/services/TwoFactorAuthService\\.ts$'
+                    '^src/modules/users/infrastructure/services/TwoFactorAuthService\\.ts$',
+                    '^src/modules/ai/infrastructure/prompts/General\\.ts$',
+                    '^src/modules/ai/domain/utils/TokenManager\\.ts$',
+                    '^src/modules/ai/domain/entities/Diagram\\.ts$',
+                    '^src/modules/ai/adapters/hooks/writing-tools/use-presentation-outline-logic\\.ts$',
+                    '^src/modules/ai/adapters/hooks/useImageUpload\\.ts$',
+                    '^src/modules/ai/adapters/components/writing-tools/MarkdownToWordTool\\.tsx$',
+                    '^src/modules/ai/adapters/components/writing-tools/MarkdownToPptxTool\\.tsx$',
+                    '^src/modules/ai/adapters/components/writing-tools/InvisibleTextDetector\\.tsx$',
+                    '^src/modules/ai/adapters/components/writing-tools/FileUploadZone\\.tsx$',
+                    '^src/modules/ai/adapters/components/writing-tools/FileListDisplay\\.tsx$',
+                    '^src/modules/ai/adapters/components/admin/GenerationLogViewer\\.tsx$',
+                    '^src/modules/ai/adapters/api-client/GenerationLogApiClient\\.ts$',
+                    '^src/modules/ai-content/infrastructure/exporters/word-converter/cover-page-templates\\.ts$',
+                    '^src/modules/ai-content/infrastructure/editor/editor/types\\.ts$',
+                    '^src/modules/ai-content/infrastructure/editor/editor/MenuBar\\.tsx$',
+                    '^src/modules/ai-content/adapters/hooks/report-mode/useKeyboardShortcuts\\.ts$',
+                    '^src/modules/ai-content/adapters/components/report-mode/dialogs/ReportTemplateDialog\\.tsx$',
+                    '^src/modules/ai-content/adapters/components/admin/sections/SectionDataTable\\.tsx$'
                 ]
             },
             to: {}

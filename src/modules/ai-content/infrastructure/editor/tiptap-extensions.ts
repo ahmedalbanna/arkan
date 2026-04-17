@@ -19,7 +19,7 @@ import Katex from 'tiptap-katex';
 import PlantUML from './editor/plantUml-extension'; // Import the new extension
 import SlashCommand from './editor/slash-command';
 import mammoth from 'mammoth';
-import { editorPlantUml } from '@/modules/ai/domain/utils/plantuml-utils';
+import { editorPlantUml } from '@/infrastructure/services/plantuml/plantuml-utils';
 import { IMarkdownService } from '../../domain/services/IMarkdownService';
 import AIImageGeneratorNode from './editor/ai-image-generator-extension';
 import { Color } from '@tiptap/extension-color';

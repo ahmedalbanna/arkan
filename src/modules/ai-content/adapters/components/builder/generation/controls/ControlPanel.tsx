@@ -8,9 +8,8 @@ import { Slider } from '@/components/ui/slider';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { useBuilderStore } from '@/hooks';
 import { cn } from '@/infrastructure/utils/cn';
-import { GenerationControlState } from '@/modules/ai-content/domain/entities/ControlTypes';
+import { DiagramTypeSchema, GenerationControlState, ToneSchema, type DiagramType } from '@/modules/ai-content/domain/entities/ControlTypes';
 import { Section } from '@/modules/ai-content/domain/entities/Section';
-import { DiagramType, DiagramTypeSchema, ToneSchema } from '@/modules/ai/domain/schemas';
 import {
     AlertCircle,
     BarChart3,

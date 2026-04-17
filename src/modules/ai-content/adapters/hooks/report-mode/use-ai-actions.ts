@@ -3,7 +3,6 @@
 import { useAuth } from '@/context/AuthContext';
 import { useLocalization } from '@/context/LocalizationContext';
 import { useToast } from '@/hooks/util/use-toast';
-import { runAuthenticatedResultCall } from '@/infrastructure/api/authenticated-client-call';
 import { projectKeys } from '@/infrastructure/api/query-keys';
 import { container } from '@/infrastructure/di/container';
 import { ReportApiClient } from '@/modules/ai-content/adapters/api-client/ReportApiClient';
@@ -13,8 +12,6 @@ import { Chapter } from '@/modules/ai-content/domain/entities/Chapter';
 import { type ExternalContextType } from '@/modules/ai-content/domain/entities/ControlTypes';
 import { Section } from '@/modules/ai-content/domain/entities/Section';
 import { PromptBuilder } from '@/modules/ai-content/domain/services/PromptBuilder';
-import { WritingToolsApiClient } from '@/modules/ai/adapters/api-client/WritingToolsApiClient';
-import type { SectionName } from '@/modules/ai/domain/schemas';
 import { useBuilderStore } from '@/modules/projects/adapters/state/useBuilderStore';
 import { type Project } from '@/modules/projects/domain/entities/Project';
 import { parseMarkdownToContent } from '@/hooks/util/useMarkdownParser';
@@ -170,7 +167,7 @@ export function useAiActions({ editor: initialEditor }: AiActionsProps = {}) {
 
       const body = {
         projectId: currentProject.id,
-        sectionToGenerate: section.id as SectionName,
+        sectionToGenerate: section.id,
         prompt: section.buildActionPrompt(),
         otherSections: mapSectionContextToRecord(section, currentProject),
         externalContext: mapExternalContextToArray(section, currentProject),
@@ -218,11 +215,10 @@ export function useAiActions({ editor: initialEditor }: AiActionsProps = {}) {
         guidelines: section.guidelines,
       };
 
-      const result = await runAuthenticatedResultCall(user, WritingToolsApiClient, (client, token) =>
-        client.writingToolApi<any, { content: string }>('/api/generate/section-rag', { data: body, token }),
-      );
-
-      return result;
+      const client = container.resolve(ReportApiClient);
+      const result = await client.generateSectionWithRagApi(body);
+      if (result.isFailure) throw result.error;
+      return result.getValue();
     },
     onSuccess: (data, sectionId) => {
       updateProject((currentProject) => currentProject.updateSection(sectionId, (section) => section.withProps({ content: data.content })));
@@ -259,11 +255,10 @@ export function useAiActions({ editor: initialEditor }: AiActionsProps = {}) {
         })),
       };
 
-      const result = await runAuthenticatedResultCall(user, WritingToolsApiClient, (client, token) =>
-        client.writingToolApi<any, { markdownContent: string }>('/api/writing-tools/generate-chapter', { data: body, token }),
-      );
-
-      return { chapterId, content: result.markdownContent };
+      const client = container.resolve(ReportApiClient);
+      const result = await client.generateChapterApi(body);
+      if (result.isFailure) throw result.error;
+      return { chapterId, content: result.getValue().markdownContent };
     },
     onSuccess: (data) => {
       updateProject((currentProject) => {
@@ -297,11 +292,10 @@ export function useAiActions({ editor: initialEditor }: AiActionsProps = {}) {
         sectionIds,
       };
 
-      const result = await runAuthenticatedResultCall(user, WritingToolsApiClient, (client, token) =>
-        client.writingToolApi<any, { content: string }>('/api/generate/chapter-rag', { data: body, token }),
-      );
-
-      return { chapterId, content: result.content };
+      const client = container.resolve(ReportApiClient);
+      const result = await client.generateChapterWithRagApi(body);
+      if (result.isFailure) throw result.error;
+      return { chapterId, content: result.getValue().content };
     },
     onSuccess: (data) => {
       updateProject((currentProject) => {

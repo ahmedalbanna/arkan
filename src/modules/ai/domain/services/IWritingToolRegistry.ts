@@ -1,6 +1,6 @@
 export interface ToolConfig {
-  flow: unknown;
-  schema: unknown;
+  flow: any;
+  schema: any;
   creditCost: number;
   isFreeForGuests?: boolean;
 }

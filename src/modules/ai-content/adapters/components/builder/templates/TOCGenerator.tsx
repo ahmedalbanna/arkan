@@ -18,7 +18,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
 import { Loader2, Sparkles, ListTree, CheckCircle2, Database, Binary } from 'lucide-react';
 import { useBuilderStore } from '@/hooks';
-import { useGenerateTocLogic } from '@/modules/ai/adapters/hooks/writing-tools/use-generate-toc-logic';
+import { useGenerateTocLogic } from '@/modules/ai-content/adapters/hooks/use-generate-toc-logic';
 import { cn } from '@/infrastructure/utils/cn';
 
 /**

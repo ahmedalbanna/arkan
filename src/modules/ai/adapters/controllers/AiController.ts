@@ -8,7 +8,7 @@ import { DeleteAgentUseCase } from "../../application/use-cases/DeleteAgentUseCa
 import { GetAgentCategoriesUseCase } from "../../application/use-cases/GetAgentCategoriesUseCase";
 import { GenerateChapterWithRAGUseCase } from "../../application/use-cases/GenerateChapterWithRAGUseCase";
 import { GenerateSectionWithRAGUseCase } from "../../application/use-cases/GenerateSectionWithRAGUseCase";
-import { WritingToolRegistry } from "../../application/services/WritingToolRegistry";
+import { type IWritingToolRegistry, IWritingToolRegistryToken } from "../../domain/services/IWritingToolRegistry";
 
 @injectable()
 export class AiController {
@@ -29,8 +29,8 @@ export class AiController {
         private generateChapterWithRAGUseCase: GenerateChapterWithRAGUseCase,
         @inject(delay(() => GenerateSectionWithRAGUseCase))
         private generateSectionWithRAGUseCase: GenerateSectionWithRAGUseCase,
-        @inject(delay(() => WritingToolRegistry))
-        private writingToolRegistry: WritingToolRegistry
+        @inject(IWritingToolRegistryToken)
+        private writingToolRegistry: IWritingToolRegistry
     ) {}
 
     getToolConfig(name: string) {

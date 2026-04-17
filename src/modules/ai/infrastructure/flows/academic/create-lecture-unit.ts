@@ -15,10 +15,10 @@ import {
 } from '@/modules/ai/domain/schemas/lecture-generator';
 import {
   generateTheoreticalLecture,
-} from '@/modules/ai/infrastructure/flows';
+} from './generate-theoretical-lecture';
 import {
   generateSessionPlan,
-} from '@/modules/ai/infrastructure/flows';
+} from '../generation/generate-session-plan';
 
 /**
  * Generates a complete lecture unit, including a theoretical lecture

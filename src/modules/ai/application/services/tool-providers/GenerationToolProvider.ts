@@ -1,41 +1,8 @@
-import {
-    generateChapterContent, generateReportSection, generateImage,
-    imageToText, rewriteDocumentToMarkdown, generateIdeas,
-    generatePlantUML, generateProjectBlueprint, generateToc,
-    generateUiDescription, generateSessionPlan, answerQuestion,
-    topicExplainer, biasCheckText, detectAiContent, factCheckText,
-    retrieveFact, sentenceStructureCheck, plagiarismCheck
-} from "@/modules/ai/infrastructure/flows";
-import {
-    GenerateChapterInputSchema, GenerateSectionInputSchema, GenerateImageInputSchema,
-    ImageToTextInputSchema, RewriteToMarkdownInputSchema, IdeaGenerationInputSchema,
-    GeneratePlantUMLInputSchema, GenerateProjectBlueprintInputSchema, GenerateTocInputSchema,
-    GenerateUIDescriptionInputSchema, GenerateSessionPlanInputSchema, QuestionAnsweringInputSchema,
-    TopicExplainerInputSchema, BiasCheckInputSchema, DetectAIInputSchema,
-    FactCheckInputSchema, FactRetrievalInputSchema, SentenceStructureCheckInputSchema,
-    PlagiarismCheckInputSchema
-} from "@/modules/ai/domain/schemas";
-import { ToolConfig } from "../WritingToolRegistry";
+import type { ToolConfig } from "@/modules/ai/domain/services/IWritingToolRegistry";
 
+// Legacy shim kept for backward compatibility with imports from
+// application/services. Runtime registry composition is owned by
+// infrastructure/services/WritingToolRegistry.
 export const GenerationTools: Record<string, ToolConfig> = {
-    'generate-chapter-content': { flow: generateChapterContent, schema: GenerateChapterInputSchema, creditCost: 2 },
-    'generate-report-section': { flow: generateReportSection, schema: GenerateSectionInputSchema, creditCost: 2 },
-    'generate-section': { flow: generateReportSection, schema: GenerateSectionInputSchema, creditCost: 2 },
-    'generate-image': { flow: generateImage, schema: GenerateImageInputSchema, creditCost: 5 },
-    'image-to-text': { flow: imageToText, schema: ImageToTextInputSchema, creditCost: 2 },
-    'rewrite-document-to-markdown': { flow: rewriteDocumentToMarkdown, schema: RewriteToMarkdownInputSchema, creditCost: 1 },
-    'generate-ideas': { flow: generateIdeas, schema: IdeaGenerationInputSchema, creditCost: 1, isFreeForGuests: true },
-    'generate-plant-uml': { flow: generatePlantUML, schema: GeneratePlantUMLInputSchema, creditCost: 2 },
-    'generate-project-blueprint': { flow: generateProjectBlueprint, schema: GenerateProjectBlueprintInputSchema, creditCost: 3 },
-    'generate-toc': { flow: generateToc, schema: GenerateTocInputSchema, creditCost: 1, isFreeForGuests: true },
-    'generate-ui-description': { flow: generateUiDescription, schema: GenerateUIDescriptionInputSchema, creditCost: 2 },
-    'generate-session-plan': { flow: generateSessionPlan, schema: GenerateSessionPlanInputSchema, creditCost: 2 },
-    'question-answering': { flow: answerQuestion, schema: QuestionAnsweringInputSchema, creditCost: 1, isFreeForGuests: true },
-    'topic-explainer': { flow: topicExplainer, schema: TopicExplainerInputSchema, creditCost: 1, isFreeForGuests: true },
-    'bias-checker': { flow: biasCheckText, schema: BiasCheckInputSchema, creditCost: 1, isFreeForGuests: true },
-    'ai-detector': { flow: detectAiContent, schema: DetectAIInputSchema, creditCost: 1, isFreeForGuests: true },
-    'fact-checker': { flow: factCheckText, schema: FactCheckInputSchema, creditCost: 1, isFreeForGuests: true },
-    'fact-retrieval': { flow: retrieveFact, schema: FactRetrievalInputSchema, creditCost: 1, isFreeForGuests: true },
-    'sentence-structure-checker': { flow: sentenceStructureCheck, schema: SentenceStructureCheckInputSchema, creditCost: 1, isFreeForGuests: true },
-    'plagiarism-checker': { flow: plagiarismCheck, schema: PlagiarismCheckInputSchema, creditCost: 2 },
+    // Intentionally empty.
 };

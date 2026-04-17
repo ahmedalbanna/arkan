@@ -7,7 +7,7 @@ import { unified } from 'unified';
 import { getNodeText, splitAstIntoSlides } from '@/modules/templates/infrastructure/exporters/pptx/ast-utils';
 import { layout } from '@/modules/templates/infrastructure/exporters/pptx/constants';
 import { createSlidesWithContent, type FontOptions } from '@/modules/templates/infrastructure/exporters/pptx/slide-layout-engine';
-import { processPlantUml } from '@/modules/ai/domain/utils/plantuml-utils';
+import { processPlantUml } from '@/infrastructure/services/plantuml/plantuml-utils';
 import { PptxStyleOptions } from '@/modules/ai/domain/schemas';
 import { cleanAiOutput } from '@/infrastructure/utils/sanitizer';
 
