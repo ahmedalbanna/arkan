@@ -12,7 +12,7 @@ import PptxGenJS from 'pptxgenjs';
 import { arrayBufferToBase64 } from '@/infrastructure/utils/arrayBufferToBase64';
 import { getProxiedImageBuffer } from '../../utils/ProxiedImage';
 import { DEFAULT_CODE_FONT, layout } from './constants';
-import type { FontOptions } from './slide-layout-engine';
+import type { FontOptions } from './font-options';
 import { PptxStyleOptions } from '@/modules/ai/domain/schemas';
 
 /**

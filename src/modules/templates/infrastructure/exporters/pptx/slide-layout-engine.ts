@@ -4,16 +4,10 @@ import PptxGenJS from 'pptxgenjs';
 
 import { getNodeText } from './ast-utils';
 import { DEFAULT_CODE_FONT, DEFAULT_FONT, layout, POINTS_PER_INCH } from './constants';
+import type { FontOptions } from './font-options';
 import { renderNodeOnSlide, transformInlinesToPptxText } from './pptx-renderer';
 import { calculateCodeLineCount, calculateLineCount } from './text-measurement';
 import { PptxStyleOptions } from '@/modules/ai/domain/schemas/template-schemas';
-
-// These types were in the main file, moving them here as they are primarily used by the layout engine.
-export interface FontOptions {
-    default?: string; // For LTR languages
-    rtl?: string;     // For RTL languages like Arabic
-    code?: string;    // For code blocks and inline code
-}
 
 interface PptxFootnote {
     id: number;
