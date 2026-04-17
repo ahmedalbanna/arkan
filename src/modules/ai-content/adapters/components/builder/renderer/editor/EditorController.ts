@@ -1,8 +1,8 @@
 'use client';
 
 import { Editor } from '@tiptap/react';
-import { useEditorStore } from '@/modules/ai-content/adapters/state/use-editor-store';
 import { useMemo } from 'react';
+import { useEditorStore } from '@/modules/ai-content/adapters/state/use-editor-store';
 
 /**
  * EditorController provides a clean imperative API to interact with the Tiptap editor
@@ -42,7 +42,7 @@ export class EditorController {
     // --- Font Size & Color ---
     setFontSize = (size: string) => this.execute(() => (this.editor.chain().focus() as any).setFontSize(size).run());
     isFontSize = (size: string) => this.editor.isActive('textStyle', { fontSize: size });
-    
+
     setColor = (color: string) => this.execute(() => this.editor.chain().focus().setColor(color).run());
     isColor = (color: string) => this.editor.isActive('textStyle', { color });
 
@@ -67,15 +67,15 @@ export class EditorController {
     // --- Tables ---
     insertTable = (rows = 3, cols = 3) => this.execute(() => this.editor.chain().focus().insertTable({ rows, cols, withHeaderRow: true }).run());
     isTable = () => this.editor.isActive('table');
-    
+
     // --- Utils ---
     undo = () => this.execute(() => this.editor.chain().focus().undo().run());
     redo = () => this.execute(() => this.editor.chain().focus().redo().run());
-    
+
     insertMath = () => {
         const formula = window.prompt('Enter LaTeX formula');
         if (formula) {
-          this.execute(() => this.editor.chain().focus().insertContent(`<katex-component content="${formula}"></katex-component>`).run());
+            this.execute(() => this.editor.chain().focus().insertContent(`<katex-component content="${formula}"></katex-component>`).run());
         }
     };
 }
@@ -86,9 +86,9 @@ export class EditorController {
 export function useEditorController(providedEditor?: Editor | null) {
     const activeEditor = useEditorStore(state => state.activeEditor);
     const updateSelectionState = useEditorStore(state => state.updateSelectionState);
-    
+
     const editor = providedEditor || activeEditor;
-    
+
     return useMemo(() => {
         if (!editor) return null;
         return new EditorController(editor, updateSelectionState);

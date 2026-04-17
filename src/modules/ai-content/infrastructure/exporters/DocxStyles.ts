@@ -3,6 +3,7 @@
 
 import { DocxTemplateProperties } from '@/modules/templates/domain/entities/DocxTemplate';
 import { CustomStyles } from '@/modules/ai-content/infrastructure/exporters/word-converter/types';
+import { DocxTemplateKey } from '@/modules/ai-content/domain/types/docx-template';
 import type { IStylesOptions } from 'docx';
 import { AlignmentType, ShadingType } from 'docx';
 
@@ -485,7 +486,7 @@ const academicStyles: IStylesOptions = {
 };
 
 // Ensure the 'templates' object conforms to the DocxTemplate schema
-export const templates: Record<string, Omit<DocxTemplateProperties, 'id'>> = {
+export const templates: Record<DocxTemplateKey, Omit<DocxTemplateProperties, 'id'>> = {
     modern: {
         name: 'templates.modern.name',
         styles: modernStyles as IStylesOptions,
@@ -512,5 +513,3 @@ export const templates: Record<string, Omit<DocxTemplateProperties, 'id'>> = {
     },
 };
 
-// Infer DocxTemplateKey dynamically from the 'templates' object
-export type DocxTemplateKey = keyof typeof templates;

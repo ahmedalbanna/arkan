@@ -1,0 +1,5508 @@
+{
+  "modules": [
+    {
+      "source": "src/modules/ai-content/adapters/api-client/DocumentProcessingApiClient.ts",
+      "dependencies": [],
+      "dependents": [],
+      "orphan": true,
+      "valid": false,
+      "rules": [
+        {
+          "severity": "warn",
+          "name": "no-orphans"
+        }
+      ]
+    },
+    {
+      "source": "src/modules/ai-content/adapters/api-client/ExportApiClient.ts",
+      "dependencies": [
+        {
+          "dynamic": false,
+          "module": "@/modules/ai-content/domain/services/IExportService",
+          "moduleSystem": "es6",
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "aliased",
+            "aliased-tsconfig",
+            "aliased-tsconfig-paths",
+            "local",
+            "import"
+          ],
+          "resolved": "src/modules/ai-content/domain/services/IExportService.ts",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        }
+      ],
+      "dependents": [],
+      "orphan": false,
+      "valid": true
+    },
+    {
+      "source": "src/modules/ai-content/domain/services/IExportService.ts",
+      "dependencies": [],
+      "dependents": [
+        "src/modules/ai-content/adapters/api-client/ExportApiClient.ts",
+        "src/modules/ai-content/application/use-cases/ExportProjectUseCase.ts",
+        "src/modules/ai-content/infrastructure/exporters/DocxExportService.ts",
+        "src/modules/ai-content/infrastructure/exporters/PdfExportService.ts",
+        "src/modules/ai-content/infrastructure/exporters/PptxExportService.ts"
+      ],
+      "orphan": false,
+      "valid": true
+    },
+    {
+      "source": "src/modules/ai-content/adapters/api-client/ReportApiClient.ts",
+      "dependencies": [],
+      "dependents": [
+        "src/modules/ai-content/adapters/hooks/report-mode/use-ai-actions.ts",
+        "src/modules/ai-content/adapters/hooks/report-mode/useProjectChat.ts"
+      ],
+      "orphan": false,
+      "valid": true
+    },
+    {
+      "source": "src/modules/ai-content/adapters/api-client/SectionApiClient.ts",
+      "dependencies": [
+        {
+          "dynamic": false,
+          "module": "../../domain/entities/Section",
+          "moduleSystem": "es6",
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "local",
+            "import"
+          ],
+          "resolved": "src/modules/ai-content/domain/entities/Section.ts",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        }
+      ],
+      "dependents": [
+        "src/modules/ai-content/adapters/hooks/use-sections.ts"
+      ],
+      "orphan": false,
+      "valid": true
+    },
+    {
+      "source": "src/modules/ai-content/domain/entities/Section.ts",
+      "dependencies": [
+        {
+          "dynamic": false,
+          "module": "../schemas/SectionSchema",
+          "moduleSystem": "es6",
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "local",
+            "import"
+          ],
+          "resolved": "src/modules/ai-content/domain/schemas/SectionSchema.ts",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        },
+        {
+          "dynamic": false,
+          "module": "./ControlTypes",
+          "moduleSystem": "es6",
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "local",
+            "import"
+          ],
+          "resolved": "src/modules/ai-content/domain/entities/ControlTypes.ts",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        }
+      ],
+      "dependents": [
+        "src/modules/ai-content/adapters/api-client/SectionApiClient.ts",
+        "src/modules/ai-content/adapters/components/admin/sections/SectionActions.tsx",
+        "src/modules/ai-content/adapters/components/admin/sections/SectionFormDialog.tsx",
+        "src/modules/ai-content/adapters/components/admin/sections/columns.tsx",
+        "src/modules/ai-content/adapters/hooks/report-mode/use-ai-actions.ts",
+        "src/modules/ai-content/adapters/state/useGenerationUIStore.ts",
+        "src/modules/ai-content/domain/entities/Chapter.ts",
+        "src/modules/ai-content/domain/services/PromptBuilder.ts",
+        "src/modules/ai-content/adapters/components/builder/session/ExportHUD.tsx",
+        "src/modules/ai-content/adapters/components/builder/renderer/BuilderDocument.tsx",
+        "src/modules/ai-content/adapters/hooks/builder/useSidebarPanels.tsx",
+        "src/modules/ai-content/adapters/components/builder/generation/SectionGenerationHUD.tsx",
+        "src/modules/ai-content/adapters/components/builder/generation/controls/ControlPanel.tsx",
+        "src/modules/ai-content/adapters/components/builder/outline/useOutlineOperations.ts",
+        "src/modules/ai-content/adapters/components/builder/generation/controls/PromptInspector.tsx",
+        "src/modules/ai-content/adapters/components/report-mode/generation-tools/IntelligenceTab.tsx",
+        "src/modules/ai-content/adapters/controllers/AIContentController.ts",
+        "src/modules/ai-content/domain/repositories/ISectionRepository.ts",
+        "src/modules/ai-content/application/use-cases/GetSectionByIdUseCase.ts",
+        "src/modules/ai-content/application/use-cases/GetSectionsUseCase.ts",
+        "src/modules/ai-content/application/use-cases/SaveSectionUseCase.ts",
+        "src/modules/ai-content/adapters/hooks/use-sections.ts",
+        "src/modules/ai-content/adapters/hooks/use-build-project.ts",
+        "src/modules/ai-content/infrastructure/exporters/MarkdownToWordConverter.ts",
+        "src/modules/ai-content/infrastructure/repositories/DrizzleSectionRepository.ts"
+      ],
+      "orphan": false,
+      "valid": true
+    },
+    {
+      "source": "src/modules/ai-content/domain/schemas/SectionSchema.ts",
+      "dependencies": [
+        {
+          "dynamic": false,
+          "module": "./ControlTypesSchema",
+          "moduleSystem": "es6",
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "local",
+            "import"
+          ],
+          "resolved": "src/modules/ai-content/domain/schemas/ControlTypesSchema.ts",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        }
+      ],
+      "dependents": [
+        "src/modules/ai-content/domain/entities/Section.ts",
+        "src/modules/ai-content/domain/schemas/ChapterSchema.ts",
+        "src/modules/ai-content/application/use-cases/SaveSectionUseCase.ts",
+        "src/modules/ai-content/domain/schemas/index.ts"
+      ],
+      "orphan": false,
+      "valid": true
+    },
+    {
+      "source": "src/modules/ai-content/domain/schemas/ControlTypesSchema.ts",
+      "dependencies": [],
+      "dependents": [
+        "src/modules/ai-content/domain/schemas/SectionSchema.ts",
+        "src/modules/ai-content/domain/entities/ControlTypes.ts",
+        "src/modules/ai-content/domain/schemas/index.ts"
+      ],
+      "orphan": false,
+      "valid": true
+    },
+    {
+      "source": "src/modules/ai-content/domain/entities/ControlTypes.ts",
+      "dependencies": [
+        {
+          "dynamic": false,
+          "module": "../schemas/ControlTypesSchema",
+          "moduleSystem": "es6",
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "local",
+            "import"
+          ],
+          "resolved": "src/modules/ai-content/domain/schemas/ControlTypesSchema.ts",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        }
+      ],
+      "dependents": [
+        "src/modules/ai-content/domain/entities/Section.ts",
+        "src/modules/ai-content/adapters/hooks/report-mode/use-ai-actions.ts",
+        "src/modules/ai-content/adapters/hooks/report-mode/use-chapter-actions.ts",
+        "src/modules/ai-content/adapters/components/builder/generation/controls/ControlPanel.tsx",
+        "src/modules/ai-content/adapters/components/builder/settings/GlobalIntelligenceHUD.tsx",
+        "src/modules/ai-content/adapters/components/builder/file-manager/SourceManager.tsx",
+        "src/modules/ai-content/domain/entities/ExternalContext.ts",
+        "src/modules/ai-content/adapters/components/builder/file-manager/UploadManager.tsx",
+        "src/modules/ai-content/adapters/hooks/use-guideline-editor.ts"
+      ],
+      "orphan": false,
+      "valid": true
+    },
+    {
+      "source": "src/modules/ai-content/adapters/components/admin/sections/SectionActions.tsx",
+      "dependencies": [
+        {
+          "dynamic": false,
+          "module": "./SectionFormDialog",
+          "moduleSystem": "es6",
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "local",
+            "import"
+          ],
+          "resolved": "src/modules/ai-content/adapters/components/admin/sections/SectionFormDialog.tsx",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        },
+        {
+          "dynamic": false,
+          "module": "@/modules/ai-content/domain/entities/Section",
+          "moduleSystem": "es6",
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "aliased",
+            "aliased-tsconfig",
+            "aliased-tsconfig-paths",
+            "local",
+            "import"
+          ],
+          "resolved": "src/modules/ai-content/domain/entities/Section.ts",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        }
+      ],
+      "dependents": [
+        "src/modules/ai-content/adapters/components/admin/sections/columns.tsx"
+      ],
+      "orphan": false,
+      "valid": true
+    },
+    {
+      "source": "src/modules/ai-content/adapters/components/admin/sections/SectionFormDialog.tsx",
+      "dependencies": [
+        {
+          "dynamic": false,
+          "module": "@/modules/ai-content/domain/entities/Section",
+          "moduleSystem": "es6",
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "aliased",
+            "aliased-tsconfig",
+            "aliased-tsconfig-paths",
+            "local",
+            "import"
+          ],
+          "resolved": "src/modules/ai-content/domain/entities/Section.ts",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        }
+      ],
+      "dependents": [
+        "src/modules/ai-content/adapters/components/admin/sections/SectionActions.tsx"
+      ],
+      "orphan": false,
+      "valid": true
+    },
+    {
+      "source": "src/modules/ai-content/adapters/components/admin/sections/SectionDataTable.tsx",
+      "dependencies": [],
+      "dependents": [],
+      "orphan": true,
+      "valid": false,
+      "rules": [
+        {
+          "severity": "warn",
+          "name": "no-orphans"
+        }
+      ]
+    },
+    {
+      "source": "src/modules/ai-content/adapters/components/admin/sections/columns.tsx",
+      "dependencies": [
+        {
+          "dynamic": false,
+          "module": "./SectionActions",
+          "moduleSystem": "es6",
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "local",
+            "import"
+          ],
+          "resolved": "src/modules/ai-content/adapters/components/admin/sections/SectionActions.tsx",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        },
+        {
+          "dynamic": false,
+          "module": "@/modules/ai-content/domain/entities/Section",
+          "moduleSystem": "es6",
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "aliased",
+            "aliased-tsconfig",
+            "aliased-tsconfig-paths",
+            "local",
+            "import"
+          ],
+          "resolved": "src/modules/ai-content/domain/entities/Section.ts",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        }
+      ],
+      "dependents": [],
+      "orphan": false,
+      "valid": true
+    },
+    {
+      "source": "src/modules/ai-content/adapters/components/builder/BuilderWorkspace.tsx",
+      "dependencies": [
+        {
+          "dynamic": false,
+          "module": "../../hooks/builder/useDesktopBreakpoint",
+          "moduleSystem": "es6",
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "local",
+            "import"
+          ],
+          "resolved": "src/modules/ai-content/adapters/hooks/builder/useDesktopBreakpoint.ts",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        },
+        {
+          "dynamic": false,
+          "module": "../../hooks/builder/useDocumentSuggestion",
+          "moduleSystem": "es6",
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "local",
+            "import"
+          ],
+          "resolved": "src/modules/ai-content/adapters/hooks/builder/useDocumentSuggestion.ts",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        },
+        {
+          "dynamic": false,
+          "module": "../../hooks/builder/useFullscreen",
+          "moduleSystem": "es6",
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "local",
+            "import"
+          ],
+          "resolved": "src/modules/ai-content/adapters/hooks/builder/useFullscreen.ts",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        },
+        {
+          "dynamic": false,
+          "module": "../../hooks/builder/useOnboarding",
+          "moduleSystem": "es6",
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "local",
+            "import"
+          ],
+          "resolved": "src/modules/ai-content/adapters/hooks/builder/useOnboarding.ts",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        },
+        {
+          "dynamic": false,
+          "module": "./generation/SelectionGenerationHUD",
+          "moduleSystem": "es6",
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "local",
+            "import"
+          ],
+          "resolved": "src/modules/ai-content/adapters/components/builder/generation/SelectionGenerationHUD.tsx",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        },
+        {
+          "dynamic": false,
+          "module": "./layout/BuilderCanvas",
+          "moduleSystem": "es6",
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "local",
+            "import"
+          ],
+          "resolved": "src/modules/ai-content/adapters/components/builder/layout/BuilderCanvas.tsx",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        },
+        {
+          "dynamic": false,
+          "module": "./layout/BuilderHeader",
+          "moduleSystem": "es6",
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "local",
+            "import"
+          ],
+          "resolved": "src/modules/ai-content/adapters/components/builder/layout/BuilderHeader.tsx",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        },
+        {
+          "dynamic": false,
+          "module": "./layout/BuilderLayout",
+          "moduleSystem": "es6",
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "local",
+            "import"
+          ],
+          "resolved": "src/modules/ai-content/adapters/components/builder/layout/BuilderLayout.tsx",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        },
+        {
+          "dynamic": false,
+          "module": "./layout/BuilderSidebar",
+          "moduleSystem": "es6",
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "local",
+            "import"
+          ],
+          "resolved": "src/modules/ai-content/adapters/components/builder/layout/BuilderSidebar.tsx",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        },
+        {
+          "dynamic": false,
+          "module": "./renderer/DocumentRenderer",
+          "moduleSystem": "es6",
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "local",
+            "import"
+          ],
+          "resolved": "src/modules/ai-content/adapters/components/builder/renderer/DocumentRenderer.tsx",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        },
+        {
+          "dynamic": false,
+          "module": "./toolbar/DocumentToolbar",
+          "moduleSystem": "es6",
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "local",
+            "import"
+          ],
+          "resolved": "src/modules/ai-content/adapters/components/builder/toolbar/DocumentToolbar.tsx",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        },
+        {
+          "dynamic": false,
+          "module": "@/modules/ai-content/adapters/hooks/report-mode/useReportGenerator",
+          "moduleSystem": "es6",
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "aliased",
+            "aliased-tsconfig",
+            "aliased-tsconfig-paths",
+            "local",
+            "import"
+          ],
+          "resolved": "src/modules/ai-content/adapters/hooks/report-mode/useReportGenerator.ts",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        }
+      ],
+      "dependents": [],
+      "orphan": false,
+      "valid": true
+    },
+    {
+      "source": "src/modules/ai-content/adapters/hooks/builder/useDesktopBreakpoint.ts",
+      "dependencies": [],
+      "dependents": [
+        "src/modules/ai-content/adapters/components/builder/BuilderWorkspace.tsx"
+      ],
+      "orphan": false,
+      "valid": true
+    },
+    {
+      "source": "src/modules/ai-content/adapters/hooks/builder/useDocumentSuggestion.ts",
+      "dependencies": [],
+      "dependents": [
+        "src/modules/ai-content/adapters/components/builder/BuilderWorkspace.tsx"
+      ],
+      "orphan": false,
+      "valid": true
+    },
+    {
+      "source": "src/modules/ai-content/adapters/hooks/builder/useFullscreen.ts",
+      "dependencies": [],
+      "dependents": [
+        "src/modules/ai-content/adapters/components/builder/BuilderWorkspace.tsx"
+      ],
+      "orphan": false,
+      "valid": true
+    },
+    {
+      "source": "src/modules/ai-content/adapters/hooks/builder/useOnboarding.ts",
+      "dependencies": [],
+      "dependents": [
+        "src/modules/ai-content/adapters/components/builder/BuilderWorkspace.tsx"
+      ],
+      "orphan": false,
+      "valid": true
+    },
+    {
+      "source": "src/modules/ai-content/adapters/components/builder/generation/SelectionGenerationHUD.tsx",
+      "dependencies": [
+        {
+          "dynamic": false,
+          "module": "@/modules/ai-content/adapters/hooks/report-mode/use-ai-actions",
+          "moduleSystem": "es6",
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "aliased",
+            "aliased-tsconfig",
+            "aliased-tsconfig-paths",
+            "local",
+            "import"
+          ],
+          "resolved": "src/modules/ai-content/adapters/hooks/report-mode/use-ai-actions.ts",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        },
+        {
+          "dynamic": false,
+          "module": "@/modules/ai-content/adapters/state/use-editor-store",
+          "moduleSystem": "es6",
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "aliased",
+            "aliased-tsconfig",
+            "aliased-tsconfig-paths",
+            "local",
+            "import"
+          ],
+          "resolved": "src/modules/ai-content/adapters/state/use-editor-store.ts",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        }
+      ],
+      "dependents": [
+        "src/modules/ai-content/adapters/components/builder/BuilderWorkspace.tsx"
+      ],
+      "orphan": false,
+      "valid": true
+    },
+    {
+      "source": "src/modules/ai-content/adapters/hooks/report-mode/use-ai-actions.ts",
+      "dependencies": [
+        {
+          "dynamic": false,
+          "module": "@/modules/ai-content/adapters/api-client/ReportApiClient",
+          "moduleSystem": "es6",
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "aliased",
+            "aliased-tsconfig",
+            "aliased-tsconfig-paths",
+            "local",
+            "import"
+          ],
+          "resolved": "src/modules/ai-content/adapters/api-client/ReportApiClient.ts",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        },
+        {
+          "dynamic": false,
+          "module": "@/modules/ai-content/adapters/state/use-editor-store",
+          "moduleSystem": "es6",
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "aliased",
+            "aliased-tsconfig",
+            "aliased-tsconfig-paths",
+            "local",
+            "import"
+          ],
+          "resolved": "src/modules/ai-content/adapters/state/use-editor-store.ts",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        },
+        {
+          "dynamic": false,
+          "module": "@/modules/ai-content/adapters/state/useGenerationUIStore",
+          "moduleSystem": "es6",
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "aliased",
+            "aliased-tsconfig",
+            "aliased-tsconfig-paths",
+            "local",
+            "import"
+          ],
+          "resolved": "src/modules/ai-content/adapters/state/useGenerationUIStore.ts",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        },
+        {
+          "dynamic": false,
+          "module": "@/modules/ai-content/domain/entities/Chapter",
+          "moduleSystem": "es6",
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "aliased",
+            "aliased-tsconfig",
+            "aliased-tsconfig-paths",
+            "local",
+            "import"
+          ],
+          "resolved": "src/modules/ai-content/domain/entities/Chapter.ts",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        },
+        {
+          "dynamic": false,
+          "module": "@/modules/ai-content/domain/entities/ControlTypes",
+          "moduleSystem": "es6",
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "aliased",
+            "aliased-tsconfig",
+            "aliased-tsconfig-paths",
+            "local",
+            "type-only",
+            "import"
+          ],
+          "resolved": "src/modules/ai-content/domain/entities/ControlTypes.ts",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        },
+        {
+          "dynamic": false,
+          "module": "@/modules/ai-content/domain/entities/Section",
+          "moduleSystem": "es6",
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "aliased",
+            "aliased-tsconfig",
+            "aliased-tsconfig-paths",
+            "local",
+            "import"
+          ],
+          "resolved": "src/modules/ai-content/domain/entities/Section.ts",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        },
+        {
+          "dynamic": false,
+          "module": "@/modules/ai-content/domain/services/PromptBuilder",
+          "moduleSystem": "es6",
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "aliased",
+            "aliased-tsconfig",
+            "aliased-tsconfig-paths",
+            "local",
+            "import"
+          ],
+          "resolved": "src/modules/ai-content/domain/services/PromptBuilder.ts",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        }
+      ],
+      "dependents": [
+        "src/modules/ai-content/adapters/components/builder/generation/SelectionGenerationHUD.tsx",
+        "src/modules/ai-content/adapters/components/builder/generation/ChapterGenerationHUD.tsx",
+        "src/modules/ai-content/adapters/components/builder/generation/SectionGenerationHUD.tsx",
+        "src/modules/ai-content/adapters/hooks/report-mode/use-report-generation-tools.ts",
+        "src/modules/ai-content/adapters/hooks/report-mode/useIntelligence.ts",
+        "src/modules/ai-content/infrastructure/editor/editor/ToolBar.tsx"
+      ],
+      "orphan": false,
+      "valid": true
+    },
+    {
+      "source": "src/modules/ai-content/adapters/state/use-editor-store.ts",
+      "dependencies": [],
+      "dependents": [
+        "src/modules/ai-content/adapters/components/builder/generation/SelectionGenerationHUD.tsx",
+        "src/modules/ai-content/adapters/hooks/report-mode/use-ai-actions.ts",
+        "src/modules/ai-content/adapters/components/builder/renderer/MarkdownEditor.tsx",
+        "src/modules/ai-content/adapters/components/builder/toolbar/DocumentToolbar.tsx",
+        "src/modules/ai-content/adapters/hooks/report-mode/useIntelligence.ts",
+        "src/modules/ai-content/infrastructure/editor/editor/EditorController.ts",
+        "src/modules/ai-content/infrastructure/editor/editor/ToolBar.tsx"
+      ],
+      "orphan": false,
+      "valid": true
+    },
+    {
+      "source": "src/modules/ai-content/adapters/state/useGenerationUIStore.ts",
+      "dependencies": [
+        {
+          "dynamic": false,
+          "module": "@/modules/ai-content/domain/entities/Section",
+          "moduleSystem": "es6",
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "aliased",
+            "aliased-tsconfig",
+            "aliased-tsconfig-paths",
+            "local",
+            "type-only",
+            "import"
+          ],
+          "resolved": "src/modules/ai-content/domain/entities/Section.ts",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        }
+      ],
+      "dependents": [
+        "src/modules/ai-content/adapters/hooks/report-mode/use-ai-actions.ts",
+        "src/modules/ai-content/adapters/components/builder/generation/SectionGenerationHUD.tsx"
+      ],
+      "orphan": false,
+      "valid": true
+    },
+    {
+      "source": "src/modules/ai-content/domain/entities/Chapter.ts",
+      "dependencies": [
+        {
+          "dynamic": false,
+          "module": "../schemas/ChapterSchema",
+          "moduleSystem": "es6",
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "local",
+            "import"
+          ],
+          "resolved": "src/modules/ai-content/domain/schemas/ChapterSchema.ts",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        },
+        {
+          "dynamic": false,
+          "module": "./Section",
+          "moduleSystem": "es6",
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "local",
+            "import"
+          ],
+          "resolved": "src/modules/ai-content/domain/entities/Section.ts",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        }
+      ],
+      "dependents": [
+        "src/modules/ai-content/adapters/hooks/report-mode/use-ai-actions.ts",
+        "src/modules/ai-content/domain/services/PromptBuilder.ts",
+        "src/modules/ai-content/adapters/components/builder/session/ExportHUD.tsx",
+        "src/modules/ai-content/adapters/components/builder/renderer/BuilderDocument.tsx",
+        "src/modules/ai-content/adapters/hooks/builder/useSidebarPanels.tsx",
+        "src/modules/ai-content/adapters/components/builder/generation/ChapterGenerationHUD.tsx",
+        "src/modules/ai-content/adapters/hooks/report-mode/use-chapter-actions.ts",
+        "src/modules/ai-content/adapters/components/builder/outline/SidebarOutlineManager.tsx",
+        "src/modules/ai-content/adapters/components/builder/outline/useOutlineOperations.ts",
+        "src/modules/ai-content/adapters/components/builder/generation/BuildManifestHUD.tsx",
+        "src/modules/ai-content/adapters/components/report-mode/dialogs/ChapterToolsDialog.tsx",
+        "src/modules/ai-content/infrastructure/exporters/MarkdownToWordConverter.ts",
+        "src/modules/ai-content/infrastructure/exporters/PptxExportService.ts"
+      ],
+      "orphan": false,
+      "valid": true
+    },
+    {
+      "source": "src/modules/ai-content/domain/schemas/ChapterSchema.ts",
+      "dependencies": [
+        {
+          "dynamic": false,
+          "module": "./SectionSchema",
+          "moduleSystem": "es6",
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "local",
+            "import"
+          ],
+          "resolved": "src/modules/ai-content/domain/schemas/SectionSchema.ts",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        }
+      ],
+      "dependents": [
+        "src/modules/ai-content/domain/entities/Chapter.ts",
+        "src/modules/ai-content/domain/schemas/index.ts"
+      ],
+      "orphan": false,
+      "valid": true
+    },
+    {
+      "source": "src/modules/ai-content/domain/services/PromptBuilder.ts",
+      "dependencies": [
+        {
+          "dynamic": false,
+          "module": "@/modules/ai-content/domain/entities/Chapter",
+          "moduleSystem": "es6",
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "aliased",
+            "aliased-tsconfig",
+            "aliased-tsconfig-paths",
+            "local",
+            "type-only",
+            "import"
+          ],
+          "resolved": "src/modules/ai-content/domain/entities/Chapter.ts",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        },
+        {
+          "dynamic": false,
+          "module": "@/modules/ai-content/domain/entities/Section",
+          "moduleSystem": "es6",
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "aliased",
+            "aliased-tsconfig",
+            "aliased-tsconfig-paths",
+            "local",
+            "type-only",
+            "import"
+          ],
+          "resolved": "src/modules/ai-content/domain/entities/Section.ts",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        }
+      ],
+      "dependents": [
+        "src/modules/ai-content/adapters/hooks/report-mode/use-ai-actions.ts",
+        "src/modules/ai-content/adapters/components/builder/generation/controls/PromptInspector.tsx"
+      ],
+      "orphan": false,
+      "valid": true
+    },
+    {
+      "source": "src/modules/ai-content/adapters/components/builder/layout/BuilderCanvas.tsx",
+      "dependencies": [],
+      "dependents": [
+        "src/modules/ai-content/adapters/components/builder/BuilderWorkspace.tsx"
+      ],
+      "orphan": false,
+      "valid": true
+    },
+    {
+      "source": "src/modules/ai-content/adapters/components/builder/layout/BuilderHeader.tsx",
+      "dependencies": [
+        {
+          "dynamic": false,
+          "module": "../session/ExportHUD",
+          "moduleSystem": "es6",
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "local",
+            "import"
+          ],
+          "resolved": "src/modules/ai-content/adapters/components/builder/session/ExportHUD.tsx",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        },
+        {
+          "dynamic": false,
+          "module": "../session/LibraryHUD",
+          "moduleSystem": "es6",
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "local",
+            "import"
+          ],
+          "resolved": "src/modules/ai-content/adapters/components/builder/session/LibraryHUD.tsx",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        }
+      ],
+      "dependents": [
+        "src/modules/ai-content/adapters/components/builder/BuilderWorkspace.tsx"
+      ],
+      "orphan": false,
+      "valid": true
+    },
+    {
+      "source": "src/modules/ai-content/adapters/components/builder/session/ExportHUD.tsx",
+      "dependencies": [
+        {
+          "dynamic": false,
+          "module": "./FormatSelector",
+          "moduleSystem": "es6",
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "local",
+            "import"
+          ],
+          "resolved": "src/modules/ai-content/adapters/components/builder/session/FormatSelector.tsx",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        },
+        {
+          "dynamic": false,
+          "module": "@/modules/ai-content/domain/entities/Chapter",
+          "moduleSystem": "es6",
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "aliased",
+            "aliased-tsconfig",
+            "aliased-tsconfig-paths",
+            "local",
+            "import"
+          ],
+          "resolved": "src/modules/ai-content/domain/entities/Chapter.ts",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        },
+        {
+          "dynamic": false,
+          "module": "@/modules/ai-content/domain/entities/Section",
+          "moduleSystem": "es6",
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "aliased",
+            "aliased-tsconfig",
+            "aliased-tsconfig-paths",
+            "local",
+            "import"
+          ],
+          "resolved": "src/modules/ai-content/domain/entities/Section.ts",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        }
+      ],
+      "dependents": [
+        "src/modules/ai-content/adapters/components/builder/layout/BuilderHeader.tsx"
+      ],
+      "orphan": false,
+      "valid": true
+    },
+    {
+      "source": "src/modules/ai-content/adapters/components/builder/session/FormatSelector.tsx",
+      "dependencies": [],
+      "dependents": [
+        "src/modules/ai-content/adapters/components/builder/session/ExportHUD.tsx"
+      ],
+      "orphan": false,
+      "valid": true
+    },
+    {
+      "source": "src/modules/ai-content/adapters/components/builder/session/LibraryHUD.tsx",
+      "dependencies": [
+        {
+          "dynamic": false,
+          "module": "./ProjectNodeItem",
+          "moduleSystem": "es6",
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "local",
+            "import"
+          ],
+          "resolved": "src/modules/ai-content/adapters/components/builder/session/ProjectNodeItem.tsx",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        }
+      ],
+      "dependents": [
+        "src/modules/ai-content/adapters/components/builder/layout/BuilderHeader.tsx"
+      ],
+      "orphan": false,
+      "valid": true
+    },
+    {
+      "source": "src/modules/ai-content/adapters/components/builder/session/ProjectNodeItem.tsx",
+      "dependencies": [],
+      "dependents": [
+        "src/modules/ai-content/adapters/components/builder/session/LibraryHUD.tsx"
+      ],
+      "orphan": false,
+      "valid": true
+    },
+    {
+      "source": "src/modules/ai-content/adapters/components/builder/layout/BuilderLayout.tsx",
+      "dependencies": [
+        {
+          "dynamic": false,
+          "module": "./motion",
+          "moduleSystem": "es6",
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "local",
+            "import"
+          ],
+          "resolved": "src/modules/ai-content/adapters/components/builder/layout/motion.ts",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        }
+      ],
+      "dependents": [
+        "src/modules/ai-content/adapters/components/builder/BuilderWorkspace.tsx"
+      ],
+      "orphan": false,
+      "valid": true
+    },
+    {
+      "source": "src/modules/ai-content/adapters/components/builder/layout/motion.ts",
+      "dependencies": [],
+      "dependents": [
+        "src/modules/ai-content/adapters/components/builder/layout/BuilderLayout.tsx",
+        "src/modules/ai-content/adapters/components/builder/toolbar/DocumentToolbar.tsx",
+        "src/modules/ai-content/adapters/components/builder/layout/SidebarSection.tsx"
+      ],
+      "orphan": false,
+      "valid": true
+    },
+    {
+      "source": "src/modules/ai-content/adapters/components/builder/layout/BuilderSidebar.tsx",
+      "dependencies": [
+        {
+          "dynamic": false,
+          "module": "./types",
+          "moduleSystem": "es6",
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "local",
+            "import"
+          ],
+          "resolved": "src/modules/ai-content/adapters/components/builder/layout/types.ts",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        }
+      ],
+      "dependents": [
+        "src/modules/ai-content/adapters/components/builder/BuilderWorkspace.tsx"
+      ],
+      "orphan": false,
+      "valid": true
+    },
+    {
+      "source": "src/modules/ai-content/adapters/components/builder/layout/types.ts",
+      "dependencies": [],
+      "dependents": [
+        "src/modules/ai-content/adapters/components/builder/layout/BuilderSidebar.tsx",
+        "src/modules/ai-content/adapters/hooks/builder/useSidebarPanels.tsx"
+      ],
+      "orphan": false,
+      "valid": true
+    },
+    {
+      "source": "src/modules/ai-content/adapters/components/builder/renderer/DocumentRenderer.tsx",
+      "dependencies": [
+        {
+          "dynamic": true,
+          "module": "./BuilderDocument",
+          "moduleSystem": "es6",
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "local",
+            "dynamic-import"
+          ],
+          "resolved": "src/modules/ai-content/adapters/components/builder/renderer/BuilderDocument.tsx",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        },
+        {
+          "dynamic": false,
+          "module": "./ReportSteps",
+          "moduleSystem": "es6",
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "local",
+            "import"
+          ],
+          "resolved": "src/modules/ai-content/adapters/components/builder/renderer/ReportSteps.tsx",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        },
+        {
+          "dynamic": true,
+          "module": "./SnapshotComparison",
+          "moduleSystem": "es6",
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "local",
+            "dynamic-import"
+          ],
+          "resolved": "src/modules/ai-content/adapters/components/builder/renderer/SnapshotComparison.tsx",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        },
+        {
+          "dynamic": false,
+          "module": "./types",
+          "moduleSystem": "es6",
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "local",
+            "type-only",
+            "import"
+          ],
+          "resolved": "src/modules/ai-content/adapters/components/builder/renderer/types.ts",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        }
+      ],
+      "dependents": [
+        "src/modules/ai-content/adapters/components/builder/BuilderWorkspace.tsx"
+      ],
+      "orphan": false,
+      "valid": true
+    },
+    {
+      "source": "src/modules/ai-content/adapters/components/builder/renderer/BuilderDocument.tsx",
+      "dependencies": [
+        {
+          "dynamic": false,
+          "module": "./MarkdownEditor",
+          "moduleSystem": "es6",
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "local",
+            "import"
+          ],
+          "resolved": "src/modules/ai-content/adapters/components/builder/renderer/MarkdownEditor.tsx",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        },
+        {
+          "dynamic": false,
+          "module": "./types",
+          "moduleSystem": "es6",
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "local",
+            "type-only",
+            "import"
+          ],
+          "resolved": "src/modules/ai-content/adapters/components/builder/renderer/types.ts",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        },
+        {
+          "dynamic": false,
+          "module": "@/modules/ai-content/domain/entities/Chapter",
+          "moduleSystem": "es6",
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "aliased",
+            "aliased-tsconfig",
+            "aliased-tsconfig-paths",
+            "local",
+            "import"
+          ],
+          "resolved": "src/modules/ai-content/domain/entities/Chapter.ts",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        },
+        {
+          "dynamic": false,
+          "module": "@/modules/ai-content/domain/entities/Section",
+          "moduleSystem": "es6",
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "aliased",
+            "aliased-tsconfig",
+            "aliased-tsconfig-paths",
+            "local",
+            "import"
+          ],
+          "resolved": "src/modules/ai-content/domain/entities/Section.ts",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        }
+      ],
+      "dependents": [
+        "src/modules/ai-content/adapters/components/builder/renderer/DocumentRenderer.tsx"
+      ],
+      "orphan": false,
+      "valid": true
+    },
+    {
+      "source": "src/modules/ai-content/adapters/components/builder/renderer/MarkdownEditor.tsx",
+      "dependencies": [
+        {
+          "dynamic": false,
+          "module": "@/modules/ai-content/adapters/components/report-mode/markdown-styles",
+          "moduleSystem": "es6",
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "aliased",
+            "aliased-tsconfig",
+            "aliased-tsconfig-paths",
+            "local",
+            "import"
+          ],
+          "resolved": "src/modules/ai-content/adapters/components/report-mode/markdown-styles.ts",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        },
+        {
+          "dynamic": false,
+          "module": "@/modules/ai-content/adapters/state/use-editor-store",
+          "moduleSystem": "es6",
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "aliased",
+            "aliased-tsconfig",
+            "aliased-tsconfig-paths",
+            "local",
+            "import"
+          ],
+          "resolved": "src/modules/ai-content/adapters/state/use-editor-store.ts",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        },
+        {
+          "dynamic": false,
+          "module": "@/modules/ai-content/domain/services/IMarkdownService",
+          "moduleSystem": "es6",
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "aliased",
+            "aliased-tsconfig",
+            "aliased-tsconfig-paths",
+            "local",
+            "import"
+          ],
+          "resolved": "src/modules/ai-content/domain/services/IMarkdownService.ts",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        }
+      ],
+      "dependents": [
+        "src/modules/ai-content/adapters/components/builder/renderer/BuilderDocument.tsx"
+      ],
+      "orphan": false,
+      "valid": true
+    },
+    {
+      "source": "src/modules/ai-content/adapters/components/report-mode/markdown-styles.ts",
+      "dependencies": [],
+      "dependents": [
+        "src/modules/ai-content/adapters/components/builder/renderer/MarkdownEditor.tsx",
+        "src/modules/ai-content/adapters/components/builder/chat/ChatMessage.tsx",
+        "src/modules/ai-content/adapters/components/report-mode/dialogs/ChapterToolsDialog.tsx"
+      ],
+      "orphan": false,
+      "valid": true
+    },
+    {
+      "source": "src/modules/ai-content/domain/services/IMarkdownService.ts",
+      "dependencies": [],
+      "dependents": [
+        "src/modules/ai-content/adapters/components/builder/renderer/MarkdownEditor.tsx",
+        "src/modules/ai-content/infrastructure/editor/tiptap-extensions.ts",
+        "src/modules/ai-content/infrastructure/services/TurndownMarkdownService.ts"
+      ],
+      "orphan": false,
+      "valid": true
+    },
+    {
+      "source": "src/modules/ai-content/adapters/components/builder/renderer/types.ts",
+      "dependencies": [],
+      "dependents": [
+        "src/modules/ai-content/adapters/components/builder/renderer/DocumentRenderer.tsx",
+        "src/modules/ai-content/adapters/components/builder/renderer/BuilderDocument.tsx",
+        "src/modules/ai-content/adapters/components/builder/renderer/SnapshotComparison.tsx"
+      ],
+      "orphan": false,
+      "valid": true
+    },
+    {
+      "source": "src/modules/ai-content/adapters/components/builder/renderer/ReportSteps.tsx",
+      "dependencies": [],
+      "dependents": [
+        "src/modules/ai-content/adapters/components/builder/renderer/DocumentRenderer.tsx"
+      ],
+      "orphan": false,
+      "valid": true
+    },
+    {
+      "source": "src/modules/ai-content/adapters/components/builder/renderer/SnapshotComparison.tsx",
+      "dependencies": [
+        {
+          "dynamic": false,
+          "module": "./types",
+          "moduleSystem": "es6",
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "local",
+            "type-only",
+            "import"
+          ],
+          "resolved": "src/modules/ai-content/adapters/components/builder/renderer/types.ts",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        }
+      ],
+      "dependents": [
+        "src/modules/ai-content/adapters/components/builder/renderer/DocumentRenderer.tsx"
+      ],
+      "orphan": false,
+      "valid": true
+    },
+    {
+      "source": "src/modules/ai-content/adapters/components/builder/toolbar/DocumentToolbar.tsx",
+      "dependencies": [
+        {
+          "dynamic": false,
+          "module": "../layout/motion",
+          "moduleSystem": "es6",
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "local",
+            "import"
+          ],
+          "resolved": "src/modules/ai-content/adapters/components/builder/layout/motion.ts",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        },
+        {
+          "dynamic": false,
+          "module": "@/modules/ai-content/adapters/state/use-editor-store",
+          "moduleSystem": "es6",
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "aliased",
+            "aliased-tsconfig",
+            "aliased-tsconfig-paths",
+            "local",
+            "import"
+          ],
+          "resolved": "src/modules/ai-content/adapters/state/use-editor-store.ts",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        }
+      ],
+      "dependents": [
+        "src/modules/ai-content/adapters/components/builder/BuilderWorkspace.tsx"
+      ],
+      "orphan": false,
+      "valid": true
+    },
+    {
+      "source": "src/modules/ai-content/adapters/hooks/report-mode/useReportGenerator.ts",
+      "dependencies": [
+        {
+          "dynamic": false,
+          "module": "@/modules/ai-content/adapters/hooks/builder/useSidebarPanels",
+          "moduleSystem": "es6",
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "aliased",
+            "aliased-tsconfig",
+            "aliased-tsconfig-paths",
+            "local",
+            "import"
+          ],
+          "resolved": "src/modules/ai-content/adapters/hooks/builder/useSidebarPanels.tsx",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        }
+      ],
+      "dependents": [
+        "src/modules/ai-content/adapters/components/builder/BuilderWorkspace.tsx"
+      ],
+      "orphan": false,
+      "valid": true
+    },
+    {
+      "source": "src/modules/ai-content/adapters/hooks/builder/useSidebarPanels.tsx",
+      "dependencies": [
+        {
+          "dynamic": true,
+          "module": "@/modules/ai-content/adapters/components/builder/chat/ProjectConsultantHUD",
+          "moduleSystem": "es6",
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "aliased",
+            "aliased-tsconfig",
+            "aliased-tsconfig-paths",
+            "local",
+            "dynamic-import"
+          ],
+          "resolved": "src/modules/ai-content/adapters/components/builder/chat/ProjectConsultantHUD.tsx",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        },
+        {
+          "dynamic": true,
+          "module": "@/modules/ai-content/adapters/components/builder/generation/ChapterGenerationHUD",
+          "moduleSystem": "es6",
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "aliased",
+            "aliased-tsconfig",
+            "aliased-tsconfig-paths",
+            "local",
+            "dynamic-import"
+          ],
+          "resolved": "src/modules/ai-content/adapters/components/builder/generation/ChapterGenerationHUD.tsx",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        },
+        {
+          "dynamic": true,
+          "module": "@/modules/ai-content/adapters/components/builder/generation/SectionGenerationHUD",
+          "moduleSystem": "es6",
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "aliased",
+            "aliased-tsconfig",
+            "aliased-tsconfig-paths",
+            "local",
+            "dynamic-import"
+          ],
+          "resolved": "src/modules/ai-content/adapters/components/builder/generation/SectionGenerationHUD.tsx",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        },
+        {
+          "dynamic": false,
+          "module": "@/modules/ai-content/adapters/components/builder/layout/types",
+          "moduleSystem": "es6",
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "aliased",
+            "aliased-tsconfig",
+            "aliased-tsconfig-paths",
+            "local",
+            "import"
+          ],
+          "resolved": "src/modules/ai-content/adapters/components/builder/layout/types.ts",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        },
+        {
+          "dynamic": true,
+          "module": "@/modules/ai-content/adapters/components/builder/settings/GlobalIntelligenceHUD",
+          "moduleSystem": "es6",
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "aliased",
+            "aliased-tsconfig",
+            "aliased-tsconfig-paths",
+            "local",
+            "dynamic-import"
+          ],
+          "resolved": "src/modules/ai-content/adapters/components/builder/settings/GlobalIntelligenceHUD.tsx",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        },
+        {
+          "dynamic": true,
+          "module": "@/modules/ai-content/adapters/components/builder/settings/ProjectSettingsHUD",
+          "moduleSystem": "es6",
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "aliased",
+            "aliased-tsconfig",
+            "aliased-tsconfig-paths",
+            "local",
+            "dynamic-import"
+          ],
+          "resolved": "src/modules/ai-content/adapters/components/builder/settings/ProjectSettingsHUD.tsx",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        },
+        {
+          "dynamic": true,
+          "module": "@/modules/ai-content/adapters/components/builder/SidebarNavigator",
+          "moduleSystem": "es6",
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "aliased",
+            "aliased-tsconfig",
+            "aliased-tsconfig-paths",
+            "local",
+            "dynamic-import"
+          ],
+          "resolved": "src/modules/ai-content/adapters/components/builder/SidebarNavigator.tsx",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        },
+        {
+          "dynamic": true,
+          "module": "@/modules/ai-content/adapters/components/builder/templates/TemplateLibraryHUD",
+          "moduleSystem": "es6",
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "aliased",
+            "aliased-tsconfig",
+            "aliased-tsconfig-paths",
+            "local",
+            "dynamic-import"
+          ],
+          "resolved": "src/modules/ai-content/adapters/components/builder/templates/TemplateLibraryHUD.tsx",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        },
+        {
+          "dynamic": false,
+          "module": "@/modules/ai-content/domain/entities/Chapter",
+          "moduleSystem": "es6",
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "aliased",
+            "aliased-tsconfig",
+            "aliased-tsconfig-paths",
+            "local",
+            "import"
+          ],
+          "resolved": "src/modules/ai-content/domain/entities/Chapter.ts",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        },
+        {
+          "dynamic": false,
+          "module": "@/modules/ai-content/domain/entities/Section",
+          "moduleSystem": "es6",
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "aliased",
+            "aliased-tsconfig",
+            "aliased-tsconfig-paths",
+            "local",
+            "import"
+          ],
+          "resolved": "src/modules/ai-content/domain/entities/Section.ts",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        }
+      ],
+      "dependents": [
+        "src/modules/ai-content/adapters/hooks/report-mode/useReportGenerator.ts"
+      ],
+      "orphan": false,
+      "valid": true
+    },
+    {
+      "source": "src/modules/ai-content/adapters/components/builder/chat/ProjectConsultantHUD.tsx",
+      "dependencies": [
+        {
+          "dynamic": false,
+          "module": "../layout/SidebarContainer",
+          "moduleSystem": "es6",
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "local",
+            "import"
+          ],
+          "resolved": "src/modules/ai-content/adapters/components/builder/layout/SidebarContainer.tsx",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        },
+        {
+          "dynamic": false,
+          "module": "./ChatInput",
+          "moduleSystem": "es6",
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "local",
+            "import"
+          ],
+          "resolved": "src/modules/ai-content/adapters/components/builder/chat/ChatInput.tsx",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        },
+        {
+          "dynamic": false,
+          "module": "./ChatMessage",
+          "moduleSystem": "es6",
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "local",
+            "import"
+          ],
+          "resolved": "src/modules/ai-content/adapters/components/builder/chat/ChatMessage.tsx",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        },
+        {
+          "dynamic": false,
+          "module": "@/modules/ai-content/adapters/hooks/report-mode/useProjectChat",
+          "moduleSystem": "es6",
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "aliased",
+            "aliased-tsconfig",
+            "aliased-tsconfig-paths",
+            "local",
+            "import"
+          ],
+          "resolved": "src/modules/ai-content/adapters/hooks/report-mode/useProjectChat.ts",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        }
+      ],
+      "dependents": [
+        "src/modules/ai-content/adapters/hooks/builder/useSidebarPanels.tsx"
+      ],
+      "orphan": false,
+      "valid": true
+    },
+    {
+      "source": "src/modules/ai-content/adapters/components/builder/layout/SidebarContainer.tsx",
+      "dependencies": [],
+      "dependents": [
+        "src/modules/ai-content/adapters/components/builder/chat/ProjectConsultantHUD.tsx",
+        "src/modules/ai-content/adapters/components/builder/generation/ChapterGenerationHUD.tsx",
+        "src/modules/ai-content/adapters/components/builder/generation/SectionGenerationHUD.tsx",
+        "src/modules/ai-content/adapters/components/builder/templates/TemplateLibraryHUD.tsx",
+        "src/modules/ai-content/adapters/components/builder/file-manager/UploadManager.tsx"
+      ],
+      "orphan": false,
+      "valid": true
+    },
+    {
+      "source": "src/modules/ai-content/adapters/components/builder/chat/ChatInput.tsx",
+      "dependencies": [],
+      "dependents": [
+        "src/modules/ai-content/adapters/components/builder/chat/ProjectConsultantHUD.tsx"
+      ],
+      "orphan": false,
+      "valid": true
+    },
+    {
+      "source": "src/modules/ai-content/adapters/components/builder/chat/ChatMessage.tsx",
+      "dependencies": [
+        {
+          "dynamic": false,
+          "module": "@/modules/ai-content/adapters/components/report-mode/markdown-styles",
+          "moduleSystem": "es6",
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "aliased",
+            "aliased-tsconfig",
+            "aliased-tsconfig-paths",
+            "local",
+            "import"
+          ],
+          "resolved": "src/modules/ai-content/adapters/components/report-mode/markdown-styles.ts",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        }
+      ],
+      "dependents": [
+        "src/modules/ai-content/adapters/components/builder/chat/ProjectConsultantHUD.tsx"
+      ],
+      "orphan": false,
+      "valid": true
+    },
+    {
+      "source": "src/modules/ai-content/adapters/hooks/report-mode/useProjectChat.ts",
+      "dependencies": [
+        {
+          "dynamic": false,
+          "module": "@/modules/ai-content/adapters/api-client/ReportApiClient",
+          "moduleSystem": "es6",
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "aliased",
+            "aliased-tsconfig",
+            "aliased-tsconfig-paths",
+            "local",
+            "import"
+          ],
+          "resolved": "src/modules/ai-content/adapters/api-client/ReportApiClient.ts",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        }
+      ],
+      "dependents": [
+        "src/modules/ai-content/adapters/components/builder/chat/ProjectConsultantHUD.tsx",
+        "src/modules/ai-content/adapters/hooks/report-mode/__tests__/useProjectChat.test.tsx"
+      ],
+      "orphan": false,
+      "valid": true
+    },
+    {
+      "source": "src/modules/ai-content/adapters/components/builder/generation/ChapterGenerationHUD.tsx",
+      "dependencies": [
+        {
+          "dynamic": false,
+          "module": "../layout/SidebarContainer",
+          "moduleSystem": "es6",
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "local",
+            "import"
+          ],
+          "resolved": "src/modules/ai-content/adapters/components/builder/layout/SidebarContainer.tsx",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        },
+        {
+          "dynamic": false,
+          "module": "./controls/ContextSelector",
+          "moduleSystem": "es6",
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "local",
+            "import"
+          ],
+          "resolved": "src/modules/ai-content/adapters/components/builder/generation/controls/ContextSelector.tsx",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        },
+        {
+          "dynamic": false,
+          "module": "@/modules/ai-content/adapters/hooks/report-mode/use-ai-actions",
+          "moduleSystem": "es6",
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "aliased",
+            "aliased-tsconfig",
+            "aliased-tsconfig-paths",
+            "local",
+            "import"
+          ],
+          "resolved": "src/modules/ai-content/adapters/hooks/report-mode/use-ai-actions.ts",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        },
+        {
+          "dynamic": false,
+          "module": "@/modules/ai-content/adapters/hooks/report-mode/use-chapter-actions",
+          "moduleSystem": "es6",
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "aliased",
+            "aliased-tsconfig",
+            "aliased-tsconfig-paths",
+            "local",
+            "import"
+          ],
+          "resolved": "src/modules/ai-content/adapters/hooks/report-mode/use-chapter-actions.ts",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        },
+        {
+          "dynamic": false,
+          "module": "@/modules/ai-content/domain/entities/Chapter",
+          "moduleSystem": "es6",
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "aliased",
+            "aliased-tsconfig",
+            "aliased-tsconfig-paths",
+            "local",
+            "import"
+          ],
+          "resolved": "src/modules/ai-content/domain/entities/Chapter.ts",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        }
+      ],
+      "dependents": [
+        "src/modules/ai-content/adapters/hooks/builder/useSidebarPanels.tsx"
+      ],
+      "orphan": false,
+      "valid": true
+    },
+    {
+      "source": "src/modules/ai-content/adapters/components/builder/generation/controls/ContextSelector.tsx",
+      "dependencies": [],
+      "dependents": [
+        "src/modules/ai-content/adapters/components/builder/generation/ChapterGenerationHUD.tsx",
+        "src/modules/ai-content/adapters/components/builder/generation/SectionGenerationHUD.tsx",
+        "src/modules/ai-content/adapters/components/report-mode/dialogs/ChapterToolsDialog.tsx"
+      ],
+      "orphan": false,
+      "valid": true
+    },
+    {
+      "source": "src/modules/ai-content/adapters/hooks/report-mode/use-chapter-actions.ts",
+      "dependencies": [
+        {
+          "dynamic": false,
+          "module": "@/modules/ai-content/domain/entities/Chapter",
+          "moduleSystem": "es6",
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "aliased",
+            "aliased-tsconfig",
+            "aliased-tsconfig-paths",
+            "local",
+            "import"
+          ],
+          "resolved": "src/modules/ai-content/domain/entities/Chapter.ts",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        },
+        {
+          "dynamic": false,
+          "module": "@/modules/ai-content/domain/entities/ControlTypes",
+          "moduleSystem": "es6",
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "aliased",
+            "aliased-tsconfig",
+            "aliased-tsconfig-paths",
+            "local",
+            "type-only",
+            "import"
+          ],
+          "resolved": "src/modules/ai-content/domain/entities/ControlTypes.ts",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        }
+      ],
+      "dependents": [
+        "src/modules/ai-content/adapters/components/builder/generation/ChapterGenerationHUD.tsx",
+        "src/modules/ai-content/adapters/components/report-mode/dialogs/ChapterToolsDialog.tsx"
+      ],
+      "orphan": false,
+      "valid": true
+    },
+    {
+      "source": "src/modules/ai-content/adapters/components/builder/generation/SectionGenerationHUD.tsx",
+      "dependencies": [
+        {
+          "dynamic": false,
+          "module": "../layout/SidebarContainer",
+          "moduleSystem": "es6",
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "local",
+            "import"
+          ],
+          "resolved": "src/modules/ai-content/adapters/components/builder/layout/SidebarContainer.tsx",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        },
+        {
+          "dynamic": false,
+          "module": "../layout/SidebarSection",
+          "moduleSystem": "es6",
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "local",
+            "import"
+          ],
+          "resolved": "src/modules/ai-content/adapters/components/builder/layout/SidebarSection.tsx",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        },
+        {
+          "dynamic": false,
+          "module": "./controls/ContextSelector",
+          "moduleSystem": "es6",
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "local",
+            "import"
+          ],
+          "resolved": "src/modules/ai-content/adapters/components/builder/generation/controls/ContextSelector.tsx",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        },
+        {
+          "dynamic": false,
+          "module": "./controls/ControlPanel",
+          "moduleSystem": "es6",
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "local",
+            "import"
+          ],
+          "resolved": "src/modules/ai-content/adapters/components/builder/generation/controls/ControlPanel.tsx",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        },
+        {
+          "dynamic": false,
+          "module": "./controls/GuidelineEditor",
+          "moduleSystem": "es6",
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "local",
+            "import"
+          ],
+          "resolved": "src/modules/ai-content/adapters/components/builder/generation/controls/GuidelineEditor.tsx",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        },
+        {
+          "dynamic": false,
+          "module": "@/modules/ai-content/adapters/hooks/report-mode/use-ai-actions",
+          "moduleSystem": "es6",
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "aliased",
+            "aliased-tsconfig",
+            "aliased-tsconfig-paths",
+            "local",
+            "import"
+          ],
+          "resolved": "src/modules/ai-content/adapters/hooks/report-mode/use-ai-actions.ts",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        },
+        {
+          "dynamic": false,
+          "module": "@/modules/ai-content/adapters/state/useGenerationUIStore",
+          "moduleSystem": "es6",
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "aliased",
+            "aliased-tsconfig",
+            "aliased-tsconfig-paths",
+            "local",
+            "import"
+          ],
+          "resolved": "src/modules/ai-content/adapters/state/useGenerationUIStore.ts",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        },
+        {
+          "dynamic": false,
+          "module": "@/modules/ai-content/domain/entities/Section",
+          "moduleSystem": "es6",
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "aliased",
+            "aliased-tsconfig",
+            "aliased-tsconfig-paths",
+            "local",
+            "import"
+          ],
+          "resolved": "src/modules/ai-content/domain/entities/Section.ts",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        }
+      ],
+      "dependents": [
+        "src/modules/ai-content/adapters/hooks/builder/useSidebarPanels.tsx"
+      ],
+      "orphan": false,
+      "valid": true
+    },
+    {
+      "source": "src/modules/ai-content/adapters/components/builder/layout/SidebarSection.tsx",
+      "dependencies": [
+        {
+          "dynamic": false,
+          "module": "./motion",
+          "moduleSystem": "es6",
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "local",
+            "import"
+          ],
+          "resolved": "src/modules/ai-content/adapters/components/builder/layout/motion.ts",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        }
+      ],
+      "dependents": [
+        "src/modules/ai-content/adapters/components/builder/generation/SectionGenerationHUD.tsx",
+        "src/modules/ai-content/adapters/components/builder/SidebarNavigator.tsx"
+      ],
+      "orphan": false,
+      "valid": true
+    },
+    {
+      "source": "src/modules/ai-content/adapters/components/builder/generation/controls/ControlPanel.tsx",
+      "dependencies": [
+        {
+          "dynamic": false,
+          "module": "@/modules/ai-content/domain/entities/ControlTypes",
+          "moduleSystem": "es6",
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "aliased",
+            "aliased-tsconfig",
+            "aliased-tsconfig-paths",
+            "local",
+            "import"
+          ],
+          "resolved": "src/modules/ai-content/domain/entities/ControlTypes.ts",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        },
+        {
+          "dynamic": false,
+          "module": "@/modules/ai-content/domain/entities/Section",
+          "moduleSystem": "es6",
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "aliased",
+            "aliased-tsconfig",
+            "aliased-tsconfig-paths",
+            "local",
+            "import"
+          ],
+          "resolved": "src/modules/ai-content/domain/entities/Section.ts",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        }
+      ],
+      "dependents": [
+        "src/modules/ai-content/adapters/components/builder/generation/SectionGenerationHUD.tsx"
+      ],
+      "orphan": false,
+      "valid": true
+    },
+    {
+      "source": "src/modules/ai-content/adapters/components/builder/generation/controls/GuidelineEditor.tsx",
+      "dependencies": [
+        {
+          "dynamic": false,
+          "module": "@/modules/ai-content/adapters/hooks/report-mode/use-guideline-editor",
+          "moduleSystem": "es6",
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "aliased",
+            "aliased-tsconfig",
+            "aliased-tsconfig-paths",
+            "local",
+            "import"
+          ],
+          "resolved": "src/modules/ai-content/adapters/hooks/report-mode/use-guideline-editor.ts",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        }
+      ],
+      "dependents": [
+        "src/modules/ai-content/adapters/components/builder/generation/SectionGenerationHUD.tsx"
+      ],
+      "orphan": false,
+      "valid": true
+    },
+    {
+      "source": "src/modules/ai-content/adapters/hooks/report-mode/use-guideline-editor.ts",
+      "dependencies": [],
+      "dependents": [
+        "src/modules/ai-content/adapters/components/builder/generation/controls/GuidelineEditor.tsx"
+      ],
+      "orphan": false,
+      "valid": true
+    },
+    {
+      "source": "src/modules/ai-content/adapters/components/builder/settings/GlobalIntelligenceHUD.tsx",
+      "dependencies": [
+        {
+          "dynamic": false,
+          "module": "./TagManager",
+          "moduleSystem": "es6",
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "local",
+            "import"
+          ],
+          "resolved": "src/modules/ai-content/adapters/components/builder/settings/TagManager.tsx",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        },
+        {
+          "dynamic": false,
+          "module": "@/modules/ai-content/domain/entities/ControlTypes",
+          "moduleSystem": "es6",
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "aliased",
+            "aliased-tsconfig",
+            "aliased-tsconfig-paths",
+            "local",
+            "import"
+          ],
+          "resolved": "src/modules/ai-content/domain/entities/ControlTypes.ts",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        }
+      ],
+      "dependents": [
+        "src/modules/ai-content/adapters/hooks/builder/useSidebarPanels.tsx"
+      ],
+      "orphan": false,
+      "valid": true
+    },
+    {
+      "source": "src/modules/ai-content/adapters/components/builder/settings/TagManager.tsx",
+      "dependencies": [],
+      "dependents": [
+        "src/modules/ai-content/adapters/components/builder/settings/GlobalIntelligenceHUD.tsx"
+      ],
+      "orphan": false,
+      "valid": true
+    },
+    {
+      "source": "src/modules/ai-content/adapters/components/builder/settings/ProjectSettingsHUD.tsx",
+      "dependencies": [
+        {
+          "dynamic": false,
+          "module": "./OptionConstants",
+          "moduleSystem": "es6",
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "local",
+            "import"
+          ],
+          "resolved": "src/modules/ai-content/adapters/components/builder/settings/OptionConstants.ts",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        }
+      ],
+      "dependents": [
+        "src/modules/ai-content/adapters/hooks/builder/useSidebarPanels.tsx"
+      ],
+      "orphan": false,
+      "valid": true
+    },
+    {
+      "source": "src/modules/ai-content/adapters/components/builder/settings/OptionConstants.ts",
+      "dependencies": [],
+      "dependents": [
+        "src/modules/ai-content/adapters/components/builder/settings/ProjectSettingsHUD.tsx",
+        "src/modules/ai-content/adapters/components/builder/settings/CoverPageHUD.tsx"
+      ],
+      "orphan": false,
+      "valid": true
+    },
+    {
+      "source": "src/modules/ai-content/adapters/components/builder/SidebarNavigator.tsx",
+      "dependencies": [
+        {
+          "dynamic": false,
+          "module": "./file-manager/SourceManager",
+          "moduleSystem": "es6",
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "local",
+            "import"
+          ],
+          "resolved": "src/modules/ai-content/adapters/components/builder/file-manager/SourceManager.tsx",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        },
+        {
+          "dynamic": false,
+          "module": "./layout/SidebarSection",
+          "moduleSystem": "es6",
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "local",
+            "import"
+          ],
+          "resolved": "src/modules/ai-content/adapters/components/builder/layout/SidebarSection.tsx",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        },
+        {
+          "dynamic": false,
+          "module": "./outline/SidebarOutlineManager",
+          "moduleSystem": "es6",
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "local",
+            "import"
+          ],
+          "resolved": "src/modules/ai-content/adapters/components/builder/outline/SidebarOutlineManager.tsx",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        }
+      ],
+      "dependents": [
+        "src/modules/ai-content/adapters/hooks/builder/useSidebarPanels.tsx"
+      ],
+      "orphan": false,
+      "valid": true
+    },
+    {
+      "source": "src/modules/ai-content/adapters/components/builder/file-manager/SourceManager.tsx",
+      "dependencies": [
+        {
+          "dynamic": false,
+          "module": "./FileNodeItem",
+          "moduleSystem": "es6",
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "local",
+            "import"
+          ],
+          "resolved": "src/modules/ai-content/adapters/components/builder/file-manager/FileNodeItem.tsx",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        },
+        {
+          "dynamic": false,
+          "module": "@/modules/ai-content/domain/entities/ControlTypes",
+          "moduleSystem": "es6",
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "aliased",
+            "aliased-tsconfig",
+            "aliased-tsconfig-paths",
+            "local",
+            "import"
+          ],
+          "resolved": "src/modules/ai-content/domain/entities/ControlTypes.ts",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        },
+        {
+          "dynamic": false,
+          "module": "@/modules/ai-content/domain/entities/ExternalContext",
+          "moduleSystem": "es6",
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "aliased",
+            "aliased-tsconfig",
+            "aliased-tsconfig-paths",
+            "local",
+            "import"
+          ],
+          "resolved": "src/modules/ai-content/domain/entities/ExternalContext.ts",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        }
+      ],
+      "dependents": [
+        "src/modules/ai-content/adapters/components/builder/SidebarNavigator.tsx"
+      ],
+      "orphan": false,
+      "valid": true
+    },
+    {
+      "source": "src/modules/ai-content/adapters/components/builder/file-manager/FileNodeItem.tsx",
+      "dependencies": [
+        {
+          "dynamic": false,
+          "module": "@/modules/ai-content/domain/entities/ExternalContext",
+          "moduleSystem": "es6",
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "aliased",
+            "aliased-tsconfig",
+            "aliased-tsconfig-paths",
+            "local",
+            "import"
+          ],
+          "resolved": "src/modules/ai-content/domain/entities/ExternalContext.ts",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        }
+      ],
+      "dependents": [
+        "src/modules/ai-content/adapters/components/builder/file-manager/SourceManager.tsx",
+        "src/modules/ai-content/adapters/components/builder/file-manager/UploadManager.tsx"
+      ],
+      "orphan": false,
+      "valid": true
+    },
+    {
+      "source": "src/modules/ai-content/domain/entities/ExternalContext.ts",
+      "dependencies": [
+        {
+          "dynamic": false,
+          "module": "./ControlTypes",
+          "moduleSystem": "es6",
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "local",
+            "import"
+          ],
+          "resolved": "src/modules/ai-content/domain/entities/ControlTypes.ts",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        }
+      ],
+      "dependents": [
+        "src/modules/ai-content/adapters/components/builder/file-manager/SourceManager.tsx",
+        "src/modules/ai-content/adapters/components/builder/file-manager/FileNodeItem.tsx"
+      ],
+      "orphan": false,
+      "valid": true
+    },
+    {
+      "source": "src/modules/ai-content/adapters/components/builder/outline/SidebarOutlineManager.tsx",
+      "dependencies": [
+        {
+          "dynamic": false,
+          "module": "./SortableOutlineItem",
+          "moduleSystem": "es6",
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "local",
+            "import"
+          ],
+          "resolved": "src/modules/ai-content/adapters/components/builder/outline/SortableOutlineItem.tsx",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        },
+        {
+          "dynamic": false,
+          "module": "./useOutlineOperations",
+          "moduleSystem": "es6",
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "local",
+            "import"
+          ],
+          "resolved": "src/modules/ai-content/adapters/components/builder/outline/useOutlineOperations.ts",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        },
+        {
+          "dynamic": false,
+          "module": "@/modules/ai-content/domain/entities/Chapter",
+          "moduleSystem": "es6",
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "aliased",
+            "aliased-tsconfig",
+            "aliased-tsconfig-paths",
+            "local",
+            "import"
+          ],
+          "resolved": "src/modules/ai-content/domain/entities/Chapter.ts",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        }
+      ],
+      "dependents": [
+        "src/modules/ai-content/adapters/components/builder/SidebarNavigator.tsx"
+      ],
+      "orphan": false,
+      "valid": true
+    },
+    {
+      "source": "src/modules/ai-content/adapters/components/builder/outline/SortableOutlineItem.tsx",
+      "dependencies": [],
+      "dependents": [
+        "src/modules/ai-content/adapters/components/builder/outline/SidebarOutlineManager.tsx"
+      ],
+      "orphan": false,
+      "valid": true
+    },
+    {
+      "source": "src/modules/ai-content/adapters/components/builder/outline/useOutlineOperations.ts",
+      "dependencies": [
+        {
+          "dynamic": false,
+          "module": "@/modules/ai-content/domain/entities/Chapter",
+          "moduleSystem": "es6",
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "aliased",
+            "aliased-tsconfig",
+            "aliased-tsconfig-paths",
+            "local",
+            "import"
+          ],
+          "resolved": "src/modules/ai-content/domain/entities/Chapter.ts",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        },
+        {
+          "dynamic": false,
+          "module": "@/modules/ai-content/domain/entities/Section",
+          "moduleSystem": "es6",
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "aliased",
+            "aliased-tsconfig",
+            "aliased-tsconfig-paths",
+            "local",
+            "import"
+          ],
+          "resolved": "src/modules/ai-content/domain/entities/Section.ts",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        }
+      ],
+      "dependents": [
+        "src/modules/ai-content/adapters/components/builder/outline/SidebarOutlineManager.tsx"
+      ],
+      "orphan": false,
+      "valid": true
+    },
+    {
+      "source": "src/modules/ai-content/adapters/components/builder/templates/TemplateLibraryHUD.tsx",
+      "dependencies": [
+        {
+          "dynamic": false,
+          "module": "../layout/SidebarContainer",
+          "moduleSystem": "es6",
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "local",
+            "import"
+          ],
+          "resolved": "src/modules/ai-content/adapters/components/builder/layout/SidebarContainer.tsx",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        }
+      ],
+      "dependents": [
+        "src/modules/ai-content/adapters/hooks/builder/useSidebarPanels.tsx"
+      ],
+      "orphan": false,
+      "valid": true
+    },
+    {
+      "source": "src/modules/ai-content/adapters/components/builder/file-manager/SourceAnalyst.tsx",
+      "dependencies": [],
+      "dependents": [
+        "src/modules/ai-content/adapters/components/builder/file-manager/UploadManager.tsx"
+      ],
+      "orphan": false,
+      "valid": true
+    },
+    {
+      "source": "src/modules/ai-content/adapters/components/builder/file-manager/UploadManager.tsx",
+      "dependencies": [
+        {
+          "dynamic": false,
+          "module": "../layout/SidebarContainer",
+          "moduleSystem": "es6",
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "local",
+            "import"
+          ],
+          "resolved": "src/modules/ai-content/adapters/components/builder/layout/SidebarContainer.tsx",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        },
+        {
+          "dynamic": false,
+          "module": "./FileNodeItem",
+          "moduleSystem": "es6",
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "local",
+            "import"
+          ],
+          "resolved": "src/modules/ai-content/adapters/components/builder/file-manager/FileNodeItem.tsx",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        },
+        {
+          "dynamic": false,
+          "module": "./SourceAnalyst",
+          "moduleSystem": "es6",
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "local",
+            "import"
+          ],
+          "resolved": "src/modules/ai-content/adapters/components/builder/file-manager/SourceAnalyst.tsx",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        },
+        {
+          "dynamic": false,
+          "module": "@/modules/ai-content/domain/entities/ControlTypes",
+          "moduleSystem": "es6",
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "aliased",
+            "aliased-tsconfig",
+            "aliased-tsconfig-paths",
+            "local",
+            "import"
+          ],
+          "resolved": "src/modules/ai-content/domain/entities/ControlTypes.ts",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        }
+      ],
+      "dependents": [],
+      "orphan": false,
+      "valid": true
+    },
+    {
+      "source": "src/modules/ai-content/adapters/components/builder/generation/BuildManifestHUD.tsx",
+      "dependencies": [
+        {
+          "dynamic": false,
+          "module": "@/modules/ai-content/domain/entities/Chapter",
+          "moduleSystem": "es6",
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "aliased",
+            "aliased-tsconfig",
+            "aliased-tsconfig-paths",
+            "local",
+            "import"
+          ],
+          "resolved": "src/modules/ai-content/domain/entities/Chapter.ts",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        }
+      ],
+      "dependents": [],
+      "orphan": false,
+      "valid": true
+    },
+    {
+      "source": "src/modules/ai-content/adapters/components/builder/generation/controls/PromptInspector.tsx",
+      "dependencies": [
+        {
+          "dynamic": false,
+          "module": "@/modules/ai-content/domain/entities/Section",
+          "moduleSystem": "es6",
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "aliased",
+            "aliased-tsconfig",
+            "aliased-tsconfig-paths",
+            "local",
+            "import"
+          ],
+          "resolved": "src/modules/ai-content/domain/entities/Section.ts",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        },
+        {
+          "dynamic": false,
+          "module": "@/modules/ai-content/domain/services/PromptBuilder",
+          "moduleSystem": "es6",
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "aliased",
+            "aliased-tsconfig",
+            "aliased-tsconfig-paths",
+            "local",
+            "import"
+          ],
+          "resolved": "src/modules/ai-content/domain/services/PromptBuilder.ts",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        }
+      ],
+      "dependents": [],
+      "orphan": false,
+      "valid": true
+    },
+    {
+      "source": "src/modules/ai-content/adapters/components/builder/hud/CoverPageSettingsHUD.tsx",
+      "dependencies": [
+        {
+          "dynamic": false,
+          "module": "../settings/CoverPageHUD",
+          "moduleSystem": "es6",
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "local",
+            "import"
+          ],
+          "resolved": "src/modules/ai-content/adapters/components/builder/settings/CoverPageHUD.tsx",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        }
+      ],
+      "dependents": [],
+      "orphan": false,
+      "valid": true
+    },
+    {
+      "source": "src/modules/ai-content/adapters/components/builder/settings/CoverPageHUD.tsx",
+      "dependencies": [
+        {
+          "dynamic": false,
+          "module": "./OptionConstants",
+          "moduleSystem": "es6",
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "local",
+            "import"
+          ],
+          "resolved": "src/modules/ai-content/adapters/components/builder/settings/OptionConstants.ts",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        }
+      ],
+      "dependents": [
+        "src/modules/ai-content/adapters/components/builder/hud/CoverPageSettingsHUD.tsx"
+      ],
+      "orphan": false,
+      "valid": true
+    },
+    {
+      "source": "src/modules/ai-content/adapters/components/builder/templates/TOCArchitect.tsx",
+      "dependencies": [
+        {
+          "dynamic": false,
+          "module": "./TOCGenerator",
+          "moduleSystem": "es6",
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "local",
+            "import"
+          ],
+          "resolved": "src/modules/ai-content/adapters/components/builder/templates/TOCGenerator.tsx",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        }
+      ],
+      "dependents": [],
+      "orphan": false,
+      "valid": true
+    },
+    {
+      "source": "src/modules/ai-content/adapters/components/builder/templates/TOCGenerator.tsx",
+      "dependencies": [],
+      "dependents": [
+        "src/modules/ai-content/adapters/components/builder/templates/TOCArchitect.tsx"
+      ],
+      "orphan": false,
+      "valid": true
+    },
+    {
+      "source": "src/modules/ai-content/adapters/components/report-mode/dialogs/ChapterToolsDialog.tsx",
+      "dependencies": [
+        {
+          "dynamic": false,
+          "module": "../../builder/generation/controls/ContextSelector",
+          "moduleSystem": "es6",
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "local",
+            "import"
+          ],
+          "resolved": "src/modules/ai-content/adapters/components/builder/generation/controls/ContextSelector.tsx",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        },
+        {
+          "dynamic": false,
+          "module": "@/modules/ai-content/adapters/components/report-mode/markdown-styles",
+          "moduleSystem": "es6",
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "aliased",
+            "aliased-tsconfig",
+            "aliased-tsconfig-paths",
+            "local",
+            "import"
+          ],
+          "resolved": "src/modules/ai-content/adapters/components/report-mode/markdown-styles.ts",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        },
+        {
+          "dynamic": false,
+          "module": "@/modules/ai-content/adapters/hooks/report-mode/use-chapter-actions",
+          "moduleSystem": "es6",
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "aliased",
+            "aliased-tsconfig",
+            "aliased-tsconfig-paths",
+            "local",
+            "import"
+          ],
+          "resolved": "src/modules/ai-content/adapters/hooks/report-mode/use-chapter-actions.ts",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        },
+        {
+          "dynamic": false,
+          "module": "@/modules/ai-content/domain/entities/Chapter",
+          "moduleSystem": "es6",
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "aliased",
+            "aliased-tsconfig",
+            "aliased-tsconfig-paths",
+            "local",
+            "import"
+          ],
+          "resolved": "src/modules/ai-content/domain/entities/Chapter.ts",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        }
+      ],
+      "dependents": [],
+      "orphan": false,
+      "valid": true
+    },
+    {
+      "source": "src/modules/ai-content/adapters/components/report-mode/dialogs/ReportTemplateDialog.tsx",
+      "dependencies": [],
+      "dependents": [],
+      "orphan": true,
+      "valid": false,
+      "rules": [
+        {
+          "severity": "warn",
+          "name": "no-orphans"
+        }
+      ]
+    },
+    {
+      "source": "src/modules/ai-content/adapters/components/report-mode/generation-tools/IntelligenceTab.tsx",
+      "dependencies": [
+        {
+          "dynamic": false,
+          "module": "@/modules/ai-content/domain/entities/Section",
+          "moduleSystem": "es6",
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "aliased",
+            "aliased-tsconfig",
+            "aliased-tsconfig-paths",
+            "local",
+            "import"
+          ],
+          "resolved": "src/modules/ai-content/domain/entities/Section.ts",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        }
+      ],
+      "dependents": [],
+      "orphan": false,
+      "valid": true
+    },
+    {
+      "source": "src/modules/ai-content/adapters/components/writing-tools/MarkdownToWordTool.tsx",
+      "dependencies": [
+        {
+          "dynamic": false,
+          "module": "@/modules/ai-content/infrastructure/exporters/DocxStyles",
+          "moduleSystem": "es6",
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "aliased",
+            "aliased-tsconfig",
+            "aliased-tsconfig-paths",
+            "local",
+            "import"
+          ],
+          "resolved": "src/modules/ai-content/infrastructure/exporters/DocxStyles.ts",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": false,
+          "rules": [
+            {
+              "severity": "warn",
+              "name": "adapters-must-not-depend-on-infrastructure-directly"
+            }
+          ]
+        }
+      ],
+      "dependents": [],
+      "orphan": false,
+      "valid": true
+    },
+    {
+      "source": "src/modules/ai-content/infrastructure/exporters/DocxStyles.ts",
+      "dependencies": [
+        {
+          "dynamic": false,
+          "module": "@/modules/ai-content/infrastructure/exporters/word-converter/types",
+          "moduleSystem": "es6",
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "aliased",
+            "aliased-tsconfig",
+            "aliased-tsconfig-paths",
+            "local",
+            "import"
+          ],
+          "resolved": "src/modules/ai-content/infrastructure/exporters/word-converter/types.ts",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        }
+      ],
+      "dependents": [
+        "src/modules/ai-content/adapters/components/writing-tools/MarkdownToWordTool.tsx"
+      ],
+      "orphan": false,
+      "valid": true
+    },
+    {
+      "source": "src/modules/ai-content/infrastructure/exporters/word-converter/types.ts",
+      "dependencies": [
+        {
+          "dynamic": false,
+          "module": "@/modules/ai-content/domain/types/export-types",
+          "moduleSystem": "es6",
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "aliased",
+            "aliased-tsconfig",
+            "aliased-tsconfig-paths",
+            "local",
+            "type-only",
+            "import"
+          ],
+          "resolved": "src/modules/ai-content/domain/types/export-types.ts",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        }
+      ],
+      "dependents": [
+        "src/modules/ai-content/infrastructure/exporters/DocxStyles.ts",
+        "src/modules/ai-content/infrastructure/exporters/MarkdownToWordConverter.ts",
+        "src/modules/ai-content/infrastructure/exporters/word-converter/ast-converter.ts",
+        "src/modules/ai-content/infrastructure/exporters/word-converter/inline-converter.ts",
+        "src/modules/ai-content/infrastructure/exporters/word-converter/document-builder.ts",
+        "src/modules/ai-content/infrastructure/exporters/word-converter/node-handlers.ts"
+      ],
+      "orphan": false,
+      "valid": true
+    },
+    {
+      "source": "src/modules/ai-content/domain/types/export-types.ts",
+      "dependencies": [],
+      "dependents": [
+        "src/modules/ai-content/infrastructure/exporters/word-converter/types.ts",
+        "src/modules/ai-content/infrastructure/exporters/DocxExportService.ts"
+      ],
+      "orphan": false,
+      "valid": true
+    },
+    {
+      "source": "src/modules/ai-content/adapters/controllers/AIContentController.ts",
+      "dependencies": [
+        {
+          "dynamic": false,
+          "module": "../../application/use-cases/BuildProjectUseCase",
+          "moduleSystem": "es6",
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "local",
+            "import"
+          ],
+          "resolved": "src/modules/ai-content/application/use-cases/BuildProjectUseCase.ts",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        },
+        {
+          "dynamic": false,
+          "module": "../../application/use-cases/DeleteSectionUseCase",
+          "moduleSystem": "es6",
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "local",
+            "import"
+          ],
+          "resolved": "src/modules/ai-content/application/use-cases/DeleteSectionUseCase.ts",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        },
+        {
+          "dynamic": false,
+          "module": "../../application/use-cases/ExportProjectUseCase",
+          "moduleSystem": "es6",
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "local",
+            "import"
+          ],
+          "resolved": "src/modules/ai-content/application/use-cases/ExportProjectUseCase.ts",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        },
+        {
+          "dynamic": false,
+          "module": "../../application/use-cases/GetSectionByIdUseCase",
+          "moduleSystem": "es6",
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "local",
+            "import"
+          ],
+          "resolved": "src/modules/ai-content/application/use-cases/GetSectionByIdUseCase.ts",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        },
+        {
+          "dynamic": false,
+          "module": "../../application/use-cases/GetSectionsUseCase",
+          "moduleSystem": "es6",
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "local",
+            "import"
+          ],
+          "resolved": "src/modules/ai-content/application/use-cases/GetSectionsUseCase.ts",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        },
+        {
+          "dynamic": false,
+          "module": "../../application/use-cases/SaveSectionUseCase",
+          "moduleSystem": "es6",
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "local",
+            "import"
+          ],
+          "resolved": "src/modules/ai-content/application/use-cases/SaveSectionUseCase.ts",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        },
+        {
+          "dynamic": false,
+          "module": "../../domain/entities/Section",
+          "moduleSystem": "es6",
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "local",
+            "import"
+          ],
+          "resolved": "src/modules/ai-content/domain/entities/Section.ts",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        },
+        {
+          "dynamic": false,
+          "module": "../../domain/errors/AIContentErrors",
+          "moduleSystem": "es6",
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "local",
+            "import"
+          ],
+          "resolved": "src/modules/ai-content/domain/errors/AIContentErrors.ts",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        }
+      ],
+      "dependents": [],
+      "orphan": false,
+      "valid": true
+    },
+    {
+      "source": "src/modules/ai-content/application/use-cases/BuildProjectUseCase.ts",
+      "dependencies": [
+        {
+          "dynamic": false,
+          "module": "../../domain/errors/AIContentErrors",
+          "moduleSystem": "es6",
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "local",
+            "import"
+          ],
+          "resolved": "src/modules/ai-content/domain/errors/AIContentErrors.ts",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        }
+      ],
+      "dependents": [
+        "src/modules/ai-content/adapters/controllers/AIContentController.ts"
+      ],
+      "orphan": false,
+      "valid": true
+    },
+    {
+      "source": "src/modules/ai-content/domain/errors/AIContentErrors.ts",
+      "dependencies": [],
+      "dependents": [
+        "src/modules/ai-content/adapters/controllers/AIContentController.ts",
+        "src/modules/ai-content/application/use-cases/BuildProjectUseCase.ts",
+        "src/modules/ai-content/application/use-cases/DeleteSectionUseCase.ts",
+        "src/modules/ai-content/domain/repositories/ISectionRepository.ts",
+        "src/modules/ai-content/application/use-cases/ExportProjectUseCase.ts",
+        "src/modules/ai-content/application/use-cases/GetSectionByIdUseCase.ts",
+        "src/modules/ai-content/application/use-cases/GetSectionsUseCase.ts",
+        "src/modules/ai-content/application/use-cases/SaveSectionUseCase.ts",
+        "src/modules/ai-content/infrastructure/repositories/DrizzleSectionRepository.ts"
+      ],
+      "orphan": false,
+      "valid": true
+    },
+    {
+      "source": "src/modules/ai-content/application/use-cases/DeleteSectionUseCase.ts",
+      "dependencies": [
+        {
+          "dynamic": false,
+          "module": "../../domain/errors/AIContentErrors",
+          "moduleSystem": "es6",
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "local",
+            "import"
+          ],
+          "resolved": "src/modules/ai-content/domain/errors/AIContentErrors.ts",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        },
+        {
+          "dynamic": false,
+          "module": "../../domain/repositories/ISectionRepository",
+          "moduleSystem": "es6",
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "local",
+            "import"
+          ],
+          "resolved": "src/modules/ai-content/domain/repositories/ISectionRepository.ts",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        },
+        {
+          "dynamic": false,
+          "module": "../../domain/repositories/ISectionRepository",
+          "moduleSystem": "es6",
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "local",
+            "type-only",
+            "import"
+          ],
+          "resolved": "src/modules/ai-content/domain/repositories/ISectionRepository.ts",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        }
+      ],
+      "dependents": [
+        "src/modules/ai-content/adapters/controllers/AIContentController.ts"
+      ],
+      "orphan": false,
+      "valid": true
+    },
+    {
+      "source": "src/modules/ai-content/domain/repositories/ISectionRepository.ts",
+      "dependencies": [
+        {
+          "dynamic": false,
+          "module": "../entities/Section",
+          "moduleSystem": "es6",
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "local",
+            "import"
+          ],
+          "resolved": "src/modules/ai-content/domain/entities/Section.ts",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        },
+        {
+          "dynamic": false,
+          "module": "../errors/AIContentErrors",
+          "moduleSystem": "es6",
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "local",
+            "import"
+          ],
+          "resolved": "src/modules/ai-content/domain/errors/AIContentErrors.ts",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        }
+      ],
+      "dependents": [
+        "src/modules/ai-content/application/use-cases/DeleteSectionUseCase.ts",
+        "src/modules/ai-content/application/use-cases/GetSectionByIdUseCase.ts",
+        "src/modules/ai-content/application/use-cases/GetSectionsUseCase.ts",
+        "src/modules/ai-content/application/use-cases/SaveSectionUseCase.ts",
+        "src/modules/ai-content/infrastructure/repositories/DrizzleSectionRepository.ts"
+      ],
+      "orphan": false,
+      "valid": true
+    },
+    {
+      "source": "src/modules/ai-content/application/use-cases/ExportProjectUseCase.ts",
+      "dependencies": [
+        {
+          "dynamic": false,
+          "module": "../../domain/errors/AIContentErrors",
+          "moduleSystem": "es6",
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "local",
+            "import"
+          ],
+          "resolved": "src/modules/ai-content/domain/errors/AIContentErrors.ts",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        },
+        {
+          "dynamic": false,
+          "module": "../../domain/services/IExportService",
+          "moduleSystem": "es6",
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "local",
+            "import"
+          ],
+          "resolved": "src/modules/ai-content/domain/services/IExportService.ts",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        }
+      ],
+      "dependents": [
+        "src/modules/ai-content/adapters/controllers/AIContentController.ts"
+      ],
+      "orphan": false,
+      "valid": true
+    },
+    {
+      "source": "src/modules/ai-content/application/use-cases/GetSectionByIdUseCase.ts",
+      "dependencies": [
+        {
+          "dynamic": false,
+          "module": "../../domain/entities/Section",
+          "moduleSystem": "es6",
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "local",
+            "import"
+          ],
+          "resolved": "src/modules/ai-content/domain/entities/Section.ts",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        },
+        {
+          "dynamic": false,
+          "module": "../../domain/errors/AIContentErrors",
+          "moduleSystem": "es6",
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "local",
+            "import"
+          ],
+          "resolved": "src/modules/ai-content/domain/errors/AIContentErrors.ts",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        },
+        {
+          "dynamic": false,
+          "module": "../../domain/repositories/ISectionRepository",
+          "moduleSystem": "es6",
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "local",
+            "import"
+          ],
+          "resolved": "src/modules/ai-content/domain/repositories/ISectionRepository.ts",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        },
+        {
+          "dynamic": false,
+          "module": "../../domain/repositories/ISectionRepository",
+          "moduleSystem": "es6",
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "local",
+            "type-only",
+            "import"
+          ],
+          "resolved": "src/modules/ai-content/domain/repositories/ISectionRepository.ts",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        }
+      ],
+      "dependents": [
+        "src/modules/ai-content/adapters/controllers/AIContentController.ts"
+      ],
+      "orphan": false,
+      "valid": true
+    },
+    {
+      "source": "src/modules/ai-content/application/use-cases/GetSectionsUseCase.ts",
+      "dependencies": [
+        {
+          "dynamic": false,
+          "module": "../../domain/entities/Section",
+          "moduleSystem": "es6",
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "local",
+            "import"
+          ],
+          "resolved": "src/modules/ai-content/domain/entities/Section.ts",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        },
+        {
+          "dynamic": false,
+          "module": "../../domain/errors/AIContentErrors",
+          "moduleSystem": "es6",
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "local",
+            "import"
+          ],
+          "resolved": "src/modules/ai-content/domain/errors/AIContentErrors.ts",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        },
+        {
+          "dynamic": false,
+          "module": "../../domain/repositories/ISectionRepository",
+          "moduleSystem": "es6",
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "local",
+            "import"
+          ],
+          "resolved": "src/modules/ai-content/domain/repositories/ISectionRepository.ts",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        },
+        {
+          "dynamic": false,
+          "module": "../../domain/repositories/ISectionRepository",
+          "moduleSystem": "es6",
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "local",
+            "type-only",
+            "import"
+          ],
+          "resolved": "src/modules/ai-content/domain/repositories/ISectionRepository.ts",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        }
+      ],
+      "dependents": [
+        "src/modules/ai-content/adapters/controllers/AIContentController.ts"
+      ],
+      "orphan": false,
+      "valid": true
+    },
+    {
+      "source": "src/modules/ai-content/application/use-cases/SaveSectionUseCase.ts",
+      "dependencies": [
+        {
+          "dynamic": false,
+          "module": "../../domain/entities/Section",
+          "moduleSystem": "es6",
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "local",
+            "import"
+          ],
+          "resolved": "src/modules/ai-content/domain/entities/Section.ts",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        },
+        {
+          "dynamic": false,
+          "module": "../../domain/errors/AIContentErrors",
+          "moduleSystem": "es6",
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "local",
+            "import"
+          ],
+          "resolved": "src/modules/ai-content/domain/errors/AIContentErrors.ts",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        },
+        {
+          "dynamic": false,
+          "module": "../../domain/repositories/ISectionRepository",
+          "moduleSystem": "es6",
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "local",
+            "import"
+          ],
+          "resolved": "src/modules/ai-content/domain/repositories/ISectionRepository.ts",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        },
+        {
+          "dynamic": false,
+          "module": "../../domain/repositories/ISectionRepository",
+          "moduleSystem": "es6",
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "local",
+            "type-only",
+            "import"
+          ],
+          "resolved": "src/modules/ai-content/domain/repositories/ISectionRepository.ts",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        },
+        {
+          "dynamic": false,
+          "module": "../../domain/schemas/SectionSchema",
+          "moduleSystem": "es6",
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "local",
+            "import"
+          ],
+          "resolved": "src/modules/ai-content/domain/schemas/SectionSchema.ts",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        }
+      ],
+      "dependents": [
+        "src/modules/ai-content/adapters/controllers/AIContentController.ts"
+      ],
+      "orphan": false,
+      "valid": true
+    },
+    {
+      "source": "src/modules/ai-content/adapters/hooks/__tests__/use-sections.test.tsx",
+      "dependencies": [
+        {
+          "dynamic": false,
+          "module": "../use-sections",
+          "moduleSystem": "cjs",
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "local",
+            "require"
+          ],
+          "resolved": "src/modules/ai-content/adapters/hooks/use-sections.ts",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        },
+        {
+          "dynamic": false,
+          "module": "../use-sections",
+          "moduleSystem": "es6",
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "local",
+            "type-import"
+          ],
+          "resolved": "src/modules/ai-content/adapters/hooks/use-sections.ts",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        }
+      ],
+      "dependents": [],
+      "orphan": false,
+      "valid": true
+    },
+    {
+      "source": "src/modules/ai-content/adapters/hooks/use-sections.ts",
+      "dependencies": [
+        {
+          "dynamic": false,
+          "module": "@/modules/ai-content/adapters/api-client/SectionApiClient",
+          "moduleSystem": "es6",
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "aliased",
+            "aliased-tsconfig",
+            "aliased-tsconfig-paths",
+            "local",
+            "import"
+          ],
+          "resolved": "src/modules/ai-content/adapters/api-client/SectionApiClient.ts",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        },
+        {
+          "dynamic": false,
+          "module": "@/modules/ai-content/domain/entities/Section",
+          "moduleSystem": "es6",
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "aliased",
+            "aliased-tsconfig",
+            "aliased-tsconfig-paths",
+            "local",
+            "import"
+          ],
+          "resolved": "src/modules/ai-content/domain/entities/Section.ts",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        }
+      ],
+      "dependents": [
+        "src/modules/ai-content/adapters/hooks/__tests__/use-sections.test.tsx"
+      ],
+      "orphan": false,
+      "valid": true
+    },
+    {
+      "source": "src/modules/ai-content/adapters/hooks/report-mode/__tests__/useProjectChat.test.tsx",
+      "dependencies": [
+        {
+          "dynamic": false,
+          "module": "../useProjectChat",
+          "moduleSystem": "cjs",
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "local",
+            "require"
+          ],
+          "resolved": "src/modules/ai-content/adapters/hooks/report-mode/useProjectChat.ts",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        }
+      ],
+      "dependents": [],
+      "orphan": false,
+      "valid": true
+    },
+    {
+      "source": "src/modules/ai-content/adapters/hooks/report-mode/use-report-generation-tools.ts",
+      "dependencies": [
+        {
+          "dynamic": false,
+          "module": "./use-ai-actions",
+          "moduleSystem": "es6",
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "local",
+            "import"
+          ],
+          "resolved": "src/modules/ai-content/adapters/hooks/report-mode/use-ai-actions.ts",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        }
+      ],
+      "dependents": [],
+      "orphan": false,
+      "valid": true
+    },
+    {
+      "source": "src/modules/ai-content/adapters/hooks/report-mode/useIntelligence.ts",
+      "dependencies": [
+        {
+          "dynamic": false,
+          "module": "./use-ai-actions",
+          "moduleSystem": "es6",
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "local",
+            "import"
+          ],
+          "resolved": "src/modules/ai-content/adapters/hooks/report-mode/use-ai-actions.ts",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        },
+        {
+          "dynamic": false,
+          "module": "@/modules/ai-content/adapters/state/use-editor-store",
+          "moduleSystem": "es6",
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "aliased",
+            "aliased-tsconfig",
+            "aliased-tsconfig-paths",
+            "local",
+            "import"
+          ],
+          "resolved": "src/modules/ai-content/adapters/state/use-editor-store.ts",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        }
+      ],
+      "dependents": [],
+      "orphan": false,
+      "valid": true
+    },
+    {
+      "source": "src/modules/ai-content/adapters/hooks/report-mode/useKeyboardShortcuts.ts",
+      "dependencies": [],
+      "dependents": [],
+      "orphan": true,
+      "valid": false,
+      "rules": [
+        {
+          "severity": "warn",
+          "name": "no-orphans"
+        }
+      ]
+    },
+    {
+      "source": "src/modules/ai-content/adapters/hooks/use-build-project.ts",
+      "dependencies": [
+        {
+          "dynamic": false,
+          "module": "@/modules/ai-content/domain/entities/Section",
+          "moduleSystem": "es6",
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "aliased",
+            "aliased-tsconfig",
+            "aliased-tsconfig-paths",
+            "local",
+            "import"
+          ],
+          "resolved": "src/modules/ai-content/domain/entities/Section.ts",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        }
+      ],
+      "dependents": [],
+      "orphan": false,
+      "valid": true
+    },
+    {
+      "source": "src/modules/ai-content/adapters/hooks/use-guideline-editor.ts",
+      "dependencies": [
+        {
+          "dynamic": false,
+          "module": "@/modules/ai-content/domain/entities/ControlTypes",
+          "moduleSystem": "es6",
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "aliased",
+            "aliased-tsconfig",
+            "aliased-tsconfig-paths",
+            "local",
+            "type-only",
+            "import"
+          ],
+          "resolved": "src/modules/ai-content/domain/entities/ControlTypes.ts",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        }
+      ],
+      "dependents": [],
+      "orphan": false,
+      "valid": true
+    },
+    {
+      "source": "src/modules/ai-content/domain/entities/TOC.ts",
+      "dependencies": [
+        {
+          "dynamic": false,
+          "module": "../schemas/TOCSchema",
+          "moduleSystem": "es6",
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "local",
+            "import"
+          ],
+          "resolved": "src/modules/ai-content/domain/schemas/TOCSchema.ts",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        }
+      ],
+      "dependents": [],
+      "orphan": false,
+      "valid": true
+    },
+    {
+      "source": "src/modules/ai-content/domain/schemas/TOCSchema.ts",
+      "dependencies": [],
+      "dependents": [
+        "src/modules/ai-content/domain/entities/TOC.ts",
+        "src/modules/ai-content/domain/schemas/index.ts"
+      ],
+      "orphan": false,
+      "valid": true
+    },
+    {
+      "source": "src/modules/ai-content/domain/schemas/index.ts",
+      "dependencies": [
+        {
+          "dynamic": false,
+          "module": "./ChapterSchema",
+          "moduleSystem": "es6",
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "local",
+            "export"
+          ],
+          "resolved": "src/modules/ai-content/domain/schemas/ChapterSchema.ts",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        },
+        {
+          "dynamic": false,
+          "module": "./ControlTypesSchema",
+          "moduleSystem": "es6",
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "local",
+            "export"
+          ],
+          "resolved": "src/modules/ai-content/domain/schemas/ControlTypesSchema.ts",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        },
+        {
+          "dynamic": false,
+          "module": "./SectionSchema",
+          "moduleSystem": "es6",
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "local",
+            "export"
+          ],
+          "resolved": "src/modules/ai-content/domain/schemas/SectionSchema.ts",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        },
+        {
+          "dynamic": false,
+          "module": "./TOCSchema",
+          "moduleSystem": "es6",
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "local",
+            "export"
+          ],
+          "resolved": "src/modules/ai-content/domain/schemas/TOCSchema.ts",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        }
+      ],
+      "dependents": [],
+      "orphan": false,
+      "valid": true
+    },
+    {
+      "source": "src/modules/ai-content/infrastructure/editor/editor/CommandList.tsx",
+      "dependencies": [],
+      "dependents": [
+        "src/modules/ai-content/infrastructure/editor/editor/slash-command.tsx"
+      ],
+      "orphan": false,
+      "valid": true
+    },
+    {
+      "source": "src/modules/ai-content/infrastructure/editor/editor/EditorController.ts",
+      "dependencies": [
+        {
+          "dynamic": false,
+          "module": "@/modules/ai-content/adapters/state/use-editor-store",
+          "moduleSystem": "es6",
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "aliased",
+            "aliased-tsconfig",
+            "aliased-tsconfig-paths",
+            "local",
+            "import"
+          ],
+          "resolved": "src/modules/ai-content/adapters/state/use-editor-store.ts",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": false,
+          "rules": [
+            {
+              "severity": "error",
+              "name": "infrastructure-must-not-depend-on-other-layers"
+            }
+          ]
+        }
+      ],
+      "dependents": [
+        "src/modules/ai-content/infrastructure/editor/editor/ToolBar.tsx"
+      ],
+      "orphan": false,
+      "valid": true
+    },
+    {
+      "source": "src/modules/ai-content/infrastructure/editor/editor/MenuBar.tsx",
+      "dependencies": [],
+      "dependents": [],
+      "orphan": true,
+      "valid": false,
+      "rules": [
+        {
+          "severity": "warn",
+          "name": "no-orphans"
+        }
+      ]
+    },
+    {
+      "source": "src/modules/ai-content/infrastructure/editor/editor/ToolBar.tsx",
+      "dependencies": [
+        {
+          "dynamic": false,
+          "module": "./EditorController",
+          "moduleSystem": "es6",
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "local",
+            "import"
+          ],
+          "resolved": "src/modules/ai-content/infrastructure/editor/editor/EditorController.ts",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        },
+        {
+          "dynamic": false,
+          "module": "@/modules/ai-content/adapters/hooks/report-mode/use-ai-actions",
+          "moduleSystem": "es6",
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "aliased",
+            "aliased-tsconfig",
+            "aliased-tsconfig-paths",
+            "local",
+            "import"
+          ],
+          "resolved": "src/modules/ai-content/adapters/hooks/report-mode/use-ai-actions.ts",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": false,
+          "rules": [
+            {
+              "severity": "error",
+              "name": "infrastructure-must-not-depend-on-other-layers"
+            }
+          ]
+        },
+        {
+          "dynamic": false,
+          "module": "@/modules/ai-content/adapters/state/use-editor-store",
+          "moduleSystem": "es6",
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "aliased",
+            "aliased-tsconfig",
+            "aliased-tsconfig-paths",
+            "local",
+            "import"
+          ],
+          "resolved": "src/modules/ai-content/adapters/state/use-editor-store.ts",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": false,
+          "rules": [
+            {
+              "severity": "error",
+              "name": "infrastructure-must-not-depend-on-other-layers"
+            }
+          ]
+        }
+      ],
+      "dependents": [],
+      "orphan": false,
+      "valid": true
+    },
+    {
+      "source": "src/modules/ai-content/infrastructure/editor/editor/ai-image-generator-extension.tsx",
+      "dependencies": [],
+      "dependents": [
+        "src/modules/ai-content/infrastructure/editor/tiptap-extensions.ts"
+      ],
+      "orphan": false,
+      "valid": true
+    },
+    {
+      "source": "src/modules/ai-content/infrastructure/editor/editor/plantUml-extension.tsx",
+      "dependencies": [],
+      "dependents": [
+        "src/modules/ai-content/infrastructure/editor/tiptap-extensions.ts"
+      ],
+      "orphan": false,
+      "valid": true
+    },
+    {
+      "source": "src/modules/ai-content/infrastructure/editor/editor/slash-command.tsx",
+      "dependencies": [
+        {
+          "dynamic": false,
+          "module": "./CommandList",
+          "moduleSystem": "es6",
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "local",
+            "import"
+          ],
+          "resolved": "src/modules/ai-content/infrastructure/editor/editor/CommandList.tsx",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        }
+      ],
+      "dependents": [
+        "src/modules/ai-content/infrastructure/editor/tiptap-extensions.ts"
+      ],
+      "orphan": false,
+      "valid": true
+    },
+    {
+      "source": "src/modules/ai-content/infrastructure/editor/editor/types.ts",
+      "dependencies": [],
+      "dependents": [],
+      "orphan": true,
+      "valid": false,
+      "rules": [
+        {
+          "severity": "warn",
+          "name": "no-orphans"
+        }
+      ]
+    },
+    {
+      "source": "src/modules/ai-content/infrastructure/editor/tiptap-extensions.ts",
+      "dependencies": [
+        {
+          "dynamic": false,
+          "module": "../../domain/services/IMarkdownService",
+          "moduleSystem": "es6",
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "local",
+            "import"
+          ],
+          "resolved": "src/modules/ai-content/domain/services/IMarkdownService.ts",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        },
+        {
+          "dynamic": false,
+          "module": "./editor/ai-image-generator-extension",
+          "moduleSystem": "es6",
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "local",
+            "import"
+          ],
+          "resolved": "src/modules/ai-content/infrastructure/editor/editor/ai-image-generator-extension.tsx",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        },
+        {
+          "dynamic": false,
+          "module": "./editor/plantUml-extension",
+          "moduleSystem": "es6",
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "local",
+            "import"
+          ],
+          "resolved": "src/modules/ai-content/infrastructure/editor/editor/plantUml-extension.tsx",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        },
+        {
+          "dynamic": false,
+          "module": "./editor/slash-command",
+          "moduleSystem": "es6",
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "local",
+            "import"
+          ],
+          "resolved": "src/modules/ai-content/infrastructure/editor/editor/slash-command.tsx",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        }
+      ],
+      "dependents": [],
+      "orphan": false,
+      "valid": true
+    },
+    {
+      "source": "src/modules/ai-content/infrastructure/exporters/DocxExportService.ts",
+      "dependencies": [
+        {
+          "dynamic": false,
+          "module": "./MarkdownToWordConverter",
+          "moduleSystem": "es6",
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "local",
+            "import"
+          ],
+          "resolved": "src/modules/ai-content/infrastructure/exporters/MarkdownToWordConverter.ts",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        },
+        {
+          "dynamic": false,
+          "module": "@/modules/ai-content/domain/services/IExportService",
+          "moduleSystem": "es6",
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "aliased",
+            "aliased-tsconfig",
+            "aliased-tsconfig-paths",
+            "local",
+            "import"
+          ],
+          "resolved": "src/modules/ai-content/domain/services/IExportService.ts",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        },
+        {
+          "dynamic": false,
+          "module": "@/modules/ai-content/domain/types/export-types",
+          "moduleSystem": "es6",
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "aliased",
+            "aliased-tsconfig",
+            "aliased-tsconfig-paths",
+            "local",
+            "type-only",
+            "import"
+          ],
+          "resolved": "src/modules/ai-content/domain/types/export-types.ts",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        }
+      ],
+      "dependents": [],
+      "orphan": false,
+      "valid": true
+    },
+    {
+      "source": "src/modules/ai-content/infrastructure/exporters/MarkdownToWordConverter.ts",
+      "dependencies": [
+        {
+          "dynamic": false,
+          "module": "@/modules/ai-content/domain/entities/Chapter",
+          "moduleSystem": "es6",
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "aliased",
+            "aliased-tsconfig",
+            "aliased-tsconfig-paths",
+            "local",
+            "import"
+          ],
+          "resolved": "src/modules/ai-content/domain/entities/Chapter.ts",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        },
+        {
+          "dynamic": false,
+          "module": "@/modules/ai-content/domain/entities/Section",
+          "moduleSystem": "es6",
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "aliased",
+            "aliased-tsconfig",
+            "aliased-tsconfig-paths",
+            "local",
+            "import"
+          ],
+          "resolved": "src/modules/ai-content/domain/entities/Section.ts",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        },
+        {
+          "dynamic": false,
+          "module": "@/modules/ai-content/infrastructure/exporters/word-converter/ast-converter",
+          "moduleSystem": "es6",
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "aliased",
+            "aliased-tsconfig",
+            "aliased-tsconfig-paths",
+            "local",
+            "import"
+          ],
+          "resolved": "src/modules/ai-content/infrastructure/exporters/word-converter/ast-converter.ts",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        },
+        {
+          "dynamic": false,
+          "module": "@/modules/ai-content/infrastructure/exporters/word-converter/document-builder",
+          "moduleSystem": "es6",
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "aliased",
+            "aliased-tsconfig",
+            "aliased-tsconfig-paths",
+            "local",
+            "import"
+          ],
+          "resolved": "src/modules/ai-content/infrastructure/exporters/word-converter/document-builder.ts",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        },
+        {
+          "dynamic": false,
+          "module": "@/modules/ai-content/infrastructure/exporters/word-converter/node-handlers",
+          "moduleSystem": "es6",
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "aliased",
+            "aliased-tsconfig",
+            "aliased-tsconfig-paths",
+            "local",
+            "import"
+          ],
+          "resolved": "src/modules/ai-content/infrastructure/exporters/word-converter/node-handlers.ts",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        },
+        {
+          "dynamic": false,
+          "module": "@/modules/ai-content/infrastructure/exporters/word-converter/types",
+          "moduleSystem": "es6",
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "aliased",
+            "aliased-tsconfig",
+            "aliased-tsconfig-paths",
+            "local",
+            "import"
+          ],
+          "resolved": "src/modules/ai-content/infrastructure/exporters/word-converter/types.ts",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        }
+      ],
+      "dependents": [
+        "src/modules/ai-content/infrastructure/exporters/DocxExportService.ts"
+      ],
+      "orphan": false,
+      "valid": true
+    },
+    {
+      "source": "src/modules/ai-content/infrastructure/exporters/word-converter/ast-converter.ts",
+      "dependencies": [
+        {
+          "dynamic": false,
+          "module": "./inline-converter",
+          "moduleSystem": "es6",
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "local",
+            "import"
+          ],
+          "resolved": "src/modules/ai-content/infrastructure/exporters/word-converter/inline-converter.ts",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        },
+        {
+          "dynamic": false,
+          "module": "./types",
+          "moduleSystem": "es6",
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "local",
+            "import"
+          ],
+          "resolved": "src/modules/ai-content/infrastructure/exporters/word-converter/types.ts",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        }
+      ],
+      "dependents": [
+        "src/modules/ai-content/infrastructure/exporters/MarkdownToWordConverter.ts"
+      ],
+      "orphan": false,
+      "valid": true
+    },
+    {
+      "source": "src/modules/ai-content/infrastructure/exporters/word-converter/inline-converter.ts",
+      "dependencies": [
+        {
+          "dynamic": false,
+          "module": "./types",
+          "moduleSystem": "es6",
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "local",
+            "import"
+          ],
+          "resolved": "src/modules/ai-content/infrastructure/exporters/word-converter/types.ts",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        }
+      ],
+      "dependents": [
+        "src/modules/ai-content/infrastructure/exporters/word-converter/ast-converter.ts",
+        "src/modules/ai-content/infrastructure/exporters/word-converter/node-handlers.ts"
+      ],
+      "orphan": false,
+      "valid": true
+    },
+    {
+      "source": "src/modules/ai-content/infrastructure/exporters/word-converter/document-builder.ts",
+      "dependencies": [
+        {
+          "dynamic": false,
+          "module": "./types",
+          "moduleSystem": "es6",
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "local",
+            "import"
+          ],
+          "resolved": "src/modules/ai-content/infrastructure/exporters/word-converter/types.ts",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        }
+      ],
+      "dependents": [
+        "src/modules/ai-content/infrastructure/exporters/MarkdownToWordConverter.ts"
+      ],
+      "orphan": false,
+      "valid": true
+    },
+    {
+      "source": "src/modules/ai-content/infrastructure/exporters/word-converter/node-handlers.ts",
+      "dependencies": [
+        {
+          "dynamic": false,
+          "module": "./inline-converter",
+          "moduleSystem": "es6",
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "local",
+            "import"
+          ],
+          "resolved": "src/modules/ai-content/infrastructure/exporters/word-converter/inline-converter.ts",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        },
+        {
+          "dynamic": false,
+          "module": "./types",
+          "moduleSystem": "es6",
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "local",
+            "import"
+          ],
+          "resolved": "src/modules/ai-content/infrastructure/exporters/word-converter/types.ts",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        }
+      ],
+      "dependents": [
+        "src/modules/ai-content/infrastructure/exporters/MarkdownToWordConverter.ts"
+      ],
+      "orphan": false,
+      "valid": true
+    },
+    {
+      "source": "src/modules/ai-content/infrastructure/exporters/PdfExportService.ts",
+      "dependencies": [
+        {
+          "dynamic": false,
+          "module": "@/modules/ai-content/domain/services/IExportService",
+          "moduleSystem": "es6",
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "aliased",
+            "aliased-tsconfig",
+            "aliased-tsconfig-paths",
+            "local",
+            "import"
+          ],
+          "resolved": "src/modules/ai-content/domain/services/IExportService.ts",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        }
+      ],
+      "dependents": [
+        "src/modules/ai-content/infrastructure/utils/pdf-utils.ts"
+      ],
+      "orphan": false,
+      "valid": true
+    },
+    {
+      "source": "src/modules/ai-content/infrastructure/exporters/PptxExportService.ts",
+      "dependencies": [
+        {
+          "dynamic": false,
+          "module": "@/modules/ai-content/domain/entities/Chapter",
+          "moduleSystem": "es6",
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "aliased",
+            "aliased-tsconfig",
+            "aliased-tsconfig-paths",
+            "local",
+            "import"
+          ],
+          "resolved": "src/modules/ai-content/domain/entities/Chapter.ts",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        },
+        {
+          "dynamic": false,
+          "module": "@/modules/ai-content/domain/services/IExportService",
+          "moduleSystem": "es6",
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "aliased",
+            "aliased-tsconfig",
+            "aliased-tsconfig-paths",
+            "local",
+            "import"
+          ],
+          "resolved": "src/modules/ai-content/domain/services/IExportService.ts",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        }
+      ],
+      "dependents": [],
+      "orphan": false,
+      "valid": true
+    },
+    {
+      "source": "src/modules/ai-content/infrastructure/exporters/word-converter/cover-page-templates.ts",
+      "dependencies": [],
+      "dependents": [],
+      "orphan": true,
+      "valid": false,
+      "rules": [
+        {
+          "severity": "warn",
+          "name": "no-orphans"
+        }
+      ]
+    },
+    {
+      "source": "src/modules/ai-content/infrastructure/repositories/DrizzleSectionRepository.ts",
+      "dependencies": [
+        {
+          "dynamic": false,
+          "module": "../../domain/entities/Section",
+          "moduleSystem": "es6",
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "local",
+            "import"
+          ],
+          "resolved": "src/modules/ai-content/domain/entities/Section.ts",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        },
+        {
+          "dynamic": false,
+          "module": "../../domain/errors/AIContentErrors",
+          "moduleSystem": "es6",
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "local",
+            "import"
+          ],
+          "resolved": "src/modules/ai-content/domain/errors/AIContentErrors.ts",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        },
+        {
+          "dynamic": false,
+          "module": "../../domain/repositories/ISectionRepository",
+          "moduleSystem": "es6",
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "local",
+            "import"
+          ],
+          "resolved": "src/modules/ai-content/domain/repositories/ISectionRepository.ts",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        }
+      ],
+      "dependents": [],
+      "orphan": false,
+      "valid": true
+    },
+    {
+      "source": "src/modules/ai-content/infrastructure/services/TurndownMarkdownService.ts",
+      "dependencies": [
+        {
+          "dynamic": false,
+          "module": "../../domain/services/IMarkdownService",
+          "moduleSystem": "es6",
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "local",
+            "import"
+          ],
+          "resolved": "src/modules/ai-content/domain/services/IMarkdownService.ts",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        }
+      ],
+      "dependents": [],
+      "orphan": false,
+      "valid": true
+    },
+    {
+      "source": "src/modules/ai-content/infrastructure/utils/pdf-utils.ts",
+      "dependencies": [
+        {
+          "dynamic": false,
+          "module": "@/modules/ai-content/infrastructure/exporters/PdfExportService",
+          "moduleSystem": "es6",
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "aliased",
+            "aliased-tsconfig",
+            "aliased-tsconfig-paths",
+            "local",
+            "import"
+          ],
+          "resolved": "src/modules/ai-content/infrastructure/exporters/PdfExportService.ts",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        }
+      ],
+      "dependents": [],
+      "orphan": false,
+      "valid": true
+    }
+  ],
+  "summary": {
+    "violations": [
+      {
+        "type": "dependency",
+        "from": "src/modules/ai-content/infrastructure/editor/editor/EditorController.ts",
+        "to": "src/modules/ai-content/adapters/state/use-editor-store.ts",
+        "rule": {
+          "severity": "error",
+          "name": "infrastructure-must-not-depend-on-other-layers"
+        }
+      },
+      {
+        "type": "dependency",
+        "from": "src/modules/ai-content/infrastructure/editor/editor/ToolBar.tsx",
+        "to": "src/modules/ai-content/adapters/hooks/report-mode/use-ai-actions.ts",
+        "rule": {
+          "severity": "error",
+          "name": "infrastructure-must-not-depend-on-other-layers"
+        }
+      },
+      {
+        "type": "dependency",
+        "from": "src/modules/ai-content/infrastructure/editor/editor/ToolBar.tsx",
+        "to": "src/modules/ai-content/adapters/state/use-editor-store.ts",
+        "rule": {
+          "severity": "error",
+          "name": "infrastructure-must-not-depend-on-other-layers"
+        }
+      },
+      {
+        "type": "dependency",
+        "from": "src/modules/ai-content/adapters/components/writing-tools/MarkdownToWordTool.tsx",
+        "to": "src/modules/ai-content/infrastructure/exporters/DocxStyles.ts",
+        "rule": {
+          "severity": "warn",
+          "name": "adapters-must-not-depend-on-infrastructure-directly"
+        }
+      },
+      {
+        "type": "module",
+        "from": "src/modules/ai-content/adapters/api-client/DocumentProcessingApiClient.ts",
+        "to": "src/modules/ai-content/adapters/api-client/DocumentProcessingApiClient.ts",
+        "rule": {
+          "severity": "warn",
+          "name": "no-orphans"
+        }
+      },
+      {
+        "type": "module",
+        "from": "src/modules/ai-content/adapters/components/admin/sections/SectionDataTable.tsx",
+        "to": "src/modules/ai-content/adapters/components/admin/sections/SectionDataTable.tsx",
+        "rule": {
+          "severity": "warn",
+          "name": "no-orphans"
+        }
+      },
+      {
+        "type": "module",
+        "from": "src/modules/ai-content/adapters/components/report-mode/dialogs/ReportTemplateDialog.tsx",
+        "to": "src/modules/ai-content/adapters/components/report-mode/dialogs/ReportTemplateDialog.tsx",
+        "rule": {
+          "severity": "warn",
+          "name": "no-orphans"
+        }
+      },
+      {
+        "type": "module",
+        "from": "src/modules/ai-content/adapters/hooks/report-mode/useKeyboardShortcuts.ts",
+        "to": "src/modules/ai-content/adapters/hooks/report-mode/useKeyboardShortcuts.ts",
+        "rule": {
+          "severity": "warn",
+          "name": "no-orphans"
+        }
+      },
+      {
+        "type": "module",
+        "from": "src/modules/ai-content/infrastructure/editor/editor/MenuBar.tsx",
+        "to": "src/modules/ai-content/infrastructure/editor/editor/MenuBar.tsx",
+        "rule": {
+          "severity": "warn",
+          "name": "no-orphans"
+        }
+      },
+      {
+        "type": "module",
+        "from": "src/modules/ai-content/infrastructure/editor/editor/types.ts",
+        "to": "src/modules/ai-content/infrastructure/editor/editor/types.ts",
+        "rule": {
+          "severity": "warn",
+          "name": "no-orphans"
+        }
+      },
+      {
+        "type": "module",
+        "from": "src/modules/ai-content/infrastructure/exporters/word-converter/cover-page-templates.ts",
+        "to": "src/modules/ai-content/infrastructure/exporters/word-converter/cover-page-templates.ts",
+        "rule": {
+          "severity": "warn",
+          "name": "no-orphans"
+        }
+      }
+    ],
+    "error": 3,
+    "warn": 8,
+    "info": 0,
+    "ignore": 0,
+    "totalCruised": 127,
+    "totalDependenciesCruised": 207,
+    "optionsUsed": {
+      "baseDir": "/root/arkan",
+      "combinedDependencies": false,
+      "detectJSDocImports": false,
+      "detectProcessBuiltinModuleCalls": false,
+      "doNotFollow": {
+        "path": "^node_modules"
+      },
+      "enhancedResolveOptions": {
+        "exportsFields": [
+          "exports"
+        ],
+        "conditionNames": [
+          "import",
+          "require",
+          "node",
+          "default"
+        ]
+      },
+      "exoticRequireStrings": [],
+      "externalModuleResolutionStrategy": "node_modules",
+      "includeOnly": "^src/modules/ai-content",
+      "metrics": false,
+      "moduleSystems": [
+        "es6",
+        "cjs",
+        "tsd",
+        "amd"
+      ],
+      "outputTo": "-",
+      "outputType": "json",
+      "preserveSymlinks": false,
+      "reporterOptions": {
+        "dot": {
+          "collapsePattern": "node_modules/(@[^/]+/[^/]+|[^/]+)",
+          "theme": {
+            "graph": {
+              "rankdir": "TB"
+            },
+            "modules": [
+              {
+                "criteria": {
+                  "source": "^src/modules/[^/]+/domain/"
+                },
+                "attributes": {
+                  "fillcolor": "#b5e48c",
+                  "style": "filled"
+                }
+              },
+              {
+                "criteria": {
+                  "source": "^src/modules/[^/]+/application/"
+                },
+                "attributes": {
+                  "fillcolor": "#90e0ef",
+                  "style": "filled"
+                }
+              },
+              {
+                "criteria": {
+                  "source": "^src/modules/[^/]+/adapters/"
+                },
+                "attributes": {
+                  "fillcolor": "#f9c74f",
+                  "style": "filled"
+                }
+              },
+              {
+                "criteria": {
+                  "source": "^src/modules/[^/]+/infrastructure/"
+                },
+                "attributes": {
+                  "fillcolor": "#f94144",
+                  "style": "filled"
+                }
+              }
+            ],
+            "dependencies": [
+              {
+                "criteria": {
+                  "resolved": "^src/modules/[^/]+/domain/"
+                },
+                "attributes": {
+                  "color": "#2d6a4f"
+                }
+              },
+              {
+                "criteria": {
+                  "resolved": "^src/modules/[^/]+/infrastructure/"
+                },
+                "attributes": {
+                  "color": "#9d0208"
+                }
+              }
+            ]
+          }
+        },
+        "archi": {
+          "collapsePattern": "^src/modules/([^/]+)/([^/]+)",
+          "theme": {
+            "modules": [
+              {
+                "criteria": {
+                  "source": "\\.domain\\."
+                },
+                "attributes": {
+                  "fillcolor": "#b5e48c"
+                }
+              },
+              {
+                "criteria": {
+                  "source": "\\.application\\."
+                },
+                "attributes": {
+                  "fillcolor": "#90e0ef"
+                }
+              },
+              {
+                "criteria": {
+                  "source": "\\.adapters\\."
+                },
+                "attributes": {
+                  "fillcolor": "#f9c74f"
+                }
+              },
+              {
+                "criteria": {
+                  "source": "\\.infrastructure\\."
+                },
+                "attributes": {
+                  "fillcolor": "#f94144"
+                }
+              }
+            ]
+          }
+        }
+      },
+      "rulesFile": ".dependency-cruiser.js",
+      "skipAnalysisNotInRules": false,
+      "tsConfig": {
+        "fileName": "tsconfig.json"
+      },
+      "tsPreCompilationDeps": true,
+      "args": "src"
+    },
+    "ruleSetUsed": {
+      "forbidden": [
+        {
+          "name": "no-circular",
+          "severity": "error",
+          "comment": "Circular dependencies are not allowed.",
+          "from": {},
+          "to": {
+            "circular": true
+          },
+          "scope": "module"
+        },
+        {
+          "name": "no-orphans",
+          "severity": "warn",
+          "comment": "Files that are not imported by any other file (except entry points).",
+          "from": {
+            "orphan": true
+          },
+          "to": {},
+          "scope": "module"
+        },
+        {
+          "name": "domain-must-not-depend-on-outer-layers",
+          "severity": "error",
+          "comment": "The domain layer must have zero dependencies on adapters, application, or infrastructure.",
+          "from": {
+            "path": "^src/modules/[^/]+/domain/"
+          },
+          "to": {
+            "path": "^src/modules/[^/]+/(adapters|application|infrastructure)/",
+            "pathNot": "\\.(test|spec)\\.(ts|tsx)$"
+          },
+          "scope": "module"
+        },
+        {
+          "name": "domain-must-not-depend-on-other-modules-domain",
+          "severity": "error",
+          "comment": "Domain of one module should not directly import domain of another module (use interfaces if cross-module communication is needed).",
+          "from": {
+            "path": "^src/modules/([^/]+)/domain/"
+          },
+          "to": {
+            "path": "^src/modules/(?!$1)[^/]+/domain/",
+            "pathNot": "\\.(test|spec)\\.(ts|tsx)$"
+          },
+          "scope": "module"
+        },
+        {
+          "name": "application-must-not-depend-on-adapters-or-infrastructure",
+          "severity": "error",
+          "comment": "Application layer (use cases) should only depend on domain and possibly shared utilities.",
+          "from": {
+            "path": "^src/modules/[^/]+/application/"
+          },
+          "to": {
+            "path": "^src/modules/[^/]+/(adapters|infrastructure)/",
+            "pathNot": "\\.(test|spec)\\.(ts|tsx)$"
+          },
+          "scope": "module"
+        },
+        {
+          "name": "adapters-must-not-depend-on-infrastructure-directly",
+          "severity": "warn",
+          "comment": "Adapters should ideally not import infrastructure directly; dependencies should be injected via composition root.",
+          "from": {
+            "path": "^src/modules/[^/]+/adapters/"
+          },
+          "to": {
+            "path": "^src/modules/[^/]+/infrastructure/",
+            "pathNot": "\\.(test|spec)\\.(ts|tsx)$"
+          },
+          "scope": "module"
+        },
+        {
+          "name": "infrastructure-must-not-depend-on-other-layers",
+          "severity": "error",
+          "comment": "Infrastructure should only depend on domain (interfaces) and external libraries.",
+          "from": {
+            "path": "^src/modules/[^/]+/infrastructure/"
+          },
+          "to": {
+            "path": "^src/modules/[^/]+/(adapters|application)/",
+            "pathNot": "\\.(test|spec)\\.(ts|tsx)$"
+          },
+          "scope": "module"
+        },
+        {
+          "name": "no-cross-module-imports-except-shared",
+          "severity": "error",
+          "comment": "Modules should be self-contained. Only allowed cross-module imports are from shared utilities or via defined public APIs.",
+          "from": {
+            "path": "^src/modules/([^/]+)/"
+          },
+          "to": {
+            "path": "^src/modules/(?!$1)[^/]+/",
+            "pathNot": "\\.(test|spec)\\.(ts|tsx)$|^src/modules/[^/]+/domain/schemas/"
+          },
+          "scope": "module"
+        },
+        {
+          "name": "no-app-router-imports-from-modules",
+          "severity": "error",
+          "comment": "The Next.js app/ directory (UI pages, API routes) may import from modules, but modules must never import from app/.",
+          "from": {
+            "path": "^src/modules/"
+          },
+          "to": {
+            "path": "^src/app/"
+          },
+          "scope": "module"
+        }
+      ]
+    }
+  }
+}

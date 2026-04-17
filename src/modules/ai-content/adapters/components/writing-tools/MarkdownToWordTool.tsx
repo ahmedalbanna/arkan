@@ -14,18 +14,19 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/util/use-toast';
 import dynamic from 'next/dynamic';
-import { DocxTemplateKey, templates } from '@/modules/ai-content/infrastructure/exporters/DocxStyles';
+import { templates } from '@/infrastructure/exporters/DocxStyles';
 import { apiService } from '@/infrastructure/api/ApiService';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { cn } from '@/infrastructure/utils/cn';
 import { FileCode, Layout, Terminal, Type, Globe, ListTree, Sparkles, FileText as FileWord } from 'lucide-react';
+import { DOCX_TEMPLATE_KEYS, type DocxTemplateKey } from '@/modules/ai-content/domain/types/docx-template';
 
 const markdownToWordSchema = z.object({
   markdown: z.string().min(10, 'Markdown content must be at least 10 characters long.'),
   fileName: z.string().min(1, 'File name is required.').regex(/^[a-zA-Z0-9_-]+$/, 'File name can only contain letters, numbers, underscores, and hyphens.'),
-  template: z.enum(['modern', 'classic', 'academic']),
+  template: z.enum(DOCX_TEMPLATE_KEYS),
   pageNumbers: z.boolean().default(true),
   addCoverPage: z.boolean().default(false),
   coverPageMarkdown: z.string().optional(),

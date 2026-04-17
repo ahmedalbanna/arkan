@@ -1,8 +1,7 @@
-
-
 'use client';
 
 import { useAiActions } from '@/modules/ai-content/adapters/hooks/report-mode/use-ai-actions';
+import { useEditorStore } from '@/modules/ai-content/adapters/state/use-editor-store';
 import { useBrowserSpeech } from '@/hooks';
 import { useLocalization } from '@/context/LocalizationContext';
 import { Editor } from '@tiptap/react';
@@ -16,11 +15,6 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSub, D
 import { Separator } from '@/components/ui/separator';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { useEditorController } from './EditorController';
-import { useEditorStore } from '@/modules/ai-content/adapters/state/use-editor-store';
-
-// ============================================================================
-// 1. Contextual Toolbar (for BubbleMenu)
-// ============================================================================
 
 interface ContextualToolbarProps {
   editor: Editor;
@@ -44,13 +38,13 @@ const ContextualToolbar = memo(function ContextualToolbar({ editor }: Contextual
   }
 
   if (!controller) return null;
-  
+
   const formatButtons = [
     { action: () => controller.toggleBold(), isActive: selection.isBold, icon: Bold, label: t('builder.Section.tooltips.bold') },
     { action: () => controller.toggleItalic(), isActive: selection.isItalic, icon: Italic, label: t('builder.Section.tooltips.italic') },
     { action: () => controller.toggleStrike(), isActive: selection.isStrike, icon: Strikethrough, label: t('builder.Section.tooltips.strike') },
   ];
-  
+
   const headingOptions = [
     { name: 'Paragraph', command: () => controller.setParagraph(), icon: Pilcrow, isActive: !selection.activeHeading },
     { name: 'Heading 1', command: () => controller.toggleHeading(1), icon: Heading1, isActive: selection.activeHeading === 1 },
@@ -92,7 +86,7 @@ const ContextualToolbar = memo(function ContextualToolbar({ editor }: Contextual
             <TooltipContent><p>{label}</p></TooltipContent>
           </Tooltip>
         ))}
-        
+
         <Separator orientation="vertical" className="h-6 mx-1" />
 
         <DropdownMenu>
@@ -107,8 +101,8 @@ const ContextualToolbar = memo(function ContextualToolbar({ editor }: Contextual
             <TooltipContent><p>{t('builder.Section.aiActions.title')}</p></TooltipContent>
           </Tooltip>
           <DropdownMenuContent className="backdrop-blur-md bg-gradient-to-r from-background/90 to-primary/5 border shadow-soft">
-              <DropdownMenuItem onSelect={() => handleAiAction('summarize')} disabled={isProcessing}><BookText className="mr-2 h-4 w-4" /><span>{t('builder.Section.aiActions.summarize')}</span></DropdownMenuItem>
-              <DropdownMenuItem onSelect={() => handleAiAction('translate')} disabled={isProcessing}><Languages className="mr-2 h-4 w-4" /><span>{t('builder.Section.aiActions.translate')}</span></DropdownMenuItem>
+            <DropdownMenuItem onSelect={() => handleAiAction('summarize')} disabled={isProcessing}><BookText className="mr-2 h-4 w-4" /><span>{t('builder.Section.aiActions.summarize')}</span></DropdownMenuItem>
+            <DropdownMenuItem onSelect={() => handleAiAction('translate')} disabled={isProcessing}><Languages className="mr-2 h-4 w-4" /><span>{t('builder.Section.aiActions.translate')}</span></DropdownMenuItem>
             <DropdownMenuSub>
               <DropdownMenuSubTrigger>
                 <Brush className="mr-2 h-4 w-4" />

@@ -1,2 +1,2 @@
-export { ContextualToolbar } from '@/modules/ai-content/infrastructure/editor/editor/ToolBar';
+export { ContextualToolbar } from '@/modules/ai-content/adapters/components/builder/renderer/editor/ToolBar';
 
