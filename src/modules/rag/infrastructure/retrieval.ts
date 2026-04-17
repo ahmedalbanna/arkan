@@ -6,7 +6,8 @@
  */
 
 import { generateEmbedding } from './embeddings';
-import { getVectorStore, type SearchResult } from './vector-store';
+import { getVectorStore } from './vector-store';
+import type { SearchResult } from './vector-store-interface';
 
 export interface RetrievalTelemetry {
   totalTimeMs: number;

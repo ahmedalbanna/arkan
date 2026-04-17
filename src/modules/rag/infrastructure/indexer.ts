@@ -6,7 +6,8 @@
  */
 
 import { chunkText, generateEmbeddings } from './embeddings';
-import { getVectorStore, type DocumentChunk } from './vector-store';
+import { getVectorStore } from './vector-store';
+import type { DocumentChunk } from './vector-store-interface';
 import { v4 as uuidv4 } from 'uuid';
 
 export interface IndexingOptions {

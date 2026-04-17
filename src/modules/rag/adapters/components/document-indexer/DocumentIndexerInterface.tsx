@@ -12,9 +12,6 @@ import { IndexingProgress } from './IndexingProgress';
 import { IndexedDocumentsList } from './IndexedDocumentsList';
 import { IndexingSettings } from './IndexingSettings';
 import { useDocumentIndexing } from '@/modules/admin/adapters/hooks/useDocumentIndexing';
-import type { IndexingOptions } from '@/modules/admin/adapters/hooks/useDocumentIndexing';
-
-export type { IndexingOptions };
 
 import { Badge } from '@/components/ui/badge';
 import { Upload, Database, Settings, Clock, CheckCircle2 } from 'lucide-react';

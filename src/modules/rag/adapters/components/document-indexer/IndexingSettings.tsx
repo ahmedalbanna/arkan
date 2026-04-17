@@ -11,7 +11,7 @@ import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Slider } from '@/components/ui/slider';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import type { IndexingOptions } from './DocumentIndexerInterface';
+import type { IndexingOptions } from './types';
 
 interface Props {
   options: IndexingOptions;

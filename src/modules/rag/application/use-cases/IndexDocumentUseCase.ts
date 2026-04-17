@@ -2,10 +2,19 @@
 import { inject, injectable } from "tsyringe";
 import type { IRagRepository, RagIndexingOptions, RagIndexingResult } from "../../domain/repositories/IRagRepository";
 import { IRagRepositoryToken } from "../../domain/repositories/IRagRepository";
-import type { IIndexedDocumentRepository, IndexedDocumentRecord } from "../../domain/repositories/IIndexedDocumentRepository";
+import type { IIndexedDocumentRepository } from "../../domain/repositories/IIndexedDocumentRepository";
 import { IIndexedDocumentRepositoryToken } from "../../domain/repositories/IIndexedDocumentRepository";
 import { Result } from "@/infrastructure/utils/result";
 import { RagError } from "../../domain/errors/RagErrors";
+
+export interface RecordFailedIndexingInput {
+    projectId: string;
+    userId?: string;
+    sourceFile: string;
+    fileSize: number;
+    type: 'report' | 'reference' | 'context' | 'user_upload';
+    errorMessage?: string;
+}
 
 @injectable()
 export class IndexDocumentUseCase {
@@ -51,7 +60,7 @@ export class IndexDocumentUseCase {
         }
     }
 
-    async recordFailed(data: Pick<IndexedDocumentRecord, 'projectId' | 'userId' | 'sourceFile' | 'fileSize' | 'type' | 'errorMessage'>): Promise<Result<string, RagError>> {
+    async recordFailed(data: RecordFailedIndexingInput): Promise<Result<string, RagError>> {
         return this.documentRepository.recordFailed({
             projectId: data.projectId,
             userId: data.userId,

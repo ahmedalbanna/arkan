@@ -8,7 +8,7 @@ import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Upload, X, Loader2, CheckCircle, AlertCircle } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import type { IndexingOptions } from './DocumentIndexerInterface';
+import type { IndexingOptions } from './types';
 import { apiService } from '@/infrastructure/api/ApiService';
 
 interface FileWithPreview extends File { preview?: string; status?: 'pending' | 'uploading' | 'success' | 'error'; error?: string; chunksCreated?: number; }

@@ -1,30 +1,11 @@
 /**
  * Vector Store Implementation for RAG
- * 
+ *
  * This module provides a simple in-memory vector store.
  * For production, consider using dedicated vector databases like Qdrant.
  */
 
-import { v4 as uuidv4 } from 'uuid';
-
-export interface DocumentChunk {
-  id: string;
-  content: string;
-  embedding?: number[];
-  metadata: {
-    projectId?: string;
-    userId?: string;
-    sourceFile?: string;
-    chunkIndex: number;
-    timestamp: number;
-    type: 'report' | 'reference' | 'context' | 'user_upload';
-  };
-}
-
-export interface SearchResult {
-  chunk: DocumentChunk;
-  score: number;
-}
+import type { DocumentChunk, SearchResult } from './vector-store-interface';
 
 /**
  * Calculate cosine similarity between two vectors

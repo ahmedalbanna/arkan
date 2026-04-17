@@ -6,7 +6,7 @@
  */
 
 import { QdrantClient } from '@qdrant/js-client-rest';
-import type { DocumentChunk, SearchResult } from './vector-store';
+import type { DocumentChunk, SearchResult } from './vector-store-interface';
 
 export interface QdrantConfig {
   url: string;
