@@ -2,10 +2,10 @@
 npm install --save-dev dependency-cruiser
 
 # Run with custom rules to highlight domain/infrastructure boundaries
-npx depcruise --include-only "^src/modules/templates" \
+npx depcruise --include-only "^src/modules/users" \
               --output-type dot \
               --do-not-follow "^node_modules" \
-              src | dot -T svg > architecture-deps_templates.svg
+              src | dot -T svg > architecture-deps_users.svg
 
 npx depcruise --include-only "^src/modules/ai-content" \
               --output-type json \

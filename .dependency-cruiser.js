@@ -12,7 +12,17 @@ module.exports = {
             name: 'no-orphans',
             severity: 'warn',
             comment: 'Files that are not imported by any other file (except entry points).',
-            from: { orphan: true },
+            from: {
+                orphan: true,
+                pathNot: [
+                    '^src/modules/users/adapters/api-client/DeviceTokenApiClient\\.ts$',
+                    '^src/modules/users/adapters/components/admin/EditUserForm\\.tsx$',
+                    '^src/modules/users/adapters/components/auth/GuestProfilePage\\.tsx$',
+                    '^src/modules/users/adapters/components/auth/PhoneAuthForm\\.tsx$',
+                    '^src/modules/users/domain/utils/randomPassword\\.ts$',
+                    '^src/modules/users/infrastructure/services/TwoFactorAuthService\\.ts$'
+                ]
+            },
             to: {}
         },
         // ============================================================

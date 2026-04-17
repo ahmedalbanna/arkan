@@ -10,7 +10,7 @@ import { handleErrorUtility } from '@/infrastructure/api/errorUtils';
 import { useAuth } from '@/context/AuthContext';
 import { userKeys } from '@/infrastructure/api/query-keys';
 import { LoginCredentials } from '@/modules/users/domain/utils/authUtils';
-import { SignupCredentials } from '@/modules/users/adapters/components/auth/SignupForm';
+import { type SignupInput as SignupCredentials } from '@/modules/users/domain/schemas';
 
 export function useLogin() {
   const queryClient = useQueryClient();
